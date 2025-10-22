@@ -1,14 +1,18 @@
-name: Test Workflow
+name: Auto Sync GPT Output
 
 on:
   push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6 hours
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Say Hello
-        run: echo "✅ Actions are working!"
+        run: echo "✅ Actions framework is working fine."
+
   sync:
     runs-on: ubuntu-latest
     steps:
@@ -22,11 +26,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Print Working Directory (sanity test)
-        run: pwd
-
-      - name: List Files
-        run: ls -R
-
-      - name: (Placeholder) Run Git Sync Script
-        run: echo "Would run src/integration/git/git_sync.py here"
+      - name: Run Git Sync Script
+        run: python src/integration/git/git_sync.py
