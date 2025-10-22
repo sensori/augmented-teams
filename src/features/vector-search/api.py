@@ -234,6 +234,161 @@ async def get_stats(
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
 
 
+@app.post("/cleanup")
+async def cleanup_deleted_files(
+    authorization: Optional[str] = Header(None),
+    vs: VectorSearchSystem = Depends(get_vector_search)
+):
+    """
+    Remove index entries for deleted files.
+    
+    Requires API key authentication via Authorization header.
+    """
+    # Verify API key
+    if not verify_api_key(authorization):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    
+    try:
+        logger.info("Cleanup request received")
+        
+        result = vs.cleanup_deleted_files()
+        
+        return {
+            "status": "completed",
+            "deleted_chunks": result["deleted_chunks"],
+            "deleted_files": result["deleted_files"],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Cleanup failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+
+@app.get("/view")
+async def view_index(
+    vs: VectorSearchSystem = Depends(get_vector_search)
+):
+    """
+    View all indexed files and their chunk counts.
+    
+    Returns a summary of what's in the vector database.
+    (Legacy endpoint - use GET /files instead)
+    """
+    try:
+        result = vs.view_index()
+        
+        return {
+            "total_files": result["total_files"],
+            "total_chunks": result["total_chunks"],
+            "files": result["files"],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to view index: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to view index: {str(e)}")
+
+
+@app.get("/files")
+async def list_files(
+    path: Optional[str] = Query(None, description="Filter by path prefix (e.g., 'assets', 'instructions')"),
+    vs: VectorSearchSystem = Depends(get_vector_search)
+):
+    """
+    List all indexed files, optionally filtered by path prefix.
+    
+    Examples:
+    - GET /files → All files
+    - GET /files?path=assets → Files in assets/
+    - GET /files?path=instructions → Files in instructions/
+    """
+    try:
+        if path:
+            files = vs.get_files_by_path(path)
+        else:
+            result = vs.view_index()
+            files = result["files"]
+        
+        return {
+            "path_filter": path or "/",
+            "total_files": len(files),
+            "files": files,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to list files: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to list files: {str(e)}")
+
+
+@app.get("/files/{file_path:path}")
+async def get_file(
+    file_path: str,
+    vs: VectorSearchSystem = Depends(get_vector_search)
+):
+    """
+    Get detailed information about a specific file including all its chunks.
+    
+    Examples:
+    - GET /files/instructions/PURPOSE.md
+    - GET /files/assets/AI Workforce Enablement Proposal/AI Transformation Slides.pptx
+    
+    Returns file metadata and all chunk contents.
+    """
+    try:
+        file_info = vs.get_file_details(file_path)
+        
+        if not file_info:
+            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+        
+        return {
+            **file_info,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get file details: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get file details: {str(e)}")
+
+
+@app.get("/chunks/{file_path:path}")
+async def get_file_chunks(
+    file_path: str,
+    vs: VectorSearchSystem = Depends(get_vector_search)
+):
+    """
+    Get just the chunks for a specific file (without full metadata).
+    
+    Examples:
+    - GET /chunks/instructions/PURPOSE.md
+    - GET /chunks/assets/AI Workforce Enablement Proposal/AI Transformation Slides.pptx
+    
+    Returns only the chunk contents.
+    """
+    try:
+        file_info = vs.get_file_details(file_path)
+        
+        if not file_info:
+            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+        
+        return {
+            "file_path": file_info["file_path"],
+            "file_type": file_info["file_type"],
+            "total_chunks": len(file_info["chunks"]),
+            "chunks": file_info["chunks"],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get chunks: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get chunks: {str(e)}")
+
+
 # Error handlers
 
 @app.exception_handler(404)

@@ -313,6 +313,169 @@ class VectorSearchSystem:
         except Exception as e:
             logger.error(f"Failed to get stats: {e}")
             return {"error": str(e)}
+    
+    def cleanup_deleted_files(self):
+        """Remove index entries for files that no longer exist"""
+        logger.info("🧹 Cleaning up deleted files...")
+        
+        # Get all indexed files
+        all_data = self.collection.get(include=["metadatas"])
+        
+        if not all_data['ids']:
+            logger.info("No indexed files found")
+            return {"deleted": 0}
+        
+        # Check which files still exist
+        deleted_ids = []
+        deleted_files = set()
+        
+        for i, metadata in enumerate(all_data['metadatas']):
+            file_path = REPO_PATH / metadata['file_path']
+            
+            if not file_path.exists():
+                deleted_ids.append(all_data['ids'][i])
+                deleted_files.add(metadata['file_path'])
+        
+        # Delete entries for non-existent files
+        if deleted_ids:
+            self.collection.delete(ids=deleted_ids)
+            logger.info(f"✅ Removed {len(deleted_ids)} chunks from {len(deleted_files)} deleted files:")
+            for file_path in sorted(deleted_files):
+                logger.info(f"   - {file_path}")
+        else:
+            logger.info("✅ No deleted files found")
+        
+        return {
+            "deleted_chunks": len(deleted_ids),
+            "deleted_files": list(deleted_files)
+        }
+    
+    def view_index(self) -> Dict:
+        """Get a summary of all indexed files and chunks"""
+        logger.info("📋 Retrieving index contents...")
+        
+        # Get all indexed data
+        all_data = self.collection.get(include=["metadatas"])
+        
+        if not all_data['ids']:
+            return {
+                "total_files": 0,
+                "total_chunks": 0,
+                "files": []
+            }
+        
+        # Group chunks by file
+        files_dict = {}
+        for metadata in all_data['metadatas']:
+            file_path = metadata['file_path']
+            if file_path not in files_dict:
+                files_dict[file_path] = {
+                    "file_path": file_path,
+                    "file_type": metadata['file_type'],
+                    "chunks": 0,
+                    "exists": (REPO_PATH / file_path).exists()
+                }
+            files_dict[file_path]["chunks"] += 1
+        
+        # Sort by file path
+        files_list = sorted(files_dict.values(), key=lambda x: x['file_path'])
+        
+        return {
+            "total_files": len(files_list),
+            "total_chunks": len(all_data['ids']),
+            "files": files_list
+        }
+    
+    def get_files_by_path(self, path_prefix: str = "") -> List[Dict]:
+        """
+        Get files matching a path prefix.
+        
+        Args:
+            path_prefix: Path prefix to filter by (e.g., 'assets', 'instructions')
+        
+        Returns:
+            List of file info dicts
+        """
+        all_data = self.collection.get(include=["metadatas"])
+        
+        if not all_data['ids']:
+            return []
+        
+        # Group chunks by file and filter by prefix
+        files_dict = {}
+        for metadata in all_data['metadatas']:
+            file_path = metadata['file_path']
+            
+            # Normalize path separators
+            normalized_path = file_path.replace('\\', '/')
+            normalized_prefix = path_prefix.replace('\\', '/')
+            
+            # Filter by prefix
+            if normalized_prefix and not normalized_path.startswith(normalized_prefix):
+                continue
+            
+            if file_path not in files_dict:
+                files_dict[file_path] = {
+                    "file_path": file_path,
+                    "file_type": metadata['file_type'],
+                    "chunks": 0,
+                    "exists": (REPO_PATH / file_path).exists()
+                }
+            files_dict[file_path]["chunks"] += 1
+        
+        return sorted(files_dict.values(), key=lambda x: x['file_path'])
+    
+    def get_file_details(self, file_path: str) -> Optional[Dict]:
+        """
+        Get detailed information about a specific file and its chunks.
+        
+        Args:
+            file_path: Path to the file (relative to repo root)
+        
+        Returns:
+            Dict with file info and all chunks, or None if not found
+        """
+        # Normalize path
+        normalized_path = file_path.replace('\\', '/')
+        
+        # Get all chunks for this file
+        all_data = self.collection.get(include=["metadatas", "documents"])
+        
+        if not all_data['ids']:
+            return None
+        
+        # Find chunks for this file
+        chunks = []
+        file_info = None
+        
+        for i, metadata in enumerate(all_data['metadatas']):
+            meta_path = metadata['file_path'].replace('\\', '/')
+            
+            if meta_path == normalized_path or metadata['file_path'] == file_path:
+                if file_info is None:
+                    file_info = {
+                        "file_path": metadata['file_path'],
+                        "file_type": metadata['file_type'],
+                        "exists": (REPO_PATH / metadata['file_path']).exists(),
+                        "modified_time": metadata.get('modified_time'),
+                        "total_chunks": metadata.get('total_chunks', 0)
+                    }
+                
+                chunks.append({
+                    "chunk_index": metadata.get('chunk_index', 0),
+                    "content": all_data['documents'][i],
+                    "token_count": metadata.get('token_count', 0),
+                    "char_count": metadata.get('char_count', 0)
+                })
+        
+        if not file_info:
+            return None
+        
+        # Sort chunks by index
+        chunks.sort(key=lambda x: x['chunk_index'])
+        file_info['chunks'] = chunks
+        
+        return file_info
 
 
 # CLI Interface
@@ -326,6 +489,8 @@ if __name__ == "__main__":
         print("  python vector_search.py index [--force]")
         print("  python vector_search.py search 'your query here' [--topic=instructions] [--type=markdown]")
         print("  python vector_search.py stats")
+        print("  python vector_search.py cleanup")
+        print("  python vector_search.py view")
         sys.exit(1)
     
     command = sys.argv[1]
@@ -370,6 +535,27 @@ if __name__ == "__main__":
         print("\n📊 Vector Database Statistics:")
         for key, value in stats.items():
             print(f"  - {key}: {value}")
+    
+    elif command == "cleanup":
+        result = vs.cleanup_deleted_files()
+        print(f"\n🧹 Cleanup complete:")
+        print(f"  - Deleted chunks: {result['deleted_chunks']}")
+        print(f"  - Deleted files: {len(result['deleted_files'])}")
+        if result['deleted_files']:
+            print("\nRemoved files:")
+            for file_path in result['deleted_files']:
+                print(f"  - {file_path}")
+    
+    elif command == "view":
+        result = vs.view_index()
+        print(f"\n📋 Indexed Files:")
+        print(f"  Total Files: {result['total_files']}")
+        print(f"  Total Chunks: {result['total_chunks']}")
+        print("\nFiles:")
+        for file_info in result['files']:
+            status = "✅" if file_info['exists'] else "❌ MISSING"
+            print(f"  {status} {file_info['file_path']}")
+            print(f"     Type: {file_info['file_type']}, Chunks: {file_info['chunks']}")
     
     else:
         print(f"Unknown command: {command}")

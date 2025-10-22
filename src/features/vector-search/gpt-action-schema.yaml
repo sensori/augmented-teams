@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: Augmented Teams Knowledge Search
+  description: Semantic search and resource browsing across repository documents
+  version: 1.0.0
+
+servers:
+  - url: https://YOUR-NGROK-URL.ngrok-free.app
+    description: Ngrok tunnel to local server
+  # After Railway deployment, replace with:
+  # - url: https://your-app.railway.app
+
+paths:
+  /search:
+    get:
+      operationId: searchKnowledge
+      summary: Semantic search across all documents
+      description: Use natural language to find relevant content from all repository files
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Natural language search query
+          example: "augmented teams principles"
+        - name: topic
+          in: query
+          schema:
+            type: string
+          description: Filter by directory (assets, instructions, config, src)
+        - name: file_type
+          in: query
+          schema:
+            type: string
+          description: Filter by type (word, excel, powerpoint, pdf, markdown, text)
+        - name: max_results
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Search results with relevance scores
+  
+  /files:
+    get:
+      operationId: browseFiles
+      summary: List indexed files
+      description: Browse all files or filter by path prefix
+      parameters:
+        - name: path
+          in: query
+          schema:
+            type: string
+          description: Path prefix filter (e.g., 'assets', 'instructions')
+          example: "assets"
+      responses:
+        '200':
+          description: List of files with chunk counts
+
+  /files/{file_path}:
+    get:
+      operationId: getFileContent
+      summary: Get file and all its chunks
+      description: Retrieve complete content for a specific file
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Full file path
+          example: "instructions/PURPOSE.md"
+      responses:
+        '200':
+          description: File with all chunks
+        '404':
+          description: File not found
+
+  /chunks/{file_path}:
+    get:
+      operationId: getFileChunks
+      summary: Get chunks for a file
+      description: Get just the text chunks without extra metadata
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Full file path
+      responses:
+        '200':
+          description: File chunks
+        '404':
+          description: File not found
+
+
+
