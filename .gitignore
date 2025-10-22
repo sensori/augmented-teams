@@ -7,3 +7,10 @@
 .kiro/steering/byterover-rules.md
 .qoder/rules/byterover-rules.md
 .augment/rules/byterover-rules.md
+
+# Vector Search
+.vector_db/
+*.pyc
+__pycache__/
+.env
+*.log
