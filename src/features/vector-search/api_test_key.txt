@@ -1,2 +1,0 @@
-OPENAI_API_KEY=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
-API_KEY = crazy_random_1234zfyuiop

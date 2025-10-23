@@ -2,7 +2,68 @@
 
 Semantic search across all repository documents using OpenAI embeddings and ChromaDB.
 
-## Overview
+## 🚀 Quick Start (5 minutes)
+
+### Prerequisites
+- Python 3.11+
+- OpenAI API key
+- Git repository cloned
+
+### Step 1: Install Dependencies
+```bash
+cd src/features/vector-search
+pip install -r requirements.txt
+```
+
+### Step 2: Set Environment Variables
+```bash
+# Option A: Export directly
+export OPENAI_API_KEY="sk-your-key-here"
+export API_KEY="my-secure-api-key"
+
+# Option B: Create .env file
+echo "OPENAI_API_KEY=sk-your-key-here" > .env
+echo "API_KEY=my-secure-api-key" >> .env
+```
+
+### Step 3: Test Setup
+```bash
+python test_setup.py
+```
+
+This verifies:
+- ✅ All packages installed
+- ✅ Environment variables set
+- ✅ Document parser working
+- ✅ Vector database accessible
+- ✅ API initialized
+
+### Step 4: Index Documents
+```bash
+python vector_search.py index
+```
+
+Expected output:
+```
+INFO:__main__:🔍 Scanning repository for documents...
+INFO:__main__:Found 17 documents
+INFO:__main__:  📄 Indexing: instructions\EXAMPLES.md
+INFO:__main__:  📄 Indexing: instructions\PURPOSE.md
+...
+INFO:__main__:✅ Indexed 17 documents, skipped 0, errors 0
+```
+
+### Step 5: Start Server
+```bash
+python -m uvicorn api:app --reload --port 8000
+```
+
+### Step 6: Access API
+- **Interactive Docs**: http://127.0.0.1:8000/docs
+- **Health Check**: http://127.0.0.1:8000/health
+- **Search Test**: http://127.0.0.1:8000/search?query=test
+
+## 📋 Overview
 
 This system enables your custom GPT to intelligently search through all repository content including:
 - Markdown files (`.md`)
@@ -12,184 +73,176 @@ This system enables your custom GPT to intelligently search through all reposito
 - PDF files (`.pdf`)
 - Text files (`.txt`)
 
-## Architecture
+## 🏗️ Architecture
 
 - **Document Parsers**: Extract text from multiple file formats
 - **Vector Database**: ChromaDB for local/production storage
 - **Embeddings**: OpenAI text-embedding-3-small (1536 dimensions)
-- **Chunking**: 512 tokens with 50 token overlap
+- **Chunking**: 1024 tokens with 100 token overlap (improved for better context)
 - **API**: FastAPI with automatic OpenAPI schema generation
 
-## Setup
+## 🎯 Cursor Commands
 
-### 1. Install Dependencies
+### Global Commands (from anywhere):
+- **`@deploy`** - Complete system deployment
+- **`@complete-workflow`** - Git sync + deploy + start server
+- **`@quick-test`** - Run quick system tests
 
+### Vector Search Commands (in `src/features/vector-search/`):
+- **`@test-vector-search`** - Run tests
+- **`@index-db`** - Index database
+- **`@start-server`** - Start server
+- **`@deploy-local`** - Local deployment
+
+### Git Integration Commands (in `src/integration/git/`):
+- **`@git-sync`** - Basic git sync
+- **`@git-sync-reindex`** - Git sync + reindex
+- **`@ensure-latest`** - Pull latest code
+- **`@commit-push`** - Commit and push
+
+## 🔧 API Endpoints
+
+### Search Endpoints
+- **`GET /search`** - Basic semantic search
+- **`GET /search-detailed`** - Enhanced search with document context and action suggestions
+
+### File Management
+- **`GET /files`** - List all indexed files
+- **`GET /files?path=assets`** - Filter by path prefix
+- **`GET /files/{file_path}`** - Get complete document with all chunks
+- **`GET /chunks/{file_path}`** - Get just chunks for a file
+
+### System
+- **`GET /health`** - Health check
+- **`GET /stats`** - Database statistics
+- **`POST /index`** - Trigger reindexing
+- **`POST /cleanup`** - Remove deleted files from index
+
+## 🚀 Deployment
+
+### Local Development
 ```bash
-pip install -r requirements.txt
+# Complete workflow
+@complete-workflow
+
+# Or step by step
+@ensure-latest
+@deploy
+@start-server
 ```
 
-### 2. Set Environment Variables
-
-Create a `.env` file:
-
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-API_KEY=your_secure_api_key_for_authentication
-```
-
-Or export them:
-
-```bash
-export OPENAI_API_KEY="your_key_here"
-export API_KEY="your_secure_key_here"
-```
-
-### 3. Index Repository
-
-```bash
-# Index all documents
-python vector_search.py index
-
-# Force re-index everything
-python vector_search.py index --force
-```
-
-### 4. Test Search
-
-```bash
-# Basic search
-python vector_search.py search "augmented teams principles"
-
-# Search with topic filter
-python vector_search.py search "operating model" --topic=instructions
-
-# Search with file type filter
-python vector_search.py search "collaboration" --type=markdown
-```
-
-### 5. Start API Server
-
-```bash
-# Development
-uvicorn api:app --reload --port 8000
-
-# Production
-uvicorn api:app --host 0.0.0.0 --port 8000
-```
-
-Visit http://localhost:8000/docs for interactive API documentation.
-
-## API Endpoints
-
-### GET /health
-Health check endpoint
-
-```bash
-curl http://localhost:8000/health
-```
-
-### GET /search
-Semantic search
-
-```bash
-curl "http://localhost:8000/search?query=augmented+teams&max_results=3"
-```
-
-Parameters:
-- `query` (required): Natural language search query
-- `topic` (optional): Filter by directory (e.g., "instructions", "assets")
-- `file_type` (optional): Filter by type (e.g., "markdown", "word", "pdf")
-- `max_results` (optional): Max results (1-20, default 5)
-
-### POST /index
-Trigger re-indexing (requires API key)
-
-```bash
-curl -X POST http://localhost:8000/index \
-     -H "Authorization: Bearer your_api_key_here"
-```
-
-### GET /stats
-Get index statistics
-
-```bash
-curl http://localhost:8000/stats
-```
-
-## Deployment
-
-### Local Development (Codespace)
-
-1. Open Codespace
-2. Install dependencies
-3. Set environment variables
-4. Run `python vector_search.py index`
-5. Start API with `uvicorn api:app --reload`
+### GitHub Actions
+- **Auto-deploy** on code commits
+- **Auto-reindex** on content changes
+- **Manual Railway deployment** available
 
 ### Production (Railway)
-
-See `plan.md` Phase 3 for complete Railway deployment instructions.
-
-Key steps:
-1. Create Railway account
+1. Set up Railway account
 2. Connect GitHub repository
-3. Set environment variables
-4. Configure persistent storage
-5. Deploy
+3. Configure environment variables
+4. Run manual deployment workflow
 
-## Integration with git_sync.py
+## 🔍 Usage Examples
 
-The vector search system integrates with the existing git sync workflow:
+### Search for Content
+```bash
+# Basic search
+curl "http://localhost:8000/search?query=augmented teams"
 
-```python
-from src.integration.git.git_sync import index_knowledge_base, search_knowledge
+# Enhanced search with context
+curl "http://localhost:8000/search-detailed?query=AI transformation"
 
-# Index documents
-index_knowledge_base(force=False)
-
-# Search documents
-results = search_knowledge(
-    query="augmented teams operating model",
-    topic="instructions",
-    max_results=5
-)
+# Filter by topic
+curl "http://localhost:8000/search?query=agile&topic=assets"
 ```
 
-## Troubleshooting
+### Browse Files
+```bash
+# List all files
+curl "http://localhost:8000/files"
 
-### Issue: "OPENAI_API_KEY not set"
-**Solution**: Set the environment variable or add to `.env` file
+# List assets files
+curl "http://localhost:8000/files?path=assets"
 
-### Issue: No results returned
-**Solution**: Run `python vector_search.py index` to index documents first
+# Get complete document
+curl "http://localhost:8000/files/instructions/PURPOSE.md"
+```
 
-### Issue: Import errors
-**Solution**: Ensure all dependencies are installed: `pip install -r requirements.txt`
+## 🔧 Configuration
 
-### Issue: ChromaDB permission errors
-**Solution**: Check that `.vector_db/` directory is writable
+### Environment Variables
+- **`OPENAI_API_KEY`** - Your OpenAI API key (required)
+- **`API_KEY`** - Secure API key for authentication (optional, defaults to 'dev-key-change-in-production')
+- **`VECTOR_DB_PATH`** - Path to vector database (optional, defaults to `.vector_db`)
 
-## Performance
+### Chunking Settings
+- **`CHUNK_SIZE`** - 1024 tokens (increased for better context)
+- **`CHUNK_OVERLAP`** - 100 tokens (increased for continuity)
+- **`MAX_RESULTS`** - 10 results (increased for more context)
 
-- **Indexing**: ~1-2 seconds per document
-- **Search**: <500ms per query
-- **Storage**: ~100KB per 1000 chunks
+## 🐛 Troubleshooting
 
-## Files
+### Common Issues
 
-- `document_parsers.py` - Multi-format document extraction
-- `vector_search.py` - Vector database and search logic
-- `api.py` - FastAPI application
-- `requirements.txt` - Python dependencies
-- `plan.md` - Complete implementation plan
-- `README.md` - This file
+**Server won't start:**
+```bash
+# Check if port 8000 is in use
+netstat -ano | findstr :8000
 
-## Next Steps
+# Kill existing processes
+taskkill /F /IM python.exe
+```
 
-1. ✅ Test locally in Codespace
-2. ⏳ Deploy to Railway
-3. ⏳ Configure GPT Action
-4. ⏳ Set up auto re-indexing workflow
+**Search returns empty results:**
+```bash
+# Reindex the database
+python vector_search.py index
 
-For detailed implementation plan, see `plan.md`.
+# Check database stats
+curl "http://localhost:8000/stats"
+```
 
+**API key errors:**
+```bash
+# Verify environment variables
+python -c "import os; print('OPENAI_API_KEY:', os.getenv('OPENAI_API_KEY', 'NOT SET'))"
+```
+
+### Logs
+- Server logs: Check terminal output
+- Indexing logs: Check `python vector_search.py index` output
+- Test logs: Check `python test_setup.py` output
+
+## 📚 GPT Action Integration
+
+### OpenAPI Schema
+The system provides an OpenAPI schema at `/docs` that can be used to configure GPT Actions.
+
+### Enhanced Search Workflow
+1. **Search for documents**: Use `/search-detailed` to find relevant content
+2. **Get complete documents**: Use `/files/{file_path}` to retrieve full documents
+3. **Browse by topic**: Use `/files?path=topic` to explore specific areas
+
+### Example GPT Action Usage
+- "Search for information about augmented teams principles"
+- "Find documents containing 'AI transformation'"
+- "Show me all files in the assets folder"
+- "Get the complete PURPOSE.md document"
+
+## 🔄 Maintenance
+
+### Regular Tasks
+- **Reindex after content changes**: `@git-sync-reindex`
+- **Clean up deleted files**: `POST /cleanup`
+- **Monitor database stats**: `GET /stats`
+
+### Updates
+- **Update dependencies**: `pip install -r requirements.txt --upgrade`
+- **Reindex after updates**: `python vector_search.py index`
+
+## 📖 Additional Resources
+
+- **Plan**: `plan.md` - Detailed implementation plan
+- **Git Integration**: `src/integration/git/` - Git sync with vector search
+- **GitHub Actions**: `.github/workflows/` - Automated deployment
+- **Cursor Commands**: `.cursorrules` - Development shortcuts
