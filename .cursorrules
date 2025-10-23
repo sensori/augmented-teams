@@ -104,6 +104,11 @@ Each feature in `src/features/` should contain:
 - Deployment guide - Setup instructions
 - Setup guide - User instructions
 
+## Code Standards
+- **No Emojis in Code** - All print statements, comments, and strings must use plain text only
+- **Windows Compatibility** - Code must work on Windows PowerShell without Unicode errors
+- **Cross-Platform** - Avoid platform-specific characters that cause encoding issues
+
 ## Development Workflow
 1. Make changes to code
 2. Run `@deploy` to test and deploy

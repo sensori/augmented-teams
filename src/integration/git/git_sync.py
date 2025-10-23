@@ -93,18 +93,18 @@ def index_knowledge_base(force: bool = False):
         sys.path.insert(0, str(REPO_PATH / "src" / "features" / "vector-search"))
         from vector_search import VectorSearchSystem
         
-        print("📚 Indexing knowledge base...")
+        print("Indexing knowledge base...")
         vs = VectorSearchSystem()
         result = vs.index_repository(force_reindex=force)
         
-        print(f"✅ Knowledge base indexed:")
+        print(f"Knowledge base indexed:")
         print(f"   - Indexed: {result['indexed']}")
         print(f"   - Skipped: {result['skipped']}")
         print(f"   - Errors: {result['errors']}")
         
         return result
     except Exception as e:
-        print(f"❌ Failed to index knowledge base: {e}")
+        print(f"Failed to index knowledge base: {e}")
         raise
 
 def search_knowledge(query: str, topic: str = None, file_type: str = None, max_results: int = 5):
@@ -148,17 +148,17 @@ def reindex_after_content_changes():
     the vector search system has the latest documents indexed.
     """
     try:
-        print("🔄 Content changed - reindexing vector database...")
+        print("Content changed - reindexing vector database...")
         result = index_knowledge_base(force=True)
         
-        print(f"✅ Vector database reindexed after content changes:")
+        print(f"Vector database reindexed after content changes:")
         print(f"   - Total indexed: {result['indexed']}")
         print(f"   - Total skipped: {result['skipped']}")
         print(f"   - Total errors: {result['errors']}")
         
         return result
     except Exception as e:
-        print(f"❌ Failed to reindex after content changes: {e}")
+        print(f"Failed to reindex after content changes: {e}")
         raise
 
 def sync_and_reindex(content_changes: bool = False):
