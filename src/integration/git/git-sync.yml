@@ -31,16 +31,5 @@ jobs:
       - name: Run Git Sync Script
         run: python src/integration/git/git_sync.py
         
-      - name: Trigger Auto-Commit Workflow
-        run: |
-          echo "🔄 Triggering auto-commit workflow..."
-          
-          # Trigger the auto-commit workflow to handle any GPT-generated files
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"ref": "main"}' \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/auto-commit.yml/dispatches"
-          
-          echo "✅ Auto-commit workflow triggered"
+      - name: Call Auto-Commit Workflow
+        uses: ./.github/workflows/auto-commit.yml
