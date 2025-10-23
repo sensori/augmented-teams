@@ -1,5 +1,30 @@
 # Cursor Rules for Augmented Teams Project
 
+## Domain-Oriented Design Principles
+
+### Feature Localization
+- **Keep everything local to the feature** - All files, classes, functions, and configurations for a specific domain should be in their feature folder
+- **Domain boundaries** - Each feature (`src/features/`) and integration (`src/integration/`) is a self-contained domain
+- **5-7 file rule** - Each feature should contain 5-7 core files that cover the complete topic:
+  - README.md (overview)
+  - Main configuration file
+  - Primary functionality script
+  - Automation/workflow file
+  - Architecture documentation
+  - Deployment guide
+  - Setup instructions
+
+### Class and Function Organization
+- **Domain-specific classes** - All classes stay within their feature domain
+- **Feature-specific functions** - No cross-feature dependencies unless explicitly needed
+- **Local utilities** - Helper functions belong to the feature that uses them
+- **Clear interfaces** - If other features need functionality, expose through clean APIs
+
+### Configuration Management
+- **Feature configs** - All feature-specific configuration in the feature folder
+- **No global configs** - Avoid putting feature-specific configs in root `config/`
+- **Self-contained** - Each feature should work independently with its own config
+
 ## Global Project Commands
 
 ### Ensure Latest Code
@@ -62,12 +87,22 @@ git grep -n "taskkill" || grep -R --line-number "taskkill" . || true
 - **Usage**: Type `@quick-test` in Cursor
 - **Action**: `cd src/features/vector-search && python test_setup.py`
 
-## Project Structure
-- **Vector Search**: `src/features/vector-search/`
-- **Git Integration**: `src/integration/git/`
-- **GitHub Actions**: `.github/workflows/`
-- **Instructions**: `instructions/`
-- **Assets**: `assets/`
+## Project Structure (Domain-Oriented)
+- **Features**: `src/features/` - Self-contained domains (vector-search, gpt-builder-config, etc.)
+- **Integrations**: `src/integration/` - External system integrations (git, notion, etc.)
+- **GitHub Actions**: `.github/workflows/` - Automation and CI/CD
+- **Instructions**: `instructions/` - GPT operating model and style guides
+- **Assets**: `assets/` - Static resources and documentation
+
+### Feature Structure (5-7 Files)
+Each feature in `src/features/` should contain:
+- README.md - Feature overview and usage
+- Main configuration file - Feature-specific settings
+- Primary script - Core functionality
+- Workflow file - Automation (if needed)
+- Architecture docs - Technical design
+- Deployment guide - Setup instructions
+- Setup guide - User instructions
 
 ## Development Workflow
 1. Make changes to code

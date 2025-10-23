@@ -38,7 +38,11 @@ def save_code(content: str, filename: str, subdir: str="src/misc"):
 def commit_and_push(commit_msg: str=None):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     msg = (commit_msg or DEFAULT_COMMIT_MSG).format(timestamp=timestamp)
-    print("🔄 Committing and pushing changes...")
+    print("Committing and pushing changes...")
+    
+    # Copy workflow files to .github/workflows/ before committing
+    copy_workflow_files()
+    
     run_cmd(["git", "add", "."])
     try:
         run_cmd(["git", "commit", "-m", msg])
@@ -47,6 +51,31 @@ def commit_and_push(commit_msg: str=None):
         return
     run_cmd(["git", "push", REMOTE_NAME, BRANCH])
     print(f"✅ Changes pushed successfully: {msg}")
+
+def copy_workflow_files():
+    """Copy workflow files from feature folders to .github/workflows/"""
+    try:
+        workflows_dir = REPO_PATH / ".github" / "workflows"
+        workflows_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Copy git-sync.yml from git integration
+        git_sync_source = REPO_PATH / "src" / "integration" / "git" / "git-sync.yml"
+        git_sync_dest = workflows_dir / "git-sync.yml"
+        if git_sync_source.exists():
+            import shutil
+            shutil.copy2(git_sync_source, git_sync_dest)
+            print(f"[OK] Copied git-sync.yml to .github/workflows/")
+        
+        # Copy sync-gpt-builder.yml from update_gpt_instructions_from_git feature
+        gpt_sync_source = REPO_PATH / "src" / "features" / "update_gpt_instructions_from_git" / "sync-gpt-builder.yml"
+        gpt_sync_dest = workflows_dir / "sync-gpt-builder.yml"
+        if gpt_sync_source.exists():
+            import shutil
+            shutil.copy2(gpt_sync_source, gpt_sync_dest)
+            print(f"[OK] Copied sync-gpt-builder.yml to .github/workflows/")
+            
+    except Exception as e:
+        print(f"[WARNING] Could not copy workflow files: {e}")
 
 # Vector Search Integration Functions
 def index_knowledge_base(force: bool = False):

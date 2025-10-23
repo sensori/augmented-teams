@@ -1,0 +1,32 @@
+name: Auto Sync GPT Output
+
+permissions:
+  contents: write  # needed for git push
+  actions: read
+
+on:
+  workflow_dispatch:    # manual trigger (GPT or you)
+  schedule:
+    - cron: "0 */6 * * *"  # optional, every 6 hours
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run Git Sync Script
+        run: python src/integration/git/git_sync.py

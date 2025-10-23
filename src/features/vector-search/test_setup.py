@@ -179,7 +179,7 @@ def test_api():
 def main():
     """Run all tests"""
     print("="*60)
-    print("🚀 Vector Search Setup Test")
+    print("Vector Search Setup Test")
     print("="*60)
     
     results = []
