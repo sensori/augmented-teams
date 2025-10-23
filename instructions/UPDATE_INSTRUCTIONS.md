@@ -35,7 +35,7 @@ If GitHub retrieval fails:
    - Or provide instructions for manual trigger via GitHub UI
    - Or use the `triggerGitSync` action if available
 
-2. **Verification Steps**:
+2. **Verification Steps**
    - Confirm the workflow ran successfully
    - Check that the GPT Builder was updated
    - Notify user of sync status

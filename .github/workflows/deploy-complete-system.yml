@@ -1,14 +1,7 @@
 name: Complete System Deployment
 
 on:
-  push:
-    paths:
-      - 'src/**'
-      - 'instructions/**'
-      - 'config/**'
-      - 'assets/**'
-      - '.github/workflows/**'
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   deploy-complete-system:
@@ -23,15 +16,27 @@ jobs:
       with:
         python-version: '3.12'
         
-    - name: Install system dependencies
+    - name: Check and install dependencies
       run: |
-        # Install vector search dependencies
-        cd src/features/vector-search
-        pip install -r requirements.txt
+        echo "📦 Checking dependencies..."
         
-        # Install git sync dependencies (if any)
+        # Check if vector search dependencies are already installed
+        cd src/features/vector-search
+        if python -c "import fastapi, uvicorn, chromadb, openai" 2>/dev/null; then
+          echo "✅ Vector search dependencies already installed"
+        else
+          echo "📦 Installing vector search dependencies..."
+          pip install -r requirements.txt
+        fi
+        
+        # Check git sync dependencies
         cd ../../integration/git
-        pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt in git sync"
+        if python -c "import git_sync" 2>/dev/null; then
+          echo "✅ Git sync module available"
+        else
+          echo "📦 Installing git sync dependencies..."
+          pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt in git sync"
+        fi
         
     - name: Run comprehensive tests
       env:
