@@ -5,6 +5,8 @@ info:
   version: 1.0.0
 
 servers:
+  - url: https://psychic-goggles-vx5qxgprpcww4p-8000.app.github.dev
+    description: GitHub Codespace server
   - url: http://127.0.0.1:8000
     description: Local development server
   # Update this with your Railway URL after deployment:
