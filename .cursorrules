@@ -109,8 +109,23 @@ Each feature in `src/features/` should contain:
 - **Windows Compatibility** - Code must work on Windows PowerShell without Unicode errors
 - **Cross-Platform** - Avoid platform-specific characters that cause encoding issues
 
+## Commit Message Standards
+- **Audit Trail Format** - All commits must follow strict naming convention:
+  - `feature: <feature name>` - for new features
+  - `refactor: <refactor name>` - for cross-cutting changes
+  - `fix: <fix description>` - for bug fixes
+  - `docs: <doc update>` - for documentation
+  - `test: <test update>` - for tests
+- **No Generic Commits** - Avoid generic messages like "update" or "changes"
+- **Consistent Formatting** - Maintain clean audit trail for project history
+
 ## Development Workflow
 1. Make changes to code
 2. Run `@deploy` to test and deploy
 3. Commit changes to trigger GitHub Actions
 4. Test GPT Actions integration
+
+## Git Operations
+- **No Automatic Git Operations** - Do NOT run git_sync.py or any git commands unless explicitly asked
+- **Manual Commits Only** - Wait for user to specify commit messages and timing
+- **Ask Before Committing** - Always ask for commit message format before any git operations
