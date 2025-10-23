@@ -79,12 +79,20 @@ jobs:
         
         cat instruction-summary.md
         
-    - name: Trigger GPT Instructions update
-      uses: openai/api_github_com__jit_plugin.triggerGitSync@main
-      with:
-        ref: main
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    - name: Trigger Git Sync Workflow
+      run: |
+        echo "🔄 Triggering Git Sync workflow via GitHub API..."
+        
+        # Trigger the git-sync.yml workflow
+        curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"ref": "main"}' \
+          "https://api.github.com/repos/${{ github.repository }}/actions/workflows/git-sync.yml/dispatches"
+        
+        echo "✅ Git Sync workflow triggered successfully"
+        echo "📋 This will sync any pending changes and update the repository"
         
     - name: Verify instruction integrity
       run: |
