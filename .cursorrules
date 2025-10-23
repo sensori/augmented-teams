@@ -13,7 +13,36 @@
 - **Command**: `complete-workflow`
 - **Description**: Complete development workflow (git sync + deploy + start server)
 - **Usage**: Type `@complete-workflow` in Cursor
-- **Action**: `cd /workspaces/augmented-teams && cd src/integration/git && python git_sync.py && python -c "import git_sync; git_sync.reindex_after_content_changes()" && cd ../../features/vector-search && python deploy_and_test.py`APter
+- **Action**: `cd /workspaces/augmented-teams && cd src/integration/git && python git_sync.py && python -c "import git_sync; git_sync.reindex_after_content_changes()" && cd ../../features/vector-search && python deploy_and_test.py`APter# verify location & list
+pwd
+ls -la
+
+# locate the workflow scripts
+GITSCRIPT=$(find . -maxdepth 6 -type f -name 'git_sync.py' -print -quit)
+DEPLSCRIPT=$(find . -maxdepth 6 -type f -name 'deploy_and_test.py' -print -quit)
+echo "git_sync.py -> ${GITSCRIPT:-NOT FOUND}"
+echo "deploy_and_test.py -> ${DEPLSCRIPT:-NOT FOUND}"
+
+# run git sync + reindex if git_sync.py found
+if [ -n "$GITSCRIPT" ]; then
+  cd "$(dirname "$GITSCRIPT")" || exit 1
+  python -u git_sync.py 2>&1 | tee ~/git_sync.log
+  python -u -c "import git_sync; git_sync.reindex_after_content_changes()" 2>&1 | tee -a ~/git_sync.log
+else
+  echo "SKIP: git_sync.py not found"
+fi
+
+# run deploy_and_test if found
+if [ -n "$DEPLSCRIPT" ]; then
+  cd "$(dirname "$DEPLSCRIPT")" || exit 1
+  python -u deploy_and_test.py 2>&1 | tee ~/deploy_and_test.log
+else
+  echo "SKIP: deploy_and_test.py not found"
+fi
+
+# show last lines and search for Windows-only taskkill usage
+tail -n 200 ~/git_sync.log ~/deploy_and_test.log 2>/dev/null || true
+git grep -n "taskkill" || grep -R --line-number "taskkill" . || true
 
 ### Git Sync with Reindex
 - **Command**: `sync-reindex`
