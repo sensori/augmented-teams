@@ -4,8 +4,9 @@ permissions:
   contents: write  # needed for git push
   actions: read
 
-on:
-  workflow_dispatch:    # manual trigger only
+# This workflow is disabled - auto-commit workflow handles sync now
+# on:
+#   workflow_dispatch:    # manual trigger only
 
 jobs:
   sync:
