@@ -2,6 +2,12 @@
 
 ## Global Project Commands
 
+### Ensure Latest Code
+- **Command**: `ensure-latest`
+- **Description**: Pull latest changes from remote
+- **Usage**: Type `@ensure-latest` in Cursor
+- **Action**: `cd src/integration/git && python -c "import git_sync; git_sync.ensure_latest()"`
+
 ### Deploy Complete System
 - **Command**: `deploy`
 - **Description**: Run comprehensive deployment and testing
