@@ -17,13 +17,13 @@ def run_cmd(cmd, cwd=REPO_PATH):
         print(f"Command failed: {' '.join(cmd)}")
         print(result.stderr)
         raise Exception("Git command failed")
-    return result.stdout.strip()
+    return result.stdout.strip(), result.stderr.strip(), result.returncode
 
 def ensure_latest():
     print("Fetching latest changes...")
-    run_cmd(["git", "fetch", REMOTE_NAME])
-    run_cmd(["git", "checkout", BRANCH])
-    run_cmd(["git", "pull", REMOTE_NAME, BRANCH])
+    run_cmd(["git", "fetch", REMOTE_NAME])[0]
+    run_cmd(["git", "checkout", BRANCH])[0]
+    run_cmd(["git", "pull", REMOTE_NAME, BRANCH])[0]
     print("Repository is up to date.")
 
 def save_code(content: str, filename: str, subdir: str="src/misc"):
@@ -43,13 +43,13 @@ def commit_and_push(commit_msg: str=None):
     # Copy workflow files to .github/workflows/ before committing
     copy_workflow_files()
     
-    run_cmd(["git", "add", "."])
+    run_cmd(["git", "add", "."])[0]
     try:
-        run_cmd(["git", "commit", "-m", msg])
+        run_cmd(["git", "commit", "-m", msg])[0]
     except Exception:
         print("No changes to commit.")
         return
-    run_cmd(["git", "push", REMOTE_NAME, BRANCH])
+    run_cmd(["git", "push", REMOTE_NAME, BRANCH])[0]
     print(f"[OK] Changes pushed successfully: {msg}")
 
 def copy_workflow_files():
