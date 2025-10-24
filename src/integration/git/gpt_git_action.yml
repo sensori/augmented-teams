@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: GitHub Sync Trigger
+  version: 1.0.0
+  description: Trigger the 'Commit Content from GPT' GitHub Action workflow for the augmented-teams repo.
+servers:
+  - url: https://api.github.com
+
+paths:
+  /repos/thomasjeffreyandersontwin/augmented-teams/actions/workflows/auto-commit.yml/dispatches:
+    post:
+      operationId: triggerGitSync
+      summary: Trigger GitHub sync workflow
+      description: Runs the Commit Content from GPT GitHub Action on the main branch.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ref:
+                  type: string
+                  example: main
+      responses:
+        "204":
+          description: Workflow triggered successfully
+        "401":
+          description: Unauthorized – invalid or missing token
+        "404":
+          description: Workflow file not found
+/repos/thomasjeffreyandersontwin/augmented-teams/contents/{path}:
+  put:
+    operationId: uploadFile
+    summary: Upload or update a file in the repo
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "update: new content from GPT"
+              content:
+                type: string
+                description: Base64 encoded file contents
+    responses:
+      "201":
+        description: File created or updated
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: GitHub Personal Access Token
+  schemas:
+    DispatchRequest:
+      type: object
+      properties:
+        ref:
+          type: string
+          description: The branch or ref to run the workflow on.
+          example: main
