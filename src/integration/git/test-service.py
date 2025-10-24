@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-SERVICE_URL = "http://localhost:8001"
+SERVICE_URL = os.getenv("CODESPACE_URL", "http://localhost:8001")
 SERVICE_TIMEOUT = 30
 TEST_FILE_CONTENT = "# Test Document\nThis is a test file created by the test suite."
 TEST_FILE_PATH = "test/test-file.md"

@@ -14,6 +14,9 @@ GITHUB_REPO=thomasjeffreyandersontwin/augmented-teams
 SERVICE_PORT=8001
 SERVICE_HOST=0.0.0.0
 
+# Codespace URL (for testing)
+CODESPACE_URL=https://ubiquitous-fiesta-4xrwxq44wh57q6-8001.app.github.dev
+
 # Git Configuration (optional - will use system defaults if not set)
 GIT_USER_NAME=Your Name
 GIT_USER_EMAIL=your.email@example.com
