@@ -1,10 +1,26 @@
 # Cursor Rules for Augmented Teams Project
 
 ## !!! CRITICAL: COMMAND EXECUTION SPEED !!!
-**NEVER WAIT FOR COMMANDS TO COMPLETE - EXECUTE AND MOVE ON IMMEDIATELY**
+**COMMAND TYPE DISTINCTION - EXECUTE BASED ON TYPE**
+
+### QUICK COMMANDS (Interrupt after 2-3 seconds):
+- Directory changes (`cd`, `pwd`, `ls`)
+- File operations (`mv`, `cp`, `rm`, `mkdir`)
+- Simple checks (`netstat`, `ps`, `find`)
+- Quick status checks
+- **DO NOT WAIT** - these hang forever if you wait
+- **ALWAYS SAY "CUTTING OFF COMMAND"** when interrupting
+
+### LONG COMMANDS (Let complete naturally):
+- Python scripts (`python script.py`)
+- Tests (`python test-service.py`)
+- Build processes
+- Service startups
+- **WAIT FOR COMPLETION** - these need to finish to show results
+
+### GENERAL RULES:
 - Run commands in parallel batches using multiple tool calls
 - Use background processes for long-running services
-- Stop interrupting commands - let them finish naturally
 - Use PowerShell syntax correctly (`;` not `&&`)
 - Execute next command immediately without waiting for response
 - Batch operations instead of sequential one-by-one execution
