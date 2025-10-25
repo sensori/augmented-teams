@@ -3,7 +3,7 @@
 ## !!! CRITICAL: COMMAND EXECUTION SPEED !!!
 **COMMAND TYPE DISTINCTION - EXECUTE BASED ON TYPE**
 
-<!-- @cmd-exec-remind -->
+@cmd-exec-remind - Review these critical command execution rules
 
 ### QUICK COMMANDS (Interrupt after 2-3 seconds):
 - Directory changes (`cd`, `pwd`, `ls`)
@@ -30,7 +30,7 @@
 
 ## Domain-Oriented Design Principles
 
-<!-- @domain-design-remind -->
+@domain-design-remind - Review these domain-oriented design principles
 
 ### Feature Localization
 - **Keep everything local to the feature** - All files, classes, functions, and configurations for a specific domain should be in their feature folder
@@ -55,115 +55,3 @@
 - **No global configs** - Avoid putting feature-specific configs in root `config/`
 - **Self-contained** - Each feature should work independently with its own config
 
-## Global Project Commands
-
-<!-- @project-commands-remind -->
-
-### Ensure Latest Code
-- **Command**: `ensure-latest`
-- **Description**: Pull latest changes from remote
-- **Usage**: Type `@ensure-latest` in Cursor
-- **Action**: `cd src/integration/git && python -c "import git_sync; git_sync.ensure_latest()"`
-
-
-### Complete Workflow
-- **Command**: `complete-workflow`
-- **Description**: Complete development workflow (git sync + deploy + start server)
-- **Usage**: Type `@complete-workflow` in Cursor
-- **Action**: `cd /workspaces/augmented-teams && cd src/integration/git && python git_sync.py && python -c "import git_sync; git_sync.reindex_after_content_changes()" && cd ../../features/vector-search && python deploy_and_test.py`APter# verify location & list
-pwd
-ls -la
-
-# locate the workflow scripts
-GITSCRIPT=$(find . -maxdepth 6 -type f -name 'git_sync.py' -print -quit)
-DEPLSCRIPT=$(find . -maxdepth 6 -type f -name 'deploy_and_test.py' -print -quit)
-echo "git_sync.py -> ${GITSCRIPT:-NOT FOUND}"
-echo "deploy_and_test.py -> ${DEPLSCRIPT:-NOT FOUND}"
-
-# run git sync + reindex if git_sync.py found
-if [ -n "$GITSCRIPT" ]; then
-  cd "$(dirname "$GITSCRIPT")" || exit 1
-  python -u git_sync.py 2>&1 | tee ~/git_sync.log
-  python -u -c "import git_sync; git_sync.reindex_after_content_changes()" 2>&1 | tee -a ~/git_sync.log
-else
-  echo "SKIP: git_sync.py not found"
-fi
-
-# run deploy_and_test if found
-if [ -n "$DEPLSCRIPT" ]; then
-  cd "$(dirname "$DEPLSCRIPT")" || exit 1
-  python -u deploy_and_test.py 2>&1 | tee ~/deploy_and_test.log
-else
-  echo "SKIP: deploy_and_test.py not found"
-fi
-
-# show last lines and search for Windows-only taskkill usage
-tail -n 200 ~/git_sync.log ~/deploy_and_test.log 2>/dev/null || true
-git grep -n "taskkill" || grep -R --line-number "taskkill" . || true
-
-### Git Sync with Reindex
-- **Command**: `sync-reindex`
-- **Description**: Git sync with vector database reindexing
-- **Usage**: Type `@sync-reindex` in Cursor
-- **Action**: `cd src/integration/git && python git_sync.py && python -c "import git_sync; git_sync.reindex_after_content_changes()"`
-
-### Complete Workflow
-- **Command**: `complete-workflow`
-- **Description**: Complete development workflow (git sync + deploy + start server)
-- **Usage**: Type `@complete-workflow` in Cursor
-- **Action**: `cd /workspaces/augmented-teams && cd src/integration/git && python git_sync.py && python -c "import git_sync; git_sync.reindex_after_content_changes()" && cd ../../features/vector-search && python deploy_and_test.py`
-
-### Quick Test
-- **Command**: `quick-test`
-- **Description**: Run quick system tests
-- **Usage**: Type `@quick-test` in Cursor
-- **Action**: `cd src/features/vector-search && python test_setup.py`
-
-## Project Structure (Domain-Oriented)
-- **Features**: `src/features/` - Self-contained domains (vector-search, gpt-builder-config, etc.)
-- **Integrations**: `src/integration/` - External system integrations (git, notion, etc.)
-- **GitHub Actions**: `.github/workflows/` - Automation and CI/CD
-- **Instructions**: `instructions/` - GPT operating model and style guides
-- **Assets**: `assets/` - Static resources and documentation
-
-### Feature Structure (5-7 Files)
-Each feature in `src/features/` should contain:
-- README.md - Feature overview and usage
-- Main configuration file - Feature-specific settings
-- Primary script - Core functionality
-- Workflow file - Automation (if needed)
-- Architecture docs - Technical design
-- Deployment guide - Setup instructions
-- Setup guide - User instructions
-
-## Code Standards
-- **No Emojis in Code** - All print statements, comments, and strings must use plain text only
-- **Windows Compatibility** - Code must work on Windows PowerShell without Unicode errors
-- **Cross-Platform** - Avoid platform-specific characters that cause encoding issues
-
-<!-- @code-standards-remind -->
-
-## Commit Message Standards
-- **Audit Trail Format** - All commits must follow strict naming convention:
-  - `feature: <feature name>` - for new features
-  - `refactor: <refactor name>` - for cross-cutting changes
-  - `fix: <fix description>` - for bug fixes
-  - `docs: <doc update>` - for documentation
-  - `test: <test update>` - for tests
-- **No Generic Commits** - Avoid generic messages like "update" or "changes"
-- **Consistent Formatting** - Maintain clean audit trail for project history
-
-<!-- @commit-standards-remind -->
-
-## Development Workflow
-1. Make changes to code
-2. Run `@deploy` to test and deploy
-3. Commit changes to trigger GitHub Actions
-4. Test GPT Actions integration
-
-## Git Operations
-- **No Automatic Git Operations** - Do NOT run git_sync.py or any git commands unless explicitly asked
-- **Manual Commits Only** - Wait for user to specify commit messages and timing
-- **Ask Before Committing** - Always ask for commit message format before any git operations
-
-<!-- @git-operations-remind -->

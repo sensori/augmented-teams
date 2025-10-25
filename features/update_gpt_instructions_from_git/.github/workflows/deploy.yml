@@ -1,0 +1,33 @@
+name: Deploy Update GPT Instructions Feature
+
+on:
+  repository_dispatch:
+    types: [deploy-update-gpt-instructions]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build & Deploy to Azure Container App
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: src/features/update_gpt_instructions_from_git
+          acrName: ${{ secrets.ACR_NAME }}
+          containerAppName: update-gpt-instructions
+          resourceGroup: ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+      - name: Deployment Status
+        run: |
+          echo "✅ Update GPT Instructions feature deployed successfully!"
+          echo "🔗 Container App: update-gpt-instructions"
+          echo "📦 Source: src/features/update_gpt_instructions_from_git"
+

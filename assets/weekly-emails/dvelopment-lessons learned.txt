@@ -1,0 +1,12 @@
+
+Working on this reminded me how perfectly the Agile mindset fits AI. You try something, it fails, you fix it, and you learn. The same principles that made Agile great for engineering — localizing knowledge, working iteratively, and tailoring solutions — are essential here. AI is messy and unpredictable, but structure and guardrails make it powerful.
+
+When deploying contextualized AI for clients, these go from nice-to-have to critical:
+
+Test first and test often
+
+Work in small, specific batches
+
+Modularize everything so it’s decoupled and decentralized
+
+Iterate quickly from concept to user impact

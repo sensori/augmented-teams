@@ -5,8 +5,8 @@ import subprocess
 from pathlib import Path
 import datetime
 
-# Locate repository root (assumes this file is in src/integration/git/)
-REPO_PATH = Path(__file__).resolve().parents[3]  # repo root
+# Locate repository root (assumes this file is in features/git-integration/)
+REPO_PATH = Path(__file__).resolve().parents[2]  # repo root
 REMOTE_NAME = "origin"
 BRANCH = "main"
 DEFAULT_COMMIT_MSG = "update: synced changes from GPT session at {timestamp}"
@@ -15,8 +15,11 @@ def run_cmd(cmd, cwd=REPO_PATH, timeout=30):
     result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
     if result.returncode != 0:
         print(f"Command failed: {' '.join(cmd)}")
-        print(result.stderr)
-        raise Exception("Git command failed")
+        print(f"Working directory: {cwd}")
+        print(f"Return code: {result.returncode}")
+        print(f"Stdout: {result.stdout}")
+        print(f"Stderr: {result.stderr}")
+        raise Exception(f"Git command failed: {' '.join(cmd)} - {result.stderr}")
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
 def ensure_latest():

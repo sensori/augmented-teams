@@ -1,0 +1,33 @@
+name: Deploy Vector Search Feature
+
+on:
+  repository_dispatch:
+    types: [deploy-vector-search]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build & Deploy to Azure Container App
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: src/features/vector-search
+          acrName: ${{ secrets.ACR_NAME }}
+          containerAppName: vector-search
+          resourceGroup: ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+      - name: Deployment Status
+        run: |
+          echo "✅ Vector Search feature deployed successfully!"
+          echo "🔗 Container App: vector-search"
+          echo "📦 Source: src/features/vector-search"
+

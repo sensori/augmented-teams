@@ -1,0 +1,36 @@
+Building “Augmented Team” using a GenAI Partner
+
+Hi all,
+
+Over the last week I (accidentally) went down a bit of a rabbit hole, working on a side project I’m calling "Augmented Teams", it's a custom GPT designed to actually do things, specifically to help us improve how we help our clients use AI to improve the way they work.  (AI for AI yay!)
+
+It’s early days, but I’m excited by the possibility of a smart, contextualized partner that helps make work simpler.
+
+This started off as me trying to build a simple shared GPT-enabled repository for us to collaborate on. But a simple custom GPT using an out-of-the-box SharePoint connector wasn’t cutting it. So, I added a few new functions — and things spiraled out of control from there. PS: if you ever want my help, just put an interesting problem in front of me and I’ll never stop.
+
+Here’s what I’ve built so far:
+
+GPT ↔ GitHub repo: stores not just instructions and tone but also the GPT’s code — keeping things structured and improving over time.
+
+Vector search: lets chats find and reference knowledge across the repo, Notion, and soon SharePoint — using AI to index anything we tell it.
+
+Connectors: Notion and Google Drive so far, with more coming.
+
+Docker / Azure: gives the GPT the ability to deploy each function in its own container — lightweight “microservices for AI.”
+
+
+As I was doing all this, the GPT actually introduced me to the idea of something called KnowledgeOps - knowledge as code ***mind blown****
+
+It explained to me that knowledge with AI scales when  you modularize it, version it, and improved using disciplined automation. The principles of containment, continuous pipelines, decentralization, relentless test automation, giving the team the tools, all the DevOps stuff applies to how we manage and evolve knowledge, especially actionable knowledge through AI.  The crazy thing is despite all the criticism out there that working with AI this way doesn’t make you dumber — it forces you to expand your thinking. It pushes you to see connections, structure ideas, and design systems that learn alongside you.
+
+Despite all the hype, we’re still in the rough-and-tumble early days. Nothing “just works” out of the box (I'll go over some obvious but equally important lessons that I'm learning the hard way next week)
+
+But that’s where the opportunity is. Figuring out the right problem, aligning around it, creating the smallest thing that helps, and iterating — that’s what we do. I’m sharing this because I hope others get excited and want to jump in. If so, reach out to Ashley, or I, as well as others who are leading in the space like Eric, or Will.  If i missed anyone shout out to here and tell others what you are doing!
+
+
+PS: this note was initially created by me, Then I put it through AI, and it was just kinda meh, but still enough forward that I could perform surgery.  really made sure to increase the amount of run on sentences and bad grammar, so I still look like I'm a human writing something, and especially kill all of those "—" I mean I don't even know how to type that; no human does,  what is wrong with GPT where it thinks that's a good thing to put into a message.
+
+I currently give my artificial intelligence partner a 5/10. 
+
+
+

@@ -8,6 +8,7 @@ Provides REST endpoints for all Git operations.
 
 import os
 import sys
+import yaml
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header, Depends
@@ -21,6 +22,15 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+def load_config():
+    """Load configuration from config.yaml"""
+    config_file = Path(__file__).parent / "config" / "config.yaml"
+    with open(config_file, 'r') as f:
+        return yaml.safe_load(f)
+
+# Load configuration
+config = load_config()
 
 # GitHub authentication
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -174,6 +184,31 @@ async def verify_auth(client: dict = Depends(verify_client_token)):
         "client": get_current_client()
     }
 
+@app.get("/debug")
+async def debug_info():
+    """Debug endpoint to check git command execution"""
+    try:
+        from integration import REPO_PATH
+        import subprocess
+        
+        # Test basic git command
+        result = subprocess.run(["git", "status", "--porcelain"], 
+                              cwd=REPO_PATH, 
+                              capture_output=True, 
+                              text=True, 
+                              timeout=30)
+        
+        return {
+            "repo_path": str(REPO_PATH),
+            "repo_exists": REPO_PATH.exists(),
+            "git_returncode": result.returncode,
+            "git_stdout": result.stdout,
+            "git_stderr": result.stderr,
+            "working_dir": str(Path.cwd())
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/status")
 async def get_status():
     """Get repository status"""
@@ -185,7 +220,8 @@ async def get_status():
             "error": stderr if returncode != 0 else None
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error in get_status: {e}")
+        raise HTTPException(status_code=500, detail=f"Git command failed: {str(e)}")
 
 @app.post("/commit/text", response_model=CommitResponse)
 async def commit_text(request: CommitRequest):
@@ -359,9 +395,11 @@ async def delete_file_post(request: DeleteFileRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    print("Starting Git Integration Service on port 8001...")
+    print("Starting Git Integration Service...")
+    print(f"Port: {config['service']['port']}")
+    print(f"Host: {config['service']['host']}")
     print(f"REPO_PATH: {REPO_PATH}")
     print(f"REPO_PATH exists: {REPO_PATH.exists()}")
     print(f"Current working directory: {Path.cwd()}")
-    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+    uvicorn.run(app, host=config['service']['host'], port=config['service']['port'], log_level="info")
 

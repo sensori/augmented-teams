@@ -1,0 +1,14 @@
+# Feature Template Dependencies
+
+# Add your Python dependencies here
+# Example:
+# fastapi==0.104.1
+# uvicorn==0.24.0
+# requests==2.31.0
+# pydantic==2.5.0
+
+# Common dependencies for Azure Container Apps
+azure-functions==1.18.0
+azure-identity==1.15.0
+azure-storage-blob==12.19.0
+

@@ -1,0 +1,34 @@
+# Common Azure Environment Configuration
+
+This file defines shared Azure environment settings for all features.
+
+## Environment Variables
+
+```yaml
+environment:
+  name: augmented-teams-prod
+  resourceGroup: augmented-team-rg
+  location: eastus
+  containerRegistry: augmentedteamacr.azurecr.io
+  
+commonSettings:
+  pythonVersion: "3.11"
+  nodeVersion: "18"
+  memoryRequest: "256Mi"
+  memoryLimit: "512Mi"
+  cpuRequest: "100m"
+  cpuLimit: "250m"
+  
+monitoring:
+  logAnalyticsWorkspace: augmented-teams-logs
+  applicationInsights: augmented-teams-insights
+  
+networking:
+  vnetName: augmented-teams-vnet
+  subnetName: container-apps-subnet
+  dnsZone: augmented-teams.local
+```
+
+## Usage
+
+This configuration is used by all features when deploying to Azure Container Apps. Each feature can override specific settings in their own `.azure/containerapp.yaml` file.

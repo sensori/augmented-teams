@@ -14,12 +14,22 @@ from pathlib import Path
 import tempfile
 import os
 from dotenv import load_dotenv
+import yaml
 
 # Load environment variables
 load_dotenv()
 
+def load_config():
+    """Load configuration from config.yaml"""
+    config_file = Path(__file__).parent / "config" / "config.yaml"
+    with open(config_file, 'r') as f:
+        return yaml.safe_load(f)
+
+# Load configuration
+config = load_config()
+
 # Configuration
-SERVICE_URL = os.getenv("CODESPACE_URL", "http://localhost:8001")
+SERVICE_URL = os.getenv("CODESPACE_URL", config['service']['url'])
 SERVICE_TIMEOUT = 30
 TEST_FILE_CONTENT = "# Test Document\nThis is a test file created by the test suite."
 TEST_FILE_PATH = "test/test-file.md"
@@ -69,10 +79,10 @@ class GitIntegrationTester:
         
         try:
             print("Starting Git Integration Service...")
-            process = subprocess.Popen(["python", "service.py"], 
+            process = subprocess.Popen(["python", "main.py"], 
                                      stdout=subprocess.PIPE, 
                                      stderr=subprocess.PIPE)
-            time.sleep(3)  # Give service time to start
+            time.sleep(5)  # Give service time to start
             print("Service started successfully")
             return True
         except Exception as e:
@@ -280,8 +290,8 @@ class GitIntegrationTester:
         # Check if service is running
         if not self.check_service_running():
             print("\nService is not running. Please start the service first:")
-            print("   cd src/integration/git")
-            print("   .\\start-git-integration-service.ps1")
+            print("   cd features/git-integration")
+            print("   python main.py")
             return False
         
         print("\n Running endpoint tests...")
