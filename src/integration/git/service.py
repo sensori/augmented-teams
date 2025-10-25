@@ -439,10 +439,16 @@ def extract_text_from_binary(binary_data: bytes, file_extension: str) -> str:
 async def extract_file_content(file_path: str):
     """Extract text content from any file in the repository (including binary files)"""
     try:
-        import base64  
+        import base64
+        
+        print(f"DEBUG: Extract endpoint called with file_path: {file_path}")
+        print(f"DEBUG: REPO_PATH: {REPO_PATH}")
         
         # Check if file exists
         full_path = REPO_PATH / file_path
+        print(f"DEBUG: Full path: {full_path}")
+        print(f"DEBUG: File exists: {full_path.exists()}")
+        
         if not full_path.exists():
             raise HTTPException(status_code=404, detail=f"File {file_path} not found at {full_path}. REPO_PATH: {REPO_PATH}")
         
