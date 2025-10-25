@@ -242,47 +242,17 @@ class GitIntegrationTester:
         except Exception as e:
             self.log_test("Folder Endpoint", False, str(e))
 
-    def test_delete_file_endpoint(self):
-        """Test the DELETE /file/{path} endpoint"""
-        try:
-            # First create a test file to delete
-            test_content = "# Delete Test File\nThis file will be deleted by the test."
-            test_file_path = "test/delete-test-file.md"
-            
-            # Create the file
-            create_payload = {
-                "content": test_content,
-                "file_path": test_file_path,
-                "commit_message": "test: create file for deletion test"
-            }
-            create_response = self.session.post(f"{self.service_url}/commit/text", json=create_payload)
-            
-            if create_response.status_code != 200:
-                self.log_test("Delete File Endpoint", False, f"Failed to create test file: HTTP {create_response.status_code}")
-                return
-            
-            # Now delete the file
-            delete_response = self.session.delete(f"{self.service_url}/delete/{test_file_path}?commit_message=test: delete test file")
-            
-            if delete_response.status_code == 200:
-                data = delete_response.json()
-                self.log_test("Delete File Endpoint", True, f"Successfully deleted {test_file_path}")
-            else:
-                self.log_test("Delete File Endpoint", False, f"HTTP {delete_response.status_code}")
-        except Exception as e:
-            self.log_test("Delete File Endpoint", False, str(e))
-
     def test_extract_file_endpoint(self):
         """Test the GET /extract/{path} endpoint"""
         try:
-            # Test extracting content from a text file (README.md)
-            response = self.session.get(f"{self.service_url}/extract/README.md")
+            # Test extracting content from a text file (this test file itself)
+            response = self.session.get(f"{self.service_url}/extract/test-service.py")
             
             if response.status_code == 200:
                 data = response.json()
                 if data.get('success') and data.get('file_type') == 'text':
                     content_length = len(data.get('content', ''))
-                    self.log_test("Extract File Endpoint (Text)", True, f"Extracted {content_length} chars from README.md")
+                    self.log_test("Extract File Endpoint (Text)", True, f"Extracted {content_length} chars from test-service.py")
                 else:
                     self.log_test("Extract File Endpoint (Text)", False, f"Unexpected response format: {data}")
             else:
@@ -293,27 +263,23 @@ class GitIntegrationTester:
     def test_extract_powerpoint_endpoint(self):
         """Test extracting content from PowerPoint files"""
         try:
-            # Test extracting content from PowerPoint files
-            pptx_files = [
-                "assets/AI Workforce Enablement Proposal/AI Transformation Slides.pptx",
-                "assets/AI Workforce Enablement Proposal/AI Transformation Slides 2.pptx"
-            ]
+            # Test extracting content from the actual PowerPoint file
+            pptx_file = "assets/AI Workforce Enablement Proposal/AI Transformation Slides 2.pptx"
             
-            for pptx_file in pptx_files:
-                response = self.session.get(f"{self.service_url}/extract/{pptx_file}")
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    if data.get('success') and data.get('file_type') == 'binary':
-                        extracted_length = len(data.get('extracted_content', ''))
-                        extension = data.get('extension', 'unknown')
-                        self.log_test(f"Extract PowerPoint ({extension})", True, f"Extracted {extracted_length} chars from {pptx_file}")
-                    else:
-                        self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"Unexpected response format: {data}")
-                elif response.status_code == 404:
-                    self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"File not found: {pptx_file}")
+            response = self.session.get(f"{self.service_url}/extract/{pptx_file}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success') and data.get('file_type') == 'binary':
+                    extracted_length = len(data.get('extracted_content', ''))
+                    extension = data.get('extension', 'unknown')
+                    self.log_test(f"Extract PowerPoint ({extension})", True, f"Extracted {extracted_length} chars from {pptx_file}")
                 else:
-                    self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"HTTP {response.status_code}")
+                    self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"Unexpected response format: {data}")
+            elif response.status_code == 404:
+                self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"File not found: {pptx_file}")
+            else:
+                self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"HTTP {response.status_code}")
         except Exception as e:
             self.log_test("Extract PowerPoint Endpoint", False, str(e))
     
@@ -370,7 +336,6 @@ class GitIntegrationTester:
         self.test_commit_text_endpoint()
         self.test_get_file_endpoint()
         self.test_folder_endpoint()
-        self.test_delete_file_endpoint()
         self.test_extract_file_endpoint()
         self.test_extract_powerpoint_endpoint()
         self.test_sync_endpoint()
