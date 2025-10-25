@@ -246,13 +246,13 @@ class GitIntegrationTester:
         """Test the GET /extract/{path} endpoint"""
         try:
             # Test extracting content from a text file (this test file itself)
-            response = self.session.get(f"{self.service_url}/extract/test-service.py")
+            response = self.session.get(f"{self.service_url}/extract/src/integration/git/test-service.py")
             
             if response.status_code == 200:
                 data = response.json()
                 if data.get('success') and data.get('file_type') == 'text':
                     content_length = len(data.get('content', ''))
-                    self.log_test("Extract File Endpoint (Text)", True, f"Extracted {content_length} chars from test-service.py")
+                    self.log_test("Extract File Endpoint (Text)", True, f"Extracted {content_length} chars from src/integration/git/test-service.py")
                 else:
                     self.log_test("Extract File Endpoint (Text)", False, f"Unexpected response format: {data}")
             else:
