@@ -256,7 +256,8 @@ class GitIntegrationTester:
                 else:
                     self.log_test("Extract File Endpoint (Text)", False, f"Unexpected response format: {data}")
             else:
-                self.log_test("Extract File Endpoint (Text)", False, f"HTTP {response.status_code}")
+                error_detail = response.json().get('detail', 'No detail') if response.headers.get('content-type') == 'application/json' else response.text
+                self.log_test("Extract File Endpoint (Text)", False, f"HTTP {response.status_code}: {error_detail}")
         except Exception as e:
             self.log_test("Extract File Endpoint (Text)", False, str(e))
 
@@ -276,10 +277,9 @@ class GitIntegrationTester:
                     self.log_test(f"Extract PowerPoint ({extension})", True, f"Extracted {extracted_length} chars from {pptx_file}")
                 else:
                     self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"Unexpected response format: {data}")
-            elif response.status_code == 404:
-                self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"File not found: {pptx_file}")
             else:
-                self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"HTTP {response.status_code}")
+                error_detail = response.json().get('detail', 'No detail') if response.headers.get('content-type') == 'application/json' else response.text
+                self.log_test(f"Extract PowerPoint ({pptx_file})", False, f"HTTP {response.status_code}: {error_detail}")
         except Exception as e:
             self.log_test("Extract PowerPoint Endpoint", False, str(e))
     

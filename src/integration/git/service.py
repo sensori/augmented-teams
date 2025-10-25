@@ -444,7 +444,7 @@ async def extract_file_content(file_path: str):
     """Extract text content from any file in the repository (including binary files)"""
     try:
         from integration import run_cmd, REPO_PATH
-        import base64
+        import base64  
         
         # Check if file exists
         full_path = REPO_PATH / file_path
@@ -492,7 +492,6 @@ async def extract_file_content(file_path: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    from integration import REPO_PATH
     print("Starting Git Integration Service on port 8001...")
     print(f"REPO_PATH: {REPO_PATH}")
     print(f"REPO_PATH exists: {REPO_PATH.exists()}")
