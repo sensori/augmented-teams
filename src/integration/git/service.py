@@ -41,7 +41,7 @@ sys.path.insert(0, str(current_dir))
 from integration import (
     ensure_latest, save_code, commit_and_push, copy_workflow_files,
     get_repository_tree, get_folder_content, search_git_content, 
-    search_git_files, get_file_content, run_cmd
+    search_git_files, get_file_content, run_cmd, REPO_PATH
 )
 
 def get_github_headers():
@@ -303,8 +303,6 @@ async def sync_repository():
 async def delete_file(file_path: str, commit_message: Optional[str] = None):
     """Delete a file from the repository"""
     try:
-        from integration import run_cmd, REPO_PATH
-        
         # Check if file exists
         full_path = REPO_PATH / file_path
         print(f"DEBUG: Looking for file at {full_path}")
@@ -355,8 +353,6 @@ class DeleteFileRequest(BaseModel):
 async def delete_file_post(request: DeleteFileRequest):
     """Delete a file from the repository (POST endpoint for GPT Actions compatibility)"""
     try:
-        from integration import run_cmd, REPO_PATH
-        
         # Check if file exists
         full_path = REPO_PATH / request.file_path
         if not full_path.exists():
@@ -443,7 +439,6 @@ def extract_text_from_binary(binary_data: bytes, file_extension: str) -> str:
 async def extract_file_content(file_path: str):
     """Extract text content from any file in the repository (including binary files)"""
     try:
-        from integration import run_cmd, REPO_PATH
         import base64  
         
         # Check if file exists
