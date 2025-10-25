@@ -1,19 +1,18 @@
 openapi: 3.1.0
 info:
-  title: Git Integration Service
-  version: 1.0.0
-  description: REST API for Git operations including committing text, documents, and managing repository changes
+  title: Git Integration Service (GTP Action)
+  version: 1.0.1
+  description: >
+    API for Git operations used by Augmented Team GPT — includes committing text, uploading documents, checking
+    repository status, and pushing to remote.
 servers:
-  - url: http://localhost:8001
-    description: Local Git Integration Service
   - url: https://ubiquitous-fiesta-4xrwxq44wh57q6-8001.app.github.dev
-    description: GitHub Codespace Git Integration Service
-
+    description: Git Integration Service (Codespace HTTPS endpoint)
 paths:
   /:
     get:
       operationId: healthCheck
-      summary: Health check
+      summary: Health Check
       description: Check if the Git Integration Service is running
       responses:
         "200":
@@ -27,12 +26,11 @@ paths:
                     type: string
                   repo:
                     type: string
-
   /status:
     get:
       operationId: getRepositoryStatus
-      summary: Get repository status
-      description: Get current repository status including pending changes
+      summary: Get Repository Status
+      description: Returns current repository status and pending changes
       responses:
         "200":
           description: Repository status
@@ -53,7 +51,6 @@ paths:
                       type: string
                   error:
                     type: string
-
   /commit/text:
     post:
       operationId: commitTextContent
@@ -74,13 +71,13 @@ paths:
                   description: The text content to write
                 file_path:
                   type: string
-                  description: Where to write the file (relative to repo root)
+                  description: Path to save the file (relative to repo root)
                 commit_message:
                   type: string
                   description: Optional commit message
       responses:
         "200":
-          description: Text content committed successfully
+          description: Text committed successfully
           content:
             application/json:
               schema:
@@ -94,14 +91,11 @@ paths:
                     type: string
                   file_path:
                     type: string
-        "500":
-          description: Error committing content
-
   /commit/document:
     post:
       operationId: commitDocument
       summary: Commit uploaded document
-      description: Upload and commit a document file to the repository
+      description: Upload and commit a document to the repository
       requestBody:
         required: true
         content:
@@ -115,13 +109,10 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: The uploaded file
                 file_path:
                   type: string
-                  description: Where to save the file (relative to repo root)
                 commit_message:
                   type: string
-                  description: Optional commit message
       responses:
         "200":
           description: Document committed successfully
@@ -138,14 +129,11 @@ paths:
                     type: string
                   file_path:
                     type: string
-        "500":
-          description: Error committing document
-
   /push:
     post:
       operationId: pushChanges
-      summary: Push changes to remote
-      description: Push committed changes to the remote repository
+      summary: Push committed changes
+      description: Push changes to the remote repository
       responses:
         "200":
           description: Changes pushed successfully
@@ -160,14 +148,11 @@ paths:
                     type: string
                   output:
                     type: string
-        "500":
-          description: Error pushing changes
-
   /commit-and-push:
     post:
       operationId: commitAndPush
-      summary: Commit text content and push
-      description: Commit text content to a file and push to remote in one operation
+      summary: Commit and push content
+      description: Commit text to a file and push to remote in one operation
       requestBody:
         required: true
         content:
@@ -180,16 +165,13 @@ paths:
               properties:
                 content:
                   type: string
-                  description: The text content to write
                 file_path:
                   type: string
-                  description: Where to write the file (relative to repo root)
                 commit_message:
                   type: string
-                  description: Optional commit message
       responses:
         "200":
-          description: Content committed and pushed successfully
+          description: Commit and push successful
           content:
             application/json:
               schema:
@@ -203,34 +185,3 @@ paths:
                     type: string
                   file_path:
                     type: string
-        "500":
-          description: Error committing or pushing
-
-components:
-  schemas:
-    CommitRequest:
-      type: object
-      required:
-        - content
-        - file_path
-      properties:
-        content:
-          type: string
-          description: The text content to write
-        file_path:
-          type: string
-          description: Where to write the file (relative to repo root)
-        commit_message:
-          type: string
-          description: Optional commit message
-    CommitResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        commit_hash:
-          type: string
-        file_path:
-          type: string
