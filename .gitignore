@@ -14,3 +14,4 @@
 __pycache__/
 .env
 *.log
+src/integration/git/packages-microsoft-prod.deb.3
