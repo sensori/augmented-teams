@@ -448,8 +448,11 @@ async def extract_file_content(file_path: str):
         
         # Check if file exists
         full_path = REPO_PATH / file_path
+        print(f"DEBUG: Looking for file at {full_path}")
+        print(f"DEBUG: REPO_PATH is {REPO_PATH}")
+        print(f"DEBUG: REPO_PATH exists: {REPO_PATH.exists()}")
         if not full_path.exists():
-            raise HTTPException(status_code=404, detail=f"File {file_path} not found")
+            raise HTTPException(status_code=404, detail=f"File {file_path} not found at {full_path}")
         
         # Get file extension
         file_extension = full_path.suffix.lower()
