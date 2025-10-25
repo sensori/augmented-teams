@@ -492,5 +492,9 @@ async def extract_file_content(file_path: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
+    from integration import REPO_PATH
     print("Starting Git Integration Service on port 8001...")
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    print(f"REPO_PATH: {REPO_PATH}")
+    print(f"REPO_PATH exists: {REPO_PATH.exists()}")
+    print(f"Current working directory: {Path.cwd()}")
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
