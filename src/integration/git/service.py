@@ -386,6 +386,111 @@ async def delete_file_post(request: DeleteFileRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+def extract_text_from_binary(binary_data: bytes, file_extension: str) -> str:
+    """Extract text from binary files"""
+    try:
+        if file_extension.lower() == ".pptx":
+            from pptx import Presentation
+            from io import BytesIO
+            
+            prs = Presentation(BytesIO(binary_data))
+            slides_text = []
+            for i, slide in enumerate(prs.slides, start=1):
+                slide_text = []
+                for shape in slide.shapes:
+                    if hasattr(shape, "text") and shape.text.strip():
+                        slide_text.append(shape.text.strip())
+                if slide_text:
+                    slides_text.append(f"--- Slide {i} ---\n" + "\n".join(slide_text))
+            return "\n\n".join(slides_text)
+        
+        elif file_extension.lower() == ".pdf":
+            try:
+                import PyPDF2
+                from io import BytesIO
+                
+                pdf_reader = PyPDF2.PdfReader(BytesIO(binary_data))
+                text_content = []
+                for page_num, page in enumerate(pdf_reader.pages, start=1):
+                    page_text = page.extract_text()
+                    if page_text.strip():
+                        text_content.append(f"--- Page {page_num} ---\n{page_text}")
+                return "\n\n".join(text_content)
+            except ImportError:
+                return "[PDF extraction requires PyPDF2: pip install PyPDF2]"
+        
+        elif file_extension.lower() in [".docx", ".doc"]:
+            try:
+                from docx import Document
+                from io import BytesIO
+                
+                doc = Document(BytesIO(binary_data))
+                paragraphs = []
+                for para in doc.paragraphs:
+                    if para.text.strip():
+                        paragraphs.append(para.text.strip())
+                return "\n".join(paragraphs)
+            except ImportError:
+                return "[DOCX extraction requires python-docx: pip install python-docx]"
+        
+        else:
+            return f"[Unsupported binary file type: {file_extension}]"
+    
+    except Exception as e:
+        return f"[Error extracting text from {file_extension}: {str(e)}]"
+
+@app.get("/extract/{file_path:path}", dependencies=[Depends(verify_client_token)])
+async def extract_file_content(file_path: str):
+    """Extract text content from any file in the repository (including binary files)"""
+    try:
+        from integration import run_cmd, REPO_PATH
+        import base64
+        
+        # Check if file exists
+        full_path = REPO_PATH / file_path
+        if not full_path.exists():
+            raise HTTPException(status_code=404, detail=f"File {file_path} not found")
+        
+        # Get file extension
+        file_extension = full_path.suffix.lower()
+        
+        # Read file content
+        with open(full_path, "rb") as f:
+            file_content = f.read()
+        
+        # If it's a text file, return as-is
+        if file_extension in [".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml", ".xml", ".html", ".css"]:
+            try:
+                text_content = file_content.decode('utf-8')
+                return {
+                    "success": True,
+                    "file_path": file_path,
+                    "file_type": "text",
+                    "content": text_content,
+                    "size": len(file_content)
+                }
+            except UnicodeDecodeError:
+                return {
+                    "success": False,
+                    "file_path": file_path,
+                    "error": "File contains non-UTF-8 text content"
+                }
+        
+        # If it's a binary file, try to extract text
+        else:
+            extracted_text = extract_text_from_binary(file_content, file_extension)
+            return {
+                "success": True,
+                "file_path": file_path,
+                "file_type": "binary",
+                "extracted_content": extracted_text,
+                "size": len(file_content),
+                "extension": file_extension
+            }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     print("Starting Git Integration Service on port 8001...")
     uvicorn.run(app, host="0.0.0.0", port=8001)

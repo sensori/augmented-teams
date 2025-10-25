@@ -130,6 +130,67 @@ paths:
           description: File not found
         "500":
           description: Error deleting file
+
+  /extract/{file_path}:
+    get:
+      operationId: extractFileContent
+      summary: Extract text content from any file
+      description: Extract text content from any file in the repository (including binary files like .pptx, .pdf, .docx)
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the file to extract content from
+      responses:
+        "200":
+          description: File content extracted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  file_path:
+                    type: string
+                  file_type:
+                    type: string
+                    enum: ["text", "binary"]
+                  content:
+                    type: string
+                    description: Text content (for text files)
+                  extracted_content:
+                    type: string
+                    description: Extracted text content (for binary files)
+                  size:
+                    type: integer
+                    description: File size in bytes
+                  extension:
+                    type: string
+                    description: File extension (for binary files)
+                  error:
+                    type: string
+                    description: Error message if extraction failed
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
   /commit/document:
     post:
       operationId: commitDocument
@@ -207,6 +268,67 @@ paths:
           description: File not found
         "500":
           description: Error deleting file
+
+  /extract/{file_path}:
+    get:
+      operationId: extractFileContent
+      summary: Extract text content from any file
+      description: Extract text content from any file in the repository (including binary files like .pptx, .pdf, .docx)
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the file to extract content from
+      responses:
+        "200":
+          description: File content extracted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  file_path:
+                    type: string
+                  file_type:
+                    type: string
+                    enum: ["text", "binary"]
+                  content:
+                    type: string
+                    description: Text content (for text files)
+                  extracted_content:
+                    type: string
+                    description: Extracted text content (for binary files)
+                  size:
+                    type: integer
+                    description: File size in bytes
+                  extension:
+                    type: string
+                    description: File extension (for binary files)
+                  error:
+                    type: string
+                    description: Error message if extraction failed
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
   /push:
     post:
       operationId: pushChanges
@@ -302,3 +424,64 @@ paths:
           description: File not found
         "500":
           description: Error deleting file
+
+  /extract/{file_path}:
+    get:
+      operationId: extractFileContent
+      summary: Extract text content from any file
+      description: Extract text content from any file in the repository (including binary files like .pptx, .pdf, .docx)
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the file to extract content from
+      responses:
+        "200":
+          description: File content extracted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  file_path:
+                    type: string
+                  file_type:
+                    type: string
+                    enum: ["text", "binary"]
+                  content:
+                    type: string
+                    description: Text content (for text files)
+                  extracted_content:
+                    type: string
+                    description: Extracted text content (for binary files)
+                  size:
+                    type: integer
+                    description: File size in bytes
+                  extension:
+                    type: string
+                    description: File extension (for binary files)
+                  error:
+                    type: string
+                    description: Error message if extraction failed
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
