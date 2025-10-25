@@ -347,6 +347,45 @@ async def copy_workflows():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class DeleteFileRequest(BaseModel):
+    file_path: str
+    commit_message: Optional[str] = None
+
+@app.post("/deleteFile", dependencies=[Depends(verify_client_token)])
+async def delete_file_post(request: DeleteFileRequest):
+    """Delete a file from the repository (POST endpoint for GPT Actions compatibility)"""
+    try:
+        from integration import run_cmd, REPO_PATH
+        
+        # Check if file exists
+        full_path = REPO_PATH / request.file_path
+        if not full_path.exists():
+            raise HTTPException(status_code=404, detail=f"File {request.file_path} not found at {full_path}")
+        
+        # Remove the file
+        stdout, stderr, returncode = run_cmd(["git", "rm", request.file_path])
+        if returncode != 0:
+            raise HTTPException(status_code=500, detail=f"git rm failed: {stderr}")
+        
+        # Commit the deletion
+        msg = request.commit_message or f"Remove {request.file_path}"
+        stdout, stderr, returncode = run_cmd(["git", "commit", "-m", msg])
+        if returncode != 0:
+            raise HTTPException(status_code=500, detail=f"git commit failed: {stderr}")
+        
+        # Push changes
+        stdout, stderr, returncode = run_cmd(["git", "push", "origin", "main"])
+        if returncode != 0:
+            raise HTTPException(status_code=500, detail=f"git push failed: {stderr}")
+        
+        return {
+            "success": True,
+            "message": f"Successfully deleted {request.file_path}",
+            "file_path": request.file_path
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     print("Starting Git Integration Service on port 8001...")
     uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -92,24 +92,26 @@ paths:
                   file_path:
                     type: string
 
-  /file/{file_path}:
-    delete:
+  /deleteFile:
+    post:
       operationId: deleteFile
       summary: Delete a file
       description: Delete a file from the repository
-      parameters:
-        - name: file_path
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Path to the file to delete
-        - name: commit_message
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Optional commit message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_path:
+                  type: string
+                  description: Path to the file to delete
+                commit_message:
+                  type: string
+                  description: Optional commit message
+              required:
+                - file_path
       responses:
         "200":
           description: File deleted successfully
@@ -167,24 +169,26 @@ paths:
                   file_path:
                     type: string
 
-  /file/{file_path}:
-    delete:
+  /deleteFile:
+    post:
       operationId: deleteFile
       summary: Delete a file
       description: Delete a file from the repository
-      parameters:
-        - name: file_path
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Path to the file to delete
-        - name: commit_message
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Optional commit message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_path:
+                  type: string
+                  description: Path to the file to delete
+                commit_message:
+                  type: string
+                  description: Optional commit message
+              required:
+                - file_path
       responses:
         "200":
           description: File deleted successfully
@@ -260,24 +264,26 @@ paths:
                   file_path:
                     type: string
 
-  /file/{file_path}:
-    delete:
+  /deleteFile:
+    post:
       operationId: deleteFile
       summary: Delete a file
       description: Delete a file from the repository
-      parameters:
-        - name: file_path
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Path to the file to delete
-        - name: commit_message
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Optional commit message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_path:
+                  type: string
+                  description: Path to the file to delete
+                commit_message:
+                  type: string
+                  description: Optional commit message
+              required:
+                - file_path
       responses:
         "200":
           description: File deleted successfully
