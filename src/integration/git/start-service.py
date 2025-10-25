@@ -4,7 +4,14 @@ Start the Git Integration Service
 """
 
 import sys
-from provision_service import install_dependencies, start_service_foreground
+import importlib.util
+import os
+provision_path = os.path.join(os.path.dirname(__file__), "provision-service.py")
+spec = importlib.util.spec_from_file_location("provision_service", provision_path)
+provision_service = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(provision_service)
+install_dependencies = provision_service.install_dependencies
+start_service_foreground = provision_service.start_service_foreground
 
 def main():
     print("🚀 Starting Git Integration Service")
