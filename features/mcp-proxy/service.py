@@ -8,7 +8,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
 import yaml
-import main
+import sys
+
+# Add current directory to path so we can import main
+sys.path.insert(0, str(Path(__file__).parent))
+
+import main as mcp_main
 
 # Load configuration
 def load_config():
@@ -53,13 +58,13 @@ def health():
 @app.get("/tools")
 def list_tools():
     """List available MCP tools"""
-    return {"tools": main.get_mcp_tools()}
+    return {"tools": mcp_main.get_mcp_tools()}
 
 @app.post("/call", response_model=MCPToolResponse)
 def call_mcp_tool(request: MCPToolCall):
     """Call an MCP tool"""
     try:
-        result = main.proxy_mcp_call(request.tool, request.input)
+        result = mcp_main.proxy_mcp_call(request.tool, request.input)
         return MCPToolResponse(success=True, result=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
