@@ -1,6 +1,6 @@
 name: Deploy Features
 
-# Version: 1.0.5
+# Version: 1.0.6
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Version Info
       run: |
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "🚀 Feature Deploy Workflow v1.0.5"
+        echo "🚀 Feature Deploy Workflow v1.0.6"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
     
@@ -157,17 +157,9 @@ jobs:
             echo "✅ Successfully deployed $FEATURE"
             
             # Get and display the deployment URL from config
-            URL=$(python -c "
-import yaml
-from pathlib import Path
-config_path = Path('features') / '$FEATURE' / 'config' / 'feature-config.yaml'
-with open(config_path) as f:
-    config = yaml.safe_load(f)
-    url = config.get('environment', {}).get('production', {}).get('url', 'NOT SET')
-    print(url)
-" 2>/dev/null || echo "NOT SET")
-            
             echo ""
+            echo "🌐 Fetching $FEATURE deployment URL..."
+            URL=$(python -c 'import yaml; from pathlib import Path; config = yaml.safe_load(open(Path("features") / "'$FEATURE'" / "config" / "feature-config.yaml")); print(config.get("environment", {}).get("production", {}).get("url", "NOT SET"))' 2>/dev/null || echo "NOT SET")
             echo "🌐 $FEATURE deployed to: $URL"
             echo ""
             
