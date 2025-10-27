@@ -21,3 +21,4 @@ if __name__ == '__main__':
     print(hello("World"))
     print(add_numbers(2, 3))
     print(goodbye("Farewell"))
+    # Test all endpoints
