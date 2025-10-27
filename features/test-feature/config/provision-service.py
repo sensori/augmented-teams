@@ -12,7 +12,7 @@ if sys.platform == 'win32':
 
 if __name__ == "__main__":
     feature_path = Path(__file__).parent.parent
-    containerization_path = feature_path.parent.parent / "containerization"
+    containerization_path = feature_path.parent / "containerization"
     
     # Import and use provisioner
     sys.path.insert(0, str(containerization_path))

@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Add containerization to path
 feature_path = Path(__file__).parent
-containerization_path = feature_path.parent.parent / "containerization"
+containerization_path = feature_path.parent / "containerization"
 sys.path.insert(0, str(containerization_path))
 
 from service_test_base import get_base_url, run_service_tests
