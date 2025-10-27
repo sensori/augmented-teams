@@ -35,6 +35,7 @@ class MCPToolCall(BaseModel):
     """MCP Tool call request"""
     tool: str
     input: dict
+    service: str = "github"  # Default to github
 
 class MCPToolResponse(BaseModel):
     """MCP Tool call response"""
@@ -55,9 +56,22 @@ def health():
     """Health check"""
     return {"status": "healthy"}
 
+@app.get("/services")
+def list_services():
+    """List available MCP services with their tools - helps GPT choose which service to use"""
+    return {"services": mcp_main.get_available_services()}
+
+@app.get("/services/{service_name}/tools")
+def list_service_tools(service_name: str):
+    """List tools available for a specific service"""
+    services = mcp_main.get_available_services()
+    if service_name not in services:
+        raise HTTPException(status_code=404, detail=f"Service not found: {service_name}")
+    return {"tools": mcp_main.get_mcp_tools(service_name)}
+
 @app.get("/tools")
 def list_tools():
-    """List available MCP tools"""
+    """List available MCP tools (defaults to github)"""
     return {"tools": mcp_main.get_mcp_tools()}
 
 @app.get("/tools/with-schemas")
@@ -75,10 +89,13 @@ def get_tool_schema(tool_name: str):
 
 @app.post("/call", response_model=MCPToolResponse)
 def call_mcp_tool(request: MCPToolCall):
-    """Call an MCP tool"""
+    """Call an MCP tool on a specific service"""
     try:
-        result = mcp_main.proxy_mcp_call(request.tool, request.input)
-        return MCPToolResponse(success=True, result=result)
+        result = mcp_main.proxy_mcp_call(request.tool, request.input, request.service)
+        if result.get("success"):
+            return MCPToolResponse(success=True, result=result)
+        else:
+            return MCPToolResponse(success=False, result=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

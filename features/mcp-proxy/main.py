@@ -99,67 +99,30 @@ def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github")
 
 
 def _call_via_docker(mcp_request: dict, config: dict, github_token: str, tool_name: str) -> dict:
-    """Call MCP server via Docker stdio protocol"""
+    """Call MCP server via Docker stdio protocol - uses shared helper"""
     try:
-        # Build docker command from config
-        docker_cmd = ["docker", "run", "-i", "--rm"]
+        # Use shared helper to send the request
+        response = _send_mcp_request_via_docker(mcp_request, config, timeout=30)
         
-        # Add environment variables
-        for key, value in config.get("env", {}).items():
-            if value:  # Only add if value exists
-                docker_cmd.extend(["-e", f"{key}={value}"])
-        
-        # Add image
-        docker_cmd.append(config.get("image", "ghcr.io/github/github-mcp-server"))
-        
-        # Start the process
-        process = subprocess.Popen(
-            docker_cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        # Send request
-        request_json = json.dumps(mcp_request) + "\n"
-        stdout, stderr = process.communicate(input=request_json, timeout=30)
-        
-        if process.returncode != 0:
+        # Check for errors from helper
+        if "error" in response:
             return {
                 "success": False,
-                "error": f"MCP server error: {stderr}",
+                "error": response["error"],
                 "tool": tool_name
             }
         
-        # Parse response
-        try:
-            response = json.loads(stdout)
-            
-            if "error" in response:
-                return {
-                    "success": False,
-                    "error": response["error"],
-                    "tool": tool_name
-                }
-            
-            if "result" in response:
-                return {
-                    "success": True,
-                    "tool": tool_name,
-                    "result": response["result"]
-                }
-            else:
-                return {
-                    "success": True,
-                    "tool": tool_name,
-                    "result": response
-                }
-        except json.JSONDecodeError as e:
+        if "result" in response:
             return {
-                "success": False,
-                "error": f"Failed to parse MCP response: {e}",
-                "raw_response": stdout
+                "success": True,
+                "tool": tool_name,
+                "result": response["result"]
+            }
+        else:
+            return {
+                "success": True,
+                "tool": tool_name,
+                "result": response
             }
             
     except subprocess.TimeoutExpired:
@@ -227,11 +190,43 @@ def _call_via_http(mcp_request: dict, config: dict, tool_name: str) -> dict:
         }
 
 
+def _send_mcp_request_via_docker(mcp_request: dict, config: dict, timeout: int = 10) -> dict:
+    """Send any MCP request via Docker stdio protocol - generic helper"""
+    github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN", "")
+    
+    docker_cmd = ["docker", "run", "-i", "--rm"]
+    for key, value in config.get("env", {}).items():
+        if value:
+            docker_cmd.extend(["-e", f"{key}={value}"])
+    docker_cmd.append(config.get("image", "ghcr.io/github/github-mcp-server"))
+    
+    process = subprocess.Popen(
+        docker_cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    
+    request_json = json.dumps(mcp_request) + "\n"
+    stdout, stderr = process.communicate(input=request_json, timeout=timeout)
+    
+    if process.returncode != 0:
+        return {"error": f"MCP server error: {stderr}"}
+    
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError as e:
+        return {"error": f"Failed to parse MCP response: {e}"}
+
+
 def get_mcp_tools(mcp_server: str = "github") -> list:
-    """Get list of available MCP tools from the actual MCP server"""
+    """Get list of available MCP tools - filtered to allowed tools only"""
     config = get_mcp_server_config(mcp_server)
     if not config:
         return []
+    
+    allowed_tools = config.get("allowed_tools", [])
     
     try:
         # Query MCP server for tools list
@@ -243,53 +238,21 @@ def get_mcp_tools(mcp_server: str = "github") -> list:
         }
         
         if config.get("command") == "docker":
-            # Call via Docker
-            docker_cmd = ["docker", "run", "-i", "--rm"]
-            for key, value in config.get("env", {}).items():
-                if value:
-                    docker_cmd.extend(["-e", f"{key}={value}"])
-            docker_cmd.append(config.get("image", "ghcr.io/github/github-mcp-server"))
-            
-            process = subprocess.Popen(
-                docker_cmd,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            
-            request_json = json.dumps(request) + "\n"
-            stdout, stderr = process.communicate(input=request_json, timeout=10)
-            
-            if process.returncode == 0:
-                response = json.loads(stdout)
-                if "result" in response and "tools" in response["result"]:
-                    return [tool["name"] for tool in response["result"]["tools"]]
+            # Call via Docker using shared helper
+            response = _send_mcp_request_via_docker(request, config, timeout=10)
+            if "result" in response and "tools" in response["result"]:
+                actual_tools = [tool["name"] for tool in response["result"]["tools"]]
+                # Filter to only return allowed tools
+                return [tool for tool in actual_tools if tool in allowed_tools]
     except:
         pass
     
-    # Fallback to hardcoded list if query fails - these are the actual tool names from GitHub MCP server
-    return [
-        "search_code",
-        "get_file_contents",
-        "create_issue",
-        "list_pull_requests",
-        "list_commits",
-        "get_commit",
-        "create_branch",
-        "push_files",
-        "delete_file",
-        "create_pull_request",
-        "update_issue",
-        "create_repository"
-    ]
+    # Fallback to allowed tools if query fails
+    return allowed_tools
 
 
-def get_tool_schema(tool_name: str) -> dict:
-    """Get schema for a specific tool - supports ChatGPT introspection"""
-    # Tool schemas based on GitHub MCP server documentation
-    # Reference: https://github.com/github/github-mcp-server
-    schemas = {
+# GitHub MCP tool schemas - service-specific
+GITHUB_TOOL_SCHEMAS = {
         "search_code": {
             "name": "search_code",
             "description": "Search for code in GitHub repositories",
@@ -483,21 +446,44 @@ def get_tool_schema(tool_name: str) -> dict:
                 "required": ["name"]
             }
         }
-    }
-    return schemas.get(tool_name, {"error": f"Unknown tool: {tool_name}"})
+}
 
 
-def list_tools_with_schemas() -> list:
+def get_tool_schema(tool_name: str, mcp_server: str = "github") -> dict:
+    """Get schema for a specific tool from global schemas registry"""
+    if mcp_server == "github":
+        schema = GITHUB_TOOL_SCHEMAS.get(tool_name)
+        if not schema:
+            return {"error": f"Unknown tool: {tool_name} for server: {mcp_server}"}
+        return schema
+    
+    return {"error": f"Unknown MCP server: {mcp_server}"}
+
+
+def list_tools_with_schemas(mcp_server: str = "github") -> list:
     """List all tools with their schemas for full introspection"""
-    tools = get_mcp_tools()
+    tools = get_mcp_tools(mcp_server)
     return [
-        get_tool_schema(tool) for tool in tools
+        get_tool_schema(tool, mcp_server) for tool in tools
     ]
+
+
+def get_available_services() -> dict:
+    """Get list of available MCP services with their configurations"""
+    return {
+        "github": {
+            "name": "github",
+            "protocol": "docker",
+            "description": "GitHub MCP server for repository operations",
+            "image": "ghcr.io/github/github-mcp-server",
+            "tools": get_mcp_tools("github")
+        }
+    }
 
 
 def get_mcp_server_config(mcp_server: str = "github") -> dict:
     """
-    Get configuration for an MCP server
+    Get configuration for an MCP server - includes allowed tools and schemas
     
     Reads from the mcp.json format to get server config
     """
@@ -509,7 +495,21 @@ def get_mcp_server_config(mcp_server: str = "github") -> dict:
             "image": "ghcr.io/github/github-mcp-server",
             "env": {
                 "GITHUB_PERSONAL_ACCESS_TOKEN": github_token
-            }
+            },
+            "allowed_tools": [
+                "search_code",
+                "get_file_contents",
+                "create_issue",
+                "list_pull_requests",
+                "list_commits",
+                "get_commit",
+                "create_branch",
+                "push_files",
+                "delete_file",
+                "create_pull_request",
+                "update_issue",
+                "create_repository"
+            ]
         }
     }
     return config.get(mcp_server, {})
