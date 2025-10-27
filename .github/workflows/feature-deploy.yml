@@ -34,7 +34,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install docker requests pyyaml
+        pip install docker requests pyyaml fastapi uvicorn pydantic
     
     - name: Login to Azure Container Registry
       uses: azure/docker-login@v1
