@@ -49,6 +49,11 @@ def add_endpoint(a: int, b: int):
     """Add endpoint"""
     return {"result": main.add_numbers(a, b)}
 
+@app.get("/goodbye")
+def goodbye_endpoint(param: str = "Farewell"):
+    """Goodbye endpoint"""
+    return {"message": main.goodbye(param)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("service:app", host="0.0.0.0", port=8000)

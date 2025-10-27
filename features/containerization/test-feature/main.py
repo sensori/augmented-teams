@@ -12,7 +12,12 @@ def add_numbers(a: int, b: int) -> int:
     """Add two numbers"""
     return a + b
 
+def goodbye(param: str) -> str:
+    """Say goodbye"""
+    return f"Goodbye {param}!"
+
 if __name__ == '__main__':
     # Simple test when run directly
     print(hello("World"))
     print(add_numbers(2, 3))
+    print(goodbye("Farewell"))

@@ -104,10 +104,20 @@ def test_add_numbers():
     print("✅ test_add_numbers passed")
 
 
+def test_goodbye():
+    """Test goodbye function"""
+    url = f"{get_base_url(feature_path)}/goodbye"
+    response = requests.get(url, params={"param": "World"}, timeout=5)
+    result = response.json()["message"]
+    assert result == "Goodbye World!", f"Expected 'Goodbye World!', got '{result}'"
+    print("✅ test_goodbye passed")
+
+
 if __name__ == "__main__":
     run_service_tests([
         test_hello_world,
         test_hello_custom,
-        test_add_numbers
+        test_add_numbers,
+        test_goodbye
     ])
 
