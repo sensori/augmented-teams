@@ -27,12 +27,26 @@ jobs:
       id: detect
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          # Manual trigger - deploy all features
-          FEATURES=$(ls features/containerization/ | grep -v "^_\|template-feature\|containerization$" | tr '\n' ' ')
+          # Manual trigger - list actual features (not config/templates)
+          FEATURES=""
+          for dir in features/containerization/*; do
+            DIRNAME=$(basename "$dir")
+            # Only include directories with provision-service.py (real features)
+            if [ -f "$dir/config/provision-service.py" ] && [ "$DIRNAME" != "containerization" ]; then
+              FEATURES="$FEATURES $DIRNAME"
+            fi
+          done
+          FEATURES=$(echo "$FEATURES" | xargs)
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         else
-          # Auto-detect changed features - look at changed files
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          # Auto-detect changed features - look at changed files in last commit
+          if [ -n "${{ github.event.before }}" ]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          else
+            # If no before, just look at last commit
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          fi
+          
           echo "📄 Changed files:"
           echo "$CHANGED_FILES"
           
