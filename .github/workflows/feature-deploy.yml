@@ -62,21 +62,20 @@ jobs:
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         else
           # Auto-detect changed features - look at changed files in last commit
-          # Get the commit hash
-          COMMIT_SHA="${{ github.sha }}"
+          echo "🔍 Detecting changed files..."
           
-          # Try multiple methods to get changed files
-          if [ -n "$COMMIT_SHA" ] && [ "$COMMIT_SHA" != "0000000000000000000000000000000000000000" ]; then
-            CHANGED_FILES=$(git diff --name-only "$COMMIT_SHA~1" "$COMMIT_SHA" 2>/dev/null || echo "")
-          fi
-          
-          # Fallback to HEAD
-          if [ -z "$CHANGED_FILES" ]; then
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
-          fi
+          # Use the most reliable method - just get the last commit's changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
           
           echo "📄 Changed files:"
           echo "$CHANGED_FILES"
+          
+          # If still empty, try HEAD vs origin/main
+          if [ -z "$CHANGED_FILES" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/main HEAD 2>/dev/null || echo "")
+            echo "📄 Tried origin/main vs HEAD:"
+            echo "$CHANGED_FILES"
+          fi
           
           # Extract feature names from paths like features/test-feature/
           # Exclude features/containerization/* (those are templates/config, not real features)
