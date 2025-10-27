@@ -365,7 +365,7 @@ class AzureContainerProvisioner(Provisioner):
         # Build and push Docker image
         import os
         acr_server = config.get('azure', {}).get('container_registry', '')
-        feature_name = config.get('feature', {}).get('name', self.feature_path.name)
+        feature_name = config.get('feature', {}).get('name', self.feature_path.name).lower()
         image_name = f"{acr_server}/{feature_name}:latest"
         
         # Login to ACR if password provided
@@ -461,7 +461,7 @@ class AzureContainerProvisioner(Provisioner):
         acr_server = config.get('azure', {}).get('container_registry', '')
         registry_username = config.get('azure', {}).get('registry_username', '')
         registry_password = os.environ.get('ACR_PASSWORD', '')
-        feature_name = config.get('feature', {}).get('name', self.feature_path.name)
+        feature_name = config.get('feature', {}).get('name', self.feature_path.name).lower()
         environment = 'managedEnvironment-AugmentedTeams-aa2c'  # TODO: get from config
         
         image_name = f"{acr_server}/{feature_name}:latest"

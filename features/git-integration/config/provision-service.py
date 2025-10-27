@@ -12,7 +12,7 @@ def main():
     feature_path = Path(__file__).parent.parent
     containerization_path = Path(__file__).parent.parent.parent / "containerization"
     
-    print(f"🚀 Provisioning {feature_path.name}...")
+    print(f"Provisioning {feature_path.name}...")
     
     # Step 1: Inject configuration
     result = subprocess.run([
@@ -32,7 +32,7 @@ def main():
     if result.returncode != 0:
         return 1
     
-    print(f"✅ {feature_path.name} provisioned and deployed successfully!")
+    print(f"SUCCESS: {feature_path.name} provisioned and deployed successfully!")
     return 0
 
 if __name__ == "__main__":

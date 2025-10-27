@@ -5,3 +5,9 @@ Miro Kanban
 Agednt that runs better long loved jobs better than ciursor which stalls all the time
 MCP on services
 OPEN AI Azure 
+new feature Action
+recognixe deloyment failure by resding action logs in real time
+tag all commit by the feature --> use featrure command to store curent feature in file and alwys refer to
+Functrion Calln to get more consitrent behavior from Cursor
+faster deployments -> skip container creation unless that is sorce of ewrror 0--> use funcitonb calling
+get curosr to STOP stalling
