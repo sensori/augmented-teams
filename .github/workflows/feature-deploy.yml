@@ -71,6 +71,13 @@ jobs:
         fi
         
         echo "📋 Detected features: $FEATURES"
+        
+        # Exit early if no features to deploy
+        if [ -z "$FEATURES" ]; then
+          echo "⚠️ No features detected to deploy"
+          echo "✅ No deployment needed"
+          exit 0
+        fi
     
     - name: Login to Azure Container Registry
       uses: azure/docker-login@v1
@@ -91,16 +98,8 @@ jobs:
         set -e  # Exit on error
         FEATURES="${{ steps.detect.outputs.features }}"
         
-        echo "🔍 Checking features to deploy..."
-        echo "📋 Features variable: '$FEATURES'"
-        
-        if [ -z "$FEATURES" ]; then
-          echo "⚠️ No features detected to deploy"
-          echo "✅ No deployment needed"
-          exit 0
-        fi
-        
-        echo "📦 Features to deploy: $FEATURES"
+        echo "🔍 Deploying features..."
+        echo "📋 Features to deploy: $FEATURES"
         
         for FEATURE in $FEATURES; do
           echo ""
