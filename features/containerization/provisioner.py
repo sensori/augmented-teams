@@ -476,12 +476,13 @@ class AzureContainerProvisioner(Provisioner):
         
         if app_exists:
             print(f"📦 Updating existing Container App '{feature_name}'...")
-            # Update existing app
+            # Update existing app with --force to ensure new revision
             update_cmd = [
                 az_path, "containerapp", "update",
                 "--name", feature_name,
                 "--resource-group", resource_group,
-                "--image", image_name
+                "--image", image_name,
+                "--set-env-vars", f"DEPLOYMENT_TIMESTAMP={int(time.time())}"
             ]
             result = subprocess.run(update_cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore')
         else:
