@@ -199,8 +199,9 @@ jobs:
                 echo "✅ Tests passed"
               else
                 TEST_EXIT=$?
-                echo "⚠️ Tests failed (exit code: $TEST_EXIT) - continuing anyway"
-                echo "ℹ️  Service may still be initializing, check manually"
+                echo "❌ Tests failed (exit code: $TEST_EXIT)"
+                echo "🛑 Stopping deployment - tests must pass"
+                exit $TEST_EXIT
               fi
             fi
           else
