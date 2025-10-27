@@ -106,11 +106,19 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     
+    - name: Cache Azure CLI
+      id: cache-azure-cli
+      uses: actions/cache@v3
+      with:
+        path: /usr/local/bin/az
+        key: azure-cli-${{ runner.os }}
+    
     - name: Install dependencies
       run: |
         pip install --cache-dir ~/.cache/pip docker requests pyyaml fastapi uvicorn pydantic
     
     - name: Install Azure CLI
+      if: steps.cache-azure-cli.outputs.cache-hit != 'true'
       run: |
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     
