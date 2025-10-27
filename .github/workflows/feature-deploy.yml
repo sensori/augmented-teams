@@ -131,6 +131,30 @@ jobs:
           
           if python features/$FEATURE/config/provision-service.py AZURE --always; then
             echo "✅ Successfully deployed $FEATURE"
+            
+            # Get and display the deployment URL
+            URL=$(python -c "
+import sys, yaml
+from pathlib import Path
+config_path = Path('features') / '$FEATURE' / 'config' / 'feature-config.yaml'
+with open(config_path) as f:
+    config = yaml.safe_load(f)
+    url = config.get('environment', {}).get('production', {}).get('url', 'NOT SET')
+    print(url)
+")
+            echo ""
+            echo "🌐 $FEATURE deployed to: $URL"
+            echo ""
+            
+            # Run tests if test file exists
+            if [ -f "features/$FEATURE/service-test.py" ]; then
+              echo "🧪 Running tests for $FEATURE..."
+              if python features/$FEATURE/service-test.py AZURE; then
+                echo "✅ All tests passed for $FEATURE"
+              else
+                echo "⚠️ Some tests failed for $FEATURE (check output above)"
+              fi
+            fi
           else
             EXIT_CODE=$?
             echo "❌ Failed to deploy $FEATURE (exit code: $EXIT_CODE)"
