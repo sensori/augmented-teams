@@ -39,19 +39,8 @@ def inject_default_repo_params(tool_name: str, input_data: dict) -> dict:
 
 
 def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github") -> dict:
-    """
-    Proxy an MCP call to the external GitHub MCP server
     
-    Calls the external GitHub MCP server at https://api.githubcopilot.com/mcp/
-    
-    Args:
-        tool_name: Name of the MCP tool to call (e.g., "github_search_code")
-        input_data: Input parameters for the tool
-        mcp_server: Which MCP server to use
-    
-    Returns:
-        Tool execution result
-    """
+
     # Get the GitHub token from environment
     github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN", "")
     
@@ -78,7 +67,7 @@ def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github")
         
         # Call external GitHub MCP server
         headers = {
-            "Authorization": f"Bearer {github_token}",
+            "Authorization": github_token,  # Already includes "ghp_..." or "Bearer ..."
             "Content-Type": "application/json"
         }
         
