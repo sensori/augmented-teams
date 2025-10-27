@@ -263,7 +263,17 @@ def _send_mcp_request_via_docker(mcp_request: dict, config: dict, timeout: int =
             break
     
     if not mcp_server_path:
-        return {"error": f"MCP server binary not found at /usr/local/bin/github-mcp-server or /server/github-mcp-server"}
+        # Debug: list what's actually in these directories
+        import subprocess as sp
+        debug_info = []
+        for check_path in ["/usr/local/bin", "/server", "/usr/local"]:
+            try:
+                result = sp.run(["ls", "-la", check_path], capture_output=True, text=True, timeout=2)
+                debug_info.append(f"Contents of {check_path}:\n{result.stdout}")
+            except:
+                debug_info.append(f"Could not list {check_path}")
+        debug_msg = "\n".join(debug_info)
+        return {"error": f"MCP server binary not found at /usr/local/bin/github-mcp-server or /server/github-mcp-server\nDebug info:\n{debug_msg}"}
     
     # Run MCP server process
     env = os.environ.copy()
