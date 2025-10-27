@@ -101,7 +101,9 @@ def inject_default_server_params(tool_name: str, input_data: dict, mcp_server: s
 
 
 def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github") -> dict:
-
+    """
+    Proxy an MCP call - handles both Docker (stdio) and URL (HTTP) protocols
+    """
     # Get the GitHub token from environment
     github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN", "")
     
@@ -134,18 +136,78 @@ def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github")
             }
         }
         
-        # Call external GitHub MCP server
-        headers = {
-            "Authorization": f"Bearer {github_token}",
-            "Content-Type": "application/json"
-        }
+        # Check if Docker protocol or URL protocol
+        server_type = config.get("command", "unknown")
         
-        response = requests.post(
-            "https://api.githubcopilot.com/mcp/",
-            json=mcp_request,
-            headers=headers,
-            timeout=30
-        )
+        if server_type == "docker":
+            # Docker stdio protocol (like Cursor does)
+            return _call_via_docker(mcp_request, config, github_token, tool_name)
+        elif "url" in config:
+            # HTTP/URL protocol
+            return _call_via_http(mcp_request, config, tool_name)
+        else:
+            return {
+                "success": False,
+                "error": f"Unknown server type: {server_type}"
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to call MCP server: {str(e)}"
+        }
+
+
+def _call_via_docker(mcp_request: dict, config: dict, github_token: str, tool_name: str) -> dict:
+    """Call MCP server via Docker stdio protocol - uses shared helper"""
+    try:
+        # Use shared helper to send the request
+        response = _send_mcp_request_via_docker(mcp_request, config, timeout=30)
+        
+        # Check for errors from helper
+        if "error" in response:
+            return {
+                "success": False,
+                "error": response["error"],
+                "tool": tool_name
+            }
+        
+        if "result" in response:
+            return {
+                "success": True,
+                "tool": tool_name,
+                "result": response["result"]
+            }
+        else:
+            return {
+                "success": True,
+                "tool": tool_name,
+                "result": response
+            }
+            
+    except subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "error": "MCP server call timed out after 30 seconds"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Docker call failed: {str(e)}"
+        }
+
+
+def _call_via_http(mcp_request: dict, config: dict, tool_name: str) -> dict:
+    """Call MCP server via HTTP/URL protocol"""
+    try:
+        url = config["url"]
+        headers = {"Content-Type": "application/json"}
+        
+        # Add auth if provided
+        if "token" in config:
+            headers["Authorization"] = config["token"]
+        
+        response = requests.post(url, json=mcp_request, headers=headers, timeout=30)
         
         if not response.ok:
             return {

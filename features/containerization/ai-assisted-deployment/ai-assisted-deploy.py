@@ -27,16 +27,20 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 # Windows-safe print function that handles Unicode
-def safe_safe_print(message: str):
+def safe_print(message: str):
     """Print with automatic Unicode handling for Windows"""
     try:
-        safe_print(message)
+        print(message, flush=True)
     except UnicodeEncodeError:
-        # Fallback: remove emojis
+        # Fallback: remove emojis and try again
         import re
         # Remove common emoji ranges
-        message = re.sub(r'[\U0001F300-\U0001F9FF]', '', message)
-        safe_print(message)
+        clean_message = re.sub(r'[\U0001F300-\U0001F9FF]', '', message)
+        try:
+            print(clean_message, flush=True)
+        except:
+            # Last resort: ASCII only
+            print(message.encode('ascii', errors='ignore').decode('ascii'), flush=True)
 
 # Add OpenAI import for AI functionality
 try:
@@ -52,7 +56,7 @@ except ImportError:
     pass  # dotenv is optional
 
 # Import existing provisioner
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
 from provisioner import Provisioner
 
 
@@ -140,7 +144,7 @@ class DeploymentLogger:
     
     def log_ai_response(self, function_name: str, response: str, success: bool = True):
         """Log AI response"""
-        status = "✅ SUCCESS" if success else "❌ FAILURE"
+        status = "[SUCCESS]" if success else "[FAILURE]"
         self.log(
             f"AI Response ({function_name}) - {status}",
             {'response': response[:2000]}  # Truncate very long responses
@@ -148,7 +152,7 @@ class DeploymentLogger:
     
     def log_outcome(self, step_name: str, success: bool, details: Optional[Dict] = None):
         """Log step outcome"""
-        status = "✅ SUCCESS" if success else "❌ FAILED"
+        status = "[SUCCESS]" if success else "[FAILED]"
         self.log(f"Outcome: {step_name} - {status}", details)
 
 
@@ -249,7 +253,7 @@ class AIAssistant:
         
         self.client = openai.OpenAI(api_key=api_key or os.getenv('OPENAI_API_KEY'))
         if not self.client.api_key:
-            safe_safe_print("⚠️  Warning: OPENAI_API_KEY not set")
+            safe_print("[WARN] Warning: OPENAI_API_KEY not set")
         
         self.logger = logger  # Optional logger for conversational logging
     
@@ -287,7 +291,7 @@ class AIAssistant:
             error_msg = str(e)
             if self.logger:
                 self.logger.log_ai_response(schema_name, f"Error: {error_msg}", success=False)
-            safe_print(f"❌ AI {schema_name} failed: {e}")
+            safe_print(f"[FAILED] AI {schema_name} failed: {e}")
             return ""
     
     async def generate_test_code(self, prompt: str, context: Optional[Dict] = None) -> str:
@@ -318,7 +322,7 @@ class AIAssistant:
                 result = json.loads(response.choices[0].message.function_call.arguments)
                 return ErrorAnalysis(**result)
         except Exception as e:
-            safe_print(f"❌ Error analysis failed: {e}")
+            safe_print(f"[FAILED] Error analysis failed: {e}")
         
         return ErrorAnalysis(
             error_type="UNKNOWN",
@@ -343,7 +347,7 @@ class AIAssistant:
                 result = json.loads(response.choices[0].message.function_call.arguments)
                 return result.get('message', f"[{feature_name}] Update")
         except Exception as e:
-            safe_print(f"❌ Commit message generation failed: {e}")
+            safe_print(f"[FAILED] Commit message generation failed: {e}")
         
         return f"[{feature_name}] Update"
 
@@ -375,7 +379,7 @@ class AssistedDeploymentOrchestrator:
             try:
                 self.ai_client = AIAssistant(logger=self.logger)
             except ImportError:
-                safe_print("⚠️  OpenAI not available - AI features disabled")
+                safe_print("[WARN] OpenAI not available - AI features disabled")
         
         # Log initial state
         self.logger.log(f"Starting deployment for feature: {self.feature_name}")
@@ -394,17 +398,17 @@ class AssistedDeploymentOrchestrator:
         
         for attempt in range(self.config.max_retries):
             try:
-                safe_print(f"🔄 Executing step: {step_name} (attempt {attempt + 1}/{self.config.max_retries})")
+                safe_print(f"[EXEC] Executing step: {step_name} (attempt {attempt + 1}/{self.config.max_retries})")
                 result = step_func()
                 
                 if result.success:
                     self.state.mark_completed(step_name)
-                    safe_print(f"✅ Step completed: {step_name}")
+                    safe_print(f"[SUCCESS] Step completed: {step_name}")
                     return result
             except Exception as e:
                 if attempt == self.config.max_retries - 1:
                     self.state.mark_failed(step_name, str(e))
-                    safe_print(f"❌ Step failed after {self.config.max_retries} attempts: {step_name}")
+                    safe_print(f"[FAILED] Step failed after {self.config.max_retries} attempts: {step_name}")
                     raise
                 wait_time = self.config.retry_delay_seconds * (2 ** attempt) if self.config.exponential_backoff else self.config.retry_delay_seconds
                 time.sleep(wait_time)
@@ -426,7 +430,7 @@ class AssistedDeploymentOrchestrator:
         
         try:
             # Phase 1: Setup
-            safe_print(f"\n🚀 Starting AI-assisted deployment for '{self.feature_name}'")
+            safe_print(f"\n[DEPLOY] Starting AI-assisted deployment for '{self.feature_name}'")
             safe_print("=" * 70)
             
             if "CREATE_STRUCTURE" not in self.config.skip_steps:
@@ -452,23 +456,23 @@ class AssistedDeploymentOrchestrator:
             
             self.state.end_time = time.time()
             duration = self.state.end_time - self.state.start_time
-            safe_print(f"\n✅ Deployment completed in {duration:.1f}s")
+            safe_print(f"\n[SUCCESS] Deployment completed in {duration:.1f}s")
             return True
             
         except Exception as e:
             self.state.end_time = time.time()
-            safe_print(f"\n❌ Deployment failed: {e}")
+            safe_print(f"\n[FAILED] Deployment failed: {e}")
             if self.config.ai_analyze_errors:
                 await self._handle_fatal_error(e)
             return False
     
     def _create_feature_structure(self) -> StepResult:
         """Create feature directory and basic structure"""
-        safe_print("📁 Creating feature structure...")
-        # This would create directories, copy template, etc.
-        # For now, just verify path exists
-        if not self.feature_path.exists():
-            return StepResult(success=False, error=f"Feature path does not exist: {self.feature_path}")
+        safe_print("[SETUP] Creating feature structure...")
+        # Create the feature directory structure
+        self.feature_path.mkdir(parents=True, exist_ok=True)
+        (self.feature_path / "config").mkdir(exist_ok=True)
+        self.logger.log(f"Created feature directory structure: {self.feature_path}")
         return StepResult(success=True, output=f"Feature structure at {self.feature_path}")
     
     async def _generate_and_test_main_code(self) -> None:
@@ -482,41 +486,41 @@ class AssistedDeploymentOrchestrator:
         4. Repeat until all tests pass
         """
         if not self.config.regenerate_main or not self.config.ai_generate_code:
-            safe_print("⏭️  Skipping main code generation (disabled in config)")
+            safe_print("[SKIP] Skipping main code generation (disabled in config)")
             return
         
         if not self.ai_client:
-            safe_print("⚠️  AI client not available - skipping code generation")
+            safe_print("[WARN] AI client not available - skipping code generation")
             return
         
-        safe_print("\n🧪 Generating and testing main code (TDD approach)...")
+        safe_print("\n[TDD] Generating and testing main code (TDD approach)...")
         
         # Generate initial test.py
         test_file = self.feature_path / "test.py"
         if not test_file.exists() or self.config.regenerate_test:
-            safe_print("🤖 AI generating test.py...")
+            safe_print("[AI] AI generating test.py...")
             prompt = f"Generate test.py for feature '{self.feature_name}' with comprehensive tests"
             test_code = await self.ai_client.generate_test_code(prompt)
             if test_code:
                 with open(test_file, 'w') as f:
                     f.write(test_code)
-                safe_print("✅ Generated test.py")
+                safe_print("[SUCCESS] Generated test.py")
         
         # TDD Loop: Generate main.py to pass tests
         main_file = self.feature_path / "main.py"
         for attempt in range(self.config.max_retries):
-            safe_print(f"\n🔍 Running tests (attempt {attempt + 1}/{self.config.max_retries})...")
+            safe_print(f"\n[TEST] Running tests (attempt {attempt + 1}/{self.config.max_retries})...")
             
             # Run tests
             result = self._run_command(f'python {test_file}')
             
             if result.returncode == 0:
-                safe_print("✅ All tests passing!")
+                safe_print("[SUCCESS] All tests passing!")
                 break
             
             # Tests failed - generate/fix main.py
             if attempt < self.config.max_retries - 1:
-                safe_print("🤖 AI generating/fixing main.py to pass tests...")
+                safe_print("[AI] AI generating/fixing main.py to pass tests...")
                 error_msg = result.stderr
                 
                 prompt = f"""
@@ -535,9 +539,9 @@ Ensure the code is production-ready and follows best practices.
                 if main_code:
                     with open(main_file, 'w') as f:
                         f.write(main_code)
-                    safe_print("✅ Updated main.py")
+                    safe_print("[SUCCESS] Updated main.py")
                 else:
-                    safe_print("❌ Failed to generate main.py")
+                    safe_print("[FAILED] Failed to generate main.py")
                     break
     
     def _run_command(self, command: str) -> subprocess.CompletedProcess:
@@ -551,7 +555,7 @@ Ensure the code is production-ready and follows best practices.
                 timeout=60
             )
         except subprocess.TimeoutExpired:
-            safe_print("⏱️  Command timed out")
+            safe_print("[TIMEOUT] Command timed out")
             return subprocess.CompletedProcess(
                 args=command.split(),
                 returncode=1,
@@ -560,10 +564,10 @@ Ensure the code is production-ready and follows best practices.
     
     async def _generate_and_test_service(self) -> None:
         """Generate service.py and service-test.py using provisioner"""
-        safe_print("\n🔧 Generating service layer...")
+        safe_print("\n[SERVICE] Generating service layer...")
         
         if not self.config.regenerate_service:
-            safe_print("⏭️  Skipping service layer (disabled in config)")
+            safe_print("[SKIP] Skipping service layer (disabled in config)")
             return
         
         # Create provisioner for the feature
@@ -576,18 +580,18 @@ Ensure the code is production-ready and follows best practices.
         
         # Provision and start service
         if self.provisioner:
-            safe_print(f"🚀 Provisioning in {self.config.provision_mode} mode...")
+            safe_print(f"[PROVISION] Provisioning in {self.config.provision_mode} mode...")
             if self.provisioner.provision(always=True):
                 if self.provisioner.start(always=True):
-                    safe_print("✅ Service started")
+                    safe_print("[SUCCESS] Service started")
                 else:
-                    safe_print("❌ Failed to start service")
+                    safe_print("[FAILED] Failed to start service")
             else:
-                safe_print("❌ Provisioning failed")
+                safe_print("[FAILED] Provisioning failed")
     
     async def _commit_and_push(self) -> None:
         """Commit changes with AI-generated message and push to trigger GitHub Actions"""
-        safe_print("\n📤 Committing and pushing changes...")
+        safe_print("\n[GIT] Committing and pushing changes...")
         
         # Generate commit message if AI is enabled
         commit_message = f"[{self.feature_name}] Update"
@@ -598,9 +602,9 @@ Ensure the code is production-ready and follows best practices.
                     changes[:5],  # First 5 changed files
                     self.feature_name
                 )
-                safe_print(f"📝 AI-generated commit message: {commit_message}")
+                safe_print(f"[AI] AI-generated commit message: {commit_message}")
             except Exception as e:
-                safe_print(f"⚠️  Failed to generate commit message: {e}")
+                safe_print(f"[WARN] Failed to generate commit message: {e}")
         
         # Stage, commit, and push
         repo_root = Path.cwd()
@@ -611,18 +615,18 @@ Ensure the code is production-ready and follows best practices.
         ]
         
         for cmd in commands:
-            safe_print(f"🔧 Running: {cmd}")
+            safe_print(f"[EXEC] Running: {cmd}")
             result = self._run_command(cmd)
             if result.returncode != 0:
-                safe_print(f"❌ Git command failed: {result.stderr}")
+                safe_print(f"[FAILED] Git command failed: {result.stderr}")
                 return
         
-        safe_print("✅ Changes pushed to GitHub")
+        safe_print("[SUCCESS] Changes pushed to GitHub")
     
     def _wait_for_github_action(self) -> None:
         """Monitor GitHub Actions deployment"""
-        safe_print("\n⏳ Waiting for GitHub Actions...")
-        safe_print("ℹ️  Check workflow status at: https://github.com/...")
+        safe_print("\n[WAIT] Waiting for GitHub Actions...")
+        safe_print("[INFO] Check workflow status at: https://github.com/...")
         # TODO: Poll GitHub API for workflow status
         # For now, just wait a bit
         time.sleep(5)
@@ -641,22 +645,22 @@ Ensure the code is production-ready and follows best practices.
         Analyzes deployment errors and applies automatic fixes.
         Recovery patterns defined in documentation.
         """
-        safe_print("\n🔧 Attempting automatic error recovery...")
+        safe_print("\n[RECOVER] Attempting automatic error recovery...")
         
         if not self.config.ai_analyze_errors or not self.ai_client:
-            safe_print("⚠️  Error recovery disabled (AI not available)")
+            safe_print("[WARN] Error recovery disabled (AI not available)")
             return
         
         # Fetch logs
-        safe_print("📋 Fetching logs...")
+        safe_print("[LOGS] Fetching logs...")
         logs = self._fetch_logs()
         
         if not logs:
-            safe_print("⚠️  Could not fetch logs")
+            safe_print("[WARN] Could not fetch logs")
             return
         
         # AI analyzes error
-        safe_print("🤖 AI analyzing error...")
+        safe_print("[AI] AI analyzing error...")
         analysis = await self.ai_client.analyze_error(
             logs=logs,
             error="Service health check failed",
@@ -667,21 +671,21 @@ Ensure the code is production-ready and follows best practices.
             }
         )
         
-        safe_print(f"🔍 Error classified as: {analysis.error_type}")
-        safe_print(f"💡 Suggested fix: {analysis.suggested_fix}")
+        safe_print(f"[CLASSIFY] Error classified as: {analysis.error_type}")
+        safe_print(f"[FIX] Suggested fix: {analysis.suggested_fix}")
         
         # TODO: Apply suggested fix based on action_type
         # CODE_FIX, INSTALL_DEPENDENCY, REPROVISION, TEST_FIX
     
     async def _handle_fatal_error(self, error: Exception) -> None:
         """Handle unrecoverable errors"""
-        safe_print(f"\n❌ Fatal error: {error}")
-        safe_print("📋 Deployment state:")
+        safe_print(f"\n[FATAL] Fatal error: {error}")
+        safe_print("[STATE] Deployment state:")
         safe_print(f"  Completed steps: {self.state.completed_steps}")
         safe_print(f"  Failed steps: {len(self.state.failed_steps)}")
         
         if self.config.ai_analyze_errors and self.ai_client:
-            safe_print("\n🤖 AI diagnostic report:")
+            safe_print("\n[AI] AI diagnostic report:")
             # TODO: Generate diagnostic report with AI
             pass
         
@@ -730,7 +734,7 @@ def main():
     
     # Run deployment
     if args.dry_run:
-        safe_print("🔍 Dry run mode - preview only")
+        safe_print("[DRY-RUN] Dry run mode - preview only")
         safe_print(f"Would deploy: {args.feature} in {args.mode} mode")
         sys.exit(0)
     
