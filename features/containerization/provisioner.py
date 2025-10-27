@@ -563,26 +563,74 @@ class AzureContainerProvisioner(Provisioner):
         return config.get('environment', {}).get('production', {}).get('url', '')
 
     def _merge_dockerfile_fragments(self, config):
-        """Check for additional Dockerfile configs in subdirectories and merge them"""
+        """Check for config.yaml in subdirectories and merge Docker config into Dockerfile"""
+        import yaml
         dockerfile_path = self.feature_path / "config" / "Dockerfile"
         
-        # Look for subdirectories with Dockerfile.fragment or Dockerfile
+        # Look for subdirectories with config.yaml
         for subdir in self.feature_path.iterdir():
             if not subdir.is_dir() or subdir.name == 'config':
                 continue
             
-            fragment_path = subdir / "Dockerfile"
-            if fragment_path.exists():
-                print(f"📝 Merging Dockerfile from {subdir.name}/")
-                with open(fragment_path, 'r') as f:
-                    fragment_content = f.read()
+            config_file = subdir / "config.yaml"
+            if config_file.exists():
+                print(f"📝 Found config in {subdir.name}/config.yaml")
                 
-                # Append fragment to main Dockerfile
-                with open(dockerfile_path, 'a') as f:
-                    f.write("\n# Additional configuration from " + subdir.name + "\n")
-                    f.write(fragment_content)
+                with open(config_file, 'r') as f:
+                    subdir_config = yaml.safe_load(f)
                 
-                print(f"✅ Merged {subdir.name}/Dockerfile")
+                if not subdir_config:
+                    continue
+                
+                # Generate Docker commands from config
+                docker_commands = self._generate_docker_commands_from_config(subdir_config, subdir.name)
+                
+                if docker_commands:
+                    # Append to main Dockerfile
+                    with open(dockerfile_path, 'a') as f:
+                        f.write("\n# Additional configuration from " + subdir.name + "\n")
+                        f.write(docker_commands)
+                    
+                    print(f"✅ Merged config from {subdir.name}/")
+    
+    def _generate_docker_commands_from_config(self, config, feature_name):
+        """Generate Docker commands from a feature config"""
+        commands = []
+        
+        # Multi-stage build
+        if 'build' in config and 'from_image' in config['build']:
+            from_image = config['build']['from_image']
+            commands.append(f"# Build stage for {feature_name}")
+            commands.append(f"FROM {from_image} AS {feature_name}_stage")
+            commands.append("")
+        
+        # Copy instructions from build stage
+        if 'build' in config and 'copy_from' in config['build']:
+            for copy in config['build']['copy_from']:
+                commands.append(f"COPY --from={feature_name}_stage {copy['src']} {copy['dst']}")
+        
+        # Install packages
+        if 'install' in config and 'packages' in config['install']:
+            packages = " ".join(config['install']['packages'])
+            commands.append(f"RUN pip install --no-cache-dir {packages}")
+        
+        # Run commands
+        if 'run' in config:
+            for run_cmd in config['run']:
+                commands.append(f"RUN {run_cmd}")
+        
+        # Environment variables
+        if 'env' in config:
+            for key, value in config['env'].items():
+                commands.append(f"ENV {key}={value}")
+        
+        # CMD override
+        if 'cmd' in config:
+            cmd_list = config['cmd']
+            cmd_str = ', '.join([f'"{c}"' for c in cmd_list])
+            commands.append(f"CMD [{cmd_str}]")
+        
+        return "\n".join(commands) if commands else ""
 
 if __name__ == "__main__":
     main()
