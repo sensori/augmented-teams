@@ -174,17 +174,14 @@ python features/test-feature/service-test.py AZURE
 
 **Provision-service.py AZURE mode steps:**
 1. Run `inject-config.py` to generate Dockerfile and Azure config
+   - Generates `config/Dockerfile` from build.requirements in feature-config.yaml
+   - Generates `config/.azure/containerapp.yaml` from all config sections
+   - These are generated files, not modified directly
 2. Build Docker image from Dockerfile
 3. Push to Azure Container Registry (ACR)
 4. Deploy to Azure Container Apps using `az containerapp`
 5. Wait for deployment to be ready
 6. Run tests against production URL
-
-**Configuration generation (when dependencies change):**
-- Run `inject-config.py` to generate:
-  - `config/Dockerfile` (from build.requirements in feature-config.yaml)
-  - `config/.azure/containerapp.yaml` (from all config sections)
-- These are generated files, not modified directly
 
 **Creating a New Feature:**
 ```bash
