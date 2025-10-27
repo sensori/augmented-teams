@@ -91,9 +91,9 @@ jobs:
         
         # Exit early if no features to deploy
         if [ -z "$FEATURES" ]; then
-          echo "⚠️ No features detected to deploy"
-          echo "✅ No deployment needed"
-          exit 0
+          echo "❌ ERROR: No features detected to deploy"
+          echo "⚠️ This indicates the workflow was triggered by a non-feature change"
+          exit 1
         fi
     
     - name: Login to Azure Container Registry
