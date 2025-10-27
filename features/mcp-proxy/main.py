@@ -4,7 +4,7 @@ MCP Proxy - Core Business Logic
 Provides MCP server proxy functionality that bridges HTTP to MCP protocol
 """
 
-import subprocess
+import requests
 import json
 import os
 from typing import Dict, Any
@@ -40,14 +40,14 @@ def inject_default_repo_params(tool_name: str, input_data: dict) -> dict:
 
 def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github") -> dict:
     """
-    Proxy an MCP call to the GitHub MCP server running in Docker
+    Proxy an MCP call to the external GitHub MCP server
     
-    Uses the MCP protocol via stdio to communicate with the MCP server.
+    Calls the external GitHub MCP server at https://api.githubcopilot.com/mcp/
     
     Args:
         tool_name: Name of the MCP tool to call (e.g., "github_search_code")
         input_data: Input parameters for the tool
-        mcp_server: Which MCP server to use (from mcp.json)
+        mcp_server: Which MCP server to use
     
     Returns:
         Tool execution result
@@ -59,14 +59,6 @@ def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github")
         return {
             "success": False,
             "error": "GITHUB_PERSONAL_ACCESS_TOKEN not set"
-        }
-    
-    # Get MCP server configuration
-    config = get_mcp_server_config(mcp_server)
-    if not config:
-        return {
-            "success": False,
-            "error": f"Unknown MCP server: {mcp_server}"
         }
     
     try:
@@ -84,72 +76,51 @@ def proxy_mcp_call(tool_name: str, input_data: dict, mcp_server: str = "github")
             }
         }
         
-        # Prepare environment for Docker
-        env = os.environ.copy()
-        env["GITHUB_PERSONAL_ACCESS_TOKEN"] = github_token
+        # Call external GitHub MCP server
+        headers = {
+            "Authorization": f"Bearer {github_token}",
+            "Content-Type": "application/json"
+        }
         
-        # Call MCP server via Docker with stdio communication
-        # Using docker run with stdin/stdout for MCP protocol
-        docker_args = config["args"].copy()
-        docker_args.extend([
-            "ghcr.io/github/github-mcp-server"
-        ])
-        
-        # Start the process
-        process = subprocess.Popen(
-            ["docker", "run", "-i", "--rm", "-e", f"GITHUB_PERSONAL_ACCESS_TOKEN={github_token}",
-             "ghcr.io/github/github-mcp-server"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=env
+        response = requests.post(
+            "https://api.githubcopilot.com/mcp/",
+            json=mcp_request,
+            headers=headers,
+            timeout=30
         )
         
-        # Send request
-        request_json = json.dumps(mcp_request) + "\n"
-        stdout, stderr = process.communicate(input=request_json, timeout=30)
-        
-        if process.returncode != 0:
+        if not response.ok:
             return {
                 "success": False,
-                "error": f"MCP server error: {stderr}",
+                "error": f"HTTP {response.status_code}: {response.text}",
                 "tool": tool_name
             }
         
-        # Parse response
-        try:
-            response = json.loads(stdout)
-            
-            # Check for errors in response
-            if "error" in response:
-                return {
-                    "success": False,
-                    "error": response["error"],
-                    "tool": tool_name
-                }
-            
-            # Extract result from MCP response
-            if "result" in response:
-                return {
-                    "success": True,
-                    "tool": tool_name,
-                    "result": response["result"]
-                }
-            else:
-                return {
-                    "success": True,
-                    "tool": tool_name,
-                    "result": response
-                }
-        except json.JSONDecodeError as e:
+        result = response.json()
+        
+        # Check for errors in response
+        if "error" in result:
             return {
                 "success": False,
-                "error": f"Failed to parse MCP response: {e}",
-                "raw_response": stdout
+                "error": result["error"],
+                "tool": tool_name
+            }
+        
+        # Extract result from MCP response
+        if "result" in result:
+            return {
+                "success": True,
+                "tool": tool_name,
+                "result": result["result"]
+            }
+        else:
+            return {
+                "success": True,
+                "tool": tool_name,
+                "result": result
             }
             
-    except subprocess.TimeoutExpired:
+    except requests.exceptions.Timeout:
         return {
             "success": False,
             "error": "MCP server call timed out after 30 seconds"
