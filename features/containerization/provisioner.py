@@ -360,29 +360,25 @@ class AzureContainerProvisioner(Provisioner):
         print("🚀 Provisioning for AZURE deployment...")
         config = self._get_config()
         
-        # Skip inject-config for features that have custom Dockerfiles (like mcp-proxy)
-        feature_name = config.get('feature', {}).get('name', self.feature_path.name).lower()
-        features_with_custom_dockerfile = ['mcp-proxy']
+        # Run inject-config to ensure Dockerfile is up to date
+        print("📦 Generating Dockerfile...")
+        inject_script = self.containerization_path / "inject-config.py"
+        result = subprocess.run(
+            [sys.executable, str(inject_script), str(self.feature_path)],
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='ignore'
+        )
         
-        if feature_name not in features_with_custom_dockerfile:
-            # Run inject-config to ensure Dockerfile is up to date
-            print("📦 Generating Dockerfile...")
-            inject_script = self.containerization_path / "inject-config.py"
-            result = subprocess.run(
-                [sys.executable, str(inject_script), str(self.feature_path)],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='ignore'
-            )
-            
-            if result.returncode != 0:
-                print(f"❌ Failed to generate Dockerfile: {result.stderr}")
-                return False
-            
-            print("✅ Dockerfile generated")
-        else:
-            print(f"📋 Skipping inject-config for {feature_name} (using custom Dockerfile)")
+        if result.returncode != 0:
+            print(f"❌ Failed to generate Dockerfile: {result.stderr}")
+            return False
+        
+        print("✅ Dockerfile generated")
+        
+        # Post-process: merge any additional Dockerfile configs from subdirectories
+        self._merge_dockerfile_fragments(config)
         
         # Build and push Docker image
         import os
@@ -565,6 +561,28 @@ class AzureContainerProvisioner(Provisioner):
         """Get Azure Container App URL from config"""
         config = self._get_config()
         return config.get('environment', {}).get('production', {}).get('url', '')
+
+    def _merge_dockerfile_fragments(self, config):
+        """Check for additional Dockerfile configs in subdirectories and merge them"""
+        dockerfile_path = self.feature_path / "config" / "Dockerfile"
+        
+        # Look for subdirectories with Dockerfile.fragment or Dockerfile
+        for subdir in self.feature_path.iterdir():
+            if not subdir.is_dir() or subdir.name == 'config':
+                continue
+            
+            fragment_path = subdir / "Dockerfile"
+            if fragment_path.exists():
+                print(f"📝 Merging Dockerfile from {subdir.name}/")
+                with open(fragment_path, 'r') as f:
+                    fragment_content = f.read()
+                
+                # Append fragment to main Dockerfile
+                with open(dockerfile_path, 'a') as f:
+                    f.write("\n# Additional configuration from " + subdir.name + "\n")
+                    f.write(fragment_content)
+                
+                print(f"✅ Merged {subdir.name}/Dockerfile")
 
 if __name__ == "__main__":
     main()
