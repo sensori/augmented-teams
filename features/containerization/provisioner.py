@@ -361,6 +361,66 @@ class AzureContainerProvisioner(Provisioner):
             return False
         
         print("✅ Dockerfile generated")
+        
+        # Build and push Docker image
+        import os
+        acr_server = config.get('azure', {}).get('container_registry', '')
+        feature_name = config.get('feature', {}).get('name', self.feature_path.name)
+        image_name = f"{acr_server}/{feature_name}:latest"
+        
+        # Login to ACR if password provided
+        registry_password = os.environ.get('ACR_PASSWORD', '')
+        if registry_password:
+            print(f"🔐 Logging into {acr_server}...")
+            registry_username = config.get('azure', {}).get('registry_username', '')
+            docker_login = subprocess.run(
+                ["docker", "login", acr_server, "--username", registry_username, "--password", registry_password],
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='ignore'
+            )
+            if docker_login.returncode != 0:
+                print(f"⚠️ Docker login failed (may already be logged in)")
+        
+        # Build the image
+        # For containerization, build from repo root; for others, build from feature directory
+        is_containerization = feature_name == 'containerization'
+        if is_containerization:
+            build_context = self.feature_path.parent.parent  # Repo root
+        else:
+            build_context = self.feature_path  # Feature directory
+        
+        print(f"🔨 Building Docker image {image_name} from {build_context}...")
+        build_result = subprocess.run(
+            ["docker", "build", "-t", image_name, "-f", str(self.feature_path / "config" / "Dockerfile"), str(build_context)],
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='ignore'
+        )
+        
+        if build_result.returncode != 0:
+            print(f"❌ Failed to build Docker image: {build_result.stderr}")
+            return False
+        
+        print("✅ Docker image built")
+        
+        # Push the image
+        print(f"📤 Pushing Docker image to {acr_server}...")
+        push_result = subprocess.run(
+            ["docker", "push", image_name],
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='ignore'
+        )
+        
+        if push_result.returncode != 0:
+            print(f"❌ Failed to push Docker image: {push_result.stderr}")
+            return False
+        
+        print("✅ Docker image pushed to ACR")
         return True
     
     def start(self, always=False):

@@ -1,66 +1,63 @@
-name: Deploy Test Feature
+name: Deploy Features
 
 on:
   push:
     branches: [ main ]
-    paths: [ 'features/containerization/test-feature/**' ]
+    paths: [ 'features/containerization/**' ]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  detect-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Detect changed features
+      id: detect
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Manual trigger - deploy all features
+          FEATURES=$(ls features/containerization/ | grep -v "^_" | grep -v "^containerization$" | tr '\n' ' ')
+          echo "features=$FEATURES" >> $GITHUB_OUTPUT
+        else
+          # Auto-detect changed features
+          FEATURES=$(git diff --name-only HEAD~1 HEAD | grep '^features/containerization/[^/]*/' | cut -d'/' -f3 | sort -u | tr '\n' ' ')
+          echo "features=$FEATURES" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Install dependencies
+      run: |
+        pip install docker requests pyyaml
+    
     - name: Login to Azure Container Registry
       uses: azure/docker-login@v1
       with:
         login-server: augmentedteams-hfdzfjhghshucaf6.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-        
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./features/containerization/test-feature
-        file: ./features/containerization/test-feature/config/Dockerfile
-        push: true
-        tags: |
-          augmentedteams-hfdzfjhghshucaf6.azurecr.io/test-feature:latest
-          augmentedteams-hfdzfjhghshucaf6.azurecr.io/test-feature:${{ github.sha }}
-        
+    
     - name: Login to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Deploy to Azure Container Apps
+    - name: Provision and deploy changed features
+      env:
+        ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
       run: |
-        # Check if container app exists, create or update
-        if az containerapp show --name test-feature --resource-group AugmentedTeams &>/dev/null; then
-          echo "📦 Updating existing container app..."
-          az containerapp update \
-            --name test-feature \
-            --resource-group AugmentedTeams \
-            --image augmentedteams-hfdzfjhghshucaf6.azurecr.io/test-feature:latest
-        else
-          echo "🚀 Creating new container app..."
-          az containerapp create \
-            --name test-feature \
-            --resource-group AugmentedTeams \
-            --environment managedEnvironment-AugmentedTeams-aa2c \
-            --image augmentedteams-hfdzfjhghshucaf6.azurecr.io/test-feature:latest \
-            --registry-server augmentedteams-hfdzfjhghshucaf6.azurecr.io \
-            --registry-username ${{ secrets.ACR_USERNAME }} \
-            --registry-password ${{ secrets.ACR_PASSWORD }} \
-            --target-port 8000 \
-            --ingress external \
-            --cpu 0.25 \
-            --memory 0.5Gi
-        fi
-        echo "✅ Container App deployed successfully!"
+        for FEATURE in ${{ steps.detect.outputs.features }}; do
+          if [ -d "features/containerization/$FEATURE" ]; then
+            echo "📦 Provisioning and deploying $FEATURE..."
+            python features/containerization/$FEATURE/config/provision-service.py AZURE --always
+          else
+            echo "⚠️ Feature $FEATURE not found in features/containerization/"
+          fi
+        done
+        echo "✅ All features deployed successfully!"

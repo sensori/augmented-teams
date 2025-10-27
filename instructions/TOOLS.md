@@ -33,3 +33,85 @@ Used to: summarize, ground responses, or cross-reference knowledge.
 **Purpose:** Retrieve up-to-date info or niche details.  
 **Guideline:** Use only when freshness or accuracy demands it.
 
+---
+
+# 🔧 Development Environment Tools
+
+Required external tools for working with this project:
+
+## Azure Tools
+
+### Azure CLI (`az`)
+**Purpose:** Deploy and manage Azure Container Apps  
+**Installation:** [Install Azure CLI](https://aka.ms/installazurecliwindows)  
+**Usage:**
+```bash
+# Login to Azure
+az login
+
+# Deploy container apps
+az containerapp create --name <app-name> --resource-group <rg-name> ...
+```
+**Version:** Latest (check with `az --version`)
+
+## Docker
+
+### Docker
+**Purpose:** Build and test containers locally  
+**Installation:** [Install Docker Desktop](https://www.docker.com/products/docker-desktop)  
+**Usage:**
+```bash
+# Build container
+docker build -t <image-name> .
+
+# Run container
+docker run -p 8000:8000 <image-name>
+```
+
+## Python Tools
+
+### Python 3.12+
+**Purpose:** Core runtime for all features  
+**Installation:** [Install Python](https://www.python.org/downloads/)  
+**Version:** 3.12 or higher
+
+### pip
+**Purpose:** Install Python dependencies  
+**Included:** Comes with Python
+
+## Git
+
+### Git
+**Purpose:** Version control  
+**Installation:** [Install Git](https://git-scm.com/downloads)  
+**Usage:** Standard git commands for clone, commit, push, etc.
+
+## GitHub
+
+### GitHub CLI (optional)
+**Purpose:** Manage GitHub from command line  
+**Installation:** [Install GitHub CLI](https://cli.github.com/)  
+**Usage:**
+```bash
+gh auth login
+gh repo clone <repo>
+```
+
+---
+
+## Quick Setup Checklist
+
+- [ ] Install Azure CLI
+- [ ] Install Docker Desktop
+- [ ] Install Python 3.12+
+- [ ] Install Git
+- [ ] Clone repository: `git clone <repo-url>`
+- [ ] Login to Azure: `az login`
+- [ ] Set ACR password environment variable: `$env:ACR_PASSWORD="your-password"`
+
+## Environment Variables
+
+Required for local Azure deployments:
+- `ACR_PASSWORD`: Azure Container Registry password
+- `OPENAI_API_KEY`: For GPT-assisted assertion generation (optional)
+

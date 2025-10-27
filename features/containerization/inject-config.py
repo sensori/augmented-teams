@@ -36,6 +36,18 @@ def inject_dockerfile(config, feature_path):
     # Build pip install command
     pip_install = "pip install --no-cache-dir " + " ".join(requirements)
     
+    # Special handling for containerization service - needs access to all features
+    is_containerization = config['feature']['name'] == 'containerization'
+    
+    if is_containerization:
+        copy_instructions = """# Copy containerization service code
+COPY . /app
+
+# Copy all features (so containerization can access them)
+COPY features /app/features"""
+    else:
+        copy_instructions = "# Copy source code\nCOPY . ."
+    
     dockerfile_content = f"""FROM python:3.11-slim
 
 # Set working directory
@@ -50,8 +62,7 @@ ENV LOG_LEVEL={config['environment']['production']['log_level']}
 # Install dependencies directly from config
 RUN {pip_install}
 
-# Copy source code
-COPY . .
+{copy_instructions}
 
 # Expose port
 EXPOSE ${{SERVICE_PORT}}
