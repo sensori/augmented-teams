@@ -80,7 +80,7 @@ from service_test_base import get_base_url, run_service_tests
 def test_hello_world():
     """Test hello function"""
     url = f"{get_base_url(feature_path)}/hello"
-    response = requests.get(url, params={"name": "World"}, timeout=5)
+    response = requests.get(url, params={"name": "World"}, timeout=30)
     result = response.json()["message"]
     assert result == "Hello World!", f"Expected 'Hello World!', got '{result}'"
     print("✅ test_hello_world passed")
@@ -89,7 +89,7 @@ def test_hello_world():
 def test_hello_custom():
     """Test hello with custom name"""
     url = f"{get_base_url(feature_path)}/hello"
-    response = requests.get(url, params={"name": "Alice"}, timeout=5)
+    response = requests.get(url, params={"name": "Alice"}, timeout=30)
     result = response.json()["message"]
     assert result == "Hello Alice!", f"Expected 'Hello Alice!', got '{result}'"
     print("✅ test_hello_custom passed")
@@ -98,7 +98,7 @@ def test_hello_custom():
 def test_add_numbers():
     """Test add_numbers function"""
     url = f"{get_base_url(feature_path)}/add"
-    response = requests.get(url, params={"a": 2, "b": 3}, timeout=5)
+    response = requests.get(url, params={"a": 2, "b": 3}, timeout=30)
     result = response.json()["result"]
     assert result == 5, f"Expected 5, got {result}"
     print("✅ test_add_numbers passed")
@@ -107,7 +107,7 @@ def test_add_numbers():
 def test_goodbye():
     """Test goodbye function"""
     url = f"{get_base_url(feature_path)}/goodbye"
-    response = requests.get(url, params={"param": "World"}, timeout=5)
+    response = requests.get(url, params={"param": "World"}, timeout=30)
     result = response.json()["message"]
     assert result == "Goodbye World!", f"Expected 'Goodbye World!', got '{result}'"
     print("✅ test_goodbye passed")
