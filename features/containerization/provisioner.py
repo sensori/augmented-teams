@@ -567,8 +567,9 @@ class AzureContainerProvisioner(Provisioner):
         import yaml
         dockerfile_path = self.feature_path / "config" / "Dockerfile"
         
-        # First pass: collect multi-stage builds and other commands separately
-        multi_stage_commands = []
+        # Collect multi-stage builds and other commands
+        build_stages = []
+        copy_commands = []
         other_commands = []
         
         # Look for subdirectories with config.yaml
@@ -587,85 +588,81 @@ class AzureContainerProvisioner(Provisioner):
                     continue
                 
                 # Generate Docker commands from config
-                docker_commands, is_multistage = self._generate_docker_commands_from_config(subdir_config, subdir.name)
+                build_stage, copies, docker_commands = self._generate_docker_commands_from_config(subdir_config, subdir.name)
                 
+                if build_stage:
+                    build_stages.append(build_stage)
+                if copies:
+                    copy_commands.extend(copies)
                 if docker_commands:
-                    if is_multistage:
-                        multi_stage_commands.append(("# Additional configuration from " + subdir.name, docker_commands))
-                    else:
-                        other_commands.append(("# Additional configuration from " + subdir.name, docker_commands))
-                    
-                    print(f"✅ Merged config from {subdir.name}/")
-        
-        # If there are multi-stage builds, prepend them to the Dockerfile
-        if multi_stage_commands:
-            print("📝 Prepending multi-stage builds to Dockerfile...")
-            
-            with open(dockerfile_path, 'r') as f:
-                original_content = f.read()
-            
-            with open(dockerfile_path, 'w') as f:
-                # Write multi-stage builds first
-                for comment, commands in multi_stage_commands:
-                    f.write(comment + "\n")
-                    f.write(commands + "\n\n")
+                    other_commands.append(("# Additional configuration from " + subdir.name, docker_commands))
                 
-                # Then write original content
-                f.write(original_content)
+                print(f"✅ Merged config from {subdir.name}/")
         
-        # Append other commands at the end
-        if other_commands:
-            print("📝 Appending additional Docker configuration...")
-            with open(dockerfile_path, 'a') as f:
-                for comment, commands in other_commands:
-                    f.write("\n" + comment + "\n")
-                    f.write(commands + "\n")
+        # Now reconstruct the Dockerfile with proper ordering
+        with open(dockerfile_path, 'r') as f:
+            original_lines = f.readlines()
+        
+        with open(dockerfile_path, 'w') as f:
+            # 1. Write build stages first
+            for stage in build_stages:
+                f.write(stage + "\n\n")
+            
+            # 2. Write original Dockerfile until after the main FROM
+            inserted_copies = False
+            for i, line in enumerate(original_lines):
+                f.write(line)
+                
+                # After the main FROM line, insert COPY commands
+                if not inserted_copies and line.strip().startswith("FROM ") and i > 0:
+                    # This is likely the main FROM, insert copies after it
+                    for copy_cmd in copy_commands:
+                        f.write(copy_cmd + "\n")
+                    inserted_copies = True
+            
+            # 3. Append other commands at the end
+            for comment, commands in other_commands:
+                f.write("\n" + comment + "\n")
+                f.write(commands + "\n")
     
     def _generate_docker_commands_from_config(self, config, feature_name):
-        """Generate Docker commands from a feature config - returns (commands, is_multistage)"""
-        commands = []
-        is_multistage = False
+        """Generate Docker commands from a feature config - returns (build_stage, copy_commands, other_commands)"""
+        build_stage = None
+        copy_commands = []
+        other_commands = []
         
         # Multi-stage build
         if 'build' in config and 'from_image' in config['build']:
-            is_multistage = True
             from_image = config['build']['from_image']
-            commands.append(f"FROM {from_image} AS {feature_name}_stage")
-            commands.append("")
+            build_stage = f"FROM {from_image} AS {feature_name}_stage"
         
         # Copy instructions from build stage
         if 'build' in config and 'copy_from' in config['build']:
             for copy in config['build']['copy_from']:
-                commands.append(f"COPY --from={feature_name}_stage {copy['src']} {copy['dst']}")
-            commands.append("")
+                copy_commands.append(f"COPY --from={feature_name}_stage {copy['src']} {copy['dst']}")
         
         # Install packages
         if 'install' in config and 'packages' in config['install']:
             packages = " ".join(config['install']['packages'])
-            commands.append(f"RUN pip install --no-cache-dir {packages}")
+            other_commands.append(f"RUN pip install --no-cache-dir {packages}")
         
         # Run commands
         if 'run' in config:
             for run_cmd in config['run']:
-                if run_cmd.startswith("echo"):
-                    # Shell command - add as RUN
-                    commands.append(f"RUN {run_cmd}")
-                else:
-                    # Already formatted as command
-                    commands.append(f"RUN {run_cmd}")
+                other_commands.append(f"RUN {run_cmd}")
         
         # Environment variables
         if 'env' in config:
             for key, value in config['env'].items():
-                commands.append(f"ENV {key}={value}")
+                other_commands.append(f"ENV {key}={value}")
         
         # CMD override
         if 'cmd' in config:
             cmd_list = config['cmd']
             cmd_str = ', '.join([f'"{c}"' for c in cmd_list])
-            commands.append(f"CMD [{cmd_str}]")
+            other_commands.append(f"CMD [{cmd_str}]")
         
-        return ("\n".join(commands) if commands else "", is_multistage)
+        return (build_stage, copy_commands, "\n".join(other_commands) if other_commands else "")
 
 if __name__ == "__main__":
     main()
