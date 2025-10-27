@@ -19,6 +19,10 @@ jobs:
       with:
         python-version: '3.12'
     
+    - name: Install Azure CLI
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    
     - name: Detect changed features
       id: detect
       run: |
@@ -34,8 +38,8 @@ jobs:
           
           FEATURES=$(echo "$CHANGED_FILES" | grep '^features/containerization/[^/]*/' | cut -d'/' -f3 | sort -u | tr '\n' ' ')
           
-          # Exclude template-feature
-          FEATURES=$(echo "$FEATURES" | sed 's/template-feature//g' | xargs)
+          # Filter out directories that aren't actual features
+          FEATURES=$(echo "$FEATURES" | grep -v "template-feature\|_template\|config\|chats" | xargs)
           
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         fi
