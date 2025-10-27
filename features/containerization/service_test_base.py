@@ -7,6 +7,8 @@ Provides common functionality for loading URLs from config and running tests
 import sys
 import io
 import yaml
+import time
+import requests
 from pathlib import Path
 
 # Fix encoding for Windows - allow emojis in output
@@ -63,6 +65,23 @@ def run_service_tests(test_functions):
     # Provision and start (skip for AZURE since it's already deployed)
     if args.mode == 'AZURE':
         print("ℹ️  AZURE mode - skipping local provision/start, using production URL")
+        # Wait for service to be ready
+        base_url = get_base_url(feature_path, args.mode)
+        print(f"⏳ Waiting for service at {base_url} to be ready...")
+        max_attempts = 30
+        for attempt in range(max_attempts):
+            try:
+                response = requests.get(f"{base_url}/hello?name=HealthCheck", timeout=5)
+                if response.status_code == 200:
+                    print(f"✅ Service is ready!")
+                    break
+            except:
+                if attempt < max_attempts - 1:
+                    print(f"⏳ Attempt {attempt + 1}/{max_attempts} - waiting for service...")
+                    time.sleep(2)
+                else:
+                    print("❌ Service failed to become ready after 60 seconds")
+                    sys.exit(1)
     else:
         provisioner = Provisioner.create(args.mode, feature_path, containerization_path)
         if not provisioner.provision(args.always_provision):
