@@ -84,9 +84,9 @@ Each feature defines its own:
 ### Common Coordination, Not Control
 
 - **Single central workflow** (feature-deploy.yml) detects and deploys changed features
-- **No per-feature workflows** - each feature has provision-service.py script
+- **Per-feature deployment script** - each feature has provision-service.py script
 - **Git-based detection** - analyzes git diff to find changed features
-- **Simplified coordination** - one workflow handles all feature deployments
+
 
 ### Separation of Concerns
 - **Common** → CI/CD orchestration and shared settings
@@ -111,6 +111,7 @@ All features MUST follow the standardized template based on the proven git integ
 | `service.py` | FastAPI service that wraps main.py functions | HTTP API layer |
 | `test.py` | Plain Python unit tests (calls main.py directly) | run python test.py |
 | `service-test.py` | HTTP integration tests (calls service via HTTP) | run python service-test.py [SERVICE\|CONTAINER\|AZURE] |
+| `gpt-action.yml` | GPT Action OpenAPI schema | **uploaded to ChatGPT prefixed as `[feature-name]-gpt-action.yml`** |
 
 ### 2. Configure the Service
 
@@ -150,38 +151,33 @@ python features/test-feature/service-test.py CONTAINER
 python features/test-feature/service-test.py AZURE
 ```
 
-**Flow:**
+**Development and Deployment Flow:**
 
-1. **Test.py (Plain Python unit tests):**
-   - Imports functions directly from `main.py`
-   - Tests business logic without service layer
-   - Example: `from main import hello; assert hello("World") == "Hello World!"`
+1. **Make changes** to `main.py` or `service.py`
+2. **Write tests** in `test.py` (plain Python)
+3. **Generate service-test.py** using GPT functions (TODO - automated generation from test.py)
+4. **Test locally in 3 modes:**
+   - `python test.py` - CODE mode (plain Python)
+   - `python service-test.py SERVICE` - SERVICE mode (local FastAPI service)
+   - `python service-test.py CONTAINER` - CONTAINER mode (local Docker)
+5. **Deploy to Azure - TWO OPTIONS:**
+   
+   **Option A: Automatic via GitHub Actions:**
+   - Commit and push changes to `features/[feature-name]/*`
+   - `.github/workflows/feature-deploy.yml` triggers
+   - Detects changed features via git diff
+   - For each feature: runs `config/provision-service.py AZURE --always`
+   
+   **Option B: Manual deployment:**
+   - Run `config/provision-service.py AZURE --always`
 
-2. **Service-test.py (HTTP integration tests):**
-   - Uses `service_test_base.py` for common infrastructure
-   - Calls `get_base_url(feature_path)` which reads `feature-config.yaml`
-   - URL selection based on mode:
-     - SERVICE mode → `environment.development.url` (http://localhost:8000)
-     - CONTAINER mode → `environment.production.url` (https://...)
-     - AZURE mode → `environment.production.url` (Azure Container Apps URL)
-   - Provisioning handled by `service_test_base.run_service_tests()`:
-     - SERVICE: Provisions locally, starts FastAPI service
-     - CONTAINER: Provisions locally, starts Docker container
-     - AZURE: Skips provisioning (already deployed to Azure)
-
-3. **Azure deployment (AZURE mode):**
-   - Uses Azure CLI (`az` command) to deploy to Azure Container Apps
-   - Requires ACR password in `ACR_PASSWORD` environment variable
-   - Validates CPU/memory against Azure Container Apps tiers
-   - **Valid CPU/Memory combinations:**
-     | CPU | Memory |
-     |-----|--------|
-     | 0.25 | 0.5Gi |
-     | 0.5 | 1.0Gi |
-     | 0.75 | 1.5Gi |
-     | 1.0 | 2.0Gi |
-   - Minimum tier: 0.25 CPU, 0.5Gi memory
-   - Default used: 0.25 CPU, 0.5Gi memory
+**Provision-service.py AZURE mode steps:**
+1. Run `inject-config.py` to generate Dockerfile and Azure config
+2. Build Docker image from Dockerfile
+3. Push to Azure Container Registry (ACR)
+4. Deploy to Azure Container Apps using `az containerapp`
+5. Wait for deployment to be ready
+6. Run tests against production URL
 
 **Configuration generation (when dependencies change):**
 - Run `inject-config.py` to generate:
