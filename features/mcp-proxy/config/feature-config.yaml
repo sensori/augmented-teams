@@ -1,5 +1,5 @@
 feature:
-  name: MCP_proxy
+  name: mcp-proxy
   version: "1.0.0"
   description: "HTTP API proxy for MCP server operations"
 
