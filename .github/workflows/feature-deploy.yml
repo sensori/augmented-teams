@@ -112,6 +112,13 @@ jobs:
         echo "🔍 Deploying features..."
         echo "📋 Features to deploy: $FEATURES"
         
+        # Fail if no features to deploy
+        if [ -z "$FEATURES" ]; then
+          echo "❌ ERROR: No features detected to deploy!"
+          echo "This should never happen - early exit in detection step should have caught this."
+          exit 1
+        fi
+        
         for FEATURE in $FEATURES; do
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
