@@ -19,16 +19,9 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install all Python dependencies
+    - name: Install dependencies
       run: |
-        pip install --upgrade pip
         pip install docker requests pyyaml fastapi uvicorn pydantic
-        
-        # Also install into user directory to ensure availability
-        pip install --user docker requests pyyaml fastapi uvicorn pydantic
-        
-        # Verify installation
-        python -c "import requests, docker, yaml, fastapi, uvicorn, pydantic; print('✅ All dependencies installed')"
     
     - name: Install Azure CLI
       run: |
