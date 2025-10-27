@@ -614,8 +614,9 @@ class AzureContainerProvisioner(Provisioner):
                 f.write(line)
                 
                 # After the main FROM line, insert COPY commands
-                if not inserted_copies and line.strip().startswith("FROM ") and i > 0:
-                    # This is likely the main FROM, insert copies after it
+                # The main FROM is the first one we encounter (build stages come before)
+                if not inserted_copies and "FROM python" in line:
+                    # Found the main Python FROM, insert copies after it
                     for copy_cmd in copy_commands:
                         f.write(copy_cmd + "\n")
                     inserted_copies = True
