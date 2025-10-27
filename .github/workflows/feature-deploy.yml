@@ -1,5 +1,7 @@
 name: Deploy Features
 
+# Version: 1.0.0
+
 on:
   push:
     branches: [ main ]
@@ -11,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Version Info
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🚀 Feature Deploy Workflow v1.0.0"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+    
     - name: Checkout code
       uses: actions/checkout@v4
     
