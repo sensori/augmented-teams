@@ -67,12 +67,6 @@ jobs:
           # Exclude features/containerization/* (those are templates/config, not real features)
           FEATURES=$(echo "$CHANGED_FILES" | grep '^features/[^/]*/' | grep -v '^features/containerization/' | cut -d'/' -f2 | sort -u | grep -v "^$" | tr '\n' ' ')
           
-          # If no changes detected, deploy all features (for manual or force-deploy cases)
-          if [ -z "$FEATURES" ]; then
-            echo "⚠️ No changes detected, deploying all features"
-            FEATURES="test-feature"
-          fi
-          
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         fi
         
