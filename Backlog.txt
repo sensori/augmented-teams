@@ -11,3 +11,8 @@ tag all commit by the feature --> use featrure command to store curent feature i
 Functrion Calln to get more consitrent behavior from Cursor
 faster deployments -> skip container creation unless that is sorce of ewrror 0--> use funcitonb calling
 get curosr to STOP stalling
+isntrucitons so it naturally genreateds flow user  orietned docs
+new feature --new chat auto
+ai deployment 
+    -- prompt injection at function level
+    -- deploy test-feature and diagnose if stuck in a loop

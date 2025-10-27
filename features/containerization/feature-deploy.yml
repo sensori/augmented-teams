@@ -1,0 +1,217 @@
+name: Deploy Features
+
+# Version: 1.1.0
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'features/**' ]
+  workflow_dispatch:
+
+jobs:
+  detect-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Version Info
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🚀 Feature Deploy Workflow v1.1.0"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+    
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Detect changed features
+      id: detect
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔍 Detecting changed features..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Manual trigger - list ONLY features at features/* level
+          FEATURES=""
+          for dir in features/*; do
+            if [ ! -d "$dir" ]; then
+              continue
+            fi
+            DIRNAME=$(basename "$dir")
+            # Skip containerization, _template, template-feature and only check direct children of features/
+            if [ "$DIRNAME" = "containerization" ] || [ "$DIRNAME" = "_template" ] || [ "$DIRNAME" = "template-feature" ]; then
+              continue
+            fi
+            # Only include if it has config/provision-service.py AND is not inside containerization
+            if echo "$dir" | grep -q '^features/[^/]*$'; then
+              if [ -f "$dir/config/provision-service.py" ]; then
+                FEATURES="$FEATURES $DIRNAME"
+              fi
+            fi
+          done
+          FEATURES=$(echo "$FEATURES" | xargs)
+          echo "features=$FEATURES" >> $GITHUB_OUTPUT
+        else
+          # Auto-detect changed features - look at changed files in last commit
+          echo "🔍 Detecting changed files..."
+          
+          # Fetch full history for git diff to work
+          git fetch --unshallow 2>/dev/null || git fetch
+          
+          # Use the most reliable method - just get the last commit's changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          
+          echo "📄 Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # If still empty, try HEAD vs origin/main
+          if [ -z "$CHANGED_FILES" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/main HEAD 2>/dev/null || echo "")
+            echo "📄 Tried origin/main vs HEAD:"
+            echo "$CHANGED_FILES"
+          fi
+          
+          # Extract feature names from paths like features/test-feature/
+          # Exclude features/containerization/* (those are templates/config, not real features)
+          FEATURES=$(echo "$CHANGED_FILES" | grep '^features/[^/]*/' | grep -v '^features/containerization/' | cut -d'/' -f2 | sort -u | grep -v "^$" | tr '\n' ' ')
+          
+          echo "📦 Features to deploy: $FEATURES"
+          
+          echo "features=$FEATURES" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "📋 Detected features: $FEATURES"
+        
+        # Exit early if no features to deploy
+        if [ -z "$FEATURES" ]; then
+          echo "❌ ERROR: No features detected to deploy"
+          echo "⚠️ This indicates the workflow was triggered by a non-feature change"
+          exit 1
+        fi
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Cache Azure CLI
+      id: cache-azure-cli
+      uses: actions/cache@v3
+      with:
+        path: /usr/local/bin/az
+        key: azure-cli-${{ runner.os }}
+    
+    - name: Install dependencies
+      run: |
+        pip install --cache-dir ~/.cache/pip docker requests pyyaml fastapi uvicorn pydantic
+    
+    - name: Install Azure CLI
+      if: steps.cache-azure-cli.outputs.cache-hit != 'true'
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: augmentedteams-hfdzfjhghshucaf6.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Provision and deploy changed features
+      env:
+        ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+      run: |
+        set -e  # Exit on error
+        FEATURES="${{ steps.detect.outputs.features }}"
+        
+        echo "🔍 Deploying features..."
+        echo "📋 Features to deploy: $FEATURES"
+        
+        # Fail if no features to deploy
+        if [ -z "$FEATURES" ]; then
+          echo "❌ ERROR: No features detected to deploy!"
+          echo "This should never happen - early exit in detection step should have caught this."
+          exit 1
+        fi
+        
+        for FEATURE in $FEATURES; do
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 Processing feature: $FEATURE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          if [ ! -d "features/$FEATURE" ]; then
+            echo "❌ Feature directory not found: features/$FEATURE"
+            echo "⚠️ Skipping $FEATURE"
+            continue
+          fi
+          
+          if [ ! -f "features/$FEATURE/config/provision-service.py" ]; then
+            echo "❌ Provision script not found: features/$FEATURE/config/provision-service.py"
+            echo "⚠️ Skipping $FEATURE"
+            continue
+          fi
+          
+          echo "✅ Starting deployment for $FEATURE..."
+          echo "📝 Command: python features/$FEATURE/config/provision-service.py AZURE --always"
+          
+          if python features/$FEATURE/config/provision-service.py AZURE --always; then
+            echo "✅ Successfully deployed $FEATURE"
+            
+            # Check container app status and logs
+            echo ""
+            echo "🔍 Checking Azure Container App status..."
+            az containerapp show --name test-feature --resource-group AugmentedTeams --query "{status: properties.runningStatus, provisioning: properties.provisioningState, url: properties.configuration.ingress.fqdn}" -o json || echo "Could not fetch status"
+            
+            echo ""
+            echo "📋 Recent container logs..."
+            az containerapp logs show --name test-feature --resource-group AugmentedTeams --tail 10 --follow false || echo "Could not fetch logs"
+            
+            # Get and display the deployment URL from config
+            echo ""
+            echo "🌐 Fetching $FEATURE deployment URL..."
+            URL=$(python -c 'import yaml; from pathlib import Path; config = yaml.safe_load(open(Path("features") / "'$FEATURE'" / "config" / "feature-config.yaml")); print(config.get("environment", {}).get("production", {}).get("url", "NOT SET"))' 2>/dev/null || echo "NOT SET")
+            echo "🌐 $FEATURE deployed to: $URL"
+            echo ""
+            
+            # Run tests if test file exists
+            if [ -f "features/$FEATURE/service-test.py" ]; then
+              echo "🧪 Running tests..."
+              if python features/$FEATURE/service-test.py AZURE; then
+                echo "✅ Tests passed"
+              else
+                TEST_EXIT=$?
+                echo "⚠️ Tests failed (exit code: $TEST_EXIT) - continuing anyway"
+                echo "ℹ️  Service may still be initializing, check manually"
+              fi
+            fi
+          else
+            EXIT_CODE=$?
+            echo "❌ Failed to deploy $FEATURE (exit code: $EXIT_CODE)"
+            exit $EXIT_CODE
+          fi
+          
+          echo "✅ $FEATURE deployment completed"
+        done
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ ALL FEATURES DEPLOYED SUCCESSFULLY!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

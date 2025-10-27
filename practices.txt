@@ -1,0 +1,8 @@
+prep AI swap notify, swap--> test, buod, refactor, unstick;  , add to backlog, note practice
+Map flow of human, code, ai loops
+Agile eng is a must (from localization to tdd)
+Keep a backog close, new featuires will come faster than you can code them (relentless focus and prioritixzation)
+FLow - active
+
+
+
