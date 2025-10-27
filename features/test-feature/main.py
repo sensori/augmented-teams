@@ -19,6 +19,10 @@ def goodbye(param: str) -> str:
 def multiply(a: int, b: int) -> int:
     """Multiply two numbers"""
     return a * b
+
+def subtract(a: int, b: int) -> int:
+    """Subtract two numbers"""
+    return a - b
    
 if __name__ == '__main__':
     # Simple test when run directly

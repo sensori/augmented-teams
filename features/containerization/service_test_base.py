@@ -6,7 +6,7 @@ Provides common functionality for loading URLs from config and running tests
 
 import sys
 import io
-import yaml
+import yaml  # pyright: ignore
 import time
 import requests
 from pathlib import Path
@@ -48,11 +48,11 @@ def run_service_tests(test_functions):
     caller_file = Path(caller_frame.f_globals['__file__'])
     feature_path = caller_file.parent
     
-    containerization_path = feature_path.parent.parent / "containerization"
+    containerization_path = feature_path.parent / "containerization"
     sys.path.insert(0, str(containerization_path))
     
     import argparse
-    from provisioner import Provisioner
+    from provisioner import Provisioner  # pyright: ignore
     
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['SERVICE', 'CONTAINER', 'AZURE'])
