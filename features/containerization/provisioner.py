@@ -431,7 +431,9 @@ class AzureContainerProvisioner(Provisioner):
         # Get Azure CLI path from PATH environment variable
         import os
         az_path = None
-        for path_dir in os.environ.get("Path", "").split(os.pathsep):
+        # Try both PATH and Path (Windows)
+        path_var = os.environ.get("PATH", "") or os.environ.get("Path", "")
+        for path_dir in path_var.split(os.pathsep):
             az_test = os.path.join(path_dir, "az.cmd" if os.name == 'nt' else "az")
             if os.path.isfile(az_test):
                 az_path = az_test
