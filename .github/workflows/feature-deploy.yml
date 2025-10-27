@@ -27,13 +27,8 @@ jobs:
           FEATURES=$(ls features/containerization/ | grep -v "^_" | grep -v "^containerization$" | tr '\n' ' ')
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         else
-          # Auto-detect changed features - look at last 3 commits to be safe
+          # Auto-detect changed features - look at last commit
           FEATURES=$(git log --name-only --format="" -1 --diff-filter=ACMR | grep '^features/containerization/[^/]*/' | cut -d'/' -f3 | sort -u | tr '\n' ' ')
-          
-          # If no features found, try listing all features
-          if [ -z "$FEATURES" ]; then
-            FEATURES=$(ls features/containerization/ | grep -v "^_\|containerization$" | tr '\n' ' ')
-          fi
           
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
         fi
