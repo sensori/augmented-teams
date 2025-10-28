@@ -5,29 +5,8 @@ Miro Kanban
 Agednt that runs better long loved jobs better than ciursor which stalls all the time
 MCP on services
 OPEN AI Azure 
-new feature Action
-recognixe deloyment failure by resding action logs in real time
-tag all commit by the feature --> use featrure command to store curent feature in file and alwys refer to
-Functrion Calln to get more consitrent behavior from Cursor
-faster deployments -> skip container creation unless that is sorce of ewrror 0--> use funcitonb calling
-get curosr to STOP stalling
-isntrucitons so it naturally genreateds flow user  orietned docs
-new feature --new chat auto
-ai deployment 
-    -- prompt injection at function level
-    -- deploy test-feature and diagnose if stuck in a loop
-    -- better notification when servier is ready
-    -- intentional not fix to vpaper over problems
-
-sdlc - multi Agednt
-
-    aska aquestin--> get an approach and aoptions (shape idea)
-    plan a solution tweak it (design and plan)
-    get it working (engineering)
-    deploy and provison and fix
-    test in GPT (validate)
-    visaly manage me 
-    remind me whata going on when stuck or ready
-    putting code in main not serviuceaslo sewrvice test 
-
-    real test framework
+Real Test
+Test on checkin
+- write tests
+access to azure container app logs
+- real time costing
