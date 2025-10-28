@@ -1,0 +1,40 @@
+{
+  "feature_name": "test-feature",
+  "phase": "DELIVERY",
+  "current_step": "dev.describe",
+  "substate": "awaiting_ai",
+  "prompt": null,
+  "red_count_config": 1,
+  "history": [
+    {
+      "step": "dev.structure",
+      "substate": "awaiting_ai",
+      "prompt": null,
+      "ts": "2025-10-28T17:24:48"
+    },
+    {
+      "step": "dev.structure",
+      "substate": "awaiting_ai",
+      "prompt": null,
+      "ts": "2025-10-28T17:26:24"
+    },
+    {
+      "step": "dev.structure",
+      "substate": "awaiting_human",
+      "prompt": null,
+      "ts": "2025-10-28T17:26:44"
+    },
+    {
+      "step": "dev.structure",
+      "substate": "completed",
+      "prompt": null,
+      "ts": "2025-10-28T17:27:10"
+    },
+    {
+      "step": "dev.describe",
+      "substate": "awaiting_ai",
+      "prompt": null,
+      "ts": "2025-10-28T17:27:10"
+    }
+  ]
+}

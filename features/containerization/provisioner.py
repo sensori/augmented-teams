@@ -377,9 +377,6 @@ class AzureContainerProvisioner(Provisioner):
         
         print("✅ Dockerfile generated")
         
-        # Post-process: merge any additional Dockerfile configs from subdirectories
-        self._merge_dockerfile_fragments(config)
-        
         # Build and push Docker image
         import os
         acr_server = config.get('azure', {}).get('container_registry', '')
@@ -561,109 +558,6 @@ class AzureContainerProvisioner(Provisioner):
         """Get Azure Container App URL from config"""
         config = self._get_config()
         return config.get('environment', {}).get('production', {}).get('url', '')
-
-    def _merge_dockerfile_fragments(self, config):
-        """Check for config.yaml in subdirectories and merge Docker config into Dockerfile"""
-        import yaml
-        dockerfile_path = self.feature_path / "config" / "Dockerfile"
-        
-        # Collect multi-stage builds and other commands
-        build_stages = []
-        copy_commands = []
-        other_commands = []
-        
-        # Look for subdirectories with config.yaml
-        for subdir in self.feature_path.iterdir():
-            if not subdir.is_dir() or subdir.name == 'config':
-                continue
-            
-            config_file = subdir / "config.yaml"
-            if config_file.exists():
-                print(f"📝 Found config in {subdir.name}/config.yaml")
-                
-                with open(config_file, 'r') as f:
-                    subdir_config = yaml.safe_load(f)
-                
-                if not subdir_config:
-                    continue
-                
-                # Generate Docker commands from config
-                build_stage, copies, docker_commands = self._generate_docker_commands_from_config(subdir_config, subdir.name)
-                
-                if build_stage:
-                    build_stages.append(build_stage)
-                if copies:
-                    copy_commands.extend(copies)
-                if docker_commands:
-                    other_commands.append(("# Additional configuration from " + subdir.name, docker_commands))
-                
-                print(f"✅ Merged config from {subdir.name}/")
-        
-        # Now reconstruct the Dockerfile with proper ordering
-        with open(dockerfile_path, 'r') as f:
-            original_lines = f.readlines()
-        
-        with open(dockerfile_path, 'w') as f:
-            # 1. Write build stages first
-            for stage in build_stages:
-                f.write(stage + "\n\n")
-            
-            # 2. Write original Dockerfile until after the main FROM
-            inserted_copies = False
-            for i, line in enumerate(original_lines):
-                f.write(line)
-                
-                # After the main FROM line, insert COPY commands
-                # The main FROM is the first one we encounter (build stages come before)
-                if not inserted_copies and "FROM python" in line:
-                    # Found the main Python FROM, insert copies after it
-                    for copy_cmd in copy_commands:
-                        f.write(copy_cmd + "\n")
-                    inserted_copies = True
-            
-            # 3. Append other commands at the end
-            for comment, commands in other_commands:
-                f.write("\n" + comment + "\n")
-                f.write(commands + "\n")
-    
-    def _generate_docker_commands_from_config(self, config, feature_name):
-        """Generate Docker commands from a feature config - returns (build_stage, copy_commands, other_commands)"""
-        build_stage = None
-        copy_commands = []
-        other_commands = []
-        
-        # Multi-stage build
-        if 'build' in config and 'from_image' in config['build']:
-            from_image = config['build']['from_image']
-            build_stage = f"FROM {from_image} AS {feature_name}_stage"
-        
-        # Copy instructions from build stage
-        if 'build' in config and 'copy_from' in config['build']:
-            for copy in config['build']['copy_from']:
-                copy_commands.append(f"COPY --from={feature_name}_stage {copy['src']} {copy['dst']}")
-        
-        # Install packages
-        if 'install' in config and 'packages' in config['install']:
-            packages = " ".join(config['install']['packages'])
-            other_commands.append(f"RUN pip install --no-cache-dir {packages}")
-        
-        # Run commands
-        if 'run' in config:
-            for run_cmd in config['run']:
-                other_commands.append(f"RUN {run_cmd}")
-        
-        # Environment variables
-        if 'env' in config:
-            for key, value in config['env'].items():
-                other_commands.append(f"ENV {key}={value}")
-        
-        # CMD override
-        if 'cmd' in config:
-            cmd_list = config['cmd']
-            cmd_str = ', '.join([f'"{c}"' for c in cmd_list])
-            other_commands.append(f"CMD [{cmd_str}]")
-        
-        return (build_stage, copy_commands, "\n".join(other_commands) if other_commands else "")
 
 if __name__ == "__main__":
     main()

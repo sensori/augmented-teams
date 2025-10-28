@@ -1,0 +1,16 @@
+{
+  "feature_name": "my-feature",
+  "phase": "DELIVERY",
+  "current_step": "dev.structure",
+  "substate": "awaiting_ai",
+  "prompt": null,
+  "red_count_config": 1,
+  "history": [
+    {
+      "step": "dev.structure",
+      "substate": "awaiting_ai",
+      "prompt": null,
+      "ts": "2025-10-28T16:57:24"
+    }
+  ]
+}
