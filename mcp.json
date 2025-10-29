@@ -20,7 +20,7 @@
     "tdd-pipeline": {
       "command": "python",
       "args": [
-        "C:\\dev\\augmented-teams\\features\\test-driven-development-mcp\\mcp-server.py"
+        "features/test-driven-development-mcp/mcp-server.py"
       ]
     }
   }

@@ -20,13 +20,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Import delivery-pipeline from same directory
-import importlib.util
-spec = importlib.util.spec_from_file_location("delivery_pipeline", Path(__file__).parent / "delivery_pipeline.py")
-delivery_pipeline = importlib.util.module_from_spec(spec)
-sys.modules["delivery_pipeline"] = delivery_pipeline
-spec.loader.exec_module(delivery_pipeline)
-
+# Import delivery-pipeline from containerization directory
+sys.path.insert(0, str(Path(__file__).parent.parent / "containerization"))
 from delivery_pipeline import DeliveryPipeline
 
 def handle_execute_next_step(feature_name):
