@@ -3,7 +3,7 @@
 ## ✅ Phase 1 Complete: Barebones MCP Server
 
 **What We Built:**
-- Created `features/test-driven-development-mcp/` feature
+- Created `features/test-driven-development-mcp/` feature 
 - Built `mcp-server.py` with 2 tools:
   - `get_current_step(feature_name)` - Get current step
   - `execute_next_step(feature_name)` - Execute next step
