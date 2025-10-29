@@ -27,21 +27,37 @@ from delivery_pipeline import DeliveryPipeline
 def handle_execute_next_step(feature_name):
     """Execute the next pipeline step"""
     try:
+        # Change to workspace root for proper paths
+        import os
+        current_dir = os.getcwd()
+        
         pipeline = DeliveryPipeline(feature_name, Path("features") / feature_name)
         next_step = pipeline.get_next_step()
         
         if not next_step:
             return "Pipeline completed - no more steps"
         
-        result = pipeline.execute_step(next_step['name'], next_step['func'])
+        # For Phase 1: Just simulate execution, don't actually run it
+        # (Real execution will be in Phase 2)
+        step_name = next_step['name']
+        step_type = next_step.get('type', 'automated')
+        phase = next_step.get('phase', 'Unknown')
+        
+        # Simulate what would happen
+        if step_type == 'human-activity':
+            result = "This step requires human activity (approval/review)"
+        else:
+            result = f"Would execute: {step_name}"
         
         return json.dumps({
-            "step_executed": next_step['name'],
-            "success": result,
-            "phase": pipeline.state.current_phase,
-            "next_step": pipeline.get_next_step()['name'] if pipeline.get_next_step() else None
+            "step_executed": step_name,
+            "step_type": step_type,
+            "phase": phase,
+            "simulated_result": result,
+            "note": "Phase 1: Actual execution coming in Phase 2"
         }, indent=2)
     except Exception as e:
+        logger.exception(f"Error executing step: {e}")
         return f"Error: {str(e)}"
 
 def handle_get_current_step(feature_name):
