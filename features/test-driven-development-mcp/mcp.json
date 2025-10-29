@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+      "tdd-pipeline": {
+        "command": "python",
+        "args": [
+          "c:/dev/augmented-teams/features/test-driven-development-mcp/mcp-server.py"
+        ]
+      },
+    }
+  }
