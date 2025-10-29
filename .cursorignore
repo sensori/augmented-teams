@@ -6,7 +6,11 @@ __pycache__
 *.pyo
 *.pyd
 *.egg-info
+# Log files
 *.log
+*.log.*
+logs/
+**/logs/
 
 # Exclude large Cursor chat export files to improve performance
 **/*chat*.md

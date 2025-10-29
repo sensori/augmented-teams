@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  title: Augmented Teams Knowledge Search
+  description: Semantic search and resource browsing across all repository documents including markdown, Word, Excel, PowerPoint, and PDF files
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development server
+  # Update this with your Railway URL after deployment:
+  # - url: https://your-app.railway.app
+  #   description: Production server
+
+paths:
+  /search:
+    get:
+      operationId: searchKnowledge
+      summary: Semantic search across all repository content
+      description: Search documents using natural language queries with vector embeddings
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Natural language search query
+        - name: topic
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [instructions, config, assets, src]
+          description: Filter by folder/topic
+        - name: file_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [word, excel, powerpoint, pdf, markdown, text]
+          description: Filter by document type
+        - name: max_results
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+            maximum: 20
+          description: Maximum number of results
+      responses:
+        '200':
+          description: Search results with relevance scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        content:
+                          type: string
+                        file_path:
+                          type: string
+                        file_type:
+                          type: string
+                        relevance_score:
+                          type: number
+                  count:
+                    type: integer
+
+  /files:
+    get:
+      operationId: listFiles
+      summary: List all indexed files
+      description: Browse indexed files, optionally filtered by path prefix
+      parameters:
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by path prefix (e.g., 'assets', 'instructions')
+      responses:
+        '200':
+          description: List of indexed files
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path_filter:
+                    type: string
+                  total_files:
+                    type: integer
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        file_path:
+                          type: string
+                        file_type:
+                          type: string
+                        chunks:
+                          type: integer
+                        exists:
+                          type: boolean
+
+  /files/{file_path}:
+    get:
+      operationId: getFileDetails
+      summary: Get file details and all chunks
+      description: Retrieve complete file information including all chunk contents
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Full file path (e.g., 'instructions/PURPOSE.md')
+      responses:
+        '200':
+          description: File details with all chunks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_path:
+                    type: string
+                  file_type:
+                    type: string
+                  exists:
+                    type: boolean
+                  total_chunks:
+                    type: integer
+                  chunks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        chunk_index:
+                          type: integer
+                        content:
+                          type: string
+                        token_count:
+                          type: integer
+        '404':
+          description: File not found
+
+  /chunks/{file_path}:
+    get:
+      operationId: getFileChunks
+      summary: Get chunks for a specific file
+      description: Retrieve just the chunk contents for a file
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Full file path
+      responses:
+        '200':
+          description: File chunks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_path:
+                    type: string
+                  file_type:
+                    type: string
+                  total_chunks:
+                    type: integer
+                  chunks:
+                    type: array
+        '404':
+          description: File not found
+
+  /stats:
+    get:
+      operationId: getDatabaseStats
+      summary: Get vector database statistics
+      description: Returns information about the indexed content
+      responses:
+        '200':
+          description: Database statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_chunks:
+                    type: integer
+                  collection_name:
+                    type: string
+                  vector_db_path:
+                    type: string
+
+
+

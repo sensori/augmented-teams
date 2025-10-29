@@ -16,6 +16,12 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
       }
+    },
+    "tdd-pipeline": {
+      "command": "python",
+      "args": [
+        "C:\\dev\\augmented-teams\\features\\test-driven-development-mcp\\mcp-server.py"
+      ]
     }
   }
 }
