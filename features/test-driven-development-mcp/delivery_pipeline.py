@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Delivery Pipeline - State-Managed Deployment Orchestration
 
@@ -67,38 +67,32 @@ def safe_print(message: str):
 # Step types
 class StepType:
     AUTOMATED = 'automated'  # Fully automated, no human needed
-    AI = 'ai'  # AI generates content, then human reviews
-    HUMAN_ACTIVITY = 'human-activity'  # Human activity required (approval, review, configure)
-    HUMAN_INTERVENTION = 'human-intervention'  # Human intervention required (error needs fixing)
+    AI_HUMAN = 'ai_human'  # AI generates content, then human reviews/approves
 
 @dataclass
 class StepState:
-    """State of a single deployment step"""
+    """State of a single step"""
     name: str
-    status: str  # 'pending', 'running', 'completed', 'failed', 'skipped'
-    step_type: str = StepType.AUTOMATED  # automated, ai, hitl-a, hitl-i
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    error: Optional[str] = None
-    attempts: int = 0
-    outputs: Dict[str, Any] = field(default_factory=dict)
+    status: str  # 'pending', 'completed'
 
 @dataclass
 class PipelineState:
-    """Current state of the deployment pipeline"""
+    """Current state of the TDD pipeline"""
     feature_name: str
     pipeline_id: str
     current_step: Optional[str] = None
-    current_phase: Optional[str] = None
-    status: str = 'pending'  # 'pending', 'running', 'paused', 'completed', 'failed'
+    status: str = 'pending'  # 'pending', 'completed'
     started_at: str = ""
     last_updated: str = ""
     steps: Dict[str, StepState] = field(default_factory=dict)
-    config: Dict[str, Any] = field(default_factory=dict)
-    commit_sha: Optional[str] = None
-    github_run_id: Optional[str] = None
-    human_activity_type: Optional[str] = None  # 'activity', 'intervention', None
-    human_activity_reason: Optional[str] = None
+    
+    def get_current_step_display(self) -> str:
+        """Get human-readable current step"""
+        return self.current_step or "No step active"
+    
+    def get_status_display(self) -> str:
+        """Get human-readable status"""
+        return self.status or "Unknown"
     
     def to_dict(self):
         """Convert to dict for JSON serialization"""
@@ -117,8 +111,7 @@ class PipelineState:
             status=data.get('status', 'pending'),
             started_at=data.get('started_at', ''),
             last_updated=data.get('last_updated', ''),
-            steps=steps,
-            config=data.get('config', {})
+            steps=steps
         )
 
 
@@ -177,66 +170,24 @@ class DeliveryPipeline:
     1.3 State Persistence - Track progress in feature directory
     """
     
-    # Phases and Steps structure - TDD workflow
+    # Phases and Steps structure - Simple TDD workflow
     PHASES = [
         {
-            'name': 'Initiate Feature',
+            'name': 'Develop',
             'steps': [
-                {'name': 'PROMPT_CREATE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'Human describes feature requirements'}
-            ]
-        },
-        {
-            'name': 'Setup',
-            'steps': [
-                {'name': 'STRUCTURE_CREATE', 'type': StepType.AUTOMATED},
-                {'name': 'CONFIG_GENERATE', 'type': StepType.AUTOMATED}
-            ]
-        },
-        {
-            'name': 'Test Scaffolding',
-            'steps': [
-                {'name': 'SCAFFOLD_SUGGEST', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI suggests test scaffolds, human reviews'},
-                {'name': 'SCAFFOLD_BUILD', 'type': StepType.AUTOMATED}
-            ]
-        },
-        {
-            'name': 'Test Red',
-            'steps': [
-                {'name': 'TEST_GENERATE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI generates test code for first test'},
-                {'name': 'TEST_REFINE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'Human reviews and refines test'},
-                {'name': 'TEST_RUN_FAIL', 'type': StepType.AUTOMATED}  # Expect to fail
-            ]
-        },
-        {
-            'name': 'Code Green',
-            'steps': [
-                {'name': 'CODE_GENERATE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI generates code to pass test'},
-                {'name': 'CODE_REFINE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'Human reviews generated code'},
-                {'name': 'CODE_TEST_PASS', 'type': StepType.AUTOMATED},
-                {'name': 'CODE_RETRY', 'type': StepType.AUTOMATED}  # Max retries (default 5)
-            ]
-        },
-        {
-            'name': 'Refactor',
-            'steps': [
-                {'name': 'REVIEW_DUPLICATION', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI reviews for duplication, bad design'},
-                {'name': 'GENERATE_FIX', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI generates refactored code'},
-                {'name': 'REVIEW_REFACTOR', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'Human reviews refactoring'}
-            ]
-        },
-        {
-            'name': 'Commit',
-            'steps': [
-                {'name': 'COMMIT_GENERATE', 'type': StepType.HUMAN_ACTIVITY, 'reason': 'AI generates commit message and tag'}
+                {'name': 'START_FEATURE', 'type': StepType.AUTOMATED},  # Creates folder, no AI
+                {'name': 'CREATE_STRUCTURE', 'type': StepType.AI_HUMAN},  # Code + AI + Human
+                {'name': 'BUILD_SCAFFOLDING', 'type': StepType.AI_HUMAN},  # Code + AI + Human
+                {'name': 'DEVELOP_TEST', 'type': StepType.AI_HUMAN},  # Code + AI + Human
+                {'name': 'WRITE_CODE', 'type': StepType.AI_HUMAN},  # Code + AI + Human
+                {'name': 'REFACTOR', 'type': StepType.AI_HUMAN}  # Code + AI + Human
             ]
         }
     ]
     
-    def __init__(self, feature_name: str, feature_path: Path, provision_mode: str = "AZURE", config=None):
+    def __init__(self, feature_name: str, feature_path: Path):
         self.feature_name = feature_name
         self.feature_path = Path(feature_path)
-        self.provision_mode = provision_mode
-        self.config = config or {}
         self.state_mgr = PipelineStateManager(self.feature_path)
         
         # Load existing state or create new
@@ -247,16 +198,14 @@ class DeliveryPipeline:
                 feature_name=feature_name,
                 pipeline_id=pipeline_id,
                 started_at=datetime.now().isoformat(),
-                status='running',
-                config={'provision_mode': provision_mode, **self.config}
+                status='started'
             )
             # Initialize all steps from PHASES
             for phase in self.PHASES:
                 for step_def in phase['steps']:
                     self.state.steps[step_def['name']] = StepState(
                         name=step_def['name'],
-                        status='pending',
-                        step_type=step_def['type']
+                        status='pending'
                     )
     
     def get_step_status(self, step_name: str) -> Optional[str]:
@@ -268,14 +217,12 @@ class DeliveryPipeline:
     def mark_step_started(self, step_name: str):
         """Mark a step as started"""
         if step_name not in self.state.steps:
-            self.state.steps[step_name] = StepState(name=step_name, status='running')
+            self.state.steps[step_name] = StepState(name=step_name, status='started')
         else:
             step = self.state.steps[step_name]
-            step.status = 'running'
-            step.started_at = datetime.now().isoformat()
-            step.attempts += 1
+            step.status = 'started'
         self.state.current_step = step_name
-        self.state.status = 'running'
+        self.state.status = 'started'
         self.state_mgr.save_state(self.state)
     
     def mark_step_completed(self, step_name: str, outputs: Optional[Dict] = None):
@@ -283,9 +230,6 @@ class DeliveryPipeline:
         if step_name in self.state.steps:
             step = self.state.steps[step_name]
             step.status = 'completed'
-            step.completed_at = datetime.now().isoformat()
-            if outputs:
-                step.outputs.update(outputs)
         self.state_mgr.save_state(self.state)
     
     def mark_step_failed(self, step_name: str, error: str):
@@ -293,8 +237,6 @@ class DeliveryPipeline:
         if step_name in self.state.steps:
             step = self.state.steps[step_name]
             step.status = 'failed'
-            step.completed_at = datetime.now().isoformat()
-            step.error = error
         self.state.status = 'failed'
         self.state_mgr.save_state(self.state)
     
@@ -303,7 +245,6 @@ class DeliveryPipeline:
         if step_name in self.state.steps:
             step = self.state.steps[step_name]
             step.status = 'skipped'
-            step.completed_at = datetime.now().isoformat()
         self.state_mgr.save_state(self.state)
     
     def pause(self, reason: str = ""):
@@ -323,7 +264,7 @@ class DeliveryPipeline:
             safe_print(f"[ERROR] Pipeline is not paused (status: {self.state.status})")
             return False
         
-        self.state.status = 'running'
+        self.state.status = 'started'
         self.state_mgr.save_state(self.state)
         safe_print(f"[RESUME] Resuming from step: {self.state.current_step}")
         return True
@@ -332,124 +273,261 @@ class DeliveryPipeline:
         """Get the current step name"""
         return self.state.current_step
     
-    def get_next_step(self) -> Optional[Dict[str, Any]]:
-        """Get the next pending step to execute"""
+    def skip_to_phase(self, phase_name: str):
+        """Jump to a specific phase and set current step to first step in that phase"""
+        skipped_steps = []
+        
+        for phase in self.PHASES:
+            if phase['name'] == phase_name:
+                if phase['steps']:
+                    first_step_name = phase['steps'][0]['name']
+                    return self._skip_to_step_internal(first_step_name, skipped_steps)
+        return None
+    
+    def skip_to_step(self, step_name: str):
+        """Jump to a specific step by name"""
+        skipped_steps = []
+        # Verify the step exists
+        for phase in self.PHASES:
+            for step_def in phase['steps']:
+                if step_def['name'] == step_name:
+                    return self._skip_to_step_internal(step_name, skipped_steps)
+        return None
+    
+    def _skip_to_step_internal(self, target_step_name: str, skipped_steps: list):
+        """Internal helper to skip to a step and mark previous steps as skipped"""
+        target_reached = False
+        
+        # Mark all steps before the target as skipped
         for phase in self.PHASES:
             for step_def in phase['steps']:
                 step_name = step_def['name']
-                step = self.state.steps.get(step_name)
-                if not step or step.status == 'pending':
-                    return {
-                        'name': step_name,
-                        'phase': phase['name'],
-                        'type': step_def['type'],
-                        'func': lambda: {'success': True}  # Placeholder
-                    }
+                if step_name == target_step_name:
+                    target_reached = True
+                    break
+                
+                # Mark as skipped if not already completed
+                if step_name in self.state.steps:
+                    step_state = self.state.steps[step_name]
+                    if step_state.status not in ['completed', 'failed']:
+                        self.mark_step_skipped(step_name)
+                        skipped_steps.append({
+                            'name': step_name,
+                            'type': step_def['type'],
+                            'phase': phase['name']
+                        })
+            
+            if target_reached:
+                break
+        
+        if not target_reached:
+            return None
+        
+        # Find the step definition and phase
+        target_step_def = None
+        target_phase = None
+        for phase in self.PHASES:
+            for step_def in phase['steps']:
+                if step_def['name'] == target_step_name:
+                    target_step_def = step_def
+                    target_phase = phase['name']
+                    break
+            if target_step_def:
+                break
+        
+        if not target_step_def:
+            return None
+        
+        # Ensure step is marked as started (status='started') when it becomes current
+        self.mark_step_started(target_step_name)
+        
+        step_obj = create_step(self, target_step_def, target_phase)
+        # Store skipped steps info on the step object so execute() can include it
+        step_obj._skipped_steps = skipped_steps
+        
+        return step_obj
+    
+    def get_next_step(self):
+        """Get the next pending step to execute as a Step object"""
+        for phase in self.PHASES:
+            for step_def in phase['steps']:
+                step_name = step_def['name']
+                step_state = self.state.steps.get(step_name)
+                
+                # Skip if this is the current step (unless it's completed)
+                if step_name == self.state.current_step:
+                    if step_state and step_state.status == 'completed':
+                        continue  # Move to next step after completed current step
+                    else:
+                        return None  # Current step is still active, not ready for next
+                
+                # Return first pending step
+                if not step_state or step_state.status == 'pending':
+                    return create_step(self, step_def, phase['name'])
         return None
+    
+    def complete_current_step(self):
+        """Complete the current step if it exists and is started/pending"""
+        current_step_name = self.state.current_step
+        if current_step_name and current_step_name in self.state.steps:
+            current_step_state = self.state.steps[current_step_name]
+            if current_step_state.status in ['started', 'pending']:
+                self.mark_step_completed(current_step_name)
+    
+    def start_next_step(self):
+        """Complete current step (if any) and start the next step"""
+        # Complete current step first
+        self.complete_current_step()
+        
+        # Get and start the next step
+        next_step = self.get_next_step()
+        if not next_step:
+            return None
+        
+        # Mark next step as started and execute it
+        self.mark_step_started(next_step.name)
+        result = next_step.execute()
+        
+        return {
+            'step': next_step,
+            'result': result
+        }
     
     def get_status_summary(self) -> Dict[str, Any]:
         """Get overall pipeline status"""
         completed = sum(1 for s in self.state.steps.values() if s.status == 'completed')
-        failed = sum(1 for s in self.state.steps.values() if s.status == 'failed')
-        pending = sum(1 for s in self.state.steps.values() if s.status in ['pending', 'running'])
+        pending = sum(1 for s in self.state.steps.values() if s.status == 'pending')
         
         return {
             'status': self.state.status,
             'current_step': self.state.current_step,
             'total_steps': len(self.state.steps),
             'completed': completed,
-            'failed': failed,
             'pending': pending
         }
     
-    def require_human_activity(self, reason: str):
-        """Require human activity (approval, review, configure)"""
-        if not self.config.get('hitl_enabled', True):
-            safe_print(f"[HUMAN] Activity gate skipped (--no-hitl): {reason}")
-            return
-        
-        self.state.human_activity_type = 'activity'
-        self.state.human_activity_reason = reason
-        self.pause(f"Human activity required: {reason}")
-        safe_print(f"\n[HUMAN-ACTIVITY] Human activity required for step: {self.state.current_step}")
-        safe_print(f"[HUMAN-ACTIVITY] Reason: {reason}")
-        safe_print(f"[HUMAN-ACTIVITY] To approve: python delivery-pipeline.py approve --feature {self.feature_name}")
-        safe_print(f"[HUMAN-ACTIVITY] To reject: python delivery-pipeline.py reject --feature {self.feature_name}")
-        self.state_mgr.save_state(self.state)
-        sys.exit(ExitStatus.NEEDS_HUMAN_ACTIVITY)
+
+class Step:
+    """Base class for all pipeline steps"""
     
-    def require_human_intervention(self, error: str):
-        """Require human intervention (error needs fixing)"""
-        self.state.human_activity_type = 'intervention'
-        self.state.human_activity_reason = error
-        self.pause(f"Error in {self.state.current_step}: {error}")
-        safe_print(f"\n[HUMAN-INTERVENTION] Human intervention required for step: {self.state.current_step}")
-        safe_print(f"[HUMAN-INTERVENTION] Error: {error}")
-        safe_print(f"[HUMAN-INTERVENTION] Fix issue, then: python delivery-pipeline.py resume --feature {self.feature_name}")
-        self.state_mgr.save_state(self.state)
-        sys.exit(ExitStatus.NEEDS_HUMAN_INTERVENTION)
+    def __init__(self, pipeline: DeliveryPipeline, name: str, phase: str, step_type: str, step_def: Dict):
+        self.pipeline = pipeline
+        self.name = name
+        self.phase = phase
+        self.type = step_type
+        self.definition = step_def
+        self.reason = step_def.get('reason', None)
     
-    def execute_step(self, step_name: str, step_func) -> bool:
-        """
-        1.2 Step Execution Control - Execute steps with state tracking and HITL gates
-        """
-        # Check if step requires human activity
-        step = self.state.steps.get(step_name)
-        if step and step.step_type == StepType.HUMAN_ACTIVITY:
-            # Find reason from step definition
-            for phase in self.PHASES:
-                for step_def in phase['steps']:
-                    if step_def['name'] == step_name and 'reason' in step_def:
-                        self.require_human_activity(step_def['reason'])
-                        break
+    def execute(self) -> Dict[str, Any]:
+        """Template method - sets current step and calls step-specific logic"""
+        # Ensure step is marked as started (status='started') when it becomes current
+        self.pipeline.mark_step_started(self.name)
         
-        self.mark_step_started(step_name)
+        result = self._execute()
         
-        try:
-            result = step_func()
-            if result.get('success', False):
-                self.mark_step_completed(step_name, result.get('outputs'))
-                return True
-            else:
-                error = result.get('error', 'Unknown error')
-                self.mark_step_failed(step_name, error)
-                # Human interventions for errors are NOT skipped
-                self.require_human_intervention(error)
-                return False
-        except Exception as e:
-            self.mark_step_failed(step_name, str(e))
-            self.require_human_intervention(str(e))
-            raise
+        # Include skipped steps info if this step was reached via skip_to_phase
+        if hasattr(self, '_skipped_steps') and self._skipped_steps:
+            result['skipped_steps'] = self._skipped_steps
+        
+        # Auto-complete automated steps
+        if self.type == StepType.AUTOMATED:
+            if self.name in self.pipeline.state.steps:
+                self.pipeline.state.steps[self.name].status = 'completed'
+            self.pipeline.state_mgr.save_state(self.pipeline.state)
+        
+        return result
     
-    def finalize(self, success: bool):
-        """Mark pipeline as completed or failed"""
-        if success:
-            self.state.status = 'completed'
-        else:
-            self.state.status = 'failed'
-        self.state_mgr.save_state(self.state)
+    def _execute(self) -> Dict[str, Any]:
+        """Override in subclasses - step-specific execution logic"""
+        raise NotImplementedError("Subclasses must implement _execute()")
+
+
+class AutoStep(Step):
+    """Automated step - just runs code, no AI or human needed"""
     
-    def show_summary(self):
-        """Display pipeline status summary"""
-        summary = self.get_status_summary()
-        safe_print(f"\n[SUMMARY] Pipeline Status for {self.feature_name}")
-        safe_print(f"  Status: {summary['status']}")
-        safe_print(f"  Current Step: {summary['current_step']}")
-        safe_print(f"  Completed: {summary['completed']}/{summary['total_steps']}")
-        safe_print(f"  Failed: {summary['failed']}")
-        safe_print(f"  Pending: {summary['pending']}")
+    def _execute(self) -> Dict[str, Any]:
+        """Execute automated code"""
+        return {
+            'success': True,
+            'outputs': {'step': self.name, 'phase': self.phase}
+        }
+
+
+class StartStep(AutoStep):
+    """Start feature step - creates folder"""
+    
+    def _execute(self) -> Dict[str, Any]:
+        """Create feature folder"""
+        # Resolve path to absolute to ensure it works regardless of working directory
+        abs_path = self.pipeline.feature_path.resolve()
+        abs_path.mkdir(parents=True, exist_ok=True)
+        return {
+            'success': True,
+            'outputs': {
+                'step': self.name,
+                'phase': self.phase,
+                'folder_created': str(abs_path)
+            }
+        }
+
+
+class AiHumanStep(Step):
+    """AI + Human step - code runs, then AI, then human reviews"""
+    
+    def execute(self) -> Dict[str, Any]:
+        """Template method for AI+Human workflow"""
+        # Ensure step is marked as started (status='started') when it becomes current
+        self.pipeline.mark_step_started(self.name)
         
-        # Show step details
-        for step_name, step in self.state.steps.items():
-            emoji = {
-                'completed': 'Γ£à',
-                'failed': 'Γ¥î',
-                'running': 'ΓÅ│',
-                'paused': 'ΓÅ╕∩╕Å',
-                'pending': 'ΓÅ¡∩╕Å',
-                'skipped': 'ΓÅ¡∩╕Å'
-            }.get(step.status, 'Γ¥ô')
-            safe_print(f"  {emoji} {step_name}: {step.status}")
+        # Run pre-code logic
+        self.preprocess_code()
+        
+        # Run AI generation
+        ai_result = self.preprocess_ai()
+        
+        # Hand off to human (don't mark completed yet)
+        result = {
+            'success': True,
+            'requires_ai': True,
+            'requires_human': True,
+            'step': self.name,
+            'phase': self.phase,
+            'ai_result': ai_result
+        }
+        
+        # Include skipped steps info if this step was reached via skip_to_phase
+        if hasattr(self, '_skipped_steps') and self._skipped_steps:
+            result['skipped_steps'] = self._skipped_steps
+        
+        return result
+    
+    def preprocess_code(self) -> None:
+        """Override to run code before AI - default no-op"""
+        pass
+    
+    def preprocess_ai(self) -> Dict[str, Any]:
+        """Override to run AI generation - default placeholder"""
+        return {'status': 'ai_action_required'}
+    
+    def preprocess_human(self) -> Dict[str, Any]:
+        """Override for human review/approval logic"""
+        return {'status': 'human_review_required'}
+
+
+# Helper function to create appropriate step class instance
+def create_step(pipeline: DeliveryPipeline, step_def: Dict, phase_name: str) -> Step:
+    """Create appropriate step class instance based on step definition"""
+    step_name = step_def['name']
+    step_type = step_def['type']
+    
+    if step_name == 'START_FEATURE':
+        return StartStep(pipeline, step_name, phase_name, step_type, step_def)
+    elif step_type == StepType.AI_HUMAN:
+        return AiHumanStep(pipeline, step_name, phase_name, step_type, step_def)
+    elif step_type == StepType.AUTOMATED:
+        return AutoStep(pipeline, step_name, phase_name, step_type, step_def)
+    else:
+        return Step(pipeline, step_name, phase_name, step_type, step_def)
 
 
 def run_command(command: str, cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
@@ -462,130 +540,4 @@ def run_command(command: str, cwd: Optional[Path] = None) -> subprocess.Complete
         encoding='utf-8',
         errors='ignore'
     )
-
-
-def main():
-    """Main CLI entry point"""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Delivery Pipeline - State-Managed Deployment')
-    parser.add_argument('action', choices=['run', 'status', 'resume', 'pause', 'approve', 'reject', 'clear'], 
-                       help='Pipeline action')
-    parser.add_argument('--feature', required=True, help='Feature name')
-    parser.add_argument('--mode', choices=['SERVICE', 'CONTAINER', 'AZURE'], default='AZURE',
-                       help='Provision mode')
-    parser.add_argument('--no-hitl', action='store_true', 
-                       help='Disable human activity gates (fully automated)')
-    parser.add_argument('--commit-sha', help='Git commit SHA for version tracking')
-    parser.add_argument('--github-run-id', help='GitHub Actions run ID')
-    
-    args = parser.parse_args()
-    
-    feature_path = Path("features") / args.feature
-    
-    if args.action == 'status':
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode)
-        pipeline.show_summary()
-    
-    elif args.action == 'resume':
-        config = {'hitl_enabled': not args.no_hitl}
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode, config)
-        if pipeline.resume():
-            safe_print("[RUN] Resuming pipeline execution...")
-            # TODO: Continue execution from current step
-        else:
-            sys.exit(1)
-    
-    elif args.action == 'approve':
-        config = {'hitl_enabled': not args.no_hitl}
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode, config)
-        if pipeline.state.human_activity_type != 'activity':
-            safe_print("[ERROR] No human activity pending")
-            sys.exit(1)
-        safe_print(f"[APPROVED] Human approved step: {pipeline.state.current_step}")
-        pipeline.resume()
-        # TODO: Continue execution
-    
-    elif args.action == 'reject':
-        config = {'hitl_enabled': not args.no_hitl}
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode, config)
-        if pipeline.state.human_activity_type != 'activity':
-            safe_print("[ERROR] No human activity pending")
-            sys.exit(1)
-        safe_print(f"[REJECTED] Human rejected step: {pipeline.state.current_step}")
-        pipeline.finalize(False)
-        sys.exit(1)
-    
-    elif args.action == 'pause':
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode)
-        pipeline.pause("Manual pause requested")
-    
-    elif args.action == 'clear':
-        state_mgr = PipelineStateManager(feature_path)
-        if state_mgr.clear_state():
-            safe_print(f"[SUCCESS] Cleared state for {args.feature}")
-        else:
-            safe_print(f"[ERROR] Failed to clear state")
-            sys.exit(1)
-    
-    elif args.action == 'run':
-        config = {'hitl_enabled': not args.no_hitl}
-        if args.commit_sha:
-            config['commit_sha'] = args.commit_sha
-        if args.github_run_id:
-            config['github_run_id'] = args.github_run_id
-        
-        pipeline = DeliveryPipeline(args.feature, feature_path, args.mode, config)
-        
-        # Store commit SHA and run ID in state
-        if args.commit_sha:
-            pipeline.state.commit_sha = args.commit_sha
-        if args.github_run_id:
-            pipeline.state.github_run_id = args.github_run_id
-        pipeline.state_mgr.save_state(pipeline.state)
-        
-        safe_print(f"[RUN] Starting pipeline for {args.feature}")
-        if args.no_hitl:
-            safe_print("[INFO] HITL activity gates disabled (--no-hitl)")
-        
-        # Import provisioner
-        sys.path.insert(0, str(Path(__file__).parent))
-        from provisioner import Provisioner
-        
-        # Step 1: Structure check
-        if pipeline.get_step_status('STRUCTURE_CHECK') != 'completed':
-            def check_structure():
-                safe_print("[STEP] Checking feature structure...")
-                if (feature_path / "main.py").exists() and (feature_path / "service.py").exists():
-                    return {'success': True}
-                return {'success': False, 'error': 'Missing required files'}
-            
-            pipeline.execute_step('STRUCTURE_CHECK', check_structure)
-        
-        # Step 2: Provision
-        if args.mode == 'AZURE':
-            if pipeline.get_step_status('PROVISION_AZURE') != 'completed':
-                def provision():
-                    safe_print("[STEP] Provisioning to Azure...")
-                    result = run_command(f"python {feature_path}/config/provision-service.py AZURE --always",
-                                        cwd=Path(__file__).parent.parent)
-                    if result.returncode == 0:
-                        return {'success': True}
-                    return {'success': False, 'error': result.stderr}
-                
-                pipeline.execute_step('PROVISION_AZURE', provision)
-        
-        # Finalize
-        summary = pipeline.get_status_summary()
-        if summary['failed'] == 0:
-            pipeline.finalize(True)
-            safe_print(f"[SUCCESS] Pipeline completed: {summary}")
-        else:
-            pipeline.finalize(False)
-            safe_print(f"[FAILED] Pipeline failed: {summary}")
-            sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
 
