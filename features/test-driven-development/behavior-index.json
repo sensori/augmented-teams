@@ -1,8 +1,8 @@
 {
   "feature": "test-driven-development",
-  "last_updated": "Fri Oct 31 14:30:56 2025",
-  "last_updated_timestamp": 1761935456.0435603,
-  "behavior_count": 5,
+  "last_updated": "Fri Oct 31 17:13:09 2025",
+  "last_updated_timestamp": 1761945189.156005,
+  "behavior_count": 4,
   "deployed": {
     ".cursor/rules/": [
       {
@@ -12,7 +12,7 @@
       },
       {
         "file": "tdd-mcp-delivery-approach.mdc",
-        "purpose": "<!-- 57f0c5ff-2b8e-4c1d-bb27-793a07188bb2 e3abd762-e52a-4e1a-8597-3cc123d13b7e -->",
+        "purpose": "MCP-Based Delivery Pipeline for Cursor Chat - Thin-slice delivery approach for TDD workflow",
         "deployed_file": ".cursor/rules/tdd-mcp-delivery-approach.mdc"
       },
       {
@@ -21,17 +21,10 @@
         "deployed_file": ".cursor/rules/tdd-playwright-debug-rule.mdc"
       }
     ],
-    ".cursor/commands/": [
-      {
-        "file": "tdd-mamba-debug-cmd.md",
-        "purpose": "Runs Mamba tests in debug mode with detailed output for rapid debugging and iteration.",
-        "deployed_file": ".cursor/commands/tdd-mamba-debug-cmd.md"
-      }
-    ],
     ".cursor/mcp/": [
       {
         "file": "tdd-mcp.json",
-        "purpose": "tdd-mcp behavior",
+        "purpose": "MCP server configuration for TDD pipeline workflow - enables MCP tools for test-driven development",
         "deployed_file": ".cursor/mcp/tdd-mcp.json"
       }
     ]
@@ -50,21 +43,10 @@
     },
     {
       "feature": "test-driven-development",
-      "file": "tdd-mamba-debug-cmd.md",
-      "type": ".md",
-      "path": "features\\test-driven-development\\cursor\\tdd-mamba-debug-cmd.md",
-      "purpose": "Runs Mamba tests in debug mode with detailed output for rapid debugging and iteration.",
-      "deployed_location": ".cursor/commands/",
-      "deployed_file": ".cursor/commands/tdd-mamba-debug-cmd.md",
-      "modified": "Thu Oct 30 11:10:50 2025",
-      "modified_timestamp": 1761837050.7781653
-    },
-    {
-      "feature": "test-driven-development",
       "file": "tdd-mcp-delivery-approach.mdc",
       "type": ".mdc",
       "path": "features\\test-driven-development\\cursor\\tdd-mcp-delivery-approach.mdc",
-      "purpose": "<!-- 57f0c5ff-2b8e-4c1d-bb27-793a07188bb2 e3abd762-e52a-4e1a-8597-3cc123d13b7e -->",
+      "purpose": "MCP-Based Delivery Pipeline for Cursor Chat - Thin-slice delivery approach for TDD workflow",
       "deployed_location": ".cursor/rules/",
       "deployed_file": ".cursor/rules/tdd-mcp-delivery-approach.mdc",
       "modified": "Tue Oct 28 20:30:06 2025",
@@ -75,7 +57,7 @@
       "file": "tdd-mcp.json",
       "type": ".json",
       "path": "features\\test-driven-development\\cursor\\tdd-mcp.json",
-      "purpose": "tdd-mcp behavior",
+      "purpose": "MCP server configuration for TDD pipeline workflow - enables MCP tools for test-driven development",
       "deployed_location": ".cursor/mcp/",
       "deployed_file": ".cursor/mcp/tdd-mcp.json",
       "modified": "Tue Oct 28 20:16:49 2025",

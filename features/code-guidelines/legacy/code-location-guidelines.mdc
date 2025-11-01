@@ -10,6 +10,6 @@ alwaysApply: true
 #### Configuration Management
 - **Feature configs** - All feature-specific configuration in the feature folder
 - **No global configs** - Avoid putting feature-specific configs in root `config/` - place in a shared feature instead
-- **Self-contained** - Each feature should work independently with its own config
+- **Self-contained** - Each feature should work independently with its own config  
 
 

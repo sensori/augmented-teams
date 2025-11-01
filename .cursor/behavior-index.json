@@ -1,401 +1,249 @@
 {
-  "last_updated": "Fri Oct 31 14:30:56 2025",
-  "last_updated_timestamp": 1761935456.0410345,
-  "total_behaviors": 27,
-  "features_count": 3,
+  "last_updated": "Fri Oct 31 19:49:48 2025",
+  "last_updated_timestamp": 1761954588.791712,
+  "total_behaviors": 17,
+  "features_count": 1,
   "deployed": {
-    ".cursor/rules/": [
-      {
-        "file": "ai-augmented-pairing-rules.mdc",
-        "purpose": "- Use cursor rules, cursor commands, and MCP servers to tailor the development environment to your team's patterns and tools.",
-        "deployed_file": ".cursor/rules/ai-augmented-pairing-rules.mdc",
-        "source": "features\\code-guidelines\\cursor\\ai-augmented-pairing-rules.mdc"
-      },
-      {
-        "file": "code-documentation-analysis-develop.mdc",
-        "purpose": "alwaysApply: true",
-        "deployed_file": ".cursor/rules/code-documentation-analysis-develop.mdc",
-        "source": "features\\code-guidelines\\cursor\\code-documentation-analysis-develop.mdc"
-      },
-      {
-        "file": "code-documentation.mdc",
-        "purpose": "1. **Table of Contents** - Must be at the top of every major file",
-        "deployed_file": ".cursor/rules/code-documentation.mdc",
-        "source": "features\\code-guidelines\\cursor\\code-documentation.mdc"
-      },
-      {
-        "file": "code-in-memoria-analysis.mdc",
-        "purpose": "alwaysApply: true",
-        "deployed_file": ".cursor/rules/code-in-memoria-analysis.mdc",
-        "source": "features\\code-guidelines\\cursor\\code-in-memoria-analysis.mdc"
-      },
-      {
-        "file": "code-location-guidelines.mdc",
-        "purpose": "alwaysApply: true",
-        "deployed_file": ".cursor/rules/code-location-guidelines.mdc",
-        "source": "features\\code-guidelines\\cursor\\code-location-guidelines.mdc"
-      },
-      {
-        "file": "behavior-consistency-rule.mdc",
-        "purpose": "behavior-consistency-rule behavior",
-        "deployed_file": ".cursor/rules/behavior-consistency-rule.mdc",
-        "source": "features\\cursor-behavior\\cursor\\behavior-consistency-rule.mdc"
-      },
-      {
-        "file": "behavior-index-rule.mdc",
-        "purpose": "behavior-index-rule behavior",
-        "deployed_file": ".cursor/rules/behavior-index-rule.mdc",
-        "source": "features\\cursor-behavior\\cursor\\behavior-index-rule.mdc"
-      },
-      {
-        "file": "behavior-structure-rule.mdc",
-        "purpose": "behavior-structure-rule behavior",
-        "deployed_file": ".cursor/rules/behavior-structure-rule.mdc",
-        "source": "features\\cursor-behavior\\cursor\\behavior-structure-rule.mdc"
-      },
-      {
-        "file": "behavior-suggest-rule.mdc",
-        "purpose": "behavior-suggest-rule behavior",
-        "deployed_file": ".cursor/rules/behavior-suggest-rule.mdc",
-        "source": "features\\cursor-behavior\\cursor\\behavior-suggest-rule.mdc"
-      },
-      {
-        "file": "behavior-sync-rule.mdc",
-        "purpose": "behavior-sync-rule behavior",
-        "deployed_file": ".cursor/rules/behavior-sync-rule.mdc",
-        "source": "features\\cursor-behavior\\cursor\\behavior-sync-rule.mdc"
-      },
-      {
-        "file": "tdd-approach.mdc",
-        "purpose": "alwaysApply: true",
-        "deployed_file": ".cursor/rules/tdd-approach.mdc",
-        "source": "features\\test-driven-development\\cursor\\tdd-approach.mdc"
-      },
-      {
-        "file": "tdd-mcp-delivery-approach.mdc",
-        "purpose": "<!-- 57f0c5ff-2b8e-4c1d-bb27-793a07188bb2 e3abd762-e52a-4e1a-8597-3cc123d13b7e -->",
-        "deployed_file": ".cursor/rules/tdd-mcp-delivery-approach.mdc",
-        "source": "features\\test-driven-development\\cursor\\tdd-mcp-delivery-approach.mdc"
-      },
-      {
-        "file": "tdd-playwright-debug-rule.mdc",
-        "purpose": "Runs Playwright tests in debug mode with Chrome MCP integration for browser-based testing.",
-        "deployed_file": ".cursor/rules/tdd-playwright-debug-rule.mdc",
-        "source": "features\\test-driven-development\\cursor\\tdd-playwright-debug-rule.mdc"
-      }
-    ],
     ".cursor/commands/": [
       {
-        "file": "update-code-docs-cmd.md",
-        "purpose": "Ensure code files follow the documentation standard defined in `@code-documentation.mdc`.",
-        "deployed_file": ".cursor/commands/update-code-docs-cmd.md",
-        "source": "features\\code-guidelines\\cursor\\update-code-docs-cmd.md"
+        "file": "code-agent-behavior-consistency-cmd.md",
+        "purpose": "when behaviors are changed, deleted, updated, or created, validate for inconsistentencies, overlapping behaviors, or inconsistent guidance, and surface potential contradictions or redundancies for review.",
+        "deployed_file": ".cursor/commands/code-agent-behavior-consistency-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-cmd.md"
       },
       {
-        "file": "behavior-consistency-cmd.md",
-        "purpose": "when behaviors are changed, deleted, updated, or created, validate for inconsistencies, overlaps, or inconsistent guidance, and surface potential contradictions or redundancies for review.",
-        "deployed_file": ".cursor/commands/behavior-consistency-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-consistency-cmd.md"
+        "file": "code-agent-behavior-index-cmd.md",
+        "purpose": "maintain an up-to-date index of all ai code agent behaviors across features.",
+        "deployed_file": ".cursor/commands/code-agent-behavior-index-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-cmd.md"
       },
       {
-        "file": "behavior-index-cmd.md",
-        "purpose": "maintain an up-to-date index of all ai behaviors across features.",
-        "deployed_file": ".cursor/commands/behavior-index-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-index-cmd.md"
-      },
-      {
-        "file": "behavior-structure-create-cmd.md",
+        "file": "code-agent-behavior-structure-create-cmd.md",
         "purpose": "scaffold a new ai behavior with all required files and proper structure.",
-        "deployed_file": ".cursor/commands/behavior-structure-create-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-structure-create-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-create-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-create-cmd.md"
       },
       {
-        "file": "behavior-structure-fix-cmd.md",
+        "file": "code-agent-behavior-structure-fix-cmd.md",
         "purpose": "automatically fix structure and naming convention issues in ai behaviors.",
-        "deployed_file": ".cursor/commands/behavior-structure-fix-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-structure-fix-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-fix-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-fix-cmd.md"
       },
       {
-        "file": "behavior-structure-validate-cmd.md",
+        "file": "code-agent-behavior-structure-validate-cmd.md",
         "purpose": "validate ai behaviors for structure and naming convention compliance.",
-        "deployed_file": ".cursor/commands/behavior-structure-validate-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-structure-validate-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-validate-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-validate-cmd.md"
       },
       {
-        "file": "behavior-suggest-cmd.md",
+        "file": "code-agent-behavior-suggest-cmd.md",
         "purpose": "when doing repetitive tasks, suggest creating new behaviors to capture patterns. help users decide if suggestions belong in an existing behavior-feature, a new behavior-feature, or the current feature being worked on.",
-        "deployed_file": ".cursor/commands/behavior-suggest-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-suggest-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-suggest-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-suggest-cmd.md"
       },
       {
-        "file": "behavior-sync-cmd.md",
+        "file": "code-agent-behavior-sync-cmd.md",
         "purpose": "keep ai behaviors up to date across all features.",
-        "deployed_file": ".cursor/commands/behavior-sync-cmd.md",
-        "source": "features\\cursor-behavior\\cursor\\behavior-sync-cmd.md"
-      },
-      {
-        "file": "tdd-mamba-debug-cmd.md",
-        "purpose": "Runs Mamba tests in debug mode with detailed output for rapid debugging and iteration.",
-        "deployed_file": ".cursor/commands/tdd-mamba-debug-cmd.md",
-        "source": "features\\test-driven-development\\cursor\\tdd-mamba-debug-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-sync-cmd.md",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-cmd.md"
       }
     ],
     "commands/": [
       {
-        "file": "behavior-consistency-cmd.py",
+        "file": "code-agent-behavior-consistency-cmd.py",
         "purpose": "{b.get('purpose', 'N/A')}\\n\"",
-        "deployed_file": "commands/behavior-consistency-cmd.py",
-        "source": "features\\cursor-behavior\\cursor\\behavior-consistency-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-consistency-cmd.py",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-cmd.py"
       },
       {
-        "file": "behavior-index-cmd.py",
+        "file": "code-agent-behavior-index-cmd.py",
         "purpose": "(must be at start or after whitespace/markers)",
-        "deployed_file": "commands/behavior-index-cmd.py",
-        "source": "features\\cursor-behavior\\cursor\\behavior-index-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-index-cmd.py",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-cmd.py"
       },
       {
-        "file": "behavior-structure-cmd.py",
+        "file": "code-agent-behavior-structure-cmd.py",
         "purpose": "[describe the command purpose]",
-        "deployed_file": "commands/behavior-structure-cmd.py",
-        "source": "features\\cursor-behavior\\cursor\\behavior-structure-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-structure-cmd.py",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-cmd.py"
       },
       {
-        "file": "behavior-sync-cmd.py",
-        "purpose": "Sync feature-local AI behaviors from features/*/cursor/ folders",
-        "deployed_file": "commands/behavior-sync-cmd.py",
-        "source": "features\\cursor-behavior\\cursor\\behavior-sync-cmd.py"
+        "file": "code-agent-behavior-sync-cmd.py",
+        "purpose": "Check all watcher processes and ensure they're running",
+        "deployed_file": "commands/code-agent-behavior-sync-cmd.py",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-cmd.py"
       }
     ],
-    ".cursor/mcp/": [
+    ".cursor/rules/": [
       {
-        "file": "tdd-mcp.json",
-        "purpose": "tdd-mcp behavior",
-        "deployed_file": ".cursor/mcp/tdd-mcp.json",
-        "source": "features\\test-driven-development\\cursor\\tdd-mcp.json"
+        "file": "code-agent-behavior-consistency-rule.mdc",
+        "purpose": "code-agent-behavior-consistency-rule behavior",
+        "deployed_file": ".cursor/rules/code-agent-behavior-consistency-rule.mdc",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-rule.mdc"
+      },
+      {
+        "file": "code-agent-behavior-index-rule.mdc",
+        "purpose": "code-agent-behavior-index-rule behavior",
+        "deployed_file": ".cursor/rules/code-agent-behavior-index-rule.mdc",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-rule.mdc"
+      },
+      {
+        "file": "code-agent-behavior-structure-rule.mdc",
+        "purpose": "a **rule** (`.mdc`) that defines the triggering condition and guidelines,",
+        "deployed_file": ".cursor/rules/code-agent-behavior-structure-rule.mdc",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-rule.mdc"
+      },
+      {
+        "file": "code-agent-behavior-suggest-rule.mdc",
+        "purpose": "code-agent-behavior-suggest-rule behavior",
+        "deployed_file": ".cursor/rules/code-agent-behavior-suggest-rule.mdc",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-suggest-rule.mdc"
+      },
+      {
+        "file": "code-agent-behavior-sync-rule.mdc",
+        "purpose": "code-agent-behavior-sync-rule behavior",
+        "deployed_file": ".cursor/rules/code-agent-behavior-sync-rule.mdc",
+        "source": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-rule.mdc"
       }
     ]
   },
   "features": {
-    "code-guidelines": [
+    "code-agent-behavior": [
       {
-        "file": "ai-augmented-pairing-rules.mdc",
-        "type": ".mdc",
-        "purpose": "- Use cursor rules, cursor commands, and MCP servers to tailor the development environment to your team's patterns and tools.",
-        "path": "features\\code-guidelines\\cursor\\ai-augmented-pairing-rules.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/ai-augmented-pairing-rules.mdc"
-      },
-      {
-        "file": "code-documentation-analysis-develop.mdc",
-        "type": ".mdc",
-        "purpose": "alwaysApply: true",
-        "path": "features\\code-guidelines\\cursor\\code-documentation-analysis-develop.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/code-documentation-analysis-develop.mdc"
-      },
-      {
-        "file": "code-documentation.mdc",
-        "type": ".mdc",
-        "purpose": "1. **Table of Contents** - Must be at the top of every major file",
-        "path": "features\\code-guidelines\\cursor\\code-documentation.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/code-documentation.mdc"
-      },
-      {
-        "file": "code-in-memoria-analysis.mdc",
-        "type": ".mdc",
-        "purpose": "alwaysApply: true",
-        "path": "features\\code-guidelines\\cursor\\code-in-memoria-analysis.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/code-in-memoria-analysis.mdc"
-      },
-      {
-        "file": "code-location-guidelines.mdc",
-        "type": ".mdc",
-        "purpose": "alwaysApply: true",
-        "path": "features\\code-guidelines\\cursor\\code-location-guidelines.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/code-location-guidelines.mdc"
-      },
-      {
-        "file": "update-code-docs-cmd.md",
+        "file": "code-agent-behavior-consistency-cmd.md",
         "type": ".md",
-        "purpose": "Ensure code files follow the documentation standard defined in `@code-documentation.mdc`.",
-        "path": "features\\code-guidelines\\cursor\\update-code-docs-cmd.md",
+        "purpose": "when behaviors are changed, deleted, updated, or created, validate for inconsistentencies, overlapping behaviors, or inconsistent guidance, and surface potential contradictions or redundancies for review.",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/update-code-docs-cmd.md"
-      }
-    ],
-    "cursor-behavior": [
-      {
-        "file": "behavior-consistency-cmd.md",
-        "type": ".md",
-        "purpose": "when behaviors are changed, deleted, updated, or created, validate for inconsistencies, overlaps, or inconsistent guidance, and surface potential contradictions or redundancies for review.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-consistency-cmd.md",
-        "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-consistency-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-consistency-cmd.md"
       },
       {
-        "file": "behavior-consistency-cmd.py",
+        "file": "code-agent-behavior-consistency-cmd.py",
         "type": ".py",
         "purpose": "{b.get('purpose', 'N/A')}\\n\"",
-        "path": "features\\cursor-behavior\\cursor\\behavior-consistency-cmd.py",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-cmd.py",
         "deployed_location": "commands/",
-        "deployed_file": "commands/behavior-consistency-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-consistency-cmd.py"
       },
       {
-        "file": "behavior-consistency-rule.mdc",
+        "file": "code-agent-behavior-consistency-rule.mdc",
         "type": ".mdc",
-        "purpose": "behavior-consistency-rule behavior",
-        "path": "features\\cursor-behavior\\cursor\\behavior-consistency-rule.mdc",
+        "purpose": "code-agent-behavior-consistency-rule behavior",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-consistency-rule.mdc",
         "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/behavior-consistency-rule.mdc"
+        "deployed_file": ".cursor/rules/code-agent-behavior-consistency-rule.mdc"
       },
       {
-        "file": "behavior-index-cmd.md",
+        "file": "code-agent-behavior-index-cmd.md",
         "type": ".md",
-        "purpose": "maintain an up-to-date index of all ai behaviors across features.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-index-cmd.md",
+        "purpose": "maintain an up-to-date index of all ai code agent behaviors across features.",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-index-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-index-cmd.md"
       },
       {
-        "file": "behavior-index-cmd.py",
+        "file": "code-agent-behavior-index-cmd.py",
         "type": ".py",
         "purpose": "(must be at start or after whitespace/markers)",
-        "path": "features\\cursor-behavior\\cursor\\behavior-index-cmd.py",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-cmd.py",
         "deployed_location": "commands/",
-        "deployed_file": "commands/behavior-index-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-index-cmd.py"
       },
       {
-        "file": "behavior-index-rule.mdc",
+        "file": "code-agent-behavior-index-rule.mdc",
         "type": ".mdc",
-        "purpose": "behavior-index-rule behavior",
-        "path": "features\\cursor-behavior\\cursor\\behavior-index-rule.mdc",
+        "purpose": "code-agent-behavior-index-rule behavior",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-index-rule.mdc",
         "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/behavior-index-rule.mdc"
+        "deployed_file": ".cursor/rules/code-agent-behavior-index-rule.mdc"
       },
       {
-        "file": "behavior-structure-cmd.py",
+        "file": "code-agent-behavior-structure-cmd.py",
         "type": ".py",
         "purpose": "[describe the command purpose]",
-        "path": "features\\cursor-behavior\\cursor\\behavior-structure-cmd.py",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-cmd.py",
         "deployed_location": "commands/",
-        "deployed_file": "commands/behavior-structure-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-structure-cmd.py"
       },
       {
-        "file": "behavior-structure-create-cmd.md",
+        "file": "code-agent-behavior-structure-create-cmd.md",
         "type": ".md",
         "purpose": "scaffold a new ai behavior with all required files and proper structure.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-structure-create-cmd.md",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-create-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-structure-create-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-create-cmd.md"
       },
       {
-        "file": "behavior-structure-fix-cmd.md",
+        "file": "code-agent-behavior-structure-fix-cmd.md",
         "type": ".md",
         "purpose": "automatically fix structure and naming convention issues in ai behaviors.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-structure-fix-cmd.md",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-fix-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-structure-fix-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-fix-cmd.md"
       },
       {
-        "file": "behavior-structure-rule.mdc",
+        "file": "code-agent-behavior-structure-rule.mdc",
         "type": ".mdc",
-        "purpose": "behavior-structure-rule behavior",
-        "path": "features\\cursor-behavior\\cursor\\behavior-structure-rule.mdc",
+        "purpose": "a **rule** (`.mdc`) that defines the triggering condition and guidelines,",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-rule.mdc",
         "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/behavior-structure-rule.mdc"
+        "deployed_file": ".cursor/rules/code-agent-behavior-structure-rule.mdc"
       },
       {
-        "file": "behavior-structure-validate-cmd.md",
+        "file": "code-agent-behavior-structure-validate-cmd.md",
         "type": ".md",
         "purpose": "validate ai behaviors for structure and naming convention compliance.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-structure-validate-cmd.md",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-structure-validate-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-structure-validate-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-structure-validate-cmd.md"
       },
       {
-        "file": "behavior-suggest-cmd.md",
+        "file": "code-agent-behavior-suggest-cmd.md",
         "type": ".md",
         "purpose": "when doing repetitive tasks, suggest creating new behaviors to capture patterns. help users decide if suggestions belong in an existing behavior-feature, a new behavior-feature, or the current feature being worked on.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-suggest-cmd.md",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-suggest-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-suggest-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-suggest-cmd.md"
       },
       {
-        "file": "behavior-suggest-rule.mdc",
+        "file": "code-agent-behavior-suggest-rule.mdc",
         "type": ".mdc",
-        "purpose": "behavior-suggest-rule behavior",
-        "path": "features\\cursor-behavior\\cursor\\behavior-suggest-rule.mdc",
+        "purpose": "code-agent-behavior-suggest-rule behavior",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-suggest-rule.mdc",
         "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/behavior-suggest-rule.mdc"
+        "deployed_file": ".cursor/rules/code-agent-behavior-suggest-rule.mdc"
       },
       {
-        "file": "behavior-sync-cmd.md",
+        "file": "code-agent-behavior-sync-cmd.md",
         "type": ".md",
         "purpose": "keep ai behaviors up to date across all features.",
-        "path": "features\\cursor-behavior\\cursor\\behavior-sync-cmd.md",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-cmd.md",
         "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/behavior-sync-cmd.md"
+        "deployed_file": ".cursor/commands/code-agent-behavior-sync-cmd.md"
       },
       {
-        "file": "behavior-sync-cmd.py",
+        "file": "code-agent-behavior-sync-cmd.py",
         "type": ".py",
-        "purpose": "Sync feature-local AI behaviors from features/*/cursor/ folders",
-        "path": "features\\cursor-behavior\\cursor\\behavior-sync-cmd.py",
+        "purpose": "Check all watcher processes and ensure they're running",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-cmd.py",
         "deployed_location": "commands/",
-        "deployed_file": "commands/behavior-sync-cmd.py"
+        "deployed_file": "commands/code-agent-behavior-sync-cmd.py"
       },
       {
-        "file": "behavior-sync-rule.mdc",
+        "file": "code-agent-behavior-sync-rule.mdc",
         "type": ".mdc",
-        "purpose": "behavior-sync-rule behavior",
-        "path": "features\\cursor-behavior\\cursor\\behavior-sync-rule.mdc",
+        "purpose": "code-agent-behavior-sync-rule behavior",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-sync-rule.mdc",
         "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/behavior-sync-rule.mdc"
-      }
-    ],
-    "test-driven-development": [
-      {
-        "file": "tdd-approach.mdc",
-        "type": ".mdc",
-        "purpose": "alwaysApply: true",
-        "path": "features\\test-driven-development\\cursor\\tdd-approach.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/tdd-approach.mdc"
+        "deployed_file": ".cursor/rules/code-agent-behavior-sync-rule.mdc"
       },
       {
-        "file": "tdd-mamba-debug-cmd.md",
-        "type": ".md",
-        "purpose": "Runs Mamba tests in debug mode with detailed output for rapid debugging and iteration.",
-        "path": "features\\test-driven-development\\cursor\\tdd-mamba-debug-cmd.md",
-        "deployed_location": ".cursor/commands/",
-        "deployed_file": ".cursor/commands/tdd-mamba-debug-cmd.md"
-      },
-      {
-        "file": "tdd-mcp-delivery-approach.mdc",
-        "type": ".mdc",
-        "purpose": "<!-- 57f0c5ff-2b8e-4c1d-bb27-793a07188bb2 e3abd762-e52a-4e1a-8597-3cc123d13b7e -->",
-        "path": "features\\test-driven-development\\cursor\\tdd-mcp-delivery-approach.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/tdd-mcp-delivery-approach.mdc"
-      },
-      {
-        "file": "tdd-mcp.json",
+        "file": "code-agent-behavior-tasks.json",
         "type": ".json",
-        "purpose": "tdd-mcp behavior",
-        "path": "features\\test-driven-development\\cursor\\tdd-mcp.json",
-        "deployed_location": ".cursor/mcp/",
-        "deployed_file": ".cursor/mcp/tdd-mcp.json"
-      },
-      {
-        "file": "tdd-playwright-debug-rule.mdc",
-        "type": ".mdc",
-        "purpose": "Runs Playwright tests in debug mode with Chrome MCP integration for browser-based testing.",
-        "path": "features\\test-driven-development\\cursor\\tdd-playwright-debug-rule.mdc",
-        "deployed_location": ".cursor/rules/",
-        "deployed_file": ".cursor/rules/tdd-playwright-debug-rule.mdc"
+        "purpose": "code-agent-behavior-tasks behavior",
+        "path": "features\\code-agent-behavior\\code-agent-behaviors\\code-agent-behavior-tasks.json",
+        "deployed_location": null,
+        "deployed_file": null
       }
     ]
   }

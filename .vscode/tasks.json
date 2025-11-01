@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "features/cursor-behavior/cursor/behavior-consistency-cmd.py"
+                "commands/behavior-consistency-cmd.py"
             ],
             "problemMatcher": [],
             "presentation": {
@@ -22,7 +22,7 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "features/cursor-behavior/cursor/behavior-consistency-cmd.py",
+                "commands/behavior-consistency-cmd.py",
                 "watch"
             ],
             "problemMatcher": [],
@@ -37,40 +37,16 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "features/cursor-behavior/cursor/behavior-sync-cmd.py"
+                "commands/behavior-sync-cmd.py"
             ],
             "problemMatcher": []
-        },
-        {
-            "label": "Behavior Index",
-            "type": "shell",
-            "command": "python",
-            "args": [
-                "features/cursor-behavior/cursor/behavior-index-cmd.py"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "label": "Behavior Sync Watch Mode",
-            "type": "shell",
-            "command": "python",
-            "args": [
-                "features/cursor-behavior/cursor/behavior-sync-cmd.py",
-                "watch"
-            ],
-            "problemMatcher": [],
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated"
-            },
-            "isBackground": true
         },
         {
             "label": "Behavior Sync on Startup",
             "type": "shell",
             "command": "python",
             "args": [
-                "features/cursor-behavior/cursor/behavior-sync-cmd.py"
+                "commands/behavior-sync-cmd.py"
             ],
             "problemMatcher": [],
             "presentation": {
@@ -82,11 +58,35 @@
             }
         },
         {
+            "label": "Behavior Sync Watch Mode",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "commands/behavior-sync-cmd.py",
+                "watch"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Behavior Index",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "commands/behavior-index-cmd.py"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Behavior Index on Startup",
             "type": "shell",
             "command": "python",
             "args": [
-                "features/cursor-behavior/cursor/behavior-index-cmd.py"
+                "commands/behavior-index-cmd.py"
             ],
             "problemMatcher": [],
             "presentation": {
