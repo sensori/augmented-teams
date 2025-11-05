@@ -182,13 +182,13 @@ def behavior_sync(feature=None, force=False):
 
     src_root = Path("behaviors")
     # File extension to target directory mapping
-    # NOTE: .py files go to root-level command-runners/, not .cursor/
+    # NOTE: .py files are NOT synced - they stay in behaviors/<feature>/
     targets = {
         ".mdc": Path(".cursor/rules"),         # Rules → .cursor/rules/
         ".md": Path(".cursor/commands"),       # Commands → .cursor/commands/
-        ".py": Path("command-runners"),        # Python runners → command-runners/ (root)
         ".json": Path(".cursor/mcp"),          # MCP configs → .cursor/mcp/
     }
+    # .py files intentionally excluded - they remain in behaviors/<feature>/
 
     # Create target directories
     for t in targets.values():

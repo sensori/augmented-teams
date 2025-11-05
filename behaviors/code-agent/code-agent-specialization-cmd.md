@@ -6,7 +6,7 @@
 * `\specialization validate <feature>` — Validate specialization structure for a specific feature
 * `\specialization fix <feature>` — Fix specialization issues automatically
 * `\specialization create <feature>` — Scaffold new specialized behavior
-* `python command-runners/code-agent-specialization-cmd.py validate <feature>` — Run from command line
+* `python behaviors/code-agent/code-agent-specialization-validation-runner.py <feature>` — Run from command line
 
 **Rule:**
 * `\code-agent-specialization-rule` — Hierarchical specialization patterns for code agent behaviors

@@ -22,6 +22,13 @@ globs:
   * may also include **MCP tool configurations** (`.json` files) for exposing tools via the Model Context Protocol
   * may a **task configurations** (`.vscode/tasks.json`) for background processes or automation workflows. 
 
+**Runner Location:**
+* ALL runner files (`.py`) MUST stay in their feature directory: `behaviors/<feature>/`
+* Commands and documentation MUST reference runners using local path: `python behaviors/<feature>/<runner-name>.py`
+* NEVER copy runners to `command-runners/` directory
+* NEVER reference `command-runners/` in documentation or commands
+* Each feature owns and maintains its own runner files 
+
 **Code Agent Behavior Features**
 Behaviors are organized within a **Behavior Features** —  a collection of tightly nit behaviors that are strongly related.
 

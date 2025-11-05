@@ -8,6 +8,9 @@ alwaysApply: false
 
 This rule extends `bdd-workflow-rule.mdc` and references `bdd-jest-rule.mdc`.
 
+**Executing Commands:**
+* `\bdd-workflow` — Guides through Jest-specific Red-Green-Refactor cycle using patterns from this rule
+
 ## Phase 1: Build Test Signatures (Jest)
 
 **✅ DO:**

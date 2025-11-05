@@ -11,6 +11,10 @@ This rule extends `bdd-rule.mdc` with Jest-specific examples.
 
 For comprehensive examples and edge cases, see `bdd-jest-reference.md`.
 
+**Executing Commands:**
+* `\bdd-validate` — Validate Jest test files against BDD principles (uses this rule for Jest-specific patterns)
+* `\bdd-workflow` — Guide through Red-Green-Refactor cycle for Jest tests
+
 ---
 
 ## 1. Business Readable Language

@@ -6,8 +6,14 @@ Abandon a stuck or errored run to allow starting fresh.
 
 import sys
 import io
+import importlib.util
 from pathlib import Path
-from bdd_workflow_run_state import BDDRunState
+
+# Import from hyphenated module name
+spec = importlib.util.spec_from_file_location("bdd_workflow_run_state", Path(__file__).parent / "bdd-workflow-run-state.py")
+bdd_workflow_run_state = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bdd_workflow_run_state)
+BDDRunState = bdd_workflow_run_state.BDDRunState
 
 
 def abandon_run(test_file: str, reason: str):

@@ -8,6 +8,9 @@ alwaysApply: false
 
 This rule extends and references `bdd-rule.mdc` — all BDD principles apply throughout the TDD cycle.
 
+**Executing Commands:**
+* `\bdd-workflow` — Start BDD workflow on current file (creates test signatures, guides through RED-GREEN-REFACTOR cycle)
+
 ## TDD Workflow Overview
 
 True TDD follows a strict cycle:

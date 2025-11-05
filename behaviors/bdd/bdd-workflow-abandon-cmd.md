@@ -2,6 +2,18 @@
 
 **Purpose:** Abandon a stuck or errored run to allow starting fresh.
 
+**Rule:**
+* `\bdd-workflow-rule` — Allows resetting workflow when stuck
+
+**AI Usage:**
+* AI Agent determines when a run should be abandoned (errors, wrong phase, etc.)
+* AI Agent provides reason for abandonment
+
+**Code Usage:**
+* Code marks current run as `abandoned`
+* Code records abandonment reason and timestamp
+* Code allows new run to be started
+
 **Usage:**
 * `\bdd-abandon <reason>` — Abandon current run with reason
 

@@ -12,11 +12,11 @@
 * `\BDD-workflow --phase red` — Jump to RED phase (write failing test)
 * `\BDD-workflow --phase green` — Jump to GREEN phase (implement code)
 * `\BDD-workflow --phase refactor` — Jump to REFACTOR phase (suggest improvements)
-* `python behaviors/bdd-behavior/bdd-workflow-cmd.py <file-path> [options]` — Run from command line
+* `python behaviors/bdd/bdd-workflow-runner.py <file-path> [options]` — Run from command line
 
 **Note:** Can be invoked on either test files or production files. If invoked on a production file, automatically creates corresponding test file.
 
-**Rules:**
+**Rule:**
 * `\bdd-workflow-rule` — Core BDD workflow (Red-Green-Refactor cycle)
 * `\bdd-rule` — BDD principles (referenced throughout TDD cycle)
 * `\bdd-jest-rule` — Jest-specific patterns
@@ -27,9 +27,8 @@
 * **Mamba**: `["**/*_test.py", "**/test_*.py", "**/*_spec.py", "**/spec_*.py", "**/*_test.pyi", "**/test_*.pyi", "**/*_spec.pyi", "**/spec_*.pyi"]`
 
 **Implementation:**
-* `tdd_workflow()` in `behaviors/bdd-behavior/bdd-workflow-cmd.py` — Main orchestrator
-* `is_test_file()` — Check if file matches test file patterns
-* `generate_test_file_path()` — Generate test file path from production file path
+* `bdd_workflow()` in `behaviors/bdd/bdd-workflow-runner.py` — Main orchestrator
+* `detect_framework_from_file()` — Detect Jest vs Mamba from file path
 * `parse_test_structure()` — Extract test signatures and implementation status
 * `determine_test_scope()` — Filter tests by scope option
 * `run_tests()` — Execute tests and capture results
@@ -53,7 +52,7 @@
 **Steps:**
 
 1. **User** invokes `\bdd-workflow` on file (with optional scope and phase flags)
-2. **Code** `tdd_workflow()` checks if file is a test file (matches glob patterns)
+2. **Code** `bdd_workflow()` checks if file is a test file (matches glob patterns)
 3. **IF NOT a test file**: 
    - **Code** `detect_framework_from_file()` detects framework from file extension (.mjs → Jest, .py → Mamba)
    - **Code** `generate_test_file_path()` creates corresponding test file path (e.g., `foo.mjs` → `foo.test.mjs`)
@@ -64,7 +63,7 @@
      - **Code** saves new test file
    - **Code** switches context to the newly created/found test file
 4. **Code** `detect_framework_from_file()` detects framework from file path (Jest vs Mamba)
-5. **Code** `TDDWorkflowState()` loads or initializes workflow state from `.tdd-workflow/<filename>.state.json`
+5. **Code** `BDDRunState()` loads or initializes workflow state from `.bdd-workflow/<filename>.run-state.json`
 6. **Code** `parse_test_structure()` parses test file into describe/it blocks with implementation status
 7. **Code** `determine_test_scope()` filters tests based on scope option (describe block, next N, all, line number)
 8. **Code** identifies current phase from state or user-provided phase flag
@@ -87,13 +86,19 @@
 #### 0.2: Build Test Signatures
 
 **Sample Steps (sample_1, sample_2, sample_N) - Pattern Learning:**
-1. **AI Agent** creates ONE complete behavioral example (one describe block with 2-6 tests)
-2. **AI Agent** creates test signatures following `bdd-rule.mdc` § 1 (fluent language, proper nesting)
-3. **MANDATORY**: **AI Agent** runs `/bdd-validate` (NO EXCEPTIONS)
-4. **IF validation errors:** Fix ALL violations, re-validate until ZERO violations
-5. **AI Agent** LEARNS patterns from violations fixed
-6. **Workflow** auto-approves and completes sample run
-7. **User** runs next sample (sample_2, sample_3, etc.) OR proceeds to expand
+1. **Code** `load_rule_examples(test_file_path)` loads rule file and presents DO/DON'T examples from all sections (§ 1-5) to AI Agent
+2. **AI Agent** creates ONE complete behavioral example (one describe block with ~18 tests) aligning to the rules and DO/DON'T examples
+3. **AI Agent** writes test signatures following examples (fluent language, proper nesting)
+4. **Human** reviews test and chooses:
+   - **Proceed** → Move to next sample or expand
+   - **Expand** → Skip remaining samples, go to expand step
+   - **Validate** → Run `/bdd-validate` to check for violations and fix them
+6. **IF Human chose Validate:** 
+   - **AI Agent** runs `/bdd-validate`
+   - **AI Agent** fixes ALL violations
+   - **AI Agent** re-validates until ZERO violations
+   - **AI Agent** LEARNS patterns from violations fixed
+   - **Human** reviews fixes, then proceeds to next sample or expand
 
 **Expand Step (expand) - Full Coverage:**
 1. **AI Agent** creates ALL remaining test signatures in ONE batch, applying learned patterns
@@ -147,9 +152,9 @@
 
 ### Repeat Cycle
 
-1. **Code** `TDDWorkflowState.get_next_test()` identifies next unimplemented test in scope
+1. **Code** identifies next unimplemented test in scope
 2. **Repeat** Phase 1 through Phase 3 until all tests in scope are implemented
-3. **Code** `TDDWorkflowState.save()` updates state to completed
+3. **Code** `BDDRunState.complete_run()` updates state to completed
 4. **User** decides next action: expand scope, start new feature, or finish session
 
 ---
@@ -227,13 +232,13 @@ State markers:
 \BDD-workflow --phase refactor
 
 # Command line usage on test file
-python behaviors/bdd-behavior/bdd-workflow-cmd.py src/auth/AuthService.test.js --scope describe
+python behaviors/bdd/bdd-workflow-runner.py src/auth/AuthService.test.js --scope describe
 
 # Command line usage on production file (auto-creates test file)
-python behaviors/bdd-behavior/bdd-workflow-cmd.py src/auth/AuthService.js --scope all
+python behaviors/bdd/bdd-workflow-runner.py src/auth/AuthService.js --scope all
 
 # Interactive with thorough refactoring suggestions
-python behaviors/bdd-behavior/bdd-workflow-cmd.py src/auth/AuthService.test.js --interactive --suggest-only
+python behaviors/bdd/bdd-workflow-runner.py src/auth/AuthService.test.js --interactive --suggest-only
 ```
 
 ---
@@ -248,10 +253,10 @@ This command integrates with:
 ## Implementation
 
 **Files:**
-* `behaviors/bdd-behavior/bdd-workflow-cmd.py` — Main command implementation
-* `behaviors/bdd-behavior/bdd-workflow-rule.mdc` — Core BDD workflow rule
-* `behaviors/bdd-workflow-jest-rule.mdc` — Jest-specific patterns
-* `behaviors/bdd-workflow-mamba-rule.mdc` — Mamba-specific patterns
+* `behaviors/bdd/bdd-workflow-runner.py` — Main command implementation
+* `behaviors/bdd/bdd-workflow-rule.mdc` — Core BDD workflow rule
+* `behaviors/bdd/bdd-workflow-jest-rule.mdc` — Jest-specific patterns
+* `behaviors/bdd/bdd-workflow-mamba-rule.mdc` — Mamba-specific patterns
 
 **Division of Labor:**
 * **Code**: File parsing, test running, state tracking, result capture
@@ -259,9 +264,9 @@ This command integrates with:
 * **AI Agent (MANDATORY)**: Run `/bdd-validate` after EVERY phase, fix ALL violations before proceeding
 
 **State Management:**
-* Test file comments track current phase and progress
-* Separate state file (`.BDD-workflow-state.json`) tracks overall workflow state
+* Separate state file (`.bdd-workflow/<filename>.run-state.json`) tracks overall workflow state
 * State persists across sessions for long workflows
+* Tracks run ID, step type, status, timestamps, and validation results
 
 #   T e s t   c h a n g e 
  

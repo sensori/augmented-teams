@@ -1,0 +1,10 @@
+{
+  "jest.jestCommandLine": "npm test --",
+  "testing.automaticallyOpenPeekView": "failureInVisibleDocument",
+  "files.associations": {
+    "*.test.mjs": "javascript",
+    "*.spec.mjs": "javascript"
+  }
+}
+
+

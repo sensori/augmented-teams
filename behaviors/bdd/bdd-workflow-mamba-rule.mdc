@@ -8,6 +8,9 @@ alwaysApply: false
 
 This rule extends `bdd-workflow-rule.mdc` and references `bdd-mamba-rule.mdc`.
 
+**Executing Commands:**
+* `\bdd-workflow` — Guides through Mamba-specific Red-Green-Refactor cycle using patterns from this rule
+
 ## Phase 1: Build Test Signatures (Mamba)
 
 **✅ DO:**

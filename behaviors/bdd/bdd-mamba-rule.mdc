@@ -11,6 +11,10 @@ This rule extends `bdd-rule.mdc` with Mamba-specific examples.
 
 For comprehensive examples and edge cases, see `bdd-mamba-reference.md`.
 
+**Executing Commands:**
+* `\bdd-validate` — Validate Mamba test files against BDD principles (uses this rule for Mamba-specific patterns)
+* `\bdd-workflow` — Guide through Red-Green-Refactor cycle for Mamba tests
+
 ---
 
 ## 1. Business Readable Language

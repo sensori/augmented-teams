@@ -2,6 +2,18 @@
 
 **Purpose:** Human approval or rejection of AI work after validation.
 
+**Rule:**
+* `\bdd-workflow-rule` — Enforces human approval step in workflow
+
+**AI Usage:**
+* AI Agent waits for human approval before proceeding to next phase
+* AI Agent interprets approval/rejection feedback
+
+**Code Usage:**
+* Code updates run state to `human_approved` or `started` (if rejected)
+* Code records feedback and timestamps
+* Code blocks workflow progression until approved
+
 **Usage:**
 * `\bdd-approve` — Approve current run and proceed
 * `\bdd-approve <feedback>` — Approve with feedback

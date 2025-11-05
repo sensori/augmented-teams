@@ -5,7 +5,7 @@ Guides developers through true BDD (Behavior-Driven Development) with Red-Green-
 Division of Labor:
 - Code: Parse files, run tests, track state, identify relationships, ENFORCE workflow
 - AI Agent: 
-  * Identify SAMPLE SIZE (lowest-level describe block, no more than 6 tests)
+  * Identify SAMPLE SIZE (lowest-level describe block, ~18 tests)
   * Write test signatures/implementations
   * Run /bdd-validate after EVERY step
   * Fix ALL violations before proceeding
@@ -578,6 +578,50 @@ def bdd_workflow(
                 next_test = (i, test)
                 break
     
+    # Step 8.5: For SIGNATURES phase, load and present DO/DON'T examples
+    rule_examples = None
+    if current_phase == BDDPhase.SIGNATURES:
+        # Import the function from hyphenated module name
+        import importlib.util
+        validate_runner_path = Path(__file__).parent / "bdd-validate-runner.py"
+        spec = importlib.util.spec_from_file_location("bdd_validate_runner", validate_runner_path)
+        validate_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validate_module)
+        load_rule_file = validate_module.load_rule_file
+        extract_dos_and_donts = validate_module.extract_dos_and_donts
+        
+        # Load rule and extract examples
+        rule_data = load_rule_file(framework)
+        if rule_data:
+            examples = extract_dos_and_donts(rule_data["content"])
+            rule_examples = {
+                "rule_file": rule_data["rule_path"],
+                "examples": examples
+            }
+            
+            # OUTPUT TO CHAT for AI Agent - Show ALL examples
+            print("\n" + "="*60)
+            print("DO/DON'T EXAMPLES FROM BDD RULES")
+            print("="*60)
+            for section, data in examples.items():
+                print(f"\n### {section}")
+                
+                if data['dos']:
+                    print("\n✅ DO:")
+                    for i, example in enumerate(data['dos'], 1):  # Show ALL DO examples
+                        print(f"\nExample {i}:")
+                        print(example)
+                
+                if data['donts']:
+                    print("\n❌ DON'T:")
+                    for i, example in enumerate(data['donts'], 1):  # Show ALL DON'T examples
+                        print(f"\nExample {i}:")
+                        print(example)
+            
+            print("\n" + "="*60)
+            print("AI Agent: Create tests aligning to these DO/DON'T examples")
+            print("="*60 + "\n")
+    
     # Step 9: Prepare data for AI Agent
     workflow_data = {
         "file_path": file_path,
@@ -585,6 +629,7 @@ def bdd_workflow(
         "phase": current_phase.value,
         "scope": scope,
         "auto_mode": auto,
+        "rule_examples": rule_examples,  # Include examples data
         "test_structure": {
             "all_blocks": blocks,
             "scoped_tests": scoped_tests,
@@ -604,7 +649,7 @@ def bdd_workflow(
     print(f"Phase: {current_phase.value.upper()}")
     if current_phase == BDDPhase.SIGNATURES:
         print("\nAI Agent TODO:")
-        print("1. Identify SAMPLE SIZE (lowest-level describe, max 6 tests)")
+        print("1. Identify SAMPLE SIZE (lowest-level describe, ~18 tests)")
         print("2. Create sample test signatures")
         print("3. Run /bdd-validate")
         print("4. Fix violations, learn, iterate")
@@ -733,7 +778,45 @@ if __name__ == "__main__":
                     print(f"\nStarted run: {run_id}")
                     print(f"   Step: {step_type}")
                     print(f"   Scope: {scope}")
-                    print("\nAI Agent: Create test signatures following BDD principles")
+                    
+                    # Load and display DO/DON'T examples for SIGNATURES phase
+                    if step_type.startswith('sample') or step_type == 'expand':
+                        framework = detect_framework_from_file(file_path)
+                        if framework:
+                            # Import the validation runner functions
+                            import importlib.util
+                            validate_runner_path = Path(__file__).parent / "bdd-validate-runner.py"
+                            spec = importlib.util.spec_from_file_location("bdd_validate_runner", validate_runner_path)
+                            validate_module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(validate_module)
+                            
+                            # Load rule and extract examples
+                            rule_data = validate_module.load_rule_file(framework)
+                            if rule_data:
+                                examples = validate_module.extract_dos_and_donts(rule_data["content"])
+                                
+                                # OUTPUT TO CHAT for AI Agent - Show ALL examples
+                                print("\n" + "="*60)
+                                print("DO/DON'T EXAMPLES FROM BDD RULES")
+                                print("="*60)
+                                for section, data in examples.items():
+                                    print(f"\n### {section}")
+                                    
+                                    if data['dos']:
+                                        print("\n✅ DO:")
+                                        for i, example in enumerate(data['dos'], 1):
+                                            print(f"\nExample {i}:")
+                                            print(example)
+                                    
+                                    if data['donts']:
+                                        print("\n❌ DON'T:")
+                                        for i, example in enumerate(data['donts'], 1):
+                                            print(f"\nExample {i}:")
+                                            print(example)
+                                
+                                print("\n" + "="*60)
+                    
+                    print("\nAI Agent: Create tests aligning to these DO/DON'T examples")
                     print("   Then run: /bdd-validate")
                     # Exit here - don't call bdd_workflow, just start the run
                     sys.exit(0)

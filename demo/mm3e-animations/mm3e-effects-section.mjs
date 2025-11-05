@@ -19071,12 +19071,10 @@ class PowerEffectSequence{
         for (let i = 0; i < this.descriptorSequence.powerEffectSequence.selectedEffectMethods.length; i++) {
             if (array.some(effect =>
                 this.descriptorSequence.powerEffectSequence.selectedEffectMethods[i].original.includes(effect))) {
-                return true
-            } else {
-            return false
+                return true;
             }
         }
-        return false
+        return false;
     }
 }
 class PowerEffectsSequenceView{

@@ -2,6 +2,18 @@
 
 **Purpose:** Check current workflow status and what's needed to proceed.
 
+**Rule:**
+* `\bdd-workflow-rule` — Follows BDD workflow state management
+
+**AI Usage:**
+* AI Agent reviews status output to determine next action
+* AI Agent interprets workflow state and validation results
+
+**Code Usage:**
+* Code loads run state from `.bdd-workflow/<filename>.run-state.json`
+* Code displays current run details, timestamps, validation results
+* Code shows recent run history
+
 **Usage:**
 * `\bdd-status` — Show current run status and history
 

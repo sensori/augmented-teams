@@ -8,6 +8,10 @@ alwaysApply: false
 
 BDD tests describe observable behavior in clear language. Keep them fast, isolated, deterministic, and worth maintaining.
 
+**Executing Commands:**
+* `\bdd-validate` — Validate test files against BDD principles
+* `\bdd-workflow` — Guide through Red-Green-Refactor cycle following these principles
+
 ## 1. Business Readable Language
 
 **Do:**

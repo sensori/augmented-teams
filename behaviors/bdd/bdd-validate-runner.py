@@ -122,6 +122,42 @@ def extract_dos_and_donts(rule_content: str) -> Dict[str, Dict[str, List[str]]]:
     return sections
 
 
+def load_rule_examples(test_file_path: str) -> Dict[str, Any]:
+    """
+    Master function: Load rule file and extract DO/DON'T examples for a test file.
+    
+    Combines: detect_framework_from_file() + load_rule_file() + extract_dos_and_donts()
+    
+    Args:
+        test_file_path: Path to test file
+        
+    Returns:
+        {
+            "framework": "jest" or "mamba",
+            "rule_file": "bdd-jest-rule.mdc" or "bdd-mamba-rule.mdc",
+            "examples": {"section_name": {"dos": [...], "donts": [...]}}
+        }
+    """
+    # Step 1: Detect framework
+    framework = detect_framework_from_file(test_file_path)
+    if not framework:
+        return {"error": "Could not detect framework from file path"}
+    
+    # Step 2: Load rule file
+    rule_data = load_rule_file(framework)
+    if not rule_data:
+        return {"error": f"Could not load rule file for framework: {framework}"}
+    
+    # Step 3: Extract DO/DON'T examples
+    examples = extract_dos_and_donts(rule_data["content"])
+    
+    return {
+        "framework": framework,
+        "rule_file": rule_data["rule_path"],
+        "examples": examples
+    }
+
+
 # Step 4b: Load reference file for thorough mode
 def load_reference_file(framework: str) -> Optional[str]:
     """

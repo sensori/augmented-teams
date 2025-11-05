@@ -5,7 +5,7 @@
 **Usage:**
 * `\bdd-validate` — Validate currently open test file against BDD principles
 * `\bdd-validate <file-path>` — Validate specific test file
-* `python command-runners/bdd-validate-runner.py <file-path> --no-guard` — Run validation from command line (testing only)
+* `python behaviors/bdd/bdd-validate-runner.py <file-path> --no-guard` — Run validation from command line (testing only)
 
 **Rule:**
 * `\bdd-rule` — Framework-agnostic BDD testing principles
@@ -20,6 +20,19 @@
 **Implementation:**
 * `bdd_validate_test_file()` in `command-runners/bdd-validate-runner.py` — Extracts and presents rule file and test structure
 * **AI Agent (in conversation)** reads rule file and validates test against principles
+
+**AI Usage:**
+* AI Agent (in conversation) reads full rule file and validates test against BDD principles
+* AI Agent compares test chunks against DO/DON'T examples
+* AI Agent identifies violations with line numbers and suggests fixes
+
+**Code Usage:**
+* Code detects framework (Jest vs Mamba) from file path
+* Code loads appropriate rule file (bdd-jest-rule.mdc or bdd-mamba-rule.mdc)
+* Code extracts DO/DON'T examples organized by section
+* Code parses test file into describe/it structure chunks
+* Code performs static checks (naming patterns, structure issues)
+* Code presents extracted data to AI Agent
 
 **Division of Labor:**
 * **Code** extracts and presents data in focused chunks:
