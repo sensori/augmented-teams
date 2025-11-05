@@ -1,11 +1,11 @@
-### Command: `bdd-behavior-validate-cmd.md`
+### Command: `bdd-validate-cmd.md`
 
 **Purpose:** Validate actual BDD test files against BDD principles (readable language, comprehensive coverage, proper structure, etc.)
 
 **Usage:**
 * `\bdd-validate` — Validate currently open test file against BDD principles
 * `\bdd-validate <file-path>` — Validate specific test file
-* `python behaviors/bdd-behavior/bdd-behavior-validate-cmd.py <file-path>` — Run validation from command line
+* `python command-runners/bdd-validate-runner.py <file-path> --no-guard` — Run validation from command line (testing only)
 
 **Rule:**
 * `\bdd-rule` — Framework-agnostic BDD testing principles
@@ -18,8 +18,8 @@
 * **Any test file**: Matches glob patterns from `bdd-rule.mdc` (all of the above)
 
 **Implementation:**
-* `bdd_validate_test_file()` in `behaviors/bdd-behavior/bdd-validate-cmd.py` — Extracts and presents data
-* **AI Agent (in conversation)** analyzes presented data and identifies violations
+* `bdd_validate_test_file()` in `command-runners/bdd-validate-runner.py` — Extracts and presents rule file and test structure
+* **AI Agent (in conversation)** reads rule file and validates test against principles
 
 **Division of Labor:**
 * **Code** extracts and presents data in focused chunks:
@@ -47,13 +47,19 @@
    - DO/DON'T examples organized by section
    - Reference examples (if thorough mode)
    - Static issues found
-9. **AI Agent** (in conversation) reviews presented data:
-   - Compares test code chunks against DO/DON'T examples
-   - Identifies violations with specific line numbers
-   - References which BDD principle was violated
-   - Suggests fixes using DO examples
-10. **AI Agent** reports findings to user with violations and suggested fixes
-11. **User** decides next action (fix manually or ignore)
+9. **MANDATORY: AI Agent MUST read the rule file** (bdd-jest-rule.mdc or bdd-mamba-rule.mdc):
+   - Read § 1-5 to get DO/DON'T examples
+   - NO EXCEPTIONS - cannot validate without reading rules
+10. **MANDATORY: AI Agent MUST compare test code line-by-line against DO/DON'T examples**:
+   - Check EVERY describe/it block against examples
+   - Identify violations with specific line numbers
+   - Reference which BDD principle was violated (§ 1-5)
+   - Suggest fixes using DO examples as templates
+11. **MANDATORY: AI Agent MUST fix ALL violations before proceeding**:
+   - Apply fixes to test file using search_replace
+   - Re-run validation to confirm zero violations
+   - CANNOT mark validation complete with violations remaining
+12. **User** reviews fixed code
 
 **Note on Data Extraction:** The command chunks large test files by `describe` blocks to stay under token limits while preserving context. The AI Agent then analyzes each chunk against BDD principles and reports violations.
 

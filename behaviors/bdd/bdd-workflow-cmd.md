@@ -85,106 +85,65 @@
    - **Code** confirms test file creation and switches context
 
 #### 0.2: Build Test Signatures
-1. **AI Agent** analyzes test structure and identifies missing test signatures in scope
-2. **AI Agent** analyzes corresponding production code to understand functionality
-3. **Code** `parse_test_structure()` identifies SAMPLE SIZE (one complete lower-level describe block) to start with
-4. **AI Agent** creates SAMPLE test signatures for that describe block following `bdd-rule.mdc` § 1 (fluent language, proper nesting)
-5. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on sample signatures (NO EXCEPTIONS)
-6. **MANDATORY**: **AI Agent** fixes ALL violations before proceeding (VALIDATION MUST PASS)
-7. **AI Agent** LEARNS patterns from violations to apply to next iteration
-8. **AI Agent** creates ANOTHER sample describe block applying learned patterns
-9. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on new sample (NO EXCEPTIONS)
-10. **IF errors found**: LOOP back to step 6 (fix-learn-build-validate) - MUST achieve zero violations
-11. **IF NO errors**: Expand to REST of signatures in scope, applying all learned patterns
-12. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on complete set (NO EXCEPTIONS)
-13. **MANDATORY**: **AI Agent** fixes ALL violations - PHASE CANNOT PROCEED WITH ANY VIOLATIONS
-14. **AI Agent** ensures comprehensive coverage: normal, edge, and failure paths
-15. **STOP**: If ANY violations remain, AI Agent MUST NOT proceed to step 16
-16. **Code** `TDDWorkflowState.save()` updates workflow state with created signatures ONLY IF validation passes
-17. **User** reviews test signatures and proceeds to Phase 1
+
+**Sample Steps (sample_1, sample_2, sample_N) - Pattern Learning:**
+1. **AI Agent** creates ONE complete behavioral example (one describe block with 2-6 tests)
+2. **AI Agent** creates test signatures following `bdd-rule.mdc` § 1 (fluent language, proper nesting)
+3. **MANDATORY**: **AI Agent** runs `/bdd-validate` (NO EXCEPTIONS)
+4. **IF validation errors:** Fix ALL violations, re-validate until ZERO violations
+5. **AI Agent** LEARNS patterns from violations fixed
+6. **Workflow** auto-approves and completes sample run
+7. **User** runs next sample (sample_2, sample_3, etc.) OR proceeds to expand
+
+**Expand Step (expand) - Full Coverage:**
+1. **AI Agent** creates ALL remaining test signatures in ONE batch, applying learned patterns
+2. **AI Agent** ensures comprehensive coverage: all settings, hooks, edge cases, failures
+3. **MANDATORY**: **AI Agent** runs `/bdd-validate` on complete set (NO EXCEPTIONS)
+4. **MANDATORY**: **AI Agent** fixes ALL violations - MUST achieve zero violations
+5. **Workflow** auto-approves and completes expand run
+6. **Phase 0 Complete** - Ready for Phase 1 (RED)
+
+**Key:** Samples teach patterns (small batches). Expand applies patterns (all at once).
 
 ### Phase 1: RED - Write Failing Test
 
-1. **Code** `TDDWorkflowState.get_next_test()` identifies next unimplemented test in scope
-2. **Code** presents test signature and context to AI Agent
-3. **AI Agent** identifies SAMPLE SIZE (1-2 tests if multiple in scope)
-4. **AI Agent** writes SAMPLE test implementation following `bdd-rule.mdc` § 2-5 (arrange/act/assert, helpers, mocking)
-5. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on sample test (NO EXCEPTIONS)
-6. **MANDATORY**: **AI Agent** fixes ALL violations before proceeding (VALIDATION MUST PASS)
-7. **AI Agent** LEARNS patterns from violations to apply to next iteration
-8. **IF more tests in scope**: Write ANOTHER test applying learned patterns
-9. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on new test (NO EXCEPTIONS)
-10. **IF errors found**: LOOP back to step 6 (fix-learn-build-validate) - MUST achieve zero violations
-11. **IF NO errors and more tests remain**: Expand to REST of tests in scope, applying all learned patterns
-12. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on all implemented tests (NO EXCEPTIONS)
-13. **MANDATORY**: **AI Agent** fixes ALL violations - PHASE CANNOT PROCEED WITH ANY VIOLATIONS
-14. **STOP**: If ANY violations remain, AI Agent MUST NOT proceed to step 15
-15. **Code** `run_tests()` runs the test(s) and captures failure output
-16. **Code** verifies failure reason (should be "not defined" error, not syntax error)
-17. **Code** presents failure details to AI Agent
-18. **AI Agent** confirms test(s) fail for RIGHT reason
-19. **Code** `TDDWorkflowState.update_test_status()` marks test(s) as RED
-20. **User** reviews failing test(s) and proceeds to Phase 2
+1. **AI Agent** implements ALL test signatures in scope following `bdd-rule.mdc` § 2-5
+2. **AI Agent** writes proper arrange/act/assert, helpers, mocking
+3. **MANDATORY**: **AI Agent** runs `/bdd-validate` on all tests (NO EXCEPTIONS)
+4. **MANDATORY**: **AI Agent** fixes ALL violations - MUST achieve zero violations
+5. **Code** identifies code under test and comments it out (if exists)
+6. **Code** `run_tests()` runs all tests and captures failure output
+7. **Code** verifies failures are for RIGHT reason (not defined, not syntax errors)
+8. **AI Agent** confirms tests fail for correct reasons
+9. **Workflow** auto-approves and completes RED phase
+10. **Ready for Phase 2 (GREEN)**
 
 ### Phase 2: GREEN - Implement Minimal Code
 
-1. **AI Agent** identifies SAMPLE SIZE (1 piece of functionality if implementation is large)
-2. **AI Agent** writes SAMPLE minimal code under test to make current test(s) pass
-3. **AI Agent** resists adding dependencies or features no test demands yet
-4. **Code** `run_tests()` runs the test(s) to verify they pass
-5. **Code** `run_tests()` runs ALL tests to check for regressions
-6. **Code** presents test results to AI Agent
-7. **AI Agent** verifies test(s) pass and no regressions occurred
-8. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on tests (NO EXCEPTIONS)
-9. **MANDATORY**: **AI Agent** fixes ALL violations before proceeding (VALIDATION MUST PASS)
-10. **AI Agent** LEARNS patterns from violations
-11. **IF more functionality needed**: Implement ANOTHER piece applying learned patterns
-12. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` after each piece (NO EXCEPTIONS)
-13. **IF errors found**: LOOP back to step 9 (fix-learn-build-validate) - MUST achieve zero violations
-14. **IF NO errors**: Complete remaining implementation applying all learned patterns
-15. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` on all tests (NO EXCEPTIONS)
-16. **MANDATORY**: **AI Agent** fixes ALL violations - PHASE CANNOT PROCEED WITH ANY VIOLATIONS
-17. **STOP**: If ANY violations remain, AI Agent MUST NOT proceed to step 18
-18. **Code** `TDDWorkflowState.update_test_status()` marks test(s) as GREEN ONLY IF validation passes
-19. **User** (optional) commits changes: `git commit -m "Make test X pass"`
-20. **User** decides to proceed to Phase 3a or skip to next test
+1. **AI Agent** writes minimal production code to make ALL tests pass
+2. **AI Agent** resists adding features no test demands
+3. **Code** `run_tests()` runs all tests to verify they pass
+4. **Code** checks for regressions in existing tests
+5. **AI Agent** verifies all tests pass with no regressions
+6. **MANDATORY**: **AI Agent** runs `/bdd-validate` on tests (NO EXCEPTIONS)
+7. **MANDATORY**: **AI Agent** fixes ALL violations - MUST achieve zero violations
+8. **Workflow** auto-approves and completes GREEN phase
+9. **Ready for Phase 3 (REFACTOR) or finish**
 
-### Phase 3a: REFACTOR - Suggest Improvements
+### Phase 3: REFACTOR - Improve Code Quality
 
-1. **Code** `identify_code_relationships()` finds code under test files and test files related to current code
-2. **Code** parses code under test and presents to AI Agent
-3. **MANDATORY**: **AI Agent** AUTOMATICALLY runs `/bdd-validate` to ensure current tests follow BDD principles before refactoring (NO EXCEPTIONS)
-4. **MANDATORY**: **AI Agent** fixes ALL violations before suggesting refactorings (VALIDATION MUST PASS)
-5. **STOP**: If ANY violations remain, AI Agent MUST fix them before proceeding to refactoring suggestions
-6. **AI Agent** LEARNS patterns from violations
-7. **AI Agent** identifies SAMPLE code smell area (1-2 related smells)
-8. **AI Agent** analyzes SAMPLE area thoroughly
-9. **AI Agent** suggests specific refactorings for sample with WHAT to change and WHY
-10. **IF more code areas to analyze**: Analyze ANOTHER area applying learned patterns
-11. **AI Agent** identifies additional code smells (duplication, long methods, magic values, poor names)
-12. **AI Agent** suggests comprehensive refactorings with WHAT to change and WHY
-13. **AI Agent** lists impacted code under test files
-14. **AI Agent** lists impacted test files that need updates
-15. **AI Agent** explains trade-offs for each suggested refactoring
-16. **User** reviews suggestions and approves which to implement (1, 2, all, skip)
-
-### Phase 3b: IMPLEMENT - Apply Refactorings
-
-1. **AI Agent** implements ONE approved refactoring (SAMPLE)
-2. **Code** `run_tests()` runs ALL tests after the refactoring
-3. **Code** presents test results to AI Agent
-4. **AI Agent** verifies all tests still pass (refactoring didn't break anything)
-5. **AI Agent** runs `/bdd-validate` to ensure tests maintain BDD quality
-6. **AI Agent** fixes violations
-7. **AI Agent** LEARNS patterns from violations and refactoring impact
-8. **IF more refactorings approved**: Implement ANOTHER refactoring applying learned patterns
-9. **IF errors found**: LOOP back to step 6 (fix-learn-apply-validate)
-10. **IF NO errors**: Complete remaining approved refactorings applying all learned patterns
-11. **AI Agent** runs `/bdd-validate` on final state
-12. **AI Agent** fixes any remaining violations
-13. **User** (optional) commits: `git commit -m "Refactor: <description>"`
-14. **Code** marks all refactorings as complete
-15. **User** finishes refactoring and proceeds to next test
+1. **Code** `identify_code_relationships()` finds code under test and related test files
+2. **AI Agent** runs `/bdd-validate` to ensure tests follow BDD principles (NO EXCEPTIONS)
+3. **AI Agent** fixes ALL violations before refactoring (MUST achieve zero violations)
+4. **AI Agent** identifies all code smells (duplication, long methods, magic values, poor names)
+5. **AI Agent** suggests refactorings with WHAT to change, WHY, and trade-offs
+6. **User** reviews and approves refactorings
+7. **AI Agent** implements ALL approved refactorings
+8. **Code** `run_tests()` verifies all tests still pass
+9. **AI Agent** runs `/bdd-validate` to ensure BDD quality maintained
+10. **AI Agent** fixes any violations
+11. **Workflow** auto-approves and completes REFACTOR phase
+12. **User** (optional) commits changes
 
 ### Repeat Cycle
 
@@ -304,5 +263,6 @@ This command integrates with:
 * Separate state file (`.BDD-workflow-state.json`) tracks overall workflow state
 * State persists across sessions for long workflows
 
-#   T e s t   c h a n g e  
+#   T e s t   c h a n g e 
+ 
  

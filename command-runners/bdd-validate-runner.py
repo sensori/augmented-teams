@@ -243,24 +243,37 @@ def extract_test_structure_chunks(test_file_path: str, framework: str, max_chunk
 # Step 5b: Perform minimal static checks
 def perform_static_checks(test_structure: str, framework: str) -> List[Dict[str, Any]]:
     """
-    Perform basic static analysis on test structure.
+    Perform MINIMAL static analysis - only obvious violations.
     Returns: [{"line": int, "issue": str, "type": "error|warning"}]
     """
     issues = []
+    import re
     
     for line in test_structure.split('\n'):
         if not line.strip():
             continue
         
         # Extract line number
-        import re
         line_match = re.match(r'Line (\d+):', line)
         if not line_match:
             continue
         
         line_num = int(line_match.group(1))
         
-        # Check for missing "should" in it() statements
+        # Check for camelCase identifiers in describe() (very obvious technical violation)
+        if 'describe(' in line:
+            desc_match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
+            if desc_match:
+                desc_text = desc_match.group(1)
+                if re.search(r'[a-z]+[A-Z]', desc_text):  # has camelCase
+                    issues.append({
+                        "line": line_num,
+                        "issue": f"describe() uses camelCase (technical identifier): '{desc_text}'",
+                        "type": "error",
+                        "rule": "1. Business Readable Language"
+                    })
+        
+        # Check for missing "should" in it()
         if framework == 'jest':
             if "it('" in line or 'it("' in line:
                 match = re.search(r"it\(['\"]([^'\"]+)['\"]", line)
@@ -269,8 +282,8 @@ def perform_static_checks(test_structure: str, framework: str) -> List[Dict[str,
                     if not desc.strip().lower().startswith('should'):
                         issues.append({
                             "line": line_num,
-                            "issue": f"it() description missing 'should' prefix: '{desc}'",
-                            "type": "warning",
+                            "issue": f"it() missing 'should' prefix: '{desc}'",
+                            "type": "error",
                             "rule": "1. Business Readable Language"
                         })
         
@@ -282,8 +295,8 @@ def perform_static_checks(test_structure: str, framework: str) -> List[Dict[str,
                     if not desc.strip().lower().startswith('should'):
                         issues.append({
                             "line": line_num,
-                            "issue": f"it() description missing 'should' prefix: '{desc}'",
-                            "type": "warning",
+                            "issue": f"it() missing 'should' prefix: '{desc}'",
+                            "type": "error",
                             "rule": "1. Business Readable Language"
                         })
     
@@ -334,15 +347,22 @@ def load_relevant_reference_examples(framework: str, sections_to_check: List[str
 
 
 # Main validation orchestrator
-def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = False):
+def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = False, phase: str = 'signatures'):
     """
     Main function to validate a BDD test file.
+    
+    Args:
+        file_path: Path to test file to validate
+        thorough: Load detailed reference examples
+        phase: 'signatures' (Phase 0) or 'implementation' (Phase 1+)
+               - signatures: Only validate § 1 (Business Readable Language)
+               - implementation: Validate all sections (§ 1-5)
     
     Steps:
     1. Get file path (from arg or current file)
     2. Detect framework from file path
     3. Load framework-specific rule
-    4. Extract DO/DON'T examples by section
+    4. Extract DO/DON'T examples by section (filtered by phase)
     5. Perform static checks
     6-9. AI evaluates test against each section's DO/DON'Ts
     10. Compile results
@@ -385,9 +405,11 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
     
     print(f"✅ Loaded rule: {rule_data['rule_path']}")
     
-    # Step 4: Extract DO/DON'T examples
+    # Step 4: Extract DO/DON'T examples - ALWAYS use ALL sections
     print("Step 4: Extracting DO/DON'T examples...")
     sections = extract_dos_and_donts(rule_data['content'])
+    print(f"   Validating all sections (§ 1-5) - rules apply at all phases")
+    
     total_dos = sum(len(s['dos']) for s in sections.values())
     total_donts = sum(len(s['donts']) for s in sections.values())
     print(f"✅ Extracted {total_dos} DO examples and {total_donts} DON'T examples from {len(sections)} sections")
@@ -417,30 +439,72 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
         reference_examples = load_relevant_reference_examples(framework, list(sections.keys()))
         print(f"   Loaded {len(reference_examples)} reference sections")
     
-    # Step 7: Compile validation data for AI analysis
-    print("Step 7: Compiling validation data for AI Agent...")
+    # Step 7: Show static issues if found
+    if static_issues:
+        print("\n" + "="*80)
+        print("STATIC VIOLATIONS DETECTED")
+        print("="*80)
+        for issue in static_issues:
+            print(f"Line {issue['line']}: {issue['issue']}")
+            print(f"   Rule: {issue['rule']}")
+        print("="*80)
+    
+    # Step 8: Print FULL RULE FILE for AI Agent
+    print("\n" + "="*80)
+    print("FULL BDD RULE FILE - READ THIS")
+    print("="*80)
+    print(f"Phase: {phase.upper()}")
+    print(f"Framework: {framework.upper()}")
+    print(f"Rule File: {rule_data['rule_path']}")
+    print("="*80)
+    print(rule_data['content'])
+    print("="*80)
+    
+    # Show test code to validate
+    print("\n" + "="*80)
+    print("YOUR TEST CODE TO VALIDATE")
+    print("="*80)
+    for chunk in chunks:
+        if chunk.get('context'):
+            print(f"\nContext: {chunk['context']}")
+        print(chunk['structure'])
+    
+    # Simple instruction
+    print("\n" + "="*80)
+    print("AI AGENT: VALIDATE ALL TESTS WITH THESE RULES AND EXAMPLES!")
+    print("="*80)
+    print("1. Compare every describe/it against the DO/DON'T examples in rule")
+    print("2. Find violations")
+    print("3. Fix violations")
+    print("4. Re-run until zero violations")
+    print("="*80)
+    
+    # Return data for AI Agent to analyze
     validation_data = {
         "test_file": file_path,
         "framework": framework,
+        "phase": phase,
+        "rule_content": rule_data['content'],
         "test_chunks": chunks,
         "total_blocks": total_blocks,
-        "rule_sections": sections,
-        "reference_examples": reference_examples if thorough else {},
         "static_issues": static_issues
     }
     
-    print(f"✅ Data compiled: {len(chunks)} chunks, {len(sections)} rule sections, {len(static_issues)} static issues")
-    print("\n" + "="*60)
-    print("READY FOR AI AGENT ANALYSIS")
-    print("="*60)
-    
-    # Return data for AI Agent to analyze
     return validation_data
 
 
 if __name__ == "__main__":
     import sys
     import io
+    
+    # Guard: Require command invocation
+    from runner_guard import require_command_invocation
+    
+    # Allow --no-guard flag for testing
+    if '--no-guard' not in sys.argv:
+        require_command_invocation("bdd-validate")
+    else:
+        sys.argv.remove('--no-guard')
     
     # Fix Windows console encoding
     if sys.platform == "win32":
@@ -451,49 +515,37 @@ if __name__ == "__main__":
     
     file_path = sys.argv[1] if len(sys.argv) > 1 else None
     thorough = '--thorough' in sys.argv
+    phase = 'implementation'  # Default to full validation
+    
+    # Check for --phase flag
+    for arg in sys.argv:
+        if arg.startswith('--phase='):
+            phase = arg.split('=')[1]
     
     if not file_path:
-        print("Usage: python behaviors/bdd/bdd-validate-runner.py <test-file-path> [--thorough]")
-        print("\nExample:")
-        print("  python behaviors/bdd/bdd-validate-runner.py src/components/User.test.js")
-        print("  python behaviors/bdd/bdd-validate-runner.py test_user_service.py --thorough")
+        print("Usage: python behaviors/bdd/bdd-validate-runner.py <test-file-path> [--phase=signatures|implementation] [--thorough]")
+        print("\nPhases:")
+        print("  --phase=signatures      Phase 0: Only validate § 1 (Business Readable Language)")
+        print("  --phase=implementation  Phase 1+: Validate all sections (§ 1-5) [DEFAULT]")
+        print("\nExamples:")
+        print("  python behaviors/bdd/bdd-validate-runner.py test.js --phase=signatures")
+        print("  python behaviors/bdd/bdd-validate-runner.py test.js --phase=implementation")
+        print("  python behaviors/bdd/bdd-validate-runner.py test.py --thorough")
         sys.exit(1)
     
     print(f"Validating: {file_path}")
     
     try:
-        validation_data = bdd_validate_test_file(file_path, thorough)
+        validation_data = bdd_validate_test_file(file_path, thorough, phase)
         
         if "error" in validation_data:
             print(f"\n❌ Validation failed: {validation_data['error']}")
             sys.exit(1)
         
-        # Print summary for human review
-        print(f"\nTest Structure:")
-        print(f"  - {validation_data['total_blocks']} test blocks")
-        print(f"  - {len(validation_data['test_chunks'])} chunks")
-        print(f"  - {len(validation_data['static_issues'])} static issues")
-        
-        if validation_data['static_issues']:
-            print("\nStatic Issues Found:")
-            for issue in validation_data['static_issues']:
-                print(f"  Line {issue['line']}: {issue['issue']}")
-        
-        print("\nRule Sections Loaded:")
-        for section_name, examples in validation_data['rule_sections'].items():
-            print(f"  {section_name}: {len(examples['dos'])} DOs, {len(examples['donts'])} DON'Ts")
-        
-        if validation_data.get('reference_examples'):
-            print(f"\nReference Examples: {len(validation_data['reference_examples'])} sections")
-        
-        print("\n" + "="*60)
-        print("DATA EXTRACTION COMPLETE")
-        print("="*60)
-        print("\nFor AI Agent to analyze this test:")
-        print("  1. Review test chunks against rule DO/DON'T examples")
-        print("  2. Identify violations with line numbers")
-        print("  3. Suggest fixes using DO examples")
-        print("  4. Report findings to user")
+        # Validation complete - AI has the rules and test code above
+        print(f"\n✅ Validation runner complete")
+        print(f"   Static issues found: {len(validation_data['static_issues'])}")
+        print(f"   AI Agent: Review rules above and validate all tests")
         
     except Exception as e:
         print(f"ERROR: {e}")

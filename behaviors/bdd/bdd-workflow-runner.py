@@ -1,15 +1,43 @@
 """
 BDD Workflow - Red-Green-Refactor Cycle
 Guides developers through true BDD (Behavior-Driven Development) with Red-Green-Refactor cycle.
+
+Division of Labor:
+- Code: Parse files, run tests, track state, identify relationships, ENFORCE workflow
+- AI Agent: 
+  * Identify SAMPLE SIZE (lowest-level describe block, no more than 6 tests)
+  * Write test signatures/implementations
+  * Run /bdd-validate after EVERY step
+  * Fix ALL violations before proceeding
+  * Learn from violations and iterate
+
+CODE ENFORCEMENT:
+- Check run state before/after every step
+- Block if run not complete (started → ai_verified → human_approved → completed)
+- Validate AI ran /bdd-validate
+- Require human approval
 """
 
 import json
 import os
 import re
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from enum import Enum
+
+# Import run state enforcement (module has hyphens in name)
+import importlib.util
+spec = importlib.util.spec_from_file_location(
+    "bdd_workflow_run_state",
+    Path(__file__).parent / "bdd-workflow-run-state.py"
+)
+bdd_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bdd_module)
+BDDRunState = bdd_module.BDDRunState
+StepType = bdd_module.StepType
+RunStatus = bdd_module.RunStatus
 
 
 class BDDPhase(Enum):
@@ -383,6 +411,86 @@ def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
     }
 
 
+# ============================================================================
+# RUN STATE ENFORCEMENT FUNCTIONS
+# ============================================================================
+
+def check_can_start_run(run_state: BDDRunState) -> None:
+    """
+    Enforce that a new run can be started.
+    Raises RuntimeError if previous run not complete.
+    """
+    try:
+        run_state.enforce_can_proceed()
+    except RuntimeError as e:
+        print("\n" + "="*60)
+        print("❌ CANNOT START NEW RUN")
+        print("="*60)
+        print(str(e))
+        print("\nTo fix:")
+        print("1. If AI hasn't verified: Run /bdd-validate")
+        print("2. If AI verified: Type 'proceed' to approve")
+        print("3. If stuck: Call abandon_run() to reset")
+        print("="*60)
+        raise
+
+
+def record_validation_results(
+    run_state: BDDRunState,
+    validation_output: str,
+    passed: bool
+) -> None:
+    """
+    Record that AI ran /bdd-validate.
+    """
+    current_run = run_state.get_current_run()
+    if not current_run:
+        raise RuntimeError("No active run to record validation for")
+    
+    validation_results = {
+        "passed": passed,
+        "output": validation_output,
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    run_state.record_ai_verification(
+        current_run["run_id"],
+        validation_results
+    )
+    
+    print(f"\n✅ AI verification recorded for run {current_run['run_id']}")
+
+
+def wait_for_human_approval(run_state: BDDRunState) -> None:
+    """
+    Wait for human to approve the run.
+    Blocks until 'proceed' or 'reject' received.
+    """
+    current_run = run_state.get_current_run()
+    if not current_run:
+        raise RuntimeError("No active run waiting for approval")
+    
+    status = current_run["status"]
+    
+    if status != RunStatus.AI_VERIFIED.value:
+        raise RuntimeError(
+            f"Run not ready for approval. Status: {status}. "
+            f"AI must verify first."
+        )
+    
+    print("\n" + "="*60)
+    print("🛑 WAITING FOR HUMAN APPROVAL")
+    print("="*60)
+    print(f"Run ID: {current_run['run_id']}")
+    print(f"Step: {current_run['step_type']}")
+    print("\nType 'proceed' to approve and continue")
+    print("Type 'reject' to send back to AI for fixes")
+    print("="*60)
+    
+    # This function signals that human input is needed
+    # Actual approval is recorded via separate command
+
+
 # Main BDD workflow orchestrator
 def bdd_workflow(
     file_path: str,
@@ -419,8 +527,19 @@ def bdd_workflow(
     
     print(f"✅ Framework: {framework.upper()}")
     
-    # Step 3: Load or initialize workflow state
+    # Step 3: Load or initialize workflow state AND run state
     workflow_state = BDDWorkflowState(file_path)
+    run_state = BDDRunState(file_path)
+    
+    # Step 3a: CHECK RUN STATE - Can we proceed?
+    try:
+        check_can_start_run(run_state)
+    except RuntimeError:
+        # Cannot proceed - return error with status
+        return {
+            "error": "Cannot proceed - previous run not complete",
+            "run_status": run_state.get_status_summary()
+        }
     
     # Step 4: Parse test structure
     print("Parsing test structure...")
@@ -483,8 +602,14 @@ def bdd_workflow(
     print("READY FOR AI AGENT")
     print("="*60)
     print(f"Phase: {current_phase.value.upper()}")
+    if current_phase == BDDPhase.SIGNATURES:
+        print("\nAI Agent TODO:")
+        print("1. Identify SAMPLE SIZE (lowest-level describe, max 6 tests)")
+        print("2. Create sample test signatures")
+        print("3. Run /bdd-validate")
+        print("4. Fix violations, learn, iterate")
     if next_test:
-        print(f"Next Test: Line {next_test[1]['line']} - '{next_test[1]['text']}'")
+        print(f"\nNext Test: Line {next_test[1]['line']} - '{next_test[1]['text']}'")
     print("="*60)
     
     return workflow_data
@@ -501,16 +626,24 @@ if __name__ == "__main__":
     
     # Parse arguments
     if len(sys.argv) < 2:
-        print("Usage: python behaviors/bdd/bdd-workflow-runner.py <test-file-path> [options]")
+        print("Usage: python behaviors/bdd/bdd-workflow-runner.py <test-file-path> [step-type] [options]")
+        print("\nStep Types (optional, defaults to sample_1):")
+        print("  sample_N   - Behavioral example (any number: sample_1, sample_2, sample_3, ...)")
+        print("  expand     - Expand to full test coverage")
+        print("  red        - RED phase (write failing tests)")
+        print("  green      - GREEN phase (implement code)")
+        print("  refactor   - REFACTOR phase")
         print("\nOptions:")
         print("  --scope describe|next:N|all|line:N  (default: describe)")
         print("  --phase signatures|red|green|refactor")
         print("  --line N                             Cursor line number")
         print("  --auto                               Automatic mode")
         print("\nExamples:")
-        print("  python behaviors/bdd/bdd-workflow-runner.py src/auth/Auth.test.js")
+        print("  python behaviors/bdd/bdd-workflow-runner.py test.mjs sample_1")
+        print("  python behaviors/bdd/bdd-workflow-runner.py test.mjs sample_2")
+        print("  python behaviors/bdd/bdd-workflow-runner.py test.mjs sample_5")
+        print("  python behaviors/bdd/bdd-workflow-runner.py test.mjs expand --scope all")
         print("  python behaviors/bdd/bdd-workflow-runner.py src/auth/Auth.test.js --scope next:3")
-        print("  python behaviors/bdd/bdd-workflow-runner.py test_user.py --phase red --line 42")
         sys.exit(1)
     
     file_path = sys.argv[1]
@@ -520,8 +653,18 @@ if __name__ == "__main__":
     phase = None
     cursor_line = None
     auto = False
+    step_type = None
     
     i = 2
+    # Check if second argument is a step type (no dashes)
+    if i < len(sys.argv) and not sys.argv[i].startswith('--'):
+        step_type_arg = sys.argv[i]
+        # Accept any sample_N pattern or fixed step types
+        if (step_type_arg.startswith('sample_') or 
+            step_type_arg in ['expand', 'red', 'green', 'refactor']):
+            step_type = step_type_arg
+            i += 1
+    
     while i < len(sys.argv):
         if sys.argv[i] == "--scope" and i + 1 < len(sys.argv):
             scope = sys.argv[i + 1]
@@ -540,10 +683,68 @@ if __name__ == "__main__":
             sys.exit(1)
     
     try:
+        # Check if test file is empty - clean up workflow state if needed
+        test_path = Path(file_path)
+        if test_path.exists():
+            content = test_path.read_text(encoding='utf-8').strip()
+            if not content:
+                print("\nTest file is empty - cleaning up workflow state")
+                workflow_dir = test_path.parent / ".bdd-workflow"
+                if workflow_dir.exists():
+                    import shutil
+                    try:
+                        shutil.rmtree(workflow_dir)
+                        print(f"Removed {workflow_dir}")
+                    except PermissionError:
+                        # Try to remove files individually
+                        for file in workflow_dir.glob('*'):
+                            try:
+                                file.unlink()
+                            except:
+                                pass
+                        try:
+                            workflow_dir.rmdir()
+                        except:
+                            print(f"Warning: Could not fully remove {workflow_dir}")
+        
+        # If step_type provided, start a new run
+        if step_type:
+            run_state = BDDRunState(file_path)
+            
+            # Map step_type to StepType enum
+            if step_type.startswith('sample_'):
+                step_enum = StepType.SAMPLE
+            else:
+                step_map = {
+                    'expand': StepType.EXPAND,
+                    'red': StepType.RED_BATCH,
+                    'green': StepType.GREEN_BATCH,
+                    'refactor': StepType.REFACTOR_SUGGEST
+                }
+                step_enum = step_map.get(step_type)
+            
+            if step_enum:
+                try:
+                    run_id = run_state.start_run(step_enum, {
+                        'scope': scope,
+                        'phase': phase or 'signatures',
+                        'step_name': step_type  # Store actual step name
+                    })
+                    print(f"\nStarted run: {run_id}")
+                    print(f"   Step: {step_type}")
+                    print(f"   Scope: {scope}")
+                    print("\nAI Agent: Create test signatures following BDD principles")
+                    print("   Then run: /bdd-validate")
+                    # Exit here - don't call bdd_workflow, just start the run
+                    sys.exit(0)
+                except RuntimeError as e:
+                    print(f"\nCannot start run: {e}")
+                    sys.exit(1)
+        
         workflow_data = bdd_workflow(file_path, scope, phase, cursor_line, auto)
         
         if "error" in workflow_data:
-            print(f"\n❌ Error: {workflow_data['error']}")
+            print(f"\nError: {workflow_data['error']}")
             sys.exit(1)
         
         # Print summary

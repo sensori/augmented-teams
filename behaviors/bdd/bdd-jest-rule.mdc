@@ -17,6 +17,8 @@ For comprehensive examples and edge cases, see `bdd-jest-reference.md`.
 
 Write `describe`/`it` so that inner/outer sentences create natural sentence. Use nouns for `describe` (concepts, states). Start each `it()` with "should …". Nest from broad → specific; each child adds context. Use plain behavioral language. Prefer domain terms over technical jargon. Connect base business concept to more specific concepts using linking words: "that is/that has" "that has been"
 
+**When sibling describes repeat the same prefix, create a parent describe to avoid repetition.**
+
 **✅ DO:**
 ```javascript
 describe('a ranged damage power', () => {  // DO: Use nouns for describe, connect with "a/an", use domain terms
@@ -26,6 +28,14 @@ describe('a ranged damage power', () => {  // DO: Use nouns for describe, connec
     });
   });
 });
+
+describe('animation settings', () => {  // DO: Group siblings with shared concept
+  describe('for automatic attacks', () => {  // DO: Each child adds NEW info only
+    it('should default to enabled');
+  describe('for movement', () => {  // DO: No repetition of "setting"
+    it('should default to enabled');
+  });
+});
 ```
 
 **❌ DON'T:**
@@ -33,6 +43,10 @@ describe('a ranged damage power', () => {  // DO: Use nouns for describe, connec
 describe('when Attack.targetToken()', () => {});  // DON'T: Use action verbs, use class/method names, omit article
 describe('retrieved attack', () => {});  // DON'T: Break natural connection (should be "that is retrieved"), repeat parent context
 it('sets isSubmitting flag', () => {});  // DON'T: Include technical jargon (flags/IDs), omit "should"
+
+describe('a setting for attack animation', () => {});  // DON'T: Repeat "a setting for" in siblings
+describe('a setting for movement', () => {});  // DON'T: Create parent "settings" instead
+describe('a setting for display', () => {});
 ```
 
 ---
