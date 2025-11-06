@@ -12,6 +12,19 @@ BDD tests describe observable behavior in clear language. Keep them fast, isolat
 * `\bdd-validate` — Validate test files against BDD principles
 * `\bdd-workflow` — Guide through Red-Green-Refactor cycle following these principles
 
+**Domain Map Integration:**
+* **Automatic Discovery**: Checks test file's directory for `*-domain-map.txt` and `*-domain-interactions.txt`
+* **Strong Guidance**: When domain maps exist, tests SHOULD:
+  - Structure describe blocks to mirror domain hierarchy
+  - Use exact domain concept names from map
+  - Name helpers/mocks to match domain concepts
+  - Use domain terminology for variables and assertions
+  - Map test scenarios to interaction flows
+* **Recommendation**: If domain maps don't exist, run `\ddd-analyze <source>` and `\ddd-interactions <source>` first
+* **Fallback**: Workflow continues without maps using code-based domain understanding
+
+Domain maps are the PRIMARY source for understanding domain structure and terminology.
+
 ## 1. Business Readable Language
 
 **Do:**
@@ -24,6 +37,13 @@ BDD tests describe observable behavior in clear language. Keep them fast, isolat
 * Connect base business concept to more specific concepts using linking words: "that is/that has/that has been"
 * Use fluent, subject-focused language: "a user that is being authenticated" not "authentication with credentials"
 
+**With Domain Maps:**
+* Use exact concept names from domain map in describe blocks
+* Match test hierarchy to domain structure (domains → concepts → behaviors)
+* Use domain terminology from map in test names
+* Align helper/mock names with domain concepts
+* Reference interaction scenarios when structuring test flows
+
 **Don't:**
 * Use action verbs in `describe` names
 * Use generic, or technical instead of subject-focused descriptions
@@ -34,6 +54,9 @@ BDD tests describe observable behavior in clear language. Keep them fast, isolat
 * Use verbs without being specific about the subject
 * Use overly verbose names
 * Break natural connections (e.g., "retrieved attack" instead of "that is retrieved")
+* Invent concept names when domain map provides them
+* Deviate from domain hierarchy without clear reason
+* Use technical terms when domain terms exist
 
 **Pattern:**
 Express all related concepts: WHO (subject) + WHAT STATE + CONDITION
@@ -64,6 +87,14 @@ See framework-specific rules for concrete code examples.
 
 ## 3. Balance Context Sharing with Localization
 
+**VALIDATION CHECKLIST (AI must check ALL):**
+1. ✓ **Sibling describe blocks:** Do they have identical beforeEach/before_each? → Move to parent
+2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → Move to beforeEach/before_each
+3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper or parent
+4. ✓ **Global/module mocks:** Repeated across tests? → Move to parent setup
+5. ✓ **Helper factories:** Defined multiple times? → Define once at appropriate scope
+6. ✓ **Test data builders:** Duplicated? → Create shared factory function
+
 **Do:**
 * Nest parent context, don't repeat it
 * Provide excpected data via helper factories / builders
@@ -73,6 +104,8 @@ See framework-specific rules for concrete code examples.
 * But keep setup / helper code as close to your test code as you can
 * Initializes helper instances for every test; reset between runs
 * Clear state after each run
+* **When 3+ sibling it() tests share identical Arrange code, move to beforeEach/before_each**
+* **When sibling describes share beforeEach/before_each, move to parent or extract helper**
 
 **Don't:**
 * Duplicate the same init or stack nested `beforeEach`
@@ -80,6 +113,8 @@ See framework-specific rules for concrete code examples.
 * Duplicate common  helper / setup code/ other logic across tests
 * Create define helpers per test
 * Scatter or repeat setup logic across files
+* **Repeat identical Arrange code in 3+ sibling it() blocks**
+* **Copy/paste beforeEach across sibling describe blocks**
 
 ---
 

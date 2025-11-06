@@ -101,38 +101,204 @@ it('handles attack', () => {  // DON'T: Skip validations (no assertions!), write
 
 ## 3. Balance Context Sharing with Localization
 
-Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run.
+Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run. When the same mock/setup appears in multiple sibling describe blocks, move it to a shared parent beforeEach() or common helper.
+
+**VALIDATION CHECKLIST (AI must check ALL):**
+1. ✓ **Sibling describe blocks:** Do they have identical beforeEach()? → Move to parent
+2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → Move to beforeEach()
+3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper or parent
+4. ✓ **global.* assignments:** Repeated across tests? → Move to parent beforeEach()
+5. ✓ **Helper factories:** Defined multiple times? → Define once at appropriate scope
+6. ✓ **Test data builders:** Duplicated? → Create shared factory function
 
 **✅ DO:**
 ```javascript
 const createPower = (o = {}) => ({ name: 'Test', rank: 10, ...o });  // DO: Use helper factories, extract complex logic
 
 describe('a Power', () => {
-  beforeEach(() => {  // DO: Place setup at correct scope, centralize when sharing
-    factory = new MockFactory();
-    factory.reset();  // DO: Clear state/reset between runs
+  let mockSequence;
+  
+  beforeEach(() => {  // DO: Place setup at parent scope when shared across siblings
+    mockSequence = {
+      effect: jest.fn().mockReturnThis(),
+      play: jest.fn()
+    };
+    global.Sequence = jest.fn().mockReturnValue(mockSequence);
     power = createPower();  // DO: Reuse helpers, keep code close to tests
   });
   
   describe('that is a ranged power', () => {  // DO: Nest parent context, don't repeat it
-    beforeEach(() => { power = createPower({ range: 'ranged' }); });
+    beforeEach(() => { power = createPower({ range: 'ranged' }); });  // DO: Add ONLY test-specific setup
+  });
+  
+  describe('that is a melee power', () => {
+    beforeEach(() => { power = createPower({ range: 'melee' }); });  // DO: Reuses parent mockSequence
   });
 });
 ```
 
-**❌ DON'T:**
+**✅ DO (Alternative - Shared Helper):**
 ```javascript
-describe('Power', () => {
-  describe('created from actor', () => {
-    beforeEach(() => { this.actor = { id: '123' }; });  // DON'T: Duplicate init, scatter setup
+// DO: Extract common mock setup to helper when used across multiple describe blocks
+function createMockSequence() {
+  return {
+    effect: jest.fn().mockReturnThis(),
+    file: jest.fn().mockReturnThis(),
+    play: jest.fn()
+  };
+}
+
+describe('Text Animation', () => {
+  let mockSequence;
+  beforeEach(() => { mockSequence = createMockSequence(); });
+  // tests...
+});
+
+describe('Combat Indicators', () => {
+  let mockSequence;
+  beforeEach(() => { mockSequence = createMockSequence(); });  // DO: Reuse helper
+  // tests...
+});
+```
+
+**✅ DO (Decorator Pattern - Base + Local Additions):**
+```javascript
+describe('Combat Outcome Feedback', () => {
+ 
+  let expectedAnimation;
+  
+  
+  beforeEach(() => {
+    expectedAnimation = getBasicFireAttackAnimation() // Base init shared across all children
   });
-  describe('that is ranged', () => {
-    beforeEach(() => { this.actor = { id: '123' }; });  // DON'T: Duplicate setup across contexts/files
+  
+  describe('Text Animation System', () => {
+    // Decorates base with ranged damage-specific data / operations
+    beforeEach(() => {
+     expectedAnimation = getRangedDamageFireAttackAnimation(expectedAnimation)
+    });
+    // tests uranged damage-specific attack ...
+  });
+  
+  describe('Attack Result Indicators', () => {
+    let animateTextSpy;
+    
+    beforeEach(() => {
+       // Decorates base with melee, aoe, affliction-specific data / operations
+     expectedAnimation = getMeleeAreaOfEffectAfflictionAttackAnimation(expectedAnimation)
+    });
+    // tests  melee, aoe, affliction-specific attack
   });
 });
-it('has tokens', () => {
-  const t = getTokens();  // DON'T: Create helpers per test
-  this.state = 'dirty';  // DON'T: Leave side effects between tests
+```
+
+**❌ DON'T (Pattern A - Duplicate beforeEach across siblings):**
+```javascript
+describe('Combat Outcome Feedback', () => {
+
+  describe('Text Animation System', () => {
+    let expectedAnimation;
+    
+    beforeEach(() => {  // DON'T: Duplicate complete initialization in each sibling
+      expectedAnimation = {
+        descriptor: 'Fire',
+        range: 'Range',
+        effect: 'Damage',
+        target: mockTarget,
+        source: mockToken
+      };
+    });
+    // tests...
+  });
+
+  describe('Attack Result Indicators', () => {
+    let expectedAnimation;
+    
+    beforeEach(() => {  // DON'T: Exact same base setup duplicated - move to parent!
+      expectedAnimation = {
+        descriptor: 'Fire',
+        range: 'Range',
+        effect: 'Damage',
+        target: mockTarget,
+        source: mockToken
+      };
+      // Then adds specific setup here
+      expectedAnimation.isMelee = true;
+    });
+    // tests...
+  });
+});
+```
+
+**❌ DON'T (Pattern B - Duplicate Arrange in sibling it() blocks):**
+```javascript
+describe('with an attached macro', () => {
+  it('should return animation with type "attached"', () => {
+    // Arrange
+    const mockMacro = { name: 'Custom', execute: jest.fn() };
+    global.game = { macros: { get: jest.fn().mockReturnValue(mockMacro) } };
+    const mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    const powerItem = new PowerItem(mockItem);
+    // Act & Assert...
+  });
+
+  it('should provide macro name as animation name', () => {
+    // Arrange - DON'T: Exact same setup as above!
+    const mockMacro = { name: 'Custom', execute: jest.fn() };
+    global.game = { macros: { get: jest.fn().mockReturnValue(mockMacro) } };
+    const mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    const powerItem = new PowerItem(mockItem);
+    // Act & Assert...
+  });
+
+  it('should execute the macro when play is called', async () => {
+    // Arrange - DON'T: Same setup repeated 3rd time!
+    const mockMacro = { name: 'Custom', execute: jest.fn() };
+    global.game = { macros: { get: jest.fn().mockReturnValue(mockMacro) } };
+    const mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    const powerItem = new PowerItem(mockItem);
+    // Act & Assert...
+  });
+  
+  // FIX: When 3+ sibling it() tests share identical Arrange → move to beforeEach()
+});
+```
+
+**✅ DO (Fix for Pattern B):**
+```javascript
+describe('with an attached macro', () => {
+  let mockMacro;
+  let mockItem;
+  let powerItem;
+  
+  beforeEach(() => {  // DO: Move shared Arrange to beforeEach()
+    mockMacro = { name: 'Custom', execute: jest.fn() };
+    global.game = { macros: { get: jest.fn().mockReturnValue(mockMacro) } };
+    mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    powerItem = new PowerItem(mockItem);
+  });
+
+  it('should return animation with type "attached"', () => {
+    // Act
+    const animation = powerItem.animation;
+    // Assert
+    expect(animation.type).toBe('attached');
+  });
+
+  it('should provide macro name as animation name', () => {
+    // Act
+    const animation = powerItem.animation;
+    // Assert
+    expect(animation.name).toBe('Custom');
+  });
+
+  it('should execute the macro when play is called', async () => {
+    const animation = powerItem.animation;
+    // Act
+    await animation.play();
+    // Assert
+    expect(mockMacro.execute).toHaveBeenCalled();
+  });
 });
 ```
 

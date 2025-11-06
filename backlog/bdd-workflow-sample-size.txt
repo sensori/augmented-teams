@@ -1,0 +1,121 @@
+BDD WORKFLOW SAMPLE SIZE PATTERN
+=================================
+
+STATUS: Active Pattern
+PRIORITY: High
+CATEGORY: BDD / Workflow
+DISCOVERED: 2025-11-05 during workflow refinement
+
+PATTERN RULE
+------------
+Each SAMPLE in BDD workflow should contain approximately 18 tests.
+
+This applies to ALL phases:
+- Phase 0 (SIGNATURES): ~18 test signatures per sample
+- Phase 1 (RED): ~18 failing tests per sample
+- Phase 2 (GREEN): ~18 implementations per sample
+- Phase 3 (REFACTOR): ~18 refactorings per sample
+
+WHY 18 TESTS?
+-------------
+1. **Sufficient Pattern Learning**
+   - Large enough to establish clear patterns
+   - Small enough to review and approve quickly
+   - Sweet spot between "too trivial" and "too overwhelming"
+
+2. **One Describe Block Coverage**
+   - Typically covers one complete describe block
+   - Includes nested describes and their tests
+   - Represents one cohesive domain concept
+
+3. **Manageable Review Scope**
+   - User can review in 2-3 minutes
+   - AI can validate thoroughly
+   - Fits in one mental chunk
+
+4. **Effective Iteration**
+   - If patterns wrong, only 18 tests to fix
+   - If patterns right, multiply across remaining tests
+   - Learn-apply-validate cycle stays tight
+
+EXAMPLE STRUCTURE
+-----------------
+Sample 1 (~18 tests):
+  describe('a power item', () => {
+    describe('that provides characteristics', () => {
+      it('should...') // 6 tests
+    });
+    describe('that resolves animation', () => {
+      describe('with attached macro', () => {
+        it('should...') // 3 tests
+      });
+      describe('with name-matched macro', () => {
+        it('should...') // 3 tests
+      });
+      describe('with AutoRec entry', () => {
+        it('should...') // 3 tests
+      });
+      describe('with descriptor generation', () => {
+        it('should...') // 3 tests
+      });
+    });
+  });
+  TOTAL: ~18 tests covering Power Item domain concept
+
+ANTI-PATTERNS TO AVOID
+-----------------------
+❌ TOO SMALL (3-5 tests):
+   - Not enough to establish patterns
+   - Too many approval cycles
+   - Fragmented learning
+
+❌ TOO LARGE (50+ tests):
+   - Overwhelming to review
+   - Hard to identify patterns
+   - If wrong, expensive to fix
+
+✅ JUST RIGHT (~18 tests):
+   - Complete domain concept
+   - Clear patterns emerge
+   - Efficient approval cycle
+
+WORKFLOW COMMANDS TO UPDATE
+----------------------------
+1. bdd-workflow-cmd.md
+   - Sample steps should specify "~18 tests"
+   - Examples should show 18-test batches
+   
+2. bdd-workflow-rule.mdc
+   - Pattern learning section needs "~18 tests"
+   - Expand step contrasts with samples
+
+3. In-conversation reminders
+   - When starting sample: "Creating ~18 test sample"
+   - When proposing: "Sample 1 will be ~18 tests covering X"
+
+IMPLEMENTATION NOTES
+--------------------
+- Count includes all it() blocks in the sample
+- Nested describes add up to parent count
+- beforeEach() doesn't count as a test
+- Aim for 15-20 range (18 is target, not absolute)
+
+RELATED PATTERNS
+----------------
+- Small batches (DevOps): frequent integration
+- Pomodoro technique: focused work chunks
+- Miller's Law: 7±2 items in working memory (18 is ~2-3 chunks)
+
+VALIDATION
+----------
+Before proceeding from sample to expand:
+✓ User has reviewed ~18 tests
+✓ Patterns are clear and repeatable
+✓ Violations found and fixed
+✓ User approves approach
+
+Then multiply across remaining tests in expand phase.
+
+
+
+

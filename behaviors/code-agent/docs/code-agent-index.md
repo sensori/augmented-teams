@@ -4,100 +4,140 @@ The **Behavior Index** feature maintains an up-to-date index of all AI behaviors
 
 ## Implementation
 
-The behavior index is implemented according to `behavior-index-rule.mdc`:
+The behavior index is implemented in `code-agent-runner.py` via the `behavior_index()` function according to `code-agent-index-rule.mdc`.
 
 ### Rule Compliance
 
 **Always:**
-- ✅ Detects additions, updates, or deletions in features marked with `code-agent-behavior.json` (deployed: true)
+- ✅ Scans features marked with `behavior.json` (deployed: true)
 - ✅ Records feature name, file type, path, and modification timestamp
-- ✅ Updates both local (`behaviors/<feature>/code-agent-index.json`) and global (`.cursor/behavior-index.json`) indexes
+- ✅ Updates global index (`.cursor/behavior-index.json`)
 - ✅ Logs the number of behaviors detected and updated
-- ✅ The Cursor environment **must constantly refer to the behavior index during chat** to discover available commands, rules, functions, and MCP configs
+- ✅ Uses `iterdir()` for direct directory scanning (not recursive glob)
+- ✅ Filters out excluded files (runners, behavior.json, docs, __pycache__)
 
 **Never:**
-- ✅ Manually edit index files
-- ✅ Include draft or experimental behaviors in the index
+- ❌ Manually edit index files
+- ❌ Include draft or experimental behaviors in the index
+- ❌ Include documentation files from `docs/` directories
 
 ### Index Structure
 
-The index has two sections:
+The global index (`.cursor/behavior-index.json`) contains:
 
-1. **`deployed`** - Behaviors organized by deployment location (e.g., `.cursor/rules/`, `.cursor/commands/`, `command-runners/`)
-2. **`features`** - Behaviors organized by feature name
-
-Each entry includes:
-- `feature` - Feature name
-- `file` - File name
-- `type` - File extension (.mdc, .md, .py, .json)
-- `path` - Full file path
-- `modified` - Modification timestamp
-- `purpose` - One-liner description extracted from the file
-
-### Purpose Extraction
-
-The index automatically extracts one-liner purposes from behavior files by:
-1. Looking for `**Purpose:**` headers in markdown files
-2. Extracting Python docstrings
-3. Using the first meaningful line of the file
-
-After generating the index, review `.cursor/behavior-index.json` and manually update any nonsensical purposes with clear, concise descriptions.
-
-### Syncing Purposes
-
-After updating purposes in the global index, run:
-```bash
-python behaviors/code-agent-behavior/code-agent-index-cmd.py sync-purposes
+```json
+{
+  "last_updated": "Thu Nov  7 10:30:45 2024",
+  "total_behaviors": 51,
+  "features_count": 3,
+  "behaviors": [
+    {
+      "feature": "code-agent",
+      "file": "code-agent-structure-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors/code-agent/structure/code-agent-structure-rule.mdc",
+      "modified_timestamp": 1730987445.123
+    },
+    ...
+  ]
+}
 ```
 
-This copies updated purposes from the global index to all local index files.
+Each entry includes:
+- `feature` - Feature name (directory name)
+- `file` - File name
+- `type` - File extension (.mdc, .md, .py, .json)
+- `path` - Full file path (forward slashes, relative to project root)
+- `modified_timestamp` - Last modification time (Unix timestamp)
+
+### Indexing Logic
+
+The indexer:
+1. Finds all directories in `behaviors/` with `behavior.json` where `deployed: true`
+2. For each feature directory:
+   - Uses `iterdir()` to scan direct children
+   - Checks `behavior.json` for `deployed: true`
+   - Recursively finds all behavior files with `rglob()`
+   - Filters by extension (`.mdc`, `.md`, `.py`, `.json`)
+   - Excludes:
+     - `behavior.json` files
+     - Runner files (`*-runner.py`)
+     - Index files (`*-index.json`)
+     - `__pycache__` directories
+     - `docs/` directories
+3. Writes consolidated index to `.cursor/behavior-index.json`
 
 ### File Structure
 
 ```
 behaviors/<feature>/
-  ├── code-agent-behavior.json        ← Marker file (deployed: true)
-  ├── <behavior-name>-rule.mdc
-  ├── <behavior-name>-cmd.md
-  ├── <behavior-name>-cmd.py
-  └── code-agent-index.json  ← Local index
+  ├── behavior.json                    ← Marker file (deployed: true)
+  ├── <feature>-runner.py              ← Excluded from index
+  ├── <behavior-group>/
+  │   ├── <feature>-<behavior>-rule.mdc       ← Indexed
+  │   ├── <feature>-<behavior>-cmd.md         ← Indexed
+  │   └── <feature>-<behavior>-index.json     ← Excluded from index
+  └── docs/                            ← Excluded from index
+      └── <feature>-<behavior>.md
 ```
 
 ### Usage
 
 ```bash
 # Index all features
-python behavior-index-cmd.py
+python behaviors/code-agent/code-agent-runner.py index
 
 # Index specific feature
-python behavior-index-cmd.py <feature-name>
-
-# Sync purposes from global to local indexes
-python behavior-index-cmd.py sync-purposes
+python behaviors/code-agent/code-agent-runner.py index <feature-name>
 ```
+
+**Important:** When running with flags like `--no-guard`, the argument parser now correctly filters them out so they don't get treated as feature names.
 
 ### Output
 
 The script provides detailed reporting:
 - ✅ **Indexed**: Number of behaviors indexed
 - 📁 **Features**: Number of features processed
-- ⏭️ **Skipped**: Files skipped due to draft/experimental markers
+- ⏭️ **Skipped**: Files skipped (if any)
+
+Example output:
+```
+✅ Indexed 51 behaviors across 3 features
+```
 
 ### Cursor Environment Integration
 
-**Critical Requirement:** The Cursor environment **must constantly refer to `.cursor/behavior-index.json` during chat** to discover and use available commands, rules, functions, and MCP configs. This ensures:
+The Cursor environment should refer to `.cursor/behavior-index.json` to discover available behaviors. The index provides:
 
-* The AI assistant has complete visibility into all available behaviors across all features
-* Commands, rules, and functions are discoverable without manual lookup
-* The index serves as the single source of truth for what behaviors are available
-* Real-time awareness of new behaviors as they're added or updated
+* Complete visibility into all available behaviors across all features
+* File locations and types for commands, rules, and configs
+* Modification timestamps for freshness tracking
+* Single source of truth for what behaviors are deployed
 
-### Auto-Triggers
+### Integration with Workflow
 
-The index runs automatically on workspace open via VS Code task `"Behavior Index on Startup"`.
+The index integrates with your behavior workflow:
+
+```
+1. Edit behavior files in behaviors/<feature>/
+2. Run sync: python behaviors/code-agent/code-agent-runner.py sync
+3. Run index: python behaviors/code-agent/code-agent-runner.py index
+4. Updated index reflects all deployed behaviors
+```
+
+### Troubleshooting
+
+**Issue:** Indexer returns 0 behaviors
+- **Cause:** Argument parsing treating flags as feature names
+- **Fix:** Updated argument parser to filter out `--no-guard` and `--from-command` flags
+
+**Issue:** Wrong features indexed
+- **Cause:** Using `glob("**/behavior.json")` which is recursive
+- **Fix:** Changed to `iterdir()` for direct directory scanning
 
 ## Related Files
 
-- `behavior-index-rule.mdc` - The rule definition
-- `behavior-index-cmd.md` - Command documentation
-- `behavior-index-cmd.py` - Implementation
+- `code-agent-index-rule.mdc` - The rule definition
+- `code-agent-index-cmd.md` - Command documentation
+- `code-agent-runner.py` - Implementation (`behavior_index()` function)
+- `.cursor/behavior-index.json` - Global index output

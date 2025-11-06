@@ -1,0 +1,126 @@
+NEW BDD WORKFLOW PHASES - CLEAR PROGRESSION
+===========================================
+
+The workflow now has distinct phases with clear outputs:
+
+STAGE 0a: DOMAIN SCAFFOLDING (Plain English)
+---------------------------------------------
+Command: /bdd-domain-scaffold
+Rule: bdd-domain-fluency-rule.mdc
+
+OUTPUT: Plain English behavioral structure
+```
+describe a power item
+  created from a power
+    it should provide access to original power
+    it should play animation for token
+  whose animation is being edited
+    it should add effect to selection
+```
+
+NO code syntax yet - pure behavioral thinking
+
+
+STAGE 0b: CONVERT TO CODE SYNTAX (Signatures)
+----------------------------------------------
+Command: /bdd-signature  
+Rule: bdd-jest-rule.mdc (syntax only)
+
+OUTPUT: Code syntax with empty bodies
+```javascript
+describe('a power item', () => {
+  describe('created from a power', () => {
+    it('should provide access to original power', () => {
+      // BDD: SIGNATURE
+    });
+    it('should play animation for token', () => {
+      // BDD: SIGNATURE
+    });
+  });
+  describe('whose animation is being edited', () => {
+    it('should add effect to selection', () => {
+      // BDD: SIGNATURE
+    });
+  });
+});
+```
+
+Just syntax conversion - no implementation
+
+
+STAGE 1: RED (Failing Tests)
+-----------------------------
+Command: /bdd-red
+Rule: bdd-jest-rule.mdc (full)
+
+OUTPUT: Implemented tests that FAIL
+```javascript
+describe('a power item', () => {
+  let powerItem;
+  
+  beforeEach(() => {
+    const mockPower = { id: 1, name: 'Fire' };
+    // powerItem = new PowerItem(mockPower); // PowerItem not defined yet
+  });
+  
+  it('should provide access to original power', () => {
+    // expect(powerItem.power).toBe(mockPower); // Commented - code not implemented
+  });
+});
+
+// In production file:
+// class PowerItem { ... }  ← COMMENTED OUT or doesn't exist
+```
+
+Test code is written but commented out - will fail when uncommented
+
+
+STAGE 2: GREEN (Implement Code)
+--------------------------------
+Command: /bdd-green
+Rule: bdd-jest-rule.mdc
+
+OUTPUT: Uncomment test code + implement production code
+```javascript
+// In test file:
+beforeEach(() => {
+  const mockPower = { id: 1, name: 'Fire' };
+  powerItem = new PowerItem(mockPower); // ← UNCOMMENTED
+});
+
+it('should provide access to original power', () => {
+  expect(powerItem.power).toBe(mockPower); // ← UNCOMMENTED
+});
+
+// In production file:
+class PowerItem {  // ← IMPLEMENTED
+  constructor(power) {
+    this.power = power;
+  }
+}
+```
+
+Tests now PASS
+
+
+STAGE 3: REFACTOR (Improve Quality)
+------------------------------------
+Command: /bdd-refactor
+Rule: bdd-jest-rule.mdc + code quality principles
+
+OUTPUT: Cleaner code, tests still pass
+
+
+PROGRESSION CLARITY
+===================
+
+Stage 0a → WHAT behavioral stories to tell (English)
+Stage 0b → HOW to express in code syntax (structure)
+Stage 1  → HOW to test the behavior (mocks, asserts)
+Stage 2  → HOW to implement the behavior (minimal code)
+Stage 3  → HOW to improve the implementation (refactoring)
+
+Each stage adds ONE layer of detail.
+Early stages are cheap to change (just words).
+Later stages build on solid foundation.
+

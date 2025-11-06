@@ -1,0 +1,116 @@
+### Command: `bdd-workflow-abandon-cmd.md`
+
+**Purpose:** Abandon a stuck or errored run to allow starting fresh.
+
+**Rule:**
+* `\bdd-workflow-rule` — Allows resetting workflow when stuck
+
+**Usage:**
+* `\bdd-abandon <reason>` — Abandon current run with reason
+
+**When to Use:**
+* Run is stuck in wrong state
+* Started wrong phase or step
+* Validation failed and need to start over
+* Error occurred and can't recover
+
+**⚠️ Warning:** This abandons current work. Use only when necessary.
+
+**Examples:**
+
+```bash
+# Abandon with reason
+python behaviors/bdd/bdd-workflow-abandon-cmd.py test.mjs "Started wrong phase"
+
+# Or use command
+\bdd-abandon "Need to restart from scratch"
+```
+
+**What Happens:**
+
+1. Shows current run details
+2. Asks for confirmation
+3. Marks run as `abandoned`
+4. Records reason in audit trail
+5. Clears current_run_id
+6. Allows starting fresh
+
+**Output Example:**
+
+```
+=== Abandoning Run: sample_1_20241104_143000 ===
+Step: sample_1
+Status: ai_verified
+Reason: Started wrong phase
+
+⚠️  This will abandon the current run and allow starting fresh.
+Continue? (y/n): y
+
+✅ Run abandoned
+Ready to start new run
+```
+
+**After Abandoning:**
+
+The run is marked `abandoned` in history but work is NOT deleted:
+- Test file remains unchanged
+- You can review what was done
+- Audit trail preserved
+- Can start new run
+
+**Check Status After:**
+
+```bash
+python behaviors/bdd/bdd-workflow-status-cmd.py test.mjs
+```
+
+You should see:
+```
+✅ No active run - ready to start new work
+✅ Can proceed: True
+```
+
+**Common Reasons to Abandon:**
+
+* `"Started wrong phase"` - Jumped to wrong step
+* `"Validation stuck"` - Can't get validation to pass
+* `"Need to refactor approach"` - Want to try different approach
+* `"Scope changed"` - Requirements changed mid-run
+* `"Testing different strategy"` - Experimenting
+
+**Alternative: Reject Instead**
+
+If AI work just needs fixes (not complete restart):
+```bash
+\bdd-reject "Fix test naming to be more behavioral"
+```
+
+Rejection sends work back to AI but keeps run active.
+
+**Runner:**
+`python behaviors/bdd/bdd-runner.py workflow <file> abandon <reason>` — Abandons current workflow run
+
+**Steps:**
+1. **User** invokes command via `\bdd-abandon <reason>` with abandonment reason
+2. **Code** function `get_current_run_state(file_path)` — loads run state, returns current run details or None
+3. **Code** displays current run details (ID, step, status) and abandonment warning
+4. **User** confirms abandonment (y/n prompt)
+5. **Code** function `abandon_run(run_id, reason)` — marks run as 'abandoned', records reason in audit trail, clears current_run_id, returns success status
+6. **Code** displays confirmation message indicating ready to start fresh
+
+**Related Commands:**
+* `\bdd-status` — Check if stuck
+* `\bdd-reject` — Send back for fixes (less drastic)
+* `\bdd-workflow` — Start new run after abandoning
+
+
+3. **Code** displays current run details (ID, step, status) and abandonment warning
+4. **User** confirms abandonment (y/n prompt)
+5. **Code** function `abandon_run(run_id, reason)` — marks run as 'abandoned', records reason in audit trail, clears current_run_id, returns success status
+6. **Code** displays confirmation message indicating ready to start fresh
+
+**Related Commands:**
+* `\bdd-status` — Check if stuck
+* `\bdd-reject` — Send back for fixes (less drastic)
+* `\bdd-workflow` — Start new run after abandoning
+

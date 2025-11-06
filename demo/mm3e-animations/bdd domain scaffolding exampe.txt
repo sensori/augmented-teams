@@ -1,0 +1,85 @@
+describe power activation animation
+  describe a power item
+    that wraps a power for animation
+      it should store the descriptor
+      it should store the effect type
+      it should store the range
+      it should store the area shape
+      it should generate descriptor names based on it attributes
+      it should link to the underlying power
+    
+    that had provided an animation that has been played
+      with an attached macro
+        it should execute that macro first
+      with a name-matched macro
+        it should search for macro that matches the descriptor name and execute that
+      with AutoRec entries
+        it should query automated recognition system and execute the autorec it finds
+      when no pre-made animation exists
+        it should generate descriptor-based animation as fallback and execute that
+      that has generated a descriptor sequence
+        it should map power descriptors to animation themes
+        it should compose all animation phases into unified a sequence
+        that has been played
+          that has a cast sequence
+              it should play the cast sequence on the selected token
+          that has a projection sequence
+              it should play the projecton sequence from selected to target(s)
+          that has an area sequence
+            it should play the area effect animation at template location based on shape
+          that has a power effect sequence
+            it should play the impact animation at target location
+          that has an affected by power sequence
+            it should play ongoing effect animation attached to affected token that follows movement
+        that has been edited
+          it should provide dialog based interface for animation assembly
+          it should provide dropdown selectors for descriptor,macro, or AutoRec sources
+          that has descriptor selected 
+            it should organize a selection of cast, projection, area, affected, and effect sequences available
+            with an updated cast, ptojection, area, affected and effect
+              it should update the text area real time preview of the generated sequence macro
+              that has been saved
+                it should generate executable descriptor sequence macro
+                it associate the macro with the power
+          that has Autorec selected   
+            it should organize a selection of cast, projection, area, impact, affected, and effect autorecs available
+            it should update the text area real time preview of the generated Autrec macro
+              that has been saved
+                it should save the Autorec macro
+                it should associate the macro with the power
+          that has a Macro selected 
+            it should update the text area field with the selected macro
+            it should save the macro
+            it should associate the macro with the power
+    that is a movement power
+      on a token that has moved
+        that has an associated animation
+          it should determine movement type and power from actor selected speed type
+          it should trigger movement animations before movement executes
+          it should support flight leaping swimming burrowing superspeed teleport ground
+
+describe combat feedback
+  on an attack that has been rolled
+    that has been extracted from chat messages and hooks
+      it should parse attack outcome and identify attacker and target tokens
+      when attack hits
+        it should create floating hit text beside target with appropriate color for perspective
+      when attack misses  
+        it should create floating miss text beside target with appropriate color for perspective
+      when attack critically hits
+        it should create dramatic critical hit text or special effect with larger animation
+
+describe system infrastructure
+  that provides foundry VTT integration
+    with module configuration settings
+      it should toggle animate on attack
+      it should toggle show animation button on chat cards
+      it should toggle animate on movement
+    with event hooks
+      it should handle ready hook for initialization
+      it should handle rollPower hook for power activation
+      it should handle attackRolled hook for combat outcomes
+      it should handle renderItemSheet hook for animation editor
+      it should handle renderChatMessage hook for animation buttons
+    with token animation helpers
+      it should manage token references and track position and movement

@@ -1,0 +1,538 @@
+---
+description: BDD test hierarchy and behavioral fluency principles
+globs: ["**/*.test.js", "**/*.spec.js", "**/*.test.ts", "**/*.spec.ts", "**/*.test.jsx", "**/*.spec.jsx", "**/*.test.tsx", "**/*.spec.tsx", "**/*.test.mjs", "**/*.spec.mjs", "**/*_test.py", "**/test_*.py", "**/*_spec.py", "**/spec_*.py"]
+alwaysApply: false
+---
+
+**When** creating BDD test structure (describe blocks),
+**then** organize by behavioral story hierarchy, not function/module lists.
+
+This rule extends `bdd-rule.mdc` with hierarchy and fluency principles.
+References `ddd-structure-analysis-rule.mdc` for domain concept mapping.
+
+**Executing Commands:**
+* `\bdd-domain-scaffold` — Generate natural language test hierarchy from domain map
+* `\bdd-domain-scaffold-verify` — Validate hierarchy follows these principles
+
+---
+
+## Core Principle: Tests Tell Stories, Not Document APIs
+
+Tests should read like behavioral narratives showing how concepts relate, evolve, and interact.
+NOT like API documentation listing available functions.
+
+**✅ DO: Concept-Centric Behavioral Stories**
+```
+describe a power item
+  created from a power
+    that provides animation characteristics
+      it should store the descriptor
+      it should store the effect type
+      it should store the range
+  
+  whose animation is being edited
+    that has its effects modified
+      it should add effect to the power
+    
+    whose descriptor is set to fire
+      it should use fire animation theme
+  
+  used to launch an attack
+    that hits the target
+      it should play impact animation
+```
+
+**❌ DON'T: Module/Function Lists**
+```
+describe power roll animations
+describe animation resolution
+describe sequence runner editor
+describe descriptor class lookup
+```
+
+---
+
+## Hierarchy Patterns
+
+### Pattern 1: Concept Lifecycle
+
+Follow natural object lifecycle: creation → modification → usage → destruction
+
+**✅ DO:**
+```
+describe a user session
+  created from login credentials
+    it should store user identity
+  that has been authenticated
+    it should grant access token
+  whose permissions have been updated
+    it should reflect new permissions
+  used to access protected resources
+    it should validate authorization
+  that has expired
+    it should reject access attempts
+```
+
+**❌ DON'T:**
+```
+describe user login
+describe session management
+describe permission updates
+```
+
+### Pattern 2: State Variations with Context
+
+Test different states/configurations of same concept under shared parent.
+
+**✅ DO:**
+```
+describe a power item
+  with fire descriptor
+    that is ranged
+      with cone area
+        it should use fire cone animation
+        it should affect targets in cone area
+  
+  with ice descriptor
+    it should use ice animation theme
+    it should apply cold damage type
+```
+
+**❌ DON'T:**
+```
+describe fire powers
+describe ice powers
+describe ranged powers
+```
+
+### Pattern 3: Behavioral Relationships
+
+Show how concepts interact and depend on each other.
+
+**✅ DO:**
+```
+describe an animation editor
+  that is opened for a power item
+    whose configuration is being modified
+      it should update phase settings
+      it should preview changes
+    
+    that saves customizations
+      as an attached macro
+        it should create macro on power
+        it should set macro as priority source
+```
+
+**❌ DON'T:**
+```
+describe sequence runner editor
+describe saving animations
+describe attached macros
+```
+
+### Pattern 4: Temporal Lifecycle Progression (CRITICAL)
+
+Follow object lifecycle through states using temporal progression and complete end-to-end behaviors.
+
+**✅ DO: Temporal State Flow with Complete Actions**
+```
+describe a power item
+  that wraps a power for animation
+    it should store the descriptor
+    it should ...
+  
+  that had provided an animation that has been played
+    with an attached macro
+      it should execute that macro first
+    with a name-matched macro
+      it should search for macro that matches the descriptor name and execute that
+    with AutoRec entries
+      it should query automated recognition system and execute the autorec it finds
+    when no pre-made animation exists
+      it should generate descriptor-based animation as fallback and execute that
+    
+    that has generated a descriptor sequence
+      it should map power descriptors to animation themes
+      that has been played
+        that has a cast sequence
+          it should play the cast sequence on the selected token
+        that has a projection sequence
+          it should play the projection sequence from selected to target(s)
+        ...
+      that has been edited
+        with descriptor selected
+          with an updated cast sequence
+            it should update the text area real time preview
+            that has been saved
+              it should generate executable macro and associate with power
+```
+
+**❌ DON'T: Disconnected Implementation Step Lists**
+```
+describe animation resolver
+  it should check macros
+  it should search by name
+  it should query AutoRec
+  it should generate fallback
+
+describe sequence editor
+  it should open dialog
+  it should show dropdowns
+  it should save
+```
+
+**Key Requirements:**
+
+1. **Temporal Markers** - Show lifecycle progression:
+   - Use "that has been X" to show state transitions
+   - Follow actual usage flow: created → played → edited → saved
+   - NOT: created, plus editing features, plus saving features (disconnected)
+
+2. **Deep Context Nesting** - Show variations with "with/when/on":
+   - "with an attached macro" → specific context
+   - "when no animation exists" → conditional context
+   - "on a token that has moved" → trigger context
+
+3. **Complete End-to-End Behaviors**:
+   - ✅ "search for macro and execute that" (COMPLETE)
+   - ❌ "search for macro" then separately "execute" (FRAGMENTED)
+   - Each behavior statement should describe the full action
+
+4. **Follow Actual Usage Flow**:
+   - Match real user journey through the system
+   - NOT: list all methods in class A, then all in class B
+   - INSTEAD: create object → use object → modify object → save object
+
+**Examples Showing Temporal Progression:**
+
+**Combat Feedback System:**
+```
+describe combat feedback
+  on an attack that has been rolled
+    that has been extracted from chat messages and hooks
+      it should parse attack outcome and identify attacker and target tokens
+      when attack hits
+        it should create floating hit text beside target with appropriate color for perspective
+      when attack misses
+        it should create floating miss text beside target with appropriate color for perspective
+      when attack critically hits
+        it should create dramatic critical hit text or special effect with larger animation
+```
+
+**System Infrastructure:**
+```
+describe system infrastructure
+  that provides foundry VTT integration
+    with module configuration settings
+      it should toggle animate on attack
+      it should toggle show animation button on chat cards
+      it should toggle animate on movement
+    with event hooks
+      it should handle ready hook for initialization
+      it should handle rollPower hook for power activation
+      it should handle attackRolled hook for combat outcomes
+      it should handle renderItemSheet hook for animation editor
+      it should handle renderChatMessage hook for animation buttons
+    with token animation helpers
+      it should manage token references and track position and movement
+```
+
+**Read-Aloud Test:**
+"A power item that had provided an animation that has been played, with an attached macro, should execute that macro first."
+
+This flows naturally because it follows temporal sequence and describes complete action.
+
+---
+
+## CRITICAL: Preserve Domain Map Hierarchy - DO NOT FLATTEN
+
+**Principle:**
+When domain map exists, its hierarchy is SACRED. Domain map indentation depth = test nesting depth. NEVER flatten nested concepts to top level. If a concept is indented under a domain in the map, it MUST be nested under that domain in tests.
+
+**✅ DO - Preserve Hierarchy:**
+```
+Domain Map:
+POWER ANIMATION (no indent)
+    Power Item (1 tab)
+    Descriptor Sequence (1 tab)
+        Cast Sequence (2 tabs - nested under Descriptor)
+    Movement-Triggered Animation (1 tab - part of domain)
+
+Test Structure:
+describe power animation
+    describe a power item
+        it should store descriptor
+    describe a descriptor sequence
+        describe a cast sequence
+            it should show power buildup
+    describe movement-triggered animation
+        it should detect token movement
+```
+✅ Hierarchy preserved - depth matches domain map
+
+**❌ DON'T - Flatten Hierarchy:**
+```
+Domain Map:
+POWER ANIMATION
+    Power Item
+    Movement-Triggered Animation (nested in domain)
+
+Test Structure (WRONG):
+describe a power item
+describe a descriptor sequence
+describe movement-triggered animation
+describe combat feedback
+```
+❌ Hierarchy destroyed - all concepts treated as siblings, parent domain lost
+
+**Mapping Rules:**
+
+| Domain Map Indentation | Test Nesting | Example |
+|------------------------|--------------|---------|
+| No indent (DOMAIN) | Top-level describe | `POWER ACTIVATION` → `describe('power activation animation', () => {})` |
+| 1 tab (Concept) | Nested under domain | `Power Item` → nested in domain describe |
+| 2 tabs (Sub-concept) | Nested under parent concept | `Cast Sequence` → nested in Descriptor Sequence |
+| 3 tabs | Nested under grandparent | Additional depth as needed |
+
+**Test:**
+Count tabs in domain map. Count describe nesting in tests. They MUST match.
+
+**Why This Matters:**
+- Domain map shows functional relationships (Movement is PART OF Power Animation)
+- Flattening loses relationships (Movement becomes unrelated concept)
+- Tests should reflect domain structure, not arbitrary organization
+
+---
+
+## Domain Map → Test Hierarchy Mapping
+
+When domain map exists, use it as primary source for test structure.
+
+**Mapping Rules:**
+
+| Domain Element | Test Structure | Example |
+|----------------|----------------|---------|
+| Domain Concept | `describe('a concept', () => {})` | Power Item → `describe('a power item', () => {})` |
+| Concept State/Property | `describe('with X', () => {})` | Fire descriptor → `describe('with fire descriptor', () => {})` |
+| Concept State (passive) | `describe('that has X', () => {})` | Macro attached → `describe('that has an attached macro', () => {})` |
+| Concept State (active) | `describe('that is doing X', () => {})` | Being edited → `describe('that is being edited', () => {})` |
+| Concept Action/Usage | `describe('used to do X', () => {})` | Launch attack → `describe('used to launch an attack', () => {})` |
+| Relationship | `describe('whose X', () => {})` | Animation being edited → `describe('whose animation is being edited', () => {})` |
+| Condition/Trigger | `describe('when X happens', () => {})` | Macro exists → `describe('when attached macro exists', () => {})` |
+
+**Example Domain Map Section:**
+```
+Power Item (PowerItem class)
+  Provides descriptor (fire, ice, etc.)
+  Provides effect type (damage, affliction)
+  Provides range (melee, ranged)
+  
+  Animation Resolution
+    Checks attached macros (highest priority)
+    Searches name-matched macros
+    Generates descriptor-based animation (fallback)
+```
+
+**Generated Test Hierarchy:**
+```
+describe a power item
+  
+  that provides animation characteristics
+    it should provide descriptor
+    it should provide effect type
+    it should provide range
+  
+  that resolves which animation to use
+    when attached macro exists
+      it should use attached macro
+    
+    when name-matched macro exists
+      it should use name-matched macro
+    
+    using descriptor-based generation as fallback
+      it should generate from descriptor
+```
+
+---
+
+## Natural Language Fluency Test
+
+**The Read-Aloud Test:**
+
+Read each describe chain as a sentence. It should sound natural.
+
+**✅ PASS:**
+- "a power item that provides animation characteristics" ✓
+- "a power item whose animation is being edited that has its effects modified" ✓
+- "a power item used to launch an attack that hits the target" ✓
+
+**❌ FAIL:**
+- "power roll animations detection" ✗ (what's the subject?)
+- "sequence runner editor configuration preview testing" ✗ (too many nouns)
+- "effect section registration that are elemental effects" ✗ (grammar broken)
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Missing Subject
+
+**❌ DON'T:**
+```
+describe detection
+describe type detection
+describe resolution
+```
+
+**✅ DO:**
+```
+describe movement animation
+  that detects token movement
+    it should hook into drag handlers
+  that determines movement type
+    it should map speed mode to animation type
+```
+
+### Anti-Pattern 2: Function/Module Names as Describes
+
+**❌ DON'T:**
+```
+describe PowerItem
+describe AnimationResolver
+describe getUserSession()
+describe authentication module
+```
+
+**✅ DO:**
+```
+describe a power item
+describe animation that is being resolved
+describe a user session that is being retrieved
+describe user authentication
+```
+
+### Anti-Pattern 3: Disconnected Siblings
+
+**❌ DON'T:**
+```
+describe a power item
+  it should store descriptor
+
+describe power item updates
+describe power item in combat
+```
+
+**✅ DO:**
+```
+describe a power item
+  created from power data
+    it should store descriptor
+  that has been updated
+    it should reflect new values
+  used in combat
+    it should provide attack animation
+```
+
+---
+
+## Validation Checklist
+
+When validating hierarchy, check ALL of these:
+
+1. ✓ **Top-level describes** - Are they domain concepts (nouns with 'a/an')?
+2. ✓ **Nesting depth** - Does depth show specificity (general → specific)?
+3. ✓ **Sibling cohesion** - Do siblings relate to same parent concept?
+4. ✓ **Natural flow** - Does each chain read naturally when spoken aloud?
+5. ✓ **Subject clarity** - Is the subject obvious in every describe?
+6. ✓ **Domain alignment** - Does structure match domain map (if exists)?
+7. ✓ **Relationship words** - Are "that/whose/when/with" used to connect concepts?
+8. ✓ **No class names** - Are class/function/module names avoided?
+
+---
+
+## Domain-Driven Structure
+
+When domain map exists, test hierarchy should mirror domain structure:
+
+**Domain Map:**
+```
+POWER ACTIVATION ANIMATION
+  Power Item
+    Animation Resolution
+      Priority 1: Attached Macro
+      Priority 2: Name-Matched Macro
+      Priority 3: AutoRec Entry
+      Priority 4: Descriptor Generation
+```
+
+**Test Hierarchy:**
+```
+describe power activation animation
+  describe a power item
+    that resolves which animation to use
+      when attached macro exists
+        it should use attached macro animation
+      when name-matched macro exists
+        it should use name-matched macro animation
+      when automated recognition entry exists
+        it should use AutoRec animation
+      using descriptor generation as fallback
+        it should generate animation from descriptor
+```
+
+Hierarchy mirrors domain structure → makes tests domain-aligned by construction.
+
+---
+
+## Sample Size: ~18 Describe Blocks
+
+For Stage 0 (scaffolding), a sample should contain approximately 18 describe blocks.
+
+This typically covers:
+- 1 top-level domain concept
+- 3-5 major behaviors/states under it
+- 2-4 levels of nesting depth
+- Multiple "it should..." statements under each describe
+- Represents one cohesive domain area
+
+**Note:** The ~18 count refers to describe levels only. Each describe can have multiple "it should..." statements.
+
+**Example Sample 1:**
+```
+describe a power item                                    // 1
+  created from power data                                // 2
+      it should provide descriptor
+      it should provide effect type
+  with an animation                                // 4
+    that is an attached macro                           // 5
+      it should use attached macro
+    that is a name-matched macro                       // 6
+      it should use name-matched macro
+    that is AutoRec entry                            // 7
+      it should use AutoRec animation
+    that has no animation asset 8
+      it should generate the animation from from its power attributes
+// 8 describes so far - add more behaviors to reach ~18
+```
+
+---
+
+## Integration with BDD Rules
+
+This rule ADDS hierarchy/fluency to existing BDD § 1 (Business Readable Language).
+
+**bdd-rule.mdc § 1 says:**
+- Use nouns for describe
+- Start it() with "should"
+- Use plain behavioral language
+
+**This rule ADDS:**
+- HOW to nest those describes
+- HOW to show relationships
+- HOW to mirror domain structure
+
+**Both rules work together** to create readable, well-structured tests.
+
+**Reference Flow:**
+1. Stage 0: Follow `bdd-domain-scaffold-rule.mdc` (structure)
+2. Stage 1 onward: Follow `bdd-jest-rule.mdc` (full BDD principles including structure from hierarchy rule)

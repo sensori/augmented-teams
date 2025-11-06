@@ -1,0 +1,262 @@
+---
+description: TDD workflow for BDD tests (Red-Green-Refactor cycle)
+globs: ["**/*.test.js", "**/*.spec.js", "**/*.test.ts", "**/*.spec.ts", "**/*_test.py", "**/test_*.py", "**/*.test.jsx", "**/*.spec.jsx", "**/*.test.tsx", "**/*.spec.tsx", "**/*_spec.py", "**/spec_*.py", "**/*_test.pyi", "**/test_*.pyi", "**/*_spec.pyi", "**/spec_*.pyi", "**/*.test.mjs", "**/*.spec.mjs"]
+alwaysApply: false
+---
+**When** practicing true Test-Driven Development with BDD tests,
+**then** follow this Red-Green-Refactor workflow to build robust, behavior-focused code.
+
+This rule extends and references `bdd-rule.mdc` — all BDD principles apply throughout the TDD cycle.
+
+**Executing Commands:**
+* `\bdd-workflow` — Start BDD workflow on current file (creates test signatures, guides through RED-GREEN-REFACTOR cycle)
+
+## TDD Workflow Overview
+
+True TDD follows a strict cycle:
+0. **DOMAIN SCAFFOLDING**: Create natural language hierarchy from domain map (plain English)
+1. **SIGNATURES**: Add "it should..." statements to hierarchy (convert to code syntax)
+2. **RED**: Write failing tests (test exists, code doesn't or is commented out)
+3. **GREEN**: Write minimal code to make tests pass
+4. **REFACTOR**: Improve code quality while keeping tests green (4a: suggest, 4b: implement)
+
+## Stage 0: Domain Scaffolding
+
+**Purpose:** Create natural language describe block hierarchy from domain map (plain English only)
+
+## Stage 1: Build Test Signatures (Setup)
+
+**Domain Map Discovery (Automatic):**
+Before building signatures, automatically check test file's directory for:
+* `*-domain-map.txt` - Domain structure, concepts, relationships
+* `*-domain-interactions.txt` - Business flows and interaction scenarios
+
+**If Domain Maps Found:**
+
+Read and use as PRIMARY source for test structure:
+* **Hierarchy**: Structure describe blocks to mirror domain map
+  - Top level: Domain names from map
+  - Nested: Domain concepts in user mental model order
+  - Deepest: Specific behaviors from interaction flows
+* **Naming**: Use exact concept names from domain map
+  - describe blocks = domain concepts (PowerItem, Animation Resolution)
+  - it blocks = domain behaviors (transforms, searches, validates)
+  - helpers = domain operations (createPowerItem, findAnimationByPriority)
+* **Scenarios**: Map tests to interaction flows from interaction map
+  - Use TRIGGER/ACTORS/FLOW structure to identify test cases
+  - Business rules become test assertions
+
+**If Domain Maps NOT Found:**
+
+Display recommendation:
+```
+⚠️  No domain maps found in this directory.
+   Recommendation: Create domain understanding first:
+   1. Run: \ddd-analyze <source-file>
+   2. Run: \ddd-interactions <source-file>
+   3. Then return to BDD workflow
+   
+   Continuing with code-based domain inference...
+```
+
+Workflow continues using code analysis for domain understanding.
+
+**Purpose:** Declare test structure before implementation to think through behavior comprehensively.
+
+**Do:**
+* Create empty test signatures with TODO comments ONLY
+* Build signatures across entire scope (describe block, next N, or all)
+* Think through all scenarios: normal, edge, and failure cases
+* Reference `bdd-rule.mdc` for naming and structure principles
+* Structure describe blocks to mirror domain map (if available)
+* Use exact concept names from domain map
+* Name helpers/mocks to match domain concepts
+
+**Don't:**
+* Write ANY test implementation code yet
+* Write ANY code under test yet
+* Skip edge cases or failure scenarios in your signatures
+* Create signatures one-at-a-time (think through the whole domain first)
+* Invent concept names when domain map provides them
+* Deviate from domain hierarchy without clear reason
+
+**Pattern:**
+- **✅ DO**: Create empty test signatures with TODO comments across entire scope
+- **❌ DON'T**: Write test implementation during signature phase
+
+See framework-specific rules for concrete code examples.
+
+## Stage 2: RED - Write Failing Test (in small batches)
+
+**Purpose:** Verify the test fails for the right reason before writing code under test.
+
+**Domain Alignment (if maps exist):**
+* Validate test names match domain concepts
+* Ensure helper names reflect domain terminology
+* Use domain terms for variables and expected values
+* Map assertions to business rules from interaction map
+
+**Scope Options:**
+* **Current describe block** (default): Implement all tests in the current `describe`
+* **Next X tests**: Implement the next 1, 3, 5, etc. tests
+* **All tests**: Implement all test signatures in the file
+* **Single test**: Implement just one specific test
+
+**Do:**
+* Work on ONE test at a time within chosen scope
+* For new code write the complete test calling code under test that doesn't exist yet
+* For legacy code Write the complete test and comment out the existing code under test
+* Ensure tests fail, a passing test here is a sign of an ERROR
+* Make tests fail for the RIGHT reason (missing code, not syntax error)
+* Reference `bdd-rule.mdc` for strict compliance to all created tests
+
+**Don't:**
+* Move to next test before this one fails correctly
+* Skip actually running the test
+* Accept syntax errors or test setup errors as valid failures
+* Write multiple test implementations at once
+
+**Pattern:**
+- **✅ DO**: Write ONE complete test calling non-existent code under test, verify it fails correctly
+- **❌ DON'T**: Implement multiple tests at once during RED phase (Phase 1)
+
+See framework-specific rules for concrete code examples.
+
+## Phase 2: GREEN - Implement Minimal Code
+
+**Purpose:** Make the failing test pass with the simplest possible implementation.
+
+**Do:**
+* Write ONLY enough code under test to make the current test pass
+* Keep implementation simple and focused on passing THIS test
+* Run the test and verify it PASSES
+* Run ALL previous tests to check for regressions
+* Stop when test is green - resist adding more
+
+**Don't:**
+* Implement features for tests you haven't written yet
+* Add speculative code "for the future"
+* Refactor or optimize yet (that's Phase 4)
+* Skip running all tests to verify no regressions
+
+**Pattern:**
+- **✅ DO**: Write minimal code to pass current test only, verify all tests pass
+- **❌ DON'T**: Add dependencies, async, or features no test demands yet (Phase 2 focus)
+
+See framework-specific rules for concrete code examples.
+
+## Phase 3a: REFACTOR - Improve Code Quality
+
+**Purpose:** Improve code structure and quality while keeping all tests green.
+
+**Refactor Validation (if maps exist):**
+* Verify refactored code still matches domain concepts
+* Ensure new helpers align with domain terminology
+* Check that abstractions map to domain structure
+
+**Do:**
+* Analyze code under test for smells and improvement opportunities
+* **SUGGEST** refactorings first - don't implement yet
+* Explain WHAT to refactor, WHY it improves the code
+* Identify all impacted code under test files
+* Identify all impacted test files
+* Wait for human approval before implementing
+
+**Don't:**
+* Implement refactorings without suggesting first
+* Suggest multiple refactorings and implement all at once
+* Skip identifying impacts on other code/tests
+* Change behavior (that requires new tests first in Phase 1: RED)
+
+**Refactoring Checklist (Phase 3a):**
+1. **Identify smells:** Duplication, long methods, poor names, magic values
+2. **Suggest improvements:** Extract methods, rename, introduce constants, use patterns
+3. **Identify impacts:** List affected code under test files and test files
+4. **Prompt human:** Present suggestions and wait for approval
+5. **Ready for Phase 3b:** Move to implementation after approval
+
+**Pattern:**
+- **✅ DO**: Suggest refactorings with impacts, explain WHY, wait for approval
+- **❌ DON'T**: Implement refactorings without suggesting first or identifying impacts
+
+See framework-specific rules for concrete examples and formats.
+
+## Phase 3b: Implement Refactorings (After Approval)
+
+**Purpose:** Apply approved refactorings while keeping all tests green.
+
+**Do:**
+* Implement ONE approved refactoring at a time
+* Run ALL tests after each refactoring
+* Update affected tests immediately if needed
+* Stop if any test fails and fix before continuing
+* Commit after each successful refactoring
+
+**Don't:**
+* Implement multiple refactorings at once
+* Skip running tests between refactorings
+* Continue to next refactoring if tests are broken
+* Leave tests broken "to fix later"
+
+**Pattern:**
+- **✅ DO**: Implement ONE approved refactoring, run tests, verify they pass, commit
+- **❌ DON'T**: Implement multiple refactorings simultaneously (Phase 3b focus)
+
+See framework-specific rules for concrete code examples.
+
+## Workflow Summary
+
+```
+0. BUILD SIGNATURES
+   ↓ (create test structure for domain/scope)
+   
+1. RED (one test at a time)
+   ↓ (write test, verify it fails correctly)
+   
+2. GREEN (make that test pass)
+   ↓ (minimal implementation, verify all tests pass)
+   
+3a. REFACTOR (suggest improvements)
+   ↓ (identify impacts, prompt human)
+   
+3b. IMPLEMENT (approved refactorings)
+   ↓ (one at a time, keep tests green)
+
+REPEAT (next test in scope)
+   └→ Back to step 1-3 until all tests in scope are implemented
+```
+
+## Integration with BDD Behavior Rule
+
+This TDD workflow rule **depends on and extends** `bdd-rule.mdc`:
+
+* **Phase 0 (Build Signatures)**: Follow § 1 (Business Readable Language)
+* **Phase 1 (RED)**: Follow § 2-5 (Comprehensive, Context, Layers, Front-End)
+* **Phase 2 (GREEN)**: Keep tests aligned with BDD principles
+* **Phase 3a-3b (REFACTOR)**: Maintain BDD test quality throughout
+
+**Always reference `bdd-rule.mdc` for:**
+* Test naming conventions (describe/it structure)
+* What to test and what not to test
+* How to organize tests and share context
+* Layer-specific testing approaches
+
+## Framework-Specific Workflows
+
+For framework-specific TDD examples and patterns:
+* **Jest/JavaScript**: See `bdd-workflow-jest-rule.mdc`
+* **Mamba/Python**: See `bdd-workflow-mamba-rule.mdc`
+
+## Command Usage
+
+To use this workflow interactively:
+* `\tdd-workflow` — Start TDD workflow on current test file
+* `\tdd-workflow --scope describe` — Work on current describe block (default)
+* `\tdd-workflow --scope next:3` — Work on next 3 tests
+* `\tdd-workflow --scope all` — Work on all test signatures
+* `\tdd-workflow --phase signatures` — Jump to Phase 0 (build signatures)
+* `\tdd-workflow --phase red` — Jump to Phase 1 (RED - failing test)
+* `\tdd-workflow --phase green` — Jump to Phase 2 (GREEN - implement)
+* `\tdd-workflow --phase refactor` — Jump to Phase 3a (suggest refactorings)
+
+See `bdd-workflow-cmd.md` for full command documentation.

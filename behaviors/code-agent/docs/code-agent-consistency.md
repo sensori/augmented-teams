@@ -4,7 +4,7 @@ The **Behavior Consistency** feature identifies and summarizes overlapping, inco
 
 ## Implementation
 
-The behavior consistency is implemented according to `behavior-consistency-rule.mdc`:
+The behavior consistency is implemented in `code-agent-runner.py` via the `behavior_consistency()` function according to `code-agent-consistency-rule.mdc`.
 
 ### Rule Compliance
 
@@ -17,9 +17,9 @@ The behavior consistency is implemented according to `behavior-consistency-rule.
 - ✅ Use OpenAI function calling for semantic analysis
 
 **Never:**
-- ✅ Edit, merge, or delete files automatically
-- ✅ Treat stylistic differences as inconsistencies
-- ✅ Override intentional divergence (e.g., feature-specific exceptions)
+- ❌ Edit, merge, or delete files automatically
+- ❌ Treat stylistic differences as inconsistencies
+- ❌ Override intentional divergence (e.g., feature-specific exceptions)
 
 ### Semantic Analysis
 
@@ -36,37 +36,40 @@ The consistency check uses OpenAI function calling to perform semantic analysis 
 - Loads from `behaviors/.env`, `.env`, or system environment
 - Install dependencies: `pip install openai python-dotenv`
 
+**Function Schema:**
+The implementation uses OpenAI function calling with a predefined schema for analyzing:
+- Overlaps (behavior1, behavior2, similarity, difference, recommendation)
+- Contradictions (behavior1, behavior2, context, contradiction, recommendation)
+- Summary of findings
+
 ### Usage
 
 ```bash
 # Check all behaviors
-python behavior-consistency-cmd.py
+python behaviors/code-agent/code-agent-runner.py consistency
 
 # Check specific feature
-python behavior-consistency-cmd.py <feature>
-
-# Watch mode (auto-check on file changes)
-python behavior-consistency-cmd.py watch
+python behaviors/code-agent/code-agent-runner.py consistency <feature>
 ```
 
-### Watch Mode
+### Current Status
 
-Watch mode automatically runs consistency checks when behavior files change:
-- Monitors all `behaviors/*/cursor/` directories
-- Triggers check when `.mdc`, `.md`, or `.py` files change
-- Debounces rapid changes (waits 2 seconds after last change)
-- Shows notifications when checks run
+The consistency check is currently a **placeholder implementation** that:
+- Validates OpenAI package installation
+- Checks for API key configuration
+- Defines the analysis schema
+- Prints a placeholder message
 
-Start watching:
-```bash
-python behavior-consistency-cmd.py watch
-```
-
-Stop watching: Press `Ctrl+C`
+**To fully implement:**
+1. Load behavior files from deployed features
+2. Extract content from rules and commands
+3. Call OpenAI API with function calling
+4. Parse and format the analysis results
+5. Generate a markdown report
 
 ### Output
 
-The script generates a markdown report with:
+When fully implemented, the script will generate a report with:
 - Summary of behaviors analyzed
 - List of overlaps with similarity descriptions
 - List of contradictions with conflict descriptions
@@ -76,29 +79,33 @@ The script generates a markdown report with:
 ### When to Run
 
 * After behaviors are created, updated, changed, or deleted
-* As part of the behavior maintenance workflow (after `\behavior-sync` and `\behavior-index`)
+* As part of the behavior maintenance workflow (after sync and index)
 * Before committing behavior changes to catch inconsistencies early
-
-### Auto-Triggers
-
-The consistency check runs automatically:
-- **On workspace open** via VS Code task `"Behavior Consistency Check"` with `runOn: "folderOpen"`
-- **On file changes** via watch mode (start manually or use `"Behavior Watch Mode"` task)
+* Periodically to maintain semantic coherence as the behavior library grows
 
 ### Integration with Workflow
 
 The consistency check integrates with your existing behavior workflow:
 
 ```
-1. Edit behavior file → File watcher detects change
-2. Run \behavior-sync → Syncs to .cursor/
-3. Run \behavior-index → Updates index
-4. Consistency check runs automatically → Validates consistency
+1. Edit behavior file → File change detected
+2. Run sync: python behaviors/code-agent/code-agent-runner.py sync
+3. Run index: python behaviors/code-agent/code-agent-runner.py index
+4. Run consistency: python behaviors/code-agent/code-agent-runner.py consistency
+5. Review findings and resolve issues
 ```
+
+### Future Enhancements
+
+Potential improvements:
+- Auto-trigger on file changes (watch mode)
+- Integration with VS Code tasks for automatic checks
+- Caching of analysis results to avoid redundant API calls
+- Severity levels for different types of issues
+- Interactive resolution workflow
 
 ## Related Files
 
-- `behavior-consistency-rule.mdc` - The rule definition
-- `behavior-consistency-cmd.md` - Command documentation
-- `behavior-consistency-cmd.py` - Implementation
-- `BEHAVIOR-WATCH-SETUP.md` - Setup guide for auto-triggers
+- `code-agent-consistency-rule.mdc` - The rule definition
+- `code-agent-consistency-cmd.md` - Command documentation
+- `code-agent-runner.py` - Implementation (`behavior_consistency()` function)

@@ -1,0 +1,151 @@
+DOMAIN TERMINOLOGY SYNC BEHAVIOR
+=================================
+
+STATUS: Proposed
+PRIORITY: Medium
+CATEGORY: DDD / Code Quality
+DISCOVERED: 2025-11-05 during BDD workflow session
+
+PROBLEM STATEMENT
+-----------------
+When domain terminology changes in one artifact (e.g., test files), it creates 
+inconsistency across related artifacts. This leads to:
+- Misaligned domain maps vs actual code
+- Confusing interaction scenarios using old terms
+- Production code that doesn't match test language
+- Documentation drift from implementation
+
+CONCRETE EXAMPLE
+----------------
+During BDD test writing for mm3e-animations, we changed terminology:
+  BEFORE: "extracts power characteristics" 
+  AFTER:  "provides animation characteristics"
+
+Rationale: "extracts" is implementation-focused, "provides" is behavioral.
+This follows BDD § 1 (Business Readable Language) principle.
+
+RIPPLE EFFECT DISCOVERED
+-------------------------
+When terminology changes in ONE artifact, we must update:
+
+1. TEST FILES
+   - Changed describe/it blocks to use "provides"
+   - Updated comments to use behavioral language
+   Location: demo/mm3e-animations/mm3e-effects-section.test.mjs
+
+2. DOMAIN MAPS (not yet updated)
+   - PowerItem section uses old "extracts" terminology
+   - Should say "Provides characteristics for animation"
+   Location: demo/mm3e-animations/mm3e-animations-domain-map.txt
+
+3. INTERACTION MAPS (not yet updated)
+   - Scenario 1 "PowerItem extracts characteristics"
+   - Should say "PowerItem provides characteristics"
+   Location: demo/mm3e-animations/mm3e-animations-domain-interactions.txt
+
+4. PRODUCTION CODE (alignment check needed)
+   - Method names might use extract* vs provide*
+   - Variable names should align with domain terms
+   Location: demo/mm3e-animations/mm3e-effects-section.mjs
+
+5. RELATED TEST AREAS (consistency check needed)
+   - Other test files referencing same concepts
+   - Ensure all use same terminology
+
+PROPOSED BEHAVIOR
+-----------------
+Name: domain-terminology-sync (or ddd-terminology-sync)
+Location: behaviors/ddd/ddd-terminology-sync-rule.mdc
+
+PURPOSE:
+When domain terminology changes are detected, automatically:
+1. Identify all artifacts containing the old terminology
+2. Suggest updates for consistency
+3. Validate that changes align with domain principles
+4. Ensure behavioral language throughout
+
+TRIGGERING CONDITIONS:
+- User changes describe/it block language
+- User updates domain map terminology
+- User refactors production code with new names
+- /ddd-analyze detects terminology drift
+
+AUTOMATIC CHECKS:
+1. Scan domain map for old terminology
+2. Scan interaction map for old scenarios
+3. Grep production code for related method/variable names
+4. Find related test files with same concepts
+5. Present comprehensive change list to user
+
+IMPLEMENTATION APPROACH
+-----------------------
+1. Create ddd-terminology-sync-rule.mdc with:
+   - Pattern matching for terminology changes
+   - Artifact scanning logic
+   - Consistency validation rules
+   - Behavioral language guidelines
+
+2. Create ddd-terminology-sync-runner.py with:
+   - File scanning across domain artifacts
+   - Term extraction and comparison
+   - Change suggestion generation
+   - Validation reporting
+
+3. Integrate with existing DDD behaviors:
+   - /ddd-analyze should check terminology consistency
+   - /ddd-interactions should validate term usage
+   - /bdd-validate should flag terminology mismatches
+
+BENEFITS
+--------
+- Prevents domain model drift
+- Maintains consistency across artifacts
+- Enforces behavioral language principles
+- Reduces confusion for future developers
+- Automates tedious cross-file updates
+
+SIMILAR PATTERNS
+----------------
+This is similar to:
+- Code refactoring (rename variable across files)
+- Schema migrations (update all dependent code)
+- API versioning (update all consumers)
+
+But applied to domain concepts and behavioral language.
+
+ACCEPTANCE CRITERIA
+-------------------
+When implemented, the behavior should:
+✓ Detect when domain terminology changes in any artifact
+✓ Identify ALL files containing old terminology
+✓ Suggest specific changes with line numbers
+✓ Validate that new terminology follows BDD principles
+✓ Support batch updates with preview/approval
+✓ Work across: tests, domain maps, interaction maps, production code
+
+NEXT STEPS
+----------
+1. Review this backlog item with team
+2. Decide placement (ddd vs new behavior-feature)
+3. Create behavior structure using /behavior-structure create
+4. Implement scanning and validation logic
+5. Add to BDD workflow as automatic check
+6. Document in practices.txt
+
+RELATED ITEMS
+-------------
+- BDD § 1: Business Readable Language (prefer domain terms)
+- DDD domain map structure analysis
+- Code refactoring automation
+- Multi-file consistency validation
+
+NOTES
+-----
+- This pattern applies beyond just "extracts" → "provides"
+- Could catch: technical jargon creeping into tests
+- Could enforce: ubiquitous language consistency
+- Could validate: domain map ↔ code alignment
+
+
+
+

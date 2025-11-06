@@ -1,0 +1,497 @@
+---
+description: Domain interaction analysis principles for mapping business flows between domain concepts
+globs: ["**/*-domain-interactions.txt", "**/*-domain-interactions.md", "**/*-interactions.*"]
+alwaysApply: false
+---
+**When** documenting how domain concepts interact to fulfill business scenarios,
+**then** maintain the same abstraction level as the domain map, focusing on domain concept flows rather than implementation details.
+
+Domain interaction analysis maps business flows showing how domain concepts work together. The goal is to show domain-level transformations, lookups, and business rules, not code-level implementation.
+
+**Executing Commands:**
+* `\ddd-interactions` — Create domain interaction analysis from domain map and code
+
+**Related Rules:**
+* `\ddd-structure-analysis-rule` — Core DDD principles for domain concepts
+* Domain interaction analysis builds on domain maps created via structure analysis
+
+---
+
+## OVERVIEW: Domain Interaction Analysis Format
+
+**Purpose:**
+Document business flows showing how domain concepts interact to fulfill scenarios, maintaining domain-level abstraction throughout.
+
+**Output Format:**
+Scenario-based interaction flows in same folder as domain map with naming pattern: `<descriptive-name>-domain-interactions.txt`
+
+**Key Elements:**
+1. **Scenario** - Business event or user action triggering the flow
+2. **Actors** - Which domain concepts participate
+3. **Flow** - Domain-level interactions (transformations, lookups, business rules)
+4. **Business Rules** - Domain constraints and logic
+5. **Result** - Business outcome
+
+**Example Structure:**
+```
+SCENARIO 1: [BUSINESS SCENARIO NAME]
+
+TRIGGER: User performs business action
+
+ACTORS:
+- Domain Concept A
+- Domain Concept B
+- Domain Concept C
+
+FLOW:
+
+1. Business event occurs
+   Platform triggers domain hook
+
+2. Domain concept handles the event through a one or more domain level behaviors, some exaples include
+   - validation
+   - transformation
+   - persisting
+   - loading
+   - orchestrating
+   - prioritizing
+   - etc
+   - forwarding
+3. Domain concept will interact with another domain concept passing and returning information
+4. Now the ball is passed to the next Domain concept which performs step 2 and may pass the ball again 
+5. All behaviors/ interactions shoud return a business level result, usually another concept on te domain map
+6. Interactions can alsooccur with other systems, apis, or plaftorm but must be desrbid in terms of businedd/ domain level state, factiors, and results
+
+BUSINESS RULES: --> list business rules that qualify constraints on behavior, validation, overriding logic
+
+```
+
+**File Location:**
+- Place in same directory as source code and domain map
+- Naming: `<system-name>-domain-interactions.txt`
+- Example: If `mm3e-animations-domain-map.txt` exists, create `mm3e-animations-domain-interactions.txt`
+
+---
+
+## ABSTRACTION LEVEL: Domain Concepts, Not Implementation
+
+**Principle:**
+Speak at the same abstraction level as the domain map. Only get specific when describing business transformations, business lookups, or business rules. Never include technical implementation details. Refer to ddd-structure-analysis.mdc for principles relating to correct level of abstraction
+
+**Do:**
+* Refer to domain concepts by name from domain map
+* Describe business transformations (PowerItem → Animation configuration)
+* Describe business lookups / validations / logic (eg finds macro by priority, matches power by type)
+* Describe business rules (teleport cancels drag, attached takes precedence)
+* Mention platform/external APIs at high level (Foundry triggers hook, Sequencer plays animation)
+* Focus on what business concept does and why
+
+**Don't:**
+* Include field names, property paths, or data structure details
+* Show HTML queries, DOM manipulation, or UI framework calls
+* Display code syntax, variable names, or function signatures
+* List CSS properties, styling details, or visual implementation
+* Show API parameters, configuration objects, or technical schemas
+* Focus on how code implements the concept
+
+**Examples from Actual Domain Interaction Analysis:**
+
+DON'T - Implementation Level (too technical):
+* ❌ "READS: item.getFlag('mm3e-animations', 'descriptorMacro')"
+  - Violates abstraction: Shows exact API call with parameters
+  - Should say: "Checks if power has flagged macro reference"
+  
+* ❌ "QUERIES: html.find('.header-button.control.my-custom-button').length"
+  - Violates abstraction: Shows jQuery selector syntax
+  - Should say: "Checks if button already exists"
+  
+* ❌ "CREATES: style object = { fill: color, fontFamily: 'Bangers', fontSize: size }"
+  - Violates abstraction: Shows data structure and styling details
+  - Should say: "Text Animation System creates floating text with alliance-based styling"
+  
+* ❌ "PARSES: resultElement.textContent.match(/vs.*?(\d+)/)"
+  - Violates abstraction: Shows regex pattern and parsing implementation
+  - Should say: "Extracts DC from save result"
+  
+* ❌ "CALLS: canvas.tokens.get(tokenId) → token"
+  - Violates abstraction: Shows exact API and return type
+  - Should say: "Retrieves target token"
+
+DO - Domain Level (correct abstraction):
+* ✅ "PowerItem transforms power into animation characteristics"
+  - Domain concept transformation
+  - Business purpose clear
+  
+* ✅ "Animation Resolution searches macros by descriptor name pattern"
+  - Business lookup described
+  - No implementation details
+  
+* ✅ "Checks for attached macro reference (highest priority)"
+  - Business rule stated
+  - Priority logic clear
+  
+* ✅ "Movement Type Detection maps movement mode to animation type"
+  - Business transformation
+  - Concept names from domain map
+  
+* ✅ "Foundry triggers rollAttack hook"
+  - Platform API at high level
+  - No parameter details
+
+* ✅ "Text Animation System creates floating text beside target"
+  - Domain concept action
+  - Business outcome clear
+  
+* ✅ "Combat Data Extraction parses chat message for DC and degrees of failure"
+  - Business extraction described
+  - What gets extracted, not how
+
+---
+
+## SCENARIO STRUCTURE: Business Flows
+
+**Principle:**
+Structure each scenario to show a complete business flow from trigger to result. Focus on domain concept participation and business logic, not code execution.
+
+**Scenario Template:**
+```
+SCENARIO N: [BUSINESS SCENARIO NAME IN CAPS]
+
+TRIGGER: [User action or system event]
+
+ACTORS:
+- [Domain Concept from map]
+- [Another Domain Concept]
+- [External System if relevant]
+
+FLOW:
+
+1. [Business step description]
+   [What domain concept does]
+   [Business transformation/lookup/rule]
+
+2. [Next business step]
+   [Domain concept interaction]
+   [Business outcome]
+
+[Continue with business steps...]
+
+BUSINESS RULES:
+- [Domain constraint]
+- [Priority order]
+- [Business logic]
+- [Special cases]
+
+RESULT: [Business outcome achieved]
+```
+
+**Flow Step Guidelines:**
+
+**Do:**
+* Start with business event or trigger
+* Show domain concept interactions
+* Describe transformations (Object A → Object B)
+* Describe lookups (finds by pattern, searches by type)
+* State business rules inline (priority order, special cases)
+* End with business result
+
+**Don't:**
+* Show code execution flow
+* List function calls and parameters
+* Include variable assignments
+* Show error handling details
+* Include logging or debugging steps
+
+**Examples from Actual Scenarios:**
+
+DON'T - Code Execution Flow:
+```
+❌ FLOW:
+
+1. [Event Detection] → PowerItem constructor
+   PASSES: atk (power data object)
+   RECEIVES: PowerItem instance
+   
+2. [PowerItem] → Reads item characteristics
+   ACCESSES: 
+     - item.system.descripteurs → descriptor property
+     - item.system.effetsprincipaux → effect property
+   GENERATES:
+     - descriptorName string (e.g., "Fire-Range-Damage")
+```
+- Violates: Shows exact code flow with parameters
+- Violates: Lists data structure paths
+- Violates: Shows variable types and examples
+
+DO - Business Flow:
+```
+✅ FLOW:
+
+1. Attack initiated
+   Foundry triggers rollAttack hook
+   
+2. Power lookup
+   Attack references linked power
+   Power retrieved from actor
+
+3. PowerItem creation
+   Power transformed into PowerItem
+   PowerItem extracts characteristics: descriptor, effect type, range, area
+
+4. Animation Resolution
+   Searches for animation using priority cascade
+   [Then describe priorities as business rules]
+```
+- Correct: Business events and actions
+- Correct: Domain concept names
+- Correct: Business transformations stated clearly
+
+---
+
+## BUSINESS RULES: Domain Constraints and Logic
+
+**Principle:**
+State business rules, priorities, and constraints clearly as domain logic, not code conditionals.
+
+**Do:**
+* State priorities as ordered lists
+* Describe special cases as business rules
+* Explain why rules exist (business rationale)
+* Use domain terminology
+
+**Don't:**
+* Show if/else code structure
+* Include boolean logic operators
+* List edge case handling code
+* Show validation implementation
+
+**Examples:**
+
+DON'T - Code Conditionals:
+```
+❌ IF result.crit === true:
+     IF isAlly:
+       SETS: file = "jb2a.ui.critical.red"
+     ELSE:
+       CALLS: animateTextBesideTarget(target, "Critical Hit!!!!!", "red", 60)
+   ELSE IF result.hit === true:
+     IF !isAlly:
+       CALLS: animateTextBesideTarget(target, "Hit", "green")
+```
+- Violates: Shows code structure
+- Violates: Boolean operators and comparisons
+- Violates: Function calls with parameters
+
+DO - Business Rules:
+```
+✅ BUSINESS RULES:
+- Critical hits get special treatment
+  * Ally criticals: Celebration effect
+  * Enemy criticals: Large announcement
+- Regular hits use text indicators
+- Alliance perspective inverts colors
+  * Ally hits shown as red (bad for us)
+  * Enemy hits shown as green (good for us)
+- All indicators animate consistently
+```
+- Correct: Rules stated as domain logic
+- Correct: Business rationale clear
+- Correct: No code structure shown
+
+---
+
+## TRANSFORMATIONS: Domain Concept Changes
+
+**Principle:**
+Describe business transformations showing what changes from one domain concept to another and why.
+
+**Transformation Pattern:**
+`[Source Concept] → [Transformation Logic] → [Target Concept]`
+
+**Do:**
+* State source and target concepts clearly
+* Describe business purpose of transformation
+* Mention key characteristics extracted/added
+* Use arrow notation for clarity
+
+**Don't:**
+* Show constructor calls or object creation code
+* List every field being copied
+* Include data type conversions
+* Show object mapping logic
+
+**Examples:**
+
+DON'T - Object Creation Code:
+```
+❌ CREATES: new PowerItem(item)
+   STORES: this.item = input
+   READS: item.system.descripteurs["2"] || item.system.descripteurs["1"]
+   SETS: descriptor property from fallback chain
+   PARSES: effect = power.system.effetsprincipaux.replace(/\d+/g, '')
+```
+
+DO - Business Transformation:
+```
+✅ Power transformed into PowerItem
+   PowerItem extracts characteristics:
+   - Descriptor (fire, ice, electricity, etc.)
+   - Effect type (damage, affliction, movement, etc.)
+   - Range (melee, ranged, personal, perception)
+   - Area shape (cone, line, burst)
+```
+- Correct: Transformation clearly stated
+- Correct: Business characteristics listed
+- Correct: No implementation details
+
+---
+
+## LOOKUPS: Finding Domain Concepts
+
+**Principle:**
+Describe business lookup logic showing search strategy and matching criteria without implementation details.
+
+**Lookup Pattern:**
+```
+[Concept] performs lookup
+Searches [where] by [criteria]
+Matches on [business pattern]
+Returns [what concept] or [fallback]
+```
+
+**Do:**
+* Describe search strategy (priority order, pattern matching)
+* State matching criteria as business rules
+* Show fallback logic as business flow
+* Use domain terminology
+
+**Don't:**
+* Show database queries or API calls
+* Include search algorithms or iteration code
+* List filter functions or predicates
+* Show null checking or error handling
+
+**Examples:**
+
+DON'T - Search Implementation:
+```
+❌ SEARCHES: game.macros.find(macro => macro.name === macroName)
+   IF NOT FOUND:
+     macroName = this.descriptorName
+     SEARCHES: game.macros.find(macro => macro.name === macroName)
+   FOR EACH power in powers:
+     CLEANS: powerName = power.name.toLowerCase().replace(/\d+$/, '')
+     IF powerName.includes(pattern):
+       RETURNS: power
+```
+
+DO - Business Lookup:
+```
+✅ Animation Resolution (priority cascade)
+
+Priority 1: Attached Macro
+- Checks if power has flagged macro reference
+- If found: Returns macro-based animation
+
+Priority 2: Name-Matched Macro
+- Searches macros by descriptor pattern
+- Tries expanded name first, simplified name second
+- If found: Returns matched animation
+
+Priority 3: AutoRec Entry
+- Queries animation library
+- Searches by power name and descriptor
+- If found: Returns library animation
+
+Priority 4: Generated
+- Creates from power characteristics
+- Returns generated animation
+```
+- Correct: Priority order as business rule
+- Correct: Search criteria stated clearly
+- Correct: No code shown
+
+---
+
+## CROSS-DOMAIN INTERACTIONS: Concept Reuse
+
+**Principle:**
+Show how domains reuse concepts and coordinate without duplicating the full flow.
+
+**Cross-Domain Pattern:**
+```
+DOMAIN A ↔ DOMAIN B:
+- Domain B reuses [Concept X] from Domain A
+- Domain B adds [specialized behavior]
+- Special coordination: [business rule]
+```
+
+**Do:**
+* State which concepts are reused
+* Describe what's added or specialized
+* Mention coordination rules
+* Keep brief (full flows in scenarios)
+
+**Don't:**
+* Duplicate full scenario flows
+* Show shared code or inheritance
+* List every reused function
+* Include implementation coupling
+
+**Example:**
+
+DON'T - Code Reuse:
+```
+❌ Movement Animation extends PowerItem:
+   Inherits: animation getter, descriptor, effect, range properties
+   Calls: super.animation.play(token)
+   Overrides: play() to add movement cancellation
+```
+
+DO - Business Reuse:
+```
+✅ POWER ACTIVATION ANIMATION ↔ MOVEMENT ANIMATION:
+- Movement Animation reuses PowerItem transformation
+- Movement Animation reuses Animation Resolution priority cascade
+- Movement adds movement-specific lookup (type detection, power patterns)
+- Movement adds special playback rule (teleport cancels drag)
+```
+- Correct: Domain-level reuse stated
+- Correct: Additions described
+- Correct: Special rules mentioned
+
+---
+
+## VALIDATION CHECKLIST
+
+When creating domain interaction analysis, verify:
+
+- [ ] **Same folder as domain map and source code**
+- [ ] **Naming pattern**: `<name>-domain-interactions.txt`
+- [ ] **Domain-level abstraction**: No code details
+- [ ] **Scenario structure**: Trigger → Actors → Flow → Rules → Result
+- [ ] **Concept names**: Match domain map exactly
+- [ ] **Transformations**: Stated clearly (A → B)
+- [ ] **Lookups**: Business criteria, not code
+- [ ] **Business rules**: Domain logic, not conditionals
+- [ ] **Platform APIs**: High-level only
+- [ ] **New concepts**: Added to domain map if introduced
+- [ ] **Cross-domain**: Reuse stated, not duplicated
+
+**Common Violations:**
+
+| Violation | Fix |
+|-----------|-----|
+| Shows field names | Use domain concept description |
+| Shows code syntax | Describe business transformation |
+| Lists API parameters | State high-level platform interaction |
+| Includes HTML/CSS details | Describe visual outcome at business level |
+| Shows conditional logic | State business rules |
+| Duplicates flows | Reference scenario or show reuse pattern |
+
+---
+
+**See Also:**
+* `\ddd-structure-analysis-rule` — Core DDD principles for domain maps
+* `\ddd-analyze` — Create domain map first
+* `\ddd-validate` — Validate domain map before creating interactions

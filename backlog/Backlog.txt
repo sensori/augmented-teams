@@ -1,0 +1,16 @@
+Dynamic intructions
+ai function call for creating service tests
+Notion Kanban
+Miro Kanban
+Agednt that runs better long loved jobs better than ciursor which stalls all the time
+MCP on services
+OPEN AI Azure 
+Real Test
+Test on checkin
+- write tests
+access to azure container app logs
+- real time costing
+
+
+
+languiages changes upstream artifacts change
