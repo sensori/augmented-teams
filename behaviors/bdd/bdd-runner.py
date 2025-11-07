@@ -1002,6 +1002,30 @@ def extract_test_structure_chunks(test_file_path: str, framework: str, max_chunk
                         "indent": indent,
                         "full_line": line
                     })
+        
+        elif framework == 'mamba':
+            # Extract description/context blocks
+            if 'with description(' in line or 'with context(' in line:
+                match = re.search(r"with (?:description|context)\(['\"]([^'\"]+)['\"]", line)
+                if match:
+                    blocks.append({
+                        "line": i,
+                        "type": "describe",
+                        "text": match.group(1),
+                        "indent": indent,
+                        "full_line": line
+                    })
+            # Extract it blocks
+            elif 'with it(' in line:
+                match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
+                if match:
+                    blocks.append({
+                        "line": i,
+                        "type": "it",
+                        "text": match.group(1),
+                        "indent": indent,
+                        "full_line": line
+                    })
     
     chunks = []
     current_chunk = []
@@ -1093,9 +1117,9 @@ def parse_test_structure(test_file_path: str, framework: str) -> List[Dict[str, 
                     })
         
         elif framework == 'mamba':
-            # Extract describe blocks
-            if 'with description(' in line or 'with describe(' in line:
-                match = re.search(r"with (?:description|describe)\(['\"]([^'\"]+)['\"]", line)
+            # Extract describe blocks (description and context)
+            if 'with description(' in line or 'with describe(' in line or 'with context(' in line:
+                match = re.search(r"with (?:description|describe|context)\(['\"]([^'\"]+)['\"]", line)
                 if match:
                     blocks.append({
                         "line": i,

@@ -273,13 +273,24 @@ def parse_structure_to_blocks(chunk: Dict[str, Any]) -> List[Dict[str, str]]:
     
     structure_lines = chunk.get('structure', '').split('\n')
     for line in structure_lines:
-        # Parse lines like: "  Line 123: describe('something', () => {"
-        match = re.match(r'\s*Line (\d+):\s+(describe|it)\(["\']([^"\']+)', line)
-        if match:
+        # Parse lines like:
+        # Jest: "  Line 123: describe('something', () => {"
+        # Mamba: "  Line 123: with description('something'):"
+        jest_match = re.match(r'\s*Line (\d+):\s+(describe|it)\(["\']([^"\']+)', line)
+        mamba_match = re.match(r'\s*Line (\d+):\s+with\s+(description|context|it)\(["\']([^"\']+)', line)
+        
+        if jest_match:
             blocks.append({
-                'line': int(match.group(1)),
-                'type': match.group(2),
-                'text': match.group(3)
+                'line': int(jest_match.group(1)),
+                'type': jest_match.group(2),
+                'text': jest_match.group(3)
+            })
+        elif mamba_match:
+            block_type = 'describe' if mamba_match.group(1) in ['description', 'context'] else 'it'
+            blocks.append({
+                'line': int(mamba_match.group(1)),
+                'type': block_type,
+                'text': mamba_match.group(3)
             })
     
     return blocks
@@ -396,6 +407,38 @@ def validate_iterative(test_file: str, framework: str, chunk_size: int = 10, cur
     
     print(f"\nValidating against {len(rules)} sections")
     print(f"Chunk size: {chunk_size} blocks\n")
+    
+    # NEW: Show ALL section rules as one-liners FIRST
+    print("="*60)
+    print("ALL SECTION RULES (Review BEFORE validating)")
+    print("="*60)
+    for section_num in sorted(rules.keys()):
+        section = rules[section_num]
+        principle = section.get('principle', 'N/A')
+        # Truncate principle to first 80 chars
+        principle_short = principle[:80] + "..." if len(principle) > 80 else principle
+        
+        print(f"\n§ {section_num}: {section['title']}")
+        print(f"   Principle: {principle_short}")
+        
+        if section.get('checklist'):
+            print(f"   Checklist items: {len(section['checklist'])}")
+            # Show first 3 checklist items
+            for i, item in enumerate(section['checklist'][:3]):
+                item_short = item[:70] + "..." if len(item) > 70 else item
+                print(f"     □ {item_short}")
+            if len(section['checklist']) > 3:
+                print(f"     ... ({len(section['checklist']) - 3} more)")
+    
+    print("\n" + "="*60)
+    print("AI: Review all 5 sections above to understand full context")
+    print("    This prevents fixing one section and violating another")
+    print("="*60)
+    
+    if not cursor_mode:
+        input("\nPress ENTER to begin section-by-section validation... ")
+    else:
+        print("\n[Cursor mode: Proceeding to section-by-section validation]\n")
     
     all_violations = []
     

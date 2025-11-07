@@ -813,7 +813,7 @@ if __name__ == "__main__":
         force = "--force" in sys.argv or "-f" in sys.argv
         feature = None
         for arg in sys.argv[2:]:
-            if arg not in ["--force", "-f"]:
+            if arg not in ["--force", "-f", "--no-guard", "--from-command"]:
                 feature = arg
                 break
         behavior_sync(feature, force=force)
@@ -825,7 +825,7 @@ if __name__ == "__main__":
     elif command == "index":
         feature = None
         for arg in sys.argv[2:]:
-            if arg not in ["--no-guard", "--from-command"]:
+            if arg not in ["--no-guard", "--from-command", "--force", "-f"]:
                 feature = arg
                 break
         behavior_index(feature)
