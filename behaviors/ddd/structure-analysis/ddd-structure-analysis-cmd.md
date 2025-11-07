@@ -21,7 +21,7 @@
 1. **User** invokes analysis via `\ddd-analyze` or `\ddd-analyze <path>`
 
 2. **MANDATORY: AI Agent reads the rule file** (ddd-structure-analysis-rule.mdc):
-   - Read § 1-7 to understand all DDD principles
+   - Read § 1-10 to understand all DDD principles
    - Review DO/DON'T examples for each principle
    - NO EXCEPTIONS - cannot analyze without reading rules
 
@@ -43,7 +43,10 @@
    - § 4: Organize domain-first (domains before infrastructure)
    - § 5: Focus on functional accomplishment
    - § 6: Maximize integration of related concepts
-   - § 7: Disambiguate similar concepts with precise verbs
+   - § 7: Domain concepts are nouns, behaviors are verbs
+   - § 8: Behaviors assigned to the concept that performs them
+   - § 9: No noun redundancy in domain or concept names
+   - § 10: Organize by domain concepts, not file structure
 
 6. **AI Agent** builds domain structure:
    - Start with functional purpose
@@ -64,6 +67,8 @@
    - [ ] Domain concepts are nouns, behaviors are verbs (§7)
    - [ ] Behaviors assigned to the concept that performs them (§8)
    - [ ] No noun redundancy in domain or concept names (§9)
+   - [ ] Organized by domain concepts, not file structure (§10)
+   - [ ] Infrastructure integrated under primary domain if single use (§10)
    - [ ] Relationships embedded in each concept
 
 8. **AI Agent** creates domain map file:

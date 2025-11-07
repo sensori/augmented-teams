@@ -409,6 +409,162 @@ def behavior_structure(action="validate", feature=None, behavior_name=None):
                     print(f"  â†’ Suggested: {issue['suggested_fix'].name}")
         
         return {"issues": len(all_issues), "features": len(features)}
+    
+    elif action == "fix":
+        """Automatically fix structure issues"""
+        print("="*60)
+        print("Behavior Structure Repair")
+        print("="*60)
+        
+        fixed_count = 0
+        for cursor_path in features:
+            issues, _ = validate_structure(cursor_path)
+            
+            for issue in issues:
+                if issue['type'] == 'missing_command' and 'suggested_fix' in issue:
+                    # Generate missing command file
+                    cmd_file = issue['suggested_fix']
+                    rule_file = issue['file']
+                    
+                    # Extract feature and behavior name from rule file
+                    rule_name = rule_file.stem
+                    parts = rule_name.split('-')
+                    if len(parts) >= 2:
+                        feature_name = parts[0]
+                        behavior_name = '-'.join(parts[1:-1])  # Everything except first and last
+                        
+                        # Create command template
+                        cmd_content = f'''### Command: /{feature_name}-{behavior_name}
+
+**Purpose:** Execute {behavior_name} behavior
+
+**Rule:**
+* `{rule_file.name}` — Defines triggering conditions
+
+**Steps:**
+1. **User** invokes `/{feature_name}-{behavior_name}`
+2. **Code** validates structure
+3. **AI Agent** reports results
+'''
+                        
+                        cmd_file.write_text(cmd_content, encoding='utf-8')
+                        print(f"Created {cmd_file.name}")
+                        fixed_count += 1
+                
+                elif issue['type'] == 'deprecated_sections':
+                    # Remove deprecated sections from command files
+                    file_path = issue['file']
+                    content = file_path.read_text(encoding='utf-8')
+                    
+                    # Remove deprecated sections
+                    content = re.sub(r'\*\*AI Usage:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
+                    content = re.sub(r'\*\*Code Usage:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
+                    content = re.sub(r'\*\*Implementation:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
+                    
+                    file_path.write_text(content, encoding='utf-8')
+                    print(f"Removed deprecated sections from {file_path.name}")
+                    fixed_count += 1
+        
+        print(f"\nFixed {fixed_count} issues")
+        return {"fixed": fixed_count, "features": len(features)}
+    
+    elif action == "create":
+        """Scaffold a new behavior"""
+        if not feature or not behavior_name:
+            print("Error: Both feature and behavior_name required for create action")
+            return {"error": "Missing required parameters"}
+        
+        print("="*60)
+        print(f"Creating New Behavior: {feature}/{behavior_name}")
+        print("="*60)
+        
+        behaviors_root = Path("behaviors")
+        feature_dir = behaviors_root / feature
+        
+        # Create feature directory if needed
+        if not feature_dir.exists():
+            feature_dir.mkdir(parents=True, exist_ok=True)
+            print(f"Created feature directory: {feature}")
+        
+        # Create behavior.json if it doesn't exist
+        behavior_json = feature_dir / "behavior.json"
+        if not behavior_json.exists():
+            config = {
+                "deployed": False,
+                "description": f"{feature} behavior",
+                "feature": feature
+            }
+            behavior_json.write_text(json.dumps(config, indent=2), encoding='utf-8')
+            print("Created behavior.json")
+        
+        # Create rule file
+        rule_file = feature_dir / f"{feature}-{behavior_name}-rule.mdc"
+        if not rule_file.exists():
+            rule_content = f'''---
+description: {behavior_name} behavior rule
+---
+
+**When** [condition occurs], **then** [action happens].
+
+**Executing Commands:**
+* `/{feature}-{behavior_name}` — Execute this behavior
+'''
+            rule_file.write_text(rule_content, encoding='utf-8')
+            print(f"Created {rule_file.name}")
+        
+        # Create command file
+        cmd_file = feature_dir / f"{feature}-{behavior_name}-cmd.md"
+        if not cmd_file.exists():
+            cmd_content = f'''### Command: /{feature}-{behavior_name}
+
+**Purpose:** Execute {behavior_name} behavior
+
+**Rule:**
+* `{rule_file.name}` — Defines triggering conditions
+
+**Runner:**
+python behaviors/{feature}/{feature}-runner.py
+
+**Steps:**
+1. **User** invokes `/{feature}-{behavior_name}`
+2. **Code** function `{behavior_name}()` — executes behavior logic
+3. **AI Agent** validates and reports results
+'''
+            cmd_file.write_text(cmd_content, encoding='utf-8')
+            print(f"Created {cmd_file.name}")
+        
+        # Optionally create runner file
+        runner_file = feature_dir / f"{feature}-runner.py"
+        if not runner_file.exists():
+            runner_content = f'''"""
+{feature.capitalize()} Behavior Runner
+"""
+
+import sys
+from pathlib import Path
+
+def require_command_invocation(command_name):
+    """Guard to prevent direct execution"""
+    if "--from-command" not in sys.argv and "--no-guard" not in sys.argv:
+        print(f"\\nPlease use the Cursor slash command instead:\\n")
+        print(f"    /{{command_name}}\\n")
+        sys.exit(1)
+
+def {behavior_name.replace('-', '_')}():
+    """Execute {behavior_name} behavior"""
+    print(f"Executing {behavior_name}...")
+    # Implementation here
+    pass
+
+if __name__ == "__main__":
+    require_command_invocation("{feature}-{behavior_name}")
+    {behavior_name.replace('-', '_')}()
+'''
+            runner_file.write_text(runner_content, encoding='utf-8')
+            print(f"Created {runner_file.name}")
+        
+        print("\nBehavior scaffolded successfully")
+        return {"created": True, "feature": feature, "behavior": behavior_name}
 
 
 # ============================================================================

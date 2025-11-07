@@ -1326,6 +1326,180 @@ Examples:
 
 ---
 
+## 10. Organization: Domain Concepts Over File Structure
+
+**Principle:**
+Organize around **domain concepts** (what things ARE and what you DO with them), not file structure, code organization, or technical artifacts. If you find yourself organizing by file types (.mdc, .md, .py) or technical layers (data, logic, presentation), stop and reorganize around user-facing capabilities.
+
+**Do:**
+* Organize by domain concepts: "Behavior" with nested capabilities (Structure, Validation, Creation, Deployment)
+* Ask: "What is this domain about?" not "What files does it have?"
+* Group by functional capability: "Structure" (what it consists of, how to validate, how to create)
+* Name sections by what they accomplish: "Validation", "Creation", "Deployment"
+
+**Don't:**
+* ❌ Organize by file types: "Rule Files", "Command Files", "Runner Files"
+* ❌ Organize by technical structure: "Configuration Layer", "Execution Layer"
+* ❌ Split capabilities across multiple sections: "Validation" separate from "Fix" separate from "Create"
+* ❌ Name sections by artifacts: "Documentation", "Scripts", "Configs"
+
+**Examples from Actual Domain Analysis:**
+
+DON'T - File Structure Organization (from initial mistakes):
+* ❌ BEFORE (violated § 10):
+```
+BEHAVIOR LIFECYCLE
+  Managing behavior definitions
+  
+  Rule (.mdc file)
+    Triggering conditions
+  
+  Command (.md file)
+    Executable steps
+  
+  Runner (.py file)
+    Python implementation
+
+BEHAVIOR STRUCTURE
+  Structure validation
+  
+BEHAVIOR DEPLOYMENT
+  File synchronization
+  
+BEHAVIOR DISCOVERY
+  Index maintenance
+  
+BEHAVIOR CONSISTENCY
+  Overlap analysis
+  
+BEHAVIOR SPECIALIZATION
+  Framework variations
+  
+BEHAVIOR SUGGESTION
+  Pattern detection
+```
+  - Violates § 10: Organized as separate flat domains by technical concern
+  - Violates § 9: Seven domains all with "BEHAVIOR" prefix (should integrate)
+  - Violates § 10: "Rule (.mdc file)", "Command (.md file)" emphasize file types
+  - User sees: scattered capabilities instead of cohesive domain
+
+DO - Domain Concept Organization (after corrections):
+* ✅ AFTER (follows § 10, § 9, § 6):
+```
+BEHAVIOR
+  Reusable instruction set defining how AI responds to specific situations
+  Complete definition consists of structure, validation, creation, deployment, and discovery
+  
+  Structure
+    What a behavior consists of and how its parts relate
+    
+    Rule
+      Triggering conditions and guidelines
+    
+    Command
+      Executable steps implementing a rule
+    
+    Runner
+      Python implementation that automates execution
+    
+    Relationships
+      How components link together
+    
+    Naming
+      Standardized file naming patterns
+  
+  Validation
+    Checks structure compliance
+  
+  Creation
+    Scaffolds new behavior
+  
+  Repair
+    Fixes structure issues
+  
+  Deployment
+    Synchronizes to active use
+  
+  Indexing
+    Maintains searchable indexes
+  
+  Consistency Analysis
+    Analyzes for overlaps and contradictions
+  
+  Specialized Behaviors
+    Framework-specific variations
+  
+  Pattern-Based Suggestion
+    Detects opportunities for new behaviors
+```
+  - ✅ Follows § 10: ONE master domain (BEHAVIOR) with nested capabilities
+  - ✅ Follows § 9: No domain noun redundancy (all integrated)
+  - ✅ Follows § 6: Related concepts maximally integrated
+  - ✅ Organized by domain concepts: what behaviors ARE and what we DO with them
+  - ✅ File types de-emphasized (mentioned but not organizational principle)
+  - User sees: complete, cohesive behavior management system
+
+**Why Domain-First Works:**
+- User thinks: "I want to work with behaviors" → finds everything under BEHAVIOR
+- All capabilities in one place: structure, validation, creation, deployment
+- File structure details nested where relevant (under Structure)
+- Technical implementation details integrated under capabilities they serve
+
+DON'T - Another Example (scope too narrow):
+* ❌ "Structure Validation" as domain name
+  - Violates § 10: Only describes ONE action (validate)
+  - Reality: We also fix and create structure
+  - Too narrow scope
+
+* ✅ "Structure" or "Structure Management"
+  - Follows § 10: Encompasses all actions (validate, fix, create)
+  - Complete functional scope
+  - Includes: what it consists of, validation, fixing, creation
+
+**Integration of Infrastructure:**
+When organizing, integrate infrastructure under primary domain if only used once:
+
+* ❌ BEFORE:
+```
+BEHAVIOR STRUCTURE
+  Validates naming
+
+SYSTEM INFRASTRUCTURE
+  Pattern Matching (only used by Structure)
+  Configuration Discovery (only used by Deployment)
+  OpenAI Function Calling (only used by Consistency)
+```
+  - Infrastructure artificially separated from primary use
+
+* ✅ AFTER:
+```
+BEHAVIOR
+  Structure
+    Naming
+      Pattern Matching (integrated here - only used by naming)
+  
+  Deployment
+    Configuration Discovery (integrated here - only used by deployment)
+  
+  Consistency Analysis
+    Semantic Analysis
+      OpenAI Function Calling (integrated here - only used by consistency)
+
+SYSTEM INFRASTRUCTURE
+  File System Operations (used by multiple: Structure, Deployment, Indexing)
+  Runner Guard (used by all runners)
+```
+  - Infrastructure integrated under primary domain if single use
+  - Only in SYSTEM INFRASTRUCTURE if used by multiple domains
+
+**Test Questions:**
+1. "Am I organizing by file types or domain concepts?" → If file types, reorganize
+2. "Does this section name describe ONE action or COMPLETE capability?" → If one action, expand scope
+3. "Are related capabilities scattered or integrated?" → Should be integrated
+4. "Does infrastructure serve one domain or many?" → If one, integrate; if many, keep separate
+
+---
+
 ## Domain Structure Output Format
 
 **Input Sources:**
@@ -1409,6 +1583,8 @@ SYSTEM INFRASTRUCTURE
 - [ ] Domain concepts are nouns, behaviors are verbs (§7)
 - [ ] Behaviors assigned to the concept that performs them (§8)
 - [ ] No noun redundancy in domain or concept names (§9)
+- [ ] Organized by domain concepts, not file structure or technical artifacts (§10)
+- [ ] Infrastructure integrated under primary domain if single use, separate if multiple (§10)
 - [ ] Relationships embedded in each concept (not separate section)
 
 ---
