@@ -9,10 +9,11 @@
 * `\behavior-suggest-rule` — Rule that triggers behavior suggestions when repetitive patterns are detected
 
 **Steps:**
-1. The AI agent analyzes current session/conversation for repetitive patterns
-2. The AI agent identifies common tasks, code structures, or operations being repeated
-3. The AI agent generates suggestion with context about the repetitive pattern
-4. The AI agent presents suggestion to user in natural language
-5. The user provides confirmation or rejection
-6. The AI agent asks user where behavior should be placed (existing behavior-feature, new behavior-feature, or current feature)
-7. After user confirmation, the AI agent uses `\behavior-structure create` to scaffold the new behavior
+1. **AI Agent** analyzes current session/conversation for repetitive patterns
+2. **AI Agent** identifies common tasks, code structures, or operations being repeated
+3. **AI Agent** generates suggestion with context about the repetitive pattern
+4. **AI Agent** presents suggestion to user in natural language
+5. **User** provides confirmation or rejection
+6. **AI Agent** asks user where behavior should be placed (existing behavior-feature, new behavior-feature, or current feature)
+7. **AI Agent** uses `/code-agent-structure create <feature> <behavior-name>` to scaffold the new behavior after user confirmation
+8. **AI Agent** suggests running `/code-agent-index` and `/code-agent-structure validate` after creation

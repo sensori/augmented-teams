@@ -36,10 +36,14 @@ Creates:
 `python behaviors/code-agent/code-agent-runner.py structure create <feature> <behavior-name> [--no-implementation]` — Scaffolds new behavior files
 
 **Steps:**
-1. **User** invokes command via `\behavior-structure create <feature> <behavior-name>`
-2. **Code** function `create_behavior(cursor_path, behavior_name, create_implementation)` — creates rule file with When/Then template, command file with governance sections, optional runner file, returns list of created files
-3. **Code** displays list of created files with relative paths
-4. **Code** suggests next steps (review templates, run index, validate)
+1. **User** invokes command via `/behavior-structure create <feature> <behavior-name>`
+2. **Code** (`Commands.structure(action="create", feature, behavior_name)`) calls `Feature.create(feature, behavior_name)` to scaffold new behavior
+3. **Code** creates rule file with When/Then template and `**Executing Commands:**` section
+4. **Code** creates command file with governance sections (`**Rule:**`, `**Runner:**`, `**Steps:**`)
+5. **Code** creates optional runner file (if implementation needed)
+6. **Code** displays list of created files with relative paths
+7. **Code** suggests next steps (review templates, run `/code-agent-index`, run `/code-agent-structure validate`)
+8. **AI Agent** reviews created files and confirms scaffolding to user
 
 **Template Contents:**
 * Rule file: When/then structure with Always/Never sections + `**Executing Commands:**` section

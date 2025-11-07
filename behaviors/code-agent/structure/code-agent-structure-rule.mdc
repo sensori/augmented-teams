@@ -101,13 +101,16 @@ Behaviors are organized within a **Behavior Features** —  a collection of tigh
 * Manually fix structure issues that can be automated
 
 **Command Steps:**
-Commands must include a `**Steps:**` section that lists the sequential actions to execute the behavior. Each step should specify who/what performs it:
-* **User steps** — User actions (e.g., "1. **User** invokes command via `\command-name`")
-* **Code steps** — Python functions that execute deterministic tasks (e.g., "2. **Code** loads configuration file and extracts DO/DON'T examples")
+Commands must include a `**Steps:**` section that lists the sequential actions to execute the behavior. Each step MUST specify who/what performs it:
+* **User steps** — User actions (e.g., "1. **User** invokes command via `/command-name`")
+* **Code steps** — Python functions that execute deterministic tasks
+  - MUST include function signature with parameters (e.g., "2. **Code** (`Commands.structure(action="validate", feature)`) calls `Feature.validate(feature)` to discover and validate features")
+  - MUST specify the actual function name and key parameters
+  - MUST indicate what the function returns or outputs
 * **AI Agent steps** — AI (in conversation) analyzes data and makes judgments (e.g., "3. **AI Agent** evaluates test file against BDD principles")
   - Can be the AI assistant analyzing function output directly in conversation
   - OR can use **OpenAI GPT function calling** (must be explicitly mentioned: "**AI Agent** (via GPT function calling) evaluates...")
-* **MCP tool steps** — Calls to MCP servers (e.g., "4. **MCP Tool** `execute_next_step()` is called with feature_name parameter")
+* **MCP tool steps** — Calls to MCP servers with tool name and parameters (e.g., "4. **MCP Tool** `execute_next_step(feature_name)` is called to advance TDD cycle")
 
 **Command Runner Implementation:**
 * **Consolidated runners** contain multiple related behavior functions in a single file

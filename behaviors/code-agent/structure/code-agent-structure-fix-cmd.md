@@ -42,11 +42,13 @@
 * `\behavior-structure-fix-rule` — [description of rule this command follows]
 
 **Steps:**
-1. The code function `behavior_structure(action="fix")` validates structure and identifies fixable issues
-2. The code function creates missing command files for existing rules (with template sections)
-3. The code function creates missing implementation files for existing commands (with template code)
-4. The code function adds missing relationship sections to rules (e.g., `**Executing Commands:**`)
-5. The code function adds missing relationship sections to commands (e.g., `**Rule:**`, `
+1. **Code** (`Commands.structure(action="fix", feature)`) calls `Feature.repair(feature)` to validate and repair structure issues
+2. **Code** creates missing command files for existing rules (with template sections including Steps)
+3. **Code** creates missing implementation files for existing commands (with template code)
+4. **Code** adds missing relationship sections to rules (e.g., `**Executing Commands:**`)
+5. **Code** adds missing relationship sections to commands (e.g., `**Rule:**`, `**Runner:**`, `**Steps:**`)
+6. **Code** outputs fix report with files created and fixed
+7. **AI Agent** reviews fix report and presents changes to user
 **Output Integration:**
 * When `behavior_structure()` runs with action="fix" and generates results, the AI should automatically:
   1. Check the command output for fix results

@@ -150,6 +150,10 @@ class BehaviorCommand:
                     file_path=self.file_path,
                     feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None
                 ))
+            else:
+                # Check that Code steps include function signatures
+                signature_violations = self.validate_steps_have_function_signatures(content)
+                violations.extend(signature_violations)
         except (IOError, UnicodeDecodeError) as e:
             violations.append(StructureViolation(
                 severity=ViolationSeverity.CRITICAL,
@@ -170,6 +174,38 @@ class BehaviorCommand:
         return ('**Steps:**' in content or 
                 '**steps:**' in content.lower() or
                 'Steps:' in content.lower())
+    
+    def validate_steps_have_function_signatures(self, content: str) -> List[StructureViolation]:
+        """Check if Code steps include function signatures with parameters"""
+        violations = []
+        
+        # Extract Steps section
+        import re
+        steps_match = re.search(r'\*\*Steps:\*\*(.*?)(?=\n\*\*|\Z)', content, re.DOTALL | re.IGNORECASE)
+        if not steps_match:
+            return violations
+        
+        steps_content = steps_match.group(1)
+        
+        # Find all Code steps
+        code_step_pattern = r'\d+\.\s+\*\*Code\*\*\s+(.*?)(?=\n\d+\.|\Z)'
+        code_steps = re.findall(code_step_pattern, steps_content, re.DOTALL)
+        
+        for i, step_text in enumerate(code_steps, 1):
+            # Check if step includes function signature with parentheses
+            # Looking for patterns like: (`FunctionName(param)`) or (ClassName.method(param))
+            has_signature = bool(re.search(r'\(`[A-Za-z_][A-Za-z0-9_.]*\([^)]*\)', step_text))
+            
+            if not has_signature:
+                violations.append(StructureViolation(
+                    severity=ViolationSeverity.IMPORTANT,
+                    principle="Command Steps Format",
+                    message=f"Code step {i} in {self.file_path.name} must include function signature with parameters (e.g., **Code** (`function_name(params)`))",
+                    file_path=self.file_path,
+                    feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None
+                ))
+        
+        return violations
     
     def sync(self, force: bool = False) -> Optional[str]:
         """Sync command file to .cursor/commands/"""

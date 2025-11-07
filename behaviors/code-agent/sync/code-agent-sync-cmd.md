@@ -1,10 +1,10 @@
-### Command: `behavior-sync-cmd.md`
+### Command: `code-agent-sync-cmd.md`
 
 **Purpose:** Keep AI behaviors up to date across all features.
 
 **Usage:**
-* `\behavior-sync` — sync all behaviors
-* `\behavior-sync <feature>` — sync a specific feature
+* `/code-agent-sync` — sync all behaviors
+* `/code-agent-sync <feature>` — sync a specific feature
 * `python behaviors/code-agent/code-agent-runner.py sync [feature] [--force]` — sync from command line
 * `python behaviors/code-agent/code-agent-runner.py sync watch` — watch for file changes and auto-sync
 
@@ -20,7 +20,7 @@
      - `*-tasks.json` → Merged into root `.vscode/tasks.json` (tasks combined, duplicate labels avoided)
 
 **Steps:**
-1. **Code** (`behavior_sync()`) scans `behaviors/*` for `behavior.json` marker files with `deployed: true`
+1. **Code** (`Feature.sync(feature, force)`) scans `behaviors/*` for `behavior.json` marker files with `deployed: true`
 2. **Code** iterates through files in each feature, skipping:
    - Files in `docs/` directories (documentation only)
    - Files marked as "draft" or "experimental" in first 10 lines
@@ -33,10 +33,10 @@
 5. **Code** collects `*-tasks.json` files and merges their tasks into root `.vscode/tasks.json` (duplicate labels avoided)
 6. **Code** overwrites only if source is newer (except for merged JSON files)
 7. **Code** reports results (synced, merged, skipped counts)
-8. **User** (optional) runs `\behavior-index` after syncing to update the behavior index
+8. **User** (optional) runs `/code-agent-index` after syncing to update the behavior index
 
 **Rule:**
-* `\code-agent-sync-rule` — Sync behaviors from features to deployed locations, preserve structure, merge configs, skip drafts
+* `/code-agent-sync-rule` — Sync behaviors from features to deployed locations, preserve structure, merge configs, skip drafts
 
 **Runner:**
 `python behaviors/code-agent/code-agent-runner.py sync [feature] [--force]` — Syncs behavior files to .cursor/ deployment locations

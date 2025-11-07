@@ -54,6 +54,13 @@ These are documentation sections that create clear links between rules, commands
     - Steps without performers are flagged during validation
   * `**Rule:**` — Which rule this command follows (e.g., `\behavior-structure-rule`)
   * `
+**Steps:**
+1. **Code** (`Commands.structure(action="validate", feature)`) calls `Feature.validate(feature)` to discover and validate features
+2. **Code** scans `behaviors/*` for `behavior.json` marker files
+3. **Code** validates structure for each feature's behaviors (naming, relationships, documentation)
+4. **Code** outputs validation report with violations and warnings
+5. **AI Agent** reviews validation report and presents findings to user
+
 **Watcher Output Integration:**
 * When `behavior_structure_watch()` runs and detects file changes, it automatically validates structure and outputs results to stderr
 * The AI should automatically:

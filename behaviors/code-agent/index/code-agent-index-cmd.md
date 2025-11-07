@@ -13,21 +13,19 @@
 * `.json` files (MCP configs)
 
 **Steps:**
-1. The user or AI agent runs `python command-runners/behavior-index-cmd.py` to generate the index
-2. The code function `behavior_index()` scans features marked with `code-agent-behavior.json` (deployed: true) for behavior files
-3. The code function detects changed or missing files
-4. The code function skips draft or experimental behaviors
-5. The code function **PRESERVES existing purposes from the index (code NEVER extracts or updates purposes)**
-6. The code function sets placeholder purpose `"[AI should update this purpose after reviewing the file]"` for new files
-7. The code function records feature name, file type, path, modification timestamp
-8. The code function updates both local (`behaviors/<feature>/code-agent-index.json`) and global (`.cursor/behavior-index.json`) indexes
-9. The code function prints summary with feature counts and last updated time
-10. **The AI agent must review `.cursor/behavior-index.json` and update purposes for:**
-    - New files (with placeholder purposes)
-    - Files with unclear or nonsensical purposes
-    - Files where the purpose needs refinement
-11. **After the AI agent updates purposes in the global index, the user or AI agent runs `python command-runners/behavior-index-cmd.py sync-purposes` to copy the updated purposes from global to all local index files**
-12. **The AI agent should consider running `\behavior-consistency` after indexing to validate for inconsistencies, overlaps, or contradictions in behaviors**
+1. **User** or **AI Agent** invokes `/code-agent-index` or `/code-agent-index <feature>`
+2. **Code** (`Commands.index(feature)`) calls `Feature.generate_index(feature)` to scan and index behaviors
+3. **Code** scans features marked with `behavior.json` (deployed: true) for behavior files
+4. **Code** detects changed or missing files
+5. **Code** skips draft or experimental behaviors
+6. **Code** preserves existing purposes from the index (code NEVER extracts or updates purposes)
+7. **Code** sets placeholder purpose `"[AI should update this purpose after reviewing the file]"` for new files
+8. **Code** records feature name, file type, path, modification timestamp
+9. **Code** updates both local (`behaviors/<feature>/code-agent-index.json`) and global (`.cursor/behavior-index.json`) indexes
+10. **Code** prints summary with feature counts and last updated time
+11. **AI Agent** reviews `.cursor/behavior-index.json` and updates purposes for new files or unclear purposes
+12. **AI Agent** (optional) runs `python behaviors/code-agent/code-agent-runner.py index sync-purposes` to copy updated purposes from global to local index files
+13. **AI Agent** suggests running `/code-agent-consistency` to validate for inconsistencies, overlaps, or contradictions
 
 **Purpose Management:**
 * **Code role:** Code preserves existing purposes and sets placeholders for new files

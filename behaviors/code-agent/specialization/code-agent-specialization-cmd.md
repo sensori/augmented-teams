@@ -14,48 +14,40 @@
 
 **Steps:**
 
-1. The function loads the feature's configuration file (`<feature>.json` or `code-agent-behavior.json`)
-2. The function checks if `isHierarchical` flag is set to `true`
-   - If `false` or missing, skip hierarchical validation (not an error, just different pattern)
-3. The function runs base structure validation first:
-   - Import and call `behavior_structure("validate", feature_name)`
-   - Report base structure issues
-4. The function validates the `hierarchy` configuration section:
+1. **User** or **AI Agent** invokes `/code-agent-specialization validate <feature>`
+2. **Code** (`validate_hierarchical_behavior(feature)`) loads the feature's configuration file (`<feature>.json` or `behavior.json`)
+3. **Code** checks if `isHierarchical` flag is set to `true` (if false/missing, skip hierarchical validation)
+4. **Code** runs base structure validation first by calling `Commands.structure("validate", feature_name)` and reports base structure issues
+5. **Code** validates the `hierarchy` configuration section:
    - Verify `baseRule` is declared
    - Verify `specializedRules` array exists and contains file names
    - Verify `referenceFiles` array exists and contains file names
-5. The function validates all declared files exist:
+6. **Code** validates all declared files exist:
    - Check base rule file exists
    - Check each specialized rule file exists
    - Check each reference file exists
    - Report missing files as errors (prevents misclassification)
-6. The function validates cross-references:
+7. **Code** validates cross-references:
    - Base rule mentions specialized rules (warning if missing)
    - Each specialized rule references base rule (error if missing)
    - Each specialized rule starts with `**When**` pattern (warning if missing)
-7. The function validates reference material links:
+8. **Code** validates reference material links:
    - Extract framework from reference file name
    - Find corresponding specialized rule
    - Check specialized rule mentions reference file
    - Report missing links as errors
-8. The function validates conceptual alignment (optional, advanced):
+9. **Code** validates conceptual alignment (optional, advanced):
    - Check principle numbering matches across files
    - Verify same section numbers exist in base and specialized rules
    - Check DO/DON'T example complexity is similar (±3 lines)
-9. The function outputs a detailed validation report:
-   - Summary of base validation results
-   - Count of hierarchical issues found
-   - Count of warnings
-   - List of specific issues and warnings
-10. The function returns validation results object:
-    - `base`: Base validation results
-    - `hierarchical`: Boolean indicating if feature uses hierarchical pattern
-    - `specialized_issues`: Count of hierarchical issues
-    - `warnings`: Count of warnings
-    - `issues_list`: Detailed issue descriptions
-    - `warnings_list`: Detailed warning descriptions
-    - `total_issues`: Combined issue count
-11. The function exits with error code 1 if issues found (for CI/CD integration)
+10. **Code** outputs a detailed validation report:
+    - Summary of base validation results
+    - Count of hierarchical issues found
+    - Count of warnings
+    - List of specific issues and warnings
+11. **Code** returns validation results object with base results, hierarchical status, issues, and warnings
+12. **Code** exits with error code 1 if issues found (for CI/CD integration)
+13. **AI Agent** reviews validation report and presents findings to user
 
 **Integration:**
 
