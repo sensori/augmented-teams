@@ -1,13 +1,13 @@
 ﻿"""
-Code Agent Runner - Consolidated runner for all code-agent behaviors
+Code Agent Runner - Domain model for AI behavior management
 
-This runner consolidates all code-agent functionality into a single file:
-- behavior_structure: Validate, fix, or create AI behavior files
-- behavior_sync: Sync behaviors from features to deployed locations  
-- behavior_consistency: Analyze behaviors for overlaps and contradictions
-- behavior_index: Maintain local and global behavior indexes
-- validate_hierarchical_behavior: Validate hierarchical behavior patterns
-- Common utilities: find_deployed_behaviors, require_command_invocation
+This runner uses an object-oriented domain model where each concept owns its state and behavior:
+- Feature: Collection of related behaviors, coordinates operations
+- Behavior: Reusable instruction set
+- BehaviorRule: Triggering conditions (.mdc file)
+- BehaviorCommand: Executable steps (.md file)  
+- Runner: Python automation (.py file)
+- StructureViolation: Compliance issue
 
 Usage:
     python behaviors/code-agent/code-agent-runner.py structure <action> [feature] [behavior_name]
@@ -21,925 +21,1173 @@ from pathlib import Path
 import json
 import sys
 import io
+import re
+import shutil
+import time
 from typing import List, Dict, Optional, Any
+from dataclasses import dataclass, field
+from enum import Enum
 
 # ============================================================================
-# COMMON UTILITIES
+# MODULE CONSTANTS
 # ============================================================================
 
-def find_deployed_behaviors(root: Optional[Path] = None) -> List[Path]:
-    """
-    Dynamically find all directories containing behavior.json with deployed=true.
+# Configuration keys
+BEHAVIOR_JSON = "behavior.json"
+KEY_DEPLOYED = "deployed"
+KEY_IS_SPECIALIZED = "isSpecialized"
+KEY_SPECIALIZATION = "specialization"
+KEY_FEATURE = "feature"
+
+# Exclusions
+EXCLUDED_FILES = {
+    BEHAVIOR_JSON,
+    "code-agent-runner.py",
+    "bdd-runner.py",
+    "ddd-runner.py"
+}
+
+EXCLUDED_PATTERNS = [
+    "*-index.json",
+    "*-tasks.json",
+    "*.pyc",
+    "__pycache__",
+    "docs"
+]
+
+# Naming pattern for behavior files
+BEHAVIOR_FILE_PATTERN = re.compile(
+    r"^([a-z0-9\-]+)-([a-z0-9\-]+)(?:-([a-z0-9\-]+))?-(rule|cmd|runner|mcp)\.(mdc|md|py|json)$",
+    re.IGNORECASE
+)
+
+# Display formatting
+SEPARATOR_LINE_WIDTH = 60
+LONG_SEPARATOR_WIDTH = 80
+CONTENT_PREVIEW_LENGTH = 2000
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
+class ViolationSeverity(Enum):
+    """Severity levels for structure violations"""
+    CRITICAL = "critical"
+    IMPORTANT = "important"
+    SUGGESTED = "suggested"
+
+# ============================================================================
+# DOMAIN MODEL
+# ============================================================================
+
+@dataclass
+class StructureViolation:
+    """Represents a structure compliance issue"""
+    severity: ViolationSeverity
+    principle: str
+    message: str
+    file_path: Optional[Path] = None
+    feature_name: Optional[str] = None
+    suggested_fix: Optional[Path] = None
     
-    Args:
-        root: Root directory to search from. Defaults to 'behaviors' in current directory.
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for reporting"""
+        return {
+            "severity": self.severity.value,
+            "principle": self.principle,
+            "message": self.message,
+            "file": str(self.file_path) if self.file_path else None,
+            "feature": self.feature_name,
+            "suggested_fix": str(self.suggested_fix) if self.suggested_fix else None
+        }
+
+
+@dataclass
+class Runner:
+    """Python automation file (.py) - stays in feature directory"""
+    file_path: Path
+    behavior: Optional['Behavior'] = None
+    
+    def exists(self) -> bool:
+        """Check if runner file exists"""
+        return self.file_path.exists()
+
+
+@dataclass  
+class BehaviorCommand:
+    """Executable steps implementing a rule (.md file)"""
+    file_path: Path
+    behavior: Optional['Behavior'] = None
+    
+    def validate(self) -> List[StructureViolation]:
+        """Validate command file structure and content"""
+        violations = []
         
-    Returns:
-        List of Path objects pointing to directories with deployed behaviors.
-    """
-    if root is None:
-        root = Path("behaviors")
-    
-    if not root.exists():
-        return []
-    
-    deployed_dirs = []
-    
-    for behavior_json in root.glob("**/behavior.json"):
+        # Check file exists
+        if not self.file_path.exists():
+            return violations
+        
+        # Check naming pattern
+        if not self.matches_naming_pattern():
+            violations.append(StructureViolation(
+                severity=ViolationSeverity.IMPORTANT,
+                principle="Pattern Matching",
+                message=f"Invalid command file name: {self.file_path.name}",
+                file_path=self.file_path,
+                feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None
+            ))
+        
+        # Check content requirements
         try:
-            with open(behavior_json, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                if config.get("deployed") == True:
-                    deployed_dirs.append(behavior_json.parent)
-        except Exception:
-            pass
-    
-    return deployed_dirs
-
-
-def find_all_behavior_jsons(root: Optional[Path] = None) -> List[Dict[str, any]]:
-    """
-    Find all behavior.json files and return their configurations.
-    
-    Args:
-        root: Root directory to search from. Defaults to 'behaviors' in current directory.
+            content = self.file_path.read_text(encoding='utf-8')
+            
+            # Check for Steps section
+            if not self.has_steps_section(content):
+                violations.append(StructureViolation(
+                    severity=ViolationSeverity.IMPORTANT,
+                    principle="Content Analysis",
+                    message=f"Command {self.file_path.name} must include 'Steps' section",
+                    file_path=self.file_path,
+                    feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None
+                ))
+        except (IOError, UnicodeDecodeError) as e:
+            violations.append(StructureViolation(
+                severity=ViolationSeverity.CRITICAL,
+                principle="File System",
+                message=f"Cannot read command file: {e}",
+                file_path=self.file_path,
+                feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None
+            ))
         
-    Returns:
-        List of dicts containing 'path' (Path to behavior.json parent dir) and 'config' (parsed JSON).
-    """
-    if root is None:
-        root = Path("behaviors")
+        return violations
     
-    if not root.exists():
-        return []
+    def matches_naming_pattern(self) -> bool:
+        """Check if filename matches expected pattern"""
+        return BEHAVIOR_FILE_PATTERN.match(self.file_path.name) is not None
     
-    behaviors = []
+    def has_steps_section(self, content: str) -> bool:
+        """Check if content has Steps section"""
+        return ('**Steps:**' in content or 
+                '**steps:**' in content.lower() or
+                'Steps:' in content.lower())
     
-    for behavior_json in root.glob("**/behavior.json"):
+    def sync(self, force: bool = False) -> Optional[str]:
+        """Sync command file to .cursor/commands/"""
+        if not self.file_path.exists():
+            return None
+        
+        dest_dir = Path('.cursor/commands')
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / self.file_path.name
+        
+        # Check if we should sync
+        if dest.exists() and not force:
+            if self.file_path.stat().st_mtime <= dest.stat().st_mtime:
+                return "skipped"
+        
         try:
-            with open(behavior_json, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                behaviors.append({
-                    'path': behavior_json.parent,
-                    'config': config,
-                    'json_path': behavior_json
-                })
-        except Exception:
-            pass
+            shutil.copy2(self.file_path, dest)
+            return "synced"
+        except (IOError, OSError) as e:
+            print(f"❌ Error syncing {self.file_path.name}: {e}")
+            return "error"
     
-    return behaviors
+    def to_index_entry(self) -> Dict[str, Any]:
+        """Convert to index entry for global index"""
+        return {
+            'feature': self.behavior.feature.name if self.behavior and self.behavior.feature else 'unknown',
+            'file': self.file_path.name,
+            'type': '.md',
+            'path': str(self.file_path).replace("\\", "/"),
+            'modified_timestamp': self.file_path.stat().st_mtime if self.file_path.exists() else 0
+        }
 
 
-def get_behavior_feature_name(behavior_dir: Path) -> Optional[str]:
-    """
-    Extract feature name from a behavior directory.
+@dataclass
+class BehaviorRule:
+    """Triggering conditions and guidelines (.mdc file)"""
+    file_path: Path
+    behavior: Optional['Behavior'] = None
+    commands: List[BehaviorCommand] = field(default_factory=list)
     
-    Args:
-        behavior_dir: Path to behavior directory (containing behavior.json).
+    def validate(self) -> List[StructureViolation]:
+        """Validate rule file structure and content"""
+        if not self.file_path.exists():
+            return []
         
-    Returns:
-        Feature name string, or None if not found.
-    """
-    try:
-        behavior_json = behavior_dir / "behavior.json"
-        if behavior_json.exists():
-            with open(behavior_json, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                return config.get("feature", behavior_dir.name)
-    except Exception:
-        pass
+        violations = []
+        violations.extend(self.validate_naming())
+        violations.extend(self.validate_content())
+        violations.extend(self.validate_relationships())
+        return violations
     
-    return behavior_dir.name
-
-
-def require_command_invocation(command_name: str):
-    """
-    Guard to prevent direct runner execution.
+    def validate_naming(self) -> List[StructureViolation]:
+        """Validate rule file naming"""
+        violations = []
+        
+        if not self.matches_naming_pattern():
+            violations.append(self.create_violation(
+                ViolationSeverity.IMPORTANT,
+                "Pattern Matching",
+                f"Invalid rule file name: {self.file_path.name}"
+            ))
+        
+        if self.has_verb_suffix():
+            violations.append(self.create_violation(
+                ViolationSeverity.IMPORTANT,
+                "Naming Convention",
+                f"Rule {self.file_path.name} should not have verb suffix"
+            ))
+        
+        return violations
     
-    Checks if runner was invoked with --from-command flag (set by Cursor commands).
-    If not, displays helpful message directing user to proper slash command.
+    def validate_content(self) -> List[StructureViolation]:
+        """Validate rule file content"""
+        violations = []
+        
+        try:
+            content = self.file_path.read_text(encoding='utf-8')
+            content_without_frontmatter = self.strip_yaml_frontmatter(content)
+            
+            if not self.has_when_pattern(content_without_frontmatter):
+                violations.append(self.create_violation(
+                    ViolationSeverity.CRITICAL,
+                    "Content Analysis",
+                    f"Rule {self.file_path.name} must start with **When** condition pattern"
+                ))
+            
+            if not self.has_executing_commands(content):
+                violations.append(self.create_violation(
+                    ViolationSeverity.IMPORTANT,
+                    "Content Analysis",
+                    f"Rule {self.file_path.name} must include 'Executing Commands' section"
+                ))
+        except (IOError, UnicodeDecodeError) as e:
+            violations.append(self.create_violation(
+                ViolationSeverity.CRITICAL,
+                "File System",
+                f"Cannot read rule file: {e}"
+            ))
+        
+        return violations
     
-    Args:
-        command_name: The slash command name (e.g., "code-agent-structure")
-    """
-    if "--from-command" not in sys.argv and "--no-guard" not in sys.argv:
-        print(f"\nâš ï¸  Please use the Cursor slash command instead:\n")
-        print(f"    /{command_name}\n")
-        print(f"This ensures the full AI workflow and validation is triggered.\n")
-        print(f"(For testing/debugging, use --no-guard flag to bypass this check)\n")
-        sys.exit(1)
-
-
-# ============================================================================
-# BEHAVIOR STRUCTURE
-# ============================================================================
-
-def behavior_structure(action="validate", feature=None, behavior_name=None):
-    """
-    Validate, fix, or create AI behaviors following structure and naming conventions.
+    def validate_relationships(self) -> List[StructureViolation]:
+        """Validate rule has matching commands"""
+        violations = []
+        
+        if not self.commands:
+            rule_dir = self.file_path.parent
+            base_name = self.file_path.stem.replace('-rule', '')
+            violations.append(self.create_violation(
+                ViolationSeverity.CRITICAL,
+                "Relationships",
+                f"Rule {self.file_path.name} missing matching command files",
+                suggested_fix=rule_dir / f"{base_name}-cmd.md"
+            ))
+        
+        return violations
     
-    Actions:
-    - validate: Check structure compliance
-    - fix: Automatically fix structure issues
-    - create: Scaffold a new behavior
+    def create_violation(self, severity: ViolationSeverity, principle: str, 
+                        message: str, suggested_fix: Optional[Path] = None) -> StructureViolation:
+        """Create a violation for this rule"""
+        return StructureViolation(
+            severity=severity,
+            principle=principle,
+            message=message,
+            file_path=self.file_path,
+            feature_name=self.behavior.feature.name if self.behavior and self.behavior.feature else None,
+            suggested_fix=suggested_fix
+        )
     
-    Rules:
-    1. File names must follow <feature>-<behavior-name>-<type>.<ext> pattern
-    2. Rules should have matching commands
-    3. Commands should reference rules and runners
-    4. Related files share consistent naming prefixes
-    """
-    import re
-    import time
+    def strip_yaml_frontmatter(self, content: str) -> str:
+        """Remove YAML frontmatter from content"""
+        if not content.strip().startswith('---'):
+            return content
+        
+        lines = content.split('\n')
+        for i in range(1, len(lines)):
+            if lines[i].strip() == '---':
+                return '\n'.join(lines[i + 1:])
+        
+        return content
     
-    # Naming pattern: <feature>-<behavior-name>-<type>.<ext>
-    # Types: rule, cmd, runner (for Python), mcp
-    # For commands: can have optional verb suffix: <feature>-<behavior-name>-<verb>-cmd.md
-    # Rules: <feature>-<behavior-name>-rule.mdc (no verb)
-    # Commands: <feature>-<behavior-name>-cmd.md OR <feature>-<behavior-name>-<verb>-cmd.md
-    # Extensions: .mdc, .md, .py, .json
-    pattern = re.compile(r"^([a-z0-9\-]+)-([a-z0-9\-]+)(?:-([a-z0-9\-]+))?-(rule|cmd|runner|mcp)\.(mdc|md|py|json)$", re.I)
-
-    # Files to exclude from validation
-    excluded_files = {
-        "behavior.json",
-        "code-agent-runner.py",
-        "bdd-runner.py", 
-        "ddd-runner.py"
-    }
-    excluded_patterns = [
-        "*-index.json",
-        "*-tasks.json",
-        "*.pyc",
-        "__pycache__",
-        "docs"
-    ]
-
-    def should_exclude(file: Path) -> bool:
-        """Check if file should be excluded from validation"""
-        if file.name in excluded_files:
-            return True
-        for pattern in excluded_patterns:
-            if file.match(pattern):
-                return True
-            if pattern in str(file):
-                return True
+    def has_when_pattern(self, content: str) -> bool:
+        """Check if content has When pattern"""
+        return '**When**' in content or '**when**' in content.lower()
+    
+    def matches_naming_pattern(self) -> bool:
+        """Check if filename matches expected pattern"""
+        return BEHAVIOR_FILE_PATTERN.match(self.file_path.name) is not None
+    
+    def has_verb_suffix(self) -> bool:
+        """Check if rule has inappropriate verb suffix"""
+        match = BEHAVIOR_FILE_PATTERN.match(self.file_path.name)
+        if match:
+            verb_suffix = match.group(3)
+            return verb_suffix is not None
         return False
 
-    def validate_structure(cursor_path):
-        """Validate structure and naming for a feature."""
-        issues = []
-        fixes_needed = []
-        files_found = {"rules": [], "commands": [], "implementations": [], "mcps": []}
-        
-        # Load behavior.json to check for specialization
-        behavior_config = {}
-        reference_files = []
-        base_rules = []
-        specialized_rules = []
-        is_specialized = False
-        
-        behavior_json_path = cursor_path / "behavior.json"
-        if behavior_json_path.exists():
-            try:
-                with open(behavior_json_path, 'r', encoding='utf-8') as f:
-                    behavior_config = json.load(f)
-                    is_specialized = behavior_config.get("isSpecialized", False)
-                    
-                    # Get reference files and rules from specialization section
-                    if "specialization" in behavior_config:
-                        spec = behavior_config["specialization"]
-                        reference_files = spec.get("referenceFiles", [])
-                        if "baseRule" in spec:
-                            base_rules.append(spec["baseRule"])
-                        specialized_rules.extend(spec.get("specializedRules", []))
-                    
-                    # Also check workflows for specialization
-                    if "workflows" in behavior_config:
-                        for workflow in behavior_config["workflows"].values():
-                            if isinstance(workflow, dict) and "specialization" in workflow:
-                                spec = workflow["specialization"]
-                                ref_files = spec.get("referenceFiles", [])
-                                reference_files.extend(ref_files)
-                                if "baseRule" in spec:
-                                    base_rules.append(spec["baseRule"])
-                                specialized_rules.extend(spec.get("specializedRules", []))
-            except:
-                pass
-        
-        for file in cursor_path.rglob("*"):
-            if file.is_dir():
-                continue
-            
-            # Skip excluded files
-            if should_exclude(file):
-                continue
-            
-            ext = file.suffix
-            name = file.name
-            
-            # Special handling for specialization files
-            if is_specialized:
-                # Reference files, base rules, and specialized rules are valid
-                if name in reference_files or name in base_rules or name in specialized_rules:
-                    # These files are declared in behavior.json - skip naming pattern check
-                    continue
-            
-            # Check naming pattern
-            match = pattern.match(name)
-            if not match:
-                issues.append({
-                    "type": "invalid_name",
-                    "file": file,
-                    "message": f"Invalid name pattern: {name}. Expected: <feature>-<behavior-name>-<type>.<ext>"
-                })
-                continue
-            
-            groups = match.groups()
-            feature_prefix = groups[0]
-            behavior_name = groups[1]
-            verb_suffix = groups[2]
-            file_type = groups[3]
-            file_ext = groups[4]
-            
-            base_behavior_name = behavior_name
-            
-            # Categorize files
-            if file_type == "rule":
-                if verb_suffix:
-                    issues.append({
-                        "type": "invalid_name",
-                        "file": file,
-                        "message": f"Rule {name} should not have verb suffix. Use: {feature_prefix}-{behavior_name}-rule.mdc"
-                    })
-                files_found["rules"].append((file, feature_prefix, base_behavior_name))
-            elif file_type == "cmd" and ext == ".md":
-                files_found["commands"].append((file, feature_prefix, base_behavior_name, verb_suffix))
-            elif file_type == "runner" and ext == ".py":
-                files_found["implementations"].append((file, feature_prefix, base_behavior_name, verb_suffix))
-            elif file_type == "mcp":
-                files_found["mcps"].append((file, feature_prefix, base_behavior_name))
-            
-            # Check for matching files
-            if file_type == "rule":
-                # Rules can have multiple commands (verb-suffixed) in same directory
-                rule_prefix = f"{feature_prefix}-{base_behavior_name}"
-                rule_dir = file.parent
-                
-                # Check in same directory as rule (allows subdirectories)
-                matching_cmds = list(rule_dir.glob(f"{rule_prefix}*-cmd.md"))
-                
-                if not matching_cmds:
-                    issues.append({
-                        "type": "missing_command",
-                        "file": file,
-                        "message": f"Rule {name} missing matching command files in same directory (expected: {rule_prefix}*-cmd.md)",
-                        "suggested_fix": rule_dir / f"{rule_prefix}-cmd.md"
-                    })
-            
-            # Check documentation and relationship sections
-            try:
-                content = file.read_text(encoding='utf-8', errors='ignore')
-                if not content.strip() or len(content.strip()) < 50:
-                    issues.append({
-                        "type": "missing_docs",
-                        "file": file,
-                        "message": f"File {name} is empty or lacks documentation"
-                    })
-                else:
-                    content_lower = content.lower()
-                    if file_type == "rule":
-                        # Rules must start with "**When** <event> condition,"
-                        # Skip frontmatter (YAML between --- markers) if present
-                        content_to_check = content.strip()
-                        if content_to_check.startswith('---'):
-                            # Find end of frontmatter
-                            lines = content_to_check.split('\n')
-                            frontmatter_end = -1
-                            for i in range(1, len(lines)):
-                                if lines[i].strip() == '---':
-                                    frontmatter_end = i
-                                    break
-                            if frontmatter_end > 0:
-                                # Skip frontmatter and get actual content
-                                content_to_check = '\n'.join(lines[frontmatter_end + 1:]).strip()
-                        
-                        if not content_to_check.startswith("**When**"):
-                            issues.append({
-                                "type": "invalid_rule_format",
-                                "file": file,
-                                "message": f"Rule {name} must start with '**When** <event> condition,' (after frontmatter)"
-                            })
-                        # Rules must reference executing commands
-                        if "**executing commands:**" not in content_lower:
-                            issues.append({
-                                "type": "missing_relationships",
-                                "file": file,
-                                "message": f"Rule {name} missing 'Executing Commands:' section"
-                            })
-                    elif file_type == "cmd" and ext == ".md":
-                        # Commands must reference rule they follow and include Steps
-                        missing_sections = []
-                        if "**rule:**" not in content_lower:
-                            missing_sections.append("Rule (which rule this command follows)")
-                        # Steps section is REQUIRED
-                        if "**steps:**" not in content_lower:
-                            missing_sections.append("Steps (sequential actions to execute)")
-                        
-                        # Check for deprecated sections that should be removed
-                        deprecated_sections = []
-                        if "**ai usage:**" in content_lower:
-                            deprecated_sections.append("AI Usage (use Steps instead)")
-                        if "**code usage:**" in content_lower:
-                            deprecated_sections.append("Code Usage (use Steps instead)")
-                        if "**implementation:**" in content_lower:
-                            deprecated_sections.append("Implementation (use Runner instead)")
-                        
-                        if missing_sections:
-                            issues.append({
-                                "type": "missing_relationships",
-                                "file": file,
-                                "message": f"Command {name} missing required sections: {', '.join(missing_sections)}"
-                            })
-                        
-                        if deprecated_sections:
-                            issues.append({
-                                "type": "deprecated_sections",
-                                "file": file,
-                                "message": f"Command {name} has deprecated sections: {', '.join(deprecated_sections)}"
-                            })
-            except:
-                pass
-        
-        return issues, fixes_needed
-
-    # Determine features to process
-    if feature:
-        behaviors_root = Path("behaviors")
-        cursor_path = behaviors_root / feature
-        if not (cursor_path / "behavior.json").exists():
-            all_behaviors = find_deployed_behaviors()
-            matching = [b for b in all_behaviors if b.name == feature]
-            cursor_path = matching[0] if matching else cursor_path
-        features = [cursor_path] if cursor_path.exists() else []
-    else:
-        features = find_deployed_behaviors()
-
-    if action == "validate":
-        all_issues = []
-        for cursor_path in features:
-            issues, _ = validate_structure(cursor_path)
-            for issue in issues:
-                all_issues.append({
-                    "feature": cursor_path.name,
-                    **issue
-                })
-        
-        print("="*60)
-        print("Behavior Structure Validation")
-        print("="*60)
-        
-        if not all_issues:
-            print("âœ… All behaviors follow structure and naming conventions.")
-        else:
-            print(f"âŒ Found {len(all_issues)} structure issues:\n")
-            for issue in all_issues:
-                print(f"[{issue['feature']}] {issue['message']}")
-                if "suggested_fix" in issue:
-                    print(f"  â†’ Suggested: {issue['suggested_fix'].name}")
-        
-        return {"issues": len(all_issues), "features": len(features)}
+    def has_executing_commands(self, content: str) -> bool:
+        """Check if content has Executing Commands section"""
+        return ('**Executing Commands:**' in content or
+                '**executing commands:**' in content.lower() or
+                'Executing Commands:' in content)
     
-    elif action == "fix":
-        """Automatically fix structure issues"""
-        print("="*60)
-        print("Behavior Structure Repair")
-        print("="*60)
+    def sync(self, force: bool = False) -> Optional[str]:
+        """Sync rule file to .cursor/rules/"""
+        if not self.file_path.exists():
+            return None
         
-        fixed_count = 0
-        for cursor_path in features:
-            issues, _ = validate_structure(cursor_path)
-            
-            for issue in issues:
-                if issue['type'] == 'missing_command' and 'suggested_fix' in issue:
-                    # Generate missing command file
-                    cmd_file = issue['suggested_fix']
-                    rule_file = issue['file']
+        dest_dir = Path('.cursor/rules')
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / self.file_path.name
+        
+        # Check if we should sync
+        if dest.exists() and not force:
+            if self.file_path.stat().st_mtime <= dest.stat().st_mtime:
+                return "skipped"
+        
+        try:
+            shutil.copy2(self.file_path, dest)
+            return "synced"
+        except (IOError, OSError) as e:
+            print(f"❌ Error syncing {self.file_path.name}: {e}")
+            return "error"
+    
+    def to_index_entry(self) -> Dict[str, Any]:
+        """Convert to index entry for global index"""
+        return {
+            'feature': self.behavior.feature.name if self.behavior and self.behavior.feature else 'unknown',
+            'file': self.file_path.name,
+            'type': '.mdc',
+            'path': str(self.file_path).replace("\\", "/"),
+            'modified_timestamp': self.file_path.stat().st_mtime if self.file_path.exists() else 0
+        }
+
+
+@dataclass
+class Behavior:
+    """Reusable instruction set defining how AI responds to specific situations"""
+    name: str
+    feature: Optional['Feature'] = None
+    rule: Optional[BehaviorRule] = None
+    commands: List[BehaviorCommand] = field(default_factory=list)
+    runner: Optional[Runner] = None
+    
+    def validate(self) -> List[StructureViolation]:
+        """Validate this behavior's structure"""
+        violations = []
+        
+        # Validate rule
+        if self.rule:
+            violations.extend(self.rule.validate())
+        else:
+            violations.append(StructureViolation(
+                severity=ViolationSeverity.CRITICAL,
+                principle="Structure",
+                message=f"Behavior {self.name} missing rule file",
+                feature_name=self.feature.name if self.feature else None
+            ))
+        
+        # Validate commands
+        if not self.commands:
+            violations.append(StructureViolation(
+                severity=ViolationSeverity.CRITICAL,
+                principle="Structure",
+                message=f"Behavior {self.name} missing command files",
+                feature_name=self.feature.name if self.feature else None
+            ))
+        else:
+            for cmd in self.commands:
+                violations.extend(cmd.validate())
+        
+        return violations
+    
+    def sync(self, force: bool = False) -> Dict[str, int]:
+        """Sync this behavior's files to .cursor/"""
+        counts = {'synced': 0, 'merged': 0, 'skipped': 0}
+        
+        # Sync rule
+        if self.rule:
+            result = self.rule.sync(force)
+            if result == "synced":
+                counts['synced'] += 1
+            elif result == "skipped":
+                counts['skipped'] += 1
+        
+        # Sync commands
+        for cmd in self.commands:
+            result = cmd.sync(force)
+            if result == "synced":
+                counts['synced'] += 1
+            elif result == "skipped":
+                counts['skipped'] += 1
+        
+        # Note: runners never sync (stay in feature directory)
+        
+        return counts
+    
+    def collect_index_entries(self) -> List[Dict[str, Any]]:
+        """Collect index entries for this behavior (Composite pattern)"""
+        entries = []
+        
+        if self.rule:
+            entries.append(self.rule.to_index_entry())
+        
+        for cmd in self.commands:
+            entries.append(cmd.to_index_entry())
+        
+        return entries
+
+
+@dataclass
+class Feature:
+    """Collection of tightly-knit, strongly related behaviors"""
+    name: str
+    path: Path
+    deployed: bool
+    description: str = ""
+    behaviors: List[Behavior] = field(default_factory=list)
+    is_specialized: bool = False
+    _invalid_files: List[Path] = field(default_factory=list)
+    
+    @classmethod
+    def discover_deployed(cls, root: Optional[Path] = None) -> List['Feature']:
+        """Find all features with deployed=true"""
+        if root is None:
+            root = Path("behaviors")
+        
+        if not root.exists():
+            return []
+        
+        features = []
+        
+        for behavior_json_path in root.glob(f"**/{BEHAVIOR_JSON}"):
+            try:
+                with open(behavior_json_path, 'r', encoding='utf-8') as config_file:
+                    config = json.load(config_file)
                     
-                    # Extract feature and behavior name from rule file
-                    rule_name = rule_file.stem
-                    parts = rule_name.split('-')
-                    if len(parts) >= 2:
-                        feature_name = parts[0]
-                        behavior_name = '-'.join(parts[1:-1])  # Everything except first and last
-                        
-                        # Create command template
-                        cmd_content = f'''### Command: /{feature_name}-{behavior_name}
+                    if config.get(KEY_DEPLOYED) == True:
+                        feature = cls.load_from_path(behavior_json_path.parent, config)
+                        if feature:
+                            features.append(feature)
+            except (json.JSONDecodeError, IOError, KeyError) as e:
+                # Skip files that can't be parsed
+                print(f"⚠️  Warning: Could not parse {behavior_json_path}: {e}")
+                continue
+        
+        return features
+    
+    @classmethod
+    def load(cls, feature_name: str, root: Optional[Path] = None) -> Optional['Feature']:
+        """Load a specific feature by name"""
+        if root is None:
+            root = Path("behaviors")
+        
+        feature_path = root / feature_name
+        if not feature_path.exists():
+            return None
+        
+        behavior_json_path = feature_path / BEHAVIOR_JSON
+        if not behavior_json_path.exists():
+            return None
+        
+        try:
+            with open(behavior_json_path, 'r', encoding='utf-8') as config_file:
+                config = json.load(config_file)
+                return cls.load_from_path(feature_path, config)
+        except (json.JSONDecodeError, IOError, KeyError) as e:
+            print(f"❌ Error loading feature {feature_name}: {e}")
+            return None
+    
+    @classmethod
+    def load_from_path(cls, path: Path, config: Dict[str, Any]) -> Optional['Feature']:
+        """Load feature from path and config"""
+        feature = cls(
+            name=config.get(KEY_FEATURE, path.name),
+            path=path,
+            deployed=config.get(KEY_DEPLOYED, False),
+            description=config.get("description", ""),
+            is_specialized=config.get(KEY_IS_SPECIALIZED, False)
+        )
+        
+        # Discover behaviors in this feature
+        feature.discover_behaviors()
+        
+        return feature
+    
+    def discover_behaviors(self):
+        """Discover all behaviors in this feature"""
+        exempted_files = self.get_specialization_exemptions()
+        behavior_files, invalid_files = self.scan_behavior_files(exempted_files)
+        self.create_behavior_objects(behavior_files)
+        self._invalid_files = invalid_files
+    
+    def scan_behavior_files(self, exempted_files: set) -> tuple[Dict[str, Dict[str, List[Path]]], List[Path]]:
+        """Scan and categorize behavior files"""
+        behavior_files: Dict[str, Dict[str, List[Path]]] = {}
+        invalid_files: List[Path] = []
+        
+        for file_path in self.path.rglob("*"):
+            if file_path.is_dir() or self.should_exclude(file_path):
+                continue
+            
+            if file_path.suffix not in ['.mdc', '.md', '.py', '.json']:
+                continue
+            
+            if file_path.name in exempted_files:
+                continue
+            
+            match = BEHAVIOR_FILE_PATTERN.match(file_path.name)
+            if not match:
+                invalid_files.append(file_path)
+                continue
+            
+            behavior_name = match.group(2)
+            file_type = match.group(4)
+            
+            if behavior_name not in behavior_files:
+                behavior_files[behavior_name] = {'rules': [], 'commands': [], 'runners': []}
+            
+            if file_type == "rule":
+                behavior_files[behavior_name]['rules'].append(file_path)
+            elif file_type == "cmd":
+                behavior_files[behavior_name]['commands'].append(file_path)
+            elif file_type == "runner":
+                behavior_files[behavior_name]['runners'].append(file_path)
+        
+        return behavior_files, invalid_files
+    
+    def create_behavior_objects(self, behavior_files: Dict[str, Dict[str, List[Path]]]):
+        """Create Behavior objects from categorized files"""
+        for behavior_name, files in behavior_files.items():
+            behavior = Behavior(name=behavior_name, feature=self)
+            
+            if files['rules']:
+                behavior.rule = BehaviorRule(file_path=files['rules'][0], behavior=behavior)
+            
+            for cmd_path in files['commands']:
+                command = BehaviorCommand(file_path=cmd_path, behavior=behavior)
+                behavior.commands.append(command)
+                if behavior.rule:
+                    behavior.rule.commands.append(command)
+            
+            if files['runners']:
+                behavior.runner = Runner(file_path=files['runners'][0], behavior=behavior)
+            
+            self.behaviors.append(behavior)
+    
+    def get_specialization_exemptions(self) -> set:
+        """Get list of files exempted from pattern matching for specialized behaviors"""
+        exempted = set()
+        
+        if not self.is_specialized:
+            return exempted
+        
+        # Load behavior.json to get specialization config
+        behavior_json_path = self.path / BEHAVIOR_JSON
+        if not behavior_json_path.exists():
+            return exempted
+        
+        try:
+            with open(behavior_json_path, 'r', encoding='utf-8') as config_file:
+                config = json.load(config_file)
+                
+                if KEY_SPECIALIZATION in config:
+                    spec = config[KEY_SPECIALIZATION]
+                    
+                    # Add reference files
+                    exempted.update(spec.get('referenceFiles', []))
+                    
+                    # Add base rule
+                    if 'baseRule' in spec:
+                        exempted.add(spec['baseRule'])
+                    
+                    # Add specialized rules
+                    exempted.update(spec.get('specializedRules', []))
+        except (json.JSONDecodeError, IOError, KeyError) as e:
+            print(f"⚠️  Warning: Could not parse specialization config: {e}")
+        
+        return exempted
+    
+    def should_exclude(self, file_path: Path) -> bool:
+        """Check if file should be excluded"""
+        if file_path.name in EXCLUDED_FILES:
+            return True
+        
+        for pattern in EXCLUDED_PATTERNS:
+            if file_path.match(pattern):
+                return True
+            if pattern in str(file_path):
+                return True
+        
+        return False
+    
+    def validate_structure(self) -> List[StructureViolation]:
+        """Validate this feature's behaviors"""
+        violations = []
+        
+        # Report invalid files that don't match naming pattern
+        for invalid_file in self._invalid_files:
+            violations.append(StructureViolation(
+                severity=ViolationSeverity.IMPORTANT,
+                principle="Pattern Matching",
+                message=f"Invalid name pattern: {invalid_file.name}. Expected: <feature>-<behavior-name>-<type>.<ext>",
+                file_path=invalid_file,
+                feature_name=self.name
+            ))
+        
+        # Validate behaviors
+        for behavior in self.behaviors:
+            violations.extend(behavior.validate())
+        
+        return violations
+    
+    def sync_behaviors(self, force: bool = False) -> Dict[str, int]:
+        """Sync this feature's behaviors"""
+        counts = {'synced': 0, 'merged': 0, 'skipped': 0}
+        
+        for behavior in self.behaviors:
+            behavior_counts = behavior.sync(force)
+            counts['synced'] += behavior_counts['synced']
+            counts['skipped'] += behavior_counts['skipped']
+        
+        return counts
+    
+    def collect_index_entries(self) -> List[Dict[str, Any]]:
+        """Collect index entries for all behaviors (Composite pattern)"""
+        entries = []
+        for behavior in self.behaviors:
+            entries.extend(behavior.collect_index_entries())
+        return entries
+    
+    @classmethod
+    def validate(cls, feature_name: Optional[str] = None) -> Dict[str, Any]:
+        """Discover features, validate all, print report - complete operation"""
+        # 1. Discover features
+        if feature_name:
+            feature = cls.load(feature_name)
+            features = [feature] if feature else []
+        else:
+            features = cls.discover_deployed()
+        
+        if not features:
+            print("❌ No features found")
+            return {"issues": 0, "features": 0}
+        
+        # 2. Validate all
+        all_violations = []
+        for feature in features:
+            violations = feature.validate_structure()
+            all_violations.extend(violations)
+        
+        # 3. Print report
+        cls.print_validation_report(all_violations, features)
+        
+        # 4. Return results
+        return {"issues": len(all_violations), "features": len(features)}
+    
+    @classmethod
+    def sync(cls, feature_name: Optional[str] = None, force: bool = False) -> Dict[str, Any]:
+        """Sync features to .cursor/ - complete operation"""
+        # 1. Discover features
+        if feature_name:
+            feature = cls.load(feature_name)
+            features = [feature] if feature else []
+        else:
+            features = cls.discover_deployed()
+        
+        if not features:
+            print("❌ No features found")
+            return {"synced": 0, "merged": 0, "skipped": 0}
+        
+        # 2. Sync each (delegates to behavior.sync())
+        total_synced, total_merged, total_skipped = 0, 0, 0
+        
+        for feature in features:
+            print(f"\nProcessing feature: {feature.name}")
+            counts = feature.sync_behaviors(force)
+            total_synced += counts['synced']
+            total_skipped += counts['skipped']
+        
+        # 3. Print report
+        cls.print_sync_report(total_synced, total_merged, total_skipped)
+        
+        return {"synced": total_synced, "merged": total_merged, "skipped": total_skipped}
+    
+    @classmethod
+    def generate_index(cls, feature_name: Optional[str] = None) -> Dict[str, Any]:
+        """Generate and write index - complete operation using Composite pattern"""
+        # 1. Discover features
+        if feature_name:
+            feature = cls.load(feature_name)
+            features = [feature] if feature else []
+        else:
+            features = cls.discover_deployed()
+        
+        if not features:
+            print("❌ No features found")
+            return {"indexed": 0, "features": 0}
+        
+        # 2. Collect index entries (Composite pattern)
+        index_entries = []
+        for feature in features:
+            index_entries.extend(feature.collect_index_entries())
+        
+        # 3. Write global index
+        cls.write_global_index(index_entries, len(features))
+        
+        # 4. Print report
+        print(f"✅ Indexed {len(index_entries)} behaviors across {len(features)} features")
+        
+        return {"indexed": len(index_entries), "features": len(features)}
+    
+    @classmethod
+    def repair(cls, feature_name: Optional[str] = None) -> Dict[str, Any]:
+        """Auto-fix structure issues - complete operation"""
+        print("="*SEPARATOR_LINE_WIDTH)
+        print("Behavior Structure Repair")
+        print("="*SEPARATOR_LINE_WIDTH)
+        
+        # 1. Discover features
+        if feature_name:
+            feature = cls.load(feature_name)
+            features = [feature] if feature else []
+        else:
+            features = cls.discover_deployed()
+        
+        if not features:
+            print("❌ No features found")
+            return {"fixed": 0, "features": 0}
+        
+        # 2. Repair all
+        fixed_count = 0
+        for feature in features:
+            fixed_count += feature.repair_behaviors()
+        
+        # 3. Report
+        print(f"\n✅ Fixed {fixed_count} issues")
+        
+        return {"fixed": fixed_count, "features": len(features)}
+    
+    def repair_behaviors(self) -> int:
+        """Repair structure issues in this feature's behaviors"""
+        fixed_count = 0
+        
+        # First validate to find issues
+        violations = self.validate_structure()
+        
+        for violation in violations:
+            # Fix missing command files
+            if "missing matching command" in violation.message and violation.suggested_fix:
+                if self.create_missing_command(violation):
+                    fixed_count += 1
+        
+        return fixed_count
+    
+    def create_missing_command(self, violation: StructureViolation) -> bool:
+        """Create a missing command file"""
+        if not violation.suggested_fix or not violation.file_path:
+            return False
+        
+        if not violation.file_path.exists():
+            return False
+        
+        names = self.extract_behavior_names_from_rule(violation.file_path)
+        if not names:
+            return False
+        
+        cmd_content = self.generate_command_template(names['feature'], names['behavior'], violation.file_path.name)
+        
+        return self.write_command_file(violation.suggested_fix, cmd_content)
+    
+    @staticmethod
+    def extract_behavior_names_from_rule(rule_file: Path) -> Optional[Dict[str, str]]:
+        """Extract feature and behavior names from rule file"""
+        parts = rule_file.stem.split('-')
+        if len(parts) < 2:
+            return None
+        
+        feature_name = parts[0]
+        behavior_name = '-'.join(parts[1:-1]) if len(parts) > 2 else parts[1]
+        
+        return {'feature': feature_name, 'behavior': behavior_name}
+    
+    @staticmethod
+    def generate_command_template(feature_name: str, behavior_name: str, rule_filename: str) -> str:
+        """Generate command file template"""
+        return f'''### Command: /{feature_name}-{behavior_name}
 
 **Purpose:** Execute {behavior_name} behavior
 
 **Rule:**
-* `{rule_file.name}` — Defines triggering conditions
+* `{rule_filename}` — Defines triggering conditions
 
 **Steps:**
 1. **User** invokes `/{feature_name}-{behavior_name}`
 2. **Code** validates structure
 3. **AI Agent** reports results
 '''
-                        
-                        cmd_file.write_text(cmd_content, encoding='utf-8')
-                        print(f"Created {cmd_file.name}")
-                        fixed_count += 1
-                
-                elif issue['type'] == 'deprecated_sections':
-                    # Remove deprecated sections from command files
-                    file_path = issue['file']
-                    content = file_path.read_text(encoding='utf-8')
-                    
-                    # Remove deprecated sections
-                    content = re.sub(r'\*\*AI Usage:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
-                    content = re.sub(r'\*\*Code Usage:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
-                    content = re.sub(r'\*\*Implementation:\*\*.*?(?=\n\*\*|\Z)', '', content, flags=re.DOTALL)
-                    
-                    file_path.write_text(content, encoding='utf-8')
-                    print(f"Removed deprecated sections from {file_path.name}")
-                    fixed_count += 1
-        
-        print(f"\nFixed {fixed_count} issues")
-        return {"fixed": fixed_count, "features": len(features)}
     
-    elif action == "create":
-        """Scaffold a new behavior"""
-        if not feature or not behavior_name:
-            print("Error: Both feature and behavior_name required for create action")
+    @staticmethod
+    def write_command_file(cmd_file: Path, content: str) -> bool:
+        """Write command file to disk"""
+        try:
+            cmd_file.write_text(content, encoding='utf-8')
+            print(f"✅ Created {cmd_file.name}")
+            return True
+        except (IOError, OSError) as e:
+            print(f"❌ Error creating {cmd_file.name}: {e}")
+            return False
+    
+    @classmethod
+    def create(cls, feature_name: str, behavior_name: str) -> Dict[str, Any]:
+        """Scaffold a new behavior - complete operation"""
+        if not feature_name or not behavior_name:
+            print("❌ Error: Both feature and behavior_name required")
             return {"error": "Missing required parameters"}
         
-        print("="*60)
-        print(f"Creating New Behavior: {feature}/{behavior_name}")
-        print("="*60)
+        print("="*SEPARATOR_LINE_WIDTH)
+        print(f"Creating New Behavior: {feature_name}/{behavior_name}")
+        print("="*SEPARATOR_LINE_WIDTH)
         
         behaviors_root = Path("behaviors")
-        feature_dir = behaviors_root / feature
+        feature_dir = behaviors_root / feature_name
         
-        # Create feature directory if needed
+        cls.ensure_feature_directory(feature_dir, feature_name)
+        cls.create_rule_file(feature_dir, feature_name, behavior_name)
+        cls.create_command_file(feature_dir, feature_name, behavior_name)
+        
+        print("\n✅ Behavior scaffolded successfully")
+        return {"created": True, "feature": feature_name, "behavior": behavior_name}
+    
+    @staticmethod
+    def ensure_feature_directory(feature_dir: Path, feature_name: str):
+        """Ensure feature directory and behavior.json exist"""
         if not feature_dir.exists():
             feature_dir.mkdir(parents=True, exist_ok=True)
-            print(f"Created feature directory: {feature}")
+            print(f"✅ Created feature directory: {feature_name}")
         
-        # Create behavior.json if it doesn't exist
-        behavior_json = feature_dir / "behavior.json"
+        behavior_json = feature_dir / BEHAVIOR_JSON
         if not behavior_json.exists():
             config = {
-                "deployed": False,
-                "description": f"{feature} behavior",
-                "feature": feature
+                KEY_DEPLOYED: False,
+                "description": f"{feature_name} behavior",
+                KEY_FEATURE: feature_name
             }
             behavior_json.write_text(json.dumps(config, indent=2), encoding='utf-8')
-            print("Created behavior.json")
+            print("✅ Created behavior.json")
+    
+    @staticmethod
+    def create_rule_file(feature_dir: Path, feature_name: str, behavior_name: str):
+        """Create rule file for behavior"""
+        rule_file = feature_dir / f"{feature_name}-{behavior_name}-rule.mdc"
+        if rule_file.exists():
+            return
         
-        # Create rule file
-        rule_file = feature_dir / f"{feature}-{behavior_name}-rule.mdc"
-        if not rule_file.exists():
-            rule_content = f'''---
+        rule_content = f'''---
 description: {behavior_name} behavior rule
 ---
 
 **When** [condition occurs], **then** [action happens].
 
 **Executing Commands:**
-* `/{feature}-{behavior_name}` — Execute this behavior
+* `/{feature_name}-{behavior_name}` — Execute this behavior
 '''
-            rule_file.write_text(rule_content, encoding='utf-8')
-            print(f"Created {rule_file.name}")
+        rule_file.write_text(rule_content, encoding='utf-8')
+        print(f"✅ Created {rule_file.name}")
+    
+    @staticmethod
+    def create_command_file(feature_dir: Path, feature_name: str, behavior_name: str):
+        """Create command file for behavior"""
+        cmd_file = feature_dir / f"{feature_name}-{behavior_name}-cmd.md"
+        if cmd_file.exists():
+            return
         
-        # Create command file
-        cmd_file = feature_dir / f"{feature}-{behavior_name}-cmd.md"
-        if not cmd_file.exists():
-            cmd_content = f'''### Command: /{feature}-{behavior_name}
+        rule_file_name = f"{feature_name}-{behavior_name}-rule.mdc"
+        cmd_content = f'''### Command: /{feature_name}-{behavior_name}
 
 **Purpose:** Execute {behavior_name} behavior
 
 **Rule:**
-* `{rule_file.name}` — Defines triggering conditions
+* `{rule_file_name}` — Defines triggering conditions
 
 **Runner:**
-python behaviors/{feature}/{feature}-runner.py
+python behaviors/{feature_name}/{feature_name}-runner.py
 
 **Steps:**
-1. **User** invokes `/{feature}-{behavior_name}`
-2. **Code** function `{behavior_name}()` — executes behavior logic
+1. **User** invokes `/{feature_name}-{behavior_name}`
+2. **Code** function `{behavior_name.replace('-', '_')}()` — executes behavior logic
 3. **AI Agent** validates and reports results
 '''
-            cmd_file.write_text(cmd_content, encoding='utf-8')
-            print(f"Created {cmd_file.name}")
+        cmd_file.write_text(cmd_content, encoding='utf-8')
+        print(f"✅ Created {cmd_file.name}")
+    
+    @classmethod
+    def analyze_consistency(cls, feature_name: Optional[str] = None) -> Dict[str, Any]:
+        """Analyze behaviors for overlaps and contradictions - complete operation"""
+        if not cls.check_openai_availability():
+            return {"error": "OpenAI not available"}
         
-        # Optionally create runner file
-        runner_file = feature_dir / f"{feature}-runner.py"
-        if not runner_file.exists():
-            runner_content = f'''"""
-{feature.capitalize()} Behavior Runner
-"""
+        print("="*SEPARATOR_LINE_WIDTH)
+        print("Behavior Consistency Analysis")
+        print("="*SEPARATOR_LINE_WIDTH)
+        
+        features = cls.discover_for_analysis(feature_name)
+        if not features:
+            print("❌ No features found")
+            return {"overlaps": 0, "contradictions": 0}
+        
+        behavior_contents = cls.collect_behavior_contents(features)
+        
+        print(f"✅ Collected {len(behavior_contents)} behavior rules")
+        print("✅ Consistency analysis ready (OpenAI integration placeholder)")
+        print("   Implement full semantic analysis using OpenAI function calling")
+        
+        return {"analyzed": len(behavior_contents), "features": len(features)}
+    
+    @staticmethod
+    def check_openai_availability() -> bool:
+        """Check if OpenAI is available and configured"""
+        import os
+        
+        try:
+            from openai import OpenAI
+        except ImportError:
+            print("❌ OpenAI package not installed. Install with: pip install openai")
+            return False
+        
+        try:
+            from dotenv import load_dotenv
+            for env_path in [Path("behaviors/.env"), Path(".env")]:
+                if env_path.exists():
+                    load_dotenv(env_path, override=True)
+                    break
+        except ImportError:
+            pass
+        
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            print("❌ OPENAI_API_KEY environment variable not set")
+            print("   Set it in behaviors/.env or .env file")
+            return False
+        
+        return True
+    
+    @classmethod
+    def discover_for_analysis(cls, feature_name: Optional[str]) -> List['Feature']:
+        """Discover features for analysis"""
+        if feature_name:
+            feature = cls.load(feature_name)
+            return [feature] if feature else []
+        return cls.discover_deployed()
+    
+    @staticmethod
+    def collect_behavior_contents(features: List['Feature']) -> List[Dict[str, Any]]:
+        """Collect behavior rule contents for analysis"""
+        print(f"\n📚 Analyzing {len(features)} features...")
+        behavior_contents = []
+        
+        for feature in features:
+            for behavior in feature.behaviors:
+                if behavior.rule and behavior.rule.file_path.exists():
+                    content = behavior.rule.file_path.read_text(encoding='utf-8')
+                    behavior_contents.append({
+                        'feature': feature.name,
+                        'behavior': behavior.name,
+                        'file': behavior.rule.file_path.name,
+                        'content': content[:CONTENT_PREVIEW_LENGTH]
+                    })
+        
+        return behavior_contents
+    
+    @staticmethod
+    def print_validation_report(violations: List[StructureViolation], features: List['Feature']):
+        """Print validation report"""
+        print("="*SEPARATOR_LINE_WIDTH)
+        print("Behavior Structure Validation")
+        print("="*SEPARATOR_LINE_WIDTH)
+        
+        if not violations:
+            print("✅ All behaviors follow structure and naming conventions.")
+        else:
+            print(f"❌ Found {len(violations)} structure issues:\n")
+            for v in violations:
+                feature = v.feature_name or "unknown"
+                print(f"[{feature}] {v.message}")
+                if v.suggested_fix:
+                    print(f"  → Suggested: {v.suggested_fix.name}")
+    
+    @staticmethod
+    def print_sync_report(synced: int, merged: int, skipped: int):
+        """Print sync report"""
+        print("\n" + "="*SEPARATOR_LINE_WIDTH)
+        print("Behavior Sync Report")
+        print("="*SEPARATOR_LINE_WIDTH)
+        print(f"✅ Synced: {synced} files")
+        print(f"📄 Merged: {merged} files")
+        print(f"⏭️  Skipped: {skipped} files")
+    
+    @staticmethod
+    def write_global_index(entries: List[Dict[str, Any]], feature_count: int):
+        """Write global index file"""
+        global_index = Path(".cursor/behavior-index.json")
+        global_index.parent.mkdir(parents=True, exist_ok=True)
+        
+        index_data = {
+            "last_updated": time.ctime(),
+            "total_behaviors": len(entries),
+            "features_count": feature_count,
+            "behaviors": entries
+        }
+        
+        with open(global_index, 'w', encoding='utf-8') as out:
+            json.dump(index_data, out, indent=2, ensure_ascii=False)
 
-import sys
-from pathlib import Path
 
-def require_command_invocation(command_name):
-    """Guard to prevent direct execution"""
+# ============================================================================
+# CLI WRAPPER
+# ============================================================================
+
+def require_command_invocation(command_name: str):
+    """Guard to prevent direct runner execution"""
     if "--from-command" not in sys.argv and "--no-guard" not in sys.argv:
-        print(f"\\nPlease use the Cursor slash command instead:\\n")
-        print(f"    /{{command_name}}\\n")
+        print(f"\n⚠️  Please use the Cursor slash command instead:\n")
+        print(f"    /{command_name}\n")
+        print(f"This ensures the full AI workflow and validation is triggered.\n")
+        print(f"(For testing/debugging, use --no-guard flag to bypass this check)\n")
         sys.exit(1)
 
-def {behavior_name.replace('-', '_')}():
-    """Execute {behavior_name} behavior"""
-    print(f"Executing {behavior_name}...")
-    # Implementation here
-    pass
 
-if __name__ == "__main__":
-    require_command_invocation("{feature}-{behavior_name}")
-    {behavior_name.replace('-', '_')}()
-'''
-            runner_file.write_text(runner_content, encoding='utf-8')
-            print(f"Created {runner_file.name}")
-        
-        print("\nBehavior scaffolded successfully")
-        return {"created": True, "feature": feature, "behavior": behavior_name}
-
-
-# ============================================================================
-# BEHAVIOR SYNC
-# ============================================================================
-
-def behavior_sync(feature=None, force=False):
-    """
-    Sync feature-local AI behaviors to deployed locations.
+class CommandRunner:
+    """Static wrapper maintaining CLI compatibility"""
     
-    Sync Rules:
-    1. All files in behaviors/ folders are synced based on extension
-    2. Files are routed to correct areas:
-       - .mdc files â†’ .cursor/rules/
-       - .md files  â†’ .cursor/commands/
-       - .json files â†’ .cursor/mcp/
-    3. Merge MCP configs if they already exist
-    4. Overwrite only if source is newer (unless force=True)
-    5. Never sync behaviors marked as "draft" or "experimental"
-    
-    Args:
-        feature: Optional feature name to sync only that feature
-        force: If True, overwrite all files regardless of timestamps
-    """
-    import shutil
-    
-    src_root = Path("behaviors")
-    targets = {
-        ".mdc": Path(".cursor/rules"),
-        ".md": Path(".cursor/commands"),
-        ".json": Path(".cursor/mcp"),
-    }
-    
-    for t in targets.values():
-        t.mkdir(parents=True, exist_ok=True)
-    
-    Path(".vscode").mkdir(parents=True, exist_ok=True)
-
-    # Determine features to sync
-    features = []
-    if feature:
-        feature_path = src_root / feature
-        marker_file = feature_path / "behavior.json"
-        
-        if marker_file.exists():
-            try:
-                marker_data = json.load(marker_file.open('r', encoding='utf-8'))
-                if marker_data.get("deployed"):
-                    features = [feature_path]
-            except:
-                pass
-    else:
-        for feature_dir in src_root.glob("*"):
-            if not feature_dir.is_dir():
-                continue
-            
-            marker_file = feature_dir / "behavior.json"
-            
-            if marker_file.exists():
-                try:
-                    marker_data = json.load(marker_file.open('r', encoding='utf-8'))
-                    if marker_data.get("deployed"):
-                        features.append(feature_dir)
-                except:
-                    pass
-
-    synced_files = []
-    merged_files = []
-    skipped_files = []
-
-    for feature_path in features:
-        print(f"\nProcessing feature: {feature_path.name}")
-        for file in feature_path.rglob("*"):
-            if file.is_dir():
-                continue
-            
-            if 'docs' in file.parts:
-                continue
-            
-            # Skip draft or experimental behaviors
-            try:
-                content = file.read_text(encoding='utf-8', errors='ignore')
-                lines = content.lower().split('\n')
-                has_draft_marker = False
-                for line in lines[:10]:
-                    stripped = line.strip()
-                    if stripped.startswith('#draft') or stripped.startswith('#experimental'):
-                        has_draft_marker = True
-                        break
-                    if stripped.startswith('draft:') or stripped.startswith('experimental:'):
-                        has_draft_marker = True
-                        break
-                
-                if has_draft_marker:
-                    skipped_files.append((file, "draft/experimental marker"))
-                    continue
-            except:
-                pass
-
-            ext = file.suffix
-            if ext not in targets:
-                continue
-
-            dest = targets[ext] / file.name
-            
-            # Handle MCP JSON configs - merge if exists
-            if ext == ".json" and dest.exists() and file.name.endswith("-mcp.json"):
-                try:
-                    with open(dest, 'r', encoding='utf-8') as d1, open(file, 'r', encoding='utf-8') as d2:
-                        existing = json.load(d1)
-                        new_data = json.load(d2)
-                        merged = {**existing, **new_data}
-                    with open(dest, 'w', encoding='utf-8') as out:
-                        json.dump(merged, out, indent=2, ensure_ascii=False)
-                    merged_files.append((file, dest))
-                    print(f"ðŸ”„ Merged {file.name} â†’ {dest}")
-                except Exception as e:
-                    print(f"âš ï¸  Error merging {file.name}: {e}")
-                    skipped_files.append((file, f"merge error: {e}"))
-            else:
-                # Check if source is newer
-                if dest.exists() and not force:
-                    source_mtime = file.stat().st_mtime
-                    dest_mtime = dest.stat().st_mtime
-                    if source_mtime <= dest_mtime:
-                        skipped_files.append((file, "source not newer"))
-                        continue
-                
-                try:
-                    shutil.copy2(file, dest)
-                    synced_files.append((file, dest))
-                    print(f"âœ… Synced {file.name} â†’ {dest}")
-                except Exception as e:
-                    print(f"âŒ Error syncing {file.name}: {e}")
-                    skipped_files.append((file, f"copy error: {e}"))
-    
-    # Report results
-    print("\n" + "="*60)
-    print("Behavior Sync Report")
-    print("="*60)
-    print(f"âœ… Synced: {len(synced_files)} files")
-    print(f"ðŸ”„ Merged: {len(merged_files)} files")
-    print(f"â­ï¸  Skipped: {len(skipped_files)} files")
-    
-    return {
-        "synced": len(synced_files),
-        "merged": len(merged_files),
-        "skipped": len(skipped_files)
-    }
-
-
-# ============================================================================
-# BEHAVIOR CONSISTENCY
-# ============================================================================
-
-def behavior_consistency(feature=None):
-    """
-    Validate behaviors for inconsistencies, overlaps, or contradictions.
-    Uses OpenAI function calling for semantic analysis.
-    Generates a summary report for human and AI review.
-    """
-    import os
-    
-    try:
-        from openai import OpenAI
-    except ImportError:
-        print("âŒ OpenAI package not installed. Install with: pip install openai")
-        return
-    
-    try:
-        from dotenv import load_dotenv
-        features_env = Path("behaviors/.env")
-        root_env = Path(".env")
-        if features_env.exists():
-            load_dotenv(features_env, override=True)
-        elif root_env.exists():
-            load_dotenv(root_env, override=True)
+    @staticmethod
+    def structure(action: str = "validate", feature: Optional[str] = None, behavior_name: Optional[str] = None):
+        """Execute structure command"""
+        if action == "validate":
+            return Feature.validate(feature)
+        elif action == "fix":
+            return Feature.repair(feature)
+        elif action == "create":
+            if not behavior_name:
+                print("❌ Error: behavior_name required for create action")
+                return {"error": "Missing behavior_name"}
+            return Feature.create(feature or "new-feature", behavior_name)
         else:
-            load_dotenv(override=True)
-    except ImportError:
-        pass
+            print(f"❌ Unknown action: {action}")
+            return {"error": f"Unknown action: {action}"}
     
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("âŒ OPENAI_API_KEY environment variable not set")
-        print("   Set it in behaviors/.env or .env file")
-        return
+    @staticmethod
+    def sync(feature: Optional[str] = None, force: bool = False):
+        """Execute sync command"""
+        return Feature.sync(feature, force)
     
-    client = OpenAI(api_key=api_key)
+    @staticmethod
+    def index(feature: Optional[str] = None):
+        """Execute index command"""
+        return Feature.generate_index(feature)
     
-    # Function schema for consistency analysis
-    ANALYSIS_SCHEMA = {
-        "name": "analyze_behavior_consistency",
-        "description": "Analyze behaviors for overlaps, contradictions, and inconsistencies",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "overlaps": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "behavior1": {"type": "string"},
-                            "behavior2": {"type": "string"},
-                            "similarity": {"type": "string"},
-                            "difference": {"type": "string"},
-                            "recommendation": {"type": "string"}
-                        }
-                    }
-                },
-                "contradictions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "behavior1": {"type": "string"},
-                            "behavior2": {"type": "string"},
-                            "context": {"type": "string"},
-                            "contradiction": {"type": "string"},
-                            "recommendation": {"type": "string"}
-                        }
-                    }
-                },
-                "summary": {"type": "string"}
-            }
-        }
-    }
+    @staticmethod
+    def consistency(feature: Optional[str] = None):
+        """Execute consistency analysis"""
+        return Feature.analyze_consistency(feature)
     
-    print(f"ðŸ“Š Analyzing behaviors for consistency...")
-    print("âœ… Consistency check placeholder - OpenAI integration ready")
-
-
-# ============================================================================
-# BEHAVIOR INDEX
-# ============================================================================
-
-def behavior_index(feature=None):
-    """
-    Detect changes to behavior files and update local/global indexes.
-    
-    Scans behaviors/ folders and maintains:
-    - Local indexes: behaviors/<feature>/behavior-index.json
-    - Global index: .cursor/behavior-index.json
-    """
-    import time
-    
-    global_index = Path(".cursor/behavior-index.json")
-    behavior_extensions = [".mdc", ".md", ".py", ".json"]
-    
-    behaviors_root = Path("behaviors")
-    excluded_files = {"behavior.json", "code-agent-runner.py", "bdd-runner.py", "ddd-runner.py"}
-    
-    # Find all feature directories with behavior.json
-    feature_dirs = []
-    
-    if feature:
-        # Single feature mode
-        feature_path = behaviors_root / feature
-        if feature_path.exists() and (feature_path / "behavior.json").exists():
-            feature_dirs.append(feature_path)
-    else:
-        # All features mode - find all directories with behavior.json that have deployed=true
-        for item in behaviors_root.iterdir():
-            if not item.is_dir():
-                continue
-            
-            behavior_json = item / "behavior.json"
-            if behavior_json.exists():
-                try:
-                    with open(behavior_json, 'r', encoding='utf-8') as f:
-                        config = json.load(f)
-                        if config.get("deployed") is True:
-                            feature_dirs.append(item)
-                except:
-                    pass
-    
-    # Index all behavior files
-    index_data = []
-    skipped_count = 0
-    
-    for feature_dir in feature_dirs:
-        feature_name = feature_dir.name
+    @staticmethod
+    def specialization(feature_name: str):
+        """Execute specialization validation"""
+        print("="*SEPARATOR_LINE_WIDTH)
+        print(f"Hierarchical Behavior Validation: {feature_name}")
+        print("="*SEPARATOR_LINE_WIDTH)
         
-        # Recursively find all files
-        for file in feature_dir.rglob("*"):
-            if file.is_dir():
-                continue
-            
-            # Skip non-behavior files
-            if file.suffix not in behavior_extensions:
-                continue
-            
-            # Skip excluded files
-            if file.name in excluded_files:
-                continue
-            
-            # Skip __pycache__ and docs
-            if "__pycache__" in str(file) or "\\docs\\" in str(file) or "/docs/" in str(file):
-                continue
-            
-            # Add to index
-            try:
-                stat = file.stat()
-                index_data.append({
-                    "feature": feature_name,
-                    "file": file.name,
-                    "type": file.suffix,
-                    "path": str(file).replace("\\", "/"),
-                    "modified_timestamp": stat.st_mtime
-                })
-            except:
-                skipped_count += 1
-    
-    # Write global index
-    global_index.parent.mkdir(parents=True, exist_ok=True)
-    with open(global_index, 'w', encoding='utf-8') as out:
-        json.dump({
-            "last_updated": time.ctime(),
-            "total_behaviors": len(index_data),
-            "features_count": len(feature_dirs),
-            "behaviors": index_data
-        }, out, indent=2, ensure_ascii=False)
-    
-    print(f"âœ… Indexed {len(index_data)} behaviors across {len(feature_dirs)} features")
-    if skipped_count > 0:
-        print(f"â­ï¸  Skipped {len(skipped_files)} files")
-    
-    return {"indexed": len(index_data), "features": len(feature_dirs)}
+        # Run base structure validation
+        print("\n📋 Running base structure validation...")
+        base_result = Feature.validate(feature_name)
+        
+        if base_result.get("issues", 0) == 0:
+            print("✅ Base structure validation passed")
+        else:
+            print(f"⚠️  Base structure has {base_result.get('issues', 0)} issue(s)")
+        
+        # Check for hierarchical configuration
+        feature = Feature.load(feature_name)
+        if not feature:
+            print(f"❌ Feature not found: {feature_name}")
+            return {"error": "Feature not found"}
+        
+        if not feature.is_specialized:
+            print("ℹ️  Feature is not marked as specialized (isSpecialized: false)")
+            return {"base": base_result, "hierarchical": False}
+        
+        print("\n✅ Feature is specialized - hierarchical validation complete")
+        return {"base": base_result, "hierarchical": True, "total_issues": base_result.get("issues", 0)}
 
 
-# ============================================================================
-# HIERARCHICAL BEHAVIOR VALIDATION (SPECIALIZATION)
-# ============================================================================
+def parse_structure_args():
+    """Parse arguments for structure command"""
+    action = sys.argv[2] if len(sys.argv) > 2 else "validate"
+    args_without_flags = [arg for arg in sys.argv[3:] if not arg.startswith('--')]
+    feature = args_without_flags[0] if args_without_flags else None
+    behavior_name = args_without_flags[1] if len(args_without_flags) > 1 else None
+    return action, feature, behavior_name
 
-def validate_hierarchical_behavior(feature_name):
-    """
-    Validate hierarchical behavior patterns with base validation inheritance.
-    """
-    behaviors_root = Path("behaviors")
-    feature_dir = behaviors_root / feature_name
+def parse_sync_args():
+    """Parse arguments for sync command"""
+    force = "--force" in sys.argv or "-f" in sys.argv
+    feature = next((arg for arg in sys.argv[2:] 
+                   if arg not in ["--force", "-f", "--no-guard", "--from-command"]), None)
+    return feature, force
+
+def parse_feature_arg():
+    """Parse single feature argument, skipping flags"""
+    return next((arg for arg in sys.argv[2:] 
+                if arg not in ["--no-guard", "--from-command", "--force", "-f"]), None)
+
+def show_usage():
+    """Display usage information"""
+    print("Usage: python code-agent-runner.py <command> [args...]")
+    print("\nCommands:")
+    print("  structure <action> [feature] [behavior_name]")
+    print("  sync [feature] [--force]")
+    print("  consistency [feature]")
+    print("  index [feature]")
+    print("  specialization <feature>")
+    sys.exit(1)
+
+def main():
+    """CLI entry point"""
+    if len(sys.argv) < 2:
+        show_usage()
     
-    if not feature_dir.exists():
-        print(f"âŒ Feature directory not found: {feature_dir}")
-        return {"error": "Feature not found"}
+    command = sys.argv[1]
     
-    print("=" * 60)
-    print(f"Hierarchical Behavior Validation: {feature_name}")
-    print("=" * 60)
+    if command == "structure":
+        action, feature, behavior_name = parse_structure_args()
+        CommandRunner.structure(action, feature, behavior_name)
     
-    # Run base structure validation
-    print("\nðŸ“‹ Running base structure validation...")
-    base_result = behavior_structure("validate", feature_name)
+    elif command == "sync":
+        feature, force = parse_sync_args()
+        CommandRunner.sync(feature, force=force)
     
-    if base_result.get("issues", 0) == 0:
-        print("âœ… Base structure validation passed")
+    elif command == "consistency":
+        feature = sys.argv[2] if len(sys.argv) > 2 else None
+        CommandRunner.consistency(feature)
+    
+    elif command == "index":
+        feature = parse_feature_arg()
+        CommandRunner.index(feature)
+    
+    elif command == "specialization":
+        if len(sys.argv) < 3:
+            print("Error: feature name required for specialization command")
+            sys.exit(1)
+        feature = sys.argv[2]
+        CommandRunner.specialization(feature)
+    
     else:
-        print(f"âš ï¸  Base structure has {base_result.get('issues', 0)} issue(s)")
-    
-    # Check for hierarchical configuration
-    config_file = feature_dir / "behavior.json"
-    if not config_file.exists():
-        return {"base": base_result, "hierarchical": False}
-    
-    config = json.loads(config_file.read_text(encoding='utf-8'))
-    
-    if not config.get("isHierarchical"):
-        return {"base": base_result, "hierarchical": False}
-    
-    print("\nâœ… Hierarchical validation complete")
-    return {"base": base_result, "hierarchical": True, "total_issues": base_result.get("issues", 0)}
+        print(f"Unknown command: {command}")
+        sys.exit(1)
 
-
-# ============================================================================
-# MAIN ENTRY POINT
-# ============================================================================
 
 if __name__ == "__main__":
     # Fix Windows console encoding for emoji support
@@ -947,52 +1195,5 @@ if __name__ == "__main__":
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     
-    if len(sys.argv) < 2:
-        print("Usage: python code-agent-runner.py <command> [args...]")
-        print("\nCommands:")
-        print("  structure <action> [feature] [behavior_name]")
-        print("  sync [feature] [--force]")
-        print("  consistency [feature]")
-        print("  index [feature]")
-        print("  specialization <feature>")
-        sys.exit(1)
-    
-    command = sys.argv[1]
-    
-    if command == "structure":
-        action = sys.argv[2] if len(sys.argv) > 2 else "validate"
-        feature = sys.argv[3] if len(sys.argv) > 3 else None
-        behavior_name = sys.argv[4] if len(sys.argv) > 4 else None
-        behavior_structure(action, feature, behavior_name)
-    
-    elif command == "sync":
-        force = "--force" in sys.argv or "-f" in sys.argv
-        feature = None
-        for arg in sys.argv[2:]:
-            if arg not in ["--force", "-f", "--no-guard", "--from-command"]:
-                feature = arg
-                break
-        behavior_sync(feature, force=force)
-    
-    elif command == "consistency":
-        feature = sys.argv[2] if len(sys.argv) > 2 else None
-        behavior_consistency(feature)
-    
-    elif command == "index":
-        feature = None
-        for arg in sys.argv[2:]:
-            if arg not in ["--no-guard", "--from-command", "--force", "-f"]:
-                feature = arg
-                break
-        behavior_index(feature)
-    
-    elif command == "specialization":
-        if len(sys.argv) < 3:
-            print("Error: feature name required for specialization command")
-            sys.exit(1)
-        feature = sys.argv[2]
-        validate_hierarchical_behavior(feature)
-    
-    else:
-        print(f"Unknown command: {command}")
-        sys.exit(1)
+    require_command_invocation("code-agent-structure")
+    main()

@@ -1,364 +1,287 @@
 {
-  "last_updated": "Thu Nov  6 17:40:23 2025",
-  "total_behaviors": 51,
-  "features_count": 3,
+  "last_updated": "Fri Nov  7 01:46:49 2025",
+  "total_behaviors": 40,
+  "features_count": 4,
   "behaviors": [
     {
-      "feature": "bdd",
-      "file": "bdd-domain-scaffold-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/bdd-domain-scaffold-cmd.md",
-      "modified_timestamp": 1762468374.3483768
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-domain-scaffold-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/bdd/bdd-domain-scaffold-rule.mdc",
-      "modified_timestamp": 1762468374.3497686
+      "modified_timestamp": 1762442526.9154646
     },
     {
-      "feature": "bdd",
-      "file": "bdd-domain-scaffold-verify-cmd.md",
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/bdd-domain-scaffold-verify-cmd.md",
-      "modified_timestamp": 1762468374.3542705
+      "path": "behaviors/bdd/bdd-domain-scaffold-cmd.md",
+      "modified_timestamp": 1762475798.5099404
     },
     {
-      "feature": "bdd",
-      "file": "bdd-jest-reference.md",
-      "type": ".md",
-      "path": "behaviors/bdd/bdd-jest-reference.md",
-      "modified_timestamp": 1762468388.0081153
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-jest-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/bdd-jest-rule.mdc",
-      "modified_timestamp": 1762468374.35527
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-mamba-reference.md",
-      "type": ".md",
-      "path": "behaviors/bdd/bdd-mamba-reference.md",
-      "modified_timestamp": 1762468392.968463
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-mamba-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/bdd-mamba-rule.mdc",
-      "modified_timestamp": 1762468374.3562706
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/bdd-rule.mdc",
-      "modified_timestamp": 1762468374.3573124
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-validate-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/validate/bdd-validate-cmd.md",
-      "modified_timestamp": 1762468374.3594096
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-validate-runner.py",
-      "type": ".py",
-      "path": "behaviors/bdd/validate/bdd-validate-runner.py",
-      "modified_timestamp": 1762468374.360408
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-abandon-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-abandon-cmd.md",
-      "modified_timestamp": 1762468374.360408
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-approve-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-approve-cmd.md",
-      "modified_timestamp": 1762468374.3614075
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-cmd.md",
-      "modified_timestamp": 1762468374.3614075
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-jest-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-jest-rule.mdc",
-      "modified_timestamp": 1762468374.362435
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-mamba-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-mamba-rule.mdc",
-      "modified_timestamp": 1762468374.3634357
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-rule.mdc",
-      "modified_timestamp": 1762468374.3644357
-    },
-    {
-      "feature": "bdd",
-      "file": "bdd-workflow-status-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-status-cmd.md",
-      "modified_timestamp": 1762468374.3644357
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-domain-scaffold-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-domain-scaffold-cmd.md",
-      "modified_timestamp": 1762468374.3644357
+      "modified_timestamp": 1762475798.5029328
     },
     {
-      "feature": "bdd",
-      "file": "bdd-domain-scaffold-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/bdd/workflow/stages/bdd-domain-scaffold-rule.mdc",
-      "modified_timestamp": 1762468374.3654363
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/bdd-domain-scaffold-verify-cmd.md",
+      "modified_timestamp": 1762475798.5029328
     },
     {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-domain-scaffold-verify-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-domain-scaffold-verify-cmd.md",
-      "modified_timestamp": 1762468374.366434
+      "modified_timestamp": 1762475798.5029328
     },
     {
-      "feature": "bdd",
-      "file": "bdd-green-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-green-cmd.md",
-      "modified_timestamp": 1762468374.366434
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-green-verify-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-green-verify-cmd.md",
-      "modified_timestamp": 1762468374.366434
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "bdd",
-      "file": "bdd-red-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-red-cmd.md",
-      "modified_timestamp": 1762468374.3674338
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-red-verify-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-red-verify-cmd.md",
-      "modified_timestamp": 1762468374.3674338
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "bdd",
-      "file": "bdd-refactor-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-refactor-cmd.md",
-      "modified_timestamp": 1762468374.368436
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-refactor-verify-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-refactor-verify-cmd.md",
-      "modified_timestamp": 1762468374.368436
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "bdd",
-      "file": "bdd-signature-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-signature-cmd.md",
-      "modified_timestamp": 1762468374.3694334
-    },
-    {
-      "feature": "bdd",
+      "feature": "bdd-behavior",
       "file": "bdd-signature-verify-cmd.md",
       "type": ".md",
       "path": "behaviors/bdd/workflow/stages/bdd-signature-verify-cmd.md",
-      "modified_timestamp": 1762468374.3694334
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-sync-cmd.md",
+      "feature": "bdd-behavior",
+      "file": "bdd-validate-cmd.md",
       "type": ".md",
-      "path": "behaviors/code-agent/code-agent-sync-cmd.md",
-      "modified_timestamp": 1762468374.3727207
+      "path": "behaviors/bdd/validate/bdd-validate-cmd.md",
+      "modified_timestamp": 1762475772.2345665
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-sync-rule.mdc",
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-abandon-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/bdd-workflow-abandon-cmd.md",
+      "modified_timestamp": 1762475798.4954276
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-approve-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/bdd-workflow-approve-cmd.md",
+      "modified_timestamp": 1762475798.4964297
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/code-agent-sync-rule.mdc",
-      "modified_timestamp": 1762296346.7277434
+      "path": "behaviors/bdd/workflow/bdd-workflow-rule.mdc",
+      "modified_timestamp": 1762457460.08899
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-tasks.json",
-      "type": ".json",
-      "path": "behaviors/code-agent/code-agent-tasks.json",
-      "modified_timestamp": 1762296346.7288117
-    },
-    {
-      "feature": "code-agent",
-      "file": "code-agent-consistency-cmd.md",
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-cmd.md",
       "type": ".md",
-      "path": "behaviors/code-agent/consistency/code-agent-consistency-cmd.md",
-      "modified_timestamp": 1762468374.3747218
+      "path": "behaviors/bdd/workflow/bdd-workflow-cmd.md",
+      "modified_timestamp": 1762449041.0305207
     },
     {
-      "feature": "code-agent",
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-jest-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors/bdd/workflow/bdd-workflow-jest-rule.mdc",
+      "modified_timestamp": 1762312135.8607879
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-mamba-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors/bdd/workflow/bdd-workflow-mamba-rule.mdc",
+      "modified_timestamp": 1762312135.8607879
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-status-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/bdd-workflow-status-cmd.md",
+      "modified_timestamp": 1762475798.4954276
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-green-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/stages/bdd-green-cmd.md",
+      "modified_timestamp": 1762475798.4964297
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-red-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/stages/bdd-red-cmd.md",
+      "modified_timestamp": 1762475798.4964297
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-refactor-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/stages/bdd-refactor-cmd.md",
+      "modified_timestamp": 1762459715.294273
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-signature-cmd.md",
+      "type": ".md",
+      "path": "behaviors/bdd/workflow/stages/bdd-signature-cmd.md",
+      "modified_timestamp": 1762475798.5099404
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors/clean-code/clean-code-validate-cmd.md",
+      "modified_timestamp": 1762492228.8409295
+    },
+    {
+      "feature": "code-agent-behavior",
       "file": "code-agent-consistency-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/code-agent/consistency/code-agent-consistency-rule.mdc",
-      "modified_timestamp": 1762468374.3747218
+      "modified_timestamp": 1762289073.8403819
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-index-cmd.md",
+      "feature": "code-agent-behavior",
+      "file": "code-agent-consistency-cmd.md",
       "type": ".md",
-      "path": "behaviors/code-agent/index/code-agent-index-cmd.md",
-      "modified_timestamp": 1762468374.378722
+      "path": "behaviors/code-agent/consistency/code-agent-consistency-cmd.md",
+      "modified_timestamp": 1762449041.035522
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-index-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/code-agent/index/code-agent-index-rule.mdc",
-      "modified_timestamp": 1762468374.378722
+      "modified_timestamp": 1762411251.1237264
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-index.json",
-      "type": ".json",
-      "path": "behaviors/code-agent/index/code-agent-index.json",
-      "modified_timestamp": 1762468374.3797212
-    },
-    {
-      "feature": "code-agent",
-      "file": "code-agent-specialization-cmd.md",
+      "feature": "code-agent-behavior",
+      "file": "code-agent-index-cmd.md",
       "type": ".md",
-      "path": "behaviors/code-agent/specialization/code-agent-specialization-cmd.md",
-      "modified_timestamp": 1762468374.3797212
+      "path": "behaviors/code-agent/index/code-agent-index-cmd.md",
+      "modified_timestamp": 1762449041.0365193
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-specialization-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/code-agent/specialization/code-agent-specialization-rule.mdc",
-      "modified_timestamp": 1762468374.380721
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
+      "file": "code-agent-specialization-cmd.md",
+      "type": ".md",
+      "path": "behaviors/code-agent/specialization/code-agent-specialization-cmd.md",
+      "modified_timestamp": 1762475798.5029328
+    },
+    {
+      "feature": "code-agent-behavior",
       "file": "code-agent-structure-create-cmd.md",
       "type": ".md",
       "path": "behaviors/code-agent/structure/code-agent-structure-create-cmd.md",
-      "modified_timestamp": 1762468374.38172
+      "modified_timestamp": 1762475798.5029328
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-structure-fix-cmd.md",
       "type": ".md",
       "path": "behaviors/code-agent/structure/code-agent-structure-fix-cmd.md",
-      "modified_timestamp": 1762468374.38172
+      "modified_timestamp": 1762449041.038518
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-structure-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/code-agent/structure/code-agent-structure-rule.mdc",
-      "modified_timestamp": 1762468374.3827233
+      "modified_timestamp": 1762476928.1807754
     },
     {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-structure-validate-cmd.md",
       "type": ".md",
       "path": "behaviors/code-agent/structure/code-agent-structure-validate-cmd.md",
-      "modified_timestamp": 1762468374.3827233
+      "modified_timestamp": 1762449041.038518
     },
     {
-      "feature": "code-agent",
-      "file": "code-agent-suggest-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/suggest/code-agent-suggest-cmd.md",
-      "modified_timestamp": 1762468374.3827233
-    },
-    {
-      "feature": "code-agent",
+      "feature": "code-agent-behavior",
       "file": "code-agent-suggest-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/code-agent/suggest/code-agent-suggest-rule.mdc",
-      "modified_timestamp": 1762468374.3837235
+      "modified_timestamp": 1762411251.40502
     },
     {
-      "feature": "ddd",
-      "file": "ddd-interaction-analysis-cmd.md",
+      "feature": "code-agent-behavior",
+      "file": "code-agent-suggest-cmd.md",
       "type": ".md",
-      "path": "behaviors/ddd/interaction-analysis/ddd-interaction-analysis-cmd.md",
-      "modified_timestamp": 1762468374.384722
+      "path": "behaviors/code-agent/suggest/code-agent-suggest-cmd.md",
+      "modified_timestamp": 1762449041.0395215
     },
     {
-      "feature": "ddd",
+      "feature": "code-agent-behavior",
+      "file": "code-agent-sync-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors/code-agent/sync/code-agent-sync-rule.mdc",
+      "modified_timestamp": 1762311413.9629095
+    },
+    {
+      "feature": "code-agent-behavior",
+      "file": "code-agent-sync-cmd.md",
+      "type": ".md",
+      "path": "behaviors/code-agent/sync/code-agent-sync-cmd.md",
+      "modified_timestamp": 1762484010.1919363
+    },
+    {
+      "feature": "ddd-structure-analysis",
       "file": "ddd-interaction-analysis-rule.mdc",
       "type": ".mdc",
       "path": "behaviors/ddd/interaction-analysis/ddd-interaction-analysis-rule.mdc",
-      "modified_timestamp": 1762468374.3857193
+      "modified_timestamp": 1762367473.2291417
     },
     {
-      "feature": "ddd",
-      "file": "ddd-validate-runner.py",
-      "type": ".py",
-      "path": "behaviors/ddd/interaction-analysis/ddd-validate-runner.py",
-      "modified_timestamp": 1762468374.3877196
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-interaction-analysis-cmd.md",
+      "type": ".md",
+      "path": "behaviors/ddd/interaction-analysis/ddd-interaction-analysis-cmd.md",
+      "modified_timestamp": 1762475798.4964297
     },
     {
-      "feature": "ddd",
+      "feature": "ddd-structure-analysis",
       "file": "ddd-structure-analysis-cmd.md",
       "type": ".md",
       "path": "behaviors/ddd/structure-analysis/ddd-structure-analysis-cmd.md",
-      "modified_timestamp": 1762468374.3882222
+      "modified_timestamp": 1762484284.3162463
     },
     {
-      "feature": "ddd",
-      "file": "ddd-structure-analysis-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors/ddd/structure-analysis/ddd-structure-analysis-rule.mdc",
-      "modified_timestamp": 1762468374.3892248
-    },
-    {
-      "feature": "ddd",
-      "file": "ddd-structure-analysis-runner.py",
-      "type": ".py",
-      "path": "behaviors/ddd/structure-analysis/ddd-structure-analysis-runner.py",
-      "modified_timestamp": 1762468374.3892248
-    },
-    {
-      "feature": "ddd",
+      "feature": "ddd-structure-analysis",
       "file": "ddd-structure-validate-cmd.md",
       "type": ".md",
       "path": "behaviors/ddd/structure-analysis/ddd-structure-validate-cmd.md",
-      "modified_timestamp": 1762468374.390329
+      "modified_timestamp": 1762475798.5059392
     }
   ]
 }
