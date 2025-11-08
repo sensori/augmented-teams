@@ -23,6 +23,12 @@
       "commands": [
         "ddd-interaction-analysis-cmd.md"
       ]
+    },
+    "detailed-model": {
+      "description": "Extract detailed object model with concepts, relationships, and inheritance from domain documents",
+      "commands": [
+        "ddd-detailed-model-cmd.md"
+      ]
     }
   }
 }
