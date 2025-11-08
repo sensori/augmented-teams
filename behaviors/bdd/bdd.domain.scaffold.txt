@@ -1,0 +1,155 @@
+// BDD Domain Scaffold - Plain English Hierarchy (Stage 0)
+// Domain Map: bdd-domain-map.txt
+
+Describe a piece of content 
+  that is being processed by a command
+    that implements a specializing rule
+      it should select the appropriate specialized rule based on the file extgension
+      it should include base rule principles
+      and the specializing has been loaded 
+        it should have access to the base rule and it's principles
+        it should provide access to specialized examples with Dos and Donts for each principle
+      that is being verified for consistency
+        it should verify specialized rule references specializing rule
+        it should verfiy specialized examples map to specializing rule principles
+      that performs code augmented AI guidance
+        that is being validated against its rules
+          it should load a code heuristics for each principles from associated specializing rule
+          it should analyze content for violations using the heuristic
+          it should assemble related violations, principles, and examples into a checklist based report
+          it should send the violation report to AI
+          it should apply fix suggestions from AI 
+    that implements incremental runs
+      it should provide the sample size based on code analysis and configured maximum
+      it should confirm sample size with AI
+      it should submit sample size instructions to limit AI batch size before stopping
+      that has has completed a run
+        it should mark run complete
+        it should save run to history
+        it should save state to disk
+        it should provide the user with the option to repeat the run, start next run, abandon run, or expand to do all remaining
+        that has been repeated
+          it should revert current run results
+          it should restart same run from beginning
+      that is proceeding to the next run
+        it should proceed to next run with same sample size
+      that is proceeding to expand to all work
+        it should prompt te AI to learn from mistakes in previuos runs
+        it should execute all remaining work
+      with more work remaining
+        it should enable next run option
+      with all work complete
+        it should mark the command as complete
+    that is a phase in a workflow
+      it should initialize workflow phase
+      it should set state of phase to starting
+      it should save state to disk
+      in order the correct phase order
+      it should the command to be invoked 
+      that is being resumed from previous session
+        it should load state from disk
+        it should start from current phase
+        it should start from current run
+      that has been invoked out of Phase order
+        it should block execution
+        it should report on current phase that needs to be completed  
+      that has completed all steps for the command
+        it should provide the user with the option to proceed to next phase, verify  against rules, or redo the phase
+      that has been approved to proceed
+        it should determine next action from state
+        it should mark the phase as complete in the Workflow
+        it should start the next phase command in the workflow 
+
+describe a test file
+  that is being processed by a BDD command
+    that implements a specializing rule for test frameworks
+      it should select appropriate specialized rule based on file extension
+        for Jest: *.test.js, *.spec.js, *.test.ts
+        for Mamba: *_test.py, test_*.py
+      it should include BDD principles from base rule
+        § 1: Business Readable Language
+        § 2: Comprehensive and Brief Coverage
+        § 3: Balance Context Sharing
+        § 4: Cover All Layers
+        § 5: Unit Tests Front-End 
+      and the specializing rule has been loaded
+        it should have access to base rule with five principles
+        it should provide access to specialized DO/DON'T examples for each principle
+      that is being verified for consistency
+        it should verify specialized rule references base BDD rule
+        it should verify specialized examples map to five BDD principles
+      that is being validated against BDD principles
+        it should load test code heuristics specific to the language, for each principle from specialized rule
+        it should analyze test structure for violations using heuristics
+        it should assemble related violations, principles, and examples into checklist report
+        it should send violation report to AI
+        it should apply fix suggestions from AI
+    that is executed through incremenal runs
+      it should provide a smaller sample size based on describe block analysis and configured maximum
+      it should confirm sample size with AI
+      it should submit sample size instructions to limit AI batch size before stopping
+      that has completed a run
+        it should mark run complete
+        it should save run to history
+        it should mark te state of completion for each test in the test code
+        it should save state to disk
+        it should provide user with option to repeat run, start next run, abandon run, or expand to all remaining
+        that has been repeated
+          it should revert changes made to tests as a result of the current run
+          it should restart same run from beginning
+      that is proceeding to next run
+        it should proceed to next run with same sample size
+      
+      that is proceeding to expand to all work
+        it should provide the next sample size based on describe block analysis and configured maximum
+        it should prompt AI to learn from mistakes in previous runs
+        it should execute the next set of test blocks
+      
+      with more test blocks remaining
+        it should enable next run option
+      
+      with all test blocks complete
+        it should mark command as complete
+    
+    that has started the BDD workflow
+      it should invoke phases in the following order
+        Phase 0: Domain Scaffolding
+        Phase 1: Build Test Signatures
+        Phase 2: RED - Create Failing Tests
+        Phase 3: GREEN - Make Tests Pass
+        Phase 4: REFACTOR - Improve Code
+    
+    that has started Phase 0: Domain Scaffolding
+      it should read domain map structure
+      it should generate plain English describe hierarchy
+      it should generate plain English it should statements for each line in hierarchy
+      it should preserve domain map nesting depth
+      it should apply behavioral fluency rules
+    
+    that has started Phase 1: Build Test Signatures
+      it should generate describe/it hierarchy in code *jest / mamba* with empty bodies
+      it should validate signatures against § 1 Business Language
+      it should keep test bodies empty
+    
+    that has started Phase 2: RED - Create Failing Tests
+      it should implement Arrange-Act-Assert in tests
+      it should validate against all five BDD principles
+      it should execute tests to verify correct failure
+      it should verify tests fail for right reason (not syntax errors)
+    
+    that has started Phase 3: GREEN - Make Tests Pass
+      it should implement minimal production code
+      it should validate production code against principles
+      it should execute tests to verify passing
+      it should check for regressions in existing tests
+    
+    that has started Phase 4: REFACTOR - Improve Code
+      it should analyze code smells
+      it should propose specific refactorings
+      it should await user approval of refactorings
+      it should apply approved refactorings
+      it should execute tests to verify still passing
+      it should validate refactored code against principles
+      
+  
+

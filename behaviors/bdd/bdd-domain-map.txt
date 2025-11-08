@@ -1,0 +1,122 @@
+FUNCTIONAL PURPOSE: Ensure tests follow behavior-driven principles through validation, workflow guidance, and framework-specific patterns
+
+=======================================================================================================
+PART 1: REUSABLE CAPABILITIES (Generic, usable by any behavior)
+=======================================================================================================
+
+SPECIALIZING BEHAVIOR
+	Extends base rules with language-specific specialization rules
+	Base rule defines common practices
+	Specialization rules extend for specific languages
+	Reference files provide detailed examples
+	
+	Selects Specialized Rule
+		Through file extension/name matching
+	
+	Extends Base Rule
+		Specialization rules inherit and extend base guidance
+		No contradictions with base rule
+		Declared in behavior.json (isSpecialized: true)
+
+CODE-DIRECTED AI VALIDATION
+	Validates content against rule-defined practices
+	Code prepares validation materials, AI performs analysis
+	
+	Extracts Practice Examples From Rules
+		Through parsing DO/DON'T code blocks from rule files
+		Dynamically injects language-specific examples into AI prompt
+	
+	Scans Content For Potential Violations
+		Through static code analysis per-rule
+		Highlights sections likely violating principles
+	
+	Packages Violations For AI Analysis
+		Through structured prompt with examples + violations + checklist
+		Improves AI diagnostic ability with pre-identified issues
+
+STATE-BASED COMMAND WORKFLOW
+	Multi-phase workflows with session persistence
+	Enables iterative development with validation checkpoints
+	
+	Tracks Multi-Phase Workflow State
+		Through session-persisted state files
+		Manages current phase, progress, completed steps
+	
+	Controls Iteration Size
+		Through configurable sample size limits
+		Prevents overwhelming AI with too many changes at once
+	
+	Enforces Validation Checkpoints
+		Through mandatory validation after each phase
+		Blocks progression until violations fixed
+
+=======================================================================================================
+PART 2: BDD IMPLEMENTATION (Specific instances using capabilities above)
+=======================================================================================================
+
+BDD RULES
+	Instance of: Specializing Behavior
+	
+	Base Rule: bdd-rule.mdc
+		Framework-agnostic testing practices
+		5 principles: Business language, Comprehensive coverage, Context balance, Multi-layer, Front-end
+	
+	Specialization Rules (2):
+		bdd-jest-rule.mdc (JavaScript/TypeScript with Jest)
+		bdd-mamba-rule.mdc (Python with Mamba)
+	
+	Reference Files (2):
+		bdd-jest-reference.md (detailed Jest examples)
+		bdd-mamba-reference.md (detailed Mamba examples)
+
+VALIDATION COMMAND
+	Instance of: Code-Directed AI Validation
+	Command: bdd-validate-cmd.md
+	Runner: bdd-validate-runner.py
+	
+	Validates test files against BDD principles
+	Selects rule based on file pattern (*.test.js → Jest, *_test.py → Mamba)
+	Extracts DO/DON'T examples from specialized rule
+	Parses describe/it or with describe/with it hierarchy
+	Identifies violations through AI comparison
+	Suggests/applies fixes using DO examples
+
+WORKFLOW COMMAND
+	Instance of: State-Based Command Workflow
+	Command: bdd-workflow-cmd.md
+	Runner: bdd-workflow-runner.py
+	
+	Guides RED-GREEN-REFACTOR TDD cycle
+	Persists state in .bdd-workflow/*.state.json
+	Sample size: 6 tests max (lowest-level describe blocks)
+	
+	Phase 0: Builds Test Signatures
+		Through sample-validate-learn-expand cycle
+	
+	Phase 1: Creates Failing Tests (RED)
+		Through test implementation + validation + execution
+	
+	Phase 2: Makes Tests Pass (GREEN)
+		Through minimal production code + validation + execution
+	
+	Phase 3a: Suggests Refactorings (REFACTOR)
+		Through code smell analysis + user approval
+	
+	Phase 3b: Applies Refactorings
+		Through approved changes + validation + verification
+
+SCAFFOLDING COMMAND
+	Command: bdd-domain-scaffold-cmd.md
+	
+	Generates test signatures from DDD domain maps
+	Translates domain concepts → describe blocks
+	Translates behaviors → it blocks
+	Orders by user mental model
+
+SYSTEM INFRASTRUCTURE
+	Runner Guard (prevents direct execution)
+	File System Operations (read/write/scan)
+	Test Execution (Jest: npm test, Mamba: mamba)
+	Code Structure Extraction (functions, classes, metrics)
+
+=======================================================================================================

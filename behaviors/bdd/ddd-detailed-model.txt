@@ -1,0 +1,431 @@
+// ============================================================================
+// DOMAIN CLASS DIAGRAM (ASCII)
+// ============================================================================
+/*
+                                    ┌──────────────┐
+                                    │   Content    │ (Aggregate Root)
+                                    ├──────────────┤
+                                    │ filePath     │
+                                    │ fileExtension│
+                                    └──────┬───────┘
+                                           │ 1:1
+                                           │ processes
+                                           ▼
+    ┌────────────┐                 ┌──────────────┐                ┌──────────────┐
+    │  BaseRule  │                 │   Command    │───implements──►│ Specializing │
+    ├────────────┤ (Aggregate Root)├──────────────┤     1:1        │     Rule     │
+    │ ruleName   │                 │ commandName  │                ├──────────────┤
+    │ description│                 │ status       │                │ filePattern  │
+    └─────┬──────┘                 └──────────────┘                │ ruleType     │
+          │ 1:*                                                    └───────┬──────┘
+          │ has principles                                                │
+          ▼                                 SpecializingRule : BaseRule   │ 1:*
+    ┌────────────┐                              │ inherits               │ has
+    │ Principle  │                              │                        ▼
+    ├────────────┤                              └──────────────►┌──────────────┐
+    │ number     │                                              │ Specialized  │
+    │ name       │                                              │     Rule     │
+    └─────┬──────┘                                              ├──────────────┤
+          │ 1:*                                                 │ language     │
+          │ illustrated by                                      │ framework    │
+          ▼                                SpecializedRule : SpecializingRule  │
+    ┌────────────┐                                              └──────┬───────┘
+    │  Example   │                                                     │ 1:*
+    ├────────────┤                                                     │ provides
+    │ type       │                                                     ▼
+    │ snippet    │                                              ┌──────────────┐
+    └────────────┘                                              │    Code      │
+                                                                │  Heuristic   │
+                                                                ├──────────────┤
+                                                                │ pattern      │
+                                                                │ detects      │
+                                                                └──────┬───────┘
+                                                                       │ 1:*
+                                                                       ▼
+                                                                ┌──────────────┐
+                                                                │  Violation   │
+                                                                ├──────────────┤
+                                                                │ line         │
+                                                                │ severity     │
+                                                                └──────┬───────┘
+                                                                       │ 1:*
+                                                                       │ assembles
+                                                                       ▼
+    ┌──────────────────────────────────────────────────────────┬──────────────┐
+    │                                                          │  Violation   │
+    │ INHERITANCE:                                             │    Report    │
+    │                                                          ├──────────────┤
+    │ ┌───────────────┐                                        │ generatedAt  │
+    │ │    Command    │                                        └──────┬───────┘
+    │         │                                                       │ 1:1
+    │    ┌────┴────┬──────────────┐                                  │ sent to
+    │    │         │              │                                  ▼
+    │    ▼         ▼              ▼                           ┌──────────────┐
+    │ ┌────┐  ┌─────────┐  ┌──────────┐                      │      AI      │
+    │ │Code│  │Incremen-│  │  Phase   │───────belongs────────│   Guidance   │
+    │ │Guid│  │  tal    │  │ Command  │       1:1            │    System    │
+    │ └────┘  └─────┬───┘  └────┬─────┘                      └──────┬───────┘
+    │               │ 1:*       │ 1:*                                │ 1:*
+    │               │ has       │ has                                │ generates
+    │               ▼           ▼                                    ▼
+    │         ┌─────────┐  ┌──────────┐                      ┌──────────────┐
+    │         │   Run   │  │ Workflow │ (Aggregate Root)  │     Fix      │
+    │         ├─────────┤  ├──────────┤                   │  Suggestion  │
+    │         │ number  │  │ name     │                   ├──────────────┤
+    │         │ status  │  │ current  │                   │ line         │
+    │         └─────────┘  │ phase    │                   │ suggested    │
+    │                      └──────────┘                   └──────────────┘
+    └──────────────────────────────────────────────────────────────────────
+
+LEGEND:
+  ─►  Association/Reference
+  ◄─  Bidirectional
+  ──▷  Inheritance
+  1:1  One-to-One
+  1:*  One-to-Many
+  0:1  Optional
+*/
+
+// ============================================================================
+// DOMAIN MODEL DETAILS
+// ============================================================================
+
+Content {
+  filePath: string
+  fileExtension: string
+  rawContent: string
+  contentType: ContentType (ex: CODE, TEST, DOCUMENTATION)
+  
+  - is being processed by --> Command (1:1)
+  - has violations detected in it --> Violation[] (1:*)
+}
+
+Command {
+  commandName: string
+  status: CommandStatus (ex: PENDING, IN_PROGRESS, COMPLETE, BLOCKED)
+  createdAt: timestamp
+  completedAt: timestamp
+  
+  - processes --> Content (1:1)
+  - implements --> SpecializingRule (1:1)
+}
+
+BaseRule {
+  ruleName: string
+  description: string
+  
+  - provides principled guidance through --> Principle[] (1:*)
+}
+
+SpecializingRule : BaseRule {
+  fileExtensionPattern: string (e.g., "*.test.js", "*_test.py")
+  ruleType: RuleType (ex: BDD, CLEAN_CODE, ARCHITECTURE)
+  
+  - selects appropriate specialized rule based on --> file extension pattern
+  - is loaded and provides access to --> SpecializedRule[] (1:*)
+  - is implemented by --> Command[] (1:*)
+}
+
+SpecializedRule : SpecializingRule {
+  targetLanguage: string (e.g., "JavaScript", "Python")
+  targetFramework: string (e.g., "Jest", "Mamba")
+  
+  - provides access to specialized examples with Dos and Donts for --> Principle[] (1:*)
+  - provides --> Example[] (1:*)
+  - may be verified for consistency against --> parent SpecializingRule (0:1)
+  - has code heuristics loaded for --> CodeHeuristic[] (1:*)
+}
+
+Principle {
+  principleNumber: int (e.g., 1, 2, 3, 4, 5)
+  principleName: string
+  description: string
+  
+  - belongs to --> BaseRule (1:1)
+  - is illustrated by --> Example[] (1:*)
+  - is validated using --> CodeHeuristic[] (1:*)
+  - is violated by --> Violation[] (0:*)
+  - maps to specialized examples in --> SpecializedRule (1:*)
+}
+
+Example {
+  exampleType: ExampleType (ex: DO, DONT)
+  codeSnippet: string
+  explanation: string
+  
+  - illustrates Dos and Donts for --> Principle (1:1)
+  - is provided by --> SpecializedRule (1:1)
+  - is referenced in --> ViolationReport (0:*)
+}
+
+CodeHeuristic {
+  heuristicName: string
+  detectionPattern: string (regex or AST pattern)
+  language: string
+  
+  - is loaded for each principle from --> SpecializedRule (1:1)
+  - validates --> Principle (1:1)
+  - analyzes content for violations using --> detection pattern
+  - detects --> Violation[] (1:*)
+}
+
+Violation {
+  lineNumber: int
+  columnNumber: int
+  severity: Severity (ex: ERROR, WARNING, INFO)
+  message: string
+  
+  - is found in --> Content (1:1)
+  - violates --> Principle (1:1)
+  - references --> Example[] (1:*) for correct approach
+  - is detected by --> CodeHeuristic using heuristic (1:1)
+}
+
+ViolationReport {
+  generatedAt: timestamp
+  reportFormat: ReportFormat (ex: CHECKLIST, DETAILED, SUMMARY)
+  
+  - assembles related --> Violation[] (1:*)
+  - references --> Principle[] (1:*)
+  - includes --> Example[] (1:*)
+  - is a checklist based report
+  - is sent to --> AIGuidanceSystem (1:1)
+  - is generated by --> CodeGuidingCommand (1:1)
+}
+
+CodeGuidingCommand : Command {
+  validationMode: ValidationMode (ex: STRICT, LENIENT, ADVISORY)
+  
+  - performs code augmented AI guidance
+  - may be validated against --> SpecializingRule (0:1)
+  - loads code heuristics for each principle from --> SpecializedRule (1:1)
+  - analyzes content for violations using --> CodeHeuristic[] (1:*)
+  - assembles related violations, principles, and examples into --> ViolationReport (1:1)
+  - sends violation report to --> AIGuidanceSystem (1:1)
+  - applies fix suggestions from --> FixSuggestion[] (1:*)
+}
+
+IncrementalCommand : Command {
+  currentRunNumber: int
+  sampleSize: int
+  maxSampleSize: int
+  totalWorkUnits: int
+  completedWorkUnits: int
+  
+  - implements incremental runs
+  - provides sample size based on --> code analysis and configured maximum
+  - confirms sample size with --> AI
+  - submits sample size instructions to limit AI batch size before stopping
+  - has completed a --> Run (when done)
+  - marks run complete
+  - saves run to --> RunHistory (1:*)
+  - saves state to --> IncrementalState (persisted to disk)
+  - provides user with option to --> repeat run, start next run, abandon run, or expand to all remaining
+  - can revert current run results when --> repeated
+  - can proceed to next run with --> same sample size
+  - can expand to all work after --> learning from mistakes in previous runs
+  - enables next run option when --> more work remaining
+  - marks command as complete when --> all work complete
+}
+
+Run {
+  runNumber: int
+  startedAt: timestamp
+  completedAt: timestamp
+  status: RunStatus (ex: IN_PROGRESS, COMPLETE, REVERTED, ABANDONED)
+  
+  - belongs to --> IncrementalCommand (1:1)
+  - has completed execution
+  - is marked complete
+  - is saved to --> RunHistory (1:1)
+  - can be reverted when --> repeated
+  - can be restarted from beginning
+}
+
+RunHistory {
+  createdAt: timestamp
+  
+  - contains completed --> Run[] (1:*)
+  - belongs to --> IncrementalCommand (1:1)
+  - is used to learn from --> mistakes in previous runs
+}
+
+IncrementalState {
+  currentRun: int
+  workRemaining: boolean
+  nextAction: NextAction (ex: REPEAT, NEXT_RUN, EXPAND_ALL, ABANDON)
+  persistedAt: timestamp
+  
+  - is saved to --> disk
+  - belongs to --> IncrementalCommand (1:1)
+}
+
+PhaseCommand : Command {
+  phaseNumber: int
+  phaseName: string
+  phaseOrder: int
+  canExecute: boolean
+  
+  - is a phase in --> Workflow (1:1)
+  - initializes workflow phase
+  - sets state of phase to --> starting
+  - saves state to --> disk through PhaseState
+  - executes in correct phase order
+  - may be resumed from --> previous session (loads state from disk)
+  - starts from --> current phase
+  - starts from --> current run
+  - has been invoked out of phase order --> blocks execution
+  - reports on current phase that needs to be completed
+  - has completed all steps --> provides option to proceed to next phase, verify, or redo
+  - has been approved to proceed --> determines next action from state
+  - marks phase as complete in --> Workflow
+  - starts next phase command in --> Workflow
+  - is preceded by --> PhaseCommand (0:1)
+  - is followed by --> PhaseCommand (0:1)
+}
+
+Workflow {
+  workflowName: string
+  currentPhaseNumber: int
+  status: WorkflowStatus (ex: NOT_STARTED, IN_PROGRESS, COMPLETE, BLOCKED)
+  
+  - has ordered phases --> PhaseCommand[] (1:*)
+  - processes --> Content (1:1)
+  - invokes phases in correct order
+  - marks phase as complete
+  - starts next phase command
+  - has state saved to --> WorkflowState (persisted to disk)
+  - can be resumed from --> previous session
+}
+
+PhaseState {
+  phaseStatus: PhaseStatus (ex: STARTING, IN_PROGRESS, COMPLETE, BLOCKED)
+  startedAt: timestamp
+  completedAt: timestamp
+  currentRun: int
+  persistedAt: timestamp
+  
+  - belongs to --> PhaseCommand (1:1)
+  - is saved to --> disk
+  - is loaded from disk when --> resuming
+}
+
+WorkflowState {
+  currentPhase: int
+  currentRun: int
+  canResume: boolean
+  persistedAt: timestamp
+  
+  - belongs to --> Workflow (1:1)
+  - is saved to --> disk
+  - is loaded from disk when --> resuming
+}
+
+AIGuidanceSystem {
+  systemName: string
+  
+  - receives --> ViolationReport[] (1:*)
+  - generates --> FixSuggestion[] (1:*)
+  - is prompted to learn from --> mistakes in previous runs
+}
+
+FixSuggestion {
+  lineNumber: int
+  originalCode: string
+  suggestedCode: string
+  explanation: string
+  
+  - addresses --> Violation (1:1)
+  - is generated by --> AIGuidanceSystem (1:1)
+  - is applied by --> CodeGuidingCommand (1:1)
+}
+
+// ============================================================================
+// RELATIONSHIP SUMMARY
+// ============================================================================
+
+/*
+INHERITANCE RELATIONSHIPS (IS-A):
+- CodeGuidingCommand : Command
+- IncrementalCommand : Command
+- PhaseCommand : Command
+- SpecializingRule : BaseRule
+- SpecializedRule : SpecializingRule
+
+COMPOSITION RELATIONSHIPS (HAS-A, STRONG):
+- BaseRule HAS Principle[] (1:*)
+- SpecializedRule HAS Example[] (1:*)
+- SpecializedRule HAS CodeHeuristic[] (1:*)
+- ViolationReport HAS Violation[] (1:*)
+- IncrementalCommand HAS Run[] (1:*)
+- RunHistory HAS Run[] (1:*)
+- Workflow HAS PhaseCommand[] (1:*)
+
+AGGREGATION RELATIONSHIPS (HAS-A, WEAK):
+- Content HAS Violation[] (1:*)
+- Command HAS IncrementalCommand (1:1)
+- Command HAS PhaseCommand (0:1)
+
+ASSOCIATION RELATIONSHIPS:
+- Content <-> Command (1:1 bidirectional)
+- Command <-> SpecializingRule (1:1)
+- BaseRule <-> Principle[] (1:*)
+- SpecializingRule <-> SpecializedRule[] (1:*)
+- SpecializedRule <-> Example[] (1:*)
+- SpecializedRule <-> CodeHeuristic[] (1:*)
+- CodeHeuristic <-> Violation[] (1:*)
+- Violation <-> Principle (1:1)
+- Violation <-> Example[] (1:*)
+- ViolationReport --> Violation[] (1:*)
+- ViolationReport <-> AIGuidanceSystem (1:1)
+- AIGuidanceSystem <-> FixSuggestion[] (1:*)
+- PhaseCommand <-> Workflow (1:1)
+- PhaseCommand <-> PhaseCommand (0:1 linked list)
+
+DEPENDENCY RELATIONSHIPS:
+- Command DEPENDS ON SpecializingRule
+- CodeGuidingCommand DEPENDS ON ViolationReport
+- IncrementalCommand DEPENDS ON Run
+- PhaseCommand DEPENDS ON Workflow
+*/
+
+// ============================================================================
+// AGGREGATE BOUNDARIES
+// ============================================================================
+
+/*
+AGGREGATE 1: Content Aggregate
+- Root: Content
+- Entities: Violation
+- Value Objects: none
+- Boundary: Content controls its Violations
+
+AGGREGATE 2: Rule Aggregate
+- Root: BaseRule (abstract)
+- Entities: SpecializingRule : BaseRule, SpecializedRule : SpecializingRule, Principle, CodeHeuristic
+- Value Objects: Example
+- Boundary: BaseRule hierarchy controls principles, examples, and heuristics
+
+AGGREGATE 3: Command Aggregate
+- Root: Command (abstract)
+- Entities: CodeGuidingCommand, IncrementalCommand, PhaseCommand, Run
+- Value Objects: IncrementalState, PhaseState, FixSuggestion
+- Boundary: Command controls its execution behavior and state
+
+AGGREGATE 4: Workflow Aggregate
+- Root: Workflow
+- Entities: PhaseCommand (shared with Command Aggregate)
+- Value Objects: WorkflowState
+- Boundary: Workflow controls phase ordering and execution
+
+AGGREGATE 5: Validation Aggregate
+- Root: ViolationReport
+- Entities: Violation (shared with Content Aggregate)
+- Value Objects: Example (shared with Rule Aggregate)
+- Boundary: ViolationReport controls violation assembly and reporting
+*/
+
+// ============================================================================
+// END OF MODEL
+// ============================================================================
+

@@ -1,9 +1,9 @@
 ### Command: `bdd-domain-scaffold-cmd.md`
 
-**Purpose:** Generate natural language test hierarchy from domain map (Stage 0 - Domain Scaffolding)
+**Purpose:** Generate plain English test hierarchy with describe blocks and "it should" statements (Stage 0)
 
 **Usage:**
-* `\bdd-domain-scaffold` — Generate/iterate describe hierarchy for current test file
+* `\bdd-domain-scaffold` — Generate/iterate plain English hierarchy
 * `\bdd-domain-scaffold-verify` — Verify hierarchy follows fluency principles
 * `python behaviors/bdd/bdd-runner.py workflow <file> domain-scaffold` — Run from command line
 
@@ -11,10 +11,11 @@
 * `\bdd-domain-fluency-rule` — Hierarchy and fluency principles
 * `\ddd-structure-analysis-rule` — Domain concept mapping (referenced by fluency rule)
 
-**Phase:** Stage 0 (before signatures, before any code)
+**Phase:** Stage 0 (before code conversion)
 
 **What This Creates:**
-Plain English behavioral structure (no code syntax yet).
+Plain English test hierarchy with BOTH describe blocks AND "it should" statements.
+NO code syntax (no parentheses, arrow functions, or braces).
 
 **Example:**
 ```
@@ -27,9 +28,9 @@ describe a power item
       it should add effect to selection
 ```
 
-This is pure English - converted to code syntax in Stage 1.
-
-**Stage 0 Stops Here** - Next: `/bdd-signature` (Stage 1) converts to code syntax
+**CRITICAL:**
+- **Stage 0:** Plain English with describe AND "it should" (output: `*.domain.scaffold.txt`)
+- **Stage 1:** Convert to code syntax (output: `*.test.js` or `*_test.py`)
 
 **3-Method Pattern:**
 
@@ -96,16 +97,19 @@ This is pure English - converted to code syntax in Stage 1.
 
 **Hierarchy Validation Checklist** (AI performs during verify):
 
-1. ✓ Read each describe chain aloud - does it flow naturally?
-2. ✓ **HIERARCHY DEPTH**: Does test nesting match domain map indentation? (Count tabs in map = count describe levels in tests)
-3. ✓ **TOP-LEVEL DOMAINS**: Are top-level describes the DOMAIN names from map (not individual concepts)?
-4. ✓ **NESTED CONCEPTS**: Are domain concepts nested under their parent domain?
-5. ✓ **NO FLATTENING**: Are nested concepts (Movement-Triggered, Customization) kept nested, not promoted to siblings?
-6. ✓ Do nested describes use 'that/whose/when/with' to show relationships?
-7. ✓ Are class/function/module names avoided?
-8. ✓ Is the subject clear in every describe chain?
-9. ✓ Do siblings relate to same parent concept?
-10. ✓ Does nesting show general → specific progression?
+1. ✓ **Top-level describes** - Are they domain concepts (nouns with 'a/an')?
+2. ✓ **Nesting depth** - Does depth show specificity (general → specific)?
+3. ✓ **Sibling cohesion** - Do siblings relate to same parent concept?
+4. ✓ **Natural flow** - Does each chain read naturally when spoken aloud?
+5. ✓ **Subject clarity** - Is the subject obvious in every describe?
+6. ✓ **Domain alignment** - Does structure match domain map (if exists)?
+7. ✓ **Relationship words** - Are "that/whose/when/with" used to connect concepts?
+8. ✓ **No class names** - Are class/function/module names avoided?
+9. ✓ **Orchestration first** - For sequential processes, are flow tests before state tests?
+10. ✓ **No concept duplication** - Is each sub-concept under only one parent (no repetition across parents)?
+11. ✓ **Active voice** - Do orchestration tests use active voice ("load" not "have loaded")?
+12. ✓ **Derived specificity** - Do derived hierarchies only add specifics (not repeat base)?
+13. ✓ **Natural language** - Are actors mentioned only for purpose/recipient (not mechanism)?
 
 **Integration:**
 
@@ -118,8 +122,4 @@ This command integrates with:
 **Next Phase:**
 
 After domain scaffold approved:
-* `\bdd-signature` — Add "it should..." statements to hierarchy
-
-
-After domain scaffold approved:
-* `\bdd-signature` — Add "it should..." statements to hierarchy
+* `\bdd-signature` — Convert plain English to code syntax (Stage 1)

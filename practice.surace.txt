@@ -1,2 +1,4 @@
 
 min code, amx ai  --> max code min ai base don ai fuck ups
+
+bdd -scaffold, nuetral langiage es plain englisg with object notation 
