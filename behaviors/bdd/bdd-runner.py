@@ -25,1726 +25,887 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
-from enum import Enum
+import sys
+# RunStatus and StepType are now imported from common_command_runner
+common_runner_path = Path(__file__).parent.parent / "common_command_runner" / "common_command_runner.py"
+import importlib.util
+spec = importlib.util.spec_from_file_location("common_command_runner", common_runner_path)
+common_runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(common_runner)
 
-# ============================================================================
-# STATE MANAGEMENT CLASSES
-# ============================================================================
-
-class RunStatus(Enum):
-    """Run lifecycle status"""
-    STARTED = "started"              # Work began, not verified
-    AI_VERIFIED = "ai_verified"      # AI ran validation, passed
-    HUMAN_APPROVED = "human_approved"  # Human reviewed and approved
-    COMPLETED = "completed"          # Fully complete
-
-
-class StepType(Enum):
-    """Workflow step types"""
-    # New modular workflow steps
-    DOMAIN_SCAFFOLD = "domain_scaffold"  # Stage 0: Hierarchy generation
-    SIGNATURES = "signatures"             # Stage 1: Add "it should..." statements
-    RED = "red"                           # Stage 2: Failing tests
-    GREEN = "green"                       # Stage 3: Minimal implementation
-    REFACTOR = "refactor"                 # Stage 4: Code improvements
-    
-    # Legacy step types (for backward compatibility)
-    SAMPLE = "sample"                     # Any sample (Phase 0) - actual name in context
-    EXPAND = "expand"                     # Expand to full scope (Phase 0)
-    RED_BATCH = "red_batch"               # RED phase batch
-    GREEN_BATCH = "green_batch"           # GREEN phase batch
-    REFACTOR_SUGGEST = "refactor_suggest"     # REFACTOR suggest
-    REFACTOR_IMPLEMENT = "refactor_implement" # REFACTOR implement
+# Import needed classes
+Content = common_runner.Content
+BaseRule = common_runner.BaseRule
+FrameworkSpecializingRule = common_runner.FrameworkSpecializingRule
+SpecializedRule = common_runner.SpecializedRule
+Command = common_runner.Command
+SpecializingRuleCommand = common_runner.SpecializingRuleCommand
+CodeAugmentedCommand = common_runner.CodeAugmentedCommand
+IncrementalCommand = common_runner.IncrementalCommand
+WorkflowPhaseCommand = common_runner.WorkflowPhaseCommand
+Workflow = common_runner.Workflow
+CodeHeuristic = common_runner.CodeHeuristic
+Violation = common_runner.Violation
+RunStatus = common_runner.RunStatus
+StepType = common_runner.StepType
 
 
-class BDDRunState:
-    """Tracks and enforces BDD workflow run state"""
+class BDDRule(FrameworkSpecializingRule):
     
-    def __init__(self, test_file: str):
-        self.test_file = test_file
-        self.state_file = self._get_state_file_path()
-        self.state = self._load_state()
+    def __init__(self, base_rule_file_name: str = 'bdd-rule.mdc'):
+        super().__init__(base_rule_file_name)
     
-    def _get_state_file_path(self) -> Path:
-        """Get run state file path"""
-        test_path = Path(self.test_file)
-        state_dir = test_path.parent / ".bdd-workflow"
-        state_dir.mkdir(exist_ok=True)
-        return state_dir / f"{test_path.stem}.run-state.json"
-    
-    def _load_state(self) -> Dict[str, Any]:
-        """Load run state from file"""
-        if self.state_file.exists():
-            return json.loads(self.state_file.read_text(encoding='utf-8'))
+    @staticmethod
+    def detect_framework_from_file(file_path: str) -> Optional[str]:
+        path_obj = Path(file_path)
+        file_extension = path_obj.suffix.lower()
         
-        # Initialize new run state
-        return {
-            "runs": [],  # List of all runs
-            "current_run_id": None,
-            "phase": "signatures",
-            "scope": "describe",
-            "created_at": datetime.now().isoformat()
-        }
-    
-    def save(self):
-        """Save run state to file"""
-        self.state_file.write_text(
-            json.dumps(self.state, indent=2), 
-            encoding='utf-8'
-        )
-    
-    def start_run(self, step_type: StepType, context: Dict[str, Any] = None) -> str:
-        """
-        Start a new run.
+        if file_extension == '.py':
+            return 'mamba'
+        elif file_extension in ['.js', '.ts', '.jsx', '.tsx', '.mjs']:
+            return 'jest'
         
-        Returns: run_id
-        Raises: RuntimeError if previous run not complete
-        """
-        if context is None:
-            context = {}
-            
-        # Check if previous run is complete
-        if self.state["current_run_id"]:
-            prev_run = self._get_run(self.state["current_run_id"])
-            if prev_run and prev_run["status"] != RunStatus.COMPLETED.value:
-                raise RuntimeError(
-                    f"Previous run {self.state['current_run_id']} not complete. "
-                    f"Status: {prev_run['status']}. "
-                    f"Complete or abandon previous run before starting new one."
-                )
-        
-        # Create new run
-        run_id = f"{step_type.value}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
-        new_run = {
-            "run_id": run_id,
-            "step_type": step_type.value,
-            "status": RunStatus.STARTED.value,
-            "context": context,
-            "started_at": datetime.now().isoformat(),
-            "ai_verified_at": None,
-            "human_approved_at": None,
-            "completed_at": None,
-            "validation_results": None,
-            "human_feedback": None
-        }
-        
-        self.state["runs"].append(new_run)
-        self.state["current_run_id"] = run_id
-        self.save()
-        
-        return run_id
-    
-    def _get_run(self, run_id: str) -> Optional[Dict[str, Any]]:
-        """Get run by ID"""
-        for run in self.state["runs"]:
-            if run["run_id"] == run_id:
-                return run
         return None
     
-    def get_current_run(self) -> Optional[Dict[str, Any]]:
-        """Get current active run"""
-        if not self.state["current_run_id"]:
+    def load_framework_rule_file(self, framework: str) -> Optional[Dict[str, Any]]:
+        rule_files = {
+            'jest': 'bdd-jest-rule.mdc',
+            'mamba': 'bdd-mamba-rule.mdc'
+        }
+        
+        rule_file = rule_files.get(framework)
+        if not rule_file:
             return None
-        return self._get_run(self.state["current_run_id"])
-    
-    def record_ai_verification(self, validation_results: Dict[str, Any] = None):
-        """Record that AI verified the work"""
-        if validation_results is None:
-            validation_results = {}
-            
-        current_run = self.get_current_run()
-        if not current_run:
-            raise RuntimeError("No current run to verify")
         
-        run_id = current_run['run_id']
-        run = self._get_run(run_id)
+        rule_path = Path("behaviors/bdd") / rule_file
+        if not rule_path.exists():
+            return None
         
-        if run["status"] != RunStatus.STARTED.value:
-            raise RuntimeError(
-                f"Run {run_id} not in STARTED status. "
-                f"Current status: {run['status']}"
-            )
-        
-        run["status"] = RunStatus.AI_VERIFIED.value
-        run["ai_verified_at"] = datetime.now().isoformat()
-        run["validation_results"] = validation_results
-        self.save()
-    
-    def record_human_approval(
-        self, 
-        run_id: str, 
-        approved: bool,
-        feedback: Optional[str] = None
-    ):
-        """Record human review and approval"""
-        run = self._get_run(run_id)
-        if not run:
-            raise RuntimeError(f"Run {run_id} not found")
-        
-        if run["status"] != RunStatus.AI_VERIFIED.value:
-            raise RuntimeError(
-                f"Run {run_id} not AI verified. "
-                f"Current status: {run['status']}. "
-                f"AI must verify before human approval."
-            )
-        
-        if approved:
-            run["status"] = RunStatus.HUMAN_APPROVED.value
-            run["human_approved_at"] = datetime.now().isoformat()
-        else:
-            # Rejected - back to STARTED
-            run["status"] = RunStatus.STARTED.value
-            run["ai_verified_at"] = None
-            run["validation_results"] = None
-        
-        run["human_feedback"] = feedback
-        self.save()
-    
-    def complete_run(self, run_id: str):
-        """Mark run as completed"""
-        run = self._get_run(run_id)
-        if not run:
-            raise RuntimeError(f"Run {run_id} not found")
-        
-        if run["status"] != RunStatus.HUMAN_APPROVED.value:
-            raise RuntimeError(
-                f"Run {run_id} not human approved. "
-                f"Current status: {run['status']}. "
-                f"Human must approve before completion."
-            )
-        
-        run["status"] = RunStatus.COMPLETED.value
-        run["completed_at"] = datetime.now().isoformat()
-        
-        # Clear current run
-        self.state["current_run_id"] = None
-        self.save()
-    
-    def abandon_run(self, run_id: str, reason: str):
-        """Abandon a run (for error recovery)"""
-        run = self._get_run(run_id)
-        if run:
-            run["status"] = "abandoned"
-            run["abandon_reason"] = reason
-            run["abandoned_at"] = datetime.now().isoformat()
-            
-            if self.state["current_run_id"] == run_id:
-                self.state["current_run_id"] = None
-            
-            self.save()
-    
-    def can_start_run(self) -> bool:
-        """Check if can start a new run"""
-        current_run = self.get_current_run()
-        if not current_run:
-            return True
-        return current_run["status"] == RunStatus.COMPLETED.value
-    
-    def get_status_summary(self) -> Dict[str, Any]:
-        """Get human-readable status summary"""
-        current_run = self.get_current_run()
-        can_proceed, reason = self._can_proceed_to_next_step()
+        content = rule_path.read_text(encoding='utf-8')
         
         return {
-            "current_run": current_run["run_id"] if current_run else None,
-            "status": current_run["status"] if current_run else "no_active_run",
-            "step_type": current_run["step_type"] if current_run else None,
-            "can_proceed": can_proceed,
-            "next_action": reason,
-            "total_runs": len(self.state["runs"]),
-            "completed_runs": len([r for r in self.state["runs"] 
-                                   if r["status"] == RunStatus.COMPLETED.value])
+            "rule_path": str(rule_path),
+            "content": content,
+            "framework": framework
         }
     
-    def _can_proceed_to_next_step(self) -> tuple[bool, str]:
-        """Check if can proceed to next workflow step"""
-        current_run = self.get_current_run()
+    def extract_dos_and_donts(self, rule_content: str) -> Dict[str, Dict[str, List[str]]]:
+        sections = {}
+        current_section = None
         
-        if not current_run:
-            return (True, "No active run, can start new one")
+        lines = rule_content.split('\n')
+        for i, line in enumerate(lines):
+            section_match = re.match(r'^##\s+(\d+)\.\s+(.+)$', line)
+            if section_match:
+                section_num = section_match.group(1)
+                section_name = section_match.group(2).strip()
+                current_section = f"{section_num}. {section_name}"
+                sections[current_section] = {"dos": [], "donts": []}
+            
+            if '**✅ DO:**' in line or '**DO:**' in line:
+                code_block = []
+                in_code = False
+                for j in range(i+1, min(i+50, len(lines))):
+                    if lines[j].strip().startswith('```') and not in_code:
+                        in_code = True
+                        continue
+                    elif lines[j].strip().startswith('```') and in_code:
+                        break
+                    elif in_code:
+                        code_block.append(lines[j])
+                
+                if code_block and current_section:
+                    sections[current_section]["dos"].append('\n'.join(code_block))
+            
+            if '**❌ DON\'T:**' in line or '**DON\'T:**' in line or "**DON'T:**" in line:
+                code_block = []
+                in_code = False
+                for j in range(i+1, min(i+50, len(lines))):
+                    if lines[j].strip().startswith('```') and not in_code:
+                        in_code = True
+                        continue
+                    elif lines[j].strip().startswith('```') and in_code:
+                        break
+                    elif in_code:
+                        code_block.append(lines[j])
+                
+                if code_block and current_section:
+                    sections[current_section]["donts"].append('\n'.join(code_block))
         
-        status = current_run["status"]
-        
-        if status == RunStatus.COMPLETED.value:
-            return (True, "Current run complete")
-        
-        if status == RunStatus.STARTED.value:
-            return (False, "AI must verify before proceeding")
-        
-        if status == RunStatus.AI_VERIFIED.value:
-            return (False, "Human must review and approve before proceeding")
-        
-        if status == RunStatus.HUMAN_APPROVED.value:
-            return (False, "Run approved but not marked complete. Call complete_run()")
-        
-        return (False, f"Unknown status: {status}")
+        return sections
 
 
-# ============================================================================
-# EXECUTOR CLASSES
-# ============================================================================
+class BDDJargonHeuristic(CodeHeuristic):
+    """Heuristic for §1: Detects technical jargon and missing 'should' in test names"""
+    def __init__(self):
+        super().__init__("bdd_jargon")
+    
+    def detect_violations(self, content):
+        """Detect violations of Business Readable Language principle"""
+        violations = []
+        if not hasattr(content, '_content_lines') or not content._content_lines:
+            return None
+        
+        for i, line in enumerate(content._content_lines, 1):
+            # Detect technical jargon patterns
+            technical_patterns = [
+                r'\b(get|set|is|has|can|will|do)[A-Z]\w+',  # getDescriptor, isActive
+                r'\b[A-Z][a-z]+(Item|Object|Entity|Class|Type|Manager|Handler|Service)',  # PowerItem, UserManager
+                r'\btest_\w+',  # test_getDescriptor
+                r'\bdescribe\([\'"]\w+[A-Z]',  # describe('PowerItem')
+            ]
+            
+            for pattern in technical_patterns:
+                if re.search(pattern, line):
+                    violations.append(Violation(i, "Uses technical jargon instead of domain language"))
+                    break
+            
+            # Detect missing "should" in it() blocks
+            if re.search(r"with it\(['\"]", line) or re.search(r"it\(['\"]", line):
+                if "should" not in line.lower() and "test_" in line.lower():
+                    violations.append(Violation(i, "Test name doesn't start with 'should' and uses technical naming"))
+        
+        return violations if violations else None
+
+class BDDComprehensiveHeuristic(CodeHeuristic):
+    """Heuristic for §2: Detects overly broad tests and internal assertions"""
+    def __init__(self):
+        super().__init__("bdd_comprehensive")
+    
+    def detect_violations(self, content):
+        """Detect violations of Comprehensive and Brief principle"""
+        violations = []
+        if not hasattr(content, '_content_lines') or not content._content_lines:
+            return None
+        
+        for i, line in enumerate(content._content_lines, 1):
+            # Detect assertions on internal calls/framework logic
+            internal_patterns = [
+                r'\.toHaveBeenCalled',  # Jest mock assertions
+                r'\.assert_called',  # Python mock assertions
+                r'\.mock\.',  # Mock internals
+                r'\.spyOn\(',  # Spy creation
+            ]
+            
+            for pattern in internal_patterns:
+                if re.search(pattern, line):
+                    violations.append(Violation(i, "Tests internal calls or framework logic instead of observable behavior"))
+                    break
+        
+        return violations if violations else None
+
+class BDDDuplicateCodeHeuristic(CodeHeuristic):
+    """Heuristic for §3: Detects duplicate code using string similarity"""
+    def __init__(self):
+        super().__init__("bdd_duplicate_code")
+        try:
+            from difflib import SequenceMatcher
+            self.SequenceMatcher = SequenceMatcher
+        except ImportError:
+            self.SequenceMatcher = None
+    
+    def _calculate_similarity(self, str1: str, str2: str) -> float:
+        """Calculate similarity ratio between two strings"""
+        if not self.SequenceMatcher:
+            # Fallback: simple character overlap
+            return len(set(str1) & set(str2)) / max(len(set(str1) | set(str2)), 1)
+        return self.SequenceMatcher(None, str1, str2).ratio()
+    
+    def detect_violations(self, content):
+        """Detect violations of Balance Context Sharing principle"""
+        violations = []
+        if not hasattr(content, '_content_lines') or not content._content_lines:
+            return None
+        
+        lines = content._content_lines
+        # Look for sibling blocks (3+ consecutive it() or context() blocks)
+        sibling_groups = []
+        current_group = []
+        
+        for i, line in enumerate(lines):
+            # Detect test blocks
+            is_test_block = bool(re.search(r"with it\(|it\(|with context\(|describe\(", line))
+            
+            if is_test_block:
+                current_group.append((i + 1, line))  # Store line number and content
+            else:
+                if len(current_group) >= 3:  # 3+ siblings
+                    sibling_groups.append(current_group)
+                current_group = []
+        
+        # Check last group
+        if len(current_group) >= 3:
+            sibling_groups.append(current_group)
+        
+        # For each group, check for duplicate code in bodies
+        for group in sibling_groups:
+            # Extract bodies (next few lines after each block start)
+            bodies = []
+            for line_num, line in group:
+                body_lines = []
+                # Get next 5-10 lines as body
+                start_idx = line_num - 1  # Convert to 0-based
+                for j in range(start_idx + 1, min(start_idx + 11, len(lines))):
+                    if re.search(r"^\s*(with |it\(|describe\(|})", lines[j]):  # Next block or closing
+                        break
+                    body_lines.append(lines[j])
+                bodies.append((line_num, '\n'.join(body_lines)))
+            
+            # Compare bodies for similarity
+            for i in range(len(bodies)):
+                for j in range(i + 1, len(bodies)):
+                    similarity = self._calculate_similarity(bodies[i][1], bodies[j][1])
+                    if similarity > 0.7:  # 70% similarity threshold
+                        violations.append(Violation(
+                            bodies[i][0],
+                            f"Duplicate code detected: {len(group)} sibling blocks with {similarity:.0%} similar code (Balance Context Sharing violation)"
+                        ))
+                        break  # Only report once per group
+        
+        return violations if violations else None
+
+class BDDLayerFocusHeuristic(CodeHeuristic):
+    """Heuristic for §4: Detects wrong layer focus (testing dependencies instead of code under test)"""
+    def __init__(self):
+        super().__init__("bdd_layer_focus")
+    
+    def detect_violations(self, content):
+        """Detect violations of Cover All Layers principle"""
+        violations = []
+        if not hasattr(content, '_content_lines') or not content._content_lines:
+            return None
+        
+        for i, line in enumerate(content._content_lines, 1):
+            # Detect excessive mocking of dependencies
+            mock_patterns = [
+                r'mock\(.*\)\.mock',  # Chained mocks
+                r'jest\.mock\(.*\)',  # Jest module mocks
+                r'@patch\(',  # Python decorator mocks
+            ]
+            
+            mock_count = sum(1 for pattern in mock_patterns if re.search(pattern, line))
+            if mock_count > 2:  # Too many mocks suggests wrong focus
+                violations.append(Violation(i, "Focuses on dependencies rather than code under test"))
+                break
+        
+        return violations if violations else None
+
+class BDDFrontEndHeuristic(CodeHeuristic):
+        """Heuristic for §5: Detects implementation details in front-end tests"""
+        def __init__(self):
+            super().__init__("bdd_frontend")
+        
+        def detect_violations(self, content):
+            """Detect violations of Unit Tests Front-End principle"""
+            violations = []
+            if not hasattr(content, '_content_lines') or not content._content_lines:
+                return None
+            
+            # Only check if this is a front-end test file
+            file_path = getattr(content, 'file_path', '')
+            if not any(ext in file_path for ext in ['.jsx', '.tsx', '.test.jsx', '.test.tsx', '.spec.jsx', '.spec.tsx']):
+                return None  # Not a front-end test
+            
+            for i, line in enumerate(content._content_lines, 1):
+                # Detect implementation detail assertions
+                impl_patterns = [
+                    r'\.state\.',  # React state access
+                    r'\.props\.',  # React props access
+                    r'\.instance\(\)',  # Component instance
+                    r'\.debug\(\)',  # Debug output
+                ]
+                
+                for pattern in impl_patterns:
+                    if re.search(pattern, line):
+                        violations.append(Violation(i, "Tests implementation details instead of user-visible behavior"))
+                        break
+            
+            return violations if violations else None
+
+class BDDCommand(CodeAugmentedCommand):
+    
+    def __init__(self, content: Content, base_rule_file_name: str = 'bdd-rule.mdc'):
+        self.rule = BDDRule(base_rule_file_name)
+        
+        inner_command = Command(content, self.rule.base_rule)
+        
+        super().__init__(inner_command, self.rule.base_rule)
+    
+    def _get_heuristic_map(self):
+        return {
+            1: BDDJargonHeuristic,
+            2: BDDComprehensiveHeuristic,
+            3: BDDDuplicateCodeHeuristic,
+            4: BDDLayerFocusHeuristic,
+            5: BDDFrontEndHeuristic,
+        }
 
 
+class BDDIncrementalCommand(IncrementalCommand):
+    
+    def __init__(self, inner_command, base_rule, test_file: str, max_sample_size: int = 18):
+        super().__init__(inner_command, base_rule, max_sample_size, test_file=test_file)
+        
+        self.test_file = test_file
+        self.max_sample_size = max_sample_size
+        
+        calculated_size = self._calculate_sample_size()
+        if calculated_size is not None:
+            self.sample_size = calculated_size
+    
+    def _calculate_sample_size(self) -> Optional[int]:
+        if not Path(self.test_file).exists():
+            return None
+        
+        try:
+            content = Content(file_path=self.test_file)
+            framework = self.rule.extract_match_key(content)
+            blocks = self.parse_test_structure(self.test_file, framework)
+            
+            describe_blocks = [b for b in blocks if b["type"] == "describe"]
+            if not describe_blocks:
+                it_blocks = [b for b in blocks if b["type"] == "it"]
+                count = len(it_blocks)
+            else:
+                lowest_describe = max(describe_blocks, key=lambda b: b["indent"])
+                describe_indent = lowest_describe["indent"]
+                describe_line = lowest_describe["line"]
+                
+                end_line = float('inf')
+                for block in blocks:
+                    if (block["line"] > describe_line and 
+                        block["type"] == "describe" and 
+                        block["indent"] <= describe_indent):
+                        end_line = block["line"]
+                        break
+                
+                it_blocks = [
+                    b for b in blocks 
+                    if b["type"] == "it" 
+                    and describe_line < b["line"] < end_line
+                ]
+                count = len(it_blocks)
+            
+            return min(count, self.max_sample_size) if count > 0 else None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def _detect_test_implementation(lines: List[str], test_line_index: int, framework: str) -> bool:
+        """
+        Detect if test has actual implementation or just TODO/empty body.
+        
+        Args:
+            lines: All file lines
+            test_line_index: Line number of test (1-indexed)
+            framework: 'jest' or 'mamba'
+        
+        Returns: True if test has implementation, False if signature only
+        """
+        # Look ahead ~20 lines for test body
+        start = test_line_index  # Already 1-indexed, but we need 0-indexed
+        end = min(start + 20, len(lines))
+        
+        test_body_lines = lines[start:end]
+        
+        # Check for TODO markers
+        for line in test_body_lines[:5]:  # Check first few lines
+            if 'TODO' in line or 'FIXME' in line or 'BDD: SIGNATURE' in line:
+                return False
+        
+        # Check for empty body (just braces/pass)
+        non_empty_lines = [l.strip() for l in test_body_lines if l.strip() and not l.strip().startswith('//')]
+        
+        if framework == 'jest':
+            # Jest: look for actual test code (expect, assertions, etc.)
+            has_code = any('expect(' in l or 'assert' in l or 'const ' in l or 'let ' in l 
+                           for l in non_empty_lines)
+            return has_code
+        
+        elif framework == 'mamba':
+            # Mamba: look for actual test code (expect, assertions, etc.)
+            has_code = any('expect(' in l or 'assert' in l or '=' in l 
+                           for l in non_empty_lines if not l.startswith('pass'))
+            return has_code
+        
+        return False
+    
+    @staticmethod
+    def parse_test_structure(test_file_path: str, framework: str) -> List[Dict[str, Any]]:
+        """
+        Parse test file and extract describe/it blocks with status.
+        
+        Returns: [{"line": int, "type": "describe|it", "text": str, "indent": int, 
+                   "status": TestStatus, "has_implementation": bool}]
+        """
+        content = Path(test_file_path).read_text(encoding='utf-8')
+        lines = content.split('\n')
+        
+        blocks = []
+        for i, line in enumerate(lines, 1):
+            indent = len(line) - len(line.lstrip())
+            
+            if framework == 'jest':
+                # Extract describe blocks
+                if 'describe(' in line:
+                    match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        blocks.append({
+                            "line": i,
+                            "type": "describe",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": None,  # describe blocks don't have status
+                            "has_implementation": True  # describes are containers
+                        })
+                
+                # Extract it/test blocks
+                elif 'it(' in line or 'test(' in line:
+                    match = re.search(r"(?:it|test)\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        # Detect if test has implementation (not just TODO or empty)
+                        has_impl = BDDIncrementalCommand._detect_test_implementation(lines, i, framework)
+                        status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
+                        
+                        blocks.append({
+                            "line": i,
+                            "type": "it",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": status.value,
+                            "has_implementation": has_impl
+                        })
+            
+            elif framework == 'mamba':
+                # Extract describe blocks (description and context)
+                if 'with description(' in line or 'with describe(' in line or 'with context(' in line:
+                    match = re.search(r"with (?:description|describe|context)\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        blocks.append({
+                            "line": i,
+                            "type": "describe",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": None,
+                            "has_implementation": True
+                        })
+                
+                # Extract it blocks
+                elif 'with it(' in line:
+                    match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        has_impl = BDDIncrementalCommand._detect_test_implementation(lines, i, framework)
+                        status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
+                        
+                        blocks.append({
+                            "line": i,
+                            "type": "it",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": status.value,
+                            "has_implementation": has_impl
+                        })
+        
+        return blocks
+    
+
+
+# BDD Phase enum - must be defined before use
 class BDDPhase(Enum):
     """BDD workflow phases"""
+    DOMAIN_SCAFFOLD = "domain_scaffold"
     SIGNATURES = "signatures"
     RED = "red"
     GREEN = "green"
     REFACTOR = "refactor"
-    IMPLEMENT = "implement"
 
 
-class TestStatus(Enum):
-    """Test implementation status"""
-    SIGNATURE = "signature"  # Test signature created, not implemented
-    RED = "red"              # Test written, failing
-    GREEN = "green"          # Test passing
-    REFACTOR = "refactor"    # Ready for refactoring
-    IMPLEMENTED = "implemented"  # Fully implemented and refactored
-
-
-class WorkflowStepTemplate:
+class BDDWorkflow(Workflow):
     """
-    Template pattern for workflow steps with 3-method iteration pattern.
+    BDD-specific workflow that extends Workflow with BDD phases.
     
-    Pattern:
-    1. start_step() - Initialize step, output instructions, exit
-    2. repeat_step() - Re-output instructions for iteration, exit  
-    3. verify_step() - Record AI verification, exit
+    Creates all BDD phases in constructor:
+    - Phase 0: Domain Scaffolding
+    - Phase 1: Build Test Signatures
+    - Phase 2: RED - Create Failing Tests
+    - Phase 3: GREEN - Make Tests Pass
+    - Phase 4: REFACTOR - Improve Code
     
-    Each method is a separate command invocation (Python process starts, outputs, exits).
-    State persists in run-state.json between calls.
+    Wrapping chain: BDDWorkflowPhaseCommand → IncrementalCommand → CodeAugmentedCommand → SpecializingRuleCommand → Command
     """
     
-    def __init__(self, test_file: str, run_state: 'BDDRunState'):
-        self.test_file = test_file
-        self.run_state = run_state
-    
-    def start_step(self, step_type: StepType, work_function):
+    def __init__(self, content: Content, test_file: str, framework: str, max_sample_size: int = 18, base_rule_file_name: str = 'bdd-rule.mdc'):
         """
-        First call - Initialize step and output instructions to AI.
-        
         Args:
-            step_type: Type of step (DOMAIN_SCAFFOLD, SIGNATURES, RED, etc.)
-            work_function: Callable that outputs instructions to chat
+            content: Content to process (test file content)
+            test_file: Test file path
+            framework: Test framework ('mamba' or 'jest')
+            max_sample_size: Maximum sample size for incremental runs (default: 18)
+            base_rule_file_name: Name of BDD base rule file (default: 'bdd-rule.mdc')
         """
-        # COMMON: Start run (will raise error if previous run not complete)
-        try:
-            run_id = self.run_state.start_run(step_type, {'scope': 'describe'})
-            print(f"\n▶ Starting {step_type.value} (Run ID: {run_id})")
-        except RuntimeError as e:
-            print(f"\n❌ {e}")
-            current_run = self.run_state.get_current_run()
-            if current_run:
-                print(f"\n   Current run: {current_run['step_type']}")
-                print(f"   Status: {current_run['status']}")
-                print(f"\n   Complete previous run first:")
-                print(f"   - Run phase-specific verify command")
-                print(f"   - /bdd-workflow-approve (if ready)")
-                print(f"   - /bdd-workflow-abandon (if need to restart)")
-            raise
+        super().__init__()
         
-        # VARIABLE: The actual work (outputs instructions)
-        try:
-            work_function()
-        except Exception as e:
-            print(f"\n❌ Error during {step_type.value}: {e}")
-            raise
+        # Build command chain directly: Command → SpecializingRuleCommand → CodeAugmentedCommand
+        # Create base rule
+        base_rule = BaseRule(base_rule_file_name) if BaseRule else None
         
-        # COMMON: Instructions for next steps
-        print(f"\n⏸  Next steps:")
-        print(f"   - Run same command again to iterate")
-        print(f"   - Run phase-specific verify command when done")
-        print(f"   - Run /bdd-workflow-status to check state")
+        # Create BDD rule for framework detection
+        bdd_rule = BDDRule(base_rule_file_name) if FrameworkSpecializingRule else None
+        specializing_rule = bdd_rule if bdd_rule else None
         
-        # State remains STARTED - waiting for AI work
-    
-    def repeat_step(self, work_function):
-        """
-        Middle calls - Re-output instructions for iteration.
-        Does NOT change state, allows unlimited iteration.
+        # Create phases in order, each with its own command instance, instructions, and name set
+        # Phase 0: Domain Scaffolding
+        phase_0 = self._create_phase_command(
+            content, base_rule, specializing_rule, max_sample_size,
+            0, "Phase 0: Domain Scaffolding", test_file, framework, BDDPhase.DOMAIN_SCAFFOLD,
+            self._get_domain_scaffold_instructions(test_file)
+        )
         
-        Args:
-            work_function: Callable that outputs instructions to chat
-        """
-        current_run = self.run_state.get_current_run()
+        # Phase 1: Build Test Signatures
+        phase_1 = self._create_phase_command(
+            content, base_rule, specializing_rule, max_sample_size,
+            1, "Phase 1: Build Test Signatures", test_file, framework, BDDPhase.SIGNATURES,
+            self._get_signature_instructions(test_file, framework)
+        )
         
-        if not current_run or current_run['status'] != RunStatus.STARTED.value:
-            print(f"\n❌ No active run to repeat")
-            print(f"   Current status: {current_run['status'] if current_run else 'None'}")
-            return
+        # Phase 2: RED - Create Failing Tests
+        phase_2 = self._create_phase_command(
+            content, base_rule, specializing_rule, max_sample_size,
+            2, "Phase 2: RED - Create Failing Tests", test_file, framework, BDDPhase.RED,
+            self._get_red_instructions()
+        )
         
-        print(f"\n🔄 Repeating {current_run['step_type']}...")
+        # Phase 3: GREEN - Make Tests Pass
+        phase_3 = self._create_phase_command(
+            content, base_rule, specializing_rule, max_sample_size,
+            3, "Phase 3: GREEN - Make Tests Pass", test_file, framework, BDDPhase.GREEN,
+            self._get_green_instructions()
+        )
         
-        # VARIABLE: Re-output instructions
-        try:
-            work_function()
-        except Exception as e:
-            print(f"\n❌ Error during repeat: {e}")
-            raise
+        # Phase 4: REFACTOR - Improve Code
+        phase_4 = self._create_phase_command(
+            content, base_rule, specializing_rule, max_sample_size,
+            4, "Phase 4: REFACTOR - Improve Code", test_file, framework, BDDPhase.REFACTOR,
+            self._get_refactor_instructions()
+        )
         
-        print(f"\n⏸  Next steps:")
-        print(f"   - Run same command again to iterate")
-        print(f"   - Run phase-specific verify command when done")
+        self.phases = [phase_0, phase_1, phase_2, phase_3, phase_4]
+    
+    def _create_phase_command(self, content, base_rule, specializing_rule, max_sample_size,
+                              phase_number, phase_name, test_file, framework, bdd_phase, generate_instructions):
+        """Create a phase command with phase-specific instructions"""
+        specializing_command = SpecializingRuleCommand(content, base_rule, specializing_rule, generate_instructions=generate_instructions)
         
-        # State remains STARTED
-    
-    def verify_step(self, step_type: StepType, validation_instructions: str):
-        """
-        Final call - Record AI verification and prepare for approval.
+        code_augmented_command = CodeAugmentedCommand(specializing_command, base_rule)
         
-        Args:
-            step_type: Expected step type to verify
-            validation_instructions: Instructions for which validation AI should have run
-        """
-        current_run = self.run_state.get_current_run()
+        incremental_command = BDDIncrementalCommand(code_augmented_command, base_rule, test_file, max_sample_size)
+        incremental_command.name = phase_name
         
-        if not current_run or current_run['step_type'] != step_type.value:
-            print(f"\n❌ Cannot verify - wrong step or no active run")
-            print(f"   Expected: {step_type.value}")
-            print(f"   Current: {current_run['step_type'] if current_run else 'None'}")
-            return
-        
-        # Output validation expectations
-        print(f"\n✅ Verifying {step_type.value}...")
-        print(f"\n⚠️  AI Verification Requirements:")
-        print(f"   {validation_instructions}")
-        print(f"\n   AI should have reported violations to Human")
-        print(f"   AI should have fixed violations per Human direction")
-        
-        # COMMON: Record AI verification in state
-        validation_results = {
-            'validated': True,
-            'rules_checked': validation_instructions,
-            'timestamp': datetime.now().isoformat()
-        }
-        self.run_state.record_ai_verification(current_run['run_id'], validation_results)
-        
-        print(f"\n✅ AI verification recorded")
-        print(f"   Run /bdd-workflow-approve to proceed to next phase")
-        print(f"   Run /bdd-workflow-status to see current state")
-    
-
-
-class DomainScaffolder:
-    """
-    Stage 0: Domain Scaffolding
-    Generates natural language describe hierarchy from domain map.
-    NO code, NO mocks, NO "it should" statements yet.
-    """
-    
-    def __init__(self, test_file: str):
-        self.test_file = test_file
-        self.test_dir = Path(test_file).parent
-    
-    def _load_hierarchy_patterns(self) -> str:
-        """Load hierarchy patterns section from rule file"""
-        rule_file = Path(__file__).parent / "stages" / "bdd-domain-scaffold-rule.mdc"
-        if not rule_file.exists():
-            return "⚠️ Rule file not found - using default patterns"
-        
-        try:
-            content = rule_file.read_text(encoding='utf-8')
-            
-            # Extract from "## Hierarchy Patterns" to next "##" section
-            start_marker = "## Hierarchy Patterns"
-            end_marker = "## CRITICAL: Preserve Domain Map Hierarchy"
-            
-            start_idx = content.find(start_marker)
-            end_idx = content.find(end_marker, start_idx)
-            
-            if start_idx == -1:
-                return "⚠️ Hierarchy Patterns section not found in rule file"
-            
-            if end_idx == -1:
-                # Take until end of file if no next section
-                patterns = content[start_idx:]
-            else:
-                patterns = content[start_idx:end_idx]
-            
-            return patterns.strip()
-        except Exception as e:
-            return f"⚠️ Error loading patterns: {e}"
-    
-    def output_instructions(self):
-        """Output domain map and instructions for AI to generate hierarchy"""
-        print("\n" + "="*60)
-        print("STAGE 0: DOMAIN SCAFFOLDING")
-        print("="*60)
-        
-        # Try to load domain map
-        domain_map = self._load_domain_map()
-        
-        if not domain_map:
-            print(f"\n❌ STOP: No domain map found")
-            print(f"   Domain map is MANDATORY for correct hierarchy")
-            print(f"   Run /ddd-analyze first to create domain map")
-            print(f"   Then return to /bdd-domain-scaffold")
-            return
-        
-        print(f"\n✅ Domain map found")
-        print("\n" + "="*60)
-        print("DOMAIN MAP HIERARCHY")
-        print("="*60)
-        print(domain_map)
-        
-        print("\n" + "="*60)
-        print("⚠️  CRITICAL: PRESERVE THIS HIERARCHY")
-        print("="*60)
-        print("Domain map indentation → Test nesting depth")
-        print("\nMapping:")
-        print("  No indent (DOMAIN) → Top-level describe")
-        print("  1 tab (Concept) → Nested under domain")
-        print("  2 tabs (Sub) → Nested under concept")
-        
-        # Load and display hierarchy patterns from rule file
-        print("\n" + "="*60)
-        print("HIERARCHY PATTERNS (from bdd-domain-scaffold-rule.mdc)")
-        print("="*60)
-        patterns = self._load_hierarchy_patterns()
-        print(patterns)
-        
-        # Determine text file path
-        test_path = Path(self.test_file)
-        hierarchy_file = test_path.parent / f"{test_path.stem}-hierarchy.txt"
-        
-        print("\n" + "="*60)
-        print("CREATE PLAIN ENGLISH HIERARCHY TEXT FILE")
-        print("="*60)
-        print(f"Create text file: {hierarchy_file}")
-        print("\nWrite plain English hierarchy following patterns above:")
-        print("- NO code syntax (), =>, {} - just plain English text")
-        print("- NEVER flatten - preserve ALL nesting from domain map")
-        print("- Follow temporal lifecycle progression (created → played → edited → saved)")
-        print("- Use complete end-to-end behaviors")
-        print(f"\nFile to create: {hierarchy_file.name}")
-        print("This is a TEXT file (.txt), separate from the test code file")
-        print("\nRun /bdd-domain-scaffold-verify when ready")
-    
-    def _load_domain_map(self) -> Optional[str]:
-        """Load domain map from test directory"""
-        # Try common domain map names
-        possible_names = [
-            f"{self.test_dir.stem}-domain-map.txt",
-            "domain-map.txt",
-            f"{self.test_dir.stem}.domain-map.txt"
-        ]
-        
-        for name in possible_names:
-            map_file = self.test_dir / name
-            if map_file.exists():
-                return map_file.read_text(encoding='utf-8')
-        
-        return None
-
-
-class SignatureGenerator:
-    """
-    Stage 1: Signature Generation
-    Adds "it should..." statements to describe hierarchy from Stage 0.
-    """
-    
-    def __init__(self, test_file: str, framework: str):
-        self.test_file = test_file
-        self.framework = framework
-    
-    def output_instructions(self):
-        """Output instructions to create hierarchy from domain map and convert to code syntax"""
-        print("\n" + "="*60)
-        print("STAGE 1: CREATE TEST HIERARCHY & SIGNATURES")
-        print("="*60)
-        
-        # Load domain map for reference
-        domain_map = self._load_domain_map()
-        
-        if domain_map:
-            print("\n" + "="*60)
-            print("DOMAIN MAP REFERENCE")
-            print("="*60)
-            print(domain_map)
-            
-            print("\n" + "="*60)
-            print("HIERARCHY MAPPING RULES")
-            print("="*60)
-            print("Domain map indentation → Test nesting depth")
-            print("\nMapping:")
-            print("  No indent (DOMAIN) → Top-level describe")
-            print("  1 tab (Concept) → Nested under domain")
-            print("  2 tabs (Sub) → Nested under concept")
-            print("\nExample from YOUR domain map:")
-            print("  POWER ACTIVATION ANIMATION (no indent)")
-            print("      Power Item (1 tab)")
-            print("      Movement-Triggered Animation (1 tab)")
-            print("\n  BECOMES:")
-            print("  describe('power activation animation', () => {")
-            print("      describe('a power item', () => {")
-            print("      describe('movement-triggered animation', () => {")
-        
-        print("\n" + "="*60)
-        print("AI AGENT TODO")
-        print("="*60)
-        print("1. CREATE test hierarchy from domain map above:")
-        print("   - Preserve ALL nesting levels from domain map")
-        print("   - Top-level describes = DOMAINS from map")
-        print("   - Nested describes = CONCEPTS under domain")
-        print("   - Deep nesting = SUB-CONCEPTS under concept")
-        print("2. Convert to proper code syntax:")
-        print("   - describe('...', () => {})")
-        print("   - it('should...', () => {})")
-        print("3. Keep test bodies EMPTY - no mocks, no stubs, no helpers")
-        print("4. Mark with // BDD: SIGNATURE comments")
-        print("5. ~18 describe/it blocks for Sample 1")
-        print("\n⚠️  CRITICAL: NEVER flatten hierarchy - preserve domain map depth!")
-        print("\nRun /bdd-signature-verify when ready")
-    
-    def _load_domain_map(self) -> Optional[str]:
-        """Load domain map from test directory"""
-        test_path = Path(self.test_file)
-        test_dir = test_path.parent
-        
-        # Try common domain map names
-        possible_names = [
-            f"{test_dir.stem}-domain-map.txt",
-            "domain-map.txt",
-            f"{test_dir.stem}.domain-map.txt"
-        ]
-        
-        for name in possible_names:
-            map_file = test_dir / name
-            if map_file.exists():
-                return map_file.read_text(encoding='utf-8')
-        
-        return None
-
-
-class RedExecutor:
-    """
-    Stage 2: RED Phase
-    Implement failing tests with Arrange-Act-Assert.
-    """
-    
-    def __init__(self, test_file: str, framework: str):
-        self.test_file = test_file
-        self.framework = framework
-    
-    def output_instructions(self):
-        """Output RED phase instructions"""
-        print("\n" + "="*60)
-        print("STAGE 2: RED - Implement Failing Tests")
-        print("="*60)
-        
-        print("\nAI AGENT TODO:")
-        print("1. Implement ~18 test signatures with Arrange-Act-Assert")
-        print("2. Add proper mocking and helpers following § 3 principles")
-        print("3. Extract duplicate setup to beforeEach()")
-        print("4. Create helper factories for repeated mocks")
-        print("5. COMMENT OUT test code that calls production code:")
-        print("   Example: // powerItem = new PowerItem(mockPower);")
-        print("   Example: // expect(powerItem.descriptor).toBe('Fire');")
-        print("6. COMMENT OUT or ensure production code doesn't exist")
-        print("   Example: In production file, comment out class PowerItem")
-        print("7. Tests should be ready to fail when uncommented")
-        print("\nRun /bdd-red-verify when ready")
-
-
-class GreenExecutor:
-    """
-    Stage 3: GREEN Phase
-    Implement minimal code to make tests pass.
-    """
-    
-    def __init__(self, test_file: str, framework: str):
-        self.test_file = test_file
-        self.framework = framework
-    
-    def output_instructions(self):
-        """Output GREEN phase instructions"""
-        print("\n" + "="*60)
-        print("STAGE 3: GREEN - Implement Minimal Code")
-        print("="*60)
-        
-        print("\nAI AGENT TODO:")
-        print("1. UNCOMMENT test code from RED phase")
-        print("2. Implement minimal production code for ~18 tests")
-        print("3. Resist adding features no test demands")
-        print("4. Verify tests now PASS")
-        print("5. Check for regressions in existing tests")
-        print("\nRun /bdd-green-verify when ready")
-
-
-class RefactorExecutor:
-    """
-    Stage 4: REFACTOR Phase
-    Improve code quality while keeping tests green.
-    """
-    
-    def __init__(self, test_file: str, framework: str):
-        self.test_file = test_file
-        self.framework = framework
-    
-    def output_instructions(self):
-        """Output REFACTOR phase instructions"""
-        print("\n" + "="*60)
-        print("STAGE 4: REFACTOR - Improve Code Quality")
-        print("="*60)
-        
-        print("\nAI AGENT TODO:")
-        print("1. Identify code smells")
-        print("2. Suggest refactorings with trade-offs")
-        print("3. Implement approved refactorings one at a time")
-        print("4. Run tests after each refactoring")
-        print("5. Stop if any test fails")
-        print("\nRun /bdd-refactor-verify when ready")
-
-
-class WorkflowOrchestrator:
-    """
-    Smart dispatcher - determines which command to run based on current phase.
-    """
-    
-    def __init__(self, test_file: str, run_state: 'BDDRunState'):
-        self.test_file = test_file
-        self.run_state = run_state
-    
-    def determine_next_command(self) -> Optional[str]:
-        """
-        Determine which command should run next based on completed runs.
-        
-        Returns: Command name or None
-        """
-        current_run = self.run_state.get_current_run()
-        
-        # Active run - user should complete it first
-        if current_run and current_run['status'] != RunStatus.COMPLETED.value:
-            print(f"\n⚠️  Active run in progress: {current_run['step_type']}")
-            print(f"   Status: {current_run['status']}")
-            print(f"   Complete this run first before starting new phase")
-            return None
-        
-        # Check which phases have been completed
-        completed_runs = [
-            run for run in self.run_state.state.get('runs', [])
-            if run['status'] == RunStatus.COMPLETED.value
-        ]
-        
-        completed_steps = {run['step_type'] for run in completed_runs}
-        
-        # Phase progression: domain-scaffold → signatures → red → green → refactor
-        if StepType.DOMAIN_SCAFFOLD.value not in completed_steps:
-            return 'domain-scaffold'
-        elif StepType.SIGNATURES.value not in completed_steps:
-            return 'signatures'
-        elif StepType.RED.value not in completed_steps:
-            return 'red'
-        elif StepType.GREEN.value not in completed_steps:
-            return 'green'
-        elif StepType.REFACTOR.value not in completed_steps:
-            return 'refactor'
-        else:
-            print(f"\n✅ All workflow phases complete!")
-            return None
-    
-    def execute_workflow(self):
-        """Execute appropriate command based on state"""
-        next_cmd = self.determine_next_command()
-        
-        if not next_cmd:
-            return
-        
-        print(f"\n▶ Dispatching to: {next_cmd}")
-        print(f"   Run /bdd-{next_cmd} to continue")
-
-
-class BDDWorkflowState:
-    """Tracks BDD workflow state"""
-    
-    def __init__(self, test_file: str):
-        self.test_file = test_file
-        self.state_file = self._get_state_file_path()
-        self.state = self._load_state()
-    
-    def _get_state_file_path(self) -> Path:
-        """Get state file path for test file"""
-        test_path = Path(self.test_file)
-        state_dir = test_path.parent / ".bdd-workflow"
-        state_dir.mkdir(exist_ok=True)
-        return state_dir / f"{test_path.stem}.state.json"
-    
-    def _load_state(self) -> Dict[str, Any]:
-        """Load workflow state from file"""
-        if self.state_file.exists():
-            return json.loads(self.state_file.read_text(encoding='utf-8'))
-        return {
-            "phase": BDDPhase.SIGNATURES.value,
-            "scope": "describe",
-            "current_test_index": 0,
-            "tests": [],
-            "completed_refactorings": []
-        }
-    
-    def save(self):
-        """Save workflow state to file"""
-        self.state_file.write_text(json.dumps(self.state, indent=2), encoding='utf-8')
-    
-    def update_phase(self, phase: BDDPhase):
-        """Update current phase"""
-        self.state["phase"] = phase.value
-        self.save()
-    
-    def update_test_status(self, test_index: int, status: TestStatus):
-        """Update status of specific test"""
-        if test_index < len(self.state["tests"]):
-            self.state["tests"][test_index]["status"] = status.value
-            self.save()
-    
-    def add_test(self, test_info: Dict[str, Any]):
-        """Add test to state"""
-        self.state["tests"].append(test_info)
-        self.save()
-    
-    def get_next_test(self) -> Optional[Tuple[int, Dict[str, Any]]]:
-        """Get next unimplemented test"""
-        for i, test in enumerate(self.state["tests"]):
-            if test["status"] in [TestStatus.SIGNATURE.value, TestStatus.RED.value]:
-                return (i, test)
-        return None
-
-
-# Step 1: Detect framework (reuse from bdd-behavior-validate-cmd.py)
-def detect_framework_from_file(file_path: str) -> Optional[str]:
-    """
-    Match file path against rule glob patterns to determine framework.
-    Returns: 'jest', 'mamba', or None
-    """
-    file_path_lower = file_path.lower()
-    
-    # Jest patterns
-    jest_patterns = ['.test.js', '.spec.js', '.test.ts', '.spec.ts', 
-                     '.test.jsx', '.spec.jsx', '.test.tsx', '.spec.tsx',
-                     '.test.mjs', '.spec.mjs']
-    
-    # Mamba patterns  
-    mamba_patterns = ['_test.py', 'test_', '_spec.py', 'spec_', 
-                      '_test.pyi', 'test_.pyi', '_spec.pyi', 'spec_.pyi']
-    
-    for pattern in jest_patterns:
-        if file_path_lower.endswith(pattern):
-            return 'jest'
-    
-    for pattern in mamba_patterns:
-        if pattern in file_path_lower:
-            return 'mamba'
-    
-    return None
-
-
-# Step 2: Discover domain maps in test file's directory
-def discover_domain_maps(test_file_path: str) -> Dict[str, Any]:
-    """
-    Look for domain maps in the same directory as the test file.
-    Returns: {
-        "found": bool,
-        "domain_map": {"path": str, "content": str} or None,
-        "interaction_map": {"path": str, "content": str} or None
-    }
-    """
-    test_path = Path(test_file_path)
-    test_dir = test_path.parent
-    
-    result = {
-        "found": False,
-        "domain_map": None,
-        "interaction_map": None
-    }
-    
-    # Look for domain map (*-domain-map.txt)
-    domain_maps = list(test_dir.glob("*-domain-map.txt"))
-    if domain_maps:
-        domain_map_path = domain_maps[0]
-        try:
-            content = domain_map_path.read_text(encoding='utf-8')
-            result["domain_map"] = {
-                "path": str(domain_map_path),
-                "content": content
-            }
-            result["found"] = True
-        except Exception as e:
-            pass
-    
-    # Look for interaction map (*-domain-interactions.txt)
-    interaction_maps = list(test_dir.glob("*-domain-interactions.txt"))
-    if interaction_maps:
-        interaction_map_path = interaction_maps[0]
-        try:
-            content = interaction_map_path.read_text(encoding='utf-8')
-            result["interaction_map"] = {
-                "path": str(interaction_map_path),
-                "content": content
-            }
-            result["found"] = True
-        except Exception as e:
-            pass
-    
-    return result
-
-
-# Step 3: Load framework-specific rule file
-def load_rule_file(framework: str) -> Dict[str, Any]:
-    """
-    Load the appropriate framework-specific rule file.
-    Returns: {"rule_path": Path, "content": str, "framework": str}
-    """
-    rule_files = {
-        'jest': 'bdd-jest-rule.mdc',
-        'mamba': 'bdd-mamba-rule.mdc'
-    }
-    
-    rule_file = rule_files.get(framework)
-    if not rule_file:
-        return None
-    
-    rule_path = Path("behaviors/bdd") / rule_file
-    if not rule_path.exists():
-        return None
-    
-    content = rule_path.read_text(encoding='utf-8')
-    
-    return {
-        "rule_path": str(rule_path),
-        "content": content,
-        "framework": framework
-    }
-
-
-# Step 4: Extract DO and DON'T examples by section
-def extract_dos_and_donts(rule_content: str) -> Dict[str, Dict[str, List[str]]]:
-    """
-    Extract DO and DON'T examples from each section (§1-5) of the rule.
-    Returns: {"section_name": {"dos": [...], "donts": [...]}}
-    """
-    sections = {}
-    current_section = None
-    
-    lines = rule_content.split('\n')
-    for i, line in enumerate(lines):
-        section_match = re.match(r'^##\s+(\d+)\.\s+(.+)$', line)
-        if section_match:
-            section_num = section_match.group(1)
-            section_name = section_match.group(2).strip()
-            current_section = f"{section_num}. {section_name}"
-            sections[current_section] = {"dos": [], "donts": []}
-        
-        if '**✅ DO:**' in line or '**DO:**' in line:
-            code_block = []
-            in_code = False
-            for j in range(i+1, min(i+50, len(lines))):
-                if lines[j].strip().startswith('```') and not in_code:
-                    in_code = True
-                    continue
-                elif lines[j].strip().startswith('```') and in_code:
-                    break
-                elif in_code:
-                    code_block.append(lines[j])
-            
-            if code_block and current_section:
-                sections[current_section]["dos"].append('\n'.join(code_block))
-        
-        if '**❌ DON\'T:**' in line or '**DON\'T:**' in line or "**DON'T:**" in line:
-            code_block = []
-            in_code = False
-            for j in range(i+1, min(i+50, len(lines))):
-                if lines[j].strip().startswith('```') and not in_code:
-                    in_code = True
-                    continue
-                elif lines[j].strip().startswith('```') and in_code:
-                    break
-                elif in_code:
-                    code_block.append(lines[j])
-            
-            if code_block and current_section:
-                sections[current_section]["donts"].append('\n'.join(code_block))
-    
-    return sections
-
-
-# Step 5: Extract test structure and chunk by describe blocks
-def extract_test_structure_chunks(test_file_path: str, framework: str, max_chunk_size: int = 8000) -> List[Dict[str, Any]]:
-    """
-    Extract test structure and chunk by describe blocks for manageable AI processing.
-    Returns: [{"start_line": int, "end_line": int, "context": str, "structure": str}]
-    """
-    content = Path(test_file_path).read_text(encoding='utf-8')
-    lines = content.split('\n')
-    
-    blocks = []
-    for i, line in enumerate(lines, 1):
-        indent = len(line) - len(line.lstrip())
-        
-        if framework == 'jest':
-            if 'describe(' in line:
-                match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "full_line": line
-                    })
-            elif 'it(' in line or 'test(' in line:
-                match = re.search(r"(?:it|test)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "full_line": line
-                    })
-        
-        elif framework == 'mamba':
-            # Extract description/context blocks
-            if 'with description(' in line or 'with context(' in line:
-                match = re.search(r"with (?:description|context)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "full_line": line
-                    })
-            # Extract it blocks
-            elif 'with it(' in line:
-                match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "full_line": line
-                    })
-    
-    chunks = []
-    current_chunk = []
-    current_describes = []
-    chunk_start_line = 1
-    
-    for block in blocks:
-        while current_describes and block["indent"] <= current_describes[-1]["indent"]:
-            current_describes.pop()
-        
-        if block["type"] == "describe":
-            current_describes.append(block)
-            
-            if len(current_chunk) > 0 and block["indent"] == 0:
-                chunk_text = '\n'.join([f"Line {b['line']}: {' ' * b['indent']}{b['type']}('{b['text']}', ...)" for b in current_chunk])
-                if len(chunk_text) < max_chunk_size or len(chunks) == 0:
-                    context = ' > '.join([d['text'] for d in current_describes[:-1]]) if len(current_describes) > 1 else ''
-                    chunks.append({
-                        "start_line": chunk_start_line,
-                        "end_line": current_chunk[-1]["line"] if current_chunk else chunk_start_line,
-                        "context": context,
-                        "structure": chunk_text
-                    })
-                
-                current_chunk = [block]
-                chunk_start_line = block["line"]
-            else:
-                current_chunk.append(block)
-        else:
-            current_chunk.append(block)
-    
-    if current_chunk:
-        chunk_text = '\n'.join([f"Line {b['line']}: {' ' * b['indent']}{b['type']}('{b['text']}', ...)" for b in current_chunk])
-        context = ' > '.join([d['text'] for d in current_describes[:-1]]) if len(current_describes) > 1 else ''
-        chunks.append({
-            "start_line": chunk_start_line,
-            "end_line": current_chunk[-1]["line"] if current_chunk else chunk_start_line,
-            "context": context,
-            "structure": chunk_text
-        })
-    
-    return chunks
-
-
-# Step 2: Parse test file structure
-def parse_test_structure(test_file_path: str, framework: str) -> List[Dict[str, Any]]:
-    """
-    Parse test file and extract describe/it blocks with status.
-    
-    Returns: [{"line": int, "type": "describe|it", "text": str, "indent": int, 
-               "status": TestStatus, "has_implementation": bool}]
-    """
-    content = Path(test_file_path).read_text(encoding='utf-8')
-    lines = content.split('\n')
-    
-    blocks = []
-    for i, line in enumerate(lines, 1):
-        indent = len(line) - len(line.lstrip())
-        
-        if framework == 'jest':
-            # Extract describe blocks
-            if 'describe(' in line:
-                match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": None,  # describe blocks don't have status
-                        "has_implementation": True  # describes are containers
-                    })
-            
-            # Extract it/test blocks
-            elif 'it(' in line or 'test(' in line:
-                match = re.search(r"(?:it|test)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    # Detect if test has implementation (not just TODO or empty)
-                    has_impl = detect_test_implementation(lines, i, framework)
-                    status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
-                    
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": status.value,
-                        "has_implementation": has_impl
-                    })
-        
-        elif framework == 'mamba':
-            # Extract describe blocks (description and context)
-            if 'with description(' in line or 'with describe(' in line or 'with context(' in line:
-                match = re.search(r"with (?:description|describe|context)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": None,
-                        "has_implementation": True
-                    })
-            
-            # Extract it blocks
-            elif 'with it(' in line:
-                match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    has_impl = detect_test_implementation(lines, i, framework)
-                    status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
-                    
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": status.value,
-                        "has_implementation": has_impl
-                    })
-    
-    return blocks
-
-
-def detect_test_implementation(lines: List[str], test_line_index: int, framework: str) -> bool:
-    """
-    Detect if test has actual implementation or just TODO/empty body.
-    
-    Args:
-        lines: All file lines
-        test_line_index: Line number of test (1-indexed)
-        framework: 'jest' or 'mamba'
-    
-    Returns: True if test has implementation, False if signature only
-    """
-    # Look ahead ~20 lines for test body
-    start = test_line_index  # Already 1-indexed, but we need 0-indexed
-    end = min(start + 20, len(lines))
-    
-    test_body_lines = lines[start:end]
-    
-    # Check for TODO markers
-    for line in test_body_lines[:5]:  # Check first few lines
-        if 'TODO' in line or 'FIXME' in line or 'BDD: SIGNATURE' in line:
-            return False
-    
-    # Check for empty body (just braces/pass)
-    non_empty_lines = [l.strip() for l in test_body_lines if l.strip() and not l.strip().startswith('//')]
-    
-    if framework == 'jest':
-        # Jest: look for actual test code (expect, assertions, etc.)
-        has_code = any('expect(' in l or 'assert' in l or 'const ' in l or 'let ' in l 
-                       for l in non_empty_lines)
-        return has_code
-    
-    elif framework == 'mamba':
-        # Mamba: look for actual test code (expect, assertions, etc.)
-        has_code = any('expect(' in l or 'assert' in l or '=' in l 
-                       for l in non_empty_lines if not l.startswith('pass'))
-        return has_code
-    
-    return False
-
-
-# Step 3: Determine scope
-def determine_test_scope(blocks: List[Dict[str, Any]], scope_option: str, cursor_line: Optional[int] = None) -> List[Dict[str, Any]]:
-    """
-    Determine which tests to work on based on scope option.
-    
-    Args:
-        blocks: All test blocks from parse_test_structure
-        scope_option: 'describe', 'next:N', 'all', or 'line:N'
-        cursor_line: Current cursor position (for 'describe' scope)
-    
-    Returns: Filtered list of test blocks in scope
-    """
-    tests_only = [b for b in blocks if b["type"] == "it"]
-    
-    if scope_option == "all":
-        return tests_only
-    
-    elif scope_option.startswith("next:"):
-        count = int(scope_option.split(":")[1])
-        # Find first unimplemented test
-        for i, test in enumerate(tests_only):
-            if test["status"] == TestStatus.SIGNATURE.value:
-                return tests_only[i:i+count]
-        return []
-    
-    elif scope_option.startswith("line:"):
-        line_num = int(scope_option.split(":")[1])
-        return [t for t in tests_only if t["line"] == line_num]
-    
-    elif scope_option == "describe":
-        if cursor_line is None:
-            # No cursor position, use first describe block
-            return tests_only
-        
-        # Find describe block containing cursor
-        current_describe = None
-        for block in blocks:
-            if block["type"] == "describe" and block["line"] <= cursor_line:
-                current_describe = block
-            elif block["type"] == "describe" and block["line"] > cursor_line:
-                break
-        
-        if not current_describe:
-            return tests_only
-        
-        # Find all tests within this describe block
-        describe_indent = current_describe["indent"]
-        start_line = current_describe["line"]
-        
-        # Find end of describe block (next describe at same or lower indent)
-        end_line = float('inf')
-        for block in blocks:
-            if (block["line"] > start_line and 
-                block["type"] == "describe" and 
-                block["indent"] <= describe_indent):
-                end_line = block["line"]
-                break
-        
-        return [t for t in tests_only if start_line < t["line"] < end_line]
-    
-    return tests_only
-
-
-# Step 4: Run tests
-def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
-    """
-    Run tests and capture results.
-    
-    Args:
-        test_file_path: Path to test file
-        framework: 'jest' or 'mamba'
-        single_test_line: If provided, run only test at this line
-    
-    Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
-    """
-    try:
-        if framework == 'jest':
-            cmd = ['npm', 'test', '--', test_file_path]
-            if single_test_line:
-                # Jest can run specific test by line number
-                cmd.extend(['-t', str(single_test_line)])
-        
-        elif framework == 'mamba':
-            cmd = ['mamba', test_file_path]
-            if single_test_line:
-                # Mamba runs specific test by line
-                cmd.extend(['--line', str(single_test_line)])
-        
-        else:
-            return {"success": False, "error": f"Unknown framework: {framework}"}
-        
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        
-        # Parse output for pass/fail counts
-        output = result.stdout + result.stderr
-        passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
-        failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
-        
-        return {
-            "success": result.returncode == 0,
-            "output": output,
-            "passed": passed,
-            "failed": failed,
-            "error": None if result.returncode == 0 else "Tests failed"
-        }
-    
-    except subprocess.TimeoutExpired:
-        return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
-    except Exception as e:
-        return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
-
-
-# Step 5: Identify code relationships
-def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
-    """
-    Identify code under test and other test files related to this test.
-    
-    Returns: {"code_under_test_files": [...], "related_tests": [...]}
-    """
-    test_path = Path(test_file_path)
-    test_content = test_path.read_text(encoding='utf-8')
-    
-    # Extract imports
-    imports = re.findall(r"import .+ from ['\"]([^'\"]+)['\"]", test_content)
-    imports += re.findall(r"require\(['\"]([^'\"]+)['\"]\)", test_content)
-    
-    code_under_test_files = []
-    related_tests = []
-    
-    for imp in imports:
-        # Skip node_modules
-        if imp.startswith('.'):
-            # Relative import
-            resolved = (test_path.parent / imp).resolve()
-            
-            # Try common extensions
-            for ext in ['.js', '.ts', '.mjs', '.jsx', '.tsx', '.py']:
-                candidate = Path(str(resolved) + ext)
-                if candidate.exists():
-                    if any(pattern in candidate.name for pattern in ['test', 'spec', '_test', 'test_']):
-                        related_tests.append(str(candidate))
-                    else:
-                        code_under_test_files.append(str(candidate))
-                    break
-    
-    return {
-        "code_under_test_files": code_under_test_files,
-        "related_tests": related_tests
-    }
-
-
-# ============================================================================
-# RUN STATE ENFORCEMENT FUNCTIONS
-# ============================================================================
-
-def check_can_start_run(run_state: BDDRunState) -> None:
-    """
-    Enforce that a new run can be started.
-    Raises RuntimeError if previous run not complete.
-    """
-    try:
-        run_state.enforce_can_proceed()
-    except RuntimeError as e:
-        print("\n" + "="*60)
-        print("❌ CANNOT START NEW RUN")
-        print("="*60)
-        print(str(e))
-        print("\nTo fix:")
-        print("1. If AI hasn't verified: Run /bdd-validate")
-        print("2. If AI verified: Type 'proceed' to approve")
-        print("3. If stuck: Call abandon_run() to reset")
-        print("="*60)
-        raise
-
-
-def record_validation_results(
-    run_state: BDDRunState,
-    validation_output: str,
-    passed: bool
-) -> None:
-    """
-    Record that AI ran /bdd-validate.
-    """
-    current_run = run_state.get_current_run()
-    if not current_run:
-        raise RuntimeError("No active run to record validation for")
-    
-    validation_results = {
-        "passed": passed,
-        "output": validation_output,
-        "timestamp": datetime.now().isoformat()
-    }
-    
-    run_state.record_ai_verification(
-        current_run["run_id"],
-        validation_results
-    )
-    
-    print(f"\n✅ AI verification recorded for run {current_run['run_id']}")
-
-
-def wait_for_human_approval(run_state: BDDRunState) -> None:
-    """
-    Wait for human to approve the run.
-    Blocks until 'proceed' or 'reject' received.
-    """
-    current_run = run_state.get_current_run()
-    if not current_run:
-        raise RuntimeError("No active run waiting for approval")
-    
-    status = current_run["status"]
-    
-    if status != RunStatus.AI_VERIFIED.value:
-        raise RuntimeError(
-            f"Run not ready for approval. Status: {status}. "
-            f"AI must verify first."
+        return BDDWorkflowPhaseCommand(
+            incremental_command, self, phase_number, phase_name,
+            test_file, framework, bdd_phase
         )
     
-    print("\n" + "="*60)
-    print("🛑 WAITING FOR HUMAN APPROVAL")
-    print("="*60)
-    print(f"Run ID: {current_run['run_id']}")
-    print(f"Step: {current_run['step_type']}")
-    print("\nType 'proceed' to approve and continue")
-    print("Type 'reject' to send back to AI for fixes")
-    print("="*60)
-    
-    # This function signals that human input is needed
-    # Actual approval is recorded via separate command
-
-
-# ============================================================================
-# COMMAND LINE FUNCTIONS
-# ============================================================================
-
-def cmd_show_status(test_file: str):
-    """Show current workflow status"""
-    run_state = BDDRunState(test_file)
-    status = run_state.get_status_summary()
-    current_run = run_state.get_current_run()
-    
-    print("\n" + "="*60)
-    print("BDD WORKFLOW STATUS")
-    print("="*60)
-    
-    print(f"\nFile: {test_file}")
-    print(f"Total runs: {status['total_runs']}")
-    print(f"Completed: {status['completed_runs']}")
-    
-    if current_run:
-        print(f"\n📍 CURRENT RUN")
-        print(f"  ID: {current_run['run_id']}")
-        print(f"  Step: {current_run['step_type']}")
-        print(f"  Status: {current_run['status']}")
-        print(f"  Started: {current_run['started_at']}")
+    def _get_domain_scaffold_instructions(self, test_file: str) -> str:
+        """Get domain scaffold phase instructions"""
+        test_path = Path(test_file)
+        hierarchy_file = test_path.parent / f"{test_path.stem}-hierarchy.txt"
         
-        if current_run.get('ai_verified_at'):
-            print(f"  AI Verified: {current_run['ai_verified_at']}")
-            
-        if current_run.get('human_approved_at'):
-            print(f"  Human Approved: {current_run['human_approved_at']}")
-            
-        if current_run.get('validation_results'):
-            val = current_run['validation_results']
-            if 'passed' in val:
-                print(f"\n  Validation: {'✅ PASSED' if val['passed'] else '❌ FAILED'}")
-            
-        if current_run.get('human_feedback'):
-            print(f"\n  Feedback: {current_run['human_feedback']}")
-    else:
-        print(f"\n✅ No active run - ready to start new work")
+        return f"""STAGE 0: DOMAIN SCAFFOLDING
+
+Create plain English hierarchy text file: {hierarchy_file.name}
+
+Write plain English hierarchy following patterns:
+- NO code syntax (), =>, {{}} - just plain English text
+- NEVER flatten - preserve ALL nesting from domain map
+- Follow temporal lifecycle progression (created → played → edited → saved)
+- Use complete end-to-end behaviors
+
+This is a TEXT file (.txt), separate from the test code file.
+Run /bdd-domain-scaffold-verify when ready."""
     
-    print(f"\n{'✅' if status['can_proceed'] else '⚠️'} Can proceed: {status['can_proceed']}")
-    print(f"Next action: {status['next_action']}")
+    def _get_signature_instructions(self, test_file: str, framework: str) -> str:
+        """Get signature phase instructions"""
+        return """STAGE 1: CREATE TEST HIERARCHY & SIGNATURES
+
+1. CREATE test hierarchy from domain map:
+   - Preserve ALL nesting levels from domain map
+   - Top-level describes = DOMAINS from map
+   - Nested describes = CONCEPTS under domain
+   - Deep nesting = SUB-CONCEPTS under concept
+2. Convert to proper code syntax:
+   - describe('...', () => {})
+   - it('should...', () => {})
+3. Keep test bodies EMPTY - no mocks, no stubs, no helpers
+4. Mark with // BDD: SIGNATURE comments
+5. ~18 describe/it blocks for Sample 1
+
+⚠️  CRITICAL: NEVER flatten hierarchy - preserve domain map depth!
+Run /bdd-signature-verify when ready"""
     
-    # Show recent runs
-    if run_state.state['runs']:
-        print(f"\n📜 RECENT RUNS (last 5):")
-        for run in run_state.state['runs'][-5:]:
-            status_icon = {
-                'completed': '✅',
-                'ai_verified': '🔍',
-                'human_approved': '👍',
-                'started': '🚧',
-                'abandoned': '❌'
-            }.get(run['status'], '❓')
-            
-            print(f"  {status_icon} {run['step_type']:20} | {run['status']:15} | {run['run_id']}")
+    def _get_red_instructions(self) -> str:
+        """Get RED phase instructions"""
+        return """STAGE 2: RED - Implement Failing Tests
+
+1. Implement ~18 test signatures with Arrange-Act-Assert
+2. Add proper mocking and helpers following § 3 principles
+3. Extract duplicate setup to beforeEach()
+4. Create helper factories for repeated mocks
+5. COMMENT OUT test code that calls production code:
+   Example: // powerItem = new PowerItem(mockPower);
+   Example: // expect(powerItem.descriptor).toBe('Fire');
+6. COMMENT OUT or ensure production code doesn't exist
+   Example: In production file, comment out class PowerItem
+7. Tests should be ready to fail when uncommented
+
+Run /bdd-red-verify when ready"""
     
-    print("="*60)
+    def _get_green_instructions(self) -> str:
+        """Get GREEN phase instructions"""
+        return """STAGE 3: GREEN - Implement Minimal Code
+
+1. UNCOMMENT test code from RED phase
+2. Implement minimal production code for ~18 tests
+3. Resist adding features no test demands
+4. Verify tests now PASS
+5. Check for regressions in existing tests
+
+Run /bdd-green-verify when ready"""
+    
+    def _get_refactor_instructions(self) -> str:
+        """Get REFACTOR phase instructions"""
+        return """STAGE 4: REFACTOR - Improve Code Quality
+
+1. Identify code smells
+2. Suggest refactorings with trade-offs
+3. Implement approved refactorings one at a time
+4. Run tests after each refactoring
+5. Stop if any test fails
+
+Run /bdd-refactor-verify when ready"""
 
 
-def cmd_approve_run(test_file: str, feedback: str = None):
-    """Approve the current run after reviewing AI work"""
-    run_state = BDDRunState(test_file)
-    current_run = run_state.get_current_run()
-    
-    if not current_run:
-        print("\n❌ No active run to approve")
-        return False
-    
-    print(f"\n=== Approving Run: {current_run['run_id']} ===")
-    print(f"Step: {current_run['step_type']}")
-    print(f"Status: {current_run['status']}")
-    
-    if current_run['status'] != 'ai_verified':
-        print(f"\n❌ Cannot approve - run not AI verified")
-        print(f"Current status: {current_run['status']}")
-        print("AI must run /bdd-validate first")
-        return False
-    
-    # Record approval
-    run_state.record_human_approval(
-        current_run['run_id'],
-        approved=True,
-        feedback=feedback
-    )
-    
-    # Mark as complete
-    run_state.complete_run(current_run['run_id'])
-    
-    print(f"\n✅ Run approved and completed")
-    if feedback:
-        print(f"Feedback: {feedback}")
-    
-    print("\n🎯 Ready to proceed to next step")
-    return True
-
-
-def cmd_reject_run(test_file: str, feedback: str):
-    """Reject the current run and send back to AI for fixes"""
-    run_state = BDDRunState(test_file)
-    current_run = run_state.get_current_run()
-    
-    if not current_run:
-        print("\n❌ No active run to reject")
-        return False
-    
-    print(f"\n=== Rejecting Run: {current_run['run_id']} ===")
-    print(f"Step: {current_run['step_type']}")
-    print(f"Reason: {feedback}")
-    
-    # Record rejection
-    run_state.record_human_approval(
-        current_run['run_id'],
-        approved=False,
-        feedback=feedback
-    )
-    
-    print(f"\n⚠️ Run rejected - sent back to AI")
-    print(f"AI must fix issues and re-validate")
-    return True
-
-
-def cmd_abandon_run(test_file: str, reason: str):
-    """Abandon the current run"""
-    run_state = BDDRunState(test_file)
-    current_run = run_state.get_current_run()
-    
-    if not current_run:
-        print("\n❌ No active run to abandon")
-        return False
-    
-    print(f"\n=== Abandoning Run: {current_run['run_id']} ===")
-    print(f"Step: {current_run['step_type']}")
-    print(f"Status: {current_run['status']}")
-    print(f"Reason: {reason}")
-    
-    # Confirm
-    print("\n⚠️  This will abandon the current run and allow starting fresh.")
-    print("Continue? (y/n): ", end='')
-    response = input().strip().lower()
-    
-    if response != 'y':
-        print("❌ Cancelled")
-        return False
-    
-    # Abandon
-    run_state.abandon_run(current_run['run_id'], reason)
-    
-    print(f"\n✅ Run abandoned")
-    print(f"Ready to start new run")
-    return True
-
-
-# ============================================================================
-# MAIN WORKFLOW ORCHESTRATOR
-# ============================================================================
-
-# Main BDD workflow orchestrator
-def bdd_workflow(
-    file_path: str,
-    scope: str = "describe",
-    phase: Optional[str] = None,
-    cursor_line: Optional[int] = None,
-    auto: bool = False
-) -> Dict[str, Any]:
+class BDDWorkflowPhaseCommand:
     """
-    Main BDD workflow function.
+    BDD-specific workflow phase command that combines WorkflowPhaseCommand with BDD phase logic.
     
-    Args:
-        file_path: Path to test file
-        scope: 'describe', 'next:N', 'all', 'line:N'
-        phase: Optional phase to jump to ('signatures', 'red', 'green', 'refactor')
-        cursor_line: Current cursor position (for 'describe' scope)
-        auto: Automatic mode (no prompts)
-    
-    Returns: Workflow data for AI Agent to process
+    Extends WorkflowPhaseCommand with:
+    - BDD phase types (DOMAIN_SCAFFOLD, SIGNATURES, RED, GREEN, REFACTOR)
     """
-    print("\n=== BDD Workflow Starting ===")
     
-    # Step 1: Validate file
-    test_path = Path(file_path)
-    if not test_path.exists():
-        return {"error": f"File not found: {file_path}"}
-    
-    print(f"✅ File: {test_path.name}")
-    
-    # Step 2: Detect framework
-    framework = detect_framework_from_file(file_path)
-    if not framework:
-        return {"error": f"Not a valid BDD test file: {file_path}"}
-    
-    print(f"✅ Framework: {framework.upper()}")
-    
-    # Step 3: Load or initialize workflow state AND run state
-    workflow_state = BDDWorkflowState(file_path)
-    run_state = BDDRunState(file_path)
-    
-    # Step 3a: CHECK RUN STATE - Can we proceed?
-    try:
-        check_can_start_run(run_state)
-    except RuntimeError:
-        # Cannot proceed - return error with status
-        return {
-            "error": "Cannot proceed - previous run not complete",
-            "run_status": run_state.get_status_summary()
-        }
-    
-    # Step 4: Parse test structure
-    print("Parsing test structure...")
-    blocks = parse_test_structure(file_path, framework)
-    tests = [b for b in blocks if b["type"] == "it"]
-    
-    print(f"✅ Found {len(tests)} tests")
-    
-    # Step 5: Determine scope
-    scoped_tests = determine_test_scope(blocks, scope, cursor_line)
-    implemented = len([t for t in scoped_tests if t["has_implementation"]])
-    signatures = len([t for t in scoped_tests if not t["has_implementation"]])
-    
-    print(f"✅ Scope: {scope}")
-    print(f"   {len(scoped_tests)} tests in scope ({implemented} implemented, {signatures} signatures)")
-    
-    # Step 6: Determine current phase
-    if phase:
-        current_phase = BDDPhase(phase)
-    else:
-        current_phase = BDDPhase(workflow_state.state["phase"])
-    
-    print(f"✅ Phase: {current_phase.value.upper()}")
-    
-    # Step 7: Identify code relationships
-    print("Identifying code relationships...")
-    relationships = identify_code_relationships(file_path)
-    print(f"   {len(relationships['code_under_test_files'])} code under test files")
-    print(f"   {len(relationships['related_tests'])} related test files")
-    
-    # Step 8: Get next test to work on
-    next_test = None
-    if current_phase in [BDDPhase.RED, BDDPhase.GREEN, BDDPhase.REFACTOR]:
-        for i, test in enumerate(scoped_tests):
-            if not test["has_implementation"]:
-                next_test = (i, test)
-                break
-    
-    # Step 8.5: For SIGNATURES phase, load and present DO/DON'T examples
-    rule_examples = None
-    if current_phase == BDDPhase.SIGNATURES:
-        # Import the function from hyphenated module name
-        import importlib.util
-        validate_runner_path = Path(__file__).parent.parent / "validate" / "bdd-validate-runner.py"
-        spec = importlib.util.spec_from_file_location("bdd_validate_runner", validate_runner_path)
-        validate_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(validate_module)
-        load_rule_file = validate_module.load_rule_file
-        extract_dos_and_donts = validate_module.extract_dos_and_donts
+    def __init__(self, inner_command, workflow: Workflow, phase_number: int, phase_name: str, 
+                 test_file: str, framework: str, bdd_phase: BDDPhase):
+        """
+        Args:
+            inner_command: Inner command (typically IncrementalCommand wrapping BDDCommand)
+            workflow: Workflow containing phases
+            phase_number: Phase number
+            phase_name: Phase name
+            test_file: Test file path
+            framework: Test framework ('mamba' or 'jest')
+            bdd_phase: BDD phase enum
+        """
+        # Store phase metadata for direct access
+        self.phase_number = phase_number
+        self.phase_name = phase_name
         
-        # Load rule and extract examples
-        rule_data = load_rule_file(framework)
-        if rule_data:
-            examples = extract_dos_and_donts(rule_data["content"])
-            rule_examples = {
-                "rule_file": rule_data["rule_path"],
-                "examples": examples
+        # Wrap with WorkflowPhaseCommand for common workflow functionality
+        if WorkflowPhaseCommand:
+            self.phase_command = WorkflowPhaseCommand(inner_command, workflow, phase_number, phase_name)
+        else:
+            self.phase_command = None
+        
+        # BDD-specific
+        self.test_file = test_file
+        self.framework = framework
+        self.bdd_phase = bdd_phase
+    
+    @property
+    def name(self):
+        """Get phase name"""
+        return self.phase_name
+    
+    @property
+    def content(self):
+        """Delegate to phase command"""
+        return self.phase_command.content if self.phase_command else None
+    
+    @property
+    def current_phase(self):
+        """Get current phase number"""
+        return self.phase_command.current_phase if self.phase_command else self.phase_number
+    
+    def start(self):
+        """Start the phase"""
+        if self.phase_command:
+            self.phase_command.start()
+    
+    def approve(self):
+        """Approve current phase"""
+        if self.phase_command:
+            self.phase_command.approve()
+    
+    def proceed_to_next_phase(self):
+        """Move to next phase in workflow"""
+        if self.phase_command:
+            self.phase_command.proceed_to_next_phase()
+    
+    def __getattr__(self, name):
+        """Delegate unknown attributes to phase command"""
+        if self.phase_command:
+            return getattr(self.phase_command, name)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+    @staticmethod
+    def generate_cross_section_prompt(all_violations: List) -> str:
+        """Generate final prompt for cross-section validation"""
+        return f"""
+FINAL CROSS-SECTION VALIDATION
+
+You've validated across Sections 1-5.
+
+Now check for issues that span MULTIPLE sections:
+
+[] Do violations in different sections indicate systemic issues?
+  (e.g., jargon in Section 1 + implementation details in Section 4 = not domain-focused)
+
+[] Are there patterns across sections suggesting missing abstractions?
+  (e.g., duplicate setup in Section 3 + testing internals in Section 2 = need helper)
+
+[] Do Section 4 layer violations conflict with Section 1 readability?
+  (e.g., "front-end" tests using business logic language)
+
+RESPOND: cross_section_issues: [list any found]
+"""
+    
+    @staticmethod
+    def validate_section_iterative(blocks: List[Dict], section_num: str, 
+                                   section_rules: Dict, chunk_size: int,
+                                   domain_map: Dict) -> List:
+        """Validate all blocks for one section in chunks"""
+        print(f"\n{'='*60}")
+        print(f"Section {section_num}: {section_rules['title']}")
+        print(f"{'='*60}\n")
+        
+        violations = []
+        total_chunks = (len(blocks) + chunk_size - 1) // chunk_size
+        
+        for chunk_idx in range(total_chunks):
+            start = chunk_idx * chunk_size
+            end = min(start + chunk_size, len(blocks))
+            chunk = blocks[start:end]
+            
+            print(f"\n[Chunk {chunk_idx+1}/{total_chunks}] {len(chunk)} blocks:\n")
+            
+            for i, block in enumerate(chunk, start=start+1):
+                prompt = BDDIncrementalCommand.generate_section_prompt(block, section_num, section_rules, domain_map)
+                print(f"Block {i}/{len(blocks)}: Line {block['line']}")
+                print(prompt)
+                print()
+            
+            print("-"*60)
+            print(f"AI: Validate above {len(chunk)} blocks against Section {section_num}")
+            print(f"    Report violations in chat")
+            print("-"*60 + "\n")
+            
+            if chunk_idx < total_chunks - 1:
+                input("   Press ENTER to continue to next chunk... ")
+        
+        print(f"\n[DONE] Section {section_num} Complete\n")
+        return violations
+    
+    @staticmethod
+    def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Run tests and capture results.
+        Used by RED, GREEN, and REFACTOR phases.
+        
+        Args:
+            test_file_path: Path to test file
+            framework: 'jest' or 'mamba'
+            single_test_line: If provided, run only test at this line
+        
+        Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
+        """
+        try:
+            if framework == 'jest':
+                cmd = ['npm', 'test', '--', test_file_path]
+                if single_test_line:
+                    # Jest can run specific test by line number
+                    cmd.extend(['-t', str(single_test_line)])
+            
+            elif framework == 'mamba':
+                cmd = ['mamba', test_file_path]
+                if single_test_line:
+                    # Mamba runs specific test by line
+                    cmd.extend(['--line', str(single_test_line)])
+            
+            else:
+                return {"success": False, "error": f"Unknown framework: {framework}"}
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            # Parse output for pass/fail counts
+            output = result.stdout + result.stderr
+            passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
+            failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
+            
+            return {
+                "success": result.returncode == 0,
+                "output": output,
+                "passed": passed,
+                "failed": failed,
+                "error": None if result.returncode == 0 else "Tests failed"
             }
-            
-            # OUTPUT TO CHAT for AI Agent - Show ALL examples
-            print("\n" + "="*60)
-            print("DO/DON'T EXAMPLES FROM BDD RULES")
-            print("="*60)
-            for section, data in examples.items():
-                print(f"\n### {section}")
-                
-                if data['dos']:
-                    print("\n✅ DO:")
-                    for i, example in enumerate(data['dos'], 1):  # Show ALL DO examples
-                        print(f"\nExample {i}:")
-                        print(example)
-                
-                if data['donts']:
-                    print("\n❌ DON'T:")
-                    for i, example in enumerate(data['donts'], 1):  # Show ALL DON'T examples
-                        print(f"\nExample {i}:")
-                        print(example)
-            
-            print("\n" + "="*60)
-            print("AI Agent: Create tests aligning to these DO/DON'T examples")
-            print("="*60 + "\n")
+        
+        except subprocess.TimeoutExpired:
+            return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
+        except Exception as e:
+            return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
     
-    # Step 9: Prepare data for AI Agent
-    workflow_data = {
-        "file_path": file_path,
-        "framework": framework,
-        "phase": current_phase.value,
-        "scope": scope,
-        "auto_mode": auto,
-        "rule_examples": rule_examples,  # Include examples data
-        "test_structure": {
-            "all_blocks": blocks,
-            "scoped_tests": scoped_tests,
-            "next_test": next_test
-        },
-        "state": workflow_state.state,
-        "relationships": relationships,
-        "commands": {
-            "run_all_tests": f"python -c \"import bdd_workflow_runner; print(bdd_workflow_runner.run_tests('{file_path}', '{framework}'))\"",
-            "run_single_test": f"python -c \"import bdd_workflow_runner; print(bdd_workflow_runner.run_tests('{file_path}', '{framework}', {{line}}))\""
+    @staticmethod
+    def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
+        """
+        Identify code under test and other test files related to this test.
+        Used by RED, GREEN, and REFACTOR phases.
+        
+        Returns: {"code_under_test_files": [...], "related_tests": [...]}
+        """
+        test_path = Path(test_file_path)
+        test_content = test_path.read_text(encoding='utf-8')
+        
+        # Extract imports
+        imports = re.findall(r"import .+ from ['\"]([^'\"]+)['\"]", test_content)
+        imports += re.findall(r"require\(['\"]([^'\"]+)['\"]\)", test_content)
+        
+        code_under_test_files = []
+        related_tests = []
+        
+        for imp in imports:
+            # Skip node_modules
+            if imp.startswith('.'):
+                # Relative import
+                resolved = (test_path.parent / imp).resolve()
+                
+                # Try common extensions
+                for ext in ['.js', '.ts', '.mjs', '.jsx', '.tsx', '.py']:
+                    candidate = Path(str(resolved) + ext)
+                    if candidate.exists():
+                        if any(pattern in candidate.name for pattern in ['test', 'spec', '_test', 'test_']):
+                            related_tests.append(str(candidate))
+                        else:
+                            code_under_test_files.append(str(candidate))
+                        break
+        
+        return {
+            "code_under_test_files": code_under_test_files,
+            "related_tests": related_tests
         }
-    }
-    
-    print("\n" + "="*60)
-    print("READY FOR AI AGENT")
-    print("="*60)
-    print(f"Phase: {current_phase.value.upper()}")
-    if current_phase == BDDPhase.SIGNATURES:
-        print("\nAI Agent TODO:")
-        print("1. Identify SAMPLE SIZE (lowest-level describe, ~18 tests)")
-        print("2. Create sample test signatures")
-        print("3. Run /bdd-validate")
-        print("4. Fix violations, learn, iterate")
-    if next_test:
-        print(f"\nNext Test: Line {next_test[1]['line']} - '{next_test[1]['text']}'")
-    print("="*60)
-    
-    return workflow_data
+
+
+
+
 
 
 # ============================================================================
@@ -1762,7 +923,8 @@ class RuleParser:
         if framework in self._cache:
             return self._cache[framework]
         
-        rule_data = load_rule_file(framework)
+        bdd_rule = BDDRule()
+        rule_data = bdd_rule.load_framework_rule_file(framework)
         if not rule_data:
             return {}
         
@@ -1935,216 +1097,6 @@ class RuleParser:
 _rule_parser = RuleParser()
 
 
-def parse_structure_to_blocks(chunk: Dict[str, Any]) -> List[Dict[str, str]]:
-    """Convert structure chunk to list of block dicts"""
-    blocks = []
-    structure_lines = chunk.get('structure', '').split('\n')
-    for line in structure_lines:
-        match = re.match(r'\s*Line (\d+):\s+(describe|it)\(["\']([^"\']+)', line)
-        if match:
-            blocks.append({
-                'line': int(match.group(1)),
-                'type': match.group(2),
-                'text': match.group(3)
-            })
-    return blocks
-
-
-def generate_section_prompt(block: Dict[str, str], section_num: str, 
-                           section_rules: Dict[str, Any], domain_map: Optional[Dict] = None) -> str:
-    """Generate structured prompt with mandatory checklist"""
-    prompt = f"""
-Block: Line {block['line']} - "{block['text']}"
-
-VALIDATE AGAINST Section {section_num}: {section_rules['title']}
-
-Principle: {section_rules['principle'][:200]}...
-
-MANDATORY CHECKLIST (answer ALL):
-"""
-    
-    for check in section_rules.get('checks', []):
-        prompt += f"\n[] {check['question']}"
-        if check.get('keywords'):
-            keywords = check['keywords'][:8]
-            prompt += f"\n  Keywords to avoid: {', '.join(keywords)}"
-        
-        if check.get('example_dont'):
-            dont_snippet = check['example_dont'].replace('\n', ' ')[:120]
-            prompt += f"\n  DON'T: {dont_snippet}..."
-        
-        if check.get('example_do'):
-            do_snippet = check['example_do'].replace('\n', ' ')[:120]
-            prompt += f"\n  DO: {do_snippet}..."
-    
-    if domain_map and domain_map.get('found'):
-        if domain_map.get('domain_map'):
-            map_content = domain_map['domain_map'].get('content', '')
-            concepts = re.findall(r'^[A-Z][A-Za-z\s]+(?=:|\n)', map_content, re.MULTILINE)[:5]
-            if concepts:
-                prompt += f"\n\nDomain Terms Available: {', '.join(concepts)}"
-    
-    prompt += "\n\nRESPOND: violations: [list any found]"
-    return prompt
-
-
-def generate_cross_section_prompt(all_violations: List) -> str:
-    """Generate final prompt for cross-section validation"""
-    return f"""
-FINAL CROSS-SECTION VALIDATION
-
-You've validated across Sections 1-5.
-
-Now check for issues that span MULTIPLE sections:
-
-[] Do violations in different sections indicate systemic issues?
-  (e.g., jargon in Section 1 + implementation details in Section 4 = not domain-focused)
-
-[] Are there patterns across sections suggesting missing abstractions?
-  (e.g., duplicate setup in Section 3 + testing internals in Section 2 = need helper)
-
-[] Do Section 4 layer violations conflict with Section 1 readability?
-  (e.g., "front-end" tests using business logic language)
-
-RESPOND: cross_section_issues: [list any found]
-"""
-
-
-def validate_iterative_mode(test_file: str, framework: str, chunk_size: int = 10) -> List:
-    """Iterative validation: section-by-section in chunks with AI feedback"""
-    print("="*60)
-    print("BDD VALIDATOR - ITERATIVE MODE")
-    print("="*60)
-    
-    print("\nParsing BDD rules...")
-    rules = _rule_parser.get_checklist(framework)
-    
-    if not rules:
-        print(f"[ERROR] Could not parse rules for {framework}")
-        return []
-    
-    print(f"[OK] Parsed {len(rules)} sections with validation checklists")
-    
-    print(f"\nExtracting test structure from {Path(test_file).name}...")
-    chunks = extract_test_structure_chunks(test_file, framework)
-    all_blocks = []
-    for chunk in chunks:
-        all_blocks.extend(parse_structure_to_blocks(chunk))
-    
-    print(f"[OK] Found {len(all_blocks)} test blocks")
-    
-    domain_map = discover_domain_maps(test_file)
-    if domain_map.get('found'):
-        print("[OK] Found domain maps for context")
-    
-    print(f"\nValidating against {len(rules)} sections")
-    print(f"Chunk size: {chunk_size} blocks\n")
-    
-    all_violations = []
-    
-    for section_num in sorted(rules.keys()):
-        violations = validate_section_iterative(
-            all_blocks, section_num, rules[section_num], 
-            chunk_size, domain_map
-        )
-        all_violations.extend(violations)
-    
-    print("\n" + "="*60)
-    print("FINAL PASS: CROSS-SECTION VALIDATION")
-    print("="*60 + "\n")
-    
-    cross_prompt = generate_cross_section_prompt(all_violations)
-    print(cross_prompt)
-    print("\nAI: Review all violations above for cross-section issues\n")
-    input("   Press ENTER when complete... ")
-    
-    print("\n" + "="*60)
-    print("[COMPLETE] VALIDATION COMPLETE")
-    print("="*60)
-    return all_violations
-
-
-def validate_section_iterative(blocks: List[Dict], section_num: str, 
-                               section_rules: Dict, chunk_size: int,
-                               domain_map: Dict) -> List:
-    """Validate all blocks for one section in chunks"""
-    print(f"\n{'='*60}")
-    print(f"Section {section_num}: {section_rules['title']}")
-    print(f"{'='*60}\n")
-    
-    violations = []
-    total_chunks = (len(blocks) + chunk_size - 1) // chunk_size
-    
-    for chunk_idx in range(total_chunks):
-        start = chunk_idx * chunk_size
-        end = min(start + chunk_size, len(blocks))
-        chunk = blocks[start:end]
-        
-        print(f"\n[Chunk {chunk_idx+1}/{total_chunks}] {len(chunk)} blocks:\n")
-        
-        for i, block in enumerate(chunk, start=start+1):
-            prompt = generate_section_prompt(block, section_num, section_rules, domain_map)
-            print(f"Block {i}/{len(blocks)}: Line {block['line']}")
-            print(prompt)
-            print()
-        
-        print("-"*60)
-        print(f"AI: Validate above {len(chunk)} blocks against Section {section_num}")
-        print(f"    Report violations in chat")
-        print("-"*60 + "\n")
-        
-        if chunk_idx < total_chunks - 1:
-            input("   Press ENTER to continue to next chunk... ")
-    
-    print(f"\n[DONE] Section {section_num} Complete\n")
-    return violations
-
-
-def validate_batch_mode(test_file: str, framework: str) -> List:
-    """Batch validation: all sections at once for quick overview"""
-    print("="*60)
-    print("BDD VALIDATOR - BATCH MODE")
-    print("="*60)
-    
-    print("\nParsing BDD rules...")
-    rules = _rule_parser.get_checklist(framework)
-    
-    if not rules:
-        print(f"[ERROR] Could not parse rules for {framework}")
-        return []
-    
-    print(f"[OK] Parsed {len(rules)} sections")
-    
-    print(f"\nExtracting test structure from {Path(test_file).name}...")
-    chunks = extract_test_structure_chunks(test_file, framework)
-    all_blocks = []
-    for chunk in chunks:
-        all_blocks.extend(parse_structure_to_blocks(chunk))
-    
-    print(f"[OK] Found {len(all_blocks)} test blocks\n")
-    
-    domain_map = discover_domain_maps(test_file)
-    
-    for section_num in sorted(rules.keys()):
-        print(f"\n{'='*60}")
-        print(f"Section {section_num}: {rules[section_num]['title']}")
-        print(f"{'='*60}\n")
-        
-        for block in all_blocks:
-            prompt = generate_section_prompt(block, section_num, rules[section_num], domain_map)
-            print(prompt)
-            print()
-    
-    print("\n" + "="*60)
-    print("FINAL: CROSS-SECTION VALIDATION")
-    print("="*60 + "\n")
-    print(generate_cross_section_prompt([]))
-    
-    print("\nAI: Validate all blocks against all sections above\n")
-    
-    return []
-
-
 # ============================================================================
 # BDD TEST FILE VALIDATION (Legacy - kept for backward compatibility)
 # ============================================================================
@@ -2194,7 +1146,7 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
     
     # Step 2: Detect framework
     print(f"Step 2: Detecting framework...")
-    framework = detect_framework_from_file(file_path)
+    framework = BDDRule.detect_framework_from_file(file_path)
     if not framework:
         print(f"❌ File doesn't match BDD test patterns: {file_path}")
         print("   Expected: *.test.js, *.spec.ts, test_*.py, etc.")
@@ -2204,7 +1156,8 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
     
     # Step 2.5: Discover domain maps
     print(f"Step 2.5: Discovering domain maps in test directory...")
-    domain_maps = discover_domain_maps(file_path)
+    bdd_command = BDDCommand(None)
+    domain_maps = bdd_command.discover_domain_maps()
     
     if domain_maps["found"]:
         if domain_maps["domain_map"]:
@@ -2231,7 +1184,8 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
     
     # Step 4: Extract DO/DON'T examples - ALWAYS use ALL sections
     print("Step 4: Extracting DO/DON'T examples...")
-    sections = extract_dos_and_donts(rule_data['content'])
+    bdd_rule = BDDRule()
+    sections = bdd_rule.extract_dos_and_donts(rule_data['content'])
     print(f"   Validating all sections (§ 1-5) - rules apply at all phases")
     
     total_dos = sum(len(s['dos']) for s in sections.values())
@@ -2240,7 +1194,7 @@ def bdd_validate_test_file(file_path: Optional[str] = None, thorough: bool = Fal
     
     # Step 5: Extract test structure in manageable chunks
     print("Step 5: Extracting test structure (chunked by describe blocks)...")
-    chunks = extract_test_structure_chunks(file_path, framework)
+    chunks = BDDIncrementalCommand.extract_test_structure_chunks(file_path, framework)
     total_blocks = sum(len(chunk['structure'].split('\n')) for chunk in chunks)
     print(f"   Extracted {total_blocks} test blocks in {len(chunks)} chunk(s)")
     
@@ -2375,7 +1329,8 @@ class RuleParser:
         if framework in self._cache:
             return self._cache[framework]
         
-        rule_data = load_rule_file(framework)
+        bdd_rule = BDDRule()
+        rule_data = bdd_rule.load_framework_rule_file(framework)
         if not rule_data:
             return {}
         
@@ -2548,216 +1503,6 @@ class RuleParser:
 _rule_parser = RuleParser()
 
 
-def parse_structure_to_blocks(chunk: Dict[str, Any]) -> List[Dict[str, str]]:
-    """Convert structure chunk to list of block dicts"""
-    blocks = []
-    structure_lines = chunk.get('structure', '').split('\n')
-    for line in structure_lines:
-        match = re.match(r'\s*Line (\d+):\s+(describe|it)\(["\']([^"\']+)', line)
-        if match:
-            blocks.append({
-                'line': int(match.group(1)),
-                'type': match.group(2),
-                'text': match.group(3)
-            })
-    return blocks
-
-
-def generate_section_prompt(block: Dict[str, str], section_num: str, 
-                           section_rules: Dict[str, Any], domain_map: Optional[Dict] = None) -> str:
-    """Generate structured prompt with mandatory checklist"""
-    prompt = f"""
-Block: Line {block['line']} - "{block['text']}"
-
-VALIDATE AGAINST Section {section_num}: {section_rules['title']}
-
-Principle: {section_rules['principle'][:200]}...
-
-MANDATORY CHECKLIST (answer ALL):
-"""
-    
-    for check in section_rules.get('checks', []):
-        prompt += f"\n[] {check['question']}"
-        if check.get('keywords'):
-            keywords = check['keywords'][:8]
-            prompt += f"\n  Keywords to avoid: {', '.join(keywords)}"
-        
-        if check.get('example_dont'):
-            dont_snippet = check['example_dont'].replace('\n', ' ')[:120]
-            prompt += f"\n  DON'T: {dont_snippet}..."
-        
-        if check.get('example_do'):
-            do_snippet = check['example_do'].replace('\n', ' ')[:120]
-            prompt += f"\n  DO: {do_snippet}..."
-    
-    if domain_map and domain_map.get('found'):
-        if domain_map.get('domain_map'):
-            map_content = domain_map['domain_map'].get('content', '')
-            concepts = re.findall(r'^[A-Z][A-Za-z\s]+(?=:|\n)', map_content, re.MULTILINE)[:5]
-            if concepts:
-                prompt += f"\n\nDomain Terms Available: {', '.join(concepts)}"
-    
-    prompt += "\n\nRESPOND: violations: [list any found]"
-    return prompt
-
-
-def generate_cross_section_prompt(all_violations: List) -> str:
-    """Generate final prompt for cross-section validation"""
-    return f"""
-FINAL CROSS-SECTION VALIDATION
-
-You've validated across Sections 1-5.
-
-Now check for issues that span MULTIPLE sections:
-
-[] Do violations in different sections indicate systemic issues?
-  (e.g., jargon in Section 1 + implementation details in Section 4 = not domain-focused)
-
-[] Are there patterns across sections suggesting missing abstractions?
-  (e.g., duplicate setup in Section 3 + testing internals in Section 2 = need helper)
-
-[] Do Section 4 layer violations conflict with Section 1 readability?
-  (e.g., "front-end" tests using business logic language)
-
-RESPOND: cross_section_issues: [list any found]
-"""
-
-
-def validate_iterative_mode(test_file: str, framework: str, chunk_size: int = 10) -> List:
-    """Iterative validation: section-by-section in chunks with AI feedback"""
-    print("="*60)
-    print("BDD VALIDATOR - ITERATIVE MODE")
-    print("="*60)
-    
-    print("\nParsing BDD rules...")
-    rules = _rule_parser.get_checklist(framework)
-    
-    if not rules:
-        print(f"[ERROR] Could not parse rules for {framework}")
-        return []
-    
-    print(f"[OK] Parsed {len(rules)} sections with validation checklists")
-    
-    print(f"\nExtracting test structure from {Path(test_file).name}...")
-    chunks = extract_test_structure_chunks(test_file, framework)
-    all_blocks = []
-    for chunk in chunks:
-        all_blocks.extend(parse_structure_to_blocks(chunk))
-    
-    print(f"[OK] Found {len(all_blocks)} test blocks")
-    
-    domain_map = discover_domain_maps(test_file)
-    if domain_map.get('found'):
-        print("[OK] Found domain maps for context")
-    
-    print(f"\nValidating against {len(rules)} sections")
-    print(f"Chunk size: {chunk_size} blocks\n")
-    
-    all_violations = []
-    
-    for section_num in sorted(rules.keys()):
-        violations = validate_section_iterative(
-            all_blocks, section_num, rules[section_num], 
-            chunk_size, domain_map
-        )
-        all_violations.extend(violations)
-    
-    print("\n" + "="*60)
-    print("FINAL PASS: CROSS-SECTION VALIDATION")
-    print("="*60 + "\n")
-    
-    cross_prompt = generate_cross_section_prompt(all_violations)
-    print(cross_prompt)
-    print("\nAI: Review all violations above for cross-section issues\n")
-    input("   Press ENTER when complete... ")
-    
-    print("\n" + "="*60)
-    print("[COMPLETE] VALIDATION COMPLETE")
-    print("="*60)
-    return all_violations
-
-
-def validate_section_iterative(blocks: List[Dict], section_num: str, 
-                               section_rules: Dict, chunk_size: int,
-                               domain_map: Dict) -> List:
-    """Validate all blocks for one section in chunks"""
-    print(f"\n{'='*60}")
-    print(f"Section {section_num}: {section_rules['title']}")
-    print(f"{'='*60}\n")
-    
-    violations = []
-    total_chunks = (len(blocks) + chunk_size - 1) // chunk_size
-    
-    for chunk_idx in range(total_chunks):
-        start = chunk_idx * chunk_size
-        end = min(start + chunk_size, len(blocks))
-        chunk = blocks[start:end]
-        
-        print(f"\n[Chunk {chunk_idx+1}/{total_chunks}] {len(chunk)} blocks:\n")
-        
-        for i, block in enumerate(chunk, start=start+1):
-            prompt = generate_section_prompt(block, section_num, section_rules, domain_map)
-            print(f"Block {i}/{len(blocks)}: Line {block['line']}")
-            print(prompt)
-            print()
-        
-        print("-"*60)
-        print(f"AI: Validate above {len(chunk)} blocks against Section {section_num}")
-        print(f"    Report violations in chat")
-        print("-"*60 + "\n")
-        
-        if chunk_idx < total_chunks - 1:
-            input("   Press ENTER to continue to next chunk... ")
-    
-    print(f"\n[DONE] Section {section_num} Complete\n")
-    return violations
-
-
-def validate_batch_mode(test_file: str, framework: str) -> List:
-    """Batch validation: all sections at once for quick overview"""
-    print("="*60)
-    print("BDD VALIDATOR - BATCH MODE")
-    print("="*60)
-    
-    print("\nParsing BDD rules...")
-    rules = _rule_parser.get_checklist(framework)
-    
-    if not rules:
-        print(f"[ERROR] Could not parse rules for {framework}")
-        return []
-    
-    print(f"[OK] Parsed {len(rules)} sections")
-    
-    print(f"\nExtracting test structure from {Path(test_file).name}...")
-    chunks = extract_test_structure_chunks(test_file, framework)
-    all_blocks = []
-    for chunk in chunks:
-        all_blocks.extend(parse_structure_to_blocks(chunk))
-    
-    print(f"[OK] Found {len(all_blocks)} test blocks\n")
-    
-    domain_map = discover_domain_maps(test_file)
-    
-    for section_num in sorted(rules.keys()):
-        print(f"\n{'='*60}")
-        print(f"Section {section_num}: {rules[section_num]['title']}")
-        print(f"{'='*60}\n")
-        
-        for block in all_blocks:
-            prompt = generate_section_prompt(block, section_num, rules[section_num], domain_map)
-            print(prompt)
-            print()
-    
-    print("\n" + "="*60)
-    print("FINAL: CROSS-SECTION VALIDATION")
-    print("="*60 + "\n")
-    print(generate_cross_section_prompt([]))
-    
-    print("\nAI: Validate all blocks against all sections above\n")
-    
-    return []
-
-
 # ============================================================================
 # RUNNER GUARD UTILITY
 # ============================================================================
@@ -2878,7 +1623,7 @@ if __name__ == "__main__":
         
         # Detect framework
         print(f"Analyzing {file_path}...")
-        framework = detect_framework_from_file(file_path)
+        framework = BDDRule.detect_framework_from_file(file_path)
         
         if not framework:
             print(f"[ERROR] Could not detect test framework from file path")

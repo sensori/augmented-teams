@@ -23,16 +23,17 @@
 # pyright: typeCheckingMode=off
 # fmt: off
 
-from mamba import description, context, it, before  # type: ignore
+from mamba import description, context, it, before
 from expects import expect, equal, be_true, be_false, contain, have_length, be_none
 from unittest.mock import patch
 
 # Import domain classes
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from common_command_runner.common_command_runner import (
+sys.path.insert(0, str(Path(__file__).parent))
+from common_command_runner import (
     Content,
+    BaseRule,
     SpecializingRule,
     FrameworkSpecializingRule,
     SpecializedRule,
@@ -40,17 +41,175 @@ from common_command_runner.common_command_runner import (
     Example,
     CodeHeuristic,
     Violation,
-    ViolationReport,
     Run,
     RunHistory,
     Command,
-    CodeGuidingCommand,
+    CodeAugmentedCommand,
+    SpecializingRuleCommand,
     IncrementalCommand,
-    PhaseCommand,
+    WorkflowPhaseCommand,
     Workflow,
     PhaseState,
     IncrementalState
 )
+
+def create_test_specializing_rule_from_file(base_rule_file_name):
+    """Create test specializing rule from base file name - discovers specialized rules internally"""
+    class TestSpecializingRule(SpecializingRule):
+        def extract_match_key(self, content):
+            if content.file_extension == '.java':
+                return 'servlet'
+            elif content.file_extension == '.pl':
+                return 'cgiscript'
+            return None
+    return TestSpecializingRule(base_rule_file_name=base_rule_file_name)
+
+def create_test_specializing_rule_with_both():
+    specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+    servlet_rule = specializing_rule.specialized_rules.get('servlet')
+    cgiscript_rule = specializing_rule.specialized_rules.get('cgiscript')
+    return specializing_rule, servlet_rule, cgiscript_rule
+
+def create_test_specializing_rule_with_servlet():
+    specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+    servlet_rule = specializing_rule.specialized_rules.get('servlet')
+    return specializing_rule, servlet_rule
+
+def create_base_rule_content_with_two_principles():
+    """Helper for base rule content with 2 principles"""
+    return """---
+description: Test rule
+---
+
+## 1. First Principle
+Test content for first principle.
+
+## 2. Second Principle  
+Test content for second principle.
+"""
+
+def create_base_rule_content():
+    """Helper for base rule content - used across multiple tests"""
+    return """---
+description: Test rule
+---
+
+## 1. Test Principle
+Test content for test principle.
+"""
+
+def create_violating_code_content():
+    """Helper to create content with violating code lines"""
+    test_code_lines = [
+        "public class BadCode {\n",
+        "    private String a;\n",
+        "    public void calc() {\n",
+        "        if (attempts < 3) { }\n",
+        "    }\n",
+        "}\n"
+    ]
+    return Content('bad-code.java', '.java', content_lines=test_code_lines)
+
+class DescriptiveNamesHeuristic(CodeHeuristic):
+    """Heuristic that scans code for descriptive naming violations"""
+    def __init__(self):
+        super().__init__("descriptive_names")
+    
+    def detect_violations(self, content):
+        """Detect descriptive naming violations"""
+        if 'bad' in content.file_path.lower() or 'violation' in content.file_path.lower():
+            return Violation(1, f"Found descriptive naming violation in {content.file_path}")
+        return None
+
+class MagicNumbersHeuristic(CodeHeuristic):
+    """Heuristic that scans code for magic number violations"""
+    def __init__(self):
+        super().__init__("magic_numbers")
+    
+    def detect_violations(self, content):
+        """Detect magic number violations"""
+        if 'bad' in content.file_path.lower() or 'violation' in content.file_path.lower():
+            return Violation(1, f"Found magic number violation in {content.file_path}")
+        return None
+
+class TestCodeAugmentedCommand(CodeAugmentedCommand):
+    """Concrete extension that creates heuristics internally"""
+    def __init__(self, inner_command, base_rule):
+        super().__init__(inner_command, base_rule)
+        self._create_heuristics()
+    
+    def _create_heuristics(self):
+        """Create heuristics and associate them with principles"""
+        # Map principle names to heuristic classes
+        heuristic_map = {
+            "Use Descriptive Names": DescriptiveNamesHeuristic,
+            "Avoid Magic Numbers": MagicNumbersHeuristic
+        }
+        
+        for principle in self.principles:
+            heuristic_class = heuristic_map[principle.principle_name]
+            principle.heuristics = [heuristic_class()]
+
+def create_code_augmented_command(content, base_rule, validate_instructions=None, generate_instructions=None):
+    """Helper to create CodeAugmentedCommand with base command"""
+    if validate_instructions:
+        base_command = Command(content, base_rule, validate_instructions=validate_instructions)
+    elif generate_instructions:
+        base_command = Command(content, base_rule, generate_instructions=generate_instructions)
+    else:
+        base_command = Command(content, base_rule)
+    return TestCodeAugmentedCommand(base_command, base_rule)
+
+def create_specialized_rule_content(principle_content="Servlet-specific content for test principle."):
+    """Helper for specialized rule content - parameterized for different test needs"""
+    return f"""---
+description: Test specialized rule
+---
+
+## 1. Test Principle
+{principle_content}
+
+**[DO]:**
+```java
+// Good example code
+public class TestServlet {{
+    // DO example
+}}
+```
+
+**[DON'T]:**
+```java
+// Bad example code
+public class BadServlet {{
+    // DON'T example
+}}
+```
+"""
+
+def create_command_with_specialized_rule(content, instructions=None, generate=False):
+    """Helper to create command with specialized rule setup"""
+    test_base_rule_content = create_base_rule_content()
+    test_specialized_rule_content = create_specialized_rule_content()
+    
+    def read_file_side_effect(file_path):
+        """Return appropriate content based on file path"""
+        if 'servlet' in str(file_path) or 'base-rule-servlet' in str(file_path):
+            return test_specialized_rule_content
+        return test_base_rule_content
+    
+    with patch.object(BaseRule, '_read_file_content', side_effect=read_file_side_effect):
+        specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+        # Ensure base rule has loaded principles
+        specializing_rule.base_rule.principles = specializing_rule.base_rule._load_principles_from_file('base-rule.mdc')
+        # Manually create specialized rule since file discovery won't find it when mocking
+        specialized_rule = SpecializedRule(rule_file_name='base-rule-servlet.mdc', parent=specializing_rule)
+        specializing_rule.specialized_rules['servlet'] = specialized_rule
+        base_rule = specializing_rule.base_rule
+        if generate:
+            base_command = Command(content, base_rule, generate_instructions=instructions or "Please build test.java according to the rules")
+        else:
+            base_command = Command(content, base_rule, validate_instructions=instructions or "Please validate test.java as specified by the rules")
+        return SpecializingRuleCommand(base_command, specializing_rule)
 
 with description('a piece of content'):
     """Base capability: specializing behavior for different file types"""
@@ -59,35 +218,19 @@ with description('a piece of content'):
         with before.each:
             self.content = Content('test.java', '.java')
         
-        def create_test_specializing_rule_from_file(base_rule_file_name):
-            """Create test specializing rule from base file name - discovers specialized rules internally"""
-            class TestSpecializingRule(SpecializingRule):
-                def extract_match_key(self, content):
-                    if content.file_extension == '.java':
-                        return 'servlet'
-                    elif content.file_extension == '.pl':
-                        return 'cgiscript'
-                    return None
-            return TestSpecializingRule(base_rule_file_name=base_rule_file_name)
-        
-        def create_test_specializing_rule_with_both():
-            specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
-            servlet_rule = specializing_rule.specialized_rules.get('servlet')
-            cgiscript_rule = specializing_rule.specialized_rules.get('cgiscript')
-            return specializing_rule, servlet_rule, cgiscript_rule
-        
-        def create_test_specializing_rule_with_servlet():
-            specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
-            servlet_rule = specializing_rule.specialized_rules.get('servlet')
-            return specializing_rule, servlet_rule
-        
         with context('that implements a specializing rule'):
             with before.each:
-                self.specializing_rule, self.servlet_specialized, self.cgiscript_specialized = create_test_specializing_rule_with_both()
+                # Inline the function call to avoid scope issues with mamba execution context
+                specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+                servlet_rule = specializing_rule.specialized_rules.get('servlet')
+                cgiscript_rule = specializing_rule.specialized_rules.get('cgiscript')
+                self.specializing_rule, self.servlet_specialized, self.cgiscript_specialized = specializing_rule, servlet_rule, cgiscript_rule
 
             with it('should use template method pattern to select specialized rule'):
                 # Arrange
-                command = Command(self.content, self.specializing_rule)
+                base_rule = self.specializing_rule.base_rule
+                base_command = Command(self.content, base_rule)
+                command = SpecializingRuleCommand(base_command, self.specializing_rule)
                 
                 # Act
                 selected_specialized = command.specialized_rule
@@ -98,19 +241,18 @@ with description('a piece of content'):
             
             with it('should include base rule principles'):
                 # Arrange - stub file reading to return test content for base rule
-                test_base_rule_content = """---
-description: Test rule
----
-
-## 1. First Principle
-Test content for first principle.
-
-## 2. Second Principle  
-Test content for second principle.
-"""
-                with patch.object(SpecializingRule, '_read_file_content', return_value=test_base_rule_content):
-                    specializing_rule, specialized_rule = create_test_specializing_rule_with_servlet()
-                    command = Command(self.content, specializing_rule)
+                test_base_rule_content = create_base_rule_content_with_two_principles()
+                with patch.object(BaseRule, '_read_file_content', return_value=test_base_rule_content):
+                    # Create specializing rule - this will create BaseRule which loads principles via patched method
+                    specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+                    # Ensure base rule has loaded principles
+                    specializing_rule.base_rule.principles = specializing_rule.base_rule._load_principles_from_file('base-rule.mdc')
+                    # Manually create specialized rule since file discovery won't find it when mocking
+                    specialized_rule = SpecializedRule(rule_file_name='base-rule-servlet.mdc', parent=specializing_rule)
+                    specializing_rule.specialized_rules['servlet'] = specialized_rule
+                    base_rule = specializing_rule.base_rule
+                    base_command = Command(self.content, base_rule)
+                    command = SpecializingRuleCommand(base_command, specializing_rule)
                     
                     # Act
                     selected_specialized = command.specialized_rule
@@ -128,21 +270,29 @@ Test content for second principle.
             with context('and the specializing rules has been loaded'):
                 with before.each:
                     # self.content inherited from parent context
-                    test_base_rule_content = """---
-description: Test rule
----
-
-## 1. Test Principle
-Test content for test principle.
-"""
-                    with patch.object(SpecializingRule, '_read_file_content', return_value=test_base_rule_content):
+                    test_base_rule_content = create_base_rule_content()
+                    test_specialized_rule_content = create_specialized_rule_content()
+                    
+                    def read_file_side_effect(file_path):
+                        """Return appropriate content based on file path"""
+                        if 'servlet' in str(file_path) or 'base-rule-servlet' in str(file_path):
+                            return test_specialized_rule_content
+                        return test_base_rule_content
+                    
+                    with patch.object(BaseRule, '_read_file_content', side_effect=read_file_side_effect):
                         self.specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
-                        self.servlet_specialized = self.specializing_rule.specialized_rules.get('servlet')
+                        # Ensure base rule has loaded principles
+                        self.specializing_rule.base_rule.principles = self.specializing_rule.base_rule._load_principles_from_file('base-rule.mdc')
+                        # Manually create specialized rule since file discovery won't find it when mocking
+                        self.servlet_specialized = SpecializedRule(rule_file_name='base-rule-servlet.mdc', parent=self.specializing_rule)
+                        self.specializing_rule.specialized_rules['servlet'] = self.servlet_specialized
                         self.principle = self.servlet_specialized.principles[0] if self.servlet_specialized and self.servlet_specialized.principles else None
                 
                 with it('should have access to the base rule and its principles'):
                     # Arrange
-                    command = Command(self.content, self.specializing_rule)
+                    base_rule = self.specializing_rule.base_rule
+                    base_command = Command(self.content, base_rule)
+                    command = SpecializingRuleCommand(base_command, self.specializing_rule)
                     
                     # Act
                     accessed_specialized = command.specialized_rule
@@ -152,120 +302,229 @@ Test content for test principle.
                     expect(principles).to(have_length(1))
                     expect(principles[0].principle_number).to(equal(1))
                     expect(principles[0].principle_name).to(equal("Test Principle"))
-                    expect(principles[0].content).to(equal("Test content for test principle."))
+                    # Specialized principle should use specialized content when available
+                    expect(principles[0].content).to(equal("Servlet-specific content for test principle."))
+                
+                with it('should use specialized principles in validate output'):
+                    # Arrange
+                    validate_instructions = "Please validate test.java as specified by the rules"
+                    command = create_command_with_specialized_rule(self.content, validate_instructions)
+                    
+                    # Act
+                    instructions = command.validate()
+                    
+                    # Assert - should use specialized principles (servlet-specific content)
+                    expect(instructions).to(contain(validate_instructions))
+                    expect(instructions).to(contain("Servlet-specific content"))
+                    expect(instructions).to(contain("TestServlet"))
+                    # Should NOT contain base rule content
+                    expect(instructions).not_to(contain("Test content for test principle"))
+                
+                with it('should use specialized principles in generate output'):
+                    # Arrange
+                    generate_instructions = "Please build test.java according to the rules"
+                    command = create_command_with_specialized_rule(self.content, generate_instructions, generate=True)
+                    
+                    # Act
+                    instructions = command.generate()
+                    
+                    # Assert - should use specialized principles (servlet-specific content)
+                    expect(instructions).to(contain(generate_instructions))
+                    expect(instructions).to(contain("Servlet-specific content"))
+                    expect(instructions).to(contain("TestServlet"))
+                    # Should NOT contain base rule content
+                    expect(instructions).not_to(contain("Test content for test principle"))
                 
                 with it('should provide access to specialized examples with DOs and DONTs for each principle'):
-                    # Arrange - stub specialized rule file with examples
-                    test_specialized_rule_content = """---
-description: Test specialized rule
----
-
-## 1. Test Principle
-Restate principle briefly.
-
-**✅ DO:**
-```java
-// Good example code
-public class TestServlet {
-    // DO example
-}
-```
-
-**❌ DON'T:**
-```java
-// Bad example code
-public class BadServlet {
-    // DON'T example
-}
-```
-"""
-                    # Stub both base rule and specialized rule file reading
-                    test_base_rule_content = """---
-description: Test rule
----
-
-## 1. Test Principle
-Test content for test principle.
-"""
-                    with patch.object(SpecializingRule, '_read_file_content', return_value=test_base_rule_content):
-                        with patch.object(SpecializedRule, '_read_file_content', return_value=test_specialized_rule_content):
-                            specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
-                            command = Command(self.content, specializing_rule)
-                            
-                            # Act
-                            accessed_specialized = command.specialized_rule
-                            accessed_principles = accessed_specialized.principles if accessed_specialized else []
-                            examples = []
-                            for principle in accessed_principles:
-                                examples.extend(principle.examples)
-                            
-                            # Assert
-                            expect(examples).to(have_length(2))
-                            expect(examples[0].example_type).to(equal("DO"))
-                            expect(examples[0].content).to(contain("Good example code"))
-                            expect(examples[1].example_type).to(equal("DONT"))
-                            expect(examples[1].content).to(contain("Bad example code"))
+                    # Arrange - use specialized content with different principle text
+                    test_specialized_rule_content = create_specialized_rule_content("Restate principle briefly.")
+                    test_base_rule_content = create_base_rule_content()
+                    
+                    def read_file_side_effect_for_examples(file_path):
+                        """Return appropriate content based on file path"""
+                        if 'servlet' in str(file_path) or 'base-rule-servlet' in str(file_path):
+                            return test_specialized_rule_content
+                        return test_base_rule_content
+                    
+                    with patch.object(BaseRule, '_read_file_content', side_effect=read_file_side_effect_for_examples):
+                        specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
+                        # Ensure base rule has loaded principles
+                        specializing_rule.base_rule.principles = specializing_rule.base_rule._load_principles_from_file('base-rule.mdc')
+                        # Manually create specialized rule since file discovery won't find it when mocking
+                        specialized_rule = SpecializedRule(rule_file_name='base-rule-servlet.mdc', parent=specializing_rule)
+                        specializing_rule.specialized_rules['servlet'] = specialized_rule
+                        base_command = Command(self.content, specializing_rule.base_rule)
+                        command = SpecializingRuleCommand(base_command, specializing_rule)
+                        
+                        # Act
+                        accessed_specialized = command.specialized_rule
+                        accessed_principles = accessed_specialized.principles if accessed_specialized else []
+                        examples = []
+                        for principle in accessed_principles:
+                            examples.extend(principle.examples)
+                        
+                        # Assert - each example contains both DO and DON'T
+                        expect(examples).to(have_length(1))  # One example with both DO and DON'T
+                        expect(examples[0].do_code).to(contain("Good example code"))
+                        expect(examples[0].dont_code).to(contain("Bad example code"))
             
             
             with context('that performs code augmented AI guidance'):
                 with context('that is being validated against its rules'):
                     with before.each:
                         # self.content inherited from parent context
-                        self.specializing_rule = create_test_specializing_rule_from_file('base-rule.mdc')
-                        self.servlet_specialized = self.specializing_rule.specialized_rules.get('servlet')
-                        self.principle = self.servlet_specialized.principles[0] if self.servlet_specialized and self.servlet_specialized.principles else Principle(1, "Test")
-                        self.heuristic = self.principle.heuristics[0] if self.principle.heuristics else CodeHeuristic("test_pattern")
+                        test_base_rule_content = """---
+description: Test rule
+---
+
+## 1. Use Descriptive Names
+Code should use descriptive variable and function names.
+
+**[DO]:**
+```java
+public class UserAccount {
+    private String accountHolderName;
+    public void calculateTotalBalance() { }
+}
+```
+
+**[DON'T]:**
+```java
+public class UA {
+    private String a;
+    public void calc() { }
+}
+```
+
+## 2. Avoid Magic Numbers
+Use named constants instead of magic numbers.
+
+**[DO]:**
+```java
+private static final int MAX_RETRY_ATTEMPTS = 3;
+if (attempts < MAX_RETRY_ATTEMPTS) { }
+```
+
+**[DON'T]:**
+```java
+if (attempts < 3) { }
+```
+"""
+                        with patch.object(BaseRule, '_read_file_content', return_value=test_base_rule_content):
+                            self.base_rule = BaseRule('base-rule.mdc')
+                            self.base_rule.principles = self.base_rule._load_principles_from_file('base-rule.mdc')
+                        
+                        # Create test content that violates rules
+                        self.violating_content = Content('bad-code.java', '.java')
+                        self.clean_content = Content('good-code.java', '.java')
                     
-                    with it('should load code heuristics for each principle from associated specializing rule'):
+                    with it('should return validation instructions with principles and examples from base command'):
                         # Arrange
-                        command = CodeGuidingCommand(self.content, self.specializing_rule)
+                        validate_instructions = "Please validate test.java as specified by the rules in base-rule.mdc"
+                        base_command = Command(self.content, self.base_rule, validate_instructions=validate_instructions)
                         
                         # Act
-                        accessed_specialized = command.specialized_rule
-                        accessed_principles = accessed_specialized.principles if accessed_specialized else []
+                        instructions = base_command.validate()
+                        
+                        # Assert - base command returns instructions with principles and examples
+                        expect(instructions).to(contain(validate_instructions))
+                        expect(instructions).to(contain("Use Descriptive Names"))
+                        expect(instructions).to(contain("Avoid Magic Numbers"))
+                        expect(instructions).to(contain("UserAccount"))
+                        expect(instructions).to(contain("UA"))
+                        expect(instructions).to(contain("DO"))
+                        expect(instructions).to(contain("DON'T"))
+                    
+                    with it('should return generation instructions with principles and examples from base command'):
+                        # Arrange
+                        generate_instructions = "Please build test.java according to the rules specified in base-rule.mdc"
+                        base_command = Command(self.content, self.base_rule, generate_instructions=generate_instructions)
+                        
+                        # Act
+                        instructions = base_command.generate()
+                        
+                        # Assert - base command returns generation instructions with principles and examples
+                        expect(instructions).to(contain(generate_instructions))
+                        expect(instructions).to(contain("Use Descriptive Names"))
+                        expect(instructions).to(contain("Avoid Magic Numbers"))
+                        expect(instructions).to(contain("UserAccount"))
+                        expect(instructions).to(contain("UA"))
+                    
+                    with it('should load code heuristics for each principle from base rule'):
+                        # Arrange
+                        command = create_code_augmented_command(self.content, self.base_rule)
+                        
+                        # Act
+                        principles = command.principles
                         heuristics = []
-                        for principle in accessed_principles:
+                        for principle in principles:
                             heuristics.extend(principle.heuristics)
                         
                         # Assert
-                        expect(heuristics).to(contain(self.heuristic))
+                        expect(principles).to(have_length(2))
+                        expect(heuristics).to(have_length(2))
+                        expect(all(h.detection_pattern in ["descriptive_names", "magic_numbers"] for h in heuristics)).to(be_true)
                     
-                    with it('should analyze content for violations using the heuristic'):
+                    with it('should scan content for violations and include them in validate output as checklist'):
                         # Arrange
-                        command = CodeGuidingCommand(self.content, self.specializing_rule)
+                        violating_content = create_violating_code_content()
+                        command = create_code_augmented_command(violating_content, self.base_rule)
+                        
+                        # Act - validate content for violations (defaults to CHECKLIST format)
+                        instructions = command.validate()
+                        
+                        # Assert - violations property contains violations
+                        expect(command.violations).to(have_length(2))  # Both heuristics detect violations
+                        expect(all(v.message for v in command.violations)).to(be_true)
+                        # Assert - instructions include violations in checklist format
+                        expect(instructions).to(contain("Violations Checklist"))
+                        expect(instructions).to(contain("- [ ]"))  # Checklist markers
+                        expect(instructions).to(contain("descriptive naming violation"))
+                        expect(instructions).to(contain("magic number violation"))
+                        # Assert - code snippets are included showing where violations occurred
+                        expect(instructions).to(contain(">>>"))  # Marker for violation line
+                        expect(instructions).to(contain("|"))  # Line number separator
+                        expect(instructions).to(contain("BadCode"))  # Code content from snippet
+                        expect(instructions).to(contain("```"))  # Code block markers
+                    
+                    with it('should format violations in detailed format when requested'):
+                        # Arrange
+                        violating_content = create_violating_code_content()
+                        command = create_code_augmented_command(violating_content, self.base_rule)
+                        
+                        # Act - validate with DETAILED format
+                        instructions = command.validate(report_format='DETAILED')
+                        
+                        # Assert - violations property contains violations
+                        expect(command.violations).to(have_length(2))
+                        # Assert - instructions include violations in detailed format (not checklist)
+                        expect(instructions).to(contain("Violations Found"))
+                        expect(instructions).not_to(contain("Violations Checklist"))
+                        expect(instructions).not_to(contain("- [ ]"))  # No checklist markers
+                        expect(instructions).to(contain("descriptive naming violation"))
+                        expect(instructions).to(contain("magic number violation"))
+                    
+                    with it('should access examples from principles for violation detection'):
+                        # Arrange
+                        command = create_code_augmented_command(self.content, self.base_rule)
                         
                         # Act
-                        violations = self.heuristic.violations
+                        principles = command.principles
+                        examples = []
+                        for principle in principles:
+                            examples.extend(principle.examples)
                         
-                        # Assert
-                        expect(violations).to(have_length(0))
-                        expect(self.content.file_extension).to(equal('.java'))
-                    
-                    with it('should assemble related violations, principles, and examples into a checklist based report'):
-                        # Arrange
-                        violation = Violation(10, "Test violation")
-                        command = CodeGuidingCommand(self.content, self.specializing_rule)
-                        
-                        # Act
-                        violation_report = ViolationReport([violation], [self.principle], 'CHECKLIST')
-                        
-                        # Assert
-                        expect(violation_report.report_format).to(equal('CHECKLIST'))
-                        expect(violation.line_number).to(equal(10))
-                    
-                    with it('should create violation report with principles'):
-                        # Arrange
-                        violation_report = ViolationReport([], [self.principle], 'CHECKLIST')
-                        command = CodeGuidingCommand(self.content, self.specializing_rule)
-                        
-                        # Act & Assert
-                        expect(violation_report.principles).to(contain(self.principle))
-                        expect(violation_report.violations).to(have_length(0))
-                        expect(violation_report.report_format).to(equal('CHECKLIST'))
+                        # Assert - examples should be available for AI prompts
+                        # Each example contains both DO and DON'T
+                        expect(examples).to(have_length(2))  # 2 examples, each with DO and DON'T
+                        expect(examples[0].do_code).to(contain("UserAccount"))
+                        expect(examples[0].dont_code).to(contain("UA"))
+                        expect(examples[1].do_code).to(contain("MAX_RETRY_ATTEMPTS"))
+                        expect(examples[1].dont_code).to(contain("3"))
                     
                     with it('should apply fix suggestions from AI'):
                         # Arrange
-                        command = CodeGuidingCommand(self.content, self.specializing_rule)
+                        command = create_code_augmented_command(self.content, self.base_rule)
                         
                         # Act
                         self.content.apply_fixes()
@@ -274,15 +533,32 @@ Test content for test principle.
                         expect(self.content.violations).to(have_length(0))
                         expect(command).not_to(be_none)
                         expect(command.content).to(equal(self.content))
-                        expect(command.validation_mode).to(equal("STRICT"))
                         expect(self.content.file_extension).to(equal('.java'))
         
         with context('that implements incremental runs'):
             with before.each:
                 # self.content inherited from parent context
                 self.max_sample_size = 18
-                specializing_rule, _ = create_test_specializing_rule_with_servlet()
-                self.command = IncrementalCommand(self.content, specializing_rule, self.max_sample_size)
+                self.base_rule = BaseRule('base-rule.mdc')
+                base_command = Command(self.content, self.base_rule)
+                self.command = IncrementalCommand(base_command, self.base_rule, self.max_sample_size)
+            
+            with context('with all work complete'):
+                # Inherits setup from parent before.each
+                with it('should mark the command as complete'):
+                    # Arrange
+                    command = self.command
+                    command._has_more_work = False
+                    
+                    # Act
+                    is_complete = command.is_complete()
+                    
+                    # Assert
+                    expect(is_complete).to(be_true)
+                    expect(command).not_to(be_none)
+                    expect(command.max_sample_size).to(equal(self.max_sample_size))
+                    expect(command.content).to(equal(self.content))
+                    expect(self.max_sample_size).to(equal(18))
             
             with it('should provide the sample size based on code analysis and configured maximum'):
                 # Arrange
@@ -295,29 +571,6 @@ Test content for test principle.
                 # Assert
                 expect(max_sample_size).to(equal(18))
                 expect(sample_size).to(be_none)
-            
-            with it('should confirm sample size'):
-                # Arrange
-                command = self.command
-                
-                # Act
-                confirmed = command.sample_size_confirmed
-                
-                # Assert
-                expect(confirmed).to(be_true)
-                expect(command.max_sample_size).to(equal(self.max_sample_size))
-                expect(command.content).to(equal(self.content))
-            
-            with it('should submit sample size instructions'):
-                # Arrange
-                command = self.command
-                
-                # Act
-                command.submit_sample_size_instructions()
-                
-                # Assert
-                expect(command.max_sample_size).to(equal(self.max_sample_size))
-                expect(command.content).to(equal(self.content))
             
             with context('that has completed a run'):
                 with before.each:
@@ -484,35 +737,26 @@ Test content for test principle.
                     expect(command.content).to(equal(self.content))
                     expect(self.max_sample_size).to(equal(18))
             
-            with context('with all work complete'):
-                with before.each:
-                    # self.content inherited from parent context
-                    self.max_sample_size = 18
-                    specializing_rule, _ = create_test_specializing_rule_with_servlet()
-                    self.command = IncrementalCommand(self.content, specializing_rule, self.max_sample_size)
-                
-                with it('should mark the command as complete'):
-                    # Arrange
-                    command = self.command
-                    command._has_more_work = False
-                    
-                    # Act
-                    is_complete = command.is_complete()
-                    
-                    # Assert
-                    expect(is_complete).to(be_true)
-                    expect(command).not_to(be_none)
-                    expect(command.max_sample_size).to(equal(self.max_sample_size))
-                    expect(command.content).to(equal(self.content))
-                    expect(self.max_sample_size).to(equal(18))
         
         with context('that is a phase in a workflow'):
             with before.each:
                 # self.content inherited from parent context
                 self.workflow = Workflow()
+                self.base_rule = BaseRule('test-rule.mdc')
+                self.base_command = Command(self.content, self.base_rule)
+                
+                # Create 3 phases for testing transitions
+                self.phase_0 = WorkflowPhaseCommand(self.base_command, self.workflow, 0, "Phase 0: Setup")
+                self.phase_1 = WorkflowPhaseCommand(self.base_command, self.workflow, 1, "Phase 1: Development")
+                self.phase_2 = WorkflowPhaseCommand(self.base_command, self.workflow, 2, "Phase 2: Review")
+                
+                self.workflow.phases = [self.phase_0, self.phase_1, self.phase_2]
+                self.workflow.current_phase_number = 0
+                
+                # Set default phase_command to phase_0 for backward compatibility
+                self.phase_command = self.phase_0
                 self.phase_number = 0
-                self.phase_name = "Test Phase"
-                self.phase_command = PhaseCommand(self.content, self.workflow, self.phase_number, self.phase_name)
+                self.phase_name = "Phase 0: Setup"
             
             with it('should initialize workflow phase'):
                 # Arrange
@@ -533,7 +777,7 @@ Test content for test principle.
                 
                 # Assert
                 expect(phase_command.phase_state.phase_status).to(equal("STARTING"))
-                expect(self.phase_name).to(equal("Test Phase"))
+                expect(self.phase_name).to(equal("Phase 0: Setup"))
             
             with it('should save state to disk'):
                 # Arrange
@@ -548,7 +792,7 @@ Test content for test principle.
                 expect(phase_command.phase_state).not_to(be_none)
                 expect(phase_command.content).to(equal(self.content))
                 expect(phase_command.workflow).to(equal(self.workflow))
-                expect(self.content.file_path).to(equal('test.py'))
+                expect(self.content.file_path).to(equal('test.java'))
             
             with context('in the correct phase order'):
                 with it('should invoke the command'):
@@ -603,29 +847,15 @@ Test content for test principle.
                     expect(phase_command.phase_number).to(equal(phase_command.phase_state.phase_number))
                     expect(phase_command.phase_state.phase_status).to(equal("STARTING"))
                     expect(phase_command.content).to(equal(self.content))
-                    expect(phase_command.start.called).to(be_true)
+                    expect(phase_command._start_called).to(be_true)
                     expect(self.phase_number).to(equal(0))
                 
-                with it('should start from current run'):
-                    # Arrange
-                    phase_command = self.phase_command
-                    incremental_state = IncrementalState(current_run=5)
-                    
-                    # Act
-                    phase_command.resume_from_run()
-                    
-                    # Assert
-                    expect(phase_command.current_run_number).to(equal(5))
-                    expect(phase_command).not_to(be_none)
-                    expect(incremental_state).not_to(be_none)
-                    expect(incremental_state.current_run).to(equal(5))
-                    expect(phase_command.phase_number).to(equal(self.phase_number))
-                    expect(self.phase_number).to(equal(0))
             
             with context('that has been invoked out of phase order'):
+                # Reuses self.base_command from parent before.each
                 with it('should block execution'):
                     # Arrange
-                    phase_command = PhaseCommand(self.content, self.workflow, 1, "Wrong Phase")
+                    phase_command = WorkflowPhaseCommand(self.base_command, self.workflow, 1, "Wrong Phase")
                     self.workflow.current_phase_number = 0
                     
                     # Act
@@ -644,7 +874,8 @@ Test content for test principle.
                 with it('should report on current phase that needs to be completed'):
                     # Arrange
                     self.workflow.current_phase_number = 0
-                    self.workflow.phases = [PhaseCommand(self.content, self.workflow, 0, "Test Phase")]
+                    test_phase = WorkflowPhaseCommand(self.base_command, self.workflow, 0, "Test Phase")
+                    self.workflow.phases = [test_phase]
                     
                     # Act
                     status_report = self.workflow.get_current_phase_status()
@@ -657,7 +888,7 @@ Test content for test principle.
                     expect(self.workflow.phases[0].phase_name).to(equal("Test Phase"))
                     expect(self.workflow.phases[0].phase_number).to(equal(0))
                     expect(self.workflow.current_phase_number).to(equal(0))
-                    expect(self.phase_name).to(equal("Test Phase"))
+                    expect(test_phase.phase_name).to(equal("Test Phase"))
             
             with context('that has completed all steps for the command'):
                 with it('should provide the user with the option to proceed to next phase, verify against rules, or redo the phase'):
@@ -675,7 +906,7 @@ Test content for test principle.
                     expect(phase_command.phase_name).to(equal(self.phase_name))
                     expect(phase_command.phase_number).to(equal(self.phase_number))
                     expect(phase_command.phase_state).not_to(be_none)
-                    expect(self.phase_name).to(equal("Test Phase"))
+                    expect(self.phase_name).to(equal("Phase 0: Setup"))
             
             with context('that has been approved to proceed'):
                 with it('should determine next action from state'):
@@ -717,7 +948,7 @@ Test content for test principle.
                 with it('should start the next phase command in the workflow'):
                     # Arrange
                     phase_command = self.phase_command
-                    next_phase_command = PhaseCommand(self.content, self.workflow, 1, "Next Phase")
+                    next_phase_command = WorkflowPhaseCommand(self.base_command, self.workflow, 1, "Next Phase")
                     self.workflow.phases = [phase_command, next_phase_command]
                     self.workflow.current_phase_number = 1
                     
@@ -726,7 +957,7 @@ Test content for test principle.
                     next_phase_command.start()
                     
                     # Assert
-                    expect(next_phase_command.start.called).to(be_true)
+                    expect(next_phase_command._start_called).to(be_true)
                     expect(self.workflow).not_to(be_none)
                     expect(self.workflow.phases).to(have_length(2))
                     expect(self.workflow.phases[0]).to(equal(phase_command))
@@ -736,4 +967,225 @@ Test content for test principle.
                     expect(next_phase_command.phase_name).to(equal("Next Phase"))
                     expect(next_phase_command.content).to(equal(self.content))
                     expect(self.phase_number).to(equal(0))
+            
+            with context('with multiple phases in workflow'):
+                with it('should proceed from phase 0 to phase 1 to phase 2'):
+                    # Arrange
+                    self.workflow.current_phase_number = 0
+                    
+                    # Act - proceed from phase 0 to phase 1
+                    self.phase_0.proceed_to_next_phase()
+                    
+                    # Assert - should be on phase 1
+                    expect(self.workflow.current_phase_number).to(equal(1))
+                    expect(self.workflow.phases[1].phase_state.phase_status).to(equal("IN_PROGRESS"))
+                    expect(self.workflow.phases[1]._start_called).to(be_true)
+                    
+                    # Act - proceed from phase 1 to phase 2
+                    self.phase_1.proceed_to_next_phase()
+                    
+                    # Assert - should be on phase 2
+                    expect(self.workflow.current_phase_number).to(equal(2))
+                    expect(self.workflow.phases[2].phase_state.phase_status).to(equal("IN_PROGRESS"))
+                    expect(self.workflow.phases[2]._start_called).to(be_true)
+                
+                with it('should allow going backwards to previous phases'):
+                    # Arrange - start on phase 1
+                    self.workflow.current_phase_number = 1
+                    self.phase_1.start()
+                    
+                    # Act - go back to phase 0
+                    self.workflow.current_phase_number = 0
+                    self.phase_0.start()
+                    
+                    # Assert - should be on phase 0
+                    expect(self.workflow.current_phase_number).to(equal(0))
+                    expect(self.phase_0.phase_state.phase_status).to(equal("IN_PROGRESS"))
+                    expect(self.phase_0._start_called).to(be_true)
+                
+                with it('should allow selecting phases arbitrarily'):
+                    # Arrange - start on phase 0
+                    self.workflow.current_phase_number = 0
+                    
+                    # Act - jump directly to phase 2
+                    self.workflow.current_phase_number = 2
+                    self.phase_2.start()
+                    
+                    # Assert - should be on phase 2
+                    expect(self.workflow.current_phase_number).to(equal(2))
+                    expect(self.phase_2.phase_state.phase_status).to(equal("IN_PROGRESS"))
+                    expect(self.phase_2._start_called).to(be_true)
+                    
+                    # Act - jump back to phase 1
+                    self.workflow.current_phase_number = 1
+                    self.phase_1.start()
+                    
+                    # Assert - should be on phase 1
+                    expect(self.workflow.current_phase_number).to(equal(1))
+                    expect(self.phase_1.phase_state.phase_status).to(equal("IN_PROGRESS"))
+                
+                with it('should track phase status across all phases'):
+                    # Arrange
+                    self.workflow.current_phase_number = 0
+                    
+                    # Act - complete phase 0
+                    self.phase_0.start()
+                    self.phase_0.approve()
+                    self.workflow.mark_phase_complete(0)
+                    
+                    # Assert - phase 0 complete, workflow moved to phase 1
+                    expect(self.phase_0.phase_state.phase_status).to(equal("APPROVED"))
+                    expect(self.workflow.current_phase_number).to(equal(1))
+                    
+                    # Act - start phase 1
+                    self.phase_1.start()
+                    
+                    # Assert - phase 1 in progress, phase 0 still approved
+                    expect(self.phase_1.phase_state.phase_status).to(equal("IN_PROGRESS"))
+                    expect(self.phase_0.phase_state.phase_status).to(equal("APPROVED"))
+                    expect(self.phase_2.phase_state.phase_status).to(equal("STARTING"))
+
+            with context('that wraps different command types'):
+                with before.each:
+                    # self.content and self.base_rule inherited from parent context
+                    self.workflow = Workflow()
+                
+                with it('should delegate generate() and validate() to wrapped CodeAugmentedCommand'):
+                    # Arrange
+                    base_command = Command(self.content, self.base_rule)
+                    code_augmented_command = CodeAugmentedCommand(base_command, self.base_rule)
+                    phase_command = WorkflowPhaseCommand(code_augmented_command, self.workflow, 0, "Phase: Code Augmented")
+                    
+                    # Mock the inner command's methods
+                    with patch.object(code_augmented_command, 'generate', return_value='generated') as mock_generate, \
+                         patch.object(code_augmented_command, 'validate', return_value='validated') as mock_validate:
+                        # Act
+                        generate_result = phase_command.generate()
+                        validate_result = phase_command.validate()
+                        
+                        # Assert
+                        expect(mock_generate.called).to(be_true)
+                        expect(mock_validate.called).to(be_true)
+                        expect(generate_result).to(equal('generated'))
+                        expect(validate_result).to(equal('validated'))
+                
+                with it('should delegate generate() and validate() to wrapped SpecializingRuleCommand'):
+                    # Arrange
+                    base_command = Command(self.content, self.base_rule)
+                    specializing_rule = FrameworkSpecializingRule('test-rule.mdc')
+                    specializing_command = SpecializingRuleCommand(base_command, specializing_rule)
+                    phase_command = WorkflowPhaseCommand(specializing_command, self.workflow, 0, "Phase: Specializing")
+                    
+                    # Mock the inner command's methods
+                    with patch.object(specializing_command, 'generate', return_value='specialized generated') as mock_generate, \
+                         patch.object(specializing_command, 'validate', return_value='specialized validated') as mock_validate:
+                        # Act
+                        generate_result = phase_command.generate()
+                        validate_result = phase_command.validate()
+                        
+                        # Assert
+                        expect(mock_generate.called).to(be_true)
+                        expect(mock_validate.called).to(be_true)
+                        expect(generate_result).to(equal('specialized generated'))
+                        expect(validate_result).to(equal('specialized validated'))
+                
+                with it('should delegate methods to wrapped IncrementalCommand'):
+                    # Arrange
+                    base_command = Command(self.content, self.base_rule)
+                    incremental_command = IncrementalCommand(base_command, self.base_rule, 'test.py', 10)
+                    phase_command = WorkflowPhaseCommand(incremental_command, self.workflow, 0, "Phase: Incremental")
+                    
+                    # Mock the inner command's methods
+                    with patch.object(incremental_command, 'generate', return_value='incremental generated') as mock_generate, \
+                         patch.object(incremental_command, 'validate', return_value='incremental validated') as mock_validate, \
+                         patch.object(incremental_command, 'has_more_work_remaining', return_value=True) as mock_has_more:
+                        # Act
+                        generate_result = phase_command.generate()
+                        validate_result = phase_command.validate()
+                        has_more_result = phase_command.has_more_work_remaining()
+                        
+                        # Assert
+                        expect(mock_generate.called).to(be_true)
+                        expect(mock_validate.called).to(be_true)
+                        expect(mock_has_more.called).to(be_true)
+                        expect(generate_result).to(equal('incremental generated'))
+                        expect(validate_result).to(equal('incremental validated'))
+                        expect(has_more_result).to(be_true)
+        
+        with context('that delegates to current phase'):
+            with before.each:
+                # self.content and self.base_rule inherited from parent context
+                self.workflow = Workflow()
+                self.base_command = Command(self.content, self.base_rule)
+                self.phase_0 = WorkflowPhaseCommand(self.base_command, self.workflow, 0, "Phase 0")
+                self.phase_1 = WorkflowPhaseCommand(self.base_command, self.workflow, 1, "Phase 1")
+                self.workflow.phases = [self.phase_0, self.phase_1]
+                self.workflow.current_phase_number = 0
+            
+            with it('should delegate generate() to current phase'):
+                # Arrange
+                workflow = self.workflow
+                
+                # Mock the current phase's generate method
+                with patch.object(self.phase_0, 'generate', return_value='workflow generated') as mock_generate:
+                    # Act
+                    result = workflow.generate()
+                    
+                    # Assert
+                    expect(mock_generate.called).to(be_true)
+                    expect(result).to(equal('workflow generated'))
+            
+            with it('should delegate validate() to current phase'):
+                # Arrange
+                workflow = self.workflow
+                
+                # Mock the current phase's validate method
+                with patch.object(self.phase_0, 'validate', return_value='workflow validated') as mock_validate:
+                    # Act
+                    result = workflow.validate()
+                    
+                    # Assert
+                    expect(mock_validate.called).to(be_true)
+                    expect(result).to(equal('workflow validated'))
+            
+            with it('should delegate validate() with report_format to current phase'):
+                # Arrange
+                workflow = self.workflow
+                
+                # Mock the current phase's validate method
+                with patch.object(self.phase_0, 'validate', return_value='workflow detailed') as mock_validate:
+                    # Act
+                    result = workflow.validate(report_format='DETAILED')
+                    
+                    # Assert
+                    expect(mock_validate.called).to(be_true)
+                    expect(mock_validate.call_args[1]['report_format']).to(equal('DETAILED'))
+                    expect(result).to(equal('workflow detailed'))
+            
+            with it('should delegate to new current phase after phase change'):
+                # Arrange
+                workflow = self.workflow
+                workflow.current_phase_number = 1  # Change to phase 1
+                
+                # Mock phase 1's generate method
+                with patch.object(self.phase_1, 'generate', return_value='phase 1 generated') as mock_generate:
+                    # Act
+                    result = workflow.generate()
+                    
+                    # Assert
+                    expect(mock_generate.called).to(be_true)
+                    expect(result).to(equal('phase 1 generated'))
+            
+            with it('should return None when no current phase'):
+                # Arrange
+                workflow = self.workflow
+                workflow.current_phase_number = 999  # No phase exists
+                
+                # Act
+                generate_result = workflow.generate()
+                validate_result = workflow.validate()
+                
+                # Assert
+                expect(generate_result).to(be_none)
+                expect(validate_result).to(be_none)
 

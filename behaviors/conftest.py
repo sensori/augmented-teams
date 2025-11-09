@@ -14,17 +14,10 @@ from pathlib import Path
 import pytest
 
 
-
-
-def pytest_collect_file(parent, file_path):
+def pytest_collect_file(parent, path):
     """Collect Mamba test files (*_test.py)"""
-    # Convert to Path if it's not already
-    if not isinstance(file_path, Path):
-        file_path = Path(file_path)
-    
-    # Only collect Mamba test files in the behaviors directory
-    if (file_path.name.endswith('_test.py') or file_path.name.startswith('test_')) and 'behaviors' in str(file_path):
-        return MambaFile.from_parent(parent, path=file_path)
+    if path.basename.endswith('_test.py') or path.basename.startswith('test_'):
+        return MambaFile.from_parent(parent, path=path)
 
 
 class MambaFile(pytest.File):
@@ -33,10 +26,7 @@ class MambaFile(pytest.File):
     def collect(self):
         """Parse Mamba test file and create test items"""
         try:
-            # Use pathlib.Path for modern pytest compatibility
-            test_file_path = Path(self.path) if not isinstance(self.path, Path) else self.path
-            
-            with open(test_file_path, 'r', encoding='utf-8') as f:
+            with open(self.path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
             
@@ -59,10 +49,9 @@ class MambaFile(pytest.File):
                         )
         except Exception as e:
             # If parsing fails, create a single test item for the whole file
-            test_file_path = Path(self.path) if not isinstance(self.path, Path) else self.path
             yield MambaTestItem.from_parent(
                 self,
-                name=f"mamba_test_file_{test_file_path.stem}",
+                name=f"mamba_test_file_{self.path.stem}",
                 line_no=1,
                 test_name=None
             )
@@ -79,12 +68,8 @@ class MambaTestItem(pytest.Item):
     
     def runtest(self):
         """Run the Mamba test using mamba CLI"""
-        # Get test file path, handling both Path and str
-        parent_path = self.parent.path
-        test_file_path = Path(parent_path) if not isinstance(parent_path, Path) else parent_path
-        test_file_path = test_file_path.resolve()
-        test_file = str(test_file_path)
-        
+        test_file = str(self.parent.path)
+        test_file_path = Path(test_file).resolve()
         # Find workspace root (go up from test file directory until we find .vscode or .git)
         workspace_root = test_file_path.parent
         while workspace_root.parent != workspace_root:
