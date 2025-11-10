@@ -14,10 +14,19 @@ from pathlib import Path
 import pytest
 
 
-def pytest_collect_file(parent, path):
+def pytest_collect_file(parent, file_path):
     """Collect Mamba test files (*_test.py)"""
-    if path.basename.endswith('_test.py') or path.basename.startswith('test_'):
-        return MambaFile.from_parent(parent, path=path)
+    # Handle both pathlib.Path (new) and py.path.local (old) for compatibility
+    if hasattr(file_path, 'name'):
+        basename = file_path.name
+        path_obj = file_path
+    else:
+        # Legacy py.path.local support
+        basename = file_path.basename
+        path_obj = Path(str(file_path))
+    
+    if basename.endswith('_test.py') or basename.startswith('test_'):
+        return MambaFile.from_parent(parent, path=path_obj)
 
 
 class MambaFile(pytest.File):

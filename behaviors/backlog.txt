@@ -1,3 +1,5 @@
 
 commands are shown in prompt and as a step is executedits highlightewrs in proimpt
+Way bettercommand line executionespecially foul movement it's really slow and it really sucks
 
+estart whewn a commandfails

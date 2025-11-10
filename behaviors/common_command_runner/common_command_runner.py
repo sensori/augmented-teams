@@ -5,8 +5,9 @@ import re
 import json
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from enum import Enum
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +229,87 @@ class BaseRule:
     
     def _load_examples_from_content(self, section_content: str, principle) -> list:
         return self._parser.load_examples_from_content(section_content, principle)
+
+
+@dataclass
+class FeatureInfo:
+    """Information about a deployed feature"""
+    name: str
+    path: Path
+    deployed: bool
+
+
+class CodeAgentRule(BaseRule):
+    """Common rule class for code-agent commands with shared business logic methods"""
+    
+    DEFAULT_ENCODING = 'utf-8'
+    HEADER_LINES_TO_CHECK = 10
+    
+    def __init__(self, rule_file_name: str = "code-agent-rule.mdc"):
+        super().__init__(rule_file_name)
+    
+    def discover_deployed_features(self, target_dirs: List[Path]) -> List[FeatureInfo]:
+        """Scans directories for behavior.json with deployed: true"""
+        features = []
+        for target_dir in target_dirs:
+            if not target_dir.exists():
+                continue
+            for behavior_json_path in target_dir.rglob("behavior.json"):
+                feature_info = self._parse_behavior_json(behavior_json_path)
+                if feature_info:
+                    features.append(feature_info)
+        return features
+    
+    def _parse_behavior_json(self, behavior_json_path: Path) -> Optional[FeatureInfo]:
+        """Parse behavior.json and return FeatureInfo if deployed, None otherwise"""
+        try:
+            with open(behavior_json_path, 'r', encoding=self.DEFAULT_ENCODING) as f:
+                config = json.load(f)
+                if config.get("deployed") == True:
+                    feature_name = config.get("feature", behavior_json_path.parent.name)
+                    return FeatureInfo(
+                        name=feature_name,
+                        path=behavior_json_path.parent,
+                        deployed=True
+                    )
+        except (json.JSONDecodeError, IOError):
+            pass
+        return None
+    
+    def should_exclude_file(self, file_path: Path, exclude_runner_py: bool = False) -> bool:
+        """Checks if file should be excluded (docs/, .py files, etc.)"""
+        if 'docs' in file_path.parts:
+            return True
+        if file_path.suffix == '.py':
+            if exclude_runner_py and file_path.name.endswith('-runner.py'):
+                return True
+            elif not exclude_runner_py:
+                return True
+        if file_path.name == 'behavior.json':
+            return True
+        if file_path.name.endswith('-index.json'):
+            return True
+        if '__pycache__' in file_path.parts:
+            return True
+        return self.is_draft_or_experimental(file_path)
+    
+    def is_draft_or_experimental(self, file_path: Path) -> bool:
+        """Checks file header for draft/experimental markers"""
+        try:
+            with open(file_path, 'r', encoding=self.DEFAULT_ENCODING) as f:
+                first_lines = ''.join(f.readline() for _ in range(self.HEADER_LINES_TO_CHECK))
+                return 'draft' in first_lines.lower() or 'experimental' in first_lines.lower()
+        except IOError:
+            return False
+    
+    def resolve_target_directories(self, target_dirs: Optional[List[str]], workspace_root: Optional[Path] = None) -> List[Path]:
+        """Resolves target directories to absolute paths"""
+        if workspace_root is None:
+            # Default to behaviors directory relative to common_command_runner location
+            workspace_root = Path(__file__).parent.parent
+        if target_dirs:
+            return [workspace_root / Path(d) if not Path(d).is_absolute() else Path(d) for d in target_dirs]
+        return [workspace_root / "behaviors"]
 
 
 class SpecializingRule:
@@ -792,6 +874,16 @@ class Command:
         else:
             return self.validate()
     
+    def plan(self, plan_template_name: Optional[str] = None, **template_kwargs) -> Optional[str]:
+        """
+        Optional method to generate an implementation plan.
+        
+        Subclasses can override this to provide command-specific planning.
+        If plan_template_name is provided, this will attempt to load and fill the template.
+        Returns None by default if not implemented or if template loading fails.
+        """
+        return None
+    
     def _build_instructions(self, base_instructions):
         
         instructions = f"{base_instructions}. Here are the rules and their examples:\n\n"
@@ -926,6 +1018,15 @@ class CodeAugmentedCommand:
         
         # Not implemented yet - placeholder for future AI interaction
         pass
+    
+    def plan(self, plan_template_name: Optional[str] = None, **template_kwargs) -> Optional[str]:
+        """
+        Delegate plan generation to inner command.
+        If inner command has plan() method, call it; otherwise return None.
+        """
+        if hasattr(self._inner_command, 'plan'):
+            return self._inner_command.plan(plan_template_name, **template_kwargs)
+        return None
     
     def __getattr__(self, name):
         

@@ -78,13 +78,15 @@ with it('handles attack'):  // DON'T: Skip validations (no assertions!), write l
 
 ## 3. Balance Context Sharing with Localization
 
-Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run. When the same mock/setup appears in multiple sibling describe blocks, move it to a shared parent beforeEach() or common helper.
+Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run. 
+
+**MAMBA LIMITATION:** Mamba does NOT support moving `before.each` to parent `describe` blocks. When the same mock/setup appears in multiple sibling `describe` blocks, extract it to a shared helper function instead of trying to move `before.each` to parent (which will break tests).
 
 **VALIDATION CHECKLIST (AI must check ALL):**
-1. ✓ **Sibling with describe() blocks:** Do they have identical before_each? → Move to parent
-2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → Move to before_each
-3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper or parent
-4. ✓ **Monkey patches:** Repeated patches across tests? → Move to parent before_each
+1. ~~**Sibling with describe() blocks:** Do they have identical before_each? → Move to parent~~ **NOTE: Mamba does NOT support moving before.each to parent describe blocks - this check is DISABLED for Mamba**
+2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → **For Mamba: Extract to helper function, do NOT move to parent before_each** (Mamba limitation)
+3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper function (do NOT move to parent before_each for Mamba)
+4. ✓ **Monkey patches:** Repeated patches across tests? → Extract to helper function (do NOT move to parent before_each for Mamba)
 5. ✓ **Helper factories:** Defined multiple times? → Define once at appropriate scope
 6. ✓ **Test data builders:** Duplicated? → Create shared factory function
 
@@ -104,10 +106,37 @@ with description('a Power'):
             self.power = create_power({'range': 'ranged'})  // DO: Add ONLY test-specific
 ```
 
-**✅ DO (Pattern B Fix - Shared Arrange in beforeEach):**
+**✅ DO (Pattern B Fix - Shared Arrange via Helper Function for Mamba):**
+```python
+def setup_macro_mocks(context_self):
+    """Helper to set up common mocks for macro tests"""
+    context_self.mock_macro = {'name': 'Custom', 'execute': Mock()}
+    context_self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+    context_self.power_item = PowerItem(context_self.mock_item)
+    return context_self.mock_macro, context_self.mock_item, context_self.power_item
+
+with description('with an attached macro'):
+    with it('should return animation with type attached'):
+        # Arrange - use helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.type).to(equal('attached'))
+    
+    with it('should provide macro name as animation name'):
+        # Arrange - reuse helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.name).to(equal('Custom'))
+```
+
+**✅ DO (Alternative - Shared Arrange in before_each when in SAME context):**
 ```python
 with description('with an attached macro'):
-    with before.each:  // DO: Move shared Arrange to before.each
+    with before.each:  // DO: Move shared Arrange to before.each (works within same context)
         self.mock_macro = {'name': 'Custom', 'execute': Mock()}
         self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
         self.power_item = PowerItem(self.mock_item)
@@ -125,15 +154,15 @@ with description('with an attached macro'):
         expect(animation.name).to(equal('Custom'))
 ```
 
-**❌ DON'T (Pattern A - Duplicate beforeEach across siblings):**
+**⚠️ MAMBA LIMITATION - Pattern A:**
 ```python
 with description('Power'):
     with context('created from actor'):
-        with before.each:  // DON'T: Duplicate init, scatter setup
-            self.actor = {'id': '123'}
+        with before.each:  // NOTE: Mamba doesn't support moving before.each to parent describe blocks
+            self.actor = {'id': '123'}  // Acceptable: Use helper functions instead of parent before.each
     with context('that is ranged'):
-        with before.each:  // DON'T: Duplicate setup across siblings - move to parent!
-            self.actor = {'id': '123'}
+        with before.each:  // NOTE: For Mamba, extract common setup to helper functions rather than parent
+            self.actor = create_actor({'id': '123'})  // DO: Use helper factory to avoid duplication
 ```
 
 **❌ DON'T (Pattern B - Duplicate Arrange in sibling it() blocks):**
@@ -153,7 +182,7 @@ with description('with an attached macro'):
         power_item = PowerItem(mock_item)
         # Act & Assert...
     
-    # FIX: When 3+ sibling it() share identical Arrange → move to before.each
+    # FIX: When 3+ sibling it() share identical Arrange → extract to helper function (Mamba limitation: cannot move to parent before.each)
 ```
 
 ---

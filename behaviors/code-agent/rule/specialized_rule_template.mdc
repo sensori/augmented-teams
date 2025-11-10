@@ -1,0 +1,42 @@
+---
+description: {framework}-specific {rule_type} patterns
+globs: ["{framework_specific_globs}"]
+alwaysApply: {always_apply}
+---
+**When** practicing {rule_type} with {framework}/{language},
+**then** follow these {framework}-specific patterns.
+
+This rule extends `{parent_specializing_rule}.mdc` and references `{base_rule}.mdc`.
+
+**Executing Commands:**
+{executing_commands}
+
+## 1. Principle Name
+
+Principle description explaining what this principle covers and why it matters. This principle extends the specializing rule and base rule principles.
+
+**[DO]:**
+* Example of correct {framework}-specific practice
+* Another example of correct practice
+
+```{language}
+// Example code showing correct {framework} implementation
+```
+
+**[DON'T]:**
+* Example of incorrect practice
+* Another example of incorrect practice
+
+```{language}
+// Example code showing incorrect {framework} implementation
+```
+
+## 2. Another Principle
+
+Another principle description specific to {framework}.
+
+**[DO]:**
+* Example of correct practice
+
+**[DON'T]:**
+* Example of incorrect practice

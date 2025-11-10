@@ -29,24 +29,24 @@ from enum import Enum
 import sys
 # RunStatus and StepType are now imported from common_command_runner
 common_runner_path = Path(__file__).parent.parent / "common_command_runner" / "common_command_runner.py"
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("common_command_runner", common_runner_path)
-    common_runner = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(common_runner)
-    
-    # Import needed classes
-    Content = common_runner.Content
-    BaseRule = common_runner.BaseRule
-    FrameworkSpecializingRule = common_runner.FrameworkSpecializingRule
-    SpecializedRule = common_runner.SpecializedRule
-    Command = common_runner.Command
-    SpecializingRuleCommand = common_runner.SpecializingRuleCommand
-    CodeAugmentedCommand = common_runner.CodeAugmentedCommand
-    IncrementalCommand = common_runner.IncrementalCommand
-    WorkflowPhaseCommand = common_runner.WorkflowPhaseCommand
-    Workflow = common_runner.Workflow
-    CodeHeuristic = common_runner.CodeHeuristic
-    Violation = common_runner.Violation
+import importlib.util
+spec = importlib.util.spec_from_file_location("common_command_runner", common_runner_path)
+common_runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(common_runner)
+
+# Import needed classes
+Content = common_runner.Content
+BaseRule = common_runner.BaseRule
+FrameworkSpecializingRule = common_runner.FrameworkSpecializingRule
+SpecializedRule = common_runner.SpecializedRule
+Command = common_runner.Command
+SpecializingRuleCommand = common_runner.SpecializingRuleCommand
+CodeAugmentedCommand = common_runner.CodeAugmentedCommand
+IncrementalCommand = common_runner.IncrementalCommand
+WorkflowPhaseCommand = common_runner.WorkflowPhaseCommand
+Workflow = common_runner.Workflow
+CodeHeuristic = common_runner.CodeHeuristic
+Violation = common_runner.Violation
 RunStatus = common_runner.RunStatus
 StepType = common_runner.StepType
 
@@ -218,6 +218,12 @@ class BDDRule(FrameworkSpecializingRule):
             if not hasattr(content, '_content_lines') or not content._content_lines:
                 return None
             
+            # Detect framework to provide framework-specific recommendations
+            framework = None
+            if hasattr(content, 'file_path') and content.file_path:
+                framework = BDDRule.detect_framework_from_file(content.file_path)
+            is_mamba = framework == 'mamba'
+            
             lines = content._content_lines
             # Look for sibling blocks (3+ consecutive it() or context() blocks)
             sibling_groups = []
@@ -257,9 +263,23 @@ class BDDRule(FrameworkSpecializingRule):
                     for j in range(i + 1, len(bodies)):
                         similarity = self._calculate_similarity(bodies[i][1], bodies[j][1])
                         if similarity > 0.7:  # 70% similarity threshold
+                            # Framework-specific violation message
+                            if is_mamba:
+                                violation_msg = (
+                                    f"§ 3 Violation: {len(group)} sibling `it()` blocks with {similarity:.0%} similar Arrange code. "
+                                    f"Mamba does NOT support moving `before.each` to parent `describe` blocks. "
+                                    f"FIX: Extract duplicate setup to a helper function and call it in each test. "
+                                    f"Example: `def setup_common_mocks(context_self): ...` then call `setup_common_mocks(self)` in each test."
+                                )
+                            else:
+                                violation_msg = (
+                                    f"§ 3 Violation: {len(group)} sibling blocks with {similarity:.0%} similar Arrange code. "
+                                    f"FIX: Move shared Arrange code to `beforeEach()`/`before_each()` in parent context."
+                                )
+                            
                             violations.append(Violation(
                                 bodies[i][0],
-                                f"Duplicate code detected: {len(group)} sibling blocks with {similarity:.0%} similar code (Balance Context Sharing violation)"
+                                violation_msg
                             ))
                             break  # Only report once per group
             
@@ -464,82 +484,82 @@ class BDDIncrementalCommand(IncrementalCommand):
         return False
     
     @staticmethod
-def parse_test_structure(test_file_path: str, framework: str) -> List[Dict[str, Any]]:
-    """
-    Parse test file and extract describe/it blocks with status.
-    
-    Returns: [{"line": int, "type": "describe|it", "text": str, "indent": int, 
-               "status": TestStatus, "has_implementation": bool}]
-    """
-    content = Path(test_file_path).read_text(encoding='utf-8')
-    lines = content.split('\n')
-    
-    blocks = []
-    for i, line in enumerate(lines, 1):
-        indent = len(line) - len(line.lstrip())
+    def parse_test_structure(test_file_path: str, framework: str) -> List[Dict[str, Any]]:
+        """
+        Parse test file and extract describe/it blocks with status.
         
-        if framework == 'jest':
-            # Extract describe blocks
-            if 'describe(' in line:
-                match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": None,  # describe blocks don't have status
-                        "has_implementation": True  # describes are containers
-                    })
-            
-            # Extract it/test blocks
-            elif 'it(' in line or 'test(' in line:
-                match = re.search(r"(?:it|test)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    # Detect if test has implementation (not just TODO or empty)
-                        has_impl = BDDIncrementalCommand._detect_test_implementation(lines, i, framework)
-                    status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
-                    
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": status.value,
-                        "has_implementation": has_impl
-                    })
+        Returns: [{"line": int, "type": "describe|it", "text": str, "indent": int, 
+                   "status": TestStatus, "has_implementation": bool}]
+        """
+        content = Path(test_file_path).read_text(encoding='utf-8')
+        lines = content.split('\n')
         
-        elif framework == 'mamba':
-            # Extract describe blocks (description and context)
-            if 'with description(' in line or 'with describe(' in line or 'with context(' in line:
-                match = re.search(r"with (?:description|describe|context)\(['\"]([^'\"]+)['\"]", line)
-                if match:
-                    blocks.append({
-                        "line": i,
-                        "type": "describe",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": None,
-                        "has_implementation": True
-                    })
+        blocks = []
+        for i, line in enumerate(lines, 1):
+            indent = len(line) - len(line.lstrip())
             
-            # Extract it blocks
-            elif 'with it(' in line:
-                match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
-                if match:
+            if framework == 'jest':
+                # Extract describe blocks
+                if 'describe(' in line:
+                    match = re.search(r"describe\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        blocks.append({
+                            "line": i,
+                            "type": "describe",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": None,  # describe blocks don't have status
+                            "has_implementation": True  # describes are containers
+                        })
+                
+                # Extract it/test blocks
+                elif 'it(' in line or 'test(' in line:
+                    match = re.search(r"(?:it|test)\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        # Detect if test has implementation (not just TODO or empty)
                         has_impl = BDDIncrementalCommand._detect_test_implementation(lines, i, framework)
-                    status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
-                    
-                    blocks.append({
-                        "line": i,
-                        "type": "it",
-                        "text": match.group(1),
-                        "indent": indent,
-                        "status": status.value,
-                        "has_implementation": has_impl
-                    })
-    
-    return blocks
+                        status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
+                        
+                        blocks.append({
+                            "line": i,
+                            "type": "it",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": status.value,
+                            "has_implementation": has_impl
+                        })
+            
+            elif framework == 'mamba':
+                # Extract describe blocks (description and context)
+                if 'with description(' in line or 'with describe(' in line or 'with context(' in line:
+                    match = re.search(r"with (?:description|describe|context)\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        blocks.append({
+                            "line": i,
+                            "type": "describe",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": None,
+                            "has_implementation": True
+                        })
+                
+                # Extract it blocks
+                elif 'with it(' in line:
+                    match = re.search(r"with it\(['\"]([^'\"]+)['\"]", line)
+                    if match:
+                        has_impl = BDDIncrementalCommand._detect_test_implementation(lines, i, framework)
+                        status = TestStatus.IMPLEMENTED if has_impl else TestStatus.SIGNATURE
+                        
+                        blocks.append({
+                            "line": i,
+                            "type": "it",
+                            "text": match.group(1),
+                            "indent": indent,
+                            "status": status.value,
+                            "has_implementation": has_impl
+                        })
+        
+        return blocks
 
     @staticmethod
     def extract_test_structure_chunks(test_file_path: str, framework: str) -> List[Dict[str, Any]]:
@@ -872,92 +892,92 @@ RESPOND: cross_section_issues: [list any found]
         return violations
     
     @staticmethod
-def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
-    """
-    Run tests and capture results.
+    def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Run tests and capture results.
         Used by RED, GREEN, and REFACTOR phases.
-    
-    Args:
-        test_file_path: Path to test file
-        framework: 'jest' or 'mamba'
-        single_test_line: If provided, run only test at this line
-    
-    Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
-    """
-    try:
-        if framework == 'jest':
-            cmd = ['npm', 'test', '--', test_file_path]
-            if single_test_line:
-                # Jest can run specific test by line number
-                cmd.extend(['-t', str(single_test_line)])
         
-        elif framework == 'mamba':
-            cmd = ['mamba', test_file_path]
-            if single_test_line:
-                # Mamba runs specific test by line
-                cmd.extend(['--line', str(single_test_line)])
+        Args:
+            test_file_path: Path to test file
+            framework: 'jest' or 'mamba'
+            single_test_line: If provided, run only test at this line
         
-        else:
-            return {"success": False, "error": f"Unknown framework: {framework}"}
+        Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
+        """
+        try:
+            if framework == 'jest':
+                cmd = ['npm', 'test', '--', test_file_path]
+                if single_test_line:
+                    # Jest can run specific test by line number
+                    cmd.extend(['-t', str(single_test_line)])
+            
+            elif framework == 'mamba':
+                cmd = ['mamba', test_file_path]
+                if single_test_line:
+                    # Mamba runs specific test by line
+                    cmd.extend(['--line', str(single_test_line)])
+            
+            else:
+                return {"success": False, "error": f"Unknown framework: {framework}"}
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            # Parse output for pass/fail counts
+            output = result.stdout + result.stderr
+            passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
+            failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
+            
+            return {
+                "success": result.returncode == 0,
+                "output": output,
+                "passed": passed,
+                "failed": failed,
+                "error": None if result.returncode == 0 else "Tests failed"
+            }
         
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        
-        # Parse output for pass/fail counts
-        output = result.stdout + result.stderr
-        passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
-        failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
-        
-        return {
-            "success": result.returncode == 0,
-            "output": output,
-            "passed": passed,
-            "failed": failed,
-            "error": None if result.returncode == 0 else "Tests failed"
-        }
-    
-    except subprocess.TimeoutExpired:
-        return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
-    except Exception as e:
-        return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
+        except subprocess.TimeoutExpired:
+            return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
+        except Exception as e:
+            return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
 
     @staticmethod
-def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
-    """
-    Identify code under test and other test files related to this test.
+    def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
+        """
+        Identify code under test and other test files related to this test.
         Used by RED, GREEN, and REFACTOR phases.
-    
-    Returns: {"code_under_test_files": [...], "related_tests": [...]}
-    """
-    test_path = Path(test_file_path)
-    test_content = test_path.read_text(encoding='utf-8')
-    
-    # Extract imports
-    imports = re.findall(r"import .+ from ['\"]([^'\"]+)['\"]", test_content)
-    imports += re.findall(r"require\(['\"]([^'\"]+)['\"]\)", test_content)
-    
-    code_under_test_files = []
-    related_tests = []
-    
-    for imp in imports:
-        # Skip node_modules
-        if imp.startswith('.'):
-            # Relative import
-            resolved = (test_path.parent / imp).resolve()
-            
-            # Try common extensions
-            for ext in ['.js', '.ts', '.mjs', '.jsx', '.tsx', '.py']:
-                candidate = Path(str(resolved) + ext)
-                if candidate.exists():
-                    if any(pattern in candidate.name for pattern in ['test', 'spec', '_test', 'test_']):
-                        related_tests.append(str(candidate))
-                    else:
-                        code_under_test_files.append(str(candidate))
-                    break
-    
-    return {
-        "code_under_test_files": code_under_test_files,
-        "related_tests": related_tests
-    }
+        
+        Returns: {"code_under_test_files": [...], "related_tests": [...]}
+        """
+        test_path = Path(test_file_path)
+        test_content = test_path.read_text(encoding='utf-8')
+        
+        # Extract imports
+        imports = re.findall(r"import .+ from ['\"]([^'\"]+)['\"]", test_content)
+        imports += re.findall(r"require\(['\"]([^'\"]+)['\"]\)", test_content)
+        
+        code_under_test_files = []
+        related_tests = []
+        
+        for imp in imports:
+            # Skip node_modules
+            if imp.startswith('.'):
+                # Relative import
+                resolved = (test_path.parent / imp).resolve()
+                
+                # Try common extensions
+                for ext in ['.js', '.ts', '.mjs', '.jsx', '.tsx', '.py']:
+                    candidate = Path(str(resolved) + ext)
+                    if candidate.exists():
+                        if any(pattern in candidate.name for pattern in ['test', 'spec', '_test', 'test_']):
+                            related_tests.append(str(candidate))
+                        else:
+                            code_under_test_files.append(str(candidate))
+                        break
+        
+        return {
+            "code_under_test_files": code_under_test_files,
+            "related_tests": related_tests
+        }
 
 
 

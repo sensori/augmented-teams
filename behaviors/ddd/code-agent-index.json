@@ -1,0 +1,78 @@
+{
+  "last_updated": "Mon Nov 10 04:00:39 2025",
+  "total_behaviors": 9,
+  "behaviors": [
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-detailed-model-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\ddd\\detailed-model\\ddd-detailed-model-rule.mdc",
+      "modified_timestamp": 1762560990.1946871,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-interaction-analysis-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\ddd\\interaction-analysis\\ddd-interaction-analysis-rule.mdc",
+      "modified_timestamp": 1762367473.2291417,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-structure-analysis-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-analysis-rule.mdc",
+      "modified_timestamp": 1762481724.8795116,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-detailed-model-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\ddd-detailed-model-cmd.md",
+      "modified_timestamp": 1762560990.1936867,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "README.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\README.md",
+      "modified_timestamp": 1762560990.1926863,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "test-example.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\test-example.md",
+      "modified_timestamp": 1762560990.1946871,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-interaction-analysis-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\interaction-analysis\\ddd-interaction-analysis-cmd.md",
+      "modified_timestamp": 1762763950.4669633,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-structure-analysis-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-analysis-cmd.md",
+      "modified_timestamp": 1762615986.3256886,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-structure-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-validate-cmd.md",
+      "modified_timestamp": 1762763950.74312,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    }
+  ]
+}

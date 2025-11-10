@@ -1,0 +1,254 @@
+{
+  "last_updated": "Mon Nov 10 04:00:39 2025",
+  "total_behaviors": 31,
+  "behaviors": [
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\code-agent-rule.mdc",
+      "modified_timestamp": 1762765237.3800855,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "base_rule_template.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\rule\\base_rule_template.mdc",
+      "modified_timestamp": 1762763955.5718405,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "principle_template.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\rule\\principle_template.mdc",
+      "modified_timestamp": 1762763956.0958996,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "rule_template.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\rule\\rule_template.mdc",
+      "modified_timestamp": 1762763955.6333046,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "specialized_rule_template.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\rule\\specialized_rule_template.mdc",
+      "modified_timestamp": 1762763955.6725125,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "specializing_rule_template.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\code-agent\\rule\\specializing_rule_template.mdc",
+      "modified_timestamp": 1762763955.725248,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "COMPREHENSIVE_TEST_ANALYSIS.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\COMPREHENSIVE_TEST_ANALYSIS.md",
+      "modified_timestamp": 1762763698.45426,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "TEST_ANALYSIS.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\TEST_ANALYSIS.md",
+      "modified_timestamp": 1762764010.0621712,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-cmd.md",
+      "modified_timestamp": 1762764979.9457517,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-generate-cmd.md",
+      "modified_timestamp": 1762732456.0756118,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-plan-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-plan-cmd.md",
+      "modified_timestamp": 1762745404.964388,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-validate-cmd.md",
+      "modified_timestamp": 1762732457.2448704,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_plan_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\command_plan_template.md",
+      "modified_timestamp": 1762758999.4353268,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\command_template.md",
+      "modified_timestamp": 1762725192.271674,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-cmd.md",
+      "modified_timestamp": 1762764986.8187108,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-generate-cmd.md",
+      "modified_timestamp": 1762721732.146144,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-validate-cmd.md",
+      "modified_timestamp": 1762721763.902041,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\command_template.md",
+      "modified_timestamp": 1762763953.4730558,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "feature_outline_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\feature_outline_template.md",
+      "modified_timestamp": 1762763953.4470143,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-cmd.md",
+      "modified_timestamp": 1762764978.4356048,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-generate-cmd.md",
+      "modified_timestamp": 1762763955.6977482,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-validate-cmd.md",
+      "modified_timestamp": 1762763955.7836337,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-sync-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-cmd.md",
+      "modified_timestamp": 1762764844.411199,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-sync-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-generate-cmd.md",
+      "modified_timestamp": 1762763955.1519258,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-sync-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-validate-cmd.md",
+      "modified_timestamp": 1762763955.1218197,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "sync-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\sync-generate-cmd.md",
+      "modified_timestamp": 1762763954.1352408,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "sync-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\sync-validate-cmd.md",
+      "modified_timestamp": 1762763954.2252104,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code_agent_runner.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\code_agent_runner.py",
+      "modified_timestamp": 1762764781.5451221,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code_agent_runner_test.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\code_agent_runner_test.py",
+      "modified_timestamp": 1762764027.9575002,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "runner_template.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\feature\\runner_template.py",
+      "modified_timestamp": 1762763953.4213927,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-tasks.json",
+      "type": ".json",
+      "path": "behaviors\\code-agent\\code-agent-tasks.json",
+      "modified_timestamp": 1762287331.1864984,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    }
+  ]
+}

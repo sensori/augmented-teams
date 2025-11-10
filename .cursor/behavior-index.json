@@ -1,315 +1,623 @@
 {
-  "last_updated": "Sat Nov  8 00:23:30 2025",
-  "total_behaviors": 44,
+  "last_updated": "Mon Nov 10 04:00:39 2025",
+  "total_behaviors": 77,
   "features_count": 4,
   "behaviors": [
     {
       "feature": "bdd-behavior",
       "file": "bdd-domain-scaffold-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/bdd/bdd-domain-scaffold-rule.mdc",
-      "modified_timestamp": 1762442526.9154646
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-domain-scaffold-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/bdd-domain-scaffold-cmd.md",
-      "modified_timestamp": 1762577901.1904607
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-domain-scaffold-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-domain-scaffold-cmd.md",
-      "modified_timestamp": 1762577901.4138365
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-domain-scaffold-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/bdd-domain-scaffold-verify-cmd.md",
-      "modified_timestamp": 1762577900.2940176
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-domain-scaffold-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-domain-scaffold-verify-cmd.md",
-      "modified_timestamp": 1762577900.2284884
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-green-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-green-verify-cmd.md",
-      "modified_timestamp": 1762577900.0861914
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-red-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-red-verify-cmd.md",
-      "modified_timestamp": 1762577900.027148
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-refactor-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-refactor-verify-cmd.md",
-      "modified_timestamp": 1762577900.0551567
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-signature-verify-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-signature-verify-cmd.md",
-      "modified_timestamp": 1762577899.9961643
+      "path": "behaviors\\bdd\\domain-scaffold\\bdd-domain-scaffold-rule.mdc",
+      "modified_timestamp": 1762442526.9154646,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "ddd-interaction-patterns-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/bdd/ddd-interaction-patterns-rule.mdc",
-      "modified_timestamp": 1762563891.4723382
+      "path": "behaviors\\bdd\\interactions\\ddd-interaction-patterns-rule.mdc",
+      "modified_timestamp": 1762563891.4723382,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
-      "file": "ddd-interaction-validate-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/ddd-interaction-validate-cmd.md",
-      "modified_timestamp": 1762577901.7044058
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-validate-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/validate/bdd-validate-cmd.md",
-      "modified_timestamp": 1762475772.2345665
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-workflow-abandon-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-abandon-cmd.md",
-      "modified_timestamp": 1762577899.7750912
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-workflow-approve-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-approve-cmd.md",
-      "modified_timestamp": 1762577899.8060932
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-workflow-rule.mdc",
+      "file": "bdd-jest-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-rule.mdc",
-      "modified_timestamp": 1762577899.6935632
+      "path": "behaviors\\bdd\\rules\\bdd-jest-rule.mdc",
+      "modified_timestamp": 1762669457.8040564,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
-      "file": "bdd-workflow-cmd.md",
-      "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-cmd.md",
-      "modified_timestamp": 1762449041.0305207
+      "file": "bdd-mamba-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\bdd\\rules\\bdd-mamba-rule.mdc",
+      "modified_timestamp": 1762763956.0226293,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\bdd\\rules\\bdd-rule.mdc",
+      "modified_timestamp": 1762374200.0967278,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-workflow-jest-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-jest-rule.mdc",
-      "modified_timestamp": 1762312135.8607879
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-jest-rule.mdc",
+      "modified_timestamp": 1762312135.8607879,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-workflow-mamba-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/bdd/workflow/bdd-workflow-mamba-rule.mdc",
-      "modified_timestamp": 1762312135.8607879
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-mamba-rule.mdc",
+      "modified_timestamp": 1762312135.8607879,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-rule.mdc",
+      "modified_timestamp": 1762763948.906451,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-domain-scaffold-rule.mdc",
+      "modified_timestamp": 1762465377.666929,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "README.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\.pytest_cache\\README.md",
+      "modified_timestamp": 1762564959.1628227,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\domain-scaffold\\bdd-domain-scaffold-cmd.md",
+      "modified_timestamp": 1762669460.036549,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\domain-scaffold\\bdd-domain-scaffold-verify-cmd.md",
+      "modified_timestamp": 1762669458.3787684,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "ddd-interaction-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\interactions\\ddd-interaction-validate-cmd.md",
+      "modified_timestamp": 1762669460.9735744,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-jest-reference.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\rules\\bdd-jest-reference.md",
+      "modified_timestamp": 1762292554.8160021,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-mamba-reference.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\rules\\bdd-mamba-reference.md",
+      "modified_timestamp": 1762292554.817033,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\validate\\bdd-validate-cmd.md",
+      "modified_timestamp": 1762475772.2345665,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-abandon-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-abandon-cmd.md",
+      "modified_timestamp": 1762763949.126745,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-approve-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-approve-cmd.md",
+      "modified_timestamp": 1762763949.2243357,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-workflow-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-cmd.md",
+      "modified_timestamp": 1762449041.0305207,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-workflow-status-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/workflow/bdd-workflow-status-cmd.md",
-      "modified_timestamp": 1762577899.8550985
+      "path": "behaviors\\bdd\\workflow\\bdd-workflow-status-cmd.md",
+      "modified_timestamp": 1762763949.2711098,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-domain-scaffold-cmd.md",
+      "modified_timestamp": 1762763952.7517383,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-domain-scaffold-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-domain-scaffold-verify-cmd.md",
+      "modified_timestamp": 1762763950.658888,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-green-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-green-cmd.md",
-      "modified_timestamp": 1762577899.9606347
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-green-cmd.md",
+      "modified_timestamp": 1762763949.4373481,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-green-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-green-verify-cmd.md",
+      "modified_timestamp": 1762763950.2700956,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-red-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-red-cmd.md",
-      "modified_timestamp": 1762577899.927631
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-red-cmd.md",
+      "modified_timestamp": 1762763949.380019,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-red-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-red-verify-cmd.md",
+      "modified_timestamp": 1762763949.5593023,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-refactor-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-refactor-cmd.md",
-      "modified_timestamp": 1762459715.294273
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-refactor-cmd.md",
+      "modified_timestamp": 1762459715.294273,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-refactor-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-refactor-verify-cmd.md",
+      "modified_timestamp": 1762763949.710174,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
       "file": "bdd-signature-cmd.md",
       "type": ".md",
-      "path": "behaviors/bdd/workflow/stages/bdd-signature-cmd.md",
-      "modified_timestamp": 1762577901.049397
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-signature-cmd.md",
+      "modified_timestamp": 1762763952.1981642,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-signature-verify-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\workflow\\stages\\bdd-signature-verify-cmd.md",
+      "modified_timestamp": 1762763949.5151093,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd_runner_test.py",
+      "type": ".py",
+      "path": "behaviors\\bdd\\bdd_runner_test.py",
+      "modified_timestamp": 1762763953.3950872,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-js-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\clean-code\\clean-code-js-rule.mdc",
+      "modified_timestamp": 1762763951.109094,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-python-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\clean-code\\clean-code-python-rule.mdc",
+      "modified_timestamp": 1762489248.5596578,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\clean-code\\clean-code-rule.mdc",
+      "modified_timestamp": 1762763951.040809,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-js-reference.md",
+      "type": ".md",
+      "path": "behaviors\\clean-code\\clean-code-js-reference.md",
+      "modified_timestamp": 1762763951.2308183,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-python-reference.md",
+      "type": ".md",
+      "path": "behaviors\\clean-code\\clean-code-python-reference.md",
+      "modified_timestamp": 1762763951.1533594,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "clean-code",
       "file": "clean-code-validate-cmd.md",
       "type": ".md",
-      "path": "behaviors/clean-code/clean-code-validate-cmd.md",
-      "modified_timestamp": 1762492228.8409295
+      "path": "behaviors\\clean-code\\clean-code-validate-cmd.md",
+      "modified_timestamp": 1762492228.8409295,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-consistency-rule.mdc",
+      "feature": "code-agent",
+      "file": "code-agent-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/consistency/code-agent-consistency-rule.mdc",
-      "modified_timestamp": 1762289073.8403819
+      "path": "behaviors\\code-agent\\code-agent-rule.mdc",
+      "modified_timestamp": 1762765237.3800855,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-consistency-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/consistency/code-agent-consistency-cmd.md",
-      "modified_timestamp": 1762560990.1846867
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-index-rule.mdc",
+      "feature": "code-agent",
+      "file": "base_rule_template.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/index/code-agent-index-rule.mdc",
-      "modified_timestamp": 1762411251.1237264
+      "path": "behaviors\\code-agent\\rule\\base_rule_template.mdc",
+      "modified_timestamp": 1762763955.5718405,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-index-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/index/code-agent-index-cmd.md",
-      "modified_timestamp": 1762560990.185686
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-specialization-rule.mdc",
+      "feature": "code-agent",
+      "file": "principle_template.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/specialization/code-agent-specialization-rule.mdc",
-      "modified_timestamp": 1762577900.177485
+      "path": "behaviors\\code-agent\\rule\\principle_template.mdc",
+      "modified_timestamp": 1762763956.0958996,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-specialization-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/specialization/code-agent-specialization-cmd.md",
-      "modified_timestamp": 1762577901.5053623
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-structure-create-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/structure/code-agent-structure-create-cmd.md",
-      "modified_timestamp": 1762577900.9260042
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-structure-fix-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/structure/code-agent-structure-fix-cmd.md",
-      "modified_timestamp": 1762560990.187693
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-structure-rule.mdc",
+      "feature": "code-agent",
+      "file": "rule_template.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/structure/code-agent-structure-rule.mdc",
-      "modified_timestamp": 1762560990.1886857
+      "path": "behaviors\\code-agent\\rule\\rule_template.mdc",
+      "modified_timestamp": 1762763955.6333046,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-structure-validate-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/structure/code-agent-structure-validate-cmd.md",
-      "modified_timestamp": 1762560990.1896853
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-suggest-rule.mdc",
+      "feature": "code-agent",
+      "file": "specialized_rule_template.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/suggest/code-agent-suggest-rule.mdc",
-      "modified_timestamp": 1762411251.40502
+      "path": "behaviors\\code-agent\\rule\\specialized_rule_template.mdc",
+      "modified_timestamp": 1762763955.6725125,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-suggest-cmd.md",
-      "type": ".md",
-      "path": "behaviors/code-agent/suggest/code-agent-suggest-cmd.md",
-      "modified_timestamp": 1762560990.1906853
-    },
-    {
-      "feature": "code-agent-behavior",
-      "file": "code-agent-sync-rule.mdc",
+      "feature": "code-agent",
+      "file": "specializing_rule_template.mdc",
       "type": ".mdc",
-      "path": "behaviors/code-agent/sync/code-agent-sync-rule.mdc",
-      "modified_timestamp": 1762311413.9629095
+      "path": "behaviors\\code-agent\\rule\\specializing_rule_template.mdc",
+      "modified_timestamp": 1762763955.725248,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
-      "feature": "code-agent-behavior",
+      "feature": "code-agent",
+      "file": "COMPREHENSIVE_TEST_ANALYSIS.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\COMPREHENSIVE_TEST_ANALYSIS.md",
+      "modified_timestamp": 1762763698.45426,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "TEST_ANALYSIS.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\TEST_ANALYSIS.md",
+      "modified_timestamp": 1762764010.0621712,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-cmd.md",
+      "modified_timestamp": 1762764979.9457517,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-generate-cmd.md",
+      "modified_timestamp": 1762732456.0756118,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-plan-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-plan-cmd.md",
+      "modified_timestamp": 1762745404.964388,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-command-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\code-agent-command-validate-cmd.md",
+      "modified_timestamp": 1762732457.2448704,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_plan_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\command_plan_template.md",
+      "modified_timestamp": 1762758999.4353268,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\command\\command_template.md",
+      "modified_timestamp": 1762725192.271674,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-cmd.md",
+      "modified_timestamp": 1762764986.8187108,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-generate-cmd.md",
+      "modified_timestamp": 1762721732.146144,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-feature-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\code-agent-feature-validate-cmd.md",
+      "modified_timestamp": 1762721763.902041,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "command_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\command_template.md",
+      "modified_timestamp": 1762763953.4730558,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "feature_outline_template.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\feature\\feature_outline_template.md",
+      "modified_timestamp": 1762763953.4470143,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-cmd.md",
+      "modified_timestamp": 1762764978.4356048,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-generate-cmd.md",
+      "modified_timestamp": 1762763955.6977482,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-rule-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\rule\\code-agent-rule-validate-cmd.md",
+      "modified_timestamp": 1762763955.7836337,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
       "file": "code-agent-sync-cmd.md",
       "type": ".md",
-      "path": "behaviors/code-agent/sync/code-agent-sync-cmd.md",
-      "modified_timestamp": 1762560990.191687
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-cmd.md",
+      "modified_timestamp": 1762764844.411199,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-sync-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-generate-cmd.md",
+      "modified_timestamp": 1762763955.1519258,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-sync-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\code-agent-sync-validate-cmd.md",
+      "modified_timestamp": 1762763955.1218197,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "sync-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\sync-generate-cmd.md",
+      "modified_timestamp": 1762763954.1352408,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "sync-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\code-agent\\sync\\sync-validate-cmd.md",
+      "modified_timestamp": 1762763954.2252104,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code_agent_runner.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\code_agent_runner.py",
+      "modified_timestamp": 1762764781.5451221,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code_agent_runner_test.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\code_agent_runner_test.py",
+      "modified_timestamp": 1762764027.9575002,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "runner_template.py",
+      "type": ".py",
+      "path": "behaviors\\code-agent\\feature\\runner_template.py",
+      "modified_timestamp": 1762763953.4213927,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "code-agent",
+      "file": "code-agent-tasks.json",
+      "type": ".json",
+      "path": "behaviors\\code-agent\\code-agent-tasks.json",
+      "modified_timestamp": 1762287331.1864984,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "ddd-structure-analysis",
       "file": "ddd-detailed-model-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/ddd/detailed-model/ddd-detailed-model-rule.mdc",
-      "modified_timestamp": 1762560990.1946871
-    },
-    {
-      "feature": "ddd-structure-analysis",
-      "file": "ddd-detailed-model-cmd.md",
-      "type": ".md",
-      "path": "behaviors/ddd/detailed-model/ddd-detailed-model-cmd.md",
-      "modified_timestamp": 1762560990.1936867
+      "path": "behaviors\\ddd\\detailed-model\\ddd-detailed-model-rule.mdc",
+      "modified_timestamp": 1762560990.1946871,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "ddd-structure-analysis",
       "file": "ddd-interaction-analysis-rule.mdc",
       "type": ".mdc",
-      "path": "behaviors/ddd/interaction-analysis/ddd-interaction-analysis-rule.mdc",
-      "modified_timestamp": 1762367473.2291417
+      "path": "behaviors\\ddd\\interaction-analysis\\ddd-interaction-analysis-rule.mdc",
+      "modified_timestamp": 1762367473.2291417,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-structure-analysis-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-analysis-rule.mdc",
+      "modified_timestamp": 1762481724.8795116,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "ddd-detailed-model-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\ddd-detailed-model-cmd.md",
+      "modified_timestamp": 1762560990.1936867,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "README.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\README.md",
+      "modified_timestamp": 1762560990.1926863,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd-structure-analysis",
+      "file": "test-example.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\detailed-model\\test-example.md",
+      "modified_timestamp": 1762560990.1946871,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "ddd-structure-analysis",
       "file": "ddd-interaction-analysis-cmd.md",
       "type": ".md",
-      "path": "behaviors/ddd/interaction-analysis/ddd-interaction-analysis-cmd.md",
-      "modified_timestamp": 1762577900.1241915
+      "path": "behaviors\\ddd\\interaction-analysis\\ddd-interaction-analysis-cmd.md",
+      "modified_timestamp": 1762763950.4669633,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "ddd-structure-analysis",
       "file": "ddd-structure-analysis-cmd.md",
       "type": ".md",
-      "path": "behaviors/ddd/structure-analysis/ddd-structure-analysis-cmd.md",
-      "modified_timestamp": 1762577900.5765932
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-analysis-cmd.md",
+      "modified_timestamp": 1762615986.3256886,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "ddd-structure-analysis",
       "file": "ddd-structure-validate-cmd.md",
       "type": ".md",
-      "path": "behaviors/ddd/structure-analysis/ddd-structure-validate-cmd.md",
-      "modified_timestamp": 1762577900.3470192
+      "path": "behaviors\\ddd\\structure-analysis\\ddd-structure-validate-cmd.md",
+      "modified_timestamp": 1762763950.74312,
+      "purpose": "[AI should update this purpose after reviewing the file]"
     }
   ]
 }

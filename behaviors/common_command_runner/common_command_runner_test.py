@@ -1784,3 +1784,82 @@ with description('Command.execute() method'):
         expect(command.validated).to(be_true)
         expect(result).to(contain("Please validate"))
 
+with description('Command.plan() method'):
+    """Tests for Command.plan() method"""
+    
+    with before.each:
+        test_base_rule_content = create_base_rule_content()
+        with patch.object(RuleParser, 'read_file_content', return_value=test_base_rule_content):
+            self.base_rule = BaseRule('base-rule.mdc')
+            parser = RuleParser()
+            self.base_rule.principles = parser.load_principles_from_file('base-rule.mdc')
+        self.content = Content('test.java', '.java')
+    
+    with it('should return None by default'):
+        # Arrange
+        command = Command(self.content, self.base_rule)
+        
+        # Act
+        result = command.plan()
+        
+        # Assert
+        expect(result).to(be_none)
+    
+    with it('should return None when plan_template_name is None'):
+        # Arrange
+        command = Command(self.content, self.base_rule)
+        
+        # Act
+        result = command.plan(plan_template_name=None)
+        
+        # Assert
+        expect(result).to(be_none)
+    
+    with it('should accept plan_template_name and template_kwargs'):
+        # Arrange
+        command = Command(self.content, self.base_rule)
+        
+        # Act - should not raise error
+        result = command.plan(plan_template_name="test.md", param1="value1", param2="value2")
+        
+        # Assert - base Command returns None (subclasses implement actual logic)
+        expect(result).to(be_none)
+
+with description('CodeAugmentedCommand.plan() method'):
+    """Tests for CodeAugmentedCommand.plan() delegation"""
+    
+    with before.each:
+        test_base_rule_content = create_base_rule_content()
+        with patch.object(RuleParser, 'read_file_content', return_value=test_base_rule_content):
+            self.base_rule = BaseRule('base-rule.mdc')
+            parser = RuleParser()
+            self.base_rule.principles = parser.load_principles_from_file('base-rule.mdc')
+        self.content = Content('test.java', '.java')
+    
+    with it('should delegate plan() to inner command when inner command has plan method'):
+        # Arrange
+        base_command = Command(self.content, self.base_rule)
+        code_augmented_command = CodeAugmentedCommand(base_command, self.base_rule)
+        
+        # Mock inner command's plan method
+        with patch.object(base_command, 'plan', return_value='plan result') as mock_plan:
+            # Act
+            result = code_augmented_command.plan(plan_template_name="test.md", param1="value1")
+            
+            # Assert
+            expect(mock_plan.called).to(be_true)
+            expect(result).to(equal('plan result'))
+            expect(mock_plan.call_args[0][0]).to(equal("test.md"))
+            expect(mock_plan.call_args[1]['param1']).to(equal("value1"))
+    
+    with it('should return None when inner command does not have plan method'):
+        # Arrange
+        base_command = Command(self.content, self.base_rule)
+        code_augmented_command = CodeAugmentedCommand(base_command, self.base_rule)
+        
+        # Act
+        result = code_augmented_command.plan(plan_template_name="test.md")
+        
+        # Assert
+        expect(result).to(be_none)
+
