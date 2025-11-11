@@ -9,6 +9,7 @@
 * CLI: `python behaviors/code-agent/code_agent_runner.py sync [feature-name] [--force] [--target-dirs]` — Execute full workflow (Sync → Index if changes)
 * CLI: `python behaviors/code-agent/code_agent_runner.py generate-sync [feature-name] [--force] [--target-dirs]` — Generate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py validate-sync [feature-name] [--force] [--target-dirs]` — Validate only
+* CLI: `python behaviors/code-agent/code_agent_runner.py correct-sync [feature-name] [--force] [--target-dirs]` — Correct sync based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -55,9 +56,32 @@ Sync results include:
         - Verify timestamp comparison logic worked correctly
         - Verify index structure is correct (JSON format, required fields present)
         - Verify index preserves existing purposes and sets placeholders for new files
+        - Verify all code agents have minimum required command files (main command, generate delegate, validate delegate, correct delegate)
 5. **AI Agent** presents validation results to user: summary of validation status, list of violations to fix (if any), confirmation when validation passes, and next steps (review synced files, verify merges, check index updates)
 
 **ACTION 4: VALIDATE FEEDBACK**
 **Steps:**
 1. **User** reviews validation results and fixes violations if needed
 2. **User** optionally calls execute, generate, or validate as needed
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/code-agent-sync-correct [feature-name] [chat-context]` when sync has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads sync results and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references rule file to understand how to correct sync operations based on:
+   - Validation violations (if any) with details
+   - Chat context provided by user
+   - Code agent principles from rule file
+
+4. **AI Agent** corrects sync operations:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures sync follows code agent principles
+   - Updates synced files or sync configuration as needed
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated file paths
+   - Next steps (re-validate, re-sync if needed)

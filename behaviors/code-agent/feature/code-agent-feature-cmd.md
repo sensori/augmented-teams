@@ -9,6 +9,7 @@
 * CLI: `python behaviors/code-agent/code_agent_runner.py execute-feature [feature-name] [location] [feature-purpose]` — Execute full workflow (Generate → User Changes → Validate)
 * CLI: `python behaviors/code-agent/code_agent_runner.py generate-feature [feature-name] [location] [feature-purpose]` — Generate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py validate-feature [feature-name] [location]` — Validate only
+* CLI: `python behaviors/code-agent/code_agent_runner.py correct-feature [feature-name] [location] [feature-purpose] [chat-context]` — Correct feature based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -50,3 +51,25 @@ OR
 **Steps:**
 1. **User** reviews validation results and fixes [violation]s if needed
 2. **User** optionally calls execute, generate, or validate as needed
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/code-agent-feature-correct [feature-name] [location] [feature-purpose] [chat-context]` when feature has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads feature files and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/code-agent-rule.mdc` to understand how to correct feature based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - Code agent principles from rule file
+
+4. **AI Agent** corrects the feature:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures feature follows code agent principles
+   - Updates feature files directly (behavior.json, feature-outline.md, runner file)
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated feature file paths
+   - Next steps (re-validate, deploy feature, create behaviors)

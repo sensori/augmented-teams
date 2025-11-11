@@ -1,0 +1,317 @@
+---
+description: BDD testing practices for Mamba/Python
+globs: ["**/*_test.py", "**/test_*.py", "**/*_spec.py", "**/spec_*.py", "**/*_test.pyi", "**/test_*.pyi", "**/*_spec.pyi", "**/spec_*.pyi"]
+alwaysApply: false
+---
+
+**When** writing Mamba tests,
+**then** apply BDD practices with Mamba/Python-specific patterns.
+
+This rule extends `bdd-rule.mdc` with Mamba-specific examples.
+
+For comprehensive examples and edge cases, see `bdd-mamba-reference.md`.
+
+**Executing Commands:**
+* `\bdd-validate` — Validate Mamba test files against BDD principles (uses this rule for Mamba-specific patterns)
+* `\bdd-workflow` — Guide through Red-Green-Refactor cycle for Mamba tests
+
+---
+
+## 1. Business Readable Language
+Write `describe`/`it` so that inner/outer sentences create natural sentence. Use nouns for `describe` (concepts, states). Start each `it()` with "should …". Nest from broad → specific; each child adds context. Use plain behavioral language. Prefer domain terms over technical jargon. Connect base business concept to more specific concepts using linking words: "that is/that has" "that has been"
+
+**✅ DO:**
+```python
+with description('a ranged damage power'):  // DO: Use nouns for describe, connect with "a/an", use domain terms
+    with context('that has targeted and resulted in a successful attack'):  // DO: Connect with "that has", nest broad→specific
+        with it('should apply damage based on degrees of failure'):  // DO: Start with "should", use plain behavioral language
+            expect(result.injuries).to(equal(2))
+```
+
+**❌ DON'T:**
+```python
+with description('when attacking Target'):  // DON'T: Use action verbs, use class names without article
+with description('Power.execute()'):  // DON'T: Use technical/method names instead of business concepts
+with context('retrieved attack'):  // DON'T: Break natural connection (should be "that is retrieved"), repeat parent context
+with it('sets is_submitting flag'):  // DON'T: Include technical jargon (flags/IDs), omit "should"
+```
+
+---
+
+## 2. Comprehensive and Brief
+
+Test observable behavior, not hidden internals. Cover state, validation, rules, and interactions. Cover normal, edge, and failure paths. Keep tests short, expressive, readable. Keep tests independent, deterministic, and fast.
+
+**✅ DO:**
+```python
+with description('a damage power'):
+    with before.each:
+        self.mock_target = {'dodge': 15, 'injury': 0}  // DO: Isolate with stubs, keep independent
+    
+    with it('should be a ranged attack'):  // DO: Test observable state, keep short & expressive
+        expect(attack.is_ranged).to(equal(True))
+    
+    with it('should calculate DC from targets dodge'):  // DO: Cover calculations/business rules/interactions
+        expect(attack.execute(self.mock_target).DC).to(equal(20))
+    
+    with context('whose roll exceeds the DC'):  // DO: Cover normal paths, keep fast
+        with it('should indicate a hit'):
+            expect(result.hit).to(be_true)
+        
+    with context('whose roll does not exceed the DC'):  // DO: Cover failure paths
+        with it('should indicate a miss'):
+            expect(result.hit).to(be_false)
+```
+
+**❌ DON'T:**
+```python
+with it('calls _validate()'):  // DON'T: Assert internal calls, test hidden internals, omit "should"
+    expect(form._flag).to(be_true)  // DON'T: Test private state
+    expect(form._validate).to(have_been_called)
+with it('handles attack'):  // DON'T: Skip validations (no assertions!), write long tests
+    # 50 lines...
+    time.sleep(2)  // DON'T: Use arbitrary sleeps, depend on external state, let suites grow slow
+    expect(db.records).to(have_len(5))
+```
+
+---
+
+## 3. Balance Context Sharing with Localization
+
+Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run. 
+
+**MAMBA LIMITATION:** Mamba does NOT support moving `before.each` to parent `describe` blocks. When the same mock/setup appears in multiple sibling `describe` blocks, extract it to a shared helper function instead of trying to move `before.each` to parent (which will break tests).
+
+**VALIDATION CHECKLIST (AI must check ALL):**
+1. ~~**Sibling with describe() blocks:** Do they have identical before_each? → Move to parent~~ **NOTE: Mamba does NOT support moving before.each to parent describe blocks - this check is DISABLED for Mamba**
+2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → **For Mamba: Extract to helper function, do NOT move to parent before_each** (Mamba limitation)
+3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper function (do NOT move to parent before_each for Mamba)
+4. ✓ **Monkey patches:** Repeated patches across tests? → Extract to helper function (do NOT move to parent before_each for Mamba)
+5. ✓ **Helper factories:** Defined multiple times? → Define once at appropriate scope
+6. ✓ **Test data builders:** Duplicated? → Create shared factory function
+
+**✅ DO:**
+```python
+def create_power(o=None):  // DO: Use helper factories, extract complex logic
+    return Power({**{'name': 'Test', 'rank': 10}, **(o or {})})
+
+with description('a Power'):
+    with before.each:  // DO: Place setup at parent scope when shared
+        self.factory = MockFactory()
+        self.factory.reset()  // DO: Clear state/reset between runs
+        self.power = create_power()  // DO: Reuse helpers, keep code close to tests
+    
+    with context('that is a ranged power'):  // DO: Nest parent context, don't repeat it
+        with before.each:
+            self.power = create_power({'range': 'ranged'})  // DO: Add ONLY test-specific
+```
+
+**✅ DO (Pattern B Fix - Shared Arrange via Helper Function for Mamba):**
+```python
+def setup_macro_mocks(context_self):
+    """Helper to set up common mocks for macro tests"""
+    context_self.mock_macro = {'name': 'Custom', 'execute': Mock()}
+    context_self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+    context_self.power_item = PowerItem(context_self.mock_item)
+    return context_self.mock_macro, context_self.mock_item, context_self.power_item
+
+with description('with an attached macro'):
+    with it('should return animation with type attached'):
+        # Arrange - use helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.type).to(equal('attached'))
+    
+    with it('should provide macro name as animation name'):
+        # Arrange - reuse helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.name).to(equal('Custom'))
+```
+
+**✅ DO (Alternative - Shared Arrange in before_each when in SAME context):**
+```python
+with description('with an attached macro'):
+    with before.each:  // DO: Move shared Arrange to before.each (works within same context)
+        self.mock_macro = {'name': 'Custom', 'execute': Mock()}
+        self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        self.power_item = PowerItem(self.mock_item)
+    
+    with it('should return animation with type attached'):
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.type).to(equal('attached'))
+    
+    with it('should provide macro name as animation name'):
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.name).to(equal('Custom'))
+```
+
+**⚠️ MAMBA LIMITATION - Pattern A:**
+```python
+with description('Power'):
+    with context('created from actor'):
+        with before.each:  // NOTE: Mamba doesn't support moving before.each to parent describe blocks
+            self.actor = {'id': '123'}  // Acceptable: Use helper functions instead of parent before.each
+    with context('that is ranged'):
+        with before.each:  // NOTE: For Mamba, extract common setup to helper functions rather than parent
+            self.actor = create_actor({'id': '123'})  // DO: Use helper factory to avoid duplication
+```
+
+**❌ DON'T (Pattern B - Duplicate Arrange in sibling it() blocks):**
+```python
+with description('with an attached macro'):
+    with it('should return animation with type attached'):
+        # Arrange
+        mock_macro = {'name': 'Custom', 'execute': Mock()}
+        mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        power_item = PowerItem(mock_item)
+        # Act & Assert...
+    
+    with it('should provide macro name'):
+        # Arrange - DON'T: Same setup as above!
+        mock_macro = {'name': 'Custom', 'execute': Mock()}
+        mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        power_item = PowerItem(mock_item)
+        # Act & Assert...
+    
+    # FIX: When 3+ sibling it() share identical Arrange → extract to helper function (Mamba limitation: cannot move to parent before.each)
+```
+
+---
+
+## 4. Cover All Layers of the System
+
+Include separate front end, business logic, integration, and data access tests. Isolate across architecture boundaries with mocks and stubs. Keep tests for a story/feature together across architectural layers. Stub/mock external deps between each layer. Organize tests so they tell a story, front, middle or integration, back. Keep unit tests fast and isolated. Focus tests on the code under test, not its dependencies. Apply a behavioral lens at every layer.
+
+**✅ DO:**
+```python
+with description('an Attack Power'):  // DO: Organize to tell story (front/middle/back), keep feature tests together
+    with context('whose actor data is being displayed on a character sheet'):  // DO: Front-end - Include separate tests
+        with it('should include attack bonus in context'):  // DO: Keep fast & isolated
+            expect(context['attack_powers'][0]['bonus']).to(equal(8))  // DO: Focus on code under test
+        with it('should render attack bonus in HTML'):
+            expect(html).to(contain('value="8"'))
+    
+    with context('that is a damage power'):  // DO: Domain - Apply behavioral lens at every layer
+        with it('should calculate damage from rank'):
+            expect(calculate_damage(5)).to(equal(10))
+    
+    with context('that has been saved to the repository'):  // DO: Data access - Isolate with mocks, stub external deps
+        with before.each:
+            self.mock_db = Mock(); self.repo.save_attack(attack)
+        with context('that is retrieved at a later time'):
+            with it('should return the saved attack with all properties'):
+                expect(self.repo.get_attack(attack.id).bonus).to(equal(attack.bonus))
+```
+
+**❌ DON'T:**
+```python
+with description('damage'):  // DON'T: Stop at happy path, test 3rd party libs
+    with it('works'):
+        expect(requests.get(url)).to(be_ok)
+with it('passes if repo ready'):  // DON'T: Rely on dependent code, mix test types
+    render_page(); expect(db.has_record()).to(be_true)
+```
+
+---
+
+## 5. Unit Tests the Front-End
+
+Mock services, business logic, and routing. Stub user events and verify resulting state or view. Validate conditional render paths (loading, empty, err). Test sheet/page functions/methods that are substantive in nature. Assert emitted events or callbacks. Reset DOM and mocks each test.
+
+**✅ DO:**
+```python
+with description('an attack power display'):
+    with before.each:
+        self.mock_service = Mock()  // DO: Mock services/business logic/routing, reset DOM & mocks
+        self.context = prepare_context(self.actor)  // DO: Stub user events, assert emitted events/callbacks
+    
+    with it('should include attack bonus in context'):  // DO: Test BOTH data structure
+        expect(self.context['attack_powers'][0]['bonus']).to(equal(8))
+    
+    with it('should render attack bonus in HTML'):  // DO: AND rendered output
+        expect(render_template(self.context)).to(contain('value="8"'))
+    
+    with context('that is loading'):  // DO: Validate conditional render paths (loading/empty/error)
+        with it('should show spinner'):
+            expect(html).to(contain('loading-spinner'))
+```
+
+**❌ DON'T:**
+```python
+with it('renders bonus'):  // DON'T: Test only HTML not data, hit live APIs, test styling
+    expect(html).to(contain('value="8"'))
+    expect(html).to(contain('color: blue'))
+    requests.get('http://api.com')
+with it('calls _on_mount()'):  // DON'T: Depend on lifecycle/internals, re-render full app trees
+    expect(component._on_mount).to(have_been_called)
+```
+
+---
+
+## Common Mamba Patterns
+
+**Mocking with unittest.mock:**
+```python
+from unittest.mock import Mock, patch
+
+with before.each:
+    self.api = Mock()
+    self.api.post.return_value = {'id': '123', 'email': 'test@example.com'}
+    self.service = UserService(self.api)
+
+with it('should create user with email'):
+    user = self.service.create_user('test@example.com')
+    expect(user['email']).to(equal('test@example.com'))
+    # Verify API called (as side-effect check, not main assertion)
+    self.api.post.assert_called_once()
+```
+
+**Async tests:**
+```python
+with _it('should fetch data asynchronously'):
+    async def spec():
+        data = await fetch_data()
+        expect(data).not_to(be_none)
+```
+
+**Context managers:**
+```python
+with it('should process file contents'):
+    with open('test.txt', 'w') as f:
+        f.write('test data')
+    
+    result = processor.process('test.txt')
+    expect(result).to(contain('test data'))
+```
+
+**Patching:**
+```python
+with _it('should send email via SMTP'):
+    with patch('smtplib.SMTP') as mock_smtp:
+        service = EmailService()
+        service.send('test@example.com', 'Hello')
+        
+        expect(mock_smtp.return_value.send_message).to(have_been_called)
+```
+
+**Expect matchers:**
+```python
+expect(value).to(equal(expected))
+expect(value).to(be_true)
+expect(value).to(be_false)
+expect(value).to(be_none)
+expect(collection).to(contain(item))
+expect(collection).to(have_len(3))
+expect(func).to(raise_error(ValueError))
+expect(mock).to(have_been_called)
+expect(mock).to(have_been_called_with(args))
+```

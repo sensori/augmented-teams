@@ -9,6 +9,15 @@
 * CLI: `python [runner-path] [execute-action] [command-parameters]` — Execute full workflow ([action-list])
 * CLI: `python [runner-path] [generate-action] [command-parameters]` — Generate only
 * CLI: `python [runner-path] [validate-action] [command-parameters]` — Validate only
+* CLI: `python [runner-path] [correct-action] [command-parameters] [chat-context]` — Correct based on errors and chat context
+
+**⚠️ EXECUTION CONTEXT FOR AI AGENTS:**
+* **Working Directory**: ALWAYS run commands from workspace root (`C:\dev\augmented-teams` or equivalent)
+* **Path Format**: Use forward slashes `/` or escaped backslashes `\\` in Python paths. For PowerShell commands, use backslashes `\`
+* **PowerShell Syntax**: Use semicolon `;` to chain commands, NOT `&&`. Example: `cd C:\dev\augmented-teams; python behaviors\code-agent\code_agent_runner.py sync`
+* **Path Resolution**: Runner paths are relative to workspace root. Example: `behaviors/bdd/bdd-runner.py` means `C:\dev\augmented-teams\behaviors\bdd\bdd-runner.py`
+* **Before Running**: Always ensure you're in workspace root. Use `cd C:\dev\augmented-teams` first if needed
+* **Test Execution**: For test runners, check if they need to run from a specific directory (e.g., test file's parent directory for Python imports)
 
 **Action 1: GENERATE**
 **Steps:**
@@ -53,3 +62,24 @@ OR
 1. **User** reviews validation results and fixes [violation]s if needed
 2. **User** optionally calls execute, generate, or validate as needed
 
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/[command-name]-correct [command-parameters] [chat-context]` when [target-entity] has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads [target-entity] files and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/[rule-name].mdc` to understand how to correct [target-entity] based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - [Rule] principles from rule file
+
+4. **AI Agent** corrects the [target-entity]:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures [target-entity] follows [rule] principles
+   - Updates [target-entity] files directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated [target-entity] file paths
+   - Next steps ([next-step-list])

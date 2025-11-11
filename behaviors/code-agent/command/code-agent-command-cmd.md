@@ -10,6 +10,7 @@
 * CLI: `python behaviors/code-agent/code_agent_runner.py generate-command [feature-name] [command-name] [command-purpose] [target-entity]` — Generate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py validate-command [feature-name] [command-name]` — Validate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py plan-command [feature-name] [command-name] [command-purpose] [target-entity]` — Generate implementation plan (optional)
+* CLI: `python behaviors/code-agent/code_agent_runner.py correct-command [feature-name] [command-name] [command-purpose] [target-entity] [chat-context]` — Correct command based on errors and chat context
 
 **Action 0: PLAN** (Optional - only if user requests)
 **Steps:**
@@ -63,4 +64,26 @@ OR
 **Steps:**
 1. **User** reviews validation results and fixes [violation]s if needed
 2. **User** optionally calls execute, generate, or validate as needed
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/code-agent-command-correct [feature-name] [command-name] [command-purpose] [target-entity] [chat-context]` when command has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads command files and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/code-agent-rule.mdc` to understand how to correct command based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - Code agent principles from rule file
+
+4. **AI Agent** corrects the command:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures command follows code agent principles
+   - Updates command files directly (command-cmd.md, runner file, rule file)
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated command file paths
+   - Next steps (re-validate, implement command logic, create more commands)
 

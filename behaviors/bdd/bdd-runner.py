@@ -424,7 +424,7 @@ class BDDScaffoldBaseHeuristic(CodeHeuristic):
             indent_level = len(line) - len(stripped)
             structure['max_depth'] = max(structure['max_depth'], indent_level)
             
-            # Check if this is a describe block
+            # Check if this is a describe block (must use "describe" keyword, not "when")
             if re.match(r'^\s*describe\s+', line, re.IGNORECASE):
                 has_that = 'that' in stripped.lower()
                 block_info = {
@@ -437,6 +437,11 @@ class BDDScaffoldBaseHeuristic(CodeHeuristic):
                 }
                 describe_blocks.append(block_info)
                 structure['describe_blocks'].append(block_info)
+            # Also detect "when" as a violation (should be "describe")
+            elif re.match(r'^\s*when\s+', line, re.IGNORECASE):
+                # This is a violation - scaffold should use "describe" not "when"
+                # We'll add this violation through a separate heuristic
+                pass
             
             # Check if this is an it statement
             elif re.match(r'^\s*it\s+', line, re.IGNORECASE):
@@ -552,6 +557,27 @@ class BDDScaffoldCodeSyntaxHeuristic(BDDScaffoldBaseHeuristic):
         
         return violations if violations else None
 
+class BDDScaffoldKeywordHeuristic(BDDScaffoldBaseHeuristic):
+    """Heuristic for §7: Plain English with Test Structure Keywords - detects use of 'when' instead of 'describe'"""
+    def __init__(self):
+        super().__init__("bdd_scaffold_keyword")
+    
+    def detect_violations(self, content):
+        """Detect use of 'when' keyword instead of 'describe'"""
+        violations = []
+        if not self._validate_content(content):
+            print(f"[DEBUG BDDScaffoldKeywordHeuristic] Content validation failed")
+            return None
+        
+        print(f"[DEBUG BDDScaffoldKeywordHeuristic] Checking {len(content._content_lines)} lines")
+        # Scaffold must use "describe" keyword, not "when"
+        for i, line in enumerate(content._content_lines, 1):
+            if re.match(r'^\s*when\s+', line, re.IGNORECASE):
+                violations.append(Violation(i, "Scaffold uses 'when' instead of 'describe' - must use 'describe [concept] that [state]' format (e.g., 'describe StoryShapeCommand that is generating story map')"))
+        
+        print(f"[DEBUG BDDScaffoldKeywordHeuristic] Found {len(violations)} violations")
+        return violations if violations else []
+
 class BDDScaffoldStructureHeuristic(BDDScaffoldBaseHeuristic):
     """Heuristic for §7: Plain English with Test Structure Keywords - detects describe blocks without it statements"""
     def __init__(self):
@@ -587,24 +613,31 @@ class BDDScaffoldStateOrientedHeuristic(BDDScaffoldBaseHeuristic):
         """Detect action-oriented test names (should be state-oriented)"""
         violations = []
         if not self._validate_content(content):
+            print(f"[DEBUG BDDScaffoldStateOrientedHeuristic] Content validation failed")
             return None
         
-        # Pattern: "should [verb]" or "should [verb] [noun]" - action-oriented (FORBIDDEN)
-        action_oriented_patterns = [
-            r'^\s*it\s+should\s+[a-z]+\s+[a-z]+',  # "should roll dice", "should calculate damage"
-            r'^\s*it\s+should\s+[a-z]+(?!\s+have|\s+be)',  # "should validate", "should create" (but not "should have" or "should be")
-        ]
+        print(f"[DEBUG BDDScaffoldStateOrientedHeuristic] Checking {len(content._content_lines)} lines")
+        # Pattern: "should [verb]" - action-oriented (FORBIDDEN)
+        # Must NOT start with "should have" or "should be" (state-oriented)
+        # Examples of violations: "should check", "should create", "should validate", "should return"
+        # Examples of valid: "should have [noun] [past participle]", "should be [state]", "should have [noun]"
         
+        checked_lines = 0
         for i, line in enumerate(content._content_lines, 1):
             # Only check it statements
-            if re.match(r'^\s*it\s+', line, re.IGNORECASE):
-                # Check for action-oriented patterns
-                for pattern in action_oriented_patterns:
-                    if re.search(pattern, line, re.IGNORECASE):
-                        violations.append(Violation(i, "Test name is action-oriented - must be state-oriented (e.g., 'should have [noun] [past participle]' or 'should be [state]')"))
-                        break
+            if re.match(r'^\s*it\s+should\s+', line, re.IGNORECASE):
+                checked_lines += 1
+                # Extract the part after "should"
+                match = re.search(r'^\s*it\s+should\s+(.+)$', line, re.IGNORECASE)
+                if match:
+                    after_should = match.group(1).strip()
+                    # Check if it starts with action verb (not "have" or "be")
+                    # Pattern: starts with verb that's not "have" or "be", followed by optional words
+                    if re.match(r'^(?!have\s|be\s)[a-z]+\s', after_should, re.IGNORECASE):
+                        violations.append(Violation(i, f"Test name is action-oriented ('should {after_should.split()[0]}') - must be state-oriented (e.g., 'should have [noun] [past participle]' or 'should be [state]')"))
         
-        return violations if violations else None
+        print(f"[DEBUG BDDScaffoldStateOrientedHeuristic] Checked {checked_lines} 'it should' lines, found {len(violations)} violations")
+        return violations if violations else []
 
 class BDDScaffoldSubjectHeuristic(BDDScaffoldBaseHeuristic):
     """Heuristic for §2: Subject Clarity - detects missing subjects in test names"""
@@ -731,16 +764,40 @@ class BDDScaffoldRule(BDDRule):
     """BDD Rule specifically for scaffolding - injects scaffold-specific heuristics into principles"""
     
     def __init__(self, base_rule_file_name: str = 'bdd-rule.mdc'):
+        # Resolve rule file path relative to this file's directory
+        if not Path(base_rule_file_name).is_absolute():
+            rule_dir = Path(__file__).parent
+            base_rule_file_name = str(rule_dir / base_rule_file_name)
+        print(f"[DEBUG BDDScaffoldRule] Loading rule from: {base_rule_file_name}")
         super().__init__(base_rule_file_name)
         self._inject_scaffold_heuristics()
+        print(f"[DEBUG BDDScaffoldRule] Initialized with {len(self.base_rule.principles)} principles")
+    
+    @property
+    def principles(self):
+        """Return principles with injected scaffold heuristics"""
+        print(f"[DEBUG BDDScaffoldRule.principles] Returning {len(self.base_rule.principles) if self.base_rule and hasattr(self.base_rule, 'principles') else 0} principles")
+        return self.base_rule.principles if self.base_rule and hasattr(self.base_rule, 'principles') else []
     
     def _inject_scaffold_heuristics(self):
-        """Inject scaffold-specific heuristics into the appropriate principles"""
-        # Map heuristics to principle numbers
-        # Section 1: Business Readable Language - add scaffold-specific technical jargon heuristic
-        # Section 2: Fluency, Hierarchy, and Storytelling - add scaffold-specific subject heuristic
-        # Section 7: Principles Especially Important for Scaffolding - add scaffold-specific heuristics
+        """Inject scaffold-specific heuristics into the appropriate principles
         
+        CRITICAL: This method wires all scaffold heuristic EXTENSIONS (not the base class) to principles.
+        BDDScaffoldBaseHeuristic is NEVER instantiated - it's only a base class providing utilities.
+        
+        Heuristic Wiring:
+        - Principle 1: BDDScaffoldTechnicalJargonHeuristic (scaffold-specific technical jargon detection)
+        - Principle 2: BDDScaffoldSubjectHeuristic (scaffold-specific subject clarity detection)
+        - Principle 7: All scaffold heuristics:
+            * BDDScaffoldCodeSyntaxHeuristic (detects code syntax violations)
+            * BDDScaffoldKeywordHeuristic (detects "when" instead of "describe")
+            * BDDScaffoldStructureHeuristic (detects describe blocks without it statements)
+            * BDDScaffoldStateOrientedHeuristic (detects action-oriented test names)
+            * BDDScaffoldDomainMapAlignmentHeuristic (validates domain map alignment)
+        
+        All scaffold heuristics extend BDDScaffoldBaseHeuristic which provides common utilities
+        but is never instantiated directly.
+        """
         for principle in self.base_rule.principles:
             if principle.principle_number == 1:
                 # Section 1: Add scaffold-specific technical jargon heuristic
@@ -760,6 +817,7 @@ class BDDScaffoldRule(BDDRule):
                     principle.heuristics = []
                 principle.heuristics.extend([
                     BDDScaffoldCodeSyntaxHeuristic(),
+                    BDDScaffoldKeywordHeuristic(),  # Detect "when" instead of "describe"
                     BDDScaffoldStructureHeuristic(),
                     BDDScaffoldStateOrientedHeuristic(),
                     BDDScaffoldDomainMapAlignmentHeuristic(),  # Domain map preservation validation
@@ -784,6 +842,59 @@ class BDDCommand(CodeAugmentedCommand):
             10: BDDRule.BDDUnicodeHeuristic,
             # Note: Scaffold-specific heuristics are injected by BDDScaffoldRule, not mapped here
         }
+    
+    def run(self, test_file_path: Optional[str] = None, framework: Optional[str] = None, single_test_line: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Run tests for the test file associated with this command.
+        Detects framework from specializing rule if available, otherwise from file extension.
+        
+        Args:
+            test_file_path: Path to test file (if None, uses self.content.file_path)
+            framework: Framework to use ('mamba' or 'jest'). If None, auto-detects from file or specializing rule
+            single_test_line: If provided, run only test at this line
+        
+        Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
+        """
+        # Determine test file path
+        if test_file_path is None:
+            test_file_path = self.content.file_path if hasattr(self.content, 'file_path') else None
+        
+        if not test_file_path:
+            return {"success": False, "error": "No test file path provided", "output": "", "passed": 0, "failed": 0}
+        
+        # Detect framework if not provided
+        if framework is None:
+            # First, try to detect from specializing rule
+            framework = self._detect_framework_from_specializing_rule()
+            
+            # If not found in specializing rule, detect from file extension
+            if framework is None:
+                framework = BDDRule.detect_framework_from_file(test_file_path)
+        
+        if framework is None:
+            return {"success": False, "error": "Could not detect framework. Please specify 'mamba' or 'jest'", "output": "", "passed": 0, "failed": 0}
+        
+        # Run tests using BDDWorkflow.run_tests
+        return BDDWorkflow.run_tests(test_file_path, framework, single_test_line)
+    
+    def _detect_framework_from_specializing_rule(self) -> Optional[str]:
+        """
+        Detect framework from specializing rule if one is loaded.
+        Checks if bdd-mamba-rule.mdc or bdd-jest-rule.mdc is loaded.
+        """
+        # Check if rule has specialized_rules dict with framework-specific rules loaded
+        if hasattr(self.rule, 'specialized_rules') and self.rule.specialized_rules:
+            # Check for mamba or jest specialized rules
+            if 'mamba' in self.rule.specialized_rules:
+                return 'mamba'
+            elif 'jest' in self.rule.specialized_rules:
+                return 'jest'
+        
+        # Also check if we can detect from content file extension
+        if hasattr(self.content, 'file_extension'):
+            return BDDRule.detect_framework_from_file(self.content.file_path if hasattr(self.content, 'file_path') else '')
+        
+        return None
 
 class BDDScaffoldCommand(BDDCommand):
     """BDD Command specifically for scaffolding - uses BDDScaffoldRule instead of BDDRule"""
@@ -795,7 +906,15 @@ class BDDScaffoldCommand(BDDCommand):
         inner_command = Command(content, self.rule.base_rule)
         
         # Call CodeAugmentedCommand directly (not BDDCommand) to avoid double initialization
-        CodeAugmentedCommand.__init__(self, inner_command, self.rule.base_rule)
+        # CRITICAL: Use self.rule (with injected heuristics) not self.rule.base_rule (without them)
+        CodeAugmentedCommand.__init__(self, inner_command, self.rule)
+    
+    def run(self, test_file_path: Optional[str] = None, framework: Optional[str] = None, single_test_line: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Run method is not implemented for scaffold command.
+        Scaffold phase does not run tests.
+        """
+        return {"success": False, "error": "Run method not implemented for scaffold command. Scaffold phase does not run tests.", "output": "", "passed": 0, "failed": 0}
     
     def _get_heuristic_map(self):
         # BDDScaffoldRule injects heuristics directly into principles, so we don't need a heuristic map here
@@ -809,6 +928,114 @@ class BDDScaffoldCommand(BDDCommand):
             10: BDDRule.BDDUnicodeHeuristic,
             # Scaffold-specific heuristics are injected by BDDScaffoldRule._inject_scaffold_heuristics()
         }
+    
+    def _load_heuristics(self):
+        """Override to preserve scaffold-specific heuristics injected by BDDScaffoldRule"""
+        # BDDScaffoldRule already injected scaffold-specific heuristics into principles 1, 2, and 7
+        # For scaffold validation, we use ONLY scaffold-specific heuristics for principles 1, 2, and 7
+        # Base heuristics are only added for principles that don't have scaffold heuristics (3, 4, 5, 10)
+        heuristic_map = self._get_heuristic_map()
+        if not heuristic_map:
+            return
+        
+        # Principles that have scaffold-specific heuristics (should NOT get base heuristics)
+        scaffold_principle_numbers = {1, 2, 7}
+        
+        for principle in self.base_rule.principles:
+            heuristic_class = heuristic_map.get(principle.principle_number)
+            if heuristic_class:
+                # Initialize heuristics list if it doesn't exist
+                if not hasattr(principle, 'heuristics') or not principle.heuristics:
+                    principle.heuristics = []
+                
+                # Skip adding base heuristics for principles that have scaffold-specific heuristics
+                # These principles (1, 2, 7) should ONLY use scaffold heuristics for scaffold validation
+                if principle.principle_number in scaffold_principle_numbers:
+                    # Verify scaffold heuristics are present (they should be from BDDScaffoldRule injection)
+                    has_scaffold_heuristic = any(
+                        isinstance(h, (BDDScaffoldTechnicalJargonHeuristic, BDDScaffoldSubjectHeuristic,
+                                     BDDScaffoldCodeSyntaxHeuristic, BDDScaffoldKeywordHeuristic,
+                                     BDDScaffoldStructureHeuristic, BDDScaffoldStateOrientedHeuristic,
+                                     BDDScaffoldDomainMapAlignmentHeuristic))
+                        for h in principle.heuristics
+                    )
+                    if not has_scaffold_heuristic:
+                        print(f"[WARNING] Principle {principle.principle_number} should have scaffold heuristics but none found")
+                    # Skip adding base heuristic - scaffold heuristics take precedence
+                    continue
+                
+                # For principles without scaffold heuristics (3, 4, 5, 10), add base heuristics
+                # Check if base heuristic already exists
+                base_heuristic_exists = any(
+                    isinstance(h, heuristic_class) for h in principle.heuristics
+                )
+                if not base_heuristic_exists:
+                    principle.heuristics.append(heuristic_class())
+    
+    def correct(self, chat_context: str) -> str:
+        """
+        Correct scaffold file based on validation errors and chat context.
+        Overrides base Command.correct() to correct scaffold content, not rules.
+        """
+        scaffold_file_path = self.content.file_path if hasattr(self.content, 'file_path') else None
+        
+        if not scaffold_file_path or not Path(scaffold_file_path).exists():
+            return f"[ERROR] Scaffold file not found: {scaffold_file_path}"
+        
+        # Get validation errors first
+        validation_result = self.validate()
+        violations = getattr(self, 'violations', [])
+        
+        # Read current scaffold content
+        scaffold_content = Path(scaffold_file_path).read_text(encoding='utf-8')
+        
+        # Build correction instructions for AI
+        instructions = f"""You are correcting a BDD scaffold hierarchy file based on validation errors and chat context.
+
+**SCAFFOLD FILE:** {scaffold_file_path}
+
+**CHAT CONTEXT:**
+{chat_context}
+
+**VALIDATION ERRORS:**
+"""
+        if violations:
+            for v in violations:
+                instructions += f"- Line {v.line_number}: {v.message}\n"
+        else:
+            instructions += "- No validation errors found (correction based on chat context only)\n"
+        
+        instructions += f"""
+**CURRENT SCAFFOLD CONTENT:**
+```
+{scaffold_content}
+```
+
+**YOUR TASK: Correct the Scaffold File**
+
+1. **Read the chat context** - Understand what changes are needed
+2. **Review validation errors** - Fix any violations found
+3. **Apply corrections** - Update the scaffold to reflect the chat context requirements
+4. **Ensure BDD compliance** - Follow BDD principles from Sections 1, 2, and 7:
+   - Section 1: Business Readable Language (plain English, domain language, natural sentences)
+   - Section 2: Fluency, Hierarchy, and Storytelling (hierarchy patterns, domain map mapping, natural language fluency)
+   - Section 7: Scaffold-specific requirements (plain English only, state-oriented test names, complete behaviors)
+
+**KEY REQUIREMENTS:**
+- Tests should be written from the code's perspective
+- Tests should verify what the code generates (prompts/instructions) rather than what AI/human does with them
+- Use state-oriented language: "should have [noun] [past participle]" or "should have [noun]"
+- Every describe block must have at least one it statement
+- Preserve domain map hierarchy structure
+
+**OUTPUT FORMAT:**
+Provide the corrected scaffold content in the same format as the input (plain text hierarchy with indentation).
+Do not include explanations or markdown - just the corrected scaffold content.
+
+**CORRECTED SCAFFOLD:**
+"""
+        
+        return instructions
     
     def discover_domain_maps(self) -> Dict[str, Any]:
         """Discover domain maps and domain interaction files in the test file directory"""
@@ -1220,11 +1447,16 @@ Run /bdd-test-validate when ready"""
         """Get code implementation phase instructions"""
         return """STAGE 3: Write Code - Implement Production Code
 
-1. Implement minimal production code for ~18 tests
-2. Make tests pass with simplest solution
-3. Resist adding features no test demands
-4. Verify tests now PASS
-5. Check for regressions in existing tests
+1. Implement complete, functional production code for ~18 tests
+2. **CRITICAL**: Code must be fully functional, not placeholders or stubs
+3. Make tests pass with simplest solution - but implement it completely
+4. Avoid over-factoring for reuse - but write complete functionality
+5. Resist adding features no test demands
+6. Use simple data structures before classes - but still implement complete functionality
+7. Verify tests now PASS
+8. Check for regressions in existing tests
+
+Minimalism means simple and straightforward, NOT incomplete. Write complete, working code that tests demand.
 
 Run /bdd-code-validate when ready"""
     
@@ -1232,6 +1464,73 @@ Run /bdd-code-validate when ready"""
     # def _get_refactor_instructions(self) -> str:
     #     """Get REFACTOR phase instructions"""
     #     return """STAGE 4: REFACTOR - Improve Code Quality"""
+    
+    @staticmethod
+    def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Run tests and capture results with framework-specific commands and proper directory context.
+        Used by TEST and CODE phases, and by the run action.
+        
+        Args:
+            test_file_path: Path to test file (absolute or relative)
+            framework: 'jest' or 'mamba'
+            single_test_line: If provided, run only test at this line
+        
+        Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
+        """
+        try:
+            test_path = Path(test_file_path).resolve()
+            if not test_path.exists():
+                return {"success": False, "error": f"Test file not found: {test_file_path}", "output": "", "passed": 0, "failed": 0}
+            
+            # Determine working directory and command based on framework
+            if framework == 'jest':
+                # Jest runs from project root (where package.json is located)
+                # Find project root by looking for package.json
+                project_root = test_path.parent
+                while project_root.parent != project_root:
+                    if (project_root / 'package.json').exists():
+                        break
+                    project_root = project_root.parent
+                
+                cmd = ['npm', 'test', '--', str(test_path.relative_to(project_root))]
+                if single_test_line:
+                    # Jest can run specific test by line number
+                    cmd.extend(['-t', str(single_test_line)])
+                cwd = str(project_root)
+            
+            elif framework == 'mamba':
+                # Mamba runs from test file's directory (ensures proper Python imports)
+                # Use python -m mamba.cli format (as used in conftest.py)
+                cmd = [sys.executable, '-m', 'mamba.cli', str(test_path.name)]
+                if single_test_line:
+                    # Mamba runs specific test by line
+                    cmd.extend(['--line', str(single_test_line)])
+                cwd = str(test_path.parent)
+            
+            else:
+                return {"success": False, "error": f"Unknown framework: {framework}", "output": "", "passed": 0, "failed": 0}
+            
+            # Run tests from the correct directory
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, cwd=cwd)
+            
+            # Parse output for pass/fail counts
+            output = result.stdout + result.stderr
+            passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
+            failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
+            
+            return {
+                "success": result.returncode == 0,
+                "output": output,
+                "passed": passed,
+                "failed": failed,
+                "error": None if result.returncode == 0 else "Tests failed"
+            }
+        
+        except subprocess.TimeoutExpired:
+            return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
+        except Exception as e:
+            return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
 
 
 class BDDWorkflowPhaseCommand:
@@ -1362,55 +1661,6 @@ RESPOND: cross_section_issues: [list any found]
         
         print(f"\n[DONE] Section {section_num} Complete\n")
         return violations
-    
-    @staticmethod
-    def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
-        """
-        Run tests and capture results.
-        Used by TEST and CODE phases.
-        
-        Args:
-            test_file_path: Path to test file
-            framework: 'jest' or 'mamba'
-            single_test_line: If provided, run only test at this line
-        
-        Returns: {"success": bool, "output": str, "passed": int, "failed": int, "error": Optional[str]}
-        """
-        try:
-            if framework == 'jest':
-                cmd = ['npm', 'test', '--', test_file_path]
-                if single_test_line:
-                    # Jest can run specific test by line number
-                    cmd.extend(['-t', str(single_test_line)])
-            
-            elif framework == 'mamba':
-                cmd = ['mamba', test_file_path]
-                if single_test_line:
-                    # Mamba runs specific test by line
-                    cmd.extend(['--line', str(single_test_line)])
-            
-            else:
-                return {"success": False, "error": f"Unknown framework: {framework}"}
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-            
-            # Parse output for pass/fail counts
-            output = result.stdout + result.stderr
-            passed = len(re.findall(r'✓|PASS|passed', output, re.IGNORECASE))
-            failed = len(re.findall(r'✗|FAIL|failed', output, re.IGNORECASE))
-            
-            return {
-                "success": result.returncode == 0,
-                "output": output,
-                "passed": passed,
-                "failed": failed,
-                "error": None if result.returncode == 0 else "Tests failed"
-            }
-        
-        except subprocess.TimeoutExpired:
-            return {"success": False, "error": "Test execution timed out", "output": "", "passed": 0, "failed": 0}
-        except Exception as e:
-            return {"success": False, "error": str(e), "output": "", "passed": 0, "failed": 0}
 
     @staticmethod
     def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
@@ -2137,6 +2387,8 @@ if __name__ == "__main__":
         print("\nCommands:")
         print("  workflow <file_path> [scope] [phase] [cursor_line] [--auto]")
         print("  validate <file_path> [--thorough] [--phase=<phase>]")
+        print("  validate-scaffold <test_file_path>")
+        print("  correct-scaffold <scaffold-file-path> [chat-context]")
         sys.exit(1)
     
     command = sys.argv[1]
@@ -2170,6 +2422,45 @@ if __name__ == "__main__":
             print(f"  Phase: {workflow_data['phase']}")
             print(f"  Scope: {workflow_data['scope']}")
             print(f"  Tests in scope: {len(workflow_data['test_structure']['scoped_tests'])}")
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+    
+    elif command == "validate-scaffold":
+        # Guard check (and remove --no-guard from argv if present)
+        if '--no-guard' in sys.argv:
+            sys.argv.remove('--no-guard')
+        else:
+            require_command_invocation("bdd-scaffold-validate")
+        
+        if len(sys.argv) < 3:
+            print("Usage: python bdd-runner.py validate-scaffold <scaffold-file-path>")
+            sys.exit(1)
+        
+        scaffold_file = sys.argv[2]
+        
+        if not Path(scaffold_file).exists():
+            print(f"[ERROR] File not found: {scaffold_file}")
+            sys.exit(1)
+        
+        try:
+            # Create content pointing directly to scaffold file
+            content = Content(scaffold_file)
+            cmd = BDDScaffoldCommand(content)
+            result = cmd.validate()
+            print(result)
+            
+            if hasattr(cmd, 'violations') and cmd.violations:
+                print(f"\n[VIOLATIONS] Found {len(cmd.violations)} violations:")
+                for v in cmd.violations:
+                    print(f"  Line {v.line_number}: {v.message}")
+                sys.exit(1)
+            else:
+                print("\n[OK] No violations found - scaffold is valid!")
+                sys.exit(0)
+                
         except Exception as e:
             print(f"ERROR: {e}")
             import traceback
@@ -2232,6 +2523,104 @@ if __name__ == "__main__":
                 validate_batch_mode(file_path, framework)
             else:
                 validate_iterative_mode(file_path, framework, chunk_size)
+            
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+    
+    elif command == "correct-scaffold":
+        # Guard check (and remove --no-guard from argv if present)
+        if '--no-guard' in sys.argv:
+            sys.argv.remove('--no-guard')
+        else:
+            require_command_invocation("bdd-scaffold-correct")
+        
+        if len(sys.argv) < 3:
+            print("Usage: python bdd-runner.py correct-scaffold <scaffold-file-path> [chat-context]")
+            sys.exit(1)
+        
+        scaffold_file = sys.argv[2]
+        chat_context = sys.argv[3] if len(sys.argv) > 3 else "User requested scaffold correction based on current chat context"
+        
+        if not Path(scaffold_file).exists():
+            print(f"[ERROR] File not found: {scaffold_file}")
+            sys.exit(1)
+        
+        try:
+            # Create content pointing directly to scaffold file
+            content = Content(scaffold_file)
+            cmd = BDDScaffoldCommand(content)
+            
+            # Call correct method with chat context
+            if hasattr(cmd, 'correct'):
+                result = cmd.correct(chat_context)
+                print(result)
+                print("\n[INFO] Review the corrected scaffold above and update the file if needed.")
+                print(f"[INFO] Scaffold file: {scaffold_file}")
+            else:
+                print("[ERROR] Correct method not available on BDDScaffoldCommand")
+                sys.exit(1)
+                
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+    
+    elif command == "run":
+        # Guard check (and remove --no-guard from argv if present)
+        if '--no-guard' in sys.argv:
+            sys.argv.remove('--no-guard')
+        else:
+            require_command_invocation("bdd-run")
+        
+        if len(sys.argv) < 3:
+            print("Usage: python bdd-runner.py run [test-file] [framework]")
+            sys.exit(1)
+        
+        test_file = sys.argv[2]
+        framework = sys.argv[3] if len(sys.argv) > 3 else None
+        
+        # Auto-detect framework if not provided
+        if not framework:
+            # Use BDDRule's framework detection
+            bdd_rule = BDDRule('bdd-rule.mdc')
+            framework = bdd_rule.detect_framework_from_file(test_file)
+            if not framework:
+                print("[ERROR] Could not detect framework. Please specify: mamba or jest")
+                sys.exit(1)
+        
+        if not Path(test_file).exists():
+            print(f"[ERROR] Test file not found: {test_file}")
+            sys.exit(1)
+        
+        try:
+            # Run tests using BDDWorkflow.run_tests (static method)
+            results = BDDWorkflow.run_tests(test_file, framework)
+            
+            # Display results
+            print("\n" + "="*60)
+            print("TEST EXECUTION RESULTS")
+            print("="*60)
+            print(f"Framework: {framework}")
+            print(f"Test File: {test_file}")
+            print(f"Status: {'PASSED' if results['success'] else 'FAILED'}")
+            print(f"Passed: {results['passed']}")
+            print(f"Failed: {results['failed']}")
+            
+            if results['error']:
+                print(f"Error: {results['error']}")
+            
+            print("\n" + "-"*60)
+            print("TEST OUTPUT:")
+            print("-"*60)
+            print(results['output'])
+            print("="*60)
+            
+            # Exit with appropriate code
+            sys.exit(0 if results['success'] else 1)
             
         except Exception as e:
             print(f"ERROR: {e}")

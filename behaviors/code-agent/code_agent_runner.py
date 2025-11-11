@@ -452,7 +452,8 @@ class CommandCommand(CodeAgentCommand):
         return {
             'cmd_file': self._generate_command_cmd_file(command_dir),
             'generate_cmd_file': self._generate_command_generate_cmd_file(command_dir),
-            'validate_cmd_file': self._generate_command_validate_cmd_file(command_dir)
+            'validate_cmd_file': self._generate_command_validate_cmd_file(command_dir),
+            'correct_cmd_file': self._generate_command_correct_cmd_file(command_dir)
         }
     
     def _display_command_generation_results(self, generated_files: dict) -> None:
@@ -466,6 +467,7 @@ class CommandCommand(CodeAgentCommand):
         print(f"  - {generated_files['cmd_file']}")
         print(f"  - {generated_files['generate_cmd_file']}")
         print(f"  - {generated_files['validate_cmd_file']}")
+        print(f"  - {generated_files['correct_cmd_file']}")
     
     def _generate_command_cmd_file(self, command_dir: Path) -> Path:
         cmd_file = command_dir / f"{self.command_name}-cmd.md"
@@ -480,8 +482,9 @@ class CommandCommand(CodeAgentCommand):
             execute_action=f"execute-{self.command_name}",
             generate_action=f"generate-{self.command_name}",
             validate_action=f"validate-{self.command_name}",
+            correct_action=f"correct-{self.command_name}",
             command_parameters=f"[{self.feature_name}] [{self.command_name}]",
-            action_list="Generate → User Feedback → Validate → User Feedback"
+            action_list="Generate → User Feedback → Validate → User Feedback → Correct"
         )
         cmd_file.write_text(cmd_content, encoding=DEFAULT_ENCODING)
         return cmd_file
@@ -515,6 +518,21 @@ class CommandCommand(CodeAgentCommand):
 """
         validate_cmd_file.write_text(validate_content, encoding=DEFAULT_ENCODING)
         return validate_cmd_file
+    
+    def _generate_command_correct_cmd_file(self, command_dir: Path) -> Path:
+        correct_cmd_file = command_dir / f"{self.command_name}-correct-cmd.md"
+        correct_content = f"""### Command: `/{self.feature_name}-{self.command_name}-correct`
+
+**Purpose:** Correct {self.target_entity or 'command'} based on errors and chat context. Delegates to main command with explicit correct action.
+
+**Usage:**
+* `/{self.feature_name}-{self.command_name}-correct [{self.feature_name}] [{self.command_name}] [chat-context]` — Correct {self.target_entity or 'command'} (AI determines parameters if not provided)
+
+**Steps:**
+1. **Code** Execute the correct action in `/{self.feature_name}-{self.command_name}`
+"""
+        correct_cmd_file.write_text(correct_content, encoding=DEFAULT_ENCODING)
+        return correct_cmd_file
     
     def _update_runner_file(self):
         """Update runner file with command class"""
@@ -567,6 +585,81 @@ class CodeAugmented{self.command_name.title().replace('-', '')}Command(CodeAugme
         # Default: append new section
         rule_content += f"\n## Executing Commands\n{command_reference}"
         rule_file.write_text(rule_content, encoding=DEFAULT_ENCODING)
+    
+    def validate(self):
+        """Validate command structure and heuristic implementation"""
+        # Call parent validate to get base validation instructions
+        instructions = super().validate()
+        
+        # Add heuristic validation checks
+        heuristic_violations = self._validate_heuristic_implementation()
+        
+        if heuristic_violations:
+            instructions += "\n\n## Heuristic Validation Violations\n\n"
+            for violation in heuristic_violations:
+                line_num, message = violation
+                instructions += f"- Line {line_num}: {message}\n"
+        
+        return instructions
+    
+    def _validate_heuristic_implementation(self) -> list:
+        """Validate that heuristics are properly implemented in CodeAugmented wrapper"""
+        violations = []
+        workspace_root = Path(__file__).parent.parent.parent
+        
+        # Guard clause: Check if feature and command names are provided
+        if not self.feature_name or not self.command_name:
+            return violations
+        
+        # Check if feature has rule file
+        feature_rule_path = workspace_root / "behaviors" / self.feature_name / f"{self.feature_name}-rule.mdc"
+        if not feature_rule_path.exists():
+            return violations  # No rule file = heuristics optional
+        
+        # Check if CodeAugmented wrapper exists in runner file
+        runner_path = workspace_root / "behaviors" / self.feature_name / f"{self.feature_name}_runner.py"
+        if not runner_path.exists():
+            return violations  # No runner yet = skip validation
+        
+        runner_content = runner_path.read_text(encoding='utf-8')
+        command_class_name = self._get_command_class_name()
+        wrapper_class_name = f"CodeAugmented{command_class_name}Command"
+        
+        # Guard clause: Check if wrapper class exists
+        if wrapper_class_name not in runner_content:
+            violations.append((0, f"CodeAugmented wrapper class '{wrapper_class_name}' not found in runner file"))
+            return violations
+        
+        # Check if _get_heuristic_map method is implemented
+        if "_get_heuristic_map" not in runner_content:
+            violations.append((0, f"CRITICAL: Method '_get_heuristic_map()' not implemented in {wrapper_class_name}"))
+            violations.append((0, f"  → Heuristics are REQUIRED when feature has rule file ({feature_rule_path.name})"))
+            violations.append((0, f"  → Add method that maps principle numbers to heuristic classes"))
+            violations.append((0, f"  → See code-agent-rule.mdc 'Heuristic Injection' principle for pattern"))
+        
+        # Check if method returns empty dict/None (potential issue)
+        # Look for the wrapper class and check its _get_heuristic_map implementation
+        if "_get_heuristic_map" in runner_content:
+            # Extract the method content for the specific wrapper class
+            class_start = runner_content.find(f"class {wrapper_class_name}")
+            if class_start != -1:
+                # Find the next class definition or end of file
+                next_class = runner_content.find("\nclass ", class_start + 1)
+                class_content = runner_content[class_start:next_class] if next_class != -1 else runner_content[class_start:]
+                
+                # Check if _get_heuristic_map in this class returns empty dict or None
+                if "_get_heuristic_map" in class_content:
+                    method_start = class_content.find("def _get_heuristic_map")
+                    if method_start != -1:
+                        method_end = class_content.find("\n    def ", method_start + 1)
+                        method_content = class_content[method_start:method_end] if method_end != -1 else class_content[method_start:]
+                        
+                        if "return {}" in method_content or "return None" in method_content:
+                            violations.append((0, f"WARNING: _get_heuristic_map() returns empty dict or None in {wrapper_class_name}"))
+                            violations.append((0, f"  → Review {feature_rule_path.name} to determine if principles apply to this command"))
+                            violations.append((0, f"  → If principles apply, create heuristics. If not, document why in a comment."))
+        
+        return violations
 
 
 @dataclass
@@ -748,10 +841,16 @@ class IndexPersistence:
         return {}
     
     def write_index(self, options: IndexWriteOptions) -> None:
-        """Writes index to both global and local locations"""
-        # Write global index
+        """Writes index to global, behaviors folder, and local locations"""
+        # Write global index (.cursor/behavior-index.json)
         options.global_path.parent.mkdir(parents=True, exist_ok=True)
         with open(options.global_path, 'w', encoding=DEFAULT_ENCODING) as f:
+            json.dump(options.index_data, f, indent=JSON_INDENT)
+        
+        # Write behaviors folder index (behaviors/behavior-index.json) - for version control
+        behaviors_index_path = options.workspace_root / 'behaviors' / 'behavior-index.json'
+        behaviors_index_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(behaviors_index_path, 'w', encoding=DEFAULT_ENCODING) as f:
             json.dump(options.index_data, f, indent=JSON_INDENT)
         
         # Write local indexes
@@ -1123,6 +1222,7 @@ class SyncIndexValidator:
         violations.extend(self.validate_exclusion_logic(features, workspace_root))
         violations.extend(self.validate_timestamp_logic(features, router, workspace_root))
         violations.extend(self.validate_index_structure(workspace_root))
+        violations.extend(self.validate_command_structure(features))
         
         return violations
     
@@ -1376,6 +1476,62 @@ class SyncIndexValidator:
             expected_count = index_data['total_behaviors']
             if actual_count != expected_count:
                 violations.append(f"Index violation: total_behaviors ({expected_count}) does not match actual count ({actual_count})")
+        return violations
+    
+    def validate_command_structure(self, features: List[FeatureInfo]) -> List[str]:
+        """Validate that all code agents have the minimum required command files (main, validate, generate)"""
+        violations = []
+        
+        for feature_info in features:
+            violations.extend(self._validate_feature_commands(feature_info.path))
+        
+        return violations
+    
+    def _validate_feature_commands(self, feature_path: Path) -> List[str]:
+        """Validate command structure for a single feature"""
+        violations = []
+        
+        # Extract feature name from feature path (last component of behaviors/<feature-name>/)
+        feature_name = feature_path.name
+        
+        # Find all main command files (not delegate files)
+        # Files follow pattern: {feature-name}-{command-name}-cmd.md
+        main_cmd_files = []
+        for cmd_file in feature_path.rglob("*-cmd.md"):
+            # Exclude delegate files (generate, validate, correct, plan)
+            if any(suffix in cmd_file.name for suffix in ['-generate-cmd.md', '-validate-cmd.md', '-correct-cmd.md', '-plan-cmd.md']):
+                continue
+            # Must match pattern: {feature-name}-{command-name}-cmd.md
+            if cmd_file.name.startswith(f"{feature_name}-") and cmd_file.name.endswith("-cmd.md"):
+                main_cmd_files.append(cmd_file)
+        
+        # For each main command file, check required delegate files exist in same directory
+        for main_cmd_file in main_cmd_files:
+            cmd_dir = main_cmd_file.parent
+            
+            # Extract command name from filename: {feature-name}-{command-name}-cmd.md
+            # Remove feature prefix and -cmd.md suffix
+            base_name = main_cmd_file.stem  # removes .md extension
+            if base_name.startswith(f"{feature_name}-"):
+                command_name = base_name[len(f"{feature_name}-"):].replace("-cmd", "")
+            else:
+                # Fallback: try to extract from directory name if filename doesn't match pattern
+                command_name = cmd_dir.name
+            
+            # Check for required delegate files in the same directory
+            generate_cmd = cmd_dir / f"{feature_name}-{command_name}-generate-cmd.md"
+            validate_cmd = cmd_dir / f"{feature_name}-{command_name}-validate-cmd.md"
+            correct_cmd = cmd_dir / f"{feature_name}-{command_name}-correct-cmd.md"
+            
+            if not generate_cmd.exists():
+                violations.append(f"Command structure violation: Generate command file missing: {generate_cmd} (for main command: {main_cmd_file})")
+            
+            if not validate_cmd.exists():
+                violations.append(f"Command structure violation: Validate command file missing: {validate_cmd} (for main command: {main_cmd_file})")
+            
+            if not correct_cmd.exists():
+                violations.append(f"Command structure violation: Correct command file missing: {correct_cmd} (for main command: {main_cmd_file})")
+        
         return violations
 
 

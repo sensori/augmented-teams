@@ -1,5 +1,5 @@
 {
-  "last_updated": "Mon Nov 10 22:49:34 2025",
+  "last_updated": "Tue Nov 11 17:06:06 2025",
   "total_behaviors": 30,
   "behaviors": [
     {
@@ -7,7 +7,7 @@
       "file": "bdd-jest-rule.mdc",
       "type": ".mdc",
       "path": "behaviors\\bdd\\bdd-jest-rule.mdc",
-      "modified_timestamp": 1762832932.3379714,
+      "modified_timestamp": 1762874849.0274224,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -15,7 +15,7 @@
       "file": "bdd-mamba-rule.mdc",
       "type": ".mdc",
       "path": "behaviors\\bdd\\bdd-mamba-rule.mdc",
-      "modified_timestamp": 1762832903.5824451,
+      "modified_timestamp": 1762874849.0284224,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -23,47 +23,23 @@
       "file": "bdd-rule.mdc",
       "type": ".mdc",
       "path": "behaviors\\bdd\\bdd-rule.mdc",
-      "modified_timestamp": 1762832840.2869668,
+      "modified_timestamp": 1762874849.0294225,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
-      "file": "bdd-code-command-plan.md",
-      "type": ".md",
-      "path": "behaviors\\bdd\\bdd-code-command-plan.md",
-      "modified_timestamp": 1762815913.426111,
+      "file": "bdd-mamba-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\bdd\\rules\\bdd-mamba-rule.mdc",
+      "modified_timestamp": 1762897041.0467656,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "bdd-behavior",
-      "file": "bdd-scaffold-command-plan.md",
+      "file": "README.md",
       "type": ".md",
-      "path": "behaviors\\bdd\\bdd-scaffold-command-plan.md",
-      "modified_timestamp": 1762820861.7668009,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-signature-command-plan.md",
-      "type": ".md",
-      "path": "behaviors\\bdd\\bdd-signature-command-plan.md",
-      "modified_timestamp": 1762811580.7436783,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-test-command-plan.md",
-      "type": ".md",
-      "path": "behaviors\\bdd\\bdd-test-command-plan.md",
-      "modified_timestamp": 1762817503.827667,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "bdd-workflow-command-plan.md",
-      "type": ".md",
-      "path": "behaviors\\bdd\\bdd-workflow-command-plan.md",
-      "modified_timestamp": 1762820862.4399986,
+      "path": "behaviors\\bdd\\.pytest_cache\\README.md",
+      "modified_timestamp": 1762564959.1628227,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -71,7 +47,7 @@
       "file": "bdd-code-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\code\\bdd-code-cmd.md",
-      "modified_timestamp": 1762820862.4234104,
+      "modified_timestamp": 1762894958.2852354,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -79,7 +55,7 @@
       "file": "bdd-code-correct-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\code\\bdd-code-correct-cmd.md",
-      "modified_timestamp": 1762831753.8556213,
+      "modified_timestamp": 1762876504.9268506,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -87,7 +63,15 @@
       "file": "bdd-code-generate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\code\\bdd-code-generate-cmd.md",
-      "modified_timestamp": 1762820862.02877,
+      "modified_timestamp": 1762894961.5593278,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-code-run-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\code\\bdd-code-run-cmd.md",
+      "modified_timestamp": 1762897402.6556008,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -95,7 +79,15 @@
       "file": "bdd-code-validate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\code\\bdd-code-validate-cmd.md",
-      "modified_timestamp": 1762820862.039162,
+      "modified_timestamp": 1762876507.600621,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-run-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\run\\bdd-run-cmd.md",
+      "modified_timestamp": 1762897741.3177767,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -103,7 +95,7 @@
       "file": "bdd-scaffold-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\scaffold\\bdd-scaffold-cmd.md",
-      "modified_timestamp": 1762830818.3333976,
+      "modified_timestamp": 1762897041.6218827,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -111,7 +103,7 @@
       "file": "bdd-scaffold-correct-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\scaffold\\bdd-scaffold-correct-cmd.md",
-      "modified_timestamp": 1762831753.8543975,
+      "modified_timestamp": 1762874849.0394468,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -119,7 +111,7 @@
       "file": "bdd-scaffold-generate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\scaffold\\bdd-scaffold-generate-cmd.md",
-      "modified_timestamp": 1762805068.9015894,
+      "modified_timestamp": 1762874849.0394468,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -127,7 +119,7 @@
       "file": "bdd-scaffold-validate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\scaffold\\bdd-scaffold-validate-cmd.md",
-      "modified_timestamp": 1762805068.903309,
+      "modified_timestamp": 1762874849.0404468,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -135,7 +127,7 @@
       "file": "bdd-signature-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\signature\\bdd-signature-cmd.md",
-      "modified_timestamp": 1762812056.1847563,
+      "modified_timestamp": 1762897041.8331432,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -143,7 +135,7 @@
       "file": "bdd-signature-correct-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\signature\\bdd-signature-correct-cmd.md",
-      "modified_timestamp": 1762831753.8521492,
+      "modified_timestamp": 1762874849.0414457,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -151,7 +143,15 @@
       "file": "bdd-signature-generate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\signature\\bdd-signature-generate-cmd.md",
-      "modified_timestamp": 1762812097.8438804,
+      "modified_timestamp": 1762874849.0424466,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-signature-run-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\signature\\bdd-signature-run-cmd.md",
+      "modified_timestamp": 1762897405.451835,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -159,7 +159,7 @@
       "file": "bdd-signature-validate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\signature\\bdd-signature-validate-cmd.md",
-      "modified_timestamp": 1762812101.102881,
+      "modified_timestamp": 1762874849.0424466,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -167,7 +167,7 @@
       "file": "bdd-test-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\test\\bdd-test-cmd.md",
-      "modified_timestamp": 1762814051.2596006,
+      "modified_timestamp": 1762897041.8109584,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -175,7 +175,7 @@
       "file": "bdd-test-correct-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\test\\bdd-test-correct-cmd.md",
-      "modified_timestamp": 1762831753.8532827,
+      "modified_timestamp": 1762874849.0439525,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -183,7 +183,15 @@
       "file": "bdd-test-generate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\test\\bdd-test-generate-cmd.md",
-      "modified_timestamp": 1762814051.2583282,
+      "modified_timestamp": 1762874849.04496,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "bdd-behavior",
+      "file": "bdd-test-run-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\bdd\\test\\bdd-test-run-cmd.md",
+      "modified_timestamp": 1762897404.1821551,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -191,7 +199,7 @@
       "file": "bdd-test-validate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\test\\bdd-test-validate-cmd.md",
-      "modified_timestamp": 1762814051.2583282,
+      "modified_timestamp": 1762874849.04496,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -199,7 +207,7 @@
       "file": "bdd-workflow-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\workflow\\bdd-workflow-cmd.md",
-      "modified_timestamp": 1762818255.954167,
+      "modified_timestamp": 1762874849.04496,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -207,7 +215,7 @@
       "file": "bdd-workflow-generate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\workflow\\bdd-workflow-generate-cmd.md",
-      "modified_timestamp": 1762820862.4492726,
+      "modified_timestamp": 1762874849.0464654,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -215,7 +223,7 @@
       "file": "bdd-workflow-validate-cmd.md",
       "type": ".md",
       "path": "behaviors\\bdd\\workflow\\bdd-workflow-validate-cmd.md",
-      "modified_timestamp": 1762820862.4628398,
+      "modified_timestamp": 1762874849.047474,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -223,7 +231,7 @@
       "file": "bdd_runner_test.py",
       "type": ".py",
       "path": "behaviors\\bdd\\bdd_runner_test.py",
-      "modified_timestamp": 1762805068.903821,
+      "modified_timestamp": 1762804189.4374318,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -231,15 +239,7 @@
       "file": "conftest.py",
       "type": ".py",
       "path": "behaviors\\bdd\\conftest.py",
-      "modified_timestamp": 1762805068.905825,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "bdd-behavior",
-      "file": "test_bdd_sample.py",
-      "type": ".py",
-      "path": "behaviors\\bdd\\test_bdd_sample.py",
-      "modified_timestamp": 1762805068.9119816,
+      "modified_timestamp": 1762804014.635432,
       "purpose": "[AI should update this purpose after reviewing the file]"
     }
   ]

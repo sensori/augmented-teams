@@ -57,8 +57,17 @@
 
 2. **Algorithms and Logic**:
    - What exact algorithms are needed for generation? (We are not certain - AI must determine)
-   - What heuristic logic is required? (AI must determine based on target entity and purpose)
-   - **Feature Rule Integration**: If the command is inside a feature that's associated with a rule file (`{feature_name}-rule.mdc`), determine if any of the principles in that rule apply to this command and ensure heuristics are created connected to those principles using the existing architecture (CodeAugmentedCommand wrapper pattern)
+   - **CRITICAL - Heuristic Requirements** (AI MUST analyze):
+     * Read feature rule file: `{feature_name}-rule.mdc` (if exists)
+     * Identify which principles apply to this command
+     * For EACH applicable principle, determine:
+       - Does this principle need automated validation? (YES/NO)
+       - What patterns should the heuristic detect?
+       - What violations should the heuristic report?
+     * Plan heuristic classes: `{command_name}{PrincipleAspect}Heuristic`
+     * Plan `_get_heuristic_map()` return dictionary: `{principle_number: HeuristicClass}`
+     * **IF feature has rule file with applicable principles**: Heuristics are MANDATORY
+     * **IF no applicable principles**: Document why heuristics aren't needed
    - What execution flow is needed? (AI must determine)
 
 3. **Command Relationships**:
@@ -141,12 +150,55 @@ Create `/{feature_name}-{command_name}` command that generates all files needed 
   - `validate()` → `_validate_structure()`, `_validate_content()`, `_validate_integration()`
   - Use guard clauses to reduce nesting
 
-### CodeAugmented{CommandClassName}Command Class Structure (Example - AI must determine actual structure)
-- **AI must determine**: What wrapper pattern is appropriate (CodeAugmentedCommand, IncrementalCommand, WorkflowPhaseCommand, etc.)
-- Example pattern: Extends `CodeAugmentedCommand` (like `CodeAugmentedFeatureCommand`)
-- Example pattern: Wraps `{CommandClassName}Command` instance for code validation
-- **AI must determine**: What validation logic and heuristics are needed
-- **Feature Rule Integration**: If the feature has an associated rule file (`{feature_name}-rule.mdc`), analyze the principles defined in that rule and create heuristics that validate compliance with those principles. The heuristics should be integrated into the CodeAugmentedCommand wrapper using the existing architecture pattern
+### CodeAugmented{CommandClassName}Command Class Structure (MANDATORY Pattern)
+
+**CRITICAL: Heuristic Implementation Steps are REQUIRED for this pattern to work**
+
+1. **Wrapper Pattern**:
+   - Extends `CodeAugmentedCommand`
+   - Wraps `{CommandClassName}Command` instance
+   - Provides CLI integration via `handle_cli()` method
+
+2. **Heuristic Mapping (MANDATORY)**:
+   ```python
+   def _get_heuristic_map(self):
+       """Map principle numbers to heuristic classes
+       
+       CRITICAL: This method MUST be implemented.
+       Return empty dict {} ONLY if:
+       - Feature has no rule file, OR
+       - Rule file has no applicable principles for this command
+       
+       Otherwise, map principle numbers to heuristic classes.
+       """
+       # AI MUST determine based on feature rule file analysis
+       return {
+           principle_number: HeuristicClass,
+           # ... more mappings
+       }
+   ```
+
+3. **Heuristic Classes (Create for each mapped principle)**:
+   ```python
+   class {CommandName}{PrincipleAspect}Heuristic(CodeHeuristic):
+       def __init__(self):
+           super().__init__(detection_pattern="{command_name}_{aspect}")
+       
+       def scan(self, content):
+           """Scan content for violations
+           
+           Returns: list of (line_number, message) tuples
+           """
+           violations = []
+           # AI MUST determine scanning logic based on principle
+           return violations
+   ```
+
+**Feature Rule Integration Decision Tree**:
+- ✅ Feature has rule file (`{feature_name}-rule.mdc`) → Analyze principles
+  - ✅ Principles apply to this command → Create heuristics (MANDATORY)
+  - ❌ No principles apply to this command → Document why, empty map OK
+- ❌ No rule file exists → Empty map OK (no principles to validate)
 
 ### File Generation Logic (AI must determine actual algorithms)
 **AI must analyze the command purpose and determine:**
@@ -186,7 +238,12 @@ Create `/{feature_name}-{command_name}` command that generates all files needed 
 - Validate CLI handlers added to main() function
 - Validate rule file has command reference added to "Executing Commands" section
 - Use code heuristics to scan for violations (via CodeAugmentedCommand wrapper)
-- **Feature Rule Integration**: If the feature has an associated rule file (`{feature_name}-rule.mdc`), validate that the command implementation complies with the principles defined in that rule. Create heuristics that check for compliance with applicable principles and integrate them into the validation logic
+- **Heuristic Validation** (if feature has rule file):
+  * Verify CodeAugmented wrapper class implements `_get_heuristic_map()` method
+  * Check that `_get_heuristic_map()` returns non-empty dict if feature has rule file with applicable principles
+  * Validate heuristic classes are defined for mapped principles
+  * Ensure heuristics extend `CodeHeuristic` base class
+  * Verify heuristics implement `scan()` method properly
 
 ### CLI Integration
 Add to `main()`:

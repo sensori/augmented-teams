@@ -1,0 +1,560 @@
+---
+description: Story writing practices and standards for agile teams
+globs: ["**/*story*.md", "**/*story*.txt", "**/story-map*.md", "**/story-map*.txt", "**/*epic*.md", "**/*feature*.md"]
+alwaysApply: false
+---
+**When** writing user stories for agile development,
+**then** follow these principles to ensure stories are well-structured, testable, valuable, and properly sized for effective planning and delivery.
+
+Stories should be written in business language that stakeholders understand, focus on user and system behavior rather than tasks, be appropriately sized for planning (3-12 day range), and include clear acceptance criteria that define when a story is complete.
+
+**Executing Commands:**
+* `/story-shape` — Create story map shell and elaborate/extrapolate scope
+* `/story-market-increments` — Identify marketable increments of value
+* `/story-discovery` — Refine increments, apply practices, groom stories
+* `/story-explore` — Write acceptance criteria, refine map, define system stories
+* `/story-specification-scenarios` — Create scenario-based specifications
+* `/story-specification-examples` — Create example-based specifications
+* `/story-discovery-explore` — Combined discovery and exploration workflow
+
+## Conventions
+
+Naming conventions, file locations, and structural conventions for stories and story maps.
+
+* **Story Map Structure**: Epic → Feature → Story hierarchy
+* **Story Format**: Optional "As a <User> I want to <Action> So that <Value>" format, but focus should be on acceptance criteria
+* **Story File Naming**: Use descriptive names like `story-map.md`, `epic-{name}.md`, `feature-{name}.md`, `story-{name}.md`
+* **Acceptance Criteria Format**: Written in behavior form using "When...then..." or "Given...When...Then..." format
+* **Story Size Range**: Most stories should fall into a 3-12 day effort range
+* **Story Map Location**: Story maps typically in `docs/` folder or root directory
+* **Story Title Pattern**: Use verb/noun format (e.g., "Place order", "Validate payment")
+
+## Section 0: Universal Principles
+
+⚠️ **Universal** - These principles apply to ALL commands across ALL stages
+
+### Principle 0.1: Stories Are Action-Oriented and Describe Interactions
+
+Stories must focus on user interactions and observable system behavior, not development tasks or system internals.
+
+**[DO]** (Agent-Relevant):
+* Focus stories on user interactions and how the system behaves as observed by users
+* Describe interactions between users and systems
+* Write stories so they can be tested
+* Ensure stories can be developed and tested in a matter of days
+* Make stories action-oriented statements of user and system behavior
+* Use behavioral language: "submits", "views", "validates", "sends", "displays"
+* Describe observable behavior: "User submits order", "System validates payment"
+
+**[DON'T]** (Agent-Relevant):
+* Focus on delivery or development tasks required to build a system
+* Focus on system internals (technical stories)
+* Write stories that don't represent a small increment of system behavior in response to an end user action
+* Use development task language: "implement", "create", "refactor", "optimize", "fix", "build", "set up"
+* Use technical implementation details: "query database", "call API", "update table", "refactor code"
+* Write technical stories that describe low-level internal behavior we don't care about
+
+**[Structural Patterns]**:
+* **Action-Oriented Pattern**: `[Actor] [action] [object]` or `System [behavioral verb] [noun]`
+* **System Story Pattern** (✅): `System [validates|sends|processes|displays] [noun]` - Observable behavior
+* **Technical Story Pattern** (❌): `[implement|create|refactor|optimize|fix|build] [component]` - Development task
+
+**[Examples]**:
+* ✅ **DO** (User/System Stories): "Customer places order", "System validates payment", "User views dashboard", "Payment service processes transaction"
+* ❌ **DON'T** (Technical Stories): "Implement order placement", "Create payment validation", "Build dashboard view", "Refactor payment service", "Optimize database queries"
+
+### Principle 0.2: INVEST Principles
+
+Stories must follow INVEST principles: Independent, Negotiable, Valuable, Estimable, Small, Testable.
+
+**[DO]** (Agent-Relevant):
+* Ensure stories are Negotiable, Testable, Valuable, Estimate-able, Small, and Independent
+* Write stories that are a unit of scope and value
+* Deliver stories in features and increments
+* Write stories so they can be tested
+* Ensure stories can be developed and tested in a matter of days
+
+**[DON'T]** (Agent-Relevant):
+* Create stories that violate INVEST principles
+* Write stories that are too large or interdependent
+
+**[Structural Patterns]**:
+* **Small**: 3-12 day effort range, complete interaction flow, 2-5 acceptance criteria
+* **Independent**: Can be delivered without other stories, no blocking dependencies
+* **Testable**: Has acceptance criteria in behavior form, observable outcomes
+* **Valuable**: Delivers measurable value independently
+* **Negotiable**: Details can be discussed (not over-specified)
+* **Estimate-able**: Team can assess effort/complexity
+
+**[Examples]**:
+* ✅ **DO**: Story with 3-5 acceptance criteria, complete flow, independent value
+* ❌ **DON'T**: Story with 8+ acceptance criteria, multiple flows, requires other stories
+
+**[Further Recommendations for Humans]**:
+* Ensure stories are worked on by the entire team (requires team assignment)
+* Use stories as placeholders for conversations and collaboration (requires team interaction)
+
+## Section 0.5: All Phases Principles
+
+⚠️ **All Phases** - These principles apply to ALL commands across Story Shaping, Discovery, and Exploration
+
+### Principle 0.5.1: Epic/Feature/Story Hierarchy
+
+Story maps must use a consistent Epic → Feature → Story hierarchy structure.
+
+**[DO]** (Agent-Relevant):
+* Use Epic, Feature, Story hierarchy structure
+* Organize stories within features and features within epics
+
+**[DON'T]** (Agent-Relevant):
+* Skip hierarchy levels without justification
+* Mix hierarchy levels inconsistently
+
+**[Structural Patterns]**:
+* **Format**: Epic → Feature → Story (nested hierarchy)
+* **Epic**: High-level business capability or initiative
+* **Feature**: Cohesive set of functionality within epic
+* **Story**: Small increment of behavior within feature
+* **Detection**: Check for proper nesting, consistent level naming
+
+**[Examples]**:
+* ✅ **DO**:
+  ```
+  Epic: Order Management
+    Feature: Order Placement
+      Story: Customer places order
+      Story: System validates payment
+    Feature: Order Fulfillment
+      Story: System processes order
+  ```
+* ❌ **DON'T**: Stories at epic level, features missing, inconsistent structure
+
+## Section 1: Story Shaping Principles
+
+⚠️ **Stage: Story Shaping** - These principles apply to all Story Shaping stage commands
+
+### Principle 1.1: Focus Story Maps on User AND System Activities
+
+⚠️ **Commands: story-shape**
+
+Story maps must outline both user and system activities, not tasks. Stories should balance being fine-grained while remaining testable and valuable.
+
+**[DO]** (Agent-Relevant):
+* Focus story maps on both user AND system activities
+* Use story maps to outline user and system behavior
+* Break/group stories so that most fall into a 3-12 day effort range
+* Enable frequent feedback by decomposing the work into smaller items
+* Enable high quality feedback by grouping work into meaningful chunks
+* Include both user activity patterns ("User submits", "Customer places") AND system activity patterns ("System validates", "System sends")
+
+**[DON'T]** (Agent-Relevant):
+* Arbitrarily decompose stories to a functional level, regardless of size
+* Focus only on user activities (ignore system activities)
+* Focus only on tasks (instead of activities)
+* Arbitrarily decompose stories to a functional level, regardless of size, whenever some content is available
+
+**[Structural Patterns]**:
+* **User Activity Detection**: Contains patterns like `^(User|Customer|Admin|\w+)\s+\w+` with user actions (submits, views, places)
+* **System Activity Detection**: Contains patterns like `^(System|\w+)\s+(validates|sends|processes|displays|notifies)`
+* **Task Detection** (avoid): Contains `\b(implement|create|build|set up|write|develop)\b`
+* **Validation**: Story map must contain BOTH user activity patterns AND system activity patterns
+
+**[Examples]**:
+* ✅ **DO**:
+  - User activities: "User submits order", "Customer views products"
+  - System activities: "System validates payment", "System sends confirmation"
+* ❌ **DON'T**:
+  - Only user activities: "User submits order", "User views products" (missing system activities)
+  - Only tasks: "Implement order submission", "Create payment validation" (not activities)
+
+**[Further Recommendations for Humans]**:
+* Ask "how big or small are the stories in the map?" when promoted to production
+* **DON'T**: Build the map in absence of the people who can estimate the work
+
+### Principle 1.2: Balance Fine-Grained with Testable/Valuable
+
+⚠️ **Commands: story-shape**
+
+Stories must balance being fine-grained enough for frequent delivery while remaining testable and valuable as independent units.
+
+**[DO]** (Agent-Relevant):
+* Balance fine-grained stories with testable/valuable stories
+* Ensure stories are fine-grained enough to enable frequent feedback
+* Ensure stories are grouped into meaningful chunks for high quality feedback
+* Validate that a business expert can understand the language of most of the stories
+* Focus the language on the business domain
+* Create lightweight but precise documentation
+
+**[DON'T]** (Agent-Relevant):
+* Create stories that are too fine-grained without being testable or valuable
+* Create stories that are too large to be testable or deliverable quickly
+* Use generic function, verbs, nouns without context
+* Use overly technical, IT concepts, unless core to domain being discussed
+
+**[Structural Patterns]**:
+* **Too Fine-Grained**: Single element, no value, can't test independently, 1 acceptance criterion
+* **Appropriate**: Complete interaction flow, 2-5 acceptance criteria, delivers value, testable independently
+* **Too Large**: Multiple flows, 6+ acceptance criteria, multiple components, requires multiple stories
+
+**[Examples]**:
+* ✅ **DO**: "Customer places order" (complete flow, testable, valuable)
+* ❌ **DON'T**: "Change button color" (too fine-grained, no value)
+* ❌ **DON'T**: "Customer places order and views history and updates profile" (too large, multiple flows)
+
+### Principle 1.3: Use Business Language That is Specific and Precise
+
+⚠️ **Commands: story-shape**
+
+Stories should use business language that is specific, precise, and understandable by business experts. Language should emphasize performing operations on explicit things.
+
+**[DO]** (Agent-Relevant):
+* Ground the map in business language that is specific and precise
+* Focus the language on the business domain
+* Use verb/noun language
+* Use language that emphasizes performing an operation on an explicit thing
+* Make the map easy to walk through (it tells a story)
+* Use domain-specific terms: "order", "customer", "payment", "inventory"
+* Use specific verb/noun combinations: "[Actor] [specific verb] [specific noun]"
+
+**[DON'T]** (Agent-Relevant):
+* Use generic functions, verbs, nouns without context
+* Use overly technical IT concepts, unless core to domain being discussed
+* Use static functional concepts
+
+**[Structural Patterns]**:
+* **Business Language Pattern**: `[Actor] [specific verb] [specific noun]` (e.g., "Customer places order")
+* **Generic Pattern** (avoid): `^\s*(Process|Handle|Manage|Get|Set)\s*$` or single word
+* **Technical Pattern** (avoid): `\b(API|database|endpoint|query|call)\b`, `\w+\(\)`
+* **Static Functional** (avoid): "[Noun] Management", "[Noun] Processing"
+* **Active Behavioral** (prefer): "[Verb] [noun]" (e.g., "Place order", "Validate payment")
+
+**[Examples]**:
+* ✅ **DO**: "Customer places order", "System validates payment", "User views dashboard"
+* ❌ **DON'T**: "Process order" (generic), "Order Management" (static), "getOrder()" (code pattern)
+
+### Principle 1.4: Use Active Behavioral Language
+
+⚠️ **Commands: story-shape**
+
+Stories should favor active behavioral language over functional/capability language.
+
+**[DO]** (Agent-Relevant):
+* Favor active behavioral language over functional/capability breakup
+* Use story maps to outline user and system behavior (NOT tasks)
+* Use action verbs: "submits", "views", "validates", "sends", "displays"
+* Describe behaviors: "[Actor] [action] [object]"
+
+**[DON'T]** (Agent-Relevant):
+* Use functional or capability-based language instead of behavioral language
+* Focus on tasks instead of behaviors
+* Use capability nouns: "Management", "Processing", "Administration"
+* Use task verbs: "implement", "create", "build", "set up"
+
+**[Examples]**:
+* ✅ **DO**: "Place order" (active behavior), "Validate payment" (active behavior)
+* ❌ **DON'T**: "Order Management" (capability), "Implement order placement" (task)
+
+### Principle 1.5: Identifying Marketable Increments of Value
+
+⚠️ **Commands: story-market-increments**
+
+Identify marketable increments of value during Story Shaping through proper story mapping and extrapolation.
+
+**[DO]**:
+* Identify marketable increments of value during Story Shaping
+* Do just enough story mapping to extrapolate how many epics, features, and stories make up an increment
+* Continually identify and refine marketable increments
+
+**[DON'T]**:
+* Over-elaborate story mapping during shaping
+* Skip increment identification
+
+### Principle 1.6: Relative Sizing Upstream
+
+⚠️ **Commands: story-market-increments**
+
+Use relative sizing upstream for larger buckets of scope by comparing against previously completed work.
+
+**[DO]**:
+* Use relative sizing upstream for larger buckets of scope
+* Compare and contrast new work against previously completed work
+* Relatively size increments and initiatives against each other
+* Relatively size against previously delivered increments that are similar in platform and team skills
+* Conduct relative sizing where size actually matters (upstream, larger scope)
+
+**[DON'T]**:
+* Use relative sizing only at story level
+* Size work without comparing to similar previously completed work
+
+## Section 2: Discovery Principles
+
+⚠️ **Stage: Discovery** - These principles apply to all Discovery stage commands
+
+### Principle 2.1: Refining Marketable Increments on Story Map
+
+⚠️ **Commands: story-discovery**
+
+Refine marketable increments on the story map during Discovery based on new insights.
+
+**[DO]**:
+* Refine marketable increments on story map during Discovery
+* Update story map based on discovery insights
+* Ensure increments are well-defined
+* Continually identify and refine marketable increments
+
+**[DON'T]**:
+* Skip increment refinement during discovery
+* Ignore discovery insights when updating story map
+
+### Principle 2.2: Story Mapping Practices
+
+⚠️ **Commands: story-discovery**
+
+Apply story mapping practices that encourage good practices and avoid anti-patterns when refining story maps, planning, and grooming stories.
+
+**[DO]** (Agent-Relevant):
+* Focus on user AND system activities (not just user activities or tasks)
+* Balance fine-grained stories with testable/valuable stories (3-12 day range where applicable)
+* Use business language that is specific, precise, and behavioral
+* Use active behavioral language to describe story activities
+
+**[DON'T]** (Agent-Relevant):
+* Arbitrarily decompose stories regardless of size whenever some content is available
+* Use generic functions, verbs, nouns without context
+* Use overly technical IT concepts
+* Use static functional concepts
+
+**[Further Recommendations for Humans]**:
+* **DON'T**: Build map without people who can estimate
+
+### Principle 2.3: Story Mapping Estimation and Counting
+
+⚠️ **Commands: story-discovery**
+
+Use story counts and throughput-based planning rather than detailed estimation for every story.
+
+**[DO]** (Agent-Relevant):
+* Add story counts to epics and features where exact stories are unknown (extrapolation)
+* Use story counts instead of detailed story lists when completing the full map is not desired
+* Mark extrapolated story counts (e.g., "~X stories" or "Extrapolated: ~X stories")
+* Use relative sizing upstream (initiative/increment level)
+* Switch from estimating story details to simply counting stories
+
+**[DON'T]** (Agent-Relevant):
+* Require complete story decomposition before adding counts to the map
+* Estimate only at story level (should add counts upstream)
+* Focus on detailed story estimation when mapping (use counts instead)
+
+### Principle 2.4: Story Grooming
+
+⚠️ **Commands: story-discovery**
+
+Groom stories to ensure they are appropriately sized, clear, and ready for delivery.
+
+**[DO]** (Agent-Relevant):
+* Identify stories that are too ambiguous
+* Split work into smaller stories before accepting
+* Ensure stories are small (can be completed quickly)
+
+**[DON'T]** (Agent-Relevant):
+* Accept stories that are too ambiguous
+* Accept stories that are too large
+
+**[Further Recommendations for Humans]**:
+* Use sprint planning and story grooming as opportunity to reject stories that are too ambiguous
+* Size enough work based on actual throughput
+
+## Section 3: Story Exploration Principles
+
+⚠️ **Stage: Story Exploration** - These principles apply to all Story Exploration stage commands
+
+### Principle 3.1: Writing Story Acceptance Criteria
+
+⚠️ **Commands: story-explore**
+
+Define acceptance criteria for every story using behavior form and testable language.
+
+**[DO]** (Agent-Relevant):
+* Define acceptance criteria for every story in next feature/slice
+* Write acceptance criteria in behavior form or domain-oriented form
+* Use "When...then..." format or similar behavioral language
+* Ensure criteria are testable and define clear boundaries
+* Make acceptance criteria the main focus (story summary provides context)
+
+**[DON'T]** (Agent-Relevant):
+* Skip acceptance criteria for stories
+* Write acceptance criteria in technical or task-oriented language
+* Make story summary the main focus (acceptance criteria should be primary)
+
+**[Structural Patterns]**:
+* **Format**: `When [condition], then [outcome]` or `Given [context], When [action], Then [outcome]`
+* **Behavior Form**: Uses behavioral language, describes user/system interactions, observable outcomes
+* **Technical Form** (avoid): Uses code patterns, implementation details, function calls
+
+**[Examples]**:
+* ✅ **DO**:
+  - "When user submits order, then system validates payment and sends confirmation"
+  - "When payment is valid, then system sends confirmation email"
+  - "When user views dashboard, then system displays recent orders"
+* ❌ **DON'T**:
+  - "When payment.validate() is called, then return true" (code pattern)
+  - "When database query executes, then return results" (technical)
+  - "When API endpoint is hit, then return JSON" (implementation detail)
+
+**[Further Recommendations for Humans]**:
+* Share common understanding of the next feature/slice starting delivery (requires team collaboration)
+
+### Principle 3.2: Refining Story Map During Exploration
+
+⚠️ **Commands: story-explore**
+
+Refine, merge, or split stories during exploration to ensure they are at an appropriate level of detail.
+
+**[DO]**:
+* Refine/merge/split stories as necessary during exploration
+* Ensure stories expressed at small/similar level of details
+* Update story map based on exploration insights
+* Keep focus on completeness from user/system behavior perspective
+
+**[DON'T]**:
+* Skip story refinement during exploration
+* Leave stories at inconsistent levels of detail
+* Lose focus on user/system behavior completeness
+
+### Principle 3.3: Defining System Level Stories
+
+⚠️ **Commands: story-explore**
+
+Identify and define system-level stories, not just user-facing stories.
+
+**[DO]**:
+* Identify and define system-level stories (not just user-facing)
+* Ensure system behavior is captured
+* Focus on how system behaves in response to user interactions
+* Document system activities alongside user activities
+
+**[DON'T]**:
+* Focus only on user-facing stories
+* Ignore system behavior
+* Skip system-level story definition
+
+### Principle 3.4: Story Specification
+
+⚠️ **Commands: story-specification-scenarios, story-specification-examples**
+
+Document story specifications with scenarios and examples that provide detailed context for implementation.
+
+**[DO]** (Agent-Relevant):
+* Refine understanding of stories and their solution
+* Document story specifications with scenarios and examples
+* Create specification scenarios that describe detailed interactions
+* Use normal examples for concrete, specific use cases
+* Use parameterized examples when multiple similar cases differ only in data
+* Link scenarios to stories (one story can have multiple scenarios)
+* Link examples to scenarios (scenarios contain examples)
+* Cover happy path, edge cases, and error cases in scenarios
+
+**[DON'T]** (Agent-Relevant):
+* Skip documenting story specifications
+* Create scenarios without examples
+* Use parameterized examples when normal examples would be clearer
+* Create examples without linking them to scenarios
+* Skip scenarios for stories (scenarios provide detailed context)
+
+**[Structural Patterns]**:
+* **Story → Scenario Relationship**: One story can have multiple scenarios
+* **Scenario → Example Relationship**: Scenarios contain examples (normal and/or parameterized)
+* **Normal Example Format**: Concrete values, specific data points
+* **Parameterized Example Format**: `<parameter>` placeholders with Examples table
+* **Scenario Format**: Given/When/Then structure with narrative flow
+
+**[Examples]**:
+* ✅ **DO**:
+  - Story with multiple scenarios covering different paths
+  - Scenarios with normal examples for concrete cases
+  - Parameterized examples for validation rules with multiple inputs
+* ❌ **DON'T**:
+  - Stories without scenarios
+  - Scenarios without examples
+  - Examples not linked to scenarios
+
+**[Further Recommendations for Humans]**:
+* Ensure subset of team takes ownership, estimates, commits to start
+
+### Principle 3.5: Story Format and Structure
+
+⚠️ **Commands: story-explore**
+
+Use appropriate story format depending on whether story maps are present, with focus on acceptance criteria.
+
+**[DO]** (Agent-Relevant):
+* Use simple title to convey meaning (when story maps are in place)
+* Make acceptance criteria the main focus
+* Use story summary only to provide context
+* Write stories that represent a small increment of system behavior
+
+**[DON'T]** (Agent-Relevant):
+* Write "stories" that don't represent a small increment of system behavior
+* Make story summary the main focus (acceptance criteria should be primary)
+* Use story template redundantly when story maps are in place
+
+**[Structural Patterns]**:
+* **With Story Maps**: Simple title format: `[Verb] [Noun]` (e.g., "Place order")
+* **Without Story Maps**: Full format: `As a [User] I want to [Action] So that [Value]`
+* **Required Fields**: Title (verb/noun), Acceptance Criteria (behavior form)
+* **Optional Fields**: Summary/Description (provides context only)
+
+**[Examples]**:
+* ✅ **DO** (With Story Maps):
+  ```
+  Title: Place order
+  Acceptance Criteria:
+    When user submits order, then system validates payment
+    When payment is valid, then system sends confirmation
+  ```
+* ✅ **DO** (Without Story Maps):
+  ```
+  As a customer
+  I want to place an order
+  So that I can purchase items
+  
+  Acceptance Criteria:
+    When user submits order, then system validates payment
+    When payment is valid, then system sends confirmation
+  ```
+* ❌ **DON'T**: Missing acceptance criteria, summary is main focus
+
+**[Further Recommendations for Humans]**:
+* Use format that gives team insight into mind of end user (requires team discussion)
+
+## Templates
+
+Templates for story artifacts:
+
+* Story map template: `behaviors/stories/map/story-map-template.md`
+* Story template: `behaviors/stories/write/story-template.md`
+* Acceptance criteria template: `behaviors/stories/acceptance/acceptance-criteria-template.md`
+
+## Commands
+
+Commands that implement or use this rule:
+
+* `/story-shape` — Create and validate story maps with epic/feature/story hierarchy
+* `/story-shape-generate` — Generate story map structure
+* `/story-shape-validate` — Validate story map follows principles
+* `/story-market-increments` — Identify and prioritize marketable increments
+* `/story-market-increments-generate` — Generate increment identification
+* `/story-market-increments-validate` — Validate increment structure
+* `/story-discovery` — Refine increments and groom stories
+* `/story-discovery-generate` — Generate discovery artifacts
+* `/story-discovery-validate` — Validate discovery completeness
+* `/story-explore` — Write acceptance criteria and define system stories
+* `/story-explore-generate` — Generate exploration artifacts
+* `/story-explore-validate` — Validate exploration completeness
+* `/story-specification-scenarios` — Create scenario-based specifications
+* `/story-specification-scenarios-generate` — Generate scenarios
+* `/story-specification-scenarios-validate` — Validate scenarios
+* `/story-specification-examples` — Create example-based specifications
+* `/story-specification-examples-generate` — Generate examples
+* `/story-specification-examples-validate` — Validate examples
+* `/story-discovery-explore` — Combined discovery and exploration workflow

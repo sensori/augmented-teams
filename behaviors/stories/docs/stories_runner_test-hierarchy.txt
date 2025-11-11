@@ -1,0 +1,127 @@
+Stories System
+	Purpose: Enable creation, validation, and management of user stories following agile story writing practices
+
+Story Shaping
+	
+	Story Shape Command
+		
+		describe StoryShapeCommand that is generating story map
+			it should have prompting questions checked before proceeding
+			it should have generate instructions that request epic feature story hierarchy structure creation
+			it should have generate instructions that focus on user AND system activities not tasks
+			it should have generate instructions that require business language verb noun specific and precise
+			it should have generate instructions that request shell elaboration to understand full scope
+			it should have generate instructions that request epics features and stories extrapolation for increments
+			it should have generate instructions that require fine-grained balanced with testable valuable
+			it should have generate instructions that require stories sized appropriately in 3 to 12 day range
+			it should have AI instructions with principles returned
+				
+		describe StoryShapeCommand that is validating story map
+			it should have epic feature story hierarchy structure checked
+			it should have user system focus validated not tasks
+			it should have business language usage checked
+			it should have scope extrapolation and story sizing validated
+			it should have validation instructions with violations returned if found
+		
+		describe CodeAugmentedStoryShapeCommand that is generating story map
+			it should have inner StoryShapeCommand generate method delegated to
+			it should have violations scanning skipped during generation
+		
+		describe CodeAugmentedStoryShapeCommand that is validating story map
+			it should have inner StoryShapeCommand validate method delegated to
+			it should have content scanned using StoryShapeHeuristic
+			it should have violations enhanced with principle info and code snippets
+			it should have violations formatted as checklist
+			it should have violations appended to validation instructions
+		
+		describe CodeAugmentedStoryShapeCommand that is checking prompting questions
+			it should have prompting questions checked if answered in context
+			it should have prompts generated to ask user if questions not answered
+			it should have normal flow proceeded with if questions answered
+	
+	Story Market Increments Command
+		
+		describe StoryMarketIncrementsCommand that is generating increments
+			it should have prompting questions checked before proceeding
+			it should have generate instructions that request marketable increments of value identification
+			it should have generate instructions that request increments placement around the story map
+			it should have generate instructions that request increment prioritization based on business priorities
+			it should have generate instructions that request relative sizing at initiative or increment level
+			it should have generate instructions that request comparison against previous similar work
+			it should have AI instructions with principles returned
+		
+		describe StoryMarketIncrementsCommand that is validating increments
+			it should have marketable increment identification validated
+			it should have relative sizing approach checked
+			it should have increment prioritization validated
+			it should have validation instructions with violations returned if found
+		
+		describe StoryMarketIncrementsCommand that is executing workflow
+			it should have generate then validate workflow orchestrated
+			it should have generate called first if not generated
+			it should have validate called after generate completes
+		
+		describe CodeAugmentedStoryMarketIncrementsCommand that is generating increments
+			it should have inner StoryMarketIncrementsCommand generate method delegated to
+			it should have violations scanning skipped during generation
+		
+		describe CodeAugmentedStoryMarketIncrementsCommand that is validating increments
+			it should have inner StoryMarketIncrementsCommand validate method delegated to
+			it should have content scanned using StoryMarketIncrementsHeuristic
+			it should have violations enhanced with principle info and code snippets
+			it should have violations formatted as checklist
+			it should have violations appended to validation instructions
+		
+		describe CodeAugmentedStoryMarketIncrementsCommand that is checking prompting questions
+			it should have prompting questions checked if answered in context
+			it should have prompts generated to ask user if questions not answered
+			it should have normal flow proceeded with if questions answered
+
+Validation
+	Purpose: Ensure story maps and increments follow story writing principles
+	
+	Story Shape Heuristic
+		
+		describe StoryShapeHeuristic that is scanning story map content
+			it should have epic feature story hierarchy structure checked
+			it should have user system focus validated not tasks
+			it should have business language usage checked
+			it should have scope extrapolation and story sizing validated in 3 to 12 day range
+			it should have fine-grained and testable balance checked
+			it should have violations list with line numbers and messages returned
+	
+	Story Market Increments Heuristic
+		
+		describe StoryMarketIncrementsHeuristic that is scanning increment content
+			it should have marketable increment identification validated
+			it should have increment prioritization checked
+			it should have relative sizing approach validated at initiative or increment level
+			it should have violations list with line numbers and messages returned
+
+CLI Entry Point
+	Purpose: Provide command-line access to all story operations
+	
+	describe CLI Entry Point that is parsing command-line arguments
+		it should have appropriate command type selected
+		it should have action determined as generate validate or execute
+		it should have command method executed
+	
+	describe CLI Entry Point that is handling story-shape command
+		it should have StoryShapeCommand instance created
+		it should have CodeAugmentedStoryShapeCommand wrapper created
+		it should have handle cli method called with action and arguments
+		it should have results displayed to user
+	
+	describe CLI Entry Point that is handling story-market-increments command
+		it should have StoryMarketIncrementsCommand instance created
+		it should have CodeAugmentedStoryMarketIncrementsCommand wrapper created
+		it should have handle cli method called with action and arguments
+		it should have results displayed to user
+	
+	describe CLI Entry Point that is handling unknown command
+		it should have error message displayed
+		it should have error code exited with
+	
+	describe CLI Entry Point that is handling no arguments
+		it should have usage information displayed
+		it should have error code exited with

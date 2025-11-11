@@ -1,0 +1,29 @@
+# AI Agent Execution Context - Memory Reference
+
+**CRITICAL: Command Runner Execution Context**
+
+When running Python command runners (e.g., `code_agent_runner.py`, `bdd-runner.py`, `stories_runner.py`):
+
+1. **ALWAYS run from workspace root**: Commands must be executed from `C:\dev\augmented-teams` (workspace root), NOT from subdirectories
+2. **PowerShell syntax**: Use semicolon `;` to chain commands, NOT `&&`. Example: `cd C:\dev\augmented-teams; python behaviors\code-agent\code_agent_runner.py sync`
+3. **Path format**: Runner paths in command files are relative to workspace root. `behaviors/bdd/bdd-runner.py` means `C:\dev\augmented-teams\behaviors\bdd\bdd-runner.py`
+4. **Before running**: If unsure of current directory, use `cd C:\dev\augmented-teams` first, then run the command
+5. **Test runners**: Some test commands need specific working directories (e.g., Python tests run from test file's parent directory for imports)
+
+**Pattern to follow**:
+```powershell
+cd C:\dev\augmented-teams; python behaviors\[feature]\[runner].py [action] [args]
+```
+
+**Common Mistakes to Avoid**:
+- ❌ Running from subdirectory: `cd behaviors/stories; python code_agent_runner.py sync`
+- ❌ Using bash syntax in PowerShell: `cd C:\dev\augmented-teams && python ...`
+- ❌ Assuming current directory without checking
+- ❌ Using forward slashes in PowerShell paths: `python behaviors/code-agent/...`
+
+**Correct Examples**:
+- ✅ `cd C:\dev\augmented-teams; python behaviors\code-agent\code_agent_runner.py sync`
+- ✅ `cd C:\dev\augmented-teams; python behaviors\bdd\bdd-runner.py workflow test_file.py mamba`
+- ✅ `cd C:\dev\augmented-teams; python behaviors\stories\stories_runner.py story-shape generate`
+
+Never assume current directory - always navigate to workspace root first.

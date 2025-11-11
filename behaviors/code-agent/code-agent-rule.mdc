@@ -137,7 +137,7 @@ A **Command** (`.md` file) defines executable steps that implement a rule. Comma
 
 **[DO]:**
 * Include header: `### Command: `/<command-name>``
-* Include sections: `**[Purpose]:**`, `**[Rule]:**`, `**Runner:**`, `**Action 1: GENERATE**`, `**Action 2: GENERATE FEEDBACK**`, `**Action 3: VALIDATE**`, `**Action 4: VALIDATE FEEDBACK**`
+* Include sections: `**[Purpose]:**`, `**[Rule]:**`, `**Runner:**`, `**Action 1: GENERATE**`, `**Action 2: GENERATE FEEDBACK**`, `**Action 3: VALIDATE**`, `**Action 4: VALIDATE FEEDBACK**`, `**ACTION 5: CORRECT**`
 * Reference valid rule file via `**[Rule]:**` section
 * Reference valid runner path via `**Runner:**` section
 * Specify performer in each step: **User**, **AI Agent**, **Runner**, or **Code**
@@ -159,8 +159,9 @@ A **Command** (`.md` file) defines executable steps that implement a rule. Comma
 * `command_plan_template.md` - For command implementation plans
 
 **Delegate Commands:**
-* `<command-name>-generate-cmd.md` - Almost always present, delegates to generate action
-* `<command-name>-validate-cmd.md` - Almost always present, delegates to validate action
+* `<command-name>-generate-cmd.md` - Always present, delegates to generate action
+* `<command-name>-validate-cmd.md` - Always present, delegates to validate action
+* `<command-name>-correct-cmd.md` - Always present, delegates to correct action
 * `<command-name>-plan-cmd.md` - Sometimes present, delegates to plan action (optional)
 * Commands can be extended with custom delegate commands for bespoke needs
 
@@ -171,8 +172,9 @@ For features with multi-phase workflows, there are two types of commands:
    * Main command: `/<feature-name>-<phase-name>` (e.g., `/bdd-scaffold`)
    * Generate delegate: `/<feature-name>-<phase-name>-generate`
    * Validate delegate: `/<feature-name>-<phase-name>-validate`
+   * Correct delegate: `/<feature-name>-<phase-name>-correct`
    * Contains full business logic for the phase
-   * Files: `<phase-name>-cmd.md`, `<phase-name>-generate-cmd.md`, `<phase-name>-validate-cmd.md`
+   * Files: `<phase-name>-cmd.md`, `<phase-name>-generate-cmd.md`, `<phase-name>-validate-cmd.md`, `<phase-name>-correct-cmd.md`
 
 2. **Workflow Orchestrator Commands** - Lightweight dispatcher that delegates to phase-specific commands:
    * Main command: `/<feature-name>-workflow` (e.g., `/bdd-workflow`)
@@ -344,3 +346,6 @@ A **Code Agent Feature** is a collection of related behaviors organized in a sin
 * **Feature ↔ Rule:** Each feature has a main rule file that defines principles for all commands in the feature
 * **Feature ↔ Command:** Commands belong to a feature and are organized in command subdirectory of feature directory
 * **Feature ↔ Runner:** Runner file belongs to feature and implements all commands for that feature
+
+## Executing Commands
+* /code-agent-stories — Generate and validate stories

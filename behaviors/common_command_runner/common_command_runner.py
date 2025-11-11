@@ -1118,10 +1118,29 @@ class CodeAugmentedCommand:
     
     def _scan_for_violations(self):
         
+        # CRITICAL: Ensure content is loaded before scanning for violations
+        if hasattr(self.content, '_ensure_content_loaded'):
+            self.content._ensure_content_loaded()
+        
+        # DEBUG: Check content loading
+        if hasattr(self.content, '_content_lines'):
+            print(f"[DEBUG] Content loaded: {len(self.content._content_lines) if self.content._content_lines else 0} lines")
+        else:
+            print("[DEBUG] Content has no _content_lines attribute")
+        
+        # DEBUG: Check principles
+        print(f"[DEBUG] Scanning {len(self.principles)} principles")
+        
         self._violations = []
         for principle in self.principles:
+            print(f"[DEBUG] Principle {principle.principle_number}: {len(principle.heuristics) if hasattr(principle, 'heuristics') and principle.heuristics else 0} heuristics")
+            if not hasattr(principle, 'heuristics') or not principle.heuristics:
+                continue
             for heuristic in principle.heuristics:
+                heuristic_name = getattr(heuristic, 'name', type(heuristic).__name__)
+                print(f"[DEBUG] Running heuristic: {heuristic_name}")
                 heuristic_violations = heuristic.scan_content(self.content)
+                print(f"[DEBUG]   Found {len(heuristic_violations)} violations")
                 # Enhance violations with principle info and code snippets
                 for violation in heuristic_violations:
                     # Attach principle to violation
@@ -1132,6 +1151,8 @@ class CodeAugmentedCommand:
                     if not violation.code_snippet:
                         violation.code_snippet = self.content.get_code_snippet(violation.line_number) if hasattr(self.content, 'get_code_snippet') else None
                     self._violations.append(violation)
+        
+        print(f"[DEBUG] Total violations collected: {len(self._violations)}")
     
     def _format_violations(self, report_format):
         

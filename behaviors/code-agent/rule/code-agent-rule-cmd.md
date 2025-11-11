@@ -10,6 +10,7 @@
 * CLI: `python behaviors/code-agent/code_agent_runner.py generate-rule [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name]` — Generate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py validate-rule [feature-name] [rule-name]` — Validate only
 * CLI: `python behaviors/code-agent/code_agent_runner.py plan-rule [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name]` — Generate implementation plan (optional)
+* CLI: `python behaviors/code-agent/code_agent_runner.py correct-rule [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name] [chat-context]` — Correct rule based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -52,4 +53,26 @@ OR
 **Steps:**
 1. **User** reviews validation results and fixes [violation]s if needed
 2. **User** optionally calls execute, generate, or validate as needed
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/code-agent-rule-correct [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name] [chat-context]` when rule has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads rule file and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references rule file to understand how to correct rule based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - Code agent principles from rule file
+
+4. **AI Agent** corrects the rule:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures rule follows code agent principles (structure, principles, examples)
+   - Updates rule file directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated rule file path
+   - Next steps (re-validate, implement rule logic, create more rules)
 

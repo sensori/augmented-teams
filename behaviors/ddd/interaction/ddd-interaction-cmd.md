@@ -9,6 +9,7 @@
 **Runner:**
 * CLI: `python behaviors/ddd/ddd_runner.py generate-interaction [file-path]` — Document interactions
 * CLI: `python behaviors/ddd/ddd_runner.py validate-interaction [interactions-file]` — Validate interactions
+* CLI: `python behaviors/ddd/ddd_runner.py correct-interaction [file-path]` — Correct interactions based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -56,3 +57,25 @@
 **ACTION 4: VALIDATE FEEDBACK**
 **Steps:**
 1. **User** fixes violations and re-validates if needed
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/ddd-interaction-correct [file-path] [chat-context]` when interactions file has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads interactions file and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/ddd-rule.mdc` Section 11 to understand how to correct interaction analysis based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - DDD principles from Section 11
+
+4. **AI Agent** corrects the interactions file:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures interactions follow DDD principles (abstraction level, scenario structure, business-level transformations)
+   - Updates interactions file directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated interactions file path
+   - Next steps (re-validate, proceed to scaffold generation)

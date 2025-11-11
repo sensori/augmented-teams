@@ -13,6 +13,8 @@
 
 **Runner:**
 * CLI: `python behaviors/bdd/bdd-runner.py workflow [test-file] [framework] 2 --no-guard` — Execute Phase 2 (Write Tests) via workflow
+* CLI: `python behaviors/bdd/bdd-runner.py run [test-file] [framework]` — Run tests after test implementation
+* CLI: `python behaviors/bdd/bdd-runner.py correct-test [test-file]` — Correct tests based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -75,3 +77,50 @@ OR
 1. **User** fixes violations (if any) and re-invokes validation
 2. **User** continues test implementation for remaining signatures (if not complete)
 3. **User** proceeds to Write Code phase (production code implementation) if all tests complete and validation passes
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/bdd-test-correct [test-file] [chat-context]` when tests have validation errors or need updates based on chat context
+
+2. **AI Agent** reads test file and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references rule files to understand how to correct test implementations based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - BDD principles from Sections 1, 2, 3, 8, and framework-specific Section 7
+
+4. **AI Agent** corrects the test file:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures tests follow BDD principles (Arrange-Act-Assert, proper mocking, helper extraction)
+   - Updates test file directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated test file path
+   - Next steps (re-validate, proceed to Write Code phase)
+
+**ACTION 6: RUN**
+**Steps:**
+1. **User** invokes test execution via `/bdd-run [test-file] [framework]` to run tests after test implementation
+
+2. **AI Agent** (using `BDDWorkflow.run_tests()`) determines:
+   - Test file path (from user input or context)
+   - Framework (from user input, or auto-detect from test file)
+   - Working directory (test file's parent directory for proper imports and context)
+
+3. **Runner** (`BDDWorkflow.run_tests()`) executes tests:
+   - **Mamba/Python**: Runs `python -m mamba.cli [test-file]` from test file's directory
+   - **Jest/JavaScript**: Runs `npm test -- [test-file]` from project root
+   - Captures stdout, stderr, and return code
+   - Parses test results (pass/fail counts)
+
+4. **Runner** displays test execution results:
+   - Test output (stdout + stderr)
+   - Pass/fail counts
+   - Success/failure status
+
+5. **AI Agent** presents execution results to user:
+   - Test results summary
+   - Pass/fail counts
+   - Next steps (fix failing tests, proceed to code implementation phase, re-run tests)

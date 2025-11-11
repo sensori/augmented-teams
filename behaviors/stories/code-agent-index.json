@@ -1,0 +1,102 @@
+{
+  "last_updated": "Tue Nov 11 17:06:06 2025",
+  "total_behaviors": 12,
+  "behaviors": [
+    {
+      "feature": "stories",
+      "file": "stories-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\stories\\stories-rule.mdc",
+      "modified_timestamp": 1762898637.0686195,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "a.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\a.md",
+      "modified_timestamp": 1762895426.7038426,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "feature-outline.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\feature-outline.md",
+      "modified_timestamp": 1762878850.5307896,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-market-increments-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\market-increments\\story-market-increments-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-market-increments-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\market-increments\\story-market-increments-generate-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-market-increments-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\market-increments\\story-market-increments-validate-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-shape-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\shape\\story-shape-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-shape-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\shape\\story-shape-generate-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "story-shape-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\stories\\shape\\story-shape-validate-cmd.md",
+      "modified_timestamp": 1762898637.065114,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "stories_runner.py",
+      "type": ".py",
+      "path": "behaviors\\stories\\stories_runner.py",
+      "modified_timestamp": 1762897041.9444754,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "stories_runner_test.py",
+      "type": ".py",
+      "path": "behaviors\\stories\\stories_runner_test.py",
+      "modified_timestamp": 1762898637.0686195,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "stories",
+      "file": "test_heuristics.py",
+      "type": ".py",
+      "path": "behaviors\\stories\\test_heuristics.py",
+      "modified_timestamp": 1762897041.5449195,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    }
+  ]
+}

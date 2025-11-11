@@ -1,0 +1,138 @@
+SCENARIO: User creates story map shell
+
+TRIGGER: User invokes story-shape command with product vision and user goals
+
+ACTORS:
+	- User: Provides product vision, target users, goals, scope boundary
+	- StoryShapeCommand: Creates story map structure
+	- CodeAugmentedStoryShapeCommand: Wraps command with validation
+
+FLOW:
+	1. User invokes command via CLI
+	2. CodeAugmentedStoryShapeCommand checks prompting questions
+	3. If questions not answered: Command prompts user for required context
+	4. If questions answered: StoryShapeCommand.generate() executes
+	5. Command creates initial epic/feature/story hierarchy structure
+	6. Command focuses on user AND system activities (not tasks)
+	7. Command uses business language (verb/noun, specific and precise)
+	8. Command elaborates on shell to understand full scope
+	9. Command extrapolates how many epics, features, and stories make up increments
+	10. Command balances fine-grained with testable/valuable
+	11. Command ensures stories are sized appropriately (3-12 day range)
+	12. Command returns AI instructions with principles
+	13. User reviews generated story map
+	14. User invokes validation
+	15. StoryShapeHeuristic validates structure
+	16. CodeAugmentedStoryShapeCommand scans for violations
+	17. Command returns validation report with violations if found
+
+BUSINESS RULES:
+	- Story map must have both user AND system activities
+	- Stories must be sized 3-12 day range
+	- Language must be business-focused (verb/noun, specific and precise)
+	- Structure must follow epic/feature/story hierarchy
+	- Focus must be on behaviors, not tasks
+
+RESULT: Story map shell created with epic/feature/story hierarchy, ready for increment identification
+
+
+SCENARIO: User identifies marketable increments
+
+TRIGGER: User invokes story-market-increments command with existing story map
+
+ACTORS:
+	- User: Provides business priorities, market constraints, dependencies
+	- StoryMarketIncrementsCommand: Identifies marketable increments
+	- CodeAugmentedStoryMarketIncrementsCommand: Wraps command with validation
+
+FLOW:
+	1. User invokes command via CLI with existing story map
+	2. CodeAugmentedStoryMarketIncrementsCommand checks prompting questions
+	3. If questions not answered: Command prompts user for required context
+	4. If questions answered: StoryMarketIncrementsCommand.generate() executes
+	5. Command reads existing story map structure
+	6. Command identifies marketable increments of value
+	7. Command places increments around the story map (horizontal slices)
+	8. Command prioritizes increments based on business priorities
+	9. Command performs relative sizing at initiative/increment level
+	10. Command compares against previous similar work
+	11. Command returns AI instructions with principles
+	12. User reviews generated increments
+	13. User invokes validation
+	14. StoryMarketIncrementsHeuristic validates increments
+	15. CodeAugmentedStoryMarketIncrementsCommand scans for violations
+	16. Command returns validation report with violations if found
+
+BUSINESS RULES:
+	- Increments must be well-defined with clear boundaries
+	- Increments must deliver measurable value
+	- Stories within increments must be appropriately sized
+	- Dependencies between increments must be identified
+	- Prioritization must align with business goals
+
+RESULT: Marketable increments identified, prioritized, and sized, ready for discovery stage
+
+
+SCENARIO: Command validation workflow
+
+TRIGGER: User invokes validate action on any story command
+
+ACTORS:
+	- User: Requests validation
+	- Command: Inner command instance
+	- CodeAugmentedCommand: Wrapper with validation capability
+	- Heuristic: Validation heuristic for command
+
+FLOW:
+	1. User invokes validate action
+	2. CodeAugmentedCommand.validate() delegates to inner command.validate()
+	3. Inner command returns validation instructions with principles
+	4. CodeAugmentedCommand._scan_for_violations() executes
+	5. For each principle in rule:
+		a. Load heuristic from principle
+		b. Heuristic.scan_content(content) executes
+		c. Heuristic returns violations
+	6. CodeAugmentedCommand enhances violations with principle info
+	7. CodeAugmentedCommand adds code snippets to violations
+	8. CodeAugmentedCommand formats violations as checklist
+	9. CodeAugmentedCommand appends violations to validation instructions
+	10. Command returns validation report to user
+
+BUSINESS RULES:
+	- Heuristics attach to principles, not commands
+	- Violations must include principle number and name
+	- Violations must include code snippets for context
+	- Validation report must be actionable
+
+RESULT: Validation report with violations checklist, ready for user review and fixes
+
+
+SCENARIO: Prompting questions check
+
+TRIGGER: User invokes generate or plan action on story command
+
+ACTORS:
+	- User: Provides context (may or may not answer questions)
+	- Command: Command with prompting questions
+	- CodeAugmentedCommand: Wrapper that checks questions
+
+FLOW:
+	1. User invokes generate or plan action
+	2. CodeAugmentedCommand.check_prompting_questions() executes
+	3. Command checks if prompting_questions are answered in context
+	4. If questions not answered:
+		a. AI generates prompts to ask user
+		b. Command waits for user response
+		c. User provides answers
+	5. If questions answered:
+		a. Command proceeds with normal generate/plan flow
+	6. Command executes generate or plan with full context
+
+BUSINESS RULES:
+	- Questions must be command-specific
+	- Questions identify required context before command can run
+	- Check runs automatically before generate/plan
+	- User must provide answers before proceeding
+
+RESULT: Command proceeds with full context, or user is prompted for missing information
+

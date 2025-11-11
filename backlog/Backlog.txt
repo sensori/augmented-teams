@@ -14,3 +14,4 @@ access to azure container app logs
 
 
 languiages changes upstream artifacts change
+create a Powerpoint connector that is good at reading slides CommBut also goodTurning that into rules commandsheuristics and command classesand templatesand templates

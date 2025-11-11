@@ -9,6 +9,7 @@
 **Runner:**
 * CLI: `python behaviors/ddd/ddd_runner.py generate-structure [file-path]` — Analyze and generate domain map
 * CLI: `python behaviors/ddd/ddd_runner.py validate-structure [domain-map]` — Validate domain map against DDD principles
+* CLI: `python behaviors/ddd/ddd_runner.py correct-structure [file-path]` — Correct domain map based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -54,3 +55,25 @@
 **Steps:**
 1. **User** fixes violations and re-validates if needed
 2. **User** proceeds to `/ddd-interaction` to document business flows
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/ddd-structure-correct [file-path] [chat-context]` when domain map has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads domain map file and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/ddd-rule.mdc` Sections 1-10 to understand how to correct domain structure based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user
+   - DDD principles from Sections 1-10
+
+4. **AI Agent** corrects the domain map file:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures domain map follows DDD principles
+   - Updates domain map file directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated domain map file path
+   - Next steps (re-validate, proceed to interaction analysis)

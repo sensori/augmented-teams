@@ -1,2 +1,0 @@
-describe Character
-  it should have stats

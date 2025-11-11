@@ -12,6 +12,7 @@
 * CLI: `python behaviors/bdd/bdd-runner.py execute-scaffold [test-file]` — Execute full workflow (Generate → User Feedback → Validate)
 * CLI: `python behaviors/bdd/bdd-runner.py generate-scaffold [test-file]` — Generate scaffold hierarchy only
 * CLI: `python behaviors/bdd/bdd-runner.py validate-scaffold [test-file]` — Validate scaffold hierarchy only
+* CLI: `python behaviors/bdd/bdd-runner.py correct-scaffold [test-file]` — Correct scaffold based on errors and chat context
 
 **Action 1: GENERATE**
 **Steps:**
@@ -106,4 +107,26 @@ OR
 **Steps:**
 1. **User** fixes violations (if any) and re-invokes validation
 2. **User** proceeds to next phase (signature creation) if validation passes
+
+**ACTION 5: CORRECT**
+**Steps:**
+1. **User** invokes correction via `/bdd-scaffold-correct [test-file] [chat-context]` when scaffold has validation errors or needs updates based on chat context
+
+2. **AI Agent** reads scaffold file and validation errors (if any), plus chat context provided by user
+
+3. **AI Agent** references `/bdd-rule.mdc` Sections 1, 2, and 7 to understand how to correct scaffold hierarchy based on:
+   - Validation violations (if any) with line numbers and messages
+   - Chat context provided by user (e.g., "tests should focus on what code does, not what AI/human does")
+   - BDD principles from Sections 1, 2, and 7
+
+4. **AI Agent** corrects the scaffold file:
+   - Fixes validation violations (if any)
+   - Applies corrections based on chat context
+   - Ensures scaffold follows BDD principles
+   - Updates scaffold file directly
+
+5. **AI Agent** presents correction results to user:
+   - List of corrections made
+   - Updated scaffold file path
+   - Next steps (re-validate, proceed to signature creation)
 
