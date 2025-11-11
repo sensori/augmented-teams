@@ -1,29 +1,5 @@
 {
   "deployed": true,
   "feature": "clean-code",
-  "description": "Clean code practices and standards for Python and JavaScript",
-  "isSpecialized": true,
-  "specialization": {
-    "baseRule": "clean-code-rule.mdc",
-    "specializedRules": [
-      "clean-code-python-rule.mdc",
-      "clean-code-js-rule.mdc"
-    ],
-    "referenceFiles": [
-      "clean-code-python-reference.md",
-      "clean-code-js-reference.md"
-    ]
-  },
-  "commands": {
-    "validate": {
-      "description": "Validate code quality and optionally apply automated fixes (use --fix flag)",
-      "files": [
-        "clean-code-validate-cmd.md"
-      ],
-      "runner": "clean-code-runner.py",
-      "flags": ["--fix"],
-      "notes": "Replaces deprecated /clean-code-refactor command - use --fix flag for automated fixes"
-    }
-  }
+  "description": "Clean code validation and refactoring for Python and JavaScript, using framework-specific rules (clean-code-python-rule.mdc and clean-code-js-rule.mdc) that extend base clean code principles (clean-code-rule.mdc). Provides validate command to check code quality and optionally apply automated fixes."
 }
-

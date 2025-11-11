@@ -10,7 +10,7 @@ BDD tests should be written in plain language that business stakeholders can und
 
 **Executing Commands:**
 * `/bdd-validate` — Validate BDD test files against these principles
-* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, RED, GREEN, REFACTOR)
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
 
 ## Conventions
 
@@ -456,6 +456,117 @@ Scaffolding must follow all principles from Section 1 (Business Readable Languag
 * Hierarchy preservation (Section 2) - CRITICAL for domain map mapping
 * Storytelling (Section 2) - tests tell stories about domain concepts
 
+## 8. Test Implementation Phase
+
+When implementing tests from signatures (Phase 2: Write Tests), convert empty signatures to full test implementations:
+
+### 8.1 Arrange-Act-Assert Structure
+
+Organize each test with clear structure:
+- **Arrange**: Set up test data, mocks, and preconditions
+- **Act**: Call the production code under test
+- **Assert**: Verify the expected outcomes
+
+This structure makes tests readable and maintainable. Each section has a clear purpose, making it easy to understand what the test does.
+
+### 8.2 Proper Mocking
+
+Mock only at architectural boundaries:
+- **DO** mock: External dependencies (file I/O, network calls, databases, APIs)
+- **DON'T** mock: Internal classes, business logic, or the code under test
+- Extract mock creation to helper functions to reduce duplication
+
+Mocking internal code defeats the purpose of tests. Test your actual business logic by mocking only what's outside your control.
+
+### 8.3 Helper Extraction
+
+Avoid duplication through shared setup:
+- Extract duplicate test data creation to factory functions
+- Move common setup to shared context (beforeEach/before.each)
+- Create reusable helper functions for complex setup
+- Keep test bodies focused on the specific behavior being tested
+
+See Section 3 (Balance Context Sharing with Localization) for detailed guidance on helper patterns and shared setup.
+
+### 8.4 Natural Test Failures
+
+Tests call production code directly:
+- **DO**: Call production code as it will be used
+- **DON'T**: Comment out production code calls
+- If production code doesn't exist, tests fail naturally with clear error messages
+- This approach shows exactly what needs to be implemented next
+
+Modern BDD approach: write real tests that call real code. If the code doesn't exist yet, the test will fail with a clear message (e.g., "NameError: name 'create_user' is not defined"). This tells you exactly what to implement next.
+
+### 8.5 Signature Conversion
+
+Replace signature markers with full implementations:
+- Find tests marked with `# BDD: SIGNATURE` or `// BDD: SIGNATURE`
+- Replace empty bodies with Arrange-Act-Assert structure
+- Remove signature markers when implementation complete
+- Preserve all test structure and hierarchy from signatures
+- Work incrementally (~18 describe blocks per iteration)
+
+**Framework-specific examples:** See specializing rules (`bdd-mamba-rule.mdc`, `bdd-jest-rule.mdc`) for concrete syntax examples showing how to convert signatures to full test implementations in your chosen framework.
+
+## 9. Code Implementation Phase
+
+When implementing production code from tests (Phase 3: Write Code), write minimal code to make tests pass:
+
+### 9.1 Minimal Implementation
+
+Implement only what tests demand:
+- **DO**: Write simplest code that makes tests pass
+- **DON'T**: Add features, abstractions, or complexity not required by tests
+- Follow YAGNI (You Aren't Gonna Need It) principle
+- If you think "I might need this later" - you don't, the tests will tell you when you do
+
+The tests define the requirements. If there's no test for it, don't implement it.
+
+### 9.2 Make Tests Pass
+
+Focus on making failing tests pass:
+- Run tests to identify what's failing
+- Implement minimal code to fix failures
+- Verify tests pass after implementation
+- Don't add extra functionality beyond what tests verify
+
+### 9.3 Avoid Over-Engineering
+
+Keep it simple:
+- **DO**: Use simplest data structures and algorithms that work
+- **DON'T**: Create elaborate class hierarchies or abstractions prematurely
+- Start with simple solutions (e.g., dictionary before custom class)
+- Refactor later if tests demand more complexity
+
+Premature abstraction is harder to change than simple code. Let tests drive when complexity is needed.
+
+### 9.4 Check for Regressions
+
+Ensure existing tests still pass:
+- Run all tests, not just the new ones
+- Verify no regressions introduced
+- If regressions occur, fix them before proceeding
+- Maintain backwards compatibility
+
+### 9.5 Incremental Implementation
+
+Work in small batches aligned with test scope:
+- Implement code for ~18 tests per iteration (matching test implementation scope)
+- Verify tests pass after each batch
+- Continue until all tests pass
+- Keep changes focused and manageable
+
+**Framework-specific examples:** See specializing rules (`bdd-mamba-rule.mdc`, `bdd-jest-rule.mdc`) for concrete syntax examples showing how to implement production code in your chosen framework.
+
+## 10. Use ASCII-Only Characters in Test Code
+
+Test code must use only ASCII characters. Unicode symbols (checkmarks, arrows, emojis, special bullets) cause encoding errors on Windows systems and many CI/CD environments. Use plain text alternatives for test output, assertions, and any string literals in tests.
+
+This principle applies to all test code: scaffolds, signatures, test implementations, and production code that tests interact with. Always use ASCII characters for maximum compatibility across platforms and CI/CD pipelines.
+
+**Framework-specific examples:** See specialized rules (`bdd-mamba-rule.mdc` for Python, `bdd-jest-rule.mdc` for JavaScript) for concrete examples showing unicode errors and ASCII alternatives in each framework.
+
 ## Commands
 
 Commands that implement or use this rule:
@@ -464,9 +575,18 @@ Commands that implement or use this rule:
 * `/bdd-scaffold` — Generate domain scaffolding (plain English hierarchy) from domain maps
 * `/bdd-scaffold-generate` — Generate scaffold hierarchy (delegates to `/bdd-scaffold` generate action)
 * `/bdd-scaffold-validate` — Validate scaffold hierarchy (delegates to `/bdd-scaffold` validate action)
+* `/bdd-signature` — Generate test signatures (code structure) from scaffolds
+* `/bdd-signature-generate` — Generate test signatures (delegates to `/bdd-signature` generate action)
+* `/bdd-signature-validate` — Validate test signatures (delegates to `/bdd-signature` validate action)
+* `/bdd-test` — Implement test code from signatures
+* `/bdd-test-generate` — Implement test code (delegates to `/bdd-test` generate action)
+* `/bdd-test-validate` — Validate test implementations (delegates to `/bdd-test` validate action)
+* `/bdd-code` — Implement production code to make tests pass
+* `/bdd-code-generate` — Implement production code (delegates to `/bdd-code` generate action)
+* `/bdd-code-validate` — Validate production code (delegates to `/bdd-code` validate action)
 
 **Workflow Orchestrator Commands:**
-* `/bdd-workflow` — Lightweight orchestrator that delegates to appropriate phase-specific commands (Domain Scaffold, Signatures, RED, GREEN, REFACTOR)
+* `/bdd-workflow` — Lightweight orchestrator that delegates to appropriate phase-specific commands (Domain Scaffold, Signatures, Write Tests, Write Code)
 * `/bdd-workflow-generate` — Generate workflow phase output (delegates to `/bdd-workflow` generate action)
 * `/bdd-workflow-validate` — Validate workflow phase output (delegates to `/bdd-workflow` validate action)
 
@@ -474,3 +594,8 @@ Commands that implement or use this rule:
 
 **General Validation:**
 * `/bdd-validate` — Validate BDD test files against these principles
+
+## Executing Commands
+* /bdd-bdd-code — Implement production code to make tests pass following BDD principles
+
+* /bdd-bdd-test — Implement test code from signatures following BDD principles

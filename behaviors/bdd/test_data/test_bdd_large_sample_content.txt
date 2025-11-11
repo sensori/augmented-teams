@@ -1,5 +1,0 @@
-from mamba import description, context, it
-from expects import expect, equal
-
-with description('a large test suite'):
-    with context('that has many tests'):

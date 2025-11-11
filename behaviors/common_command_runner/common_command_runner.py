@@ -845,6 +845,7 @@ class Command:
         # Track execution state
         self.generated = False
         self.validated = False
+        self.corrected = False
     
     @property
     def principles(self):
@@ -883,6 +884,154 @@ class Command:
         Returns None by default if not implemented or if template loading fails.
         """
         return None
+    
+    def correct(self, chat_context: str) -> str:
+        self.corrected = True
+        
+        next_principle_number = len(self.base_rule.principles) + 1
+        content_file = self.content.file_path if self.content else 'Not specified'
+        
+        # Detect if this is a specializing rule
+        rule_type_info = ""
+        rule_file_name = getattr(self.base_rule, 'rule_file_name', 'unknown')
+        
+        # Check for common specializing rule patterns
+        if 'bdd-rule' in rule_file_name or 'clean-code-rule' in rule_file_name:
+            # Detect framework from content file
+            framework = None
+            if content_file.endswith('.py'):
+                framework = 'Python/Mamba'
+                specialized_file = rule_file_name.replace('.mdc', '-mamba.mdc')
+            elif content_file.endswith(('.js', '.ts', '.jsx', '.tsx', '.mjs')):
+                framework = 'JavaScript/Jest'
+                specialized_file = rule_file_name.replace('.mdc', '-jest.mdc')
+            
+            if framework:
+                rule_type_info = f"""
+**RULE TYPE: SPECIALIZING RULE**
+
+The base rule '{rule_file_name}' is a specializing rule with framework-specific versions.
+
+**Where to Place Changes:**
+- **Base rule** ({rule_file_name}): Add/update principle content (framework-agnostic text only, NO code examples)
+- **Specialized rule** ({specialized_file}): Add framework-specific DO/DON'T code examples
+
+**For this correction:**
+1. Detected framework: {framework} (from file extension)
+2. Principle content goes in: {rule_file_name}
+3. Code examples go in: {specialized_file}
+4. DO NOT put code examples in the base rule - they belong in specialized rules only
+
+---
+"""
+        
+        instructions = f"""You are correcting the rule file based on an error or pattern observed in chat.
+{rule_type_info}
+**CONTEXT:**
+{chat_context}
+
+**CONTENT FILE:** {content_file}
+
+---
+
+**YOUR TASK: Analyze and Propose Rule Changes**
+
+**Step 1: Check Existing Principles**
+Review the current principles and examples below. Determine:
+- Do we already have a principle that SHOULD have caught this error?
+- Is there an existing example that's similar but didn't prevent the error?
+- Is this a completely new pattern not covered by any principle?
+
+**Step 2: Decide Action and Propose**
+
+IF an existing principle should have caught this error:
+→ **IMPROVE EXISTING PRINCIPLE**
+  1. Identify which principle (by number and name)
+  2. Explain why it didn't catch this error
+  3. If principle text is unclear, propose improved wording
+  4. Propose new or improved example:
+     - DON'T: The actual error from the context (show exactly what went wrong)
+     - DO: The correct approach (show exactly what should have been done)
+
+IF this is a new pattern not covered by any principle:
+→ **ADD NEW PRINCIPLE**
+  1. Use principle number: {next_principle_number}
+  2. Propose clear, specific principle name
+  3. Write principle content explaining the rule
+  4. Create example from context:
+     - DON'T: The actual error from the context
+     - DO: The correct approach
+
+**Step 3: Reverse Engineer Examples from Context**
+
+CRITICAL: Extract examples directly from the context:
+
+A. **For DON'T Example:**
+   - Find the ACTUAL error code/text in the context above
+   - Copy it EXACTLY as it appeared (don't make up a generic version)
+   - If it's a description, convert it to concrete code showing the error
+   - Example: If context says "user put unicode in test", show actual test with unicode
+
+B. **For DO Example:**
+   - Take the DON'T example and CORRECT it
+   - Show the EXACT fix that would prevent the error
+   - Don't create an unrelated good example - fix the specific error
+   - Example: If DON'T has unicode, DO shows same test without unicode
+
+C. **Follow Existing Format:**
+   - Look at examples in the current rule below
+   - Match their code style (language, patterns, level of detail)
+   - If rule has short examples (1-3 lines), keep yours short
+   - If rule has detailed examples (5-10 lines), make yours detailed
+   - If rule uses specific naming patterns, use the same patterns
+   - Preserve the formatting style: comments, indentation, code structure
+
+**Step 4: Validate Your Proposal**
+Before presenting:
+1. Check if DO example follows ALL principles in the rule below
+2. Check if DON'T example violates ONLY the target principle
+3. If examples violate other principles, FIX THEM immediately
+4. Repeat until examples are clean
+
+**Step 5: Present Formatted Proposal**
+
+Format as:
+
+**PROPOSAL: [Improve Principle X / Add New Principle {next_principle_number}]**
+
+**Principle:** ## N. Principle Name
+[Principle content explaining the rule]
+
+**Example:**
+**[DON'T]:**
+[Explanation of why this is wrong]
+```
+[actual error code from context]
+```
+
+**[DO]:**
+[Explanation of correct approach]
+```
+[corrected code]
+```
+
+**Rationale:** [Explain why this change will prevent future errors]
+
+**Validation:** [Confirm DO follows all principles, DON'T violates only target]
+
+**Optional Heuristic:** [If automated detection makes sense, propose detection pattern]
+
+---
+
+**CURRENT RULE FILE - ANALYZE THESE PRINCIPLES:**
+
+"""
+        
+        for principle in self.principles:
+            instructions += self._format_principle(principle)
+            instructions += self._format_examples(principle.examples)
+        
+        return instructions
     
     def _build_instructions(self, base_instructions):
         

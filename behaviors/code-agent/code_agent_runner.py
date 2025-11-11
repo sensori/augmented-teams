@@ -236,6 +236,11 @@ class CodeAugmentedFeatureCommand(CodeAugmentedCommand):
                 print(plan_content)
             else:
                 print("Plan generation not available for this command.")
+        elif action == "correct":
+            chat_context = args[3] if len(args) > 3 else "User requested rule correction based on current chat context"
+            correct_instructions = command.correct(chat_context)
+            sys.stdout.reconfigure(encoding=DEFAULT_ENCODING)
+            print(correct_instructions)
 
 
 class CommandCommand(CodeAgentCommand):
@@ -1808,6 +1813,10 @@ class RuleFileGenerator:
     
     def _build_base_template_kwargs(self, principles_section: str) -> Dict:
         """Build base template kwargs common to all rule types"""
+        conventions_section = "Naming conventions, file locations, and structural conventions will be defined here."
+        templates_section = "## Templates\n\nTemplates used for generating files that follow this rule.\n\n* TODO: Add templates if applicable"
+        commands_section = "## Commands\n\nCommands that implement or use this rule.\n\n* TODO: Add commands that use this rule"
+        
         return {
             "rule_description": self.rule_purpose or f"Description for {self.rule_name} rule",
             "glob_patterns": "**/*.mdc",
@@ -1816,7 +1825,10 @@ class RuleFileGenerator:
             "behavior": "follow these practices",
             "rule_overview_text": self.rule_purpose or f"Overview for {self.rule_name} rule",
             "executing_commands": f"* `\\{self.feature_name}-{self.rule_name}` — {self.rule_purpose or f'Purpose of the {self.rule_name} rule'}",
-            "principles_section": principles_section
+            "conventions_section": conventions_section,
+            "principles_section": principles_section,
+            "templates_section": templates_section,
+            "commands_section": commands_section
         }
     
     def _build_rule_type_specific_kwargs(self) -> Dict:
@@ -2007,7 +2019,18 @@ class RuleCommand(CodeAgentCommand):
         template_name = self._get_template_name_for_type(config.rule_type)
         template_path = f"behaviors/code-agent/rule/{template_name}"
         
-        generate_instructions = f"""Generate or update rule '{config.rule_name}' for feature '{config.feature_name}' following the template and principles in {rule_name_for_base}.
+        generate_instructions = f"""
+🤖 AI AGENT ACTION REQUIRED 🤖
+
+**TASK:** Generate or update rule '{config.rule_name}' for feature '{config.feature_name}' following the template and principles in {rule_name_for_base}.
+
+**YOU MUST:**
+1. Read any available reference implementations or context from chat history
+2. Populate the generated template file with appropriate content
+3. Use rule_purpose, existing examples, and domain knowledge as content sources
+4. Follow the template structure defined in {template_path}
+
+**DO THIS NOW - Do not wait for further user action.**
 
 **Template Reference:**
 - Use the attached template file: {template_path}
@@ -2097,14 +2120,18 @@ This verification ensures examples are accurate, consistent, and serve as reliab
     def _determine_rule_location(feature_name: Optional[str], rule_name: Optional[str]) -> str:
         """Determine rule location from parameters"""
         if feature_name and rule_name:
+            # Main feature rule goes at feature root, not in rules/ subdirectory
+            if rule_name == feature_name:
+                return f"behaviors/{feature_name}/{rule_name}-rule.mdc"
+            # Other rules go in rules/ subdirectory
             return f"behaviors/{feature_name}/rules/{rule_name}-rule.mdc"
         if feature_name:
-            return f"behaviors/{feature_name}/rules"
+            return f"behaviors/{feature_name}"
         return "behaviors/"
     
     def generate(self):
         """Generate or update rule file (.mdc) with principles and examples following BDD pattern"""
-        rule_location = f"behaviors/{self.feature_name}/rules/{self.rule_name}-rule.mdc"
+        rule_location = self._determine_rule_location(self.feature_name, self.rule_name)
         rule_path = self._resolve_rule_path(rule_location)
         rule_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -2129,7 +2156,7 @@ This verification ensures examples are accurate, consistent, and serve as reliab
         if not self.feature_name or not self.rule_name:
             raise ValueError("feature_name and rule_name are required for validation")
         
-        rule_location = f"behaviors/{self.feature_name}/rules/{self.rule_name}-rule.mdc"
+        rule_location = self._determine_rule_location(self.feature_name, self.rule_name)
         rule_path = self._resolve_rule_path(rule_location)
         
         if not rule_path.exists():
@@ -2213,6 +2240,11 @@ class CodeAugmentedRuleCommand(CodeAugmentedCommand):
                 print(plan_content)
             else:
                 print("Plan generation not available for this command.")
+        elif action == "correct":
+            chat_context = args[5] if len(args) > 5 else "User requested rule correction based on current chat context"
+            correct_instructions = command.correct(chat_context)
+            sys.stdout.reconfigure(encoding=DEFAULT_ENCODING)
+            print(correct_instructions)
 
 
 class CodeAugmentedCommandCommand(CodeAugmentedCommand):
@@ -2247,6 +2279,11 @@ class CodeAugmentedCommandCommand(CodeAugmentedCommand):
                 print(plan_content)
             else:
                 print("Plan generation not available for this command.")
+        elif action == "correct":
+            chat_context = args[4] if len(args) > 4 else "User requested rule correction based on current chat context"
+            correct_instructions = command.correct(chat_context)
+            sys.stdout.reconfigure(encoding=DEFAULT_ENCODING)
+            print(correct_instructions)
     
 
 def _print_usage() -> None:
@@ -2257,10 +2294,12 @@ def _print_usage() -> None:
     print("  generate-feature [feature-name] [location] [purpose]")
     print("  validate-feature [feature-name] [location]")
     print("  plan-feature [feature-name] [location] [purpose]")
+    print("  correct-feature [feature-name] [location] [purpose] [chat-context]")
     print("  execute-command [feature-name] [command-name] [command-purpose] [target-entity]")
     print("  generate-command [feature-name] [command-name] [command-purpose] [target-entity]")
     print("  validate-command [feature-name] [command-name]")
     print("  plan-command [feature-name] [command-name] [command-purpose] [target-entity]")
+    print("  correct-command [feature-name] [command-name] [command-purpose] [target-entity] [chat-context]")
     print("  execute-rule [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name]")
     print("  generate-rule [feature-name] [rule-name] [rule-purpose] [rule-type] [parent-rule-name]")
     print("  validate-rule [feature-name] [rule-name]")
@@ -2280,10 +2319,12 @@ def _build_command_handlers() -> Dict[str, Callable]:
         "generate-feature": lambda a: CodeAugmentedFeatureCommand.handle_cli("generate", a),
         "validate-feature": lambda a: CodeAugmentedFeatureCommand.handle_cli("validate", a),
         "plan-feature": lambda a: CodeAugmentedFeatureCommand.handle_cli("plan", a),
+        "correct-feature": lambda a: CodeAugmentedFeatureCommand.handle_cli("correct", a),
         "execute-command": lambda a: CodeAugmentedCommandCommand.handle_cli("execute", a),
         "generate-command": lambda a: CodeAugmentedCommandCommand.handle_cli("generate", a),
         "validate-command": lambda a: CodeAugmentedCommandCommand.handle_cli("validate", a),
         "plan-command": lambda a: CodeAugmentedCommandCommand.handle_cli("plan", a),
+        "correct-command": lambda a: CodeAugmentedCommandCommand.handle_cli("correct", a),
         "execute-rule": lambda a: CodeAugmentedRuleCommand.handle_cli("execute", a),
         "generate-rule": lambda a: CodeAugmentedRuleCommand.handle_cli("generate", a),
         "validate-rule": lambda a: CodeAugmentedRuleCommand.handle_cli("validate", a),

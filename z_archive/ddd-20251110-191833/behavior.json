@@ -1,0 +1,35 @@
+{
+  "deployed": true,
+  "feature": "ddd-structure-analysis",
+  "description": "Domain-Driven Design structure analysis for code, text, and diagrams to build domain structures and interaction flows",
+  "isSpecialized": false,
+  "workflows": {
+    "analysis": {
+      "description": "Analyze code/text/diagrams to extract domain structure as text hierarchy",
+      "commands": [
+        "ddd-structure-analysis-cmd.md",
+        "ddd-structure-analysis-runner.py"
+      ]
+    },
+    "validation": {
+      "description": "Validate domain structure against DDD principles",
+      "commands": [
+        "ddd-validate-cmd.md",
+        "ddd-validate-runner.py"
+      ]
+    },
+    "interaction-analysis": {
+      "description": "Document domain concept interactions and business flows at domain abstraction level",
+      "commands": [
+        "ddd-interaction-analysis-cmd.md"
+      ]
+    },
+    "detailed-model": {
+      "description": "Extract detailed object model with concepts, relationships, and inheritance from domain documents",
+      "commands": [
+        "ddd-detailed-model-cmd.md"
+      ]
+    }
+  }
+}
+

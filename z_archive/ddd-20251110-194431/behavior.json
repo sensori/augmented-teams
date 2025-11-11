@@ -1,0 +1,6 @@
+{
+  "deployed": true,
+  "feature": "ddd",
+  "description": "Domain-Driven Design analysis for extracting domain structures and interaction flows from code, text, and diagrams"
+}
+

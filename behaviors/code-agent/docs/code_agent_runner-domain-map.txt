@@ -1,0 +1,496 @@
+Code Agent System
+	Purpose: Enable creation, extension, deployment and management of reusable code agent behaviors
+	
+Behavior
+	Purpose: Self-contained code agent capability with rules, commands, and execution logic
+
+Feature
+	Purpose: Reusable behavior capability that can be deployed
+	Actors: FeatureCommand (extends CodeAgentCommand), CodeAugmentedFeatureCommand (wrapper)
+	Properties:
+		- feature_name: Name of the feature
+		- location: Directory path for feature files
+		- feature_purpose: Description of feature's purpose
+		- command_folder: "feature" (for template loading)
+		- content: Content object with file_path
+		- base_rule: BaseRule from code-agent-rule.mdc
+		- generate_instructions: AI instructions for generation
+		- validate_instructions: AI instructions for validation
+		- generated: Boolean tracking if generate was called
+		- validated: Boolean tracking if validate was called
+	Methods:
+		- generate: Creates feature scaffolding and returns AI instructions
+			- Resolves feature directory path
+			- Validates feature doesn't exist
+			- Creates directory structure
+			- Generates behavior.json with deployed=false, feature name, description
+			- Generates runner file from runner_template.py
+			- Generates feature-outline.md from feature_outline_template.md
+			- Displays generation results
+			- Returns AI instructions with principles
+		- validate: Validates feature structure compliance
+			- Scans for code violations in feature files
+			- Returns validation instructions with violations if found
+		- execute: Orchestrates generate then validate workflow
+			- Checks if feature exists, sets generated flag if true
+			- Calls generate if not generated
+			- Calls validate if generated but not validated
+		- load_template: Loads and formats templates with keyword arguments
+		- plan: Not implemented
+
+Command
+	Purpose: Executable action within a behavior
+	Actors: CommandCommand (extends CodeAgentCommand), CodeAugmentedCommandCommand (wrapper)
+	Properties:
+		- feature_name: Parent feature name
+		- command_name: Name of the command
+		- command_purpose: Description of command's purpose
+		- target_entity: Entity the command operates on
+		- command_folder: "command" (for template loading)
+		- content: Content object with file_path
+		- base_rule: BaseRule from {feature-name}-rule.mdc
+		- generate_instructions: AI instructions for generation
+		- validate_instructions: AI instructions for validation
+		- generated: Boolean tracking if generate was called
+		- validated: Boolean tracking if validate was called
+	Methods:
+		- generate: Creates command files and updates existing files
+			- Resolves command directory path
+			- Validates command doesn't exist
+			- Creates command directory
+			- Generates command-cmd.md from command_template.md
+			- Generates command-generate-cmd.md that delegates to main
+			- Generates command-validate-cmd.md that delegates to main
+			- Updates runner file by appending command class
+			- Updates rule file by appending command reference
+			- Displays generation results
+			- Returns AI instructions with principles
+		- validate: Validates command structure compliance
+			- Scans for code violations in command files
+			- Returns validation instructions with violations if found
+		- execute: Orchestrates generate then validate workflow
+		- plan: Generates implementation plan
+			- Loads command_plan_template.md
+			- Fills template with feature_name, command_name, command_purpose, target_entity
+			- Builds plan instructions
+			- Saves plan to command-name-plan.md
+			- Returns plan content for user review
+		- load_template: Loads and formats templates with keyword arguments
+
+Rule
+	Purpose: Coding standard or pattern definition for behaviors
+	Actors: RuleCommand (extends CodeAgentCommand), CodeAugmentedRuleCommand (wrapper)
+	Properties:
+		- feature_name: Parent feature name
+		- rule_name: Name of the rule
+		- rule_purpose: Description of rule's purpose
+		- rule_type: Type of rule (base, specializing, specialized)
+		- parent_rule_name: Name of parent rule (for specialized rules)
+		- command_folder: "rule" (for template loading)
+		- content: Content object with file_path
+		- base_rule: BaseRule from {feature-name}-rule.mdc
+		- generate_instructions: AI instructions for generation with template reference
+		- validate_instructions: AI instructions for validation
+		- generated: Boolean tracking if generate was called
+		- validated: Boolean tracking if validate was called
+		- template_loader: RuleTemplateLoader (composition)
+		- file_generator: RuleFileGenerator (composition)
+		- validator: RuleValidator (composition)
+	Types:
+		- Base rule: Framework-agnostic foundation
+		- Specializing rule: Can have specialized rules for frameworks
+		- Specialized rule: Framework-specific refinement of specializing rule
+	Structure:
+		- Frontmatter: description, globs, alwaysApply flag
+		- Conventions: Naming, file locations, organizational patterns
+		- Principles: Numbered format (## N. Principle Name)
+		- Examples: DO/DON'T format with code blocks
+		- Templates: Optional section for rule templates
+		- Commands: List of commands that use this rule
+	Methods:
+		- generate: Creates or updates rule file
+			- Determines rule location
+			- Resolves rule path
+			- Creates rules directory if needed
+			- Delegates to file_generator.generate_rule_file if file doesn't exist
+			- Displays generation results
+			- Returns AI instructions with template reference
+			- AI enhances based on template plus existing content
+		- validate: Validates rule file structure and compliance
+			- Resolves rule path
+			- Checks file exists
+			- Delegates to validator.validate_all
+			- Checks frontmatter format, principles structure, examples format
+			- Validates specializing rules have specialized rules
+			- Validates code heuristics attached to principles not commands
+			- Validates rule instances can load examples
+			- Returns validation instructions with violations if found
+		- execute: Orchestrates generate then validate workflow
+		- load_template: Loads and formats templates with keyword arguments
+		- plan: Not implemented
+	Templates:
+		- base_rule_template.mdc: Framework-agnostic base rules
+		- specializing_rule_template.mdc: Rules that can specialize by framework
+		- specialized_rule_template.mdc: Framework-specific specialized rules
+
+Deployment
+	Purpose: Move behavior artifacts from development to active locations
+	
+	Sync
+		Purpose: Copy behavior files to deployment destinations
+		Actors: Sync Command, Code Agent Command (base)
+		Properties:
+			- Feature name (optional, syncs all if omitted)
+			- Force flag (overwrites older files)
+			- Target directories (where to discover behaviors)
+		Discovery:
+			- Scans for behavior.json files
+			- Checks deployed=true flag
+			- Returns feature info objects
+		File Routing:
+			- Rules and commands to deployment destinations
+			- Configuration files merge or create
+			- Python files excluded
+			- Docs directories excluded
+			- Draft/experimental files excluded
+		Configuration Merging:
+			- MCP config files merge with existing or create
+			- VSCode tasks.json merge with existing or create
+			- Unknown configs generate AI instructions
+		Sync Logic:
+			- Destination missing copies file, returns true
+			- Source newer copies file, returns true
+			- Source older skips unless forced, returns false
+		Result: Has-changes flag and sync summary
+		Validation:
+			- Scans for violations in sync logic
+			- Returns validation results for file routing and merging
+	
+	Index
+		Purpose: Searchable catalog of deployed behaviors
+		Actors: Index Command, Code Agent Command (base)
+		Properties:
+			- Feature name (optional, indexes all if omitted)
+			- Target directories (where to discover behaviors)
+		Discovery:
+			- Scans for behavior.json files with deployed=true
+			- Finds all mdc, md, py, json files recursively
+			- Excludes runner files, behavior.json, index files, docs, drafts
+		Entry Building:
+			- Existing entry preserves purpose, updates timestamp
+			- New entry sets purpose and timestamp
+			- Tracks available commands, rule files, runners, deployed locations
+		Output:
+			- Global index at .cursor/behavior-index.json
+			- Local indexes at feature/code-agent-index.json
+			- Metadata includes behavior count, feature count, last updated timestamp
+		Result: AI awareness of deployed capabilities
+		Validation:
+			- Structural soundness checks
+			- Entry count matches deployed count
+			- Returns validation results for index format and purpose preservation
+
+Command Execution
+	Purpose: Provide common patterns for executing behavior commands
+	
+	Basic Execution
+		Purpose: Foundation for all command execution
+		Properties:
+			- Content being processed with file path and violations
+			- Rule with principles and examples
+			- Instructions for generation and validation
+			- Execution state tracking
+		Operations:
+			- generate: Returns instructions with principles and examples
+			- validate: Returns validation instructions with principles
+			- execute: Orchestrates generate then validate workflow
+			- plan: Optional planning capability
+			- correct: Suggests rule improvements based on chat context
+		Behavior:
+			- Loads principles from rule
+			- Formats instructions with principle content and examples
+			- Tracks what operations have been performed
+	
+	Rule Correction
+		Purpose: Evolve rules based on actual usage and chat context
+		Triggered By: User requests correction or AI detects pattern worth capturing
+		Properties:
+			- Chat context with observed patterns
+			- Associated rule file
+			- Rule type (base, specializing, specialized)
+		Correction Types:
+			- New principle to capture new pattern
+			- Edit existing principle for clarity or accuracy
+			- New example on existing principle
+			- Edit existing example to fix or improve it
+			- Suggest heuristic for automated validation
+		Process Flow:
+			1. Analyze Context:
+				- Examines chat context for patterns
+				- Identifies relevant principle or need for new one
+				- Determines correction type needed
+			2. Examine Rule Structure:
+				- Checks if rule is base or specializing
+				- Identifies correct location for change
+				- Reviews existing principles and examples
+			3. Suggest Change:
+				- Proposes specific edit to rule file
+				- Includes new or modified principle text
+				- Includes new or modified examples with DO/DON'T format
+				- Suggests heuristic implementation if applicable
+				- Repeats example back to user for review
+			4. Validate Proposed Change:
+				- Runs validation with just the new example
+				- Checks proposed change against all other principles
+				- Ensures new example doesn't violate other principles
+				- Auto-fixes violations in proposed change if found
+				- Repeats validation until clean
+			5. Present to User:
+				- Shows proposed principle change
+				- Shows proposed examples
+				- Shows proposed heuristic if applicable
+				- Explains rationale for change
+			6. On User Accept:
+				- Updates rule file with new/edited principle
+				- Adds or updates examples in correct section
+				- Implements heuristic code if suggested
+				- Runs full validation to confirm
+			7. On User Reject:
+				- Discards proposed changes
+				- Optionally asks for feedback to refine suggestion
+		Compliance:
+			- Follows all rules in code-agent-rule.mdc
+			- Maintains frontmatter, conventions, principles structure
+			- Uses proper DO/DON'T example format
+			- Places examples in correct area for rule type
+			- Verifies examples don't violate any principles
+			- Ensures heuristics attach to principles not commands
+	
+	Template-Based Execution
+		Purpose: Command execution with template loading capability
+		Additional Properties:
+			- Command folder containing templates
+		Additional Operations:
+			- load_template: Loads and formats templates
+				- Locates template in command folder
+				- Reads template content
+				- Formats with provided values
+				- Returns formatted content
+			- plan: Generates implementation plan
+				- Loads plan template if available
+				- Returns formatted plan content
+	
+	Code-Validated Execution
+		Purpose: Add automated code validation using heuristics
+		Pattern: Wraps any command to add validation
+		Properties:
+			- Wrapped command instance
+			- Rule with principles
+			- Detected violations list
+		Operations:
+			- generate: Delegates to wrapped command, no violation scanning
+			- validate: Scans for violations, formats report
+				- Calls wrapped command validate
+				- Scans content using heuristics from principles
+				- Enhances violations with principle info and code snippets
+				- Formats violations as checklist or detailed report
+				- Appends violations to validation instructions
+			- execute: Delegates to wrapped command
+			- plan: Delegates to wrapped command if available
+		Behavior:
+			- Loads heuristics from principles at initialization
+			- Attaches heuristics to principles
+			- Scans for violations only during validation
+			- Provides violation checklist to AI for fixing
+	
+	Incremental Execution
+		Purpose: Execute commands in batches with sample sizes
+		Pattern: Wraps any command to add incremental capability
+		Properties:
+			- Wrapped command instance
+			- Maximum sample size
+			- Current run
+			- Run history
+			- Incremental state persisted to disk
+			- Completed work units
+		Operations:
+			- generate: Executes with sample size injection
+			- validate: Executes with sample size injection
+			- execute: Executes with run tracking
+			- expand_to_all_work: Processes all remaining work
+			- proceed_to_next_run: Creates new run and continues
+		Sample Size Management:
+			- Injects sample size note into instructions
+			- Current run tracks sample size
+			- Expands to full scope when requested
+		Run Tracking:
+			- Creates new run when needed
+			- Tracks execution timestamps
+			- Persists state after each operation
+			- Maintains run history
+		State Persistence:
+			- Saves to .incremental-state directory
+			- Loads previous state on initialization
+			- Tracks all runs and current run
+	
+	Workflow Execution
+		Purpose: Execute commands through multi-phase workflows
+		Pattern: Wraps command within workflow phase
+		Properties:
+			- Wrapped command instance
+			- Parent workflow
+			- Phase number
+			- Phase name
+			- Phase state
+		Operations:
+			- start: Begins phase execution
+			- approve: Marks phase as approved and advances workflow
+			- proceed_to_next_phase: Advances to next phase
+			- block_execution: Blocks phase from executing
+			- resume_from_phase: Resumes from persisted state
+		Phase Management:
+			- Phase states: STARTING, IN_PROGRESS, COMPLETE, APPROVED, BLOCKED
+			- Workflow tracks current phase number
+			- Phases execute in sequence
+			- Can resume from saved phase state
+		Workflow Coordination:
+			- Workflow manages multiple phases
+			- Marks phases complete
+			- Starts next phase when ready
+			- Tracks workflow status
+
+Supporting Domain Objects
+	Purpose: Core domain entities used throughout command execution
+	
+	Content
+		Purpose: Represents file content with violation tracking
+		Properties:
+			- file_path: Path to file being processed
+			- file_extension: File type (.py, .js, .md, etc.)
+			- violations: List of detected violations
+			- _content_lines: Cached file content lines
+		Methods:
+			- get_code_snippet: Returns code around violation with line numbers
+			- apply_fixes: Clears violations list
+	
+	BaseRule
+		Purpose: Loads and provides access to rule principles and examples
+		Properties:
+			- rule_file_name: Path to rule .mdc file
+			- principles: List of Principle objects
+			- _parser: RuleParser for loading principles
+		Methods:
+			- _load_principles: Parses rule file for principles
+			- _read_file_content: Reads rule file
+			- _load_examples_from_content: Extracts examples from principle content
+	
+	SpecializingRule
+		Purpose: Rule that can have framework-specific specialized versions
+		Properties:
+			- base_rule: BaseRule with framework-agnostic principles
+			- base_rule_file_name: Path to base rule file
+			- specialized_rules: Dictionary mapping framework keys to SpecializedRule instances
+		Operations:
+			- Discovers specialized rule files at initialization
+			- Loads specialized rules for each framework
+			- Extracts match key from content to determine which specialized rule applies
+			- Returns appropriate specialized rule based on content
+		Discovery Pattern:
+			- Scans for files matching base-stem-*.mdc pattern
+			- Extracts framework key from filename
+			- Loads each as SpecializedRule
+		Framework Detection:
+			- Subclasses implement extract_match_key to detect framework
+			- FrameworkSpecializingRule detects by file extension
+			- Python files use mamba specialized rule
+			- JavaScript/TypeScript files use jest specialized rule
+	
+	SpecializedRule
+		Purpose: Framework-specific refinement of specializing rule principles
+		Properties:
+			- parent: Reference to parent SpecializingRule
+			- principles: List of SpecializedPrinciple objects
+			- examples: Framework-specific examples
+		Behavior:
+			- Wraps base principles from parent specializing rule
+			- Loads specialized content and examples from framework-specific file
+			- Provides framework-specific principle content when available
+			- Falls back to base principle content when no specialization exists
+	
+	SpecializedPrinciple
+		Purpose: Wrapper that provides framework-specific principle content
+		Properties:
+			- _base_principle: Reference to base principle
+			- _specialized_content: Framework-specific content override
+			- examples: Framework-specific examples
+		Accessors:
+			- principle_number: Returns base principle number
+			- principle_name: Returns base principle name
+			- content: Returns specialized content if available, otherwise base content
+			- heuristics: Returns base principle heuristics
+	
+	Principle
+		Purpose: Represents a single rule principle with examples
+		Properties:
+			- principle_number: Numeric identifier
+			- principle_name: Human-readable name
+			- content: Full principle text
+			- heuristics: List of CodeHeuristic instances for validation
+			- examples: List of Example objects
+		Accessors:
+			- number: Returns principle_number
+			- name: Returns principle_name
+	
+	Example
+		Purpose: DO/DON'T examples for a principle
+		Properties:
+			- principle: Reference to parent Principle
+			- do_text: Description of correct approach
+			- do_code: Code example showing correct approach
+			- dont_text: Description of incorrect approach
+			- dont_code: Code example showing incorrect approach
+	
+	Violation
+		Purpose: Represents a detected rule violation
+		Properties:
+			- line_number: Line where violation occurs
+			- message: Description of violation
+			- principle: Principle that was violated
+			- code_snippet: Code context around violation
+			- severity: Optional severity level
+			- principle_number: Number of violated principle
+			- principle_name: Name of violated principle
+
+Template System
+	Purpose: Generate consistent file structures from reusable patterns
+	Integration: Used by CodeAgentCommand subclasses
+	Templates:
+		Feature Templates:
+			- runner_template.py: Python runner file template
+			- feature_outline_template.md: Feature documentation template
+		Command Templates:
+			- command_template.md: Command definition template
+			- command_plan_template.md: Implementation plan template
+		Rule Templates:
+			- base_rule_template.mdc: Framework-agnostic rule template
+			- specializing_rule_template.mdc: Specializing rule template
+			- specialized_rule_template.mdc: Specialized rule template
+	Operations:
+		- Load template from command folder
+		- Format with keyword arguments using Python string formatting
+		- Return formatted content for file writing
+
+CLI Entry Point
+	Purpose: Provide command-line access to all code agent operations
+	Properties:
+		- Command type
+		- Command arguments
+	Operations:
+		- Parses command-line arguments
+		- Routes to appropriate command class
+		- Determines action: generate, validate, plan, execute
+		- Executes command method
+	Error Handling:
+		- No arguments displays usage, exits with error
+		- Unknown command displays error message, exits with error
+

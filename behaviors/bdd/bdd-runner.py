@@ -1,6 +1,6 @@
 """
-BDD Workflow - Red-Green-Refactor Cycle
-Guides developers through true BDD (Behavior-Driven Development) with Red-Green-Refactor cycle.
+BDD Workflow - Test-Code Cycle
+Guides developers through true BDD (Behavior-Driven Development) with Test-Code cycle.
 
 Division of Labor:
 - Code: Parse files, run tests, track state, identify relationships, ENFORCE workflow
@@ -340,6 +340,33 @@ class BDDRule(FrameworkSpecializingRule):
                     if re.search(pattern, line):
                         violations.append(Violation(i, "Tests implementation details instead of user-visible behavior"))
                         break
+            
+            return violations if violations else None
+
+    class BDDUnicodeHeuristic(CodeHeuristic):
+        """Heuristic for §10: Detects unicode characters in test code"""
+        def __init__(self):
+            super().__init__("bdd_unicode")
+        
+        def detect_violations(self, content):
+            """Detect unicode characters in test code"""
+            violations = []
+            if not hasattr(content, '_content_lines') or not content._content_lines:
+                return None
+            
+            # Common unicode symbols that cause problems
+            unicode_symbols = ['✓', '✅', '❌', '→', '←', '↓', '↑', '⚠', '✔', '✖', '►', '◄', '•', '‣']
+            
+            for i, line in enumerate(content._content_lines, 1):
+                # Check for any unicode symbols in the line
+                for symbol in unicode_symbols:
+                    if symbol in line:
+                        violations.append(Violation(
+                            line_number=i,
+                            message=f"Unicode character '{symbol}' in test code (use ASCII alternatives like PASS, SUCCESS, ERROR, Next)",
+                            principle=None
+                        ))
+                        break  # Only report once per line
             
             return violations if violations else None
 
@@ -749,11 +776,12 @@ class BDDCommand(CodeAugmentedCommand):
     
     def _get_heuristic_map(self):
         return {
-            1: BDDJargonHeuristic,
-            2: BDDComprehensiveHeuristic,
-            3: BDDDuplicateCodeHeuristic,
-            4: BDDLayerFocusHeuristic,
-            5: BDDFrontEndHeuristic,
+            1: BDDRule.BDDJargonHeuristic,
+            2: BDDRule.BDDComprehensiveHeuristic,
+            3: BDDRule.BDDDuplicateCodeHeuristic,
+            4: BDDRule.BDDLayerFocusHeuristic,
+            5: BDDRule.BDDFrontEndHeuristic,
+            10: BDDRule.BDDUnicodeHeuristic,
             # Note: Scaffold-specific heuristics are injected by BDDScaffoldRule, not mapped here
         }
 
@@ -773,11 +801,12 @@ class BDDScaffoldCommand(BDDCommand):
         # BDDScaffoldRule injects heuristics directly into principles, so we don't need a heuristic map here
         # But we still need the base heuristics for non-scaffold validation
         return {
-            1: BDDJargonHeuristic,
-            2: BDDComprehensiveHeuristic,
-            3: BDDDuplicateCodeHeuristic,
-            4: BDDLayerFocusHeuristic,
-            5: BDDFrontEndHeuristic,
+            1: BDDRule.BDDJargonHeuristic,
+            2: BDDRule.BDDComprehensiveHeuristic,
+            3: BDDRule.BDDDuplicateCodeHeuristic,
+            4: BDDRule.BDDLayerFocusHeuristic,
+            5: BDDRule.BDDFrontEndHeuristic,
+            10: BDDRule.BDDUnicodeHeuristic,
             # Scaffold-specific heuristics are injected by BDDScaffoldRule._inject_scaffold_heuristics()
         }
     
@@ -825,23 +854,26 @@ class BDDScaffoldCommand(BDDCommand):
 class BDDIncrementalCommand(IncrementalCommand):
     
     def __init__(self, inner_command, base_rule, test_file: str, max_sample_size: int = 18):
-        super().__init__(inner_command, base_rule, max_sample_size, command_file_path=test_file)
+        # Calculate sample size before calling super().__init__
+        calculated_size = self._calculate_sample_size_pre_init(test_file, max_sample_size, base_rule)
+        
+        # Use calculated size as max_sample_size if available
+        effective_max_sample_size = calculated_size if calculated_size is not None else max_sample_size
+        
+        super().__init__(inner_command, base_rule, effective_max_sample_size, command_file_path=test_file)
         
         self.test_file = test_file
         self.max_sample_size = max_sample_size
-        
-        calculated_size = self._calculate_sample_size()
-        if calculated_size is not None:
-            self.sample_size = calculated_size
     
-    def _calculate_sample_size(self) -> Optional[int]:
-        if not Path(self.test_file).exists():
+    def _calculate_sample_size_pre_init(self, test_file: str, max_sample_size: int, base_rule) -> Optional[int]:
+        """Calculate sample size before initialization - static version for constructor"""
+        if not Path(test_file).exists():
             return None
         
         try:
-            content = Content(file_path=self.test_file)
-            framework = self.rule.extract_match_key(content)
-            blocks = self.parse_test_structure(self.test_file, framework)
+            content = Content(file_path=test_file)
+            framework = base_rule.extract_match_key(content) if hasattr(base_rule, 'extract_match_key') else 'mamba'
+            blocks = self.parse_test_structure(test_file, framework)
             
             describe_blocks = [b for b in blocks if b["type"] == "describe"]
             if not describe_blocks:
@@ -867,7 +899,7 @@ class BDDIncrementalCommand(IncrementalCommand):
                 ]
                 count = len(it_blocks)
             
-            return min(count, self.max_sample_size) if count > 0 else None
+            return min(count, max_sample_size) if count > 0 else None
             
         except Exception:
             return None
@@ -1021,9 +1053,8 @@ class BDDPhase(Enum):
     """BDD workflow phases"""
     DOMAIN_SCAFFOLD = "domain_scaffold"
     SIGNATURES = "signatures"
-    RED = "red"
-    GREEN = "green"
-    REFACTOR = "refactor"
+    TEST = "test"
+    CODE = "code"
 
 
 class BDDWorkflow(Workflow):
@@ -1033,9 +1064,8 @@ class BDDWorkflow(Workflow):
     Creates all BDD phases in constructor:
     - Phase 0: Domain Scaffolding
     - Phase 1: Build Test Signatures
-    - Phase 2: RED - Create Failing Tests
-    - Phase 3: GREEN - Make Tests Pass
-    - Phase 4: REFACTOR - Improve Code
+    - Phase 2: Write Tests
+    - Phase 3: Write Code
     
     Wrapping chain: BDDWorkflowPhaseCommand → IncrementalCommand → CodeAugmentedCommand → SpecializingRuleCommand → Command
     """
@@ -1074,28 +1104,21 @@ class BDDWorkflow(Workflow):
             self._get_signature_instructions(test_file, framework)
         )
         
-        # Phase 2: RED - Create Failing Tests
+        # Phase 2: Write Tests
         phase_2 = self._create_phase_command(
             content, base_rule, specializing_rule, max_sample_size,
-            2, "Phase 2: RED - Create Failing Tests", test_file, framework, BDDPhase.RED,
-            self._get_red_instructions()
+            2, "Phase 2: Write Tests", test_file, framework, BDDPhase.TEST,
+            self._get_test_instructions()
         )
         
-        # Phase 3: GREEN - Make Tests Pass
+        # Phase 3: Write Code
         phase_3 = self._create_phase_command(
             content, base_rule, specializing_rule, max_sample_size,
-            3, "Phase 3: GREEN - Make Tests Pass", test_file, framework, BDDPhase.GREEN,
-            self._get_green_instructions()
+            3, "Phase 3: Write Code", test_file, framework, BDDPhase.CODE,
+            self._get_code_instructions()
         )
         
-        # Phase 4: REFACTOR - Improve Code
-        phase_4 = self._create_phase_command(
-            content, base_rule, specializing_rule, max_sample_size,
-            4, "Phase 4: REFACTOR - Improve Code", test_file, framework, BDDPhase.REFACTOR,
-            self._get_refactor_instructions()
-        )
-        
-        self.phases = [phase_0, phase_1, phase_2, phase_3, phase_4]
+        self.phases = [phase_0, phase_1, phase_2, phase_3]
     
     def _create_phase_command(self, content, base_rule, specializing_rule, max_sample_size,
                               phase_number, phase_name, test_file, framework, bdd_phase, generate_instructions):
@@ -1175,46 +1198,40 @@ Run /bdd-domain-scaffold-verify when ready."""
 ⚠️  CRITICAL: NEVER flatten hierarchy - preserve domain map depth!
 Run /bdd-signature-verify when ready"""
     
-    def _get_red_instructions(self) -> str:
-        """Get RED phase instructions"""
-        return """STAGE 2: RED - Implement Failing Tests
+    def _get_test_instructions(self) -> str:
+        """Get test implementation phase instructions"""
+        return """STAGE 2: Write Tests - Implement Full Test Code
 
-1. Implement ~18 test signatures with Arrange-Act-Assert
-2. Add proper mocking and helpers following § 3 principles
-3. Extract duplicate setup to beforeEach()
-4. Create helper factories for repeated mocks
-5. COMMENT OUT test code that calls production code:
-   Example: // powerItem = new PowerItem(mockPower);
-   Example: // expect(powerItem.descriptor).toBe('Fire');
-6. COMMENT OUT or ensure production code doesn't exist
-   Example: In production file, comment out class PowerItem
-7. Tests should be ready to fail when uncommented
+1. Find ~18 test signatures marked with # BDD: SIGNATURE
+2. Implement with Arrange-Act-Assert structure:
+   - Arrange: Set up test data and mocks
+   - Act: Call production code directly
+   - Assert: Verify expected outcomes
+3. Mock only external boundaries (file I/O, network, database)
+4. Extract duplicate setup to helper functions or beforeEach()
+5. Call production code directly - NO commenting out code
+6. If production code doesn't exist, tests fail naturally
+   Example: NameError: name 'PowerItem' is not defined
+7. This shows exactly what to implement next
 
-Run /bdd-red-verify when ready"""
+Run /bdd-test-validate when ready"""
     
-    def _get_green_instructions(self) -> str:
-        """Get GREEN phase instructions"""
-        return """STAGE 3: GREEN - Implement Minimal Code
+    def _get_code_instructions(self) -> str:
+        """Get code implementation phase instructions"""
+        return """STAGE 3: Write Code - Implement Production Code
 
-1. UNCOMMENT test code from RED phase
-2. Implement minimal production code for ~18 tests
+1. Implement minimal production code for ~18 tests
+2. Make tests pass with simplest solution
 3. Resist adding features no test demands
 4. Verify tests now PASS
 5. Check for regressions in existing tests
 
-Run /bdd-green-verify when ready"""
+Run /bdd-code-validate when ready"""
     
-    def _get_refactor_instructions(self) -> str:
-        """Get REFACTOR phase instructions"""
-        return """STAGE 4: REFACTOR - Improve Code Quality
-
-1. Identify code smells
-2. Suggest refactorings with trade-offs
-3. Implement approved refactorings one at a time
-4. Run tests after each refactoring
-5. Stop if any test fails
-
-Run /bdd-refactor-verify when ready"""
+    # REFACTOR phase removed - refactoring happens through validation at every phase
+    # def _get_refactor_instructions(self) -> str:
+    #     """Get REFACTOR phase instructions"""
+    #     return """STAGE 4: REFACTOR - Improve Code Quality"""
 
 
 class BDDWorkflowPhaseCommand:
@@ -1222,7 +1239,7 @@ class BDDWorkflowPhaseCommand:
     BDD-specific workflow phase command that combines WorkflowPhaseCommand with BDD phase logic.
     
     Extends WorkflowPhaseCommand with:
-    - BDD phase types (DOMAIN_SCAFFOLD, SIGNATURES, RED, GREEN, REFACTOR)
+    - BDD phase types (DOMAIN_SCAFFOLD, SIGNATURES, TEST, CODE)
     """
     
     def __init__(self, inner_command, workflow: Workflow, phase_number: int, phase_name: str, 
@@ -1350,7 +1367,7 @@ RESPOND: cross_section_issues: [list any found]
     def run_tests(test_file_path: str, framework: str, single_test_line: Optional[int] = None) -> Dict[str, Any]:
         """
         Run tests and capture results.
-        Used by RED, GREEN, and REFACTOR phases.
+        Used by TEST and CODE phases.
         
         Args:
             test_file_path: Path to test file
@@ -1399,7 +1416,7 @@ RESPOND: cross_section_issues: [list any found]
     def identify_code_relationships(test_file_path: str) -> Dict[str, List[str]]:
         """
         Identify code under test and other test files related to this test.
-        Used by RED, GREEN, and REFACTOR phases.
+        Used by TEST and CODE phases.
         
         Returns: {"code_under_test_files": [...], "related_tests": [...]}
         """

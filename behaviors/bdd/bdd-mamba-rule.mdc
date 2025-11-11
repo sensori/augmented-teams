@@ -10,7 +10,7 @@ This rule extends `bdd-rule.mdc` — all base BDD principles apply throughout.
 
 **Executing Commands:**
 * `/bdd-validate` — Validate BDD test files against these principles
-* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, RED, GREEN, REFACTOR)
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
 
 ## Conventions
 
@@ -184,6 +184,190 @@ with it('calls _on_mount()'):
     expect(component._on_mount).to(have_been_called)
 ```
 
+## 6. Signature Phase Requirements
+
+When creating test signatures (Phase 1: Build Test Signatures), generate test structure with empty bodies:
+
+**[DO]:**
+* Use proper Mamba syntax: `with description()`, `with context()`, `with it()`
+* Keep test bodies empty with only `pass` statement
+* Mark each test with `# BDD: SIGNATURE` comment at start of body
+* Preserve ALL nesting levels from scaffold hierarchy
+* Convert plain English scaffold to proper code syntax
+* Update test file directly (e.g., `test_zorbling.py`)
+* Target ~18 describe blocks per signature iteration
+
+```python
+# From scaffold (plain English):
+# Zorbling Management
+#   Creating Zorblings
+#     should create zorbling with valid data
+#     should reject zorbling with invalid data
+
+# To signature (code structure):
+with description("Zorbling Management"):
+    with context("Creating Zorblings"):
+        with it("should create zorbling with valid data"):
+            # BDD: SIGNATURE
+            pass
+        
+        with it("should reject zorbling with invalid data"):
+            # BDD: SIGNATURE
+            pass
+```
+
+**[DON'T]:**
+* Add mocks, stubs, or helpers in signature phase
+* Include implementation code or assertions
+* Flatten hierarchy from scaffold
+* Skip signature markers
+* Change nesting structure from scaffold
+
+```python
+# Missing signature marker
+with it("should create zorbling"):
+    pass
+
+# Has implementation code (wrong for signature phase)
+with it("should create zorbling"):
+    zorbling = Zorbling()
+    expect(zorbling).not_to(be_none)
+```
+
+## 7. Test Implementation Phase Examples
+
+When implementing tests from signatures (Phase 2: Write Tests), follow base rule § 8 principles with Mamba-specific syntax:
+
+**[DO]:**
+* Use Arrange-Act-Assert structure with Python syntax
+* Mock using `unittest.mock` or `mamba` mocks for external boundaries only
+* Extract setup to helper functions or `with before.each`
+* Call production code directly - let tests fail naturally if code doesn't exist
+* Replace `# BDD: SIGNATURE` markers with full implementation
+
+```python
+# From signature:
+with it("should create user with valid email"):
+    # BDD: SIGNATURE
+    pass
+
+# To full test implementation:
+with it("should create user with valid email"):
+    # Arrange
+    email = "test@example.com"
+    user_data = {"email": email, "name": "Test User"}
+    
+    # Act
+    user = create_user(user_data)
+    
+    # Assert
+    expect(user.email).to(equal(email))
+    expect(user.is_active).to(be_true)
+```
+
+**[DON'T]:**
+* Comment out production code calls
+* Mock internal business logic
+* Duplicate setup across sibling tests
+
+```python
+# DON'T: Commented out code
+with it("should create user"):
+    # email = "test@example.com"
+    # user = create_user({"email": email})
+    pass
+
+# DON'T: Mocking internal business logic
+with it("should validate user"):
+    mock_user = Mock()  # Don't mock the thing you're testing
+    expect(mock_user.is_valid()).to(be_true)
+```
+
+## 8. Code Implementation Phase Examples
+
+When implementing production code from tests (Phase 3: Write Code), follow base rule § 9 principles with Python-specific syntax:
+
+**[DO]:**
+* Implement minimal Python code to make tests pass
+* Use simple data structures (dict, list) before creating classes
+* Follow Python conventions (PEP 8)
+* Return what tests expect, nothing more
+* Let tests drive when you need classes or complexity
+
+```python
+# Test expects:
+with it("should create user with valid email"):
+    user = create_user({"email": "test@example.com", "name": "Test"})
+    expect(user["email"]).to(equal("test@example.com"))
+    expect(user["is_active"]).to(be_true)
+
+# Minimal implementation (start with dict):
+def create_user(user_data):
+    """Create user with validated data"""
+    email = user_data.get("email")
+    if not email or "@" not in email:
+        raise ValueError("Invalid email format")
+    
+    return {
+        "email": email,
+        "name": user_data.get("name"),
+        "role": user_data.get("role", "user"),
+        "is_active": True
+    }
+```
+
+**[DON'T]:**
+* Add features not tested
+* Create complex class hierarchies prematurely
+* Add configuration or options not tested
+
+```python
+# DON'T: Over-engineered with untested features
+class User:
+    def __init__(self, email, name, role="user", permissions=None, preferences=None):
+        self.email = email
+        self.name = name
+        self.role = role
+        self.permissions = permissions or []  # Not tested
+        self.preferences = preferences or {}  # Not tested
+        self.created_at = datetime.now()      # Not tested
+    
+    def validate_permissions(self):  # Not tested
+        pass
+    
+    def update_preferences(self, prefs):  # Not tested
+        pass
+```
+
+## 10. Use ASCII-Only Characters in Test Code
+
+**[DO]:**
+Use plain ASCII text that works on all systems:
+```python
+print("PASS: Test passed")
+print("SUCCESS: All assertions correct")
+print("Next step:")
+expect(result).to(contain("correct the error"))
+```
+
+**[DON'T]:**
+Unicode characters crash on Windows console:
+```python
+print("✓ Test passed")
+print("✅ All assertions correct")
+print("→ Next step")
+expect(result).to(contain("→"))
+```
+
+**Error:** `UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 0`
+
 ## Commands
 
-Commands that implement or use this rule. Currently, no commands are implemented for this rule.
+Commands that implement or use this rule:
+
+* `/bdd-validate` — Validate BDD test files against these principles
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
+* `/bdd-scaffold` — Generate domain scaffolding (plain English hierarchy) from domain maps
+* `/bdd-signature` — Generate test signatures (code structure) from scaffolds
+* `/bdd-test` — Implement test code from signatures
+* `/bdd-code` — Implement production code to make tests pass

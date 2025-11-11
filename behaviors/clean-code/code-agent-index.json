@@ -1,53 +1,29 @@
 {
-  "last_updated": "Mon Nov 10 04:00:39 2025",
-  "total_behaviors": 6,
+  "last_updated": "Mon Nov 10 22:49:34 2025",
+  "total_behaviors": 3,
   "behaviors": [
-    {
-      "feature": "clean-code",
-      "file": "clean-code-js-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors\\clean-code\\clean-code-js-rule.mdc",
-      "modified_timestamp": 1762763951.109094,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "clean-code",
-      "file": "clean-code-python-rule.mdc",
-      "type": ".mdc",
-      "path": "behaviors\\clean-code\\clean-code-python-rule.mdc",
-      "modified_timestamp": 1762489248.5596578,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
     {
       "feature": "clean-code",
       "file": "clean-code-rule.mdc",
       "type": ".mdc",
       "path": "behaviors\\clean-code\\clean-code-rule.mdc",
-      "modified_timestamp": 1762763951.040809,
+      "modified_timestamp": 1762807052.500342,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "clean-code",
-      "file": "clean-code-js-reference.md",
+      "file": "feature-outline.md",
       "type": ".md",
-      "path": "behaviors\\clean-code\\clean-code-js-reference.md",
-      "modified_timestamp": 1762763951.2308183,
+      "path": "behaviors\\clean-code\\feature-outline.md",
+      "modified_timestamp": 1762806485.9397922,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
       "feature": "clean-code",
-      "file": "clean-code-python-reference.md",
-      "type": ".md",
-      "path": "behaviors\\clean-code\\clean-code-python-reference.md",
-      "modified_timestamp": 1762763951.1533594,
-      "purpose": "[AI should update this purpose after reviewing the file]"
-    },
-    {
-      "feature": "clean-code",
-      "file": "clean-code-validate-cmd.md",
-      "type": ".md",
-      "path": "behaviors\\clean-code\\clean-code-validate-cmd.md",
-      "modified_timestamp": 1762492228.8409295,
+      "file": "clean-code_runner.py",
+      "type": ".py",
+      "path": "behaviors\\clean-code\\clean-code_runner.py",
+      "modified_timestamp": 1762806485.9397922,
       "purpose": "[AI should update this purpose after reviewing the file]"
     }
   ]

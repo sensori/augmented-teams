@@ -10,7 +10,7 @@ This rule extends `bdd-rule.mdc` — all base BDD principles apply throughout.
 
 **Executing Commands:**
 * `/bdd-validate` — Validate BDD test files against these principles
-* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, RED, GREEN, REFACTOR)
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
 
 ## Conventions
 
@@ -200,6 +200,202 @@ it('calls _onMount()', () => {
 });
 ```
 
+## 6. Signature Phase Requirements
+
+When creating test signatures (Phase 1: Build Test Signatures), generate test structure with empty bodies:
+
+**[DO]:**
+* Use proper Jest syntax: `describe()`, `it()`, nested `describe()` blocks
+* Keep test bodies empty (no statements)
+* Mark each test with `// BDD: SIGNATURE` comment at start of body
+* Preserve ALL nesting levels from scaffold hierarchy
+* Convert plain English scaffold to proper code syntax
+* Update test file directly (e.g., `zorbling.test.js`)
+* Target ~18 describe blocks per signature iteration
+
+```javascript
+// From scaffold (plain English):
+// Zorbling Management
+//   Creating Zorblings
+//     should create zorbling with valid data
+//     should reject zorbling with invalid data
+
+// To signature (code structure):
+describe("Zorbling Management", () => {
+  describe("Creating Zorblings", () => {
+    it("should create zorbling with valid data", () => {
+      // BDD: SIGNATURE
+    });
+    
+    it("should reject zorbling with invalid data", () => {
+      // BDD: SIGNATURE
+    });
+  });
+});
+```
+
+**[DON'T]:**
+* Add mocks, stubs, or helpers in signature phase
+* Include implementation code or assertions
+* Flatten hierarchy from scaffold
+* Skip signature markers
+* Change nesting structure from scaffold
+
+```javascript
+// Missing signature marker
+it("should create zorbling", () => {
+});
+
+// Has implementation code (wrong for signature phase)
+it("should create zorbling", () => {
+  const zorbling = new Zorbling();
+  expect(zorbling).not.toBeNull();
+});
+```
+
+## 7. Test Implementation Phase Examples
+
+When implementing tests from signatures (Phase 2: Write Tests), follow base rule § 8 principles with Jest-specific syntax:
+
+**[DO]:**
+* Use Arrange-Act-Assert structure with JavaScript syntax
+* Mock using `jest.mock()` for modules or `jest.fn()` for functions - external boundaries only
+* Extract setup to helper functions or `beforeEach()`
+* Call production code directly - let tests fail naturally if code doesn't exist
+* Replace `// BDD: SIGNATURE` markers with full implementation
+
+```javascript
+// From signature:
+it("should create user with valid email", () => {
+  // BDD: SIGNATURE
+});
+
+// To full test implementation:
+it("should create user with valid email", () => {
+  // Arrange
+  const email = "test@example.com";
+  const userData = { email, name: "Test User" };
+  
+  // Act
+  const user = createUser(userData);
+  
+  // Assert
+  expect(user.email).toBe(email);
+  expect(user.isActive).toBe(true);
+});
+```
+
+**[DON'T]:**
+* Comment out production code calls
+* Mock internal business logic
+* Duplicate setup across sibling tests
+
+```javascript
+// DON'T: Commented out code
+it("should create user", () => {
+  // const email = "test@example.com";
+  // const user = createUser({ email });
+});
+
+// DON'T: Mocking internal business logic
+it("should validate user", () => {
+  const mockUser = jest.fn();  // Don't mock the thing you're testing
+  expect(mockUser.isValid()).toBe(true);
+});
+```
+
+## 8. Code Implementation Phase Examples
+
+When implementing production code from tests (Phase 3: Write Code), follow base rule § 9 principles with JavaScript-specific syntax:
+
+**[DO]:**
+* Implement minimal JavaScript code to make tests pass
+* Use simple objects before creating classes
+* Follow JavaScript conventions (ES6+)
+* Return what tests expect, nothing more
+* Let tests drive when you need classes or complexity
+
+```javascript
+// Test expects:
+it("should create user with valid email", () => {
+  const user = createUser({ email: "test@example.com", name: "Test" });
+  expect(user.email).toBe("test@example.com");
+  expect(user.isActive).toBe(true);
+});
+
+// Minimal implementation (start with object):
+function createUser(userData) {
+  const { email, name, role = "user" } = userData;
+  
+  if (!email || !email.includes("@")) {
+    throw new Error("Invalid email format");
+  }
+  
+  return {
+    email,
+    name,
+    role,
+    isActive: true
+  };
+}
+```
+
+**[DON'T]:**
+* Add features not tested
+* Create complex class structures prematurely
+* Add configuration or options not tested
+
+```javascript
+// DON'T: Over-engineered with untested features
+class User {
+  constructor(email, name, role = "user", permissions = [], preferences = {}) {
+    this.email = email;
+    this.name = name;
+    this.role = role;
+    this.permissions = permissions;  // Not tested
+    this.preferences = preferences;  // Not tested
+    this.createdAt = new Date();     // Not tested
+  }
+  
+  validatePermissions() {  // Not tested
+    // ...
+  }
+  
+  updatePreferences(prefs) {  // Not tested
+    // ...
+  }
+}
+```
+
+## 10. Use ASCII-Only Characters in Test Code
+
+**[DO]:**
+Use plain ASCII text that works on all systems:
+```javascript
+console.log("PASS: Test passed");
+console.log("SUCCESS: All assertions correct");
+console.log("Next step:");
+expect(result).toContain("correct the error");
+```
+
+**[DON'T]:**
+Unicode characters crash on Windows console:
+```javascript
+console.log("✓ Test passed");
+console.log("✅ All assertions correct");
+console.log("→ Next step");
+expect(result).toContain("→");
+```
+
+**Error:** Unicode encoding errors prevent tests from running on Windows and many CI/CD systems.
+
 ## Commands
 
-Commands that implement or use this rule. Currently, no commands are implemented for this rule.
+Commands that implement or use this rule:
+
+* `/bdd-validate` — Validate BDD test files against these principles
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
+* `/bdd-scaffold` — Generate domain scaffolding (plain English hierarchy) from domain maps
+* `/bdd-signature` — Generate test signatures (code structure) from scaffolds
+* `/bdd-test` — Implement test code from signatures
+* `/bdd-code` — Implement production code to make tests pass

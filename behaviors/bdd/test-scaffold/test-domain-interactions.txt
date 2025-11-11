@@ -1,1 +1,0 @@
-SCENARIO 1: Test Scenario

@@ -1863,3 +1863,282 @@ with description('CodeAugmentedCommand.plan() method'):
         # Assert
         expect(result).to(be_none)
 
+
+with description('Command.correct() method'):
+    """Tests for Command.correct() - rule correction based on context"""
+    
+    def create_test_command():
+        """Helper to create command with test fixtures"""
+        return Command(self.content, self.base_rule)
+    
+    def create_example_with_code(principle):
+        """Helper to create example with DO/DON'T code"""
+        return Example(
+            principle=principle,
+            do_text="Good example",
+            do_code="good_code()",
+            dont_text="Bad example",
+            dont_code="bad_code()"
+        )
+    
+    with before.each:
+        test_base_rule_content = create_base_rule_content()
+        with patch.object(RuleParser, 'read_file_content', return_value=test_base_rule_content):
+            self.base_rule = BaseRule('base-rule.mdc')
+            parser = RuleParser()
+            self.base_rule.principles = parser.load_principles_from_file('base-rule.mdc')
+        self.content = Content('test.java', '.java')
+        self.chat_context = "User encountered error pattern XYZ"
+    
+    with context('that is corrected with context'):
+        with it('should have access to chat context'):
+            # Arrange
+            command = create_test_command()
+            specific_context = "Error pattern detected in line 42"
+            
+            # Act
+            result = command.correct(specific_context)
+            
+            # Assert
+            expect(result).to(contain(specific_context))
+        
+        with it('should have access to content with error'):
+            # Arrange
+            self.content.violations = [Violation(line_number=42, message="Test violation")]
+            command = create_test_command()
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("test.java"))
+        
+        with it('should have access to rule principles'):
+            # Arrange
+            command = create_test_command()
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("Test Principle"))
+            expect(len(command.principles)).to(equal(1))
+    
+    with context('when correction is requested'):
+        with it('should instruct AI prompt to correct the error based on context'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("correct the error"))
+            expect(result).to(contain(self.chat_context))
+        
+        with it('should insert all existing examples from rule in instructions'):
+            # Arrange
+            example = Example(
+                principle=self.base_rule.principles[0],
+                do_text="Good example",
+                do_code="good_code()",
+                dont_text="Bad example",
+                dont_code="bad_code()"
+            )
+            self.base_rule.principles[0].examples = [example]
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("good_code()"))
+            expect(result).to(contain("bad_code()"))
+        
+        with it('should insert all principles from rule in instructions'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("Test Principle"))
+        
+        with it('should tell AI to examine context for changes to principle'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("examine context"))
+            expect(result).to(contain("principle"))
+        
+        with it('should tell AI to examine context for changes to examples'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("examine context"))
+            expect(result).to(contain("examples"))
+        
+        with it('should tell AI to propose new principle if needed'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("propose new principle"))
+        
+        with it('should tell AI to propose new example if needed'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("propose new example"))
+        
+        with it('should set corrected flag to true'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            command.correct(self.chat_context)
+            
+            # Assert
+            expect(command.corrected).to(be_true)
+    
+    with context('that generates correction instructions for AI'):
+        with it('should include instruction to analyze error pattern in context'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("analyze error pattern"))
+        
+        with it('should include instruction to create new principle capturing pattern'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("create new principle"))
+            expect(result).to(contain("capturing pattern"))
+        
+        with it('should include next available principle number'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            next_number = len(self.base_rule.principles) + 1
+            expect(result).to(contain(f"Principle {next_number}"))
+        
+        with it('should include instruction to use principle_template'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("principle_template"))
+        
+        with it('should include instruction to analyze why principle was unclear'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("why principle was unclear"))
+        
+        with it('should include instruction to improve principle content'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("improve principle content"))
+        
+        with it('should include instruction to preserve principle structure'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("preserve principle structure"))
+        
+        with it('should include instruction to run DO example against content to see if would prevent error'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("run DO example"))
+            expect(result).to(contain("prevent error"))
+        
+        with it('should include instruction to test example against all other principles'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("test example against all other principles"))
+        
+        with it('should include instruction to auto fix if example violates other principles'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("auto fix"))
+            expect(result).to(contain("violates other principles"))
+        
+        with it('should include instructions to consider code heuristic for new example if it makes sense'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("code heuristic"))
+        
+        with it('should include instructions to create code-heuristics according to code-agent-rules rules and code heuristics section'):
+            # Arrange
+            command = Command(self.content, self.base_rule)
+            
+            # Act
+            result = command.correct(self.chat_context)
+            
+            # Assert
+            expect(result).to(contain("code-agent-rules"))
+            expect(result).to(contain("code heuristics section"))

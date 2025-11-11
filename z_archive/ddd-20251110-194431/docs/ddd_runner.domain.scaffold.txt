@@ -1,0 +1,72 @@
+DDD Runner Domain Scaffold
+
+DDDCommand
+  Base command for DDD operations
+  Loads DDD rule file
+  Provides common DDD functionality
+  
+  should load ddd-rule.mdc file
+  should provide access to rule principles
+  should extend Command base class
+
+DDDStructureCommand
+  Extracts domain structure from code/text/diagrams
+  Generates hierarchical domain maps
+  Applies DDD principles for domain analysis
+  
+  Generating Domain Structure
+    should extract domain concepts from source file
+    should apply outcome verbs principle
+    should integrate system support under domain concepts
+    should order concepts by user mental model
+    should organize domain-first before infrastructure
+    should focus on functional accomplishment
+    should maximize integration of related concepts
+    should use nouns for concepts and verbs for behaviors
+    should assign behaviors to performing concepts
+    should avoid noun redundancy in domain names
+    should organize by domain concepts not file structure
+    should generate hierarchical text output
+    should save to domain-map.txt file
+  
+  Validating Domain Structure
+    should validate against ten DDD principles
+    should detect communication verbs violations
+    should detect separated system support violations
+    should detect code structure ordering violations
+    should detect system-first organization violations
+    should detect technical framing violations
+    should detect artificial separation violations
+    should detect verb-based concept names violations
+    should detect wrong behavior assignment violations
+    should detect noun redundancy violations
+    should detect file structure organization violations
+    should return validation report with violations
+
+DDDInteractionCommand
+  Documents domain concept interactions
+  Generates scenario-based business flows
+  Maintains domain abstraction level
+  
+  Generating Domain Interactions
+    should discover domain map file as input
+    should extract domain concepts from map
+    should analyze source code for interactions
+    should maintain domain abstraction level
+    should generate scenario-based flows
+    should document transformations
+    should document lookups
+    should document business rules
+    should show cross-domain reuse
+    should save to domain-interactions.txt file
+  
+  Validating Domain Interactions
+    should validate against interaction principles
+    should detect implementation details leaking
+    should detect missing scenario structure
+    should detect code transformations instead of business
+    should detect database queries instead of lookups
+    should detect code conditionals instead of rules
+    should detect code reuse instead of domain reuse
+    should return validation report with violations
+

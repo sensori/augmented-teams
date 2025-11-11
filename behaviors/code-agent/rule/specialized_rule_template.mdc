@@ -13,67 +13,10 @@ This rule extends `{parent_specializing_rule}.mdc` and references `{base_rule}.m
 
 ## Conventions
 
-Naming conventions, file locations, and structural conventions for the subject matter this rule applies to (NOT conventions about the rule file itself). Include framework-specific conventions such as naming patterns, file locations, directory structures, and organizational patterns that developers should follow when applying this rule.
+{conventions_section}
 
-**Important:** 
-- This section describes conventions for the CODE/ARTIFACTS that follow this rule, NOT conventions about the rule file itself (rule file conventions belong in documentation, not in the rule).
-- **Specialized rules should include framework-specific conventions** that extend the base rule's framework-agnostic conventions.
+{principles_section}
 
-* Framework-specific naming convention example (e.g., {framework} test files should use `*.test.{extension}` pattern)
-* Framework-specific file location example (e.g., place {framework} test files in `__tests__/` directory)
-* Framework-specific syntax conventions (e.g., use {framework} syntax: `describe()`, `it()`, etc.)
-* Additional framework-specific conventions as needed
+{templates_section}
 
-## 1. Principle Name
-
-Principle description explaining what this principle covers and why it matters. This principle extends the specializing rule and base rule principles.
-
-**[DO]:**
-* Example of correct {framework}-specific practice
-* Another example of correct practice
-
-```{language}
-// Example code showing correct {framework} implementation
-```
-
-**[DON'T]:**
-* Example of incorrect practice
-* Another example of incorrect practice
-
-```{language}
-// Example code showing incorrect {framework} implementation
-```
-
-**Note:** After creating examples, verify ALL examples against ALL principles in this rule (including base rule and specializing rule principles). Each DO example must follow all principles, and each DON'T example must only violate the intended principle(s).
-
-## 2. Another Principle
-
-Another principle description specific to {framework}.
-
-**[DO]:**
-* Example of correct practice
-
-**[DON'T]:**
-* Example of incorrect practice
-
-## Templates
-
-Templates used for generating files that follow this rule. Include this section if the rule uses or references specific templates.
-
-* `template-name.md` - Description of when and how to use this template
-* `another-template.md` - Another template description
-
-## Commands
-
-Commands that implement or use this rule. List all commands that execute this rule's principles.
-
-* `/feature-command-name` — Brief description of what the command does
-* `/feature-another-command` — Another command that uses this rule
-
----
-
-**FINAL VERIFICATION STEP:** After completing all principles and examples, verify ALL examples in this rule against ALL principles (including base rule and specializing rule principles):
-- Read every DO and DON'T example across all principles
-- Check each example against every principle to ensure compliance
-- Fix any examples that violate principles (even if the violation is in a different principle section)
-- Ensure examples are consistent, accurate, and serve as reliable guidance
+{commands_section}
