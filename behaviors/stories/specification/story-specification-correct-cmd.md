@@ -16,7 +16,7 @@ Correct scenario specifications based on validation errors or user feedback, par
 **Purpose**: Correct scenario specifications based on validation errors or user feedback
 
 **Steps**:
-1. **[User]** Invokes `/story-specification-scenarios-correct` with validation errors or feedback context
+1. **[User]** Invokes `/story-specification-correct` with validation errors or feedback context
 2. **[AI Agent]** Reads validation results and user feedback
 3. **[AI Agent]** Identifies corrections needed:
    - **Given statements using action-oriented language** (Principle 4.1)
@@ -120,7 +120,7 @@ Correct scenario specifications based on validation errors or user feedback, par
 After applying corrections, suggest user run validation again:
 
 ```
-python behaviors/stories/stories_runner.py story-specification-scenarios validate [story-doc-path]
+python behaviors/stories/stories_runner.py story-specification validate [story-doc-path]
 ```
 
 Or use test script:
@@ -134,5 +134,5 @@ python test_validation.py
 
 **BDD State Patterns**: See `behaviors/bdd/bdd-rule.mdc` Section 2 (Fluency, Hierarchy, and Storytelling)
 **Story Rules**: See `behaviors/stories/stories-rule.mdc` Section 4 (Specification Scenarios Principles)
-**Template**: See `behaviors/stories/specification-scenarios/scenario-template.md`
+**Template**: See `behaviors/stories/specification/scenario-template.md`
 

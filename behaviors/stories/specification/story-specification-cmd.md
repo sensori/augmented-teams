@@ -1,22 +1,23 @@
-### Command: /story-specification-scenarios
+### Command: /story-specification
 
 **[Purpose]:**
-Create story specification scenarios by filling in the Scenarios section of story documents. Creates detailed Given/When/Then scenarios including Background and Scenario Outline patterns. Covers happy path, edge cases, and error cases based on the acceptance criteria already written.
+Create story specifications by filling in the Scenarios section of story documents with detailed Given/When/Then scenarios. Intelligently uses Background for shared context and Scenario Outline with Examples tables when the story warrants concrete data examples. Covers happy path, edge cases, and error cases based on acceptance criteria.
 
 **[Rule]:**
 - `behaviors/stories/stories-rule.mdc` - Story writing practices and standards
-- Applies principles: Universal (0.1, 0.2), Phase 4 Specification Scenarios (4.1)
+- Applies principles: Universal (0.1, 0.2), Phase 4 Specification (4.1)
+- References source material: Story Writing Training PowerPoint (Slides 16, 149-154)
 
 **[Runner]:**
 ```bash
-# Generate scenarios for story documents
-python behaviors/stories/stories_runner.py story-specification-scenarios generate
+# Generate specifications for story documents
+python behaviors/stories/stories_runner.py story-specification generate
 
-# Validate scenarios
-python behaviors/stories/stories_runner.py story-specification-scenarios validate
+# Validate specifications
+python behaviors/stories/stories_runner.py story-specification validate
 
 # Combined generate + validate
-python behaviors/stories/stories_runner.py story-specification-scenarios execute
+python behaviors/stories/stories_runner.py story-specification execute
 ```
 
 ---
@@ -71,6 +72,11 @@ python behaviors/stories/stories_runner.py story-specification-scenarios execute
    - Parameterized testing?
    - Multiple examples of same behavior?
 
+6. Does this story warrant concrete examples inline?
+   - Domain has named entities from source material (advantages, powers, equipment)?
+   - Formulas or calculations need multiple data points to be clear?
+   - User would benefit from seeing "real" data vs abstract?
+
 **Decision Point**: If user answers are unclear or insufficient, ask follow-up questions before proceeding.
 **DO NOT PROCEED** to Step 2 until user confirms scope and answers questions.
 
@@ -112,10 +118,29 @@ python behaviors/stories/stories_runner.py story-specification-scenarios execute
    - Error handling
    - Invalid inputs
    
-5. **Create Scenario Outlines** (if needed):
-   - Parameterized scenarios with <placeholder> syntax
-   - Examples table with | column | format
-   - Multiple value combinations
+5. **Create Scenario Outlines with Examples** (when story warrants it):
+   - **Use Scenario Outline when:**
+     * Formula/calculation needs multiple data points to validate pattern
+     * Behavior varies based on parameter combinations
+     * Source material (PowerPoint, Hero's Handbook) has concrete examples
+     * Stakeholders benefit from seeing "real" domain data
+   
+   - **Skip Scenario Outline when:**
+     * Behavior is simple/obvious (doesn't need examples)
+     * No formulas or parameterized behavior
+     * Abstract description is sufficient
+   
+   - **Format:**
+     * Use <placeholder> syntax in scenario text
+     * Create Examples table with | column | headers |
+     * Include calculation column if formula-based
+     * Use actual domain data from source material when available
+   
+   - **Best Practices from Source Material:**
+     * Reference PowerPoint slides 149-154 for scenario patterns
+     * Use Hero's Handbook names (advantages, powers, equipment) when applicable
+     * Show before/after states in examples
+     * Include edge cases in examples table (minimums, maximums, zeros, negatives)
 
 **Decision Point**: If scenarios don't cover all acceptance criteria, add more scenarios.
 
@@ -123,7 +148,7 @@ python behaviors/stories/stories_runner.py story-specification-scenarios execute
 **Performer**: Runner (Code)
 
 **Actions**:
-1. Use template: `behaviors/stories/specification-scenarios/scenario-template.md`
+1. Use template: `behaviors/stories/specification/scenario-template.md`
 2. Fill in Scenarios section of story document
 3. Use proper Gherkin keywords: Given/When/Then/And/But
 4. Use Background for repeated Given steps
@@ -204,7 +229,7 @@ python behaviors/stories/stories_runner.py story-specification-scenarios execute
 **Decision Point**: If validation fails, present violations to user.
 
 ### Step 2: Apply Heuristics
-**Performer**: AI Agent (using StorySpecificationScenariosHeuristic)
+**Performer**: AI Agent (using StorySpecificationHeuristic)
 
 **Heuristics**:
 1. Check for missing scenarios (gaps in coverage)
@@ -265,22 +290,53 @@ python behaviors/stories/stories_runner.py story-specification-scenarios execute
 - Cover happy path, edge cases, and error cases
 - Use Given/When/Then/But structure consistently
 - Use Background for repeated Given steps across scenarios
-- Use Scenario Outline for parameterized scenarios with multiple value combinations
+- Use Scenario Outline with Examples tables when story warrants concrete data
 - Each scenario describes a specific interaction flow
 - Scenarios are narrative descriptions (not code)
 - Link scenarios to acceptance criteria
 
+### When to Include Examples Inline (Scenario Outline)
+
+**✅ Use Examples When:**
+1. **Formulas/Calculations**: Behavior involves formulas that need validation with multiple data points
+   - Example: Ability modifier calculation `(Rank - 10) ÷ 2 rounded down`
+   - Show examples: Rank 10→0, Rank 12→+1, Rank 14→+2, Rank 8→-1
+   
+2. **Domain Entities from Source**: Story references named items from Hero's Handbook or source material
+   - Example: Selecting advantages (Attractive, Leadership, Sidekick)
+   - Use actual names from handbook, not abstract "item A, item B"
+   
+3. **Parameter Variations**: Behavior changes based on input combinations
+   - Example: Different cascade patterns (Agility→Dodge, Stamina→Toughness+Fortitude)
+   - Show all combinations in examples table
+   
+4. **Edge Cases with Data**: Boundary conditions best shown with specific values
+   - Example: Min/max ranks, zero values, negative values, overflow scenarios
+   
+5. **Stakeholder Clarity**: Concrete examples make behavior clearer than abstract description
+   - Example: Point costs across different rank ranges
+
+**❌ Skip Examples When:**
+1. **Simple Behavior**: Action is straightforward (click button → modal opens)
+2. **No Formulas**: No calculations or complex logic to demonstrate
+3. **Abstract is Clear**: Description is sufficient without concrete data
+4. **No Source Data**: No handbook/PowerPoint examples to reference
+5. **Single Path**: Only one way behavior can execute (no variations)
+
 ### PowerPoint References
 - Slide 16: Story specification and scenario creation
-- Slides 149-154: Scenario patterns and examples
-- Slide 154: Purchase Textbook example (happy path scenario)
+- Slides 149-154: Scenario patterns and examples (USE THESE!)
+- Slide 154: Purchase Textbook example (happy path scenario with concrete steps)
 
-### Examples Section
-- Examples section filled in Phase 5 (separate command: `/story-specification-examples`)
-- This command focuses ONLY on scenarios structure
+### Best Practices for Examples Tables
+1. **Include calculation column** for formulas (shows the math)
+2. **Use actual domain names** from source material (not generic placeholders)
+3. **Cover edge cases** in examples (not just happy path)
+4. **Show before→after state** when helpful
+5. **Keep tables focused** (5-8 rows typically sufficient)
 
 ### Related Commands
 - **Prerequisite**: `/story-explore` (must have acceptance criteria)
-- **Next**: `/story-specification-examples` (adds examples to scenarios)
+- **This command**: Handles BOTH scenarios AND examples (in one step)
 
 

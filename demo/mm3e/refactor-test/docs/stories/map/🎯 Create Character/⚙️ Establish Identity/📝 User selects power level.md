@@ -1,0 +1,23 @@
+# 📝 User selects power level
+
+**Epic:** Create Character
+**Feature:** Establish Identity
+
+## Story Description
+
+User selects power level
+
+## Acceptance Criteria
+
+- [ ] 
+
+## Notes
+
+---
+
+## Source Material
+
+**Inherited From**: Story Map
+- See story map "Source Material" section for primary source
+- Additional source references will be added during Exploration phase
+

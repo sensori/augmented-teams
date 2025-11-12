@@ -1,0 +1,23 @@
+# 📝 User decreases ability rank
+
+**Epic:** Create Character
+**Feature:** Allocate Abilities
+
+## Story Description
+
+User decreases ability rank
+
+## Acceptance Criteria
+
+- [ ] 
+
+## Notes
+
+---
+
+## Source Material
+
+**Inherited From**: Story Map
+- See story map "Source Material" section for primary source
+- Additional source references will be added during Exploration phase
+

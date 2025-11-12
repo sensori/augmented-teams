@@ -1,21 +1,17 @@
-# 📝 [Verb] [Noun]
+# 📝 {story_name}
 
-**Epic:** [Epic Name]
-**Feature:** [Feature Name]
+**Epic:** {epic_name}
+**Feature:** {feature_name}
 
 ## Story Description
 
-[Brief description of the story - user action and system response]
+{story_name}
 
 ## Acceptance Criteria
 
-**AC are located in feature document, NOT in story document**
-
-See feature document for acceptance criteria: `⚙️ [Feature Name] - Feature Overview.md`
+- [ ] 
 
 ## Notes
-
-[Any additional notes, edge cases, or clarifications]
 
 ---
 
@@ -24,3 +20,4 @@ See feature document for acceptance criteria: `⚙️ [Feature Name] - Feature O
 **Inherited From**: Story Map
 - See story map "Source Material" section for primary source
 - Additional source references will be added during Exploration phase
+

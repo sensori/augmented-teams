@@ -2,38 +2,75 @@
 
 ## Generate Action Prompts
 
-**AI should infer from user request** - only ask if critical information is genuinely missing.
+### Load Templates
 
-**CRITICAL - Location Inference Strategy:**
-1. **Check open/recently viewed files** - If user has files open in a subdirectory (e.g., `demo/mm3e/`), use that as base
-2. **Check current working directory** - Use pwd/cwd if available
-3. **Check project context** - Look for project indicators (package.json, requirements.txt, etc.)
-4. **Default to workspace root** - Only if no other context available
+**MANDATORY**: Load these template files:
+1. `behaviors/stories/templates/story-map-decomposition-template.md`
+2. `behaviors/stories/templates/story-map-increments-template.md`
 
-**Location Examples:**
-- User viewing `demo/mm3e/HeroesHandbook.pdf` → Create in `demo/mm3e/docs/stories/map/`
-- User viewing `demo/project-x/src/index.js` → Create in `demo/project-x/docs/stories/map/`
-- No files open, at workspace root → Create in `docs/stories/map/`
+### Fill Placeholders
 
-Optional context to consider (don't prompt unless needed):
-- Product vision, scope, users
-- Business priorities
-- Relative sizing reference (previous work)
+**Infer from context (or ask if missing):**
+- `{product_name}`: Product name (e.g., "MM3E Online Character Creator")
+- `{product_name_slug}`: Filename version (e.g., "mm3e-character-creator")
+- `{solution_folder}`: Detected from recently viewed files, open files, or current directory
+  - Example: User viewing `demo/mm3e/HeroesHandbook.pdf` → Use `demo/mm3e/`
+  - Example: At workspace root → Create new folder
+- `{system_purpose}`: High-level purpose and user goals
+
+**Generate from analysis:**
+- `{epic_hierarchy}`: Build epic/feature/story tree structure
+  - Apply §1.1 Story Map Hierarchy (4 levels with emojis: 🎯 📂 ⚙️ 📝)
+  - Apply §1.2 Business Language ([Verb] [Noun] format, NO "Epic:" prefix)
+  - Apply §1.3 User AND System Activities (both perspectives)
+  - Apply §1.4 Story Counting (~X stories for unexplored, 10-20% identified)
+  - Apply §1.5 7±2 Sizing (Epic: 4-9 features, Feature: 4-9 stories)
+  - Use tree characters: │ ├─ └─ for hierarchy
+  
+- `{increments_organized}`: Identify marketable value increments
+  - Apply §1.5 Marketable Increments
+  - Use NOW/NEXT/LATER priorities
+  - Include relative sizing notes (compared to previous work)
+  - Format: 🚀 **Value Increment X: [Name] - [Priority]**
+
+- `{source_material}`: Track source document and sections referenced
+  - Include primary source location
+  - List sections/pages referenced
+  - Add date generated
+  - Add context note for Discovery phase
+
+### Template Structure
+
+**DO NOT override template structure** - templates define:
+- File header format and metadata
+- Section headings (## System Purpose, ## Legend, etc.)
+- Legend content (emoji definitions)
+- Source Material section placement
+
+**YOU define:**
+- Content for each placeholder
+- Epic/feature/story names following [Verb] [Noun] format
+- Story counts and priorities
+- Tree hierarchy relationships
 
 ---
 
 ## Validate Action Prompts
 
-These checks should be performed AFTER generating the story map:
+### Template Usage Validation
 
-### Structure
-- Are TWO files created:
-  - `[inferred-location]/docs/stories/map/[product-name]-story-map.md` (hierarchical decomposition)
-  - `[inferred-location]/docs/stories/increments/[product-name]-story-map-increments.md` (value increments organized)
-- Does `[inferred-location]/docs/stories/increments/` folder exist?
-- Is the 🎯 Epic → 📂 Sub-Epic → ⚙️ Feature → 📝 Story hierarchy present in documents?
+**Verify templates were loaded:**
+- Are TWO files created from templates:
+  - `[solution-folder]/docs/stories/map/[product-name]-story-map.md`
+  - `[solution-folder]/docs/stories/increments/[product-name]-story-map-increments.md`
+- Do files follow template structure (headings, sections, legend)?
+- Are all placeholders filled (no {placeholder} text remaining)?
+
+### Structure Validation
+- Does `[solution-folder]/docs/stories/increments/` folder exist?
+- Is the 🎯 Epic → 📂 Sub-Epic → ⚙️ Feature → 📝 Story hierarchy present?
 - Are tree characters (│ ├─ └─) used correctly?
-- Is the Legend at the top of the file?
+- Is the Legend at the top of both files?
 - Are NO epic/feature documents created (those are created in Discovery/Exploration)?
 - Are NO epic/feature folders created (those are created by `/story-arrange`)?
 

@@ -1,13 +1,37 @@
 {
-  "last_updated": "Wed Nov 12 16:54:49 2025",
-  "total_behaviors": 3,
+  "last_updated": "Wed Nov 12 18:16:23 2025",
+  "total_behaviors": 8,
   "behaviors": [
+    {
+      "feature": "clean-code",
+      "file": "clean-code-js-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\clean-code\\clean-code-js-rule.mdc",
+      "modified_timestamp": 1762989152.3938806,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-python-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\clean-code\\clean-code-python-rule.mdc",
+      "modified_timestamp": 1762989152.3938806,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
     {
       "feature": "clean-code",
       "file": "clean-code-rule.mdc",
       "type": ".mdc",
       "path": "behaviors\\clean-code\\clean-code-rule.mdc",
-      "modified_timestamp": 1762897041.50554,
+      "modified_timestamp": 1762897041.505,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\clean-code\\clean-code-cmd.md",
+      "modified_timestamp": 1762989152.5080342,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -15,7 +39,7 @@
       "file": "feature-outline.md",
       "type": ".md",
       "path": "behaviors\\clean-code\\feature-outline.md",
-      "modified_timestamp": 1762874849.0514734,
+      "modified_timestamp": 1762874849.051,
       "purpose": "[AI should update this purpose after reviewing the file]"
     },
     {
@@ -23,7 +47,23 @@
       "file": "clean-code_runner.py",
       "type": ".py",
       "path": "behaviors\\clean-code\\clean-code_runner.py",
-      "modified_timestamp": 1762874849.049472,
+      "modified_timestamp": 1762874849.049,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code_runner.RECOVERED.py",
+      "type": ".py",
+      "path": "behaviors\\clean-code\\clean-code_runner.RECOVERED.py",
+      "modified_timestamp": 1762987557.8516543,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "clean-code",
+      "file": "clean-code_runner_test.py",
+      "type": ".py",
+      "path": "behaviors\\clean-code\\clean-code_runner_test.py",
+      "modified_timestamp": 1762989152.3938806,
       "purpose": "[AI should update this purpose after reviewing the file]"
     }
   ]

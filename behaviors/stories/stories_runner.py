@@ -45,48 +45,42 @@ class StoryShapeCommand(Command):
     """Command for generating story map instructions"""
     
     def __init__(self, content: Content, base_rule: BaseRule):
-        generate_instructions = """Generate a story map using tree structure and emojis.
+        generate_instructions = """Generate story map using templates.
 
-CRITICAL - FOLDER STRUCTURE (EXACT structure required):
-<solution-folder>/
-└── docs/
-    └── stories/
-        ├── map/
-        │   ├── [product-name]-story-map.md
-        │   └── 🎯 Epic folders/ (created by /story-arrange command)
-        └── increments/
-            └── [product-name]-story-map-increments.md
+TEMPLATES TO LOAD:
+- behaviors/stories/templates/story-map-decomposition-template.md
+- behaviors/stories/templates/story-map-increments-template.md
 
 LOCATION INFERENCE:
 - Detect solution folder from context (recently viewed files, open files, current directory)
 - Example: Context shows demo/mm3e/ → Use demo/mm3e/ as solution folder
 - Example: At workspace root → Create new solution folder
 
-Request the following:
-- Create TWO artifact files with meaningful product name:
-  1. <solution-folder>/docs/stories/map/[product-name]-story-map.md (hierarchical tree view)
-  2. <solution-folder>/docs/stories/increments/[product-name]-story-map-increments.md (value increments)
-- Use tree structure with emojis for visual hierarchy:
-  🎯 Epic - High-level capability
-  📂 Sub-Epic - Sub-capability (when epic has > 9 features)
-  ⚙️ Feature - Cohesive functionality
-  📝 Story - Small increment
-  Tree characters: │ ├─ └─ to show hierarchy
-- Add Legend at top of file
-- ALL levels use [Verb] [Noun] *[optional clarifier]* format (including Sub-Epics)
-- NO "Epic:" prefix - just the name (e.g., "🎯 **Manage Orders**" not "🎯 **Epic: Manage Orders**")
-- NO folder creation during Shape - Epic/feature folders created by /story-arrange inside map/
-- Focus on user AND system activities (avoid work items/tasks)
-- Require business language (verb noun specific and precise)
-- Only decompose 10-20% of stories (critical/unique/architecturally significant)
-- Use story counting (~X stories) for unexplored areas
-- Apply 7±2 sizing thresholds (Epic: 4-9 features, Feature: 4-9 stories, Story: 2-9 AC)
-- Include value increments in increments file with NOW/NEXT/LATER priorities
-- Require fine-grained balanced with testable valuable
-- NO story estimates during Shape (added in Discovery)
-- NO discovery status during Shape (added in Discovery)
+PLACEHOLDERS TO FILL:
+- {product_name}: Product name (infer from context or ask)
+- {product_name_slug}: Slugified product name for filename
+- {solution_folder}: Detected solution folder path
+- {system_purpose}: High-level purpose and user goals
+- {epic_hierarchy}: Build epic/feature/story tree structure
+- {increments_organized}: Identify value increments with NOW/NEXT/LATER priorities
+- {source_material}: Track source document sections used
 
-Include principles from the rule file."""
+APPLY PRINCIPLES (for {epic_hierarchy} and {increments_organized}):
+- §1.1 Story Map Hierarchy (4 levels: Epic/Sub-Epic/Feature/Story)
+- §1.2 Business Language ([Verb] [Noun] format, NO "Epic:" prefix)
+- §1.3 User AND System Activities (both perspectives required)
+- §1.4 Story Counting (~X stories for unexplored areas, 10-20% identified)
+- §1.5 7±2 Sizing (Epic: 4-9 features, Feature: 4-9 stories)
+- §1.5 Marketable Increments (NOW/NEXT/LATER priorities)
+- §1.6 Relative Sizing (compare to previous work)
+
+CRITICAL:
+- NO folder creation during Shape - folders created by /story-arrange
+- NO story estimates during Shape - added in Discovery
+- NO discovery status during Shape - added in Discovery
+
+Templates define structure and formatting.
+YOU define content following principles."""
         super().__init__(content, base_rule, generate_instructions=generate_instructions)
         # Prompting questions - only ask if critical context missing
         self.prompting_questions = [
@@ -190,136 +184,8 @@ class CodeAugmentedStoryShapeCommand(CodeAugmentedCommand):
         
         return result
 
-# 1.2 Story Market Increments Command
-# DEPRECATED: Market increments functionality merged into StoryShapeCommand (Phase 1)
-# This class kept for backward compatibility with existing tests
-class StoryMarketIncrementsCommand(Command):
-    """DEPRECATED: Use StoryShapeCommand instead - generates both decomposition and increments"""
-    
-    def __init__(self, content: Content, base_rule: BaseRule):
-        generate_instructions = """Generate market increments that follow story shaping principles.
-        
-Request the following:
-- Request marketable increments of value identification
-- Request increments placement around the story map
-- Request increment prioritization based on business priorities
-- Request relative sizing at initiative or increment level
-- Request comparison against previous similar work
-
-Include principles from the rule file."""
-        super().__init__(content, base_rule, generate_instructions=generate_instructions)
-        # Prompting questions for market increments
-        self.prompting_questions = [
-            "Is there an existing story map shell to work with?",
-            "What are the business priorities or strategic goals?",
-            "What are the market constraints or deadlines?",
-            "Are there any dependencies between increments?"
-        ]
-    
-    def generate(self):
-        """Generate market increments instructions"""
-        instructions = super().generate()
-        # Ensure all required keywords are present for tests
-        result = instructions
-        result_lower = result.lower()
-        
-        # Check for marketable increments of value
-        if not all(word in result_lower for word in ['marketable', 'increment', 'value']):
-            result += "\n- Request marketable increments of value identification"
-        
-        # Check for increments placement around story map
-        if 'place' not in result_lower or ('increment' not in result_lower and 'story map' not in result_lower):
-            result += "\n- Request increments placement around the story map"
-        
-        # Check for increment prioritization based on business priorities
-        if 'priority' not in result_lower or 'prioritize' not in result_lower:
-            if 'business' not in result_lower:
-                result += "\n- Request increment prioritization based on business priorities"
-            else:
-                result += "\n- Request increment priority based on business priorities"
-        
-        # Check for relative sizing at initiative or increment level
-        if 'size' not in result_lower or ('initiative' not in result_lower and 'increment' not in result_lower):
-            result += "\n- Request relative sizing at initiative or increment level"
-        
-        # Check for comparison against previous similar work
-        if not all(word in result_lower for word in ['comparison', 'previous']):
-            result += "\n- Request comparison against previous similar work"
-        
-        # Check for principles
-        if 'principle' not in result_lower:
-            result += "\n\nInclude principles from the rule file."
-        return result
-    
-    def validate(self):
-        """Validate market increments content"""
-        instructions = super().validate()
-        # Add validation instructions
-        result = instructions
-        result_lower = result.lower()
-        if 'increment' not in result_lower:
-            result += "\n- Validate marketable increment identification"
-        if 'violation' not in result_lower and 'validation' not in result_lower:
-            result += "\n- Return violations list with line numbers and messages if found"
-        return result
-
-# 1.2.2 Wrap StoryMarketIncrementsCommand with code augmentation
-# DEPRECATED: Use CodeAugmentedStoryShapeCommand instead
-class CodeAugmentedStoryMarketIncrementsCommand(CodeAugmentedCommand):
-    """DEPRECATED: Use CodeAugmentedStoryShapeCommand - validates both decomposition and increments"""
-    
-    def __init__(self, inner_command: StoryMarketIncrementsCommand):
-        # Get base_rule from inner command
-        base_rule = inner_command.base_rule
-        super().__init__(inner_command, base_rule)
-    
-    def _get_heuristic_map(self):
-        """Map principle numbers to heuristic classes"""
-        # Map principle 5 (Relative Sizing) to StoryMarketIncrementsHeuristic
-        return {
-            5: StoryMarketIncrementsHeuristic
-        }
-    
-    def check_prompting_questions(self, context: str) -> bool:
-        """Check if prompting questions are answered in context"""
-        if not hasattr(self._inner_command, 'prompting_questions'):
-            return True  # No questions to check
-        
-        context_lower = context.lower()
-        # Check if all questions have answers in context
-        required_terms = []
-        for question in self._inner_command.prompting_questions:
-            # Extract key terms from question
-            if "story map" in question.lower():
-                required_terms.append("story map")
-            if "priorities" in question.lower() or "goals" in question.lower():
-                required_terms.append("priorities")
-            if "constraints" in question.lower() or "deadlines" in question.lower():
-                required_terms.append("constraints")
-            if "dependencies" in question.lower():
-                required_terms.append("dependencies")
-        
-        # Check if context contains answers (look for patterns like "Story map: ...", "Priorities: ...")
-        has_answers = any(
-            term in context_lower and ":" in context 
-            for term in required_terms
-        )
-        
-        return has_answers
-    
-    def execute(self):
-        """Execute generate then validate workflow"""
-        # If not generated, generate first
-        if not self._inner_command.generated:
-            self.generate()
-        
-        # After generation (or if already generated), validate
-        result = self.validate()
-        
-        return result
-
-# 1.3 Story Arrange Command
-# 1.3.1 Arrange folder structure to match story map
+# 1.2 Story Arrange Command
+# 1.2.1 Arrange folder structure to match story map
 class StoryArrangeCommand(Command):
     """Command for arranging folder structure to match story map"""
     
@@ -496,31 +362,14 @@ Include principles from the rule file."""
                     
                     # Create story file if doesn't exist
                     if not story_path.exists():
-                        # Create basic story file with title
-                        story_content = f"""# 📝 {story_name}
-
-**Epic:** {epic_name}
-**Feature:** {feature_name}
-
-## Story Description
-
-{story_name}
-
-## Acceptance Criteria
-
-- [ ] 
-
-## Notes
-
----
-
-## Source Material
-
-**Inherited From**: Story Map
-- See story map "Source Material" section for primary source
-- Additional source references will be added during Exploration phase
-
-"""
+                        # Load and fill story template
+                        template_path = Path(__file__).parent / "templates" / "story-doc-template.md"
+                        story_content = self.load_and_fill_template(
+                            str(template_path),
+                            story_name=story_name,
+                            epic_name=epic_name,
+                            feature_name=feature_name
+                        )
                         with open(story_path, 'w', encoding='utf-8') as f:
                             f.write(story_content)
                         created_stories.append(str(story_path.relative_to(base_dir)))
@@ -690,7 +539,7 @@ Next steps:
             result += "\n- Check for extra folders (in filesystem, not in story map)"
         return result
 
-# 1.3.2 Wrap StoryArrangeCommand with code augmentation
+# 1.2.2 Wrap StoryArrangeCommand with code augmentation
 class CodeAugmentedStoryArrangeCommand(CodeAugmentedCommand):
     """Wrapper for StoryArrangeCommand with code validation"""
     
@@ -709,8 +558,8 @@ class CodeAugmentedStoryArrangeCommand(CodeAugmentedCommand):
         result = self.validate()
         return result
 
-# 1.4 Story Discovery Command
-# 1.4.1 Refine increments and groom stories for next increment
+# 1.3 Story Discovery Command
+# 1.3.1 Refine increments and groom stories for next increment
 class StoryDiscoveryCommand(Command):
     """Command for discovery - refining increments and identifying story issues"""
     
@@ -811,7 +660,7 @@ Include principles from the rule file (Section 2: Discovery Principles)."""
         
         return result
 
-# 1.4.2 Wrap StoryDiscoveryCommand with code augmentation
+# 1.3.2 Wrap StoryDiscoveryCommand with code augmentation
 class CodeAugmentedStoryDiscoveryCommand(CodeAugmentedCommand):
     """Wrapper for StoryDiscoveryCommand with code validation"""
     
@@ -860,46 +709,53 @@ class CodeAugmentedStoryDiscoveryCommand(CodeAugmentedCommand):
         result = self.validate()
         return result
 
-# 1.5 Story Exploration Command
-# 1.5.1 Write acceptance criteria for stories with exhaustive AC decomposition
+# 1.4 Story Exploration Command
+# 1.4.1 Write acceptance criteria for stories with exhaustive AC decomposition
 class StoryExploreCommand(Command):
     """Command for exploration - writing acceptance criteria with Domain AC and Behavioral AC"""
     
     def __init__(self, content: Content, base_rule: BaseRule):
-        generate_instructions = """Write acceptance criteria for stories with exhaustive AC decomposition and consolidation review.
+        generate_instructions = """Write acceptance criteria using Feature Overview template.
 
-CRITICAL - FEATURE-SCOPED DOMAIN PERSPECTIVE:
-⭐ Define domain concepts through the lens of THIS feature's concerns
-- DO NOT copy entire domain model - define only the facets/aspects THIS feature operates on
-- Same concept, different facets per feature (e.g., "Character" in Establish Identity shows identity fields; "Character" in Save Character shows persistence states)
-- Canonical Reference: demo/mm3e/docs/stories/map/⚙️ [Feature] - Feature Overview.md
+TEMPLATE TO LOAD:
+- behaviors/stories/templates/feature-overview-template.md
 
 CRITICAL - SOURCE TRACEABILITY:
 1. READ "Source Material" section from story map (Discovery Refinements)
-2. Check for domain map at <solution-folder>/<system-name>-domain-map.txt (if exists, load relevant sections)
+2. Check for domain map at <solution-folder>/<system-name>-domain-map.txt (if exists, load)
 3. Check for domain interactions at <solution-folder>/<system-name>-domain-interactions.txt (if available)
 4. AUTOMATICALLY load source material into context
-5. Reference domain rules, formulas, validation patterns from Discovery
 
-FOLDER STRUCTURE:
-- Story map: <solution-folder>/docs/stories/map/[product-name]-story-map.md
-- Feature documents: <solution-folder>/docs/stories/map/🎯 [Epic]/⚙️ [Feature]/⚙️ [Feature] - Feature Overview.md
-- Story documents: <solution-folder>/docs/stories/map/🎯 [Epic]/⚙️ [Feature]/📝 [Story].md
+PLACEHOLDERS TO FILL:
+- {feature_name}: Feature being explored
+- {epic_name}: Parent epic name
+- {feature_purpose}: Extract from story descriptions
+- {story_count}: Number of stories in feature
+- {domain_concepts}: Write Core Domain Concepts (feature-scoped perspective)
+- {domain_behaviors}: Write Domain Behaviors (operations on concepts)
+- {domain_rules}: Write Domain Rules (formulas, constraints, validation patterns)
+- {stories_with_ac}: Write AC for each story (When/Then format, NO Given)
+- {consolidation_decisions}: Document consolidate/separate decisions with reasoning
+- {domain_rules_referenced}: Extract formulas/rules from source material
+- {source_material}: Inherit from story map, add exploration details
 
-Request the following:
-- Write Domain AC at feature level (Core Concepts → Behaviors → Rules)
-- Use FEATURE-SCOPED DOMAIN PERSPECTIVE (only facets relevant to THIS feature)
-- Check higher levels first (solution → epic → sub-epic) and reference shared concepts
-- Write Acceptance Criteria for each story (When/Then format, NO "Given" clauses)
-- Apply exhaustive logic decomposition at AC level (enumerate ALL permutations)
-- Present CONSOLIDATION REVIEW to user BEFORE finalizing
-- Document consolidation decisions and assumptions
-- Place ALL AC in feature documents (NOT in story documents)
-- Update story documents to reference feature document for AC
-- Document source material references and domain rules
-- CRITICAL: All notes, consolidation decisions, domain rules, and source material go BELOW all acceptance criteria
+APPLY PRINCIPLES:
+- §3.1 Feature-Scoped Domain Perspective (only facets THIS feature operates on)
+- §3.1a Domain AC format (Concepts → Behaviors → Rules)
+- §3.1b Behavioral AC format (When/Then, NO Given)
+- §3.2 Consolidation Review (present questions to user BEFORE finalizing)
 
-Include principles from the rule file (Section 3: Story Exploration Principles)."""
+CRITICAL - CONSOLIDATION REVIEW:
+Present consolidation matrix to user with questions about same/different logic.
+Document assumptions about consolidation decisions.
+WAIT for user answers before finalizing.
+
+CRITICAL - CONTENT PLACEMENT:
+- ALL AC in feature documents (NOT in story documents)
+- Update story documents to reference feature document
+- All notes, consolidation decisions, rules BELOW all acceptance criteria
+
+Templates define structure. YOU define content following principles."""
         super().__init__(content, base_rule, generate_instructions=generate_instructions)
         # Prompting questions
         self.prompting_questions = [
@@ -969,7 +825,7 @@ Include principles from the rule file (Section 3: Story Exploration Principles).
         
         return result
 
-# 1.5.2 Wrap StoryExploreCommand with code augmentation
+# 1.4.2 Wrap StoryExploreCommand with code augmentation
 class CodeAugmentedStoryExploreCommand(CodeAugmentedCommand):
     """Wrapper for StoryExploreCommand with code validation"""
     
@@ -1024,10 +880,10 @@ class CodeAugmentedStoryExploreCommand(CodeAugmentedCommand):
         result = self.validate()
         return result
 
-# 1.6 Story Specification Scenarios Command
-# 1.6.1 Create scenario specifications for stories
-class StorySpecificationScenariosCommand(Command):
-    """Command for creating scenario specifications with Given/When/Then structure"""
+# 1.5 Story Specification Command
+# 1.5.1 Create specifications with scenarios and examples
+class StorySpecificationCommand(Command):
+    """Command for creating story specifications with Given/When/Then scenarios and examples"""
     
     def __init__(self, content: Content, base_rule: BaseRule):
         generate_instructions = """Create story specification scenarios with Given/When/Then structure.
@@ -1040,7 +896,7 @@ See prompts file for detailed scope detection and generation instructions.
 Include principles from the rule file (Section 4: Specification Scenarios Principles)."""
         
         # Load prompts from file
-        prompts_file = Path(__file__).parent / "specification-scenarios" / "story-specification-scenarios-prompts.md"
+        prompts_file = Path(__file__).parent / "specification" / "story-specification-prompts.md"
         
         super().__init__(content, base_rule, generate_instructions=generate_instructions)
         
@@ -1105,11 +961,11 @@ Include principles from the rule file (Section 4: Specification Scenarios Princi
         
         return result
 
-# 1.6.2 Wrap StorySpecificationScenariosCommand with code augmentation
-class CodeAugmentedStorySpecificationScenariosCommand(CodeAugmentedCommand):
-    """Wrapper for StorySpecificationScenariosCommand with code validation"""
+# 1.5.2 Wrap StorySpecificationCommand with code augmentation
+class CodeAugmentedStorySpecificationCommand(CodeAugmentedCommand):
+    """Wrapper for StorySpecificationCommand with code validation"""
     
-    def __init__(self, inner_command: StorySpecificationScenariosCommand):
+    def __init__(self, inner_command: StorySpecificationCommand):
         base_rule = inner_command.base_rule
         super().__init__(inner_command, base_rule)
     
@@ -1168,7 +1024,7 @@ def main():
     
     if len(sys.argv) < 2:
         print("Usage: python stories_runner.py <command> [action] [args...]")
-        print("Commands: story-shape, story-arrange, story-discovery, story-explore, story-specification-scenarios, story-specification-examples")
+        print("Commands: story-shape, story-arrange, story-discovery, story-explore, story-specification")
         print("Actions: generate, validate, correct, execute")
         sys.exit(1)
     
@@ -1198,12 +1054,9 @@ def main():
     elif command_type == "story-explore":
         inner_command = StoryExploreCommand(content, base_rule)
         command = CodeAugmentedStoryExploreCommand(inner_command)
-    elif command_type == "story-specification-scenarios":
-        inner_command = StorySpecificationScenariosCommand(content, base_rule)
-        command = CodeAugmentedStorySpecificationScenariosCommand(inner_command)
-    elif command_type == "story-specification-examples":
-        print(f"Error: Command '{command_type}' not yet implemented")
-        sys.exit(1)
+    elif command_type == "story-specification-scenarios" or command_type == "story-specification":
+        inner_command = StorySpecificationCommand(content, base_rule)
+        command = CodeAugmentedStorySpecificationCommand(inner_command)
     else:
         print(f"Error: Unknown command: {command_type}")
         sys.exit(1)

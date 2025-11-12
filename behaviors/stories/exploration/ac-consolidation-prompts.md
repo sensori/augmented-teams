@@ -1,9 +1,35 @@
 # Acceptance Criteria Consolidation Prompts
 
-**Purpose**: Guide AC enumeration and consolidation review during Exploration phase. Apply same principles as story-level consolidation (Principle 2.5) at acceptance criteria level.
+**Purpose**: Guide AC enumeration and consolidation review during Exploration phase, using Feature Overview template.
 
+**Template Reference**: `behaviors/stories/templates/feature-overview-template.md`
 **Principle Reference**: `behaviors/stories/stories-rule.mdc` - Principle 2.5 (applied to ACs), Principle 3.2
 **Consolidation Patterns**: `behaviors/stories/discovery/consolidation-checklist.md` (same patterns apply to ACs)
+
+---
+
+## Template Usage
+
+**MANDATORY**: Load template file:
+- `behaviors/stories/templates/feature-overview-template.md`
+
+**Key Placeholder:**
+- `{stories_with_ac}`: This is where you fill in all stories with their acceptance criteria
+
+**Format for {stories_with_ac}:**
+```markdown
+### 1. **[Story Title]** - 📝 [Verb] [Noun]
+
+**Story Description**: [description]
+
+#### Acceptance Criteria
+
+##### [AC Group Name]
+- **When** [condition], **then** [outcome]
+- **When** [condition], **then** [outcome]
+
+---
+```
 
 ---
 

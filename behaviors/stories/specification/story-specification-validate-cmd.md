@@ -66,7 +66,7 @@ Validate scenario specifications for structure, completeness, and adherence to b
 
 ### Step 4: Apply Heuristics
 
-**Use**: `StorySpecificationScenariosHeuristic` class
+**Use**: `StorySpecificationHeuristic` class
 
 **Checks**:
 1. `validate_scenarios(spec_content)` - Validate scenario structure

@@ -13,7 +13,7 @@ Stories should be written in business language that stakeholders understand, foc
 * `/story-arrange` — Arrange and validate folder structure to match story map hierarchy
 * `/story-discovery` — Refine increments, apply practices, groom stories for next increment
 * `/story-explore` — Write acceptance criteria (Domain AC + Behavioral AC), refine map
-* `/story-specification-scenarios` — Create scenario specifications with Given/When/Then
+* `/story-specification` — Create story specifications with Given/When/Then scenarios and examples
 * `/story-specification-examples` — Create example specifications (completes spec)
 *
 ## Conventions
@@ -906,7 +906,7 @@ Identify and define system-level stories, not just user-facing stories.
 
 ## 3.5. Story Specification
 
-⚠️ **Commands: story-specification-scenarios, story-specification-examples**
+⚠️ **Commands: story-specification**
 
 Document story specifications with scenarios and examples that provide detailed context for implementation.
 
@@ -995,11 +995,11 @@ Use appropriate story format depending on whether story maps are present, with f
 
 ## Section 4: Specification Scenarios Principles
 
-⚠️ **Commands: story-specification-scenarios** - These principles apply to scenario specification
+⚠️ **Commands: story-specification** - These principles apply to story specification
 
 ## 4.1. Given Statements Describe States (BDD-Inspired)
 
-⚠️ **Commands: story-specification-scenarios**
+⚠️ **Commands: story-specification**
 
 **CRITICAL**: Given statements describe STATES, not actions. This principle is borrowed from BDD test practices where describe blocks use state-oriented language.
 
@@ -1053,7 +1053,7 @@ This principle is borrowed from BDD testing practices where test describe blocks
 
 ## 4.2. Scenario Structure and Gherkin Keywords
 
-⚠️ **Commands: story-specification-scenarios**
+⚠️ **Commands: story-specification**
 
 Use proper Gherkin structure with Given/When/Then keywords, Background for repeated steps, and Scenario Outline for parameterized scenarios.
 
@@ -1078,7 +1078,7 @@ Use proper Gherkin structure with Given/When/Then keywords, Background for repea
 
 ## 4.3. Scenario Coverage (Happy Path, Edge Cases, Error Cases)
 
-⚠️ **Commands: story-specification-scenarios**
+⚠️ **Commands: story-specification**
 
 Cover happy path, edge cases, and error cases to ensure comprehensive scenario documentation.
 
@@ -1098,7 +1098,7 @@ Cover happy path, edge cases, and error cases to ensure comprehensive scenario d
 
 ## 4.4. Behavioral Language in Scenarios
 
-⚠️ **Commands: story-specification-scenarios**
+⚠️ **Commands: story-specification**
 
 Write scenarios in behavioral language that describes observable behavior, not technical implementation.
 
@@ -1229,9 +1229,9 @@ Commands that implement or use this rule:
 * `/story-explore` — Write acceptance criteria and define system stories
 * `/story-explore-generate` — Generate exploration artifacts
 * `/story-explore-validate` — Validate exploration completeness
-* `/story-specification-scenarios` — Create scenario-based specifications
-* `/story-specification-scenarios-generate` — Generate scenarios
-* `/story-specification-scenarios-validate` — Validate scenarios
+* `/story-specification` — Create story specifications with scenarios and examples
+* `/story-specification-generate` — Generate specifications
+* `/story-specification-validate` — Validate specifications
 * `/story-specification-examples` — Create example-based specifications
 * `/story-specification-examples-generate` — Generate examples
 * `/story-specification-examples-validate` — Validate examples

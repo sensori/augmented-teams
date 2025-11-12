@@ -869,6 +869,23 @@ The heuristics provide initial findings. YOU must validate comprehensively again
         self.validated = False
         self.corrected = False
     
+    def load_template(self, template_path: str) -> str:
+        """Load template file content"""
+        from pathlib import Path
+        template_file = Path(template_path)
+        if not template_file.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        return template_file.read_text(encoding='utf-8')
+    
+    def fill_template(self, template_content: str, **kwargs) -> str:
+        """Fill template placeholders with values using str.format()"""
+        return template_content.format(**kwargs)
+    
+    def load_and_fill_template(self, template_path: str, **kwargs) -> str:
+        """Load template and fill placeholders in one step"""
+        template_content = self.load_template(template_path)
+        return self.fill_template(template_content, **kwargs)
+    
     @property
     def principles(self):
         
