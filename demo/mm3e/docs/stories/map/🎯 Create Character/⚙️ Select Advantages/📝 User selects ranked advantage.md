@@ -9,7 +9,8 @@ User selects ranked advantage
 
 ## Acceptance Criteria
 
-- [ ] 
+**AC are located in feature document**
+See: ⚙️ Select Advantages - Feature Overview.md 
 
 ## Notes
 

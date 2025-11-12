@@ -7,11 +7,9 @@ Guide through discovery stage for next market increment. Refine marketable incre
 `behaviors/stories/stories-rule.mdc` - Section 2: Discovery Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-discovery --action generate
-python behaviors/stories/stories_runner.py story-discovery --action validate
-python behaviors/stories/stories_runner.py story-discovery --action execute
-```
+* CLI: `python behaviors/stories/stories_runner.py story-discovery generate [story-map-file]` — Generate discovery refinements for increment
+* CLI: `python behaviors/stories/stories_runner.py story-discovery validate [story-map-file]` — Validate discovery refinements against principles
+* CLI: `python behaviors/stories/stories_runner.py story-discovery execute [story-map-file]` — Execute full workflow (generate then validate)
 
 ---
 

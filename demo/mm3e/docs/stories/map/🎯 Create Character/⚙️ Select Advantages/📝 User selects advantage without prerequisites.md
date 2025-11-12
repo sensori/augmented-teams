@@ -9,7 +9,8 @@ User selects advantage without prerequisites
 
 ## Acceptance Criteria
 
-- [ ] 
+**AC are located in feature document**
+See: ⚙️ Select Advantages - Feature Overview.md 
 
 ## Notes
 

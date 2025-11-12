@@ -7,11 +7,9 @@ Write acceptance criteria for stories in next increment. Define Domain AC (featu
 `behaviors/stories/stories-rule.mdc` - Section 3: Story Exploration Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-explore --action generate
-python behaviors/stories/stories_runner.py story-explore --action validate
-python behaviors/stories/stories_runner.py story-explore --action execute
-```
+* CLI: `python behaviors/stories/stories_runner.py story-explore generate [feature-doc-path]` — Generate acceptance criteria for feature
+* CLI: `python behaviors/stories/stories_runner.py story-explore validate [feature-doc-path]` — Validate acceptance criteria against principles
+* CLI: `python behaviors/stories/stories_runner.py story-explore execute [feature-doc-path]` — Execute full workflow (generate then validate)
 
 ---
 
@@ -33,7 +31,11 @@ python behaviors/stories/stories_runner.py story-explore --action execute
    - **References Discovery Refinements** for domain rules and formulas
    - **References domain map** (if exists) to extract relevant domain concepts for this feature
    - **References domain interactions** (if available) to understand how concepts work together
-   - **For Domain AC**: Create hierarchical domain AC, checking higher levels first
+   - **For Domain AC**: Create hierarchical domain AC using FEATURE-SCOPED DOMAIN PERSPECTIVE (⭐ CRITICAL PATTERN):
+     - **Define domain concepts through the lens of THIS feature's concerns**
+     - **DO NOT copy entire domain model** - define only the facets/aspects THIS feature operates on
+     - **Same concept, different facets per feature** (e.g., "Character" in Establish Identity shows identity fields; "Character" in Save Character shows persistence states)
+     - Check higher levels first
      - **Step 1 - Check Higher Levels**:
        - Check story map for **Solution-level Domain AC** (concepts used across ALL epics)
        - Check for **Epic document** (`🎯 [Epic Name] - Epic Overview.md`) with epic-level Domain AC

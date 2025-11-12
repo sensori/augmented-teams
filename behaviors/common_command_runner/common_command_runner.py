@@ -1105,9 +1105,13 @@ class CodeAugmentedCommand:
         heuristic_map = self._get_heuristic_map()
         if heuristic_map:
             for principle in self.base_rule.principles:
-                heuristic_class = heuristic_map.get(principle.principle_number)
-                if heuristic_class:
-                    principle.heuristics = [heuristic_class()]
+                heuristic_class_or_list = heuristic_map.get(principle.principle_number)
+                if heuristic_class_or_list:
+                    # Handle both single heuristic and list of heuristics
+                    if isinstance(heuristic_class_or_list, list):
+                        principle.heuristics = [heuristic_class() for heuristic_class in heuristic_class_or_list]
+                    else:
+                        principle.heuristics = [heuristic_class_or_list()]
     
     def _get_heuristic_map(self):
         return None

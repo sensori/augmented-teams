@@ -9,7 +9,8 @@ User adds ranks to untrained skill
 
 ## Acceptance Criteria
 
-- [ ] 
+**AC are located in feature document**
+See: ⚙️ Purchase Skills - Feature Overview.md 
 
 ## Notes
 

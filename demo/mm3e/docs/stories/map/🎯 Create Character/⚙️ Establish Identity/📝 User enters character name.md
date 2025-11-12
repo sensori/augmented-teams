@@ -9,7 +9,8 @@ User enters character name
 
 ## Acceptance Criteria
 
-- [ ] 
+**AC are located in feature document**
+See: ⚙️ Establish Identity - Feature Overview.md 
 
 ## Notes
 

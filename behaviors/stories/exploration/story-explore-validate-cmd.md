@@ -7,9 +7,7 @@ Validate acceptance criteria against story exploration principles.
 `behaviors/stories/stories-rule.mdc` - Section 3: Story Exploration Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-explore --action validate
-```
+* CLI: `python behaviors/stories/stories_runner.py story-explore validate [feature-doc-path]` — Validate acceptance criteria against principles
 
 ---
 

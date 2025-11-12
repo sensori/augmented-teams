@@ -7,9 +7,7 @@ Generate discovery refinements for next market increment
 `behaviors/stories/stories-rule.mdc` - Section 2: Discovery Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-discovery --action generate
-```
+* CLI: `python behaviors/stories/stories_runner.py story-discovery generate [story-map-file]` — Generate discovery refinements for increment
 
 ---
 

@@ -7,9 +7,7 @@ Validate discovery refinements against Discovery principles
 `behaviors/stories/stories-rule.mdc` - Section 2: Discovery Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-discovery --action validate
-```
+* CLI: `python behaviors/stories/stories_runner.py story-discovery validate [story-map-file]` — Validate discovery refinements against principles
 
 ---
 

@@ -7,9 +7,7 @@ Correct acceptance criteria based on validation errors or user feedback.
 `behaviors/stories/stories-rule.mdc` - Section 3: Story Exploration Principles
 
 **Runner:**
-```bash
-python behaviors/stories/stories_runner.py story-explore --action correct
-```
+* CLI: `python behaviors/stories/stories_runner.py story-explore correct [feature-doc-path] [chat-context]` — Correct acceptance criteria based on errors and chat context
 
 ---
 

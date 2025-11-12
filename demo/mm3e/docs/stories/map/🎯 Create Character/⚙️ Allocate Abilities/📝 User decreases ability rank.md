@@ -9,7 +9,8 @@ User decreases ability rank
 
 ## Acceptance Criteria
 
-- [ ] 
+**AC are located in feature document**
+See: ⚙️ Allocate Abilities - Feature Overview.md 
 
 ## Notes
 

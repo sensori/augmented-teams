@@ -48,7 +48,7 @@ Naming conventions, file locations, and structural conventions for stories and s
 
 ⚠️ **Universal** - These principles apply to ALL commands across ALL stages
 
-### Principle 0.1: Stories Are Action-Oriented and Describe Interactions
+## 0.1. Stories Are Action-Oriented and Describe Interactions
 
 Stories must focus on user interactions and observable system behavior, not development tasks or system internals.
 
@@ -78,7 +78,7 @@ Stories must focus on user interactions and observable system behavior, not deve
 * ✅ **DO** (User/System Stories): "Customer places order", "System validates payment", "User views dashboard", "Payment service processes transaction"
 * ❌ **DON'T** (Technical Stories): "Implement order placement", "Create payment validation", "Build dashboard view", "Refactor payment service", "Optimize database queries"
 
-### Principle 0.2: INVEST Principles
+## 0.2. INVEST Principles
 
 Stories must follow INVEST principles: Independent, Negotiable, Valuable, Estimable, Small, Testable.
 
@@ -113,7 +113,7 @@ Stories must follow INVEST principles: Independent, Negotiable, Valuable, Estima
 
 ⚠️ **All Phases** - These principles apply to ALL commands across Story Shaping, Discovery, and Exploration
 
-### Principle 0.5.1: Epic/Feature/Story Hierarchy
+## 0.5.1. Epic/Feature/Story Hierarchy
 
 Story maps must use a consistent Epic → Feature → Story hierarchy structure.
 
@@ -152,7 +152,7 @@ Story maps must use a consistent Epic → Feature → Story hierarchy structure.
 
 ⚠️ **Stage: Story Shaping** - These principles apply to all Story Shaping stage commands
 
-### Principle 1.1: Focus Story Maps on User AND System Activities
+## 1.1. Focus Story Maps on User AND System Activities
 
 ⚠️ **Commands: story-shape**
 
@@ -190,7 +190,7 @@ Story maps must outline both user and system activities, not tasks. Stories shou
 * Ask "how big or small are the stories in the map?" when promoted to production
 * **DON'T**: Build the map in absence of the people who can estimate the work
 
-### Principle 1.2: Balance Fine-Grained with Testable/Valuable
+## 1.2. Balance Fine-Grained with Testable/Valuable
 
 ⚠️ **Commands: story-shape**
 
@@ -220,7 +220,7 @@ Stories must balance being fine-grained enough for frequent delivery while remai
 * ❌ **DON'T**: "Change button color" (too fine-grained, no value)
 * ❌ **DON'T**: "Customer places order and views history and updates profile" (too large, multiple flows)
 
-### Principle 1.3: Use Business Language That is Specific and Precise
+## 1.3. Use Business Language That is Specific and Precise
 
 ⚠️ **Commands: story-shape**
 
@@ -251,7 +251,7 @@ Stories should use business language that is specific, precise, and understandab
 * ✅ **DO**: "Customer places order", "System validates payment", "User views dashboard"
 * ❌ **DON'T**: "Process order" (generic), "Order Management" (static), "getOrder()" (code pattern)
 
-### Principle 1.4: Use Active Behavioral Language
+## 1.4. Use Active Behavioral Language
 
 ⚠️ **Commands: story-shape**
 
@@ -273,7 +273,7 @@ Stories should favor active behavioral language over functional/capability langu
 * ✅ **DO**: "Place order" (active behavior), "Validate payment" (active behavior)
 * ❌ **DON'T**: "Order Management" (capability), "Implement order placement" (task)
 
-### Principle 1.5: Hierarchy Sizing Thresholds (7±2 Rule)
+## 1.5. Hierarchy Sizing Thresholds (7±2 Rule)
 
 ⚠️ **Commands: story-shape, story-discovery, story-explore**
 
@@ -325,7 +325,7 @@ Size hierarchy levels so each contains no more than 7-9 items of the next level.
 * Optimal range: 5-9 items per level
 * Review and adjust during Discovery and Exploration
 
-### Principle 1.6: Story Counting for Unexplored Areas
+## 1.6. Story Counting for Unexplored Areas
 
 ⚠️ **Commands: story-shape**
 
@@ -355,7 +355,7 @@ Use story counts (~X stories) to extrapolate scope for unexplored areas rather t
   ```
 * ❌ **DON'T**: Decompose all 45 stories during shaping
 
-### Principle 1.7: Identifying Marketable Increments of Value
+## 1.7. Identifying Marketable Increments of Value
 
 ⚠️ **Commands: story-shape**
 
@@ -387,7 +387,7 @@ Identify and organize marketable increments of value during Story Shaping, creat
       Feature: Configure Pricing (approx 5 stories)
   ```
 
-### Principle 1.8: Relative Sizing Upstream
+## 1.8. Relative Sizing Upstream
 
 ⚠️ **Commands: story-shape**
 
@@ -412,7 +412,7 @@ Use relative sizing upstream for larger buckets of scope by comparing against pr
 
 ⚠️ **Stage: Discovery** - These principles apply to all Discovery stage commands
 
-### Principle 2.1: Refining Marketable Increments on Story Map
+## 2.1. Refining Marketable Increments on Story Map
 
 ⚠️ **Commands: story-discovery**
 
@@ -428,7 +428,7 @@ Refine marketable increments on the story map during Discovery based on new insi
 * Skip increment refinement during discovery
 * Ignore discovery insights when updating story map
 
-### Principle 2.2: Story Mapping Practices
+## 2.2. Story Mapping Practices
 
 ⚠️ **Commands: story-discovery**
 
@@ -449,7 +449,7 @@ Apply story mapping practices that encourage good practices and avoid anti-patte
 **[Further Recommendations for Humans]**:
 * **DON'T**: Build map without people who can estimate
 
-### Principle 2.3: Story Mapping Estimation and Counting
+## 2.3. Story Mapping Estimation and Counting
 
 ⚠️ **Commands: story-discovery**
 
@@ -470,7 +470,7 @@ Use story counts and throughput-based planning rather than detailed estimation f
 * Focus on detailed story estimation when mapping (use counts instead)
 * Generate or invent day estimates without human input
 
-### Principle 2.4: Story Refinement
+## 2.4. Story Refinement
 
 ⚠️ **Commands: story-discovery**
 
@@ -498,7 +498,7 @@ Refine stories to identify potentially ambiguous or complex stories. Story refin
 * Size enough work based on actual throughput
 * Add day estimates during Discovery based on team knowledge and comparison to previous work
 
-### Principle 2.5: Exhaustive Logic Decomposition
+## 2.5. Exhaustive Logic Decomposition
 
 ⚠️ **Commands: story-discovery**
 
@@ -613,7 +613,7 @@ During Discovery, decompose stories exhaustively by identifying all distinct sof
 * For other increments: Use story counts (~X stories)
 * Ask "Can we say 'we've thought of everything' for this increment?"
 
-### Principle 2.5.1: Critical Complexity Detection in Collections
+## 2.5.1. Critical Complexity Detection in Collections
 
 ⚠️ **Commands: story-discovery**
 
@@ -665,7 +665,7 @@ When encountering large collections of similar items (catalogs, product types, r
 
 * ❌ **DON'T**: "User selects advantage" (single story for 80 different advantages with different prerequisites and behaviors)
 
-### Principle 2.5.2: Decomposition Level - Shaping vs Discovery
+## 2.5.2. Decomposition Level - Shaping vs Discovery
 
 ⚠️ **Commands: story-shape, story-discovery**
 
@@ -695,7 +695,7 @@ Apply different decomposition levels during Shaping vs Discovery phases.
 * ✅ **DISCOVERY (increment in focus)**: "Purchase Skills" - ALL 9 stories listed explicitly with full permutation coverage
 * ✅ **DISCOVERY (other increments)**: "Configure Equipment (~12 stories)" - still using counts
 
-### Principle 2.6: Story Format and Clarity
+## 2.6. Story Format and Clarity
 
 ⚠️ **Commands: story-discovery**
 
@@ -739,7 +739,7 @@ Stories must follow a clean, consistent format that makes the user/system intera
 
 ⚠️ **Stage: Story Exploration** - These principles apply to all Story Exploration stage commands
 
-### Principle 3.1: Writing Acceptance Criteria (Domain and Behavioral)
+## 3.1. Writing Acceptance Criteria (Domain and Behavioral)
 
 ⚠️ **Commands: story-explore**
 
@@ -760,17 +760,22 @@ Define two types of acceptance criteria: Domain AC (feature level) and Behaviora
   - **Structure as mini domain map**: Identify core BUSINESS CONCEPTS first, then behaviors on those concepts
   - **Check for existing domain map** (`<solution-folder>/<system-name>-domain-map.txt`) and extract relevant business concepts
   - **Check for domain interactions** (`<solution-folder>/<system-name>-domain-interactions.txt`) if available
-  - **For Feature-level Domain AC**:
+  - **For Feature-level Domain AC** (⭐ FEATURE-SCOPED DOMAIN PERSPECTIVE):
+    - **CRITICAL PATTERN**: Define domain concepts through the lens of THIS feature's concerns
     - Reference shared concepts from higher levels
-    - Define only feature-specific concepts
-    - **Core Domain Concepts** (nouns): Business objects specific to this feature
+    - Define only feature-specific concepts and ONLY THE FACETS relevant to this feature
+    - **DO NOT** copy entire domain model - define only aspects THIS feature operates on
+    - **Same concept, different facets per feature** (Character in "Establish Identity" shows identity fields; Character in "Save Character" shows persistence states)
+    - **Core Domain Concepts** (nouns): Business objects specific to this feature - ONLY the facets/attributes this feature touches
     - **Domain Behaviors** (verbs on concepts): Operations specific to this feature
     - **Domain Rules**: Formulas, patterns, constraints specific to this feature
+    - **Canonical Reference**: See `demo/mm3e/docs/stories/map/⚙️ [Feature] - Feature Overview.md` files for examples of feature-scoped domain perspective
   - Use domain-driven principles: see `behaviors/ddd/ddd-rule.mdc` Principles 1, 4, 5, 7, 10
   - Place in feature document (e.g., "Feature Overview.md")
   - Document consolidation decisions and logic patterns
   - **NOT** technical implementation: no API endpoints, database schemas, JSON structures
   - **NOT** operations-first: Don't start with operations without defining WHAT is being operated on
+  - **NOT** full domain model duplication: Don't copy every attribute of a concept into every feature
 * **Acceptance Criteria** (Story level - always behavioral):
   - Define acceptance criteria for every story
   - Use "When...then..." format (NO "Given" clauses at AC level - save for spec)
@@ -834,7 +839,7 @@ Define two types of acceptance criteria: Domain AC (feature level) and Behaviora
 **[Further Recommendations for Humans]**:
 * Share common understanding of the next feature/slice starting delivery (requires team collaboration)
 
-### Principle 3.2: Apply Logic Decomposition and Consolidation at Acceptance Criteria Level
+## 3.2. Apply Logic Decomposition and Consolidation at Acceptance Criteria Level
 
 ⚠️ **Commands: story-explore**
 
@@ -865,7 +870,7 @@ Apply Principle 2.5 (Exhaustive Logic Decomposition) when writing acceptance cri
 * ✅ **DO**: Document assumption "All ability prerequisite checks use same validation (rank >= requirement) - consolidate to 1 AC?" → Wait for user confirmation
 * ❌ **DON'T**: Assume all validations are same and consolidate without asking
 
-### Principle 3.3: Refining Story Map During Exploration
+## 3.3. Refining Story Map During Exploration
 
 ⚠️ **Commands: story-explore**
 
@@ -882,7 +887,7 @@ Refine, merge, or split stories during exploration to ensure they are at an appr
 * Leave stories at inconsistent levels of detail
 * Lose focus on user/system behavior completeness
 
-### Principle 3.4: Defining System Level Stories
+## 3.4. Defining System Level Stories
 
 ⚠️ **Commands: story-explore**
 
@@ -899,7 +904,7 @@ Identify and define system-level stories, not just user-facing stories.
 * Ignore system behavior
 * Skip system-level story definition
 
-### Principle 3.5: Story Specification
+## 3.5. Story Specification
 
 ⚠️ **Commands: story-specification-scenarios, story-specification-examples**
 
@@ -987,6 +992,215 @@ Use appropriate story format depending on whether story maps are present, with f
 
 **[Further Recommendations for Humans]**:
 * Use format that gives team insight into mind of end user (requires team discussion)
+
+## Section 4: Specification Scenarios Principles
+
+⚠️ **Commands: story-specification-scenarios** - These principles apply to scenario specification
+
+## 4.1. Given Statements Describe States (BDD-Inspired)
+
+⚠️ **Commands: story-specification-scenarios**
+
+**CRITICAL**: Given statements describe STATES, not actions. This principle is borrowed from BDD test practices where describe blocks use state-oriented language.
+
+**[DO]** (Agent-Relevant):
+* Write Given statements that describe current state or context
+* Use state patterns (from `behaviors/bdd/bdd-rule.mdc` Section 2):
+  - **"that has been [past participle]"** - completed states
+    - ✅ "Given character has been created"
+    - ✅ "Given user has been authenticated"
+  - **"that is being [verb]"** - ongoing states
+    - ✅ "Given character is being edited"
+    - ✅ "Given form is being validated"
+  - **"that is [adjective/noun]"** - current states
+    - ✅ "Given screen is displayed"
+    - ✅ "Given user is authenticated"
+    - ✅ "Given field is empty"
+  - **"that has [noun]"** - possession states
+    - ✅ "Given character has invalid data"
+    - ✅ "Given form has validation errors"
+* Describe WHAT state exists, not HOW it got there
+* Focus on observable state that can be verified
+
+**[DON'T]** (Agent-Relevant):
+* Use action-oriented language in Given statements
+* Imply navigation or user actions in state descriptions
+* Describe HOW the state was reached (Given is about current state, not past actions)
+* Use past tense verbs that describe completed actions rather than resulting states
+
+**[Examples]**:
+* ✅ **DO - State-Oriented**:
+  - "Given character is being edited" (ongoing state)
+  - "Given identity fields are displayed" (current state)
+  - "Given user is authenticated" (completed state)
+  - "Given character has been created" (completed state)
+  - "Given field is empty" (current state)
+  - "Given textbook is in stock" (current state)
+* ❌ **DON'T - Action-Oriented**:
+  - "Given user is on the character creation screen" (implies navigation action - use "Given character creation screen is displayed")
+  - "Given user logged in" (action - use "Given user is authenticated")
+  - "Given user navigated to page" (action - use "Given page is displayed")
+  - "Given user clicked button" (action - belongs in When, not Given)
+
+**[Rationale]**:
+This principle is borrowed from BDD testing practices where test describe blocks use state-oriented language to create readable, maintainable hierarchies. States are verifiable and testable, while actions are transient. By describing states in Given, we create specifications that focus on observable conditions rather than implementation details of how those conditions were reached.
+
+**[Reference]**:
+- See `behaviors/bdd/bdd-rule.mdc` Section 2 (Fluency, Hierarchy, and Storytelling) for state pattern details
+- State patterns ensure Given statements are about "being in a state" not "having completed actions"
+
+---
+
+## 4.2. Scenario Structure and Gherkin Keywords
+
+⚠️ **Commands: story-specification-scenarios**
+
+Use proper Gherkin structure with Given/When/Then keywords, Background for repeated steps, and Scenario Outline for parameterized scenarios.
+
+**[DO]** (Agent-Relevant):
+* Create specification scenarios that describe detailed interactions between users and system
+* Use proper Gherkin keywords: Given/When/Then/And/But
+* Use Background for repeated Given steps across scenarios (3+ scenarios with same Given)
+* Use Scenario Outline for parameterized scenarios (3+ similar cases with different data)
+* Include Examples table with Scenario Outline (use | column | format)
+* Link scenarios to stories (one story can have multiple scenarios)
+* Each scenario should have clear Given (STATE), When (ACTION), Then (OUTCOME)
+* Apply Principle 4.1 (Given Statements Describe States) when writing Given steps
+
+**[DON'T]** (Agent-Relevant):
+* Skip documenting scenarios
+* Skip scenarios for stories (scenarios provide detailed context)
+* Create scenarios without proper Given/When/Then structure
+* Use Background for non-Given steps (Background = Given/And only)
+* Use Scenario Outline without Examples table
+* Add examples in this phase (examples come in Phase 5 - separate command)
+* Violate Principle 4.1 by using action-oriented language in Given statements
+
+## 4.3. Scenario Coverage (Happy Path, Edge Cases, Error Cases)
+
+⚠️ **Commands: story-specification-scenarios**
+
+Cover happy path, edge cases, and error cases to ensure comprehensive scenario documentation.
+
+**[DO]** (Agent-Relevant):
+* Cover happy path scenarios (main success flow)
+* Cover edge case scenarios (boundary conditions, special cases)
+* Cover error case scenarios (failure conditions, error handling)
+* Link scenarios to acceptance criteria from feature document
+* Explore remaining key risks/unknowns/assumptions through scenarios
+* Ensure all acceptance criteria have corresponding scenarios
+
+**[DON'T]** (Agent-Relevant):
+* Skip edge cases or error cases
+* Only document happy path (insufficient coverage)
+* Create scenarios that don't link to acceptance criteria
+* Leave acceptance criteria uncovered by scenarios
+
+## 4.4. Behavioral Language in Scenarios
+
+⚠️ **Commands: story-specification-scenarios**
+
+Write scenarios in behavioral language that describes observable behavior, not technical implementation.
+
+**[DO]** (Agent-Relevant):
+* Write scenarios in behavioral language (observable behavior)
+* Use user/system interaction language
+* Each scenario should be understandable by non-technical stakeholders
+* Describe what user sees/experiences
+* Describe what system does (observable actions)
+* Focus on business domain language
+
+**[DON'T]** (Agent-Relevant):
+* Use technical language or code patterns in scenarios
+* Write scenarios that require technical knowledge to understand
+* Use implementation details (API, database, JSON, endpoints)
+* Use code syntax (function(), method(), .save())
+* Create overly complex scenarios (split into multiple scenarios instead)
+
+**[Structural Patterns]**:
+* **Story → Scenario Relationship**: One story can have multiple scenarios (happy path, edge cases, error cases)
+* **Scenario Format**: Background (optional) + Given/When/Then/But/And structure
+* **Scenario Outline**: Parameterized scenarios with <parameter> placeholders and Examples table
+* **Background**: Shared Given steps that run before each scenario (optional)
+* **Gherkin Keywords**: Given (context), When (action), Then (outcome), And (continuation), But (negative assertion)
+
+**[Examples]**:
+* ✅ **DO** (Happy Path Scenario - State-oriented Given):
+  ```
+  ### Scenario 1: Successful textbook purchase
+  
+  **Given** student is authenticated
+  **And** textbook exists in catalog
+  **And** textbook is in stock
+  **When** the student selects that textbook for purchase
+  **And** the student specifies shipping information
+  **And** the student confirms purchase
+  **Then** the system sends payment information to 3rd party
+  **And** the system sends Order Details to bookstore application
+  **And** success message is displayed to student
+  ```
+* ✅ **DO** (Error Case Scenario - State-oriented Given):
+  ```
+  ### Scenario 2: Textbook out of stock
+  
+  **Given** student is authenticated
+  **And** textbook is out of stock
+  **When** student attempts to purchase textbook
+  **Then** system displays "Out of stock" message
+  **But** payment is not processed
+  ```
+* ✅ **DO** (Using Background - State-oriented):
+  ```
+  ### Background
+  **Given** student is authenticated
+  **And** textbook catalog is displayed
+  
+  ### Scenario 1: Purchase available textbook
+  **Given** textbook is in stock
+  **When** student selects textbook
+  **Then** purchase proceeds
+  
+  ### Scenario 2: Purchase out of stock textbook
+  **Given** textbook is out of stock
+  **When** student selects textbook
+  **Then** out of stock message is displayed
+  ```
+* ✅ **DO** (Scenario Outline):
+  ```
+  ### Scenario Outline: Bill generation for preferences
+  
+  **Given** a Customer has billing preferences set to <format>
+  **And** a Billing Period is completed
+  **When** the System generates a Customer Bill
+  **Then** the bill is rendered in <format> format
+  
+  **Examples**:
+  | format |
+  |--------|
+  | PDF    |
+  | HTML   |
+  | Email  |
+  ```
+* ❌ **DON'T** (Technical Language):
+  ```
+  ### Scenario: API call
+  **When** POST /orders endpoint is called
+  **Then** database record is created
+  ```
+* ❌ **DON'T** (Missing structure):
+  ```
+  ### Scenario: Order placement
+  User places order and it works
+  ```
+
+**[PowerPoint References]**:
+* Slide 16: Story specification guidance
+* Slides 149-154: Scenario patterns and examples
+* Slide 154: Purchase Textbook (concrete scenario example)
+
+**[Further Recommendations for Humans]**:
+* Use scenarios to facilitate conversation and shared understanding (requires team collaboration)
+* Scenarios are living documentation - update as understanding evolves
 
 ## Templates
 

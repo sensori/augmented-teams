@@ -615,16 +615,51 @@ class BDDScaffoldStructureHeuristic(BDDScaffoldBaseHeuristic):
         return violations if violations else None
 
 class BDDScaffoldStateOrientedHeuristic(BDDScaffoldBaseHeuristic):
-    """Heuristic for §7: Output Format - DISABLED: All verb forms are valid for 'it should' statements"""
+    """Heuristic for §7: Output Format - Validates describe blocks use state-oriented language (not 'it should' statements)"""
     def __init__(self):
         super().__init__("bdd_scaffold_state_oriented")
     
     def detect_violations(self, content):
-        """DISABLED: All verb forms are valid for 'it should' statements"""
-        # No longer checking for action-oriented vs state-oriented
-        # All forms are valid: "should extract", "should create", "should have extracted", "should be valid"
-        print(f"[DEBUG BDDScaffoldStateOrientedHeuristic] DISABLED - All verb forms are valid")
-        return []
+        """Check describe blocks for state-oriented language (skip 'it should' statements - all verb forms valid there)"""
+        violations = []
+        if not self._validate_content(content):
+            return None
+        
+        # Action-oriented patterns in describe blocks (should be state-oriented instead)
+        # These patterns suggest completed actions rather than states
+        action_patterns = [
+            (r'\bthat\s+(\w+ed)\b', "action-oriented past tense"),  # e.g., "that clicked", "that navigated"
+            (r'\bis\s+on\s+the\b', "implies navigation action"),     # e.g., "is on the screen"
+            (r'\bwent\s+to\b', "navigation action"),                 # e.g., "went to page"
+            (r'\bclicked\b', "action verb"),                         # e.g., "that clicked button"
+            (r'\bnavigated\b', "action verb"),                       # e.g., "that navigated"
+            (r'\bsubmitted\b', "action verb in describe"),           # e.g., "that submitted" (OK in 'it should' but not describe)
+        ]
+        
+        # Valid state patterns (from Section 2) - for reference/suggestions
+        # "that has been [past participle]" - completed states
+        # "that is being [verb]" - ongoing states
+        # "that is [adjective/noun]" - current states
+        # "that has [noun]" - possession states
+        
+        for i, line in enumerate(content._content_lines, 1):
+            # Only check describe blocks (skip 'it should' statements)
+            if re.match(r'^\s*describe\s+', line, re.IGNORECASE):
+                for pattern, description in action_patterns:
+                    if re.search(pattern, line, re.IGNORECASE):
+                        # Suggest state-oriented alternative
+                        suggestion = ""
+                        if "is on the" in line.lower():
+                            suggestion = " - Try: 'screen is displayed' instead of 'is on screen'"
+                        elif "navigated" in line.lower():
+                            suggestion = " - Try: 'page is displayed' instead of 'navigated to page'"
+                        elif "clicked" in line.lower():
+                            suggestion = " - Try: state after click (e.g., 'button has been activated')"
+                        
+                        violations.append(Violation(i, f"Describe block uses {description} - should use state-oriented language (e.g., 'that has been created', 'that is being edited', 'that is displayed'){suggestion}"))
+                        break  # Only report first violation per line
+        
+        return violations if violations else []
 
 class BDDScaffoldExternalFocusHeuristic(BDDScaffoldBaseHeuristic):
     """Heuristic for §7: User-Oriented Flow - detects internal operation focus instead of external state changes"""
