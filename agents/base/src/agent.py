@@ -2455,7 +2455,11 @@ class ProjectPathManager:
 
         if output_config and output_config.path:
             kebab_name = output_name.replace("_", "-").replace(".", "-")
-            return project_path / output_config.path / f"{kebab_name}{file_ext}"
+            # If project_path already ends with 'docs', remove it from output_config.path to avoid docs/docs
+            output_path = output_config.path
+            if str(project_path).endswith('docs') and output_path.startswith('docs/'):
+                output_path = output_path[5:]  # Remove 'docs/' prefix
+            return project_path / output_path / f"{kebab_name}{file_ext}"
 
         return self.get_output_dir() / f"{output_name}{file_ext}"
 
