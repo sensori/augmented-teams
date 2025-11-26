@@ -1,0 +1,134 @@
+{
+  "common_instruction": "**CRITICAL: PROJECT AREA AND AGENT AREA SCOPE RESTRICTION - NO EXCEPTIONS**\n\n**MANDATORY RULE - PROJECT AREA IMMUTABILITY:**\n**NEVER, EVER change the project_area without explicit user permission. The project_area is set once and must remain unchanged unless the user explicitly requests a change. You MUST NOT call `agent_set_project_area` or modify the project_area in any way without the user explicitly asking you to do so. This is a hardwired rule with NO EXCEPTIONS.**\n\n**MANDATORY RULE:** You MUST ONLY look in the project area or the agent area (including base area) for artifacts, structures, templates, or anything else. NEVER look in other folders that are not in the agent folder or the project folder or any subfolders of the project. Pretend those folders don't exist.\n\n**Allowed Locations:**\n- Project area: {{project_area}} (and all subfolders)\n- Agent area: agents/{{agent_name}}/ (and all subfolders)\n- Base agent area: agents/base/ (and all subfolders)\n\n**Forbidden:**\n- Any folder outside the project area, agent area, or base area\n- Other project folders\n- Other agent folders\n- Workspace root folders (except agents/ and the project folder itself)\n\n**When searching for files, templates, artifacts, or any content:**\n1. FIRST check the project area ({{project_area}})\n2. THEN check the agent area (agents/{{agent_name}}/)\n3. THEN check the base agent area (agents/base/)\n4. NEVER look elsewhere - pretend other folders don't exist\n\n**This rule applies to ALL operations:**\n- Reading files\n- Searching for templates\n- Looking for artifacts\n- Finding configuration files\n- Loading rules or documentation\n- Any file system operation\n\n**If you need something that's not in these allowed areas, you MUST ask the user where it is or request they move it to the project/agent area.**\n\n",
+  "prompt_templates": {
+    "context_clarification": {
+      "clarification_instructions": {
+        "template": "**CRITICAL WORKFLOW ENFORCEMENT - NO EXCEPTIONS:**\n\nWhen moving to ANY behavior, you MUST start at the clarification action (first action). Do NOT skip clarification or planning stages. Do NOT make assumptions about whether clarification/planning has been done. The user can explicitly tell you to skip, but you must NEVER skip on your own initiative.\n\n**MANDATORY WORKFLOW RULE:**\n- You MUST go through clarification for EVERY behavior\n- Do NOT skip clarification stage\n- Do NOT make assumptions about whether clarification has been done\n- The user can explicitly tell you to skip, but you must NEVER skip on your own\n- Present ALL required questions and wait for answers before proceeding\n\n**MANDATORY CLARIFICATION PROCESS:**\n1. Review all provided context (story maps, increments documents, existing files, conversation history, etc.)\n2. For EACH required question below, THOUGHTFULLY attempt to answer it yourself using the available context\n3. When answering questions:\n   - ACTUALLY ANSWER THE QUESTION - don't just list available options without answering\n   - If the question asks \"what is the scope\", answer what the scope IS based on context\n   - If the question requires a CHOICE/DECISION from the user, identify the available options/deltas and ask the user to choose\n   - Be thoughtful and specific in your answers based on what's available in context\n4. Place your answers directly with each question in the format:\n   **Question:** [question text]\n   **Answer:** [your thoughtful answer based on context]\n   OR if a choice is needed:\n   **Answer:** [your answer based on context]. **Available options:** [list options]. **Which option do you want to choose?**\n   OR if information is missing:\n   **Answer:** ⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT**\n5. Be EXPLICIT and CLEAR when you cannot answer a question - use \"⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT**\" so the user knows they must provide this information\n6. Do NOT guess or infer answers - if information is not clearly available in context, state that user input is required\n7. When a question requires a decision/choice, identify the available deltas/options from context and ask the user to select\n8. Present ALL questions with your answers to the user\n9. Ask the user to review, confirm, correct, or provide missing answers\n10. Do NOT proceed until the user has reviewed and confirmed/corrected all answers\n\nAssess the provided context against the required questions and evidence below.\n\n**Required Key Questions:**\n{{key_questions}}\n\n**Required Evidence:**\n{{evidence}}\n\nFor each question, provide a thoughtful answer based on available context. If the question requires a choice/decision, identify available options and ask the user to choose. If the answer cannot be determined from available context, clearly state \"⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT\".",
+        "description": "Instructions for AI to assess context and identify missing information"
+      },
+      "context_sufficient": {
+        "template": "Context validation complete. The following key questions were answered:\n{{key_questions_answered}}\n\nThe following evidence was provided:\n{{evidence_provided}}\n\nProceeding to planning stage.",
+        "description": "Used when context is sufficient to proceed"
+      },
+      "context_insufficient": {
+        "template": "Context validation indicates missing information. The following key questions still need answers:\n{{missing_key_questions}}\n\nThe following evidence is still required:\n{{missing_evidence}}\n\nPlease provide the missing information to proceed.",
+        "description": "Used when context is insufficient and more information is needed"
+      }
+    },
+    "planning": {
+      "planning_instructions": {
+        "template": "**CRITICAL WORKFLOW ENFORCEMENT - NO EXCEPTIONS:**\n\nYou MUST go through planning AFTER clarification for EVERY behavior. Do NOT skip planning stage. Do NOT make assumptions about whether planning has been done. The user can explicitly tell you to skip, but you must NEVER skip on your own initiative.\n\n**MANDATORY WORKFLOW RULE:**\n- You MUST go through planning AFTER clarification for EVERY behavior\n- Do NOT skip planning stage\n- Do NOT make assumptions about whether planning has been done\n- The user can explicitly tell you to skip, but you must NEVER skip on your own\n- Present ALL decision criteria and assumptions, get user selections before proceeding\n\n**CRITICAL: Previous Clarification and Planning Data:**\nThe clarification and planning data from previous stages has been loaded and is shown above. You MUST review and reference this data when presenting assumptions and decision criteria. Previous decisions and assumptions inform the current planning session.\n\nPresent the following assumptions and decision criteria to the user and ask for their opinion on key decisions.\n\n**Typical Assumptions:**\n{{assumptions}}\n\n**Decision Making Criteria:**\n{{decision_criteria}}\n\nPresent these assumptions and decision criteria to the user. Ask them to review the assumptions and select their preferred criteria/options for each decision point.\n\n**MANDATORY STORAGE STEP:** After user confirms decisions, you MUST call `agent_store_planning()` MCP tool with:\n   - `decisions_made`: dict mapping decision keys to selected options/values\n   - `assumptions_made`: dict mapping assumption keys to assumption content\n   - The MCP tool will automatically save these to planning.json under the current behavior's section\n   - Example: decisions_made={'drill_down': 'Dig deep on system interactions', 'flow_scope': 'End-to-end user-system behavior'}",
+        "description": "Instructions for AI to present assumptions and decision criteria to user, and store planning decisions"
+      },
+      "assumptions_and_criteria": {
+        "template": "Planning Assessment:\n\n**Assumptions I will make:**\n{{assumptions_list}}\n\n**Decision Criteria Available:**\n{{decision_criteria_questions}}\n\n**Options for each criterion:**\n{{criteria_options}}\n\nPlease review the assumptions and select your preferred criteria/options.",
+        "description": "Used to present assumptions and decision criteria to user"
+      },
+      "high_level_assessment": {
+        "template": "Based on your selections, here's my approach:\n\n**Selected Criteria:**\n{{selected_criteria}}\n\n**High-Level Assessment:**\n{{high_level_assessment}}\n\n**Reasoning:**\n{{reasoning}}\n\nPlease confirm if this approach is correct, or provide feedback for adjustments.",
+        "description": "Used to present high-level assessment after user selects criteria"
+      }
+    },
+    "generate": {
+      "build_instructions": {
+        "template": "**MANDATORY: Before generating any content, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.**\n\n**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work (e.g., discovery decisions affect exploration).**\n\nGenerate structured content following the rules and schema provided.\n\n**Agent-level rules:**\n{{agent_rules}}\n\n**Behavior-level rules:**\n{{behavior_rules}}\n\n**Schema:** Use schema '{{schema}}'\n\n**Description:** {{description}}\n\n**Instructions:** {{instructions}}\n\nGenerate the structured content according to the schema and rules above, ensuring all requirements from clarification.json and planning.json (especially the current behavior's decisions_made and assumptions_made) are incorporated.\n\n**AUTOMATIC PROGRESSION: After completing build_structure and storing the structured content, automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**",
+        "description": "Instructions for AI to generate structured content following rules and schema"
+      },
+      "initial_prompt": {
+        "template": "Generate {{content_type}} with the following context:\n\n**Confirmed Assumptions:**\n{{confirmed_assumptions}}\n\n**Decision Criteria Applied:**\n{{applied_criteria}}\n\n**Approach:**\n{{approach_summary}}\n\n{{behavior_specific_instructions}}",
+        "description": "Base prompt for generation, gets behavior-specific instructions injected"
+      }
+    },
+    "render_output": {
+      "transform_instructions": {
+        "template": "**MANDATORY: Before rendering any output, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements, decisions, and context that MUST be reflected in all rendered artifacts.**\n\n**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work.**\n\nTransform the structured content into rendered artifacts using available templates.\n\n**Output Instructions:**\n{{output_instructions}}\n\nTransform the structured content according to the output instructions above, ensuring all requirements from clarification.json and planning.json (especially the current behavior's decisions_made and assumptions_made) are reflected in the rendered output.",
+        "description": "Instructions for AI to transform structured content into rendered artifacts"
+      }
+    },
+    "validate": {
+      "validation_instructions": {
+        "template": "**MANDATORY: Before validating any content, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements and decisions that MUST be checked against during validation.**\n\n**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work.**\n\n**Instructions:**\n1. Load and review clarification.json and planning.json to understand all requirements and decisions\n2. Check planning.json for the current behavior's decisions_made and assumptions_made sections\n3. Evaluate the Content Data against all rules listed above\n4. Check for violations of each rule\n5. Verify that Content Data incorporates all requirements from clarification.json and planning.json (especially the current behavior's decisions_made and assumptions_made)\n6. Generate a validation report with:\n   - List of all violations found (if any)\n   - Specific examples from the Content Data that violate rules\n   - Any missing requirements from clarification.json or planning.json (including stage-specific decisions/assumptions)\n   - Recommendations for fixing violations\n7. If no violations found, confirm that Content Data follows all rules and incorporates all requirements",
+        "description": "Instructions for AI to evaluate content against rules and generate validation report"
+      },
+      "validation_results": {
+        "template": "Validation Results:\n\n**Status:** {{validation_status}}\n\n**Violations Found:**\n{{violations_list}}\n\n**Suggested Corrections:**\n{{suggested_corrections}}\n\nYou may request a second validation pass with corrections applied.",
+        "description": "Used to present validation results to user"
+      }
+    },
+    "correct": {
+      "correction_instructions": {
+        "template": "**MANDATORY: Before applying corrections, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements and decisions that MUST be maintained and incorporated when correcting content.**\n\nApply corrections based on the violations and user feedback provided.\n\n**Violations:**\n{{violations}}\n\n**User Feedback:**\n{{user_feedback}}\n\nRegenerate the content with corrections applied to address all violations and incorporate user feedback, ensuring all requirements from clarification.json and planning.json are maintained and properly incorporated.",
+        "description": "Instructions for AI to apply corrections based on violations and feedback"
+      },
+      "correction_prompt": {
+        "template": "Applying corrections based on:\n\n**Violations:**\n{{violations}}\n\n**User Feedback:**\n{{user_feedback}}\n\nRegenerating content with corrections applied.",
+        "description": "Used when applying corrections"
+      }
+    },
+    "project_initialization": {
+      "project_area_required": {
+        "template": "**CRITICAL: PROJECT AREA CONFIRMATION REQUIRED - STOP AND WAIT FOR USER**\n\n**MANDATORY AI BEHAVIOR:**\n1. **STOP immediately** - Do NOT call `agent_set_project_area` or proceed with any workflow\n2. **PRINT the suggested project area** to the user: `{{example_project_path}}`\n3. **ASK the user to confirm:** \"I will create/use the project at: `{{example_project_path}}`. Is this correct?\"\n4. **WAIT for explicit user confirmation** before proceeding\n5. **ONLY after user confirms** (says \"yes\" or provides different path), then call `agent_set_project_area` with the confirmed path\n\n**Project Area Initialization Flow:**\n1. If project_area is explicitly provided, it will be used\n2. If agent_state.json exists in current directory, project_area will be loaded from there\n3. Otherwise, project_area defaults to current folder name\n\n**Suggested project area:** `{{example_project_path}}`\n\n**User must confirm this location or provide a different path before workflow can proceed.**",
+        "description": "Instructions shown when project area is not set or defaults to current directory"
+      }
+    }
+  },
+  "trigger_words": {
+    "correct": {
+      "patterns": [
+        "please make.*correction",
+        "fix.*because.*don't like",
+        "please fix",
+        "make.*suggested.*correction",
+        "update.*based.*validation",
+        "apply.*correction",
+        "fix.*violation",
+        "correct.*error"
+      ],
+      "priority": 10
+    },
+    "validate": {
+      "patterns": [
+        "check.*against.*rule",
+        "validate.*content",
+        "verify.*compliance"
+      ],
+      "priority": 5
+    },
+    "build_structure": {
+      "patterns": [
+        "create.*structure",
+        "build.*content"
+      ],
+      "priority": 5
+    },
+    "update_project_location": {
+      "patterns": [
+        "moved.*project.*location",
+        "move.*project.*to",
+        "project.*location.*to",
+        "update.*project.*location",
+        "change.*project.*location",
+        "set.*project.*to",
+        "project.*directory.*to",
+        "project.*folder.*to",
+        "all.*documentation.*there",
+        "documentation.*there"
+      ],
+      "priority": 15
+    }
+  },
+  "mcp": {
+    "server_name": "agent-{agent_name}",
+    "command": "python",
+    "args": [
+      "agents/base/src/agent_mcp_server.py",
+      "{agent_name}"
+    ],
+    "cwd": "{workspace_root}",
+    "env": {
+      "AGENT_NAME": "{agent_name}",
+      "PYTHONPATH": "{workspace_root}"
+    }
+  }
+}
+

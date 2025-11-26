@@ -1,0 +1,147 @@
+---
+title: Episode Rule
+description: Rules for when and how to use episode management
+feature: character
+---
+
+# Episode Rule
+
+**When** managing narrative episodes and character story progression,
+**then** follow these principles to determine when to use episode management and typical workflow patterns.
+
+## Overview
+
+Episodes are the primary output destination for character interactions. Once an episode is set as current, all character chat commands automatically write to that episode file. **For complete tool documentation (parameters, return values, examples), see `behaviors/character/code/character_mcp_server.py`.**
+
+This rule focuses on **when to use episodes** and **typical workflows** - not implementation details (that's in the tool descriptions and behavior.json).
+
+## When to Use Episodes
+
+### Start New Episode
+
+**Trigger phrases/situations:**
+- User wants to begin a new story/scene/adventure
+- Starting a new session or chapter
+- User says "start episode", "new episode", "begin story"
+- Need a fresh narrative context
+
+**Examples:**
+- "Start a new episode called 'The Battle'"
+- "Begin episode 'Roach-Boy Meets the Team'"
+- "Create new episode for Atom"
+
+### List Episodes
+
+**Trigger phrases/situations:**
+- User wants to see all episodes for a character
+- User asks "what episodes exist?" or "show episodes"
+- Need to find a specific episode to continue
+
+**Examples:**
+- "List all episodes for Roach-Boy"
+- "Show me Atom's episodes"
+- "What episodes do we have?"
+
+### Set Current Episode
+
+**Trigger phrases/situations:**
+- User wants to continue an existing episode
+- User says "continue episode X" or "switch to episode Y"
+- Need to resume writing to a specific episode
+
+**Examples:**
+- "Set current episode to 'roach-boy-fights-the-evil-alligator.md'"
+- "Continue episode 3"
+- "Switch to the previous episode"
+
+### Summarize Episode
+
+**Trigger phrases/situations:**
+- User wants to extract key events from an episode
+- Episode is complete and needs summarization
+- User says "summarize episode" or "create summary"
+- Preparing to finalize episode
+
+**Examples:**
+- "Summarize the current episode"
+- "Create summary for episode 2"
+- "Extract key events from this episode"
+
+### Update Plot
+
+**Trigger phrases/situations:**
+- User has approved an episode summary
+- User wants to finalize episode and add to canon
+- User says "update plot", "approve summary", "finalize episode"
+- Ready to move episode from in-progress to completed
+
+**Examples:**
+- "Update plot with the approved summary"
+- "Approve and finalize this episode"
+- "Add episode summary to plot"
+
+### Undo/Edit Last Entry
+
+**Trigger phrases/situations:**
+- User wants to remove the last interaction
+- User says "undo last entry" or "remove last response"
+- Need to correct the most recent episode entry
+
+**Examples:**
+- "Undo the last entry"
+- "Remove the last response"
+- "Edit the last entry to say..."
+
+## Typical Workflows
+
+### Workflow 1: Start New Episode and Write
+
+**When:** User wants to begin a new story and have character interactions
+
+1. **Start Episode**:
+   - Use `character_episodes` with `action="start"` and `episode_title`
+
+2. **Character Interactions**:
+   - Use `character_chat` - automatically writes to current episode
+   - No episode parameter needed - uses current episode automatically
+
+**Example trigger:** "Start a new episode called 'The Adventure' and have Roach-Boy greet the team"
+
+### Workflow 2: Continue Existing Episode
+
+**When:** User wants to resume writing to a previous episode
+
+1. **Set Current Episode**:
+   - Use `character_episodes` with `action="set-current"` and `episode_filename`
+
+2. **Continue Writing**:
+   - Use `character_chat` - automatically writes to the set episode
+
+**Example trigger:** "Continue episode 'roach-boy-fights-the-evil-alligator.md'"
+
+### Workflow 3: Complete Episode (Summarize and Finalize)
+
+**When:** Episode is done and needs to be finalized
+
+1. **Summarize Episode**:
+   - Use `character_episodes` with `action="summarize"`
+   - Review the generated summary
+
+2. **Approve and Update Plot**:
+   - Use `character_episodes` with `action="update-plot"` and the approved summary
+   - Episode is finalized, renamed, and NPCs are synced
+
+**Example trigger:** "Summarize and finalize the current episode"
+
+## Key Concepts
+
+- **Episodes are output destinations**: All character chat automatically writes to the current episode
+- **No episode parameter needed**: Character chat commands use the current episode automatically
+- **Two-phase approval**: Summarize first (for review), then update plot (to finalize)
+- **NPC sync**: NPC journals are automatically created/updated when plot is updated
+
+## Related Files
+
+- **MCP Server**: `behaviors/character/code/character_mcp_server.py` - **Complete tool documentation with parameters and examples**
+- **Behavior JSON**: `behaviors/character/behaviors/episode/behavior.json` - Episode behavior rules and usage documentation
+- **Templates**: Located in `behaviors/character/behaviors/episode/templates/` - Episode file templates

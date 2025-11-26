@@ -1,0 +1,28 @@
+{
+  "shape": {
+    "decisions_made": {
+      "test": "decision",
+      "story_drill_down": "Component-level drill down"
+    },
+    "assumptions_made": {
+      "test": "assumption",
+      "component_level": "Stories track component interactions"
+    }
+  },
+  "prioritization": {
+    "decisions_made": {
+      "risk_assessment": "Foundry integration carries risk"
+    },
+    "assumptions_made": {
+      "reuse_requirements": "Need common Mob domain object"
+    }
+  },
+  "discovery": {
+    "decisions_made": {
+      "story_enumeration_approach": "System /back office"
+    },
+    "assumptions_made": {
+      "component_coverage": "Must show full coverage"
+    }
+  }
+}

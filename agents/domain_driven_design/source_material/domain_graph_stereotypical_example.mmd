@@ -1,0 +1,186 @@
+```mermaid
+classDiagram
+    %% Bounded Context: Service Oriented Bounded Context
+    class "Service Oriented Bounded Context" {
+        <<Bounded Context>>
+    }
+
+    %% Aggregate: An Aggregate
+    class "An Aggregate" {
+        <<Aggregate>>
+    }
+
+    %% Entities
+    class "An Aggregate Root" {
+        <<Entity>>
+        +aggregateRootId : string
+        +performAggregateOperation()
+        +manageSubEntities()
+        +useValueObject()
+    }
+
+    class "A Sub Object Of The Aggregate" {
+        <<Entity>>
+        +subObjectId : string
+        +performSubOperation()
+        +getAggregateRoot()
+    }
+
+    class "Another Aggregate Root" {
+        <<Entity>>
+        +anotherAggregateRootId : string
+        +performAnotherOperation()
+        +referenceAnAggregateRoot()
+    }
+
+    %% Value Objects
+    class "A Value Object" {
+        <<Value Object>>
+        +valueProperty : string
+        +validateValue()
+        +combineWith()
+    }
+
+    class "A Sub Object Of The Value Object" {
+        <<Value Object>>
+        +subValueProperty : string
+        +calculateSubValue()
+    }
+
+    class "Another Value Object" {
+        <<Value Object>>
+        +anotherValueProperty : string
+        +transformValue()
+    }
+
+    %% Domain Events
+    class "An Aggregate Root Created Event" {
+        <<Domain Event>>
+        +eventId : string
+        +timestamp : datetime
+        +aggregateRootData : object
+    }
+
+    class "An Aggregate Root Updated Event" {
+        <<Domain Event>>
+        +eventId : string
+        +timestamp : datetime
+        +changes : object
+    }
+
+    %% Commands
+    class "Create An Aggregate Root Command" {
+        <<Command>>
+        +commandId : string
+        +aggregateRootData : object
+    }
+
+    class "Update An Aggregate Root Command" {
+        <<Command>>
+        +commandId : string
+        +aggregateRootId : string
+        +updateData : object
+    }
+
+    %% Domain Service
+    class "A Service" {
+        <<Domain Service>>
+        +performCrossAggregateOperation()
+        +calculateComplexValue()
+        +validateBusinessRule()
+    }
+
+    %% Repository
+    class "A Repository" {
+        <<Repository>>
+        +findById()
+        +findByCriteria()
+        +save()
+        +delete()
+    }
+
+    class "A Search Criteria" {
+        <<Value Object>>
+        +criteria : string
+    }
+
+    %% Database
+    class "Database" {
+        <<Database>>
+        +store()
+    }
+
+    %% Relationships within An Aggregate
+    "An Aggregate Root" *-- "A Sub Object Of The Aggregate" : owns
+    "An Aggregate Root" o-- "A Value Object" : uses
+    "A Sub Object Of The Aggregate" --> "An Aggregate Root" : references
+    "A Sub Object Of The Aggregate" o-- "A Sub Object Of The Value Object" : uses
+    "A Value Object" *-- "A Sub Object Of The Value Object" : contains
+    "A Value Object" ..> "Another Value Object" : associates
+
+    %% Cross-aggregate relationships
+    "An Aggregate Root" ..> "Another Aggregate Root" : references
+    "Another Aggregate Root" ..> "An Aggregate Root" : references
+
+    %% Event relationships
+    "An Aggregate Root" ..> "An Aggregate Root Created Event" : raises
+    "An Aggregate Root" ..> "An Aggregate Root Updated Event" : raises
+    "An Aggregate Root Created Event" --> "An Aggregate Root" : references
+    "An Aggregate Root Updated Event" --> "An Aggregate Root" : references
+    "An Aggregate Root Updated Event" --> "A Value Object" : references
+
+    %% Command relationships
+    "Create An Aggregate Root Command" --> "A Value Object" : contains
+    "Update An Aggregate Root Command" --> "An Aggregate Root" : targets
+    "Update An Aggregate Root Command" --> "A Value Object" : contains
+
+    %% Service relationships
+    "A Service" --> "An Aggregate Root" : operates
+    "A Service" --> "Another Aggregate Root" : operates
+    "A Service" --> "A Value Object" : uses
+    "A Service" --> "Another Value Object" : uses
+    "A Service" --> "A Repository" : uses
+
+    %% Repository relationships
+    "A Repository" --> "An Aggregate Root" : persists
+    "A Repository" --> "A Search Criteria" : uses
+
+    %% Persistence relationships
+    "An Aggregate Root" ..> "Database" : persisted
+    "A Sub Object Of The Aggregate" ..> "Database" : persisted
+    "A Value Object" ..> "Database" : persisted
+    "A Sub Object Of The Value Object" ..> "Database" : persisted
+    "Another Value Object" ..> "Database" : persisted
+
+    %% Aggregate boundary
+    "An Aggregate" *-- "An Aggregate Root" : contains
+    "An Aggregate" *-- "A Sub Object Of The Aggregate" : contains
+    "An Aggregate" *-- "A Value Object" : contains
+    "An Aggregate" *-- "A Sub Object Of The Value Object" : contains
+    "An Aggregate" *-- "Another Value Object" : contains
+    "An Aggregate" *-- "An Aggregate Root Created Event" : contains
+    "An Aggregate" *-- "An Aggregate Root Updated Event" : contains
+    "An Aggregate" *-- "Create An Aggregate Root Command" : contains
+    "An Aggregate" *-- "Update An Aggregate Root Command" : contains
+    "An Aggregate" *-- "A Service" : contains
+    "An Aggregate" *-- "A Repository" : contains
+
+    %% Bounded Context boundary
+    "Service Oriented Bounded Context" *-- "An Aggregate" : contains
+    "Service Oriented Bounded Context" *-- "Another Aggregate Root" : contains
+
+    %% Integration Points
+    class "Another Bounded Context" {
+        <<Bounded Context>>
+        +contextId : string
+    }
+
+    class "Yet Another Bounded Context" {
+        <<Bounded Context>>
+        +contextId : string
+    }
+
+    "Service Oriented Bounded Context" ..> "Another Bounded Context" : customer_supplier
+    "Service Oriented Bounded Context" ..> "Yet Another Bounded Context" : open_host
+```
+

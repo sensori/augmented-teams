@@ -1,0 +1,2039 @@
+{
+  "source_folder": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted",
+  "total_slides": 48,
+  "domain_model_slides": 48,
+  "domain_model_entries": [
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 5,
+        "images": []
+      },
+      "extracted_text": "Domain Driven Design tackles solution complexity by focusing on the details of the business domain Key Principles Capture the domain model, in domain terms, through frequent interaction with domain experts Embed the domain terminology into your code Separate all domain logic from corruption Frame all dialogue about the solution in terms of the model, forming a Ubiquitous Language Divide the domain into separate sub-domains, separated by bounded contexts Tight collaboration between technical and domain experts Divide the domain into separate Bounded Contexts built by different teams Tightly aligns models, language and business logic code Results in a Ubiquitous Language Domain Driven Design tightly aligns the software solution with the business problem Repository Service Bounded Context",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Driven",
+          "Key",
+          "Principles",
+          "Capture",
+          "Embed",
+          "Separate",
+          "Frame",
+          "Ubiquitous",
+          "Language",
+          "Divide",
+          "Tight",
+          "Bounded",
+          "Contexts",
+          "Tightly",
+          "Results",
+          "Repository",
+          "Service",
+          "Context"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 6,
+        "images": []
+      },
+      "extracted_text": "Domain Driven Design provides a framework to guide the design decisions required to define the boundary, scope and interactions of a modern, microservices based solution We can conduct Domain Analysis for each sub system, defining the service, domain aggregate, and domain events We can use EventStorming to explore your domain flow,  mapping major domain events, reactions to those events, and domain commands We can group domain concepts into discrete Bounded Contexts, mapping out our ecosystem of sub systems",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Driven",
+          "We",
+          "Analysis",
+          "EventStorming",
+          "Bounded",
+          "Contexts"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 8,
+        "images": []
+      },
+      "extracted_text": "Domain Driven Design provides a means for Technology and Product to come together to design a solution around its business domain logic Domain Driven Design A Software Design approach that focuses the modelling, communication, and development on the core business domain logic of a solution Use Domain Driven Design to guide the design and build of your Microservice solution with agility and at scale Product Analysts extend structured story definition techniques to explore, capture, and model domain details Technology leverage service and object oriented design to refines domain models and incorporate domain concepts directly into code with a minimum of translation. Product Owners  provide domain subject matter expertise to design and validate that our domain logic reflect the business",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Driven",
+          "Technology",
+          "Product",
+          "Software",
+          "Use",
+          "Microservice",
+          "Analysts",
+          "Owners"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 9,
+        "images": [
+          "slide_009_image_1.png"
+        ]
+      },
+      "extracted_text": "Language, Models, and Code all meet in the Domain layer of a software solution DDD is a structured way to create a Ubiquitous Language We model the language of the business, in a structure easily represented in code Describes business concepts, business state, and business rules Enables reusable acceptance criteria when connecting multiple domain concepts (end-to-end testing!) May be illustrated using CRC \u000b(Class-Responsibility-Collaborator) \u000bCards or plain old UML One model for the code, the diagrams, and the language people use!",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Language",
+          "Models",
+          "Code",
+          "DDD",
+          "Ubiquitous",
+          "We",
+          "Describes",
+          "Enables",
+          "May",
+          "CRC",
+          "Class",
+          "Responsibility",
+          "Collaborator",
+          "Cards",
+          "UML",
+          "One"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 11,
+        "images": [
+          "slide_011_group_image_1.png",
+          "slide_011_image_1.png"
+        ]
+      },
+      "extracted_text": "DDD stated simply; holding a conversation rooted in a domain model, that is reflected in the domain layer of your code A Program represents all program information maintained by OSAP for each Educational Institution. Students enrolled in a Programs do not have Eligibility to apply for specific Funding Instruments. Funding Instruments Eligibility for a Program is determined by the Educational Institution providing the Program. Each Program has a set of Program Costs that are either Fixed, Flexible or Student Centric. A Program may be defined by a Student when making an Application for a specific Course. This will set the type of Program Cost to Student Centric. The resulting Student Centric Program would be associated with the Student and the Application that created it. The Conversation The Model The Code",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "DDD",
+          "Program",
+          "OSAP",
+          "Educational",
+          "Institution",
+          "Students",
+          "Programs",
+          "Eligibility",
+          "Funding",
+          "Instruments",
+          "Each",
+          "Costs",
+          "Fixed",
+          "Flexible",
+          "Student",
+          "Centric",
+          "Application",
+          "Course",
+          "This",
+          "Cost",
+          "The",
+          "Conversation",
+          "Code"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 2 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 13,
+        "images": []
+      },
+      "extracted_text": "Modelling Domains Using CRC Cards",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Modelling",
+          "Domains",
+          "Using",
+          "CRC",
+          "Cards"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 14,
+        "images": []
+      },
+      "extracted_text": "Class Responsibility Cards provide a way to model in an object-oriented way using natural, business friendly language Each discrete part of the domain is captured using  a “Class” (or Concept) Card We want to assign behaviour and information to each Class, we capture these as distinct Responsibilities Classes are almost never an island onto their own, Classes need to interact with other Classes to fulfill their Responsibilities, these are listed as Collaborators beside the associated Responsibility A specific Class can be derived from a more generic Class, this lets us define concepts that apply to more than one situation The biggest value of CRC cards is to allow people to break away from the procedural mode of thought and more fully appreciate object technology. http://www.extremeprogramming.org/rules/crccards.html CRC cards provide a highly collaborative mechanism for business and technology subject matter experts to collectively understand their business domain and how it will be expressed as a solution Jeff & Adeeb",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Class",
+          "Responsibility",
+          "Cards",
+          "Each",
+          "Concept",
+          "Card",
+          "We",
+          "Responsibilities",
+          "Classes",
+          "Collaborators",
+          "The",
+          "CRC",
+          "Jeff",
+          "Adeeb"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 15,
+        "images": []
+      },
+      "extracted_text": "The Classic Vehicle Example A CRC model gives you structure that can be applied to your solution (UI, Database, services, etc…) A Vehicle Drives Passengers, a collection of Persons (People?) from place to place A Person May be A Passenger in a Vehicle at any given time (or not) A Vehicle is Driven by a Driver A Driver is a type of Person that Drives a Vehicle using Steering, Gas, and Breaks Driving a Vehicle causes it to Turn, Accelerate, or Decelerate A Plane is a type of Vehicle A Plane is Piloted by a type of Driver called a Pilot A Pilot Pilots a Plane using a Flight Stick and Rudder Pedals A Plane Ascends or Descends when a Pilot uses their Flight Stick to interact with the Plane’s Elevators A Plane is stabilized when a Pilot uses their Rudder Pedals to interact with the Plane’s Rudder A Plane Rolls when a Pilot uses their Flight Stick to interact with the Plane’s Ailerons A CRC model gives you language; plain sentences that can be verified (or not) by domain experts: 0..* 0..1 is Driven                          Driver Turns                                Steering, Wheels, Driver Accelerates and Decelerates Gas, Pedal, Driver Is Piloted                         Pilot Ascends / Descends     Flight Stick, Elevator, Pilot Stabilizes                        Rudder Pedals, Rudder Roll                                  Aileron, Flight Stick",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "The",
+          "Classic",
+          "Vehicle",
+          "Example",
+          "CRC",
+          "UI",
+          "Database",
+          "Drives",
+          "Passengers",
+          "Persons",
+          "People",
+          "Person",
+          "May",
+          "Passenger",
+          "Driven",
+          "Driver",
+          "Steering",
+          "Gas",
+          "Breaks",
+          "Driving",
+          "Turn",
+          "Accelerate",
+          "Decelerate",
+          "Plane",
+          "Piloted",
+          "Pilot",
+          "Pilots",
+          "Flight",
+          "Stick",
+          "Rudder",
+          "Pedals",
+          "Ascends",
+          "Descends",
+          "Elevators",
+          "Rolls",
+          "Ailerons",
+          "Turns",
+          "Wheels",
+          "Accelerates",
+          "Decelerates",
+          "Pedal",
+          "Is",
+          "Elevator",
+          "Stabilizes",
+          "Roll",
+          "Aileron"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 16,
+        "images": []
+      },
+      "extracted_text": "Perform The Iterative Steps of CRC Modeling Going through the thin-slice, identify key domain concept, the key entities, key actors, state, etc. Create new CRC card for each concept Use one or two words to describe the class Create Class names in the Form of A Nested Concept Identify Taking a second pass on the thin-slice, ask probing questions and explore the meaning of each Class Is the class a true first-class domain concept, or is it part of something else What are the classes key responsibilities, what does it do, what do we do with it? What core information does it have? For each responsibility identify collaborators, potentially creating new classes to fulfill responsibilities Use action-oriented Action Subject language for each responsibility Explore Walk Once the CRC model has been battle-tested, translate the model into domain code! Transcribe each CRC card into a class, operations into methods and/or properties, and required relationships into constructors Continue to ask domain related questions made obvious as you start putting some code down Refine your model to reflect new learning or decisions made while coding! Code Please See Miro Example https://miro.com/app/board/o9J_kvfvWeY=/?moveToWidget=3074457356449611848&cot=14 Going through our thin-slice a final time, for each story, walk through the CRC model to validate the domain model supports each story Start with first CRC card required to support the story being walked Find the responsibility that fulfills the requirements of the story For each collaborator listed in the responsibility found, continue tracing through the right responsibility and its associated collaborator Refine the model as required",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Perform",
+          "The",
+          "Iterative",
+          "Steps",
+          "CRC",
+          "Modeling",
+          "Going",
+          "Create",
+          "Use",
+          "Class",
+          "Form",
+          "Nested",
+          "Concept",
+          "Identify",
+          "Taking",
+          "Is",
+          "What",
+          "For",
+          "Action",
+          "Subject",
+          "Explore",
+          "Walk",
+          "Once",
+          "Transcribe",
+          "Continue",
+          "Refine",
+          "Code",
+          "Please",
+          "See",
+          "Miro",
+          "Example",
+          "Start",
+          "Find"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 17,
+        "images": []
+      },
+      "extracted_text": "Exercise: Take an Hour and Model The Domain Of Your Thin Slice Using CRC Cards Take the Thin Slice From Your Previous Example Refine your Ubiquitous Language Through CRC Modelling Identify Explore Walk Code! Each team be ready to spend 10 minutes showing your results!",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Take",
+          "Hour",
+          "The",
+          "Of",
+          "Your",
+          "Thin",
+          "Slice",
+          "Using",
+          "CRC",
+          "Cards",
+          "From",
+          "Previous",
+          "Example",
+          "Refine",
+          "Ubiquitous",
+          "Language",
+          "Through",
+          "Modelling",
+          "Identify",
+          "Explore",
+          "Walk",
+          "Code",
+          "Each"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 18,
+        "images": []
+      },
+      "extracted_text": "DDD Training - Session 2 Thin Slice Shaping Agenda Review each Team’s Domain Model Thin-slice Shaping Completing our Functional Story Map Exercise 1: Thin-slice Shaping Exercise Refine Key Domain Concepts Exercise 2: Walk the Model and update the Story Map Aggregate, Roots, Entities, and Bounded Contexts Exercise 3: Entities and Value Objects Exercise 3b: Aggregates Exercise 3c: Bounded Context Session 3: Sub System Shaping Event Storming Bounded Context Maps In Detail",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "DDD",
+          "Session",
+          "Thin",
+          "Slice",
+          "Shaping",
+          "Agenda",
+          "Review",
+          "Team",
+          "Completing",
+          "Functional",
+          "Exercise",
+          "Refine",
+          "Key",
+          "Concepts",
+          "Walk",
+          "Aggregate",
+          "Roots",
+          "Entities",
+          "Bounded",
+          "Contexts",
+          "Value",
+          "Objects",
+          "Aggregates",
+          "Context",
+          "Sub",
+          "System",
+          "Event",
+          "Storming",
+          "Maps",
+          "In",
+          "Detail"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 20,
+        "images": []
+      },
+      "extracted_text": "VPHX uses Kanban to manage how work items flow through our system, from idea to customer Define testable thin slices Outline key domains and entities Refine story map Create thin-slice acceptance criteria Add system stories Estimate story counts Identify bounded contexts EventStorming to define flow across contexts Create bounded context map Add stories to Jira Add stories to confluence Complete story acceptance criteria Develop stories using TDD Track flow Refine entities and value objects Define domain internals Test all story acceptance criteria Test thin-slice acceptance criteria Perform regression test VPHX Program Kanban to Manage Workflow",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "VPHX",
+          "Kanban",
+          "Define",
+          "Outline",
+          "Refine",
+          "Create",
+          "Add",
+          "Estimate",
+          "Identify",
+          "EventStorming",
+          "Jira",
+          "Complete",
+          "Develop",
+          "TDD",
+          "Track",
+          "Test",
+          "Perform",
+          "Program",
+          "Manage",
+          "Workflow"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 21,
+        "images": []
+      },
+      "extracted_text": "Goal: Create a fully estimated thin-slice complete with scenarios and acceptance criteria, refined to include system stories. Key Activities Refine the thin-slice story map with system stories Define thin-slice scenarios and acceptance criteria Add thin-slice to Jira Identify bounded context & aggregates Estimate total story count for thin-slice Create cumulative flow diagram and forecast Key Practices Story mapping Thin-slicing Estimating Forecasting Cumulative flow diagram A Recap on Thin-slice Shaping Key Tools Miro Jira Key Participants Product Owner Product Analysts Tech pair",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Goal",
+          "Create",
+          "Key",
+          "Activities",
+          "Refine",
+          "Define",
+          "Add",
+          "Jira",
+          "Identify",
+          "Estimate",
+          "Practices",
+          "Thin",
+          "Estimating",
+          "Forecasting",
+          "Cumulative",
+          "Recap",
+          "Shaping",
+          "Tools",
+          "Miro",
+          "Participants",
+          "Product",
+          "Owner",
+          "Analysts",
+          "Tech"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 34,
+        "images": [
+          "slide_034_image_1.png"
+        ]
+      },
+      "extracted_text": "Glimpse Of Expanded Domain Model To Spec Please see https://miro.com/app/board/o9J_kvfvWeY=/?moveToWidget=3074457356476780707&cot=14",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Glimpse",
+          "Of",
+          "Expanded",
+          "To",
+          "Spec",
+          "Please"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 35,
+        "images": [
+          "slide_035_image_1.jpg",
+          "slide_035_image_1.png"
+        ]
+      },
+      "extracted_text": "Actual Domain Model & Story Map",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Actual"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 2 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 36,
+        "images": [
+          "slide_036_image_1.jpg",
+          "slide_036_image_1.png"
+        ]
+      },
+      "extracted_text": "Domain Model in progress…",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 2 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 37,
+        "images": []
+      },
+      "extracted_text": "Specifications Exercise: Take 90 mins \u000bWalk the domain model and update the story map Walk your domain model Compare the steps you walked to the story map Update the story map with the same language of your domain model Update the story map to include any missing stories Each team be ready to spend 10 minutes showing their results!",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Specifications",
+          "Exercise",
+          "Take",
+          "Walk",
+          "Compare",
+          "Update",
+          "Each"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 38,
+        "images": []
+      },
+      "extracted_text": "Aggregate, Roots, Entities, and Bounded Contexts",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Aggregate",
+          "Roots",
+          "Entities",
+          "Bounded",
+          "Contexts"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 39,
+        "images": []
+      },
+      "extracted_text": "DDD Provides a Means to Partition Business Logic According In The Model and the Code Patient Pick Up Method Address Entities Have an identity that remains the same regardless of changes to specific data. Are the primary domain concepts we care about We identify a Unique Patient In The System by their PHIN, and through a unique combination of Address, Name, and Phone Value Objects Are attributes, they do not have any inherent identity, and shared by many different Entities, considered Read Only The parts of the system can we assume are immutable include Pick Up Methods and Addresses… Clinical Information Insurance Aggregates A grouping of closely associated objects that should be treated as a single unit for the purpose of data access and changes, defined in terms of roots that are directly accessible, and boundaries We access all Patient Information directly through the Patient Services Gatekeeper to accessing business logic for a particular domain, services control/encapsulate business rules, business logic and business validation for a particular domain The public operations for Patient that we want to expose to the rest of the system include Search, Merge, … Patient Service Repository Represents the persistence layer required to search/access/ modify domain objects, Repositories are a simple and business specific interface for all operations on stored data We can search for Patients by any combination of PHIN, Fname, Lname, Address, … Patients Events The Conditions and state changes that happen within the Payments Domain that are made available for the rest of the system to consume. Most integrations across Contexts should occur asynchronously through Events Events are raised whenever Patients change their Address, Insurance, Pickup Method… Patient Created Patient Merged Bounded Context Is a boundary explicitly set where the details of a subset of the domain is consistent and uniformly true. Consistency is expected to be true for the business domain language, domain model, and domain code, for a domain focused team. The way we represent Patients and all of it’s internal will be consistent for every one working on the Payments Module Each Domain Artifact Is Built Through Deep Understanding Of The Business Domain Patient Bounded Context",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "DDD",
+          "Provides",
+          "Means",
+          "Partition",
+          "Business",
+          "Logic",
+          "According",
+          "In",
+          "The",
+          "Code",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "Entities",
+          "Have",
+          "Are",
+          "We",
+          "Unique",
+          "System",
+          "PHIN",
+          "Name",
+          "Phone",
+          "Value",
+          "Objects",
+          "Read",
+          "Only",
+          "Methods",
+          "Addresses",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Aggregates",
+          "Services",
+          "Gatekeeper",
+          "Search",
+          "Merge",
+          "Service",
+          "Repository",
+          "Represents",
+          "Repositories",
+          "Patients",
+          "Fname",
+          "Lname",
+          "Events",
+          "Conditions",
+          "Payments",
+          "Most",
+          "Contexts",
+          "Pickup",
+          "Created",
+          "Merged",
+          "Bounded",
+          "Context",
+          "Is",
+          "Consistency",
+          "Module",
+          "Each",
+          "Artifact",
+          "Built",
+          "Through",
+          "Deep",
+          "Understanding",
+          "Of"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 40,
+        "images": []
+      },
+      "extracted_text": "Entities have Identities that Transcend The Value of Their Attributes Patient Pick Up Method Address Have an identity that remains the same regardless of changes to specific data. The primary concepts that are core to the domain One of the first things we want to do  in DDD is key on the terms in our Ubiquitous Language that exhibit a common thread of identity Clinical Information Insurance Patient Service Patients Patient Created Patient Merged Questions That Only The Business Can Answer Regarding Entities If two instances of a thing (Person, Product, etc) have the same name, are they automatically the same thing? What business concepts are identified by more than the value of their attributes? What attributes, or rules can we use to establish /verify the identity of a thing? If two instances of the same object have different attribute values, but same identity value, are they the same entity? Developers use Entities to explicitly capture concerns relating to identity, and the lifecycle of identity Patient Bounded Context Please see https://miro.com/app/board/o9J_kvfvWeY=/?moveToWidget=3074457356476780707&cot=14",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Entities",
+          "Identities",
+          "Transcend",
+          "The",
+          "Value",
+          "Their",
+          "Attributes",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "Have",
+          "One",
+          "DDD",
+          "Ubiquitous",
+          "Language",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Service",
+          "Patients",
+          "Created",
+          "Merged",
+          "Questions",
+          "That",
+          "Only",
+          "Business",
+          "Can",
+          "Answer",
+          "Regarding",
+          "If",
+          "Person",
+          "Product",
+          "What",
+          "Developers",
+          "Bounded",
+          "Context",
+          "Please"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 41,
+        "images": []
+      },
+      "extracted_text": "Value Objects are simpler, read-only,  and are shareable across the system Patient Pick Up Method Address Have no identity beyond the attributes they possess We don’t care about the extra complexity required to manage identity One of the first things we want to do in DDD is key on the terms in our Ubiquitous Language that exhibit a common thread of identity Clinical Information Insurance Patient Service Patients Patient Created Patient Merged Questions That Only The Business Can Answer Regarding Value Objects What business concepts are identified by more than the value of their attributes? What attributes, or rules can we use to establish /verify the identity of a thing? Defining Value Objects allows developers to greatly simplify parts of the system through implementation of side effect free functions Patient Bounded Context",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Value",
+          "Objects",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "Have",
+          "We",
+          "One",
+          "DDD",
+          "Ubiquitous",
+          "Language",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Service",
+          "Patients",
+          "Created",
+          "Merged",
+          "Questions",
+          "That",
+          "Only",
+          "The",
+          "Business",
+          "Can",
+          "Answer",
+          "Regarding",
+          "What",
+          "Defining",
+          "Bounded",
+          "Context"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 42,
+        "images": [
+          "slide_042_image_1.png"
+        ]
+      },
+      "extracted_text": "Design Constraints When Developing Entities and Value Object Entities should have an operation that is guaranteed to produce a unique result that will identify the object within the system.. The interface of an entity should be reduced to those operations and attributes necessary to identify or search for it/match its identity to coordinate the operations of the objects that they own. Factor out all other behavior to “owned” objects Value objects should be treated as immutable. This helps us to optimize performance as we can now safely share value objects. A Value object may also safely pass attributes to another object without worrying about it being unsafely modified and possibly corrupting the owner. Design value objects so that they are never changed; rather they are created and possibly replaced Please see https://miro.com/app/board/o9J_kvfvWeY=/?moveToWidget=3074457356476780707&cot=14 Value Objects Entities",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Constraints",
+          "When",
+          "Developing",
+          "Entities",
+          "Value",
+          "Object",
+          "The",
+          "Factor",
+          "This",
+          "Please",
+          "Objects"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 43,
+        "images": []
+      },
+      "extracted_text": "Exercise: Revisit our model and identify Entities and Value Objects Which elements require thoughtful identity management? Which elements are really just fancy primitives?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Revisit",
+          "Entities",
+          "Value",
+          "Objects",
+          "Which"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 44,
+        "images": []
+      },
+      "extracted_text": "Aggregates are a tight collection of objects that are treated as a single unit when undergoing any changes in state Patient Pick Up Method Address An aggregate is a collection of objects that represent a single concept All objects inside an aggregate can only be accessed through a pre-defined Root All objects that are associated with the Root can only be updated/deleted/etc together, ie they are treated as single concept When object relationships exists across aggregates we must consider how to keep changes synchronized across aggregates Clinical Information Insurance Patient Service Patients Patient Created Patient Merged Questions That Only The Business Can Answer Regarding Aggregates Which parts of our domain can we directly access? Which domain concepts get updated together as a single cohesive unit? Which domain concepts get updated separately? When / How frequently do we coordinate updates made to aggregates that have relationships to other aggregates? What attributes, or rules can we use to establish /verify the identity of a thing? If two instances of the same object have different attribute values, but same identity value, are they the same entity? Aggregates allows developers to design both data integrity and service integration according to the specific business criteria Patient Bounded Context Root",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Aggregates",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "An",
+          "All",
+          "Root",
+          "When",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Service",
+          "Patients",
+          "Created",
+          "Merged",
+          "Questions",
+          "That",
+          "Only",
+          "The",
+          "Business",
+          "Can",
+          "Answer",
+          "Regarding",
+          "Which",
+          "How",
+          "What",
+          "If",
+          "Bounded",
+          "Context"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 45,
+        "images": [
+          "slide_045_image_1.png"
+        ]
+      },
+      "extracted_text": "Design Constraints When Developing Aggregates An aggregate is an abstraction used to represent a cluster of associated objects that should be treated as a single unit for the purpose of data changes. Each aggregate has a root and a boundary.  The root of the aggregate is a single, specific entity. The root is the only member of the aggregate that outside objects are allowed to hold a persistent reference to Code outside of an aggregate boundary can only load/save/delete/create an aggregate through its root Entity Invariants are consistency rules that must be maintained whenever data changes The root has a global identity and is responsible for all invariant checking When any change to an aggregate boundary is committed, all invariants must be satisfied Entities within the boundary of an aggregate have a local identity, and are unique within the aggregate Delete operations must remove everything within the aggregate boundary at once",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Constraints",
+          "When",
+          "Developing",
+          "Aggregates",
+          "An",
+          "Each",
+          "The",
+          "Code",
+          "Entity",
+          "Invariants",
+          "Entities",
+          "Delete"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 47,
+        "images": []
+      },
+      "extracted_text": "Exercise: Revisit our model and identify Aggregates Which elements do we directly access and which elements change with them? Where in our model should element changes not occur In real time?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Revisit",
+          "Aggregates",
+          "Which",
+          "Where",
+          "In"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 48,
+        "images": []
+      },
+      "extracted_text": "A Bounded Context defines where the details of subset of our Domain is set to be consistent and true Patient Pick Up Method Address A hard boundary that is explicitly managed so that all concepts within it are kept consistent. Pertains to all artifacts inside the boundary, the model, the language, and the code Often a one-to-one match to a team, ie a team operates and owns one bounded context Many systems operate across multiple organizational and solution specific Bounded Contexts. We illustrate how to translate across these contexts by using a Bounded Context Map Clinical Information Insurance Patient Service Patients Patient Created Patient Merged Questions That Only The Business Can Answer Regarding Bounded Contexts Where in our organization / teams / solutions do similar concepts get represented in different ways, or where the same terms can mean different things? How do we resolve dependencies between domain elements that exist across multiple contexts? What parts of our domain can be thought in a truly independent way? Bounded Contexts allow us to deliver completely decoupled sub systems according to our organizational our intended org structure. Patient Bounded Context Please see https://miro.com/app/board/o9J_kvfvWeY=/?moveToWidget=3074457356476780707&cot=14",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Bounded",
+          "Context",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "Pertains",
+          "Often",
+          "Many",
+          "Contexts",
+          "We",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Service",
+          "Patients",
+          "Created",
+          "Merged",
+          "Questions",
+          "That",
+          "Only",
+          "The",
+          "Business",
+          "Can",
+          "Answer",
+          "Regarding",
+          "Where",
+          "How",
+          "What",
+          "Please"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 49,
+        "images": []
+      },
+      "extracted_text": "Exercise: Revisit our model and identify Bounded Contexts Which parts of the business can be thought of in a highly decoupled way?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Revisit",
+          "Bounded",
+          "Contexts",
+          "Which"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 50,
+        "images": []
+      },
+      "extracted_text": "Exercise: Clean Up Focus on Refine the Language in the classes for the responsibilities Make sure the lines connecting to the cards have the appropriate collaborators Identify any missing Entities, Value Objects, Roots, and Aggregates Identify any Contexts that are outside of your primary Bounded Context Walk through and refine the Story Map",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Clean",
+          "Up",
+          "Focus",
+          "Refine",
+          "Language",
+          "Make",
+          "Identify",
+          "Entities",
+          "Value",
+          "Objects",
+          "Roots",
+          "Aggregates",
+          "Contexts",
+          "Bounded",
+          "Context",
+          "Walk"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 52,
+        "images": []
+      },
+      "extracted_text": "Kanban – Subsystem Shaping Identify events crossing bounded context boundaries. Define testable thin slices Outline key domains and entities Refine story map Create thin-slices Estimate story counts Identify bounded contexts EventStorming to define flow across contexts Create bounded context map Add stories to Jira Add stories to confluence Complete story acceptance criteria Develop stories using TDD Track flow Refine entities and value objects Define domain internals Test all story acceptance criteria Test thin-slice acceptance criteria Perform regression test",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Kanban",
+          "Subsystem",
+          "Shaping",
+          "Identify",
+          "Define",
+          "Outline",
+          "Refine",
+          "Create",
+          "Estimate",
+          "EventStorming",
+          "Add",
+          "Jira",
+          "Complete",
+          "Develop",
+          "TDD",
+          "Track",
+          "Test",
+          "Perform"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 53,
+        "images": []
+      },
+      "extracted_text": "Goal: Identify events crossing bounded context boundaries. Refine thin-slice with stories and add stories to Jira and Confluence. Key Activities Extend thin-slice story map with event storming to define flow across bounded contexts Identify system-stories Add stories to Jira Add story details to Confluence Key Practices Domain-driven design EventStorming A Recap on Subsystem Shaping Key Tools Miro Jira Confluence Key Participants Tech Leads Product Analysts",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Goal",
+          "Identify",
+          "Refine",
+          "Jira",
+          "Confluence",
+          "Key",
+          "Activities",
+          "Extend",
+          "Add",
+          "Practices",
+          "EventStorming",
+          "Recap",
+          "Subsystem",
+          "Shaping",
+          "Tools",
+          "Miro",
+          "Participants",
+          "Tech",
+          "Leads",
+          "Product",
+          "Analysts"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 58,
+        "images": []
+      },
+      "extracted_text": "We can group events and stories to refine the exact scope of responsibility for each bounded contexts Credit Card Credit Card Account Command Reaction Event Credit Card Plan",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "We",
+          "Credit",
+          "Card",
+          "Account",
+          "Command",
+          "Reaction",
+          "Event",
+          "Plan"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 60,
+        "images": []
+      },
+      "extracted_text": "Defining a Bounded Context Map",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Defining",
+          "Bounded",
+          "Context"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 61,
+        "images": [
+          "slide_061_image_1.png"
+        ]
+      },
+      "extracted_text": "Bounded Context explicitly set boundaries in which the context of a model is applicable and explicitly managed to be uniform Organizational:  a team, department, community, etc. Implementation: code base, database schema, etc. Bounded Context Map marks the boundaries and relationships between different models and/or system contexts in a specific project, program, or organization determines appropriate integration strategies identifies where  a context may be shared across teams may span an entire system, a portion of a system, or across several systems within the enterprise A Bounded Dependency Map illustrates the relationship across our solution and the different teams, calling out how dependencies are managed on large scale programs",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Bounded",
+          "Context",
+          "Organizational",
+          "Implementation",
+          "Dependency"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 65,
+        "images": [
+          "slide_065_image_1.png"
+        ]
+      },
+      "extracted_text": "CC Account Service CC Account Repo CC Plan Service CC Plan Repo Credit Card Service Credit Card Repo Properly defined bounded context enable agile teams to work autonomously while participating in a much larger ecosystem Use Domain Driven Design to define the right boundaries for contexts that different teams can work on in a autonomous fashion Account Team CC Plan Team Credit Card Team",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "CC",
+          "Account",
+          "Service",
+          "Repo",
+          "Plan",
+          "Credit",
+          "Card",
+          "Properly",
+          "Use",
+          "Driven",
+          "Team"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 66,
+        "images": []
+      },
+      "extracted_text": "We need to call out mapping,  an integration mechanism, and a team engagement model for every dependency that exists across or bounded context map Identify key domain constructs/objects that are relevant across more than one bounded context Map out how the specific elements relate to each other Identify the integration approach Identify how the teams will collaborate across the bounded context CRM System Accounts System Interests | Job How will the two teams collaborate? Travelling Team Members (Significant Change) Members from multiple teams work as a single team Service Provider(Small Change) One team makes changes according to needs of other team Enabler(No Change) One team provides support to enable another team to use their code How will we integrate  across the systems? Events Batch Messaging REST / API",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "We",
+          "Identify",
+          "CRM",
+          "System",
+          "Accounts",
+          "Interests",
+          "Job",
+          "How",
+          "Travelling",
+          "Team",
+          "Members",
+          "Significant",
+          "Change",
+          "Service",
+          "Provider",
+          "Small",
+          "One",
+          "Enabler",
+          "No",
+          "Events",
+          "Batch",
+          "Messaging",
+          "REST",
+          "API"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 67,
+        "images": [
+          "slide_067_image_1.png"
+        ]
+      },
+      "extracted_text": "We can also use a Bounded Context Map to Illustrate the Different Contexts Between Systems and the Teams that Support Them",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "We",
+          "Bounded",
+          "Context",
+          "Illustrate",
+          "Different",
+          "Contexts",
+          "Between",
+          "Systems",
+          "Teams",
+          "Support",
+          "Them"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 68,
+        "images": []
+      },
+      "extracted_text": "Exercise: Take 30 mins \u000bBuild a Bounded context map Zoom out from the thin slice Explore bounded contexts that are outside of patient, drug, and prescription Draw arrows to indicate which contexts would need to collaborate with another and why Each team be ready to spend 10 minutes showing your results!",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Exercise",
+          "Take",
+          "Build",
+          "Bounded",
+          "Zoom",
+          "Explore",
+          "Draw",
+          "Each"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 72,
+        "images": []
+      },
+      "extracted_text": "Goal: Perform enough planning for the next burst of value creation for a small cross functional team to collaborate on delivery A Review on Story Exploration Key Activities The understanding of stories & solution have been refined for a tightly integrated increment of business value A subset of the team have estimated the work and committed to delivering it Acceptance criteria have been defined for the story Key risks/unknowns/assumptions have been explored for the value increment Agile Accelerators Story Sketch Relative Sizing and Estimation Class Responsibility Cards Domain Driven Design Experimentation Sketch",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Goal",
+          "Perform",
+          "Review",
+          "Exploration",
+          "Key",
+          "Activities",
+          "The",
+          "Acceptance",
+          "Agile",
+          "Accelerators",
+          "Sketch",
+          "Relative",
+          "Sizing",
+          "Estimation",
+          "Class",
+          "Responsibility",
+          "Cards",
+          "Driven",
+          "Experimentation"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 86,
+        "images": [
+          "slide_086_image_1.png"
+        ]
+      },
+      "extracted_text": "The first step to establishing micro-services, understanding your bounded contexts",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "The"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 89,
+        "images": []
+      },
+      "extracted_text": "DDD Provides a Means to Partition Business Logic According In The Model and the Code Patient Pick Up Method Address Entities Have an identity that remains the same regardless of changes to specific data. Are the primary domain concepts we care about We identify a Unique Patient In The System by their PHIN, and through a unique combination of Address, Name, and Phone Value Objects Are attributes, they do not have any inherent identity, and shared by many different Entities, considered Read Only The parts of the system can we assume are immutable include Pick Up Methods and Addresses… Clinical Information Insurance Aggregates A grouping of closely associated objects that should be treated as a single unit for the purpose of data access and changes, defined in terms of roots that are directly accessible, and boundaries We access all Patient Information directly through the Patient Services Gatekeeper to accessing business logic for a particular domain, services control/encapsulate business rules, business logic and business validation for a particular domain The public operations for Patient that we want to expose to the rest of the system include Search, Merge, … Patient Service Repository Represents the persistence layer required to search/access/ modify domain objects, Repositories are a simple and business specific interface for all operations on stored data We can search for Patients by any combination of PHIN, Fname, Lname, Address, … Patients Events The Conditions and state changes that happen within the Payments Domain that are made available for the rest of the system to consume. Most integrations across Contexts should occur asynchronously through Events Events are raised whenever Patients change their Address, Insurance, Pickup Method… Patient Created Patient Merged Bounded Context Is a boundary explicitly set where the details of a subset of the domain is consistent and uniformly true. Consistency is expected to be true for the business domain language, domain model, and domain code, for a domain focused team. The way we represent Patients and all of it’s internal will be consistent for every one working on the Payments Module Each Domain Artifact Is Built Through Deep Understanding Of The Business Domain Patient Bounded Context",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "DDD",
+          "Provides",
+          "Means",
+          "Partition",
+          "Business",
+          "Logic",
+          "According",
+          "In",
+          "The",
+          "Code",
+          "Patient",
+          "Pick",
+          "Up",
+          "Method",
+          "Address",
+          "Entities",
+          "Have",
+          "Are",
+          "We",
+          "Unique",
+          "System",
+          "PHIN",
+          "Name",
+          "Phone",
+          "Value",
+          "Objects",
+          "Read",
+          "Only",
+          "Methods",
+          "Addresses",
+          "Clinical",
+          "Information",
+          "Insurance",
+          "Aggregates",
+          "Services",
+          "Gatekeeper",
+          "Search",
+          "Merge",
+          "Service",
+          "Repository",
+          "Represents",
+          "Repositories",
+          "Patients",
+          "Fname",
+          "Lname",
+          "Events",
+          "Conditions",
+          "Payments",
+          "Most",
+          "Contexts",
+          "Pickup",
+          "Created",
+          "Merged",
+          "Bounded",
+          "Context",
+          "Is",
+          "Consistency",
+          "Module",
+          "Each",
+          "Artifact",
+          "Built",
+          "Through",
+          "Deep",
+          "Understanding",
+          "Of"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 90,
+        "images": []
+      },
+      "extracted_text": "1..* 0..* Produces Subscribes to Extend your Domain Model by incorporating Services and Events for each Bounded Context Credit Card Credit Card Account Credit Card Plan",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Produces",
+          "Subscribes",
+          "Extend",
+          "Services",
+          "Events",
+          "Bounded",
+          "Context",
+          "Credit",
+          "Card",
+          "Account",
+          "Plan"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 91,
+        "images": []
+      },
+      "extracted_text": "1..* 0..* Produces Subscribes to Extend your Domain Model by incorporating Services and Events for each Bounded Context Credit Card Credit Card Account Credit Card Plan",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Produces",
+          "Subscribes",
+          "Extend",
+          "Services",
+          "Events",
+          "Bounded",
+          "Context",
+          "Credit",
+          "Card",
+          "Account",
+          "Plan"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 104,
+        "images": [
+          "slide_104_image_1.png"
+        ]
+      },
+      "extracted_text": "Remember Domain Driven Design Organize Domain Aggregates Bounded Contexts",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Remember",
+          "Driven",
+          "Organize",
+          "Aggregates",
+          "Bounded",
+          "Contexts"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 105,
+        "images": []
+      },
+      "extracted_text": "Identifying Domain Aggregates and Context Boundaries Regulatory and Compliance Transaction Rates Market Actors Domain Life Cycle State",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Identifying",
+          "Aggregates",
+          "Context",
+          "Boundaries",
+          "Regulatory",
+          "Compliance",
+          "Transaction",
+          "Rates",
+          "Market",
+          "Actors",
+          "Life",
+          "Cycle",
+          "State"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 106,
+        "images": [
+          "slide_106_image_1.png"
+        ]
+      },
+      "extracted_text": "Identifying Domain Aggregates and Context Boundaries Limiting Domain Complexity Per Team The Modern World Of Micro-Services",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Identifying",
+          "Aggregates",
+          "Context",
+          "Boundaries",
+          "Limiting",
+          "Complexity",
+          "Per",
+          "Team",
+          "The",
+          "Modern",
+          "World",
+          "Of",
+          "Micro",
+          "Services"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 110,
+        "images": []
+      },
+      "extracted_text": "A range of Model Sharing Patterns can be used to establish how individuals Domain Boundaries can be integrated between agile teams Shared Kernel: Portions of two separate systems require tight integration. Designate some subset of the domain model,  code, database, etc that the two teams agree to share. No changes to model subset is made without participation from both teams Customer/ Supplier teams:  One subsystem feeds another and all the dependencies go one way.  Establish a clear customer/supplier relationship between the two teams.  Make the dependent team play the customer role, providing requirements and allocating budget to the supplier team. Jointly develop automated acceptance tests to validate team interfaces. Both teams use these tests as part of their own continuous integration. customer supplier Conformist:  Two teams are in different companies or very far apart in the management hierarchy. Force the team with the dependencies to adhere to the model of the team upon which they depend.  This may not yield the ideal model for the application but greatly simplifies integration. Often appropriate when delivering an enterprise package solution (e.g. PeopleSoft, SAP) that requires a slight or moderate customization/configuration. Anticorruption Layer:  A new system is being built has a large interface with another system with an established model. Prevent the new model from being modified ad-hoc to resemble the other system’s model by creating an isolation layer.  The isolation layer provides clients with functionality in terms of their own domain model.  The layer talks to the other system through its existing interface, requiring little or no modification to the other system.  Internally, the layer translates in both directions as necessary between the two models.",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Sharing",
+          "Patterns",
+          "Boundaries",
+          "Shared",
+          "Kernel",
+          "Portions",
+          "Designate",
+          "No",
+          "Customer",
+          "Supplier",
+          "One",
+          "Establish",
+          "Make",
+          "Jointly",
+          "Both",
+          "Conformist",
+          "Two",
+          "Force",
+          "This",
+          "Often",
+          "PeopleSoft",
+          "SAP",
+          "Anticorruption",
+          "Layer",
+          "Prevent",
+          "The",
+          "Internally"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\domain driven design extracted\\extracted_content.md",
+        "slide_number": 111,
+        "images": [
+          "slide_111_image_1.png"
+        ]
+      },
+      "extracted_text": "A range of Model Sharing Patterns can be used to establish how individuals Model Boundaries can be integrated across an enterprise Open host services: A subsystem has to be integrated with many others. Define a common  protocol that gives access as a set of services.  Open the protocol to all teams who need access can use it.  Enhance and expand the protocol to handle new requirements as necessary. Published language: Direct translation to and from the existing domain models may not be a good solution.  Those models may be overly complex or poorly factored.  In this case, use a well documented shared language that can express the necessary domain information as a common medium of communication, translating as necessary into and out of that language. Separate ways: sometimes the value of integration is outweighed by the cost to do so. In this case two teams may approach similar concepts and functionality in entirely different weights and agreed to go on their own separate path. Agreeing to disagree",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Sharing",
+          "Patterns",
+          "Boundaries",
+          "Open",
+          "Define",
+          "Enhance",
+          "Published",
+          "Direct",
+          "Those",
+          "In",
+          "Separate",
+          "Agreeing"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,656 @@
+---
+description: Mamba-specific BDD workflow patterns for Red-Green-Refactor cycle
+globs: ["**/*_test.py", "**/test_*.py", "**/*_spec.py", "**/spec_*.py", "**/*_test.pyi", "**/test_*.pyi", "**/*_spec.pyi", "**/spec_*.pyi"]
+alwaysApply: false
+---
+**When** practicing BDD with Mamba/Python tests,
+**then** follow these Mamba-specific patterns for the Red-Green-Refactor cycle.
+
+This rule extends `bdd-workflow-rule.mdc` and references `bdd-mamba-rule.mdc`.
+
+**Executing Commands:**
+* `\bdd-workflow` — Guides through Mamba-specific Red-Green-Refactor cycle using patterns from this rule
+
+## Phase 1: Build Test Signatures (Mamba)
+
+**✅ DO:**
+```python
+from mamba import description, context, it
+from expects import expect, equal, be_true, raise_error
+
+with description('a user authentication service') as self:
+    with context('a user that is being authenticated'):
+        with context('with valid credentials'):
+            with it('should receive an access token'):
+                # TODO: implement
+                pass
+        
+        with context('with invalid credentials'):
+            with it('should receive an authentication error'):
+                # TODO: implement
+                pass
+        
+        with context('whose account is locked'):
+            with it('should receive an account locked error'):
+                # TODO: implement
+                pass
+    
+    with context('a token that is being validated'):
+        with context('that is valid and not expired'):
+            with it('should return true'):
+                # TODO: implement
+                pass
+        
+        with context('that is expired'):
+            with it('should return false'):
+                # TODO: implement
+                pass
+        
+        with context('that has an invalid signature'):
+            with it('should return false'):
+                # TODO: implement
+                pass
+```
+
+**❌ DON'T:**
+```python
+# Violates Phase 1 - not thinking through ALL scenarios upfront
+with description('a user authentication service') as self:
+    with it('should return user token'):
+        # TODO: implement
+        pass
+    
+    # NO! Where are the failure cases? Edge cases?
+    # Phase 1 requires comprehensive scenario planning
+```
+
+---
+
+## Phase 2: RED - Write Failing Test (Mamba)
+
+### Arrange-Act-Assert Pattern
+
+**✅ DO:**
+```python
+from mamba import description, context, it, before
+from expects import expect, equal, be_a, match, have_key
+from datetime import datetime
+from auth_service import AuthService
+from auth_error import AuthError
+
+with description('a user authentication service') as self:
+    with context('a user that is being authenticated'):
+        with context('with valid credentials'):
+            with it('should receive an access token'):
+            # Arrange
+            auth_service = AuthService()
+            credentials = {
+                'username': 'alice@example.com',
+                'password': 'SecurePass123!'
+            }
+            
+            # Act
+            result = auth_service.authenticate(credentials)
+            
+            # Assert
+            expect(result).to(have_key('token'))
+            expect(result['token']).to(match(r'^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$'))  # JWT format
+            expect(result['user_id']).to(equal('alice@example.com'))
+            expect(result['expires_at']).to(be_a(datetime))
+
+# Run: mamba auth_service_test.py
+# Expected: ❌ FAIL - ModuleNotFoundError: No module named 'auth_service'
+```
+
+**❌ DON'T:**
+```python
+with it('should return user token when credentials are valid'):
+    # Vague, incomplete assertions
+    result = auth_service.login({'username': 'alice', 'password': 'pass'})
+    expect(result).not_to(be(None))  # Too vague!
+```
+
+### Testing Async Code
+
+**✅ DO:**
+```python
+from mamba import description, context, it
+from expects import expect, equal, have_key
+import asyncio
+
+with description('a user service') as self:
+    with context('fetching a user by ID'):
+        with context('that succeeds'):
+            with it('should return user data'):
+            # Arrange
+            user_service = UserService()
+            user_id = 'user123'
+            
+            # Act
+            user = asyncio.run(user_service.get_user(user_id))
+            
+            # Assert
+            expect(user).to(have_key('id'))
+            expect(user['id']).to(equal(user_id))
+            expect(user['email']).to(match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$'))
+
+# Expected: ❌ FAIL - NameError: name 'UserService' is not defined
+```
+
+### Testing Error Cases
+
+**✅ DO:**
+```python
+from mamba import description, context, it
+from expects import expect, raise_error
+
+with description('a user authentication service') as self:
+    with context('a user that is being authenticated'):
+        with context('with invalid credentials'):
+            with it('should receive an authentication error'):
+            # Arrange
+            auth_service = AuthService()
+            invalid_credentials = {
+                'username': 'alice@example.com',
+                'password': 'WrongPassword'
+            }
+            
+            # Act & Assert
+            def attempt_auth():
+                auth_service.authenticate(invalid_credentials)
+            
+            expect(attempt_auth).to(raise_error(AuthError))
+            expect(attempt_auth).to(raise_error(AuthError, 'Invalid username or password'))
+
+# Expected: ❌ FAIL - NameError: name 'AuthError' is not defined
+```
+
+**❌ DON'T:**
+```python
+with it('should handle invalid credentials'):
+    # Generic error handling, not specific
+    try:
+        auth_service.login({'username': 'bad', 'password': 'bad'})
+        success = True
+    except Exception:
+        success = False
+    
+    expect(success).to(be_false)  # Too vague!
+```
+
+### Using Test Helpers and Fixtures
+
+**✅ DO:**
+```python
+from mamba import description, context, it, before
+
+with description('a user authentication service') as self:
+    with before.each:
+        # Helper function for creating test data
+        def create_valid_credentials(**overrides):
+            credentials = {
+                'username': 'alice@example.com',
+                'password': 'SecurePass123!'
+            }
+            credentials.update(overrides)
+            return credentials
+        
+        self.create_valid_credentials = create_valid_credentials
+        self.auth_service = AuthService()
+    
+    with context('a user that is being authenticated'):
+        with context('with valid credentials'):
+            with it('should receive an access token'):
+            credentials = self.create_valid_credentials()
+            result = self.auth_service.authenticate(credentials)
+            expect(result).to(have_key('token'))
+        
+        
+        with context('with a password that is too short'):
+            with it('should receive a validation error'):
+            credentials = self.create_valid_credentials(password='123')
+            expect(lambda: self.auth_service.authenticate(credentials)).to(raise_error(ValidationError))
+```
+
+---
+
+## Phase 3: GREEN - Implement Code (Mamba)
+
+### Minimal Implementation
+
+**✅ DO:**
+```python
+# auth_service.py - Minimal implementation to make test pass
+from datetime import datetime, timedelta
+
+class AuthService:
+    def login(self, credentials):
+        if (credentials['username'] == 'alice@example.com' and 
+            credentials['password'] == 'SecurePass123!'):
+            return {
+                'token': 'header.payload.signature',  # Minimal JWT-like token
+                'user_id': 'alice@example.com',
+                'expires_at': datetime.now() + timedelta(hours=1)
+            }
+        raise ValueError('Invalid username or password')
+
+# Run: mamba auth_service_test.py
+# Expected: ✅ PASS - 1 passing
+```
+
+**❌ DON'T:**
+```python
+# Over-engineered before tests demand it
+class AuthService:
+    def __init__(
+        self,
+        user_repository,
+        token_generator,
+        password_hasher,
+        logger,
+        rate_limiter,
+        session_manager
+    ):
+        # Tests don't require this complexity yet!
+        self.user_repository = user_repository
+        # ... lots of dependencies not needed yet
+    
+    async def login(self, credentials):
+        await self.logger.log('Login attempt', credentials['username'])
+        await self.rate_limiter.check(credentials['username'])
+        # ... lots of code not required by tests
+```
+
+### Verify All Tests Pass
+
+```bash
+# Run single test to verify it passes
+mamba auth_service_test.py --line 15
+# ✅ PASS
+
+# Run all tests to check for regressions
+mamba auth_service_test.py
+# ✅ PASS - All tests passing
+```
+
+---
+
+## Phase 4: REFACTOR - Suggest Improvements (Mamba)
+
+### Example Refactoring Suggestions
+
+**Smell: Hardcoded Credentials**
+```python
+# Current implementation
+def login(self, credentials):
+    if (credentials['username'] == 'alice@example.com' and 
+        credentials['password'] == 'SecurePass123!'):
+        return {'token': '...', 'user_id': 'alice@example.com', 'expires_at': datetime.now() + timedelta(hours=1)}
+    raise ValueError('Invalid username or password')
+```
+
+**Suggestion:**
+```
+REFACTORING: Extract User Validation
+
+Current: Hardcoded username/password check
+Suggest: Introduce UserRepository to validate credentials
+
+Why: 
+- Separation of concerns (auth logic vs user data)
+- Testable in isolation
+- Allows multiple users in tests
+
+Impact:
+Production:
+  - auth_service.py (add UserRepository dependency)
+  - user_repository.py (new file)
+  
+Tests:
+  - auth_service_test.py (mock UserRepository)
+  - user_repository_test.py (new test file)
+
+Trade-offs:
+  ✅ Better separation of concerns
+  ✅ More testable
+  ❌ More files to maintain
+  ❌ Requires mocking in tests
+```
+
+**Smell: Generic Error Type**
+```python
+raise ValueError('Invalid username or password')
+```
+
+**Suggestion:**
+```
+REFACTORING: Introduce Custom Error Types
+
+Current: ValueError for all auth failures
+Suggest: Create AuthError with error codes
+
+Why:
+- More specific error handling
+- Better test assertions
+- Clearer error messages to consumers
+
+Impact:
+Production:
+  - errors/auth_error.py (new file)
+  - auth_service.py (raise AuthError instead of ValueError)
+
+Tests:
+  - auth_service_test.py (update assertions to check for AuthError)
+
+Example:
+  raise AuthError('INVALID_CREDENTIALS', 'Invalid username or password')
+```
+
+**Smell: Dictionary Return Type**
+```python
+return {'token': '...', 'user_id': '...', 'expires_at': ...}
+```
+
+**Suggestion:**
+```
+REFACTORING: Introduce AuthResult Value Object
+
+Current: Dictionary with magic keys
+Suggest: Create AuthResult dataclass
+
+Why:
+- Type safety with dataclasses
+- Explicit structure
+- Better IDE support and autocompletion
+
+Impact:
+Production:
+  - models/auth_result.py (new file)
+  - auth_service.py (return AuthResult instead of dict)
+
+Tests:
+  - auth_service_test.py (update assertions to check AuthResult attributes)
+
+Example:
+  from dataclasses import dataclass
+  from datetime import datetime
+  
+  @dataclass
+  class AuthResult:
+      token: str
+      user_id: str
+      expires_at: datetime
+```
+
+---
+
+## Phase 5: IMPLEMENT - Apply Refactorings (Mamba)
+
+### Step-by-Step Refactoring
+
+**Refactoring #1: Extract UserRepository**
+
+```python
+# Step 1: Create UserRepository (code under test)
+# user_repository.py
+class UserRepository:
+    def validate_credentials(self, credentials):
+        # Minimal implementation for current tests
+        if (credentials['username'] == 'alice@example.com' and 
+            credentials['password'] == 'SecurePass123!'):
+            return {'id': 'alice@example.com', 'email': 'alice@example.com'}
+        return None
+
+# Step 2: Update AuthService to use UserRepository
+# auth_service.py
+from datetime import datetime, timedelta
+from user_repository import UserRepository
+
+class AuthService:
+    def __init__(self, user_repository=None):
+        self.user_repository = user_repository or UserRepository()
+    
+    def login(self, credentials):
+        user = self.user_repository.validate_credentials(credentials)
+        
+        if user:
+            return {
+                'token': 'header.payload.signature',
+                'user_id': user['id'],
+                'expires_at': datetime.now() + timedelta(hours=1)
+            }
+        
+        raise ValueError('Invalid username or password')
+
+# Step 3: Run tests
+# mamba auth_service_test.py
+# ✅ PASS - All tests still passing
+
+# Step 4: Commit
+# git add auth_service.py user_repository.py
+# git commit -m "Extract UserRepository from AuthService"
+```
+
+**Refactoring #2: Introduce Custom Error**
+
+```python
+# Step 1: Create AuthError
+# errors/auth_error.py
+class AuthError(Exception):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+# Step 2: Update AuthService
+# auth_service.py
+from datetime import datetime, timedelta
+from user_repository import UserRepository
+from errors.auth_error import AuthError
+
+class AuthService:
+    def __init__(self, user_repository=None):
+        self.user_repository = user_repository or UserRepository()
+    
+    def login(self, credentials):
+        user = self.user_repository.validate_credentials(credentials)
+        
+        if user:
+            return {
+                'token': 'header.payload.signature',
+                'user_id': user['id'],
+                'expires_at': datetime.now() + timedelta(hours=1)
+            }
+        
+        raise AuthError('INVALID_CREDENTIALS', 'Invalid username or password')
+
+# Step 3: Update tests to use AuthError
+# auth_service_test.py
+from errors.auth_error import AuthError
+
+with it('should raise AuthError when credentials are invalid'):
+    auth_service = AuthService()
+    credentials = self.create_valid_credentials(password='wrong')
+    
+    def attempt_login():
+        auth_service.login(credentials)
+    
+    expect(attempt_login).to(raise_error(AuthError))
+    
+    try:
+        auth_service.login(credentials)
+    except AuthError as e:
+        expect(e.code).to(equal('INVALID_CREDENTIALS'))
+
+# Step 4: Run tests
+# mamba auth_service_test.py
+# ✅ PASS - All tests passing with improved error handling
+
+# Step 5: Commit
+# git add auth_service.py errors/auth_error.py auth_service_test.py
+# git commit -m "Introduce AuthError for better error handling"
+```
+
+**Refactoring #3: Introduce AuthResult Dataclass**
+
+```python
+# Step 1: Create AuthResult dataclass
+# models/auth_result.py
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class AuthResult:
+    token: str
+    user_id: str
+    expires_at: datetime
+
+# Step 2: Update AuthService
+# auth_service.py
+from datetime import datetime, timedelta
+from user_repository import UserRepository
+from errors.auth_error import AuthError
+from models.auth_result import AuthResult
+
+class AuthService:
+    def __init__(self, user_repository=None):
+        self.user_repository = user_repository or UserRepository()
+    
+    def login(self, credentials):
+        user = self.user_repository.validate_credentials(credentials)
+        
+        if user:
+            return AuthResult(
+                token='header.payload.signature',
+                user_id=user['id'],
+                expires_at=datetime.now() + timedelta(hours=1)
+            )
+        
+        raise AuthError('INVALID_CREDENTIALS', 'Invalid username or password')
+
+# Step 3: Update tests
+# auth_service_test.py
+from models.auth_result import AuthResult
+
+with it('should return user token when credentials are valid'):
+    credentials = self.create_valid_credentials()
+    result = self.auth_service.login(credentials)
+    
+    expect(result).to(be_a(AuthResult))
+    expect(result.token).to(match(r'^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$'))
+    expect(result.user_id).to(equal('alice@example.com'))
+    expect(result.expires_at).to(be_a(datetime))
+
+# Step 4: Run tests
+# mamba auth_service_test.py
+# ✅ PASS - All tests passing with type safety
+
+# Step 5: Commit
+# git add auth_service.py models/auth_result.py auth_service_test.py
+# git commit -m "Introduce AuthResult dataclass for type safety"
+```
+
+---
+
+## Mamba-Specific Testing Patterns
+
+### Using Doubles (Mocking)
+
+**✅ DO (during GREEN phase when dependency exists):**
+```python
+from mamba import description, context, it, before
+from expects import expect, equal, have_been_called_with
+from doublex import Spy, when
+
+with description('a user service') as self:
+    with before.each:
+        self.user_repository = Spy(UserRepository)
+        when(self.user_repository).find_by_id('user123').returns({'id': 'user123', 'name': 'Alice'})
+        self.user_service = UserService(self.user_repository)
+    
+    with context('fetching a user by ID'):
+        with context('that is found by repository'):
+            with it('should return user'):
+            # Act
+            user = self.user_service.get_user('user123')
+            
+            # Assert
+            expect(user).to(equal({'id': 'user123', 'name': 'Alice'}))
+            expect(self.user_repository.find_by_id).to(have_been_called_with('user123'))
+```
+
+### Shared Context with before.each
+
+**✅ DO:**
+```python
+from mamba import description, context, it, before
+
+with description('a user authentication service') as self:
+    with before.each:
+        # Initialize common test data
+        self.auth_service = AuthService()
+        self.valid_credentials = {
+            'username': 'alice@example.com',
+            'password': 'SecurePass123!'
+        }
+    
+    with context('a user that is being authenticated'):
+        with context('with valid credentials'):
+            with it('should receive an access token'):
+            result = self.auth_service.authenticate(self.valid_credentials)
+            expect(result).to(have_key('token'))
+        
+            with it('should receive user ID'):
+            result = self.auth_service.authenticate(self.valid_credentials)
+            expect(result['user_id']).to(equal('alice@example.com'))
+```
+
+---
+
+## Running Tests at Each Phase
+
+### RED Phase
+```bash
+# Run single failing test
+mamba auth_service_test.py --line 15
+# Expected: ❌ FAIL
+
+# Verify failure reason
+# Should see: "ModuleNotFoundError: No module named 'auth_service'"
+# NOT: "SyntaxError" or "IndentationError"
+```
+
+### GREEN Phase
+```bash
+# Run single test to verify it passes
+mamba auth_service_test.py --line 15
+# Expected: ✅ PASS
+
+# Run all tests to check regressions
+mamba auth_service_test.py
+# Expected: ✅ PASS - All tests passing
+```
+
+### REFACTOR Phase
+```bash
+# After each refactoring, run all tests
+mamba auth_service_test.py
+# Expected: ✅ PASS - All tests still passing
+
+# Run related tests too
+mamba user_repository_test.py
+# Expected: ✅ PASS
+```
+
+---
+
+## Integration with BDD Mamba Rule
+
+This BDD workflow follows all patterns from `bdd-mamba-behavior-rule.mdc`:
+* **Test Structure**: with description/context/it nesting (§ 1)
+* **Assertions**: expect() with matchers (§ 2)
+* **Setup/Teardown**: with before.each (§ 3)
+* **Mocking**: doublex Spy/Stub patterns (§ 4)
+* **Async**: asyncio patterns (§ 5)
+
+Always reference `bdd-mamba-rule.mdc` for detailed Mamba patterns and `bdd-rule.mdc` for core BDD principles.

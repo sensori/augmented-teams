@@ -1,0 +1,158 @@
+{
+  "solution": {
+    "name": "",
+    "purpose": ""
+  },
+  "epics": [
+    {
+      "name": "",
+      "purpose": "",
+      "users": [],
+      "features": [
+        {
+          "name": "",
+          "purpose": "",
+          "story_count": "",
+          "users": [],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "",
+                "description": ""
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "",
+                "behavior": ""
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "",
+              "description": "",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                ""
+              ],
+              "scenarios": [
+                {
+                  "name": "",
+                  "background": {
+                    "steps": [
+                      ""
+                    ]
+                  },
+                  "steps": [
+                    ""
+                  ],
+                  "examples": [
+                    {
+                      "variable_name": "example_value"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "",
+          "purpose": "",
+          "users": [],
+          "features": [
+            {
+              "name": "",
+              "purpose": "",
+              "story_count": "",
+              "users": [],
+              "domain_ac": {
+                "concepts": [
+                  {
+                    "name": "",
+                    "description": ""
+                  }
+                ],
+                "behaviors": [
+                  {
+                    "concept": "",
+                    "behavior": ""
+                  }
+                ]
+              },
+              "stories": [
+                {
+                  "name": "",
+                  "description": "",
+                  "optional": false,
+                  "sequential_order": 1,
+                  "vertical_order": null,
+                  "users": [],
+                  "behavioral_ac": [
+                    ""
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "",
+                      "background": {
+                        "steps": [
+                          ""
+                        ]
+                      },
+                      "steps": [
+                        ""
+                      ],
+                      "examples": [
+                        {
+                          "variable_name": "example_value"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "",
+      "priority": "",
+      "relative_size": "",
+      "approach": "",
+      "focus": "",
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "",
+            "description": ""
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "",
+            "behavior": ""
+          }
+        ],
+        "rules": [
+          {
+            "name": "",
+            "description": ""
+          }
+        ]
+      },
+      "stories": [
+        ""
+      ]
+    }
+  ]
+}

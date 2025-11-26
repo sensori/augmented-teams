@@ -1,0 +1,66 @@
+---
+title: Character Generate Rule
+description: Rules for when and how to use character profile generation
+feature: character
+---
+
+# Character Generate Rule
+
+**When** creating a new character profile,
+**then** follow these principles to determine when to use character generation and typical workflow patterns.
+
+## Overview
+
+Character profile generation creates the folder structure and template files needed for a new character. **For complete tool documentation (parameters, return values, examples), see `behaviors/character/code/character_mcp_server.py`.**
+
+This rule focuses on **when to use character generation** and **typical workflows** - not implementation details (that's in the tool descriptions).
+
+## When to Use Character Generation
+
+### Create New Character Profile
+
+**Trigger phrases/situations:**
+- User wants to create a new character
+- User says "generate character", "create character profile", "new character"
+- Setting up a character for the first time
+- Need to initialize character folder structure and templates
+
+**Examples:**
+- "Generate a character profile for 'Spider-Man'"
+- "Create a new character called 'Thunder'"
+- "Set up character profile for 'Atom'"
+
+## Typical Workflow
+
+### Workflow: Create New Character
+
+**When:** User wants to create a new character profile
+
+1. **Generate Character Profile**:
+   - Use `character_profile_generate` with `character_name`
+   - Tool creates folder structure and copies templates
+   - Tool interactively prompts for template placeholders
+
+2. **Fill Template Placeholders**:
+   - Answer prompts for character background, personality, dialogue style, etc.
+   - Provide narrative style examples for each mode combination
+   - Optionally provide character-specific keywords (defaults available)
+
+3. **Character Profile Ready**:
+   - Generated profile is saved to `behaviors/character/characters/{character-name}/character-profile.mdc`
+   - Profile is ready to use with character chat commands
+
+**Example trigger:** "Generate a character profile for 'Spider-Man'"
+
+## Key Concepts
+
+- **Templates are copied**: Source templates in `behaviors/character/behaviors/generate/` are copied to character folder
+- **Interactive population**: Tool prompts for each template placeholder
+- **Keywords optional**: Character-specific keywords can be left empty to use defaults
+- **Profile structure**: Generated profile follows template structure with all placeholders filled
+
+## Related Files
+
+- **MCP Server**: `behaviors/character/code/character_mcp_server.py` - **Complete tool documentation with parameters and examples**
+- **Templates**: Located in `behaviors/character/behaviors/generate/templates/` - Character profile templates
+- **Generated Profiles**: `behaviors/character/characters/{character-name}/character-profile.mdc` - Generated character profiles (used by chat commands)

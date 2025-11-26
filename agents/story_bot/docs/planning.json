@@ -1,0 +1,67 @@
+{
+  "shape": {
+    "decisions_made": {},
+    "assumptions_made": {}
+  },
+  "discovery": {
+    "decisions_made": {
+      "story_scope_definition": "System /back office — Deep dive into system internals and back-office components. Include detailed component interactions, data flows, and system-to-system communication",
+      "story_granularity": "System inner behavior and inner workings — needed when elaboration of new complex architecture across unknown libraries and components is useful to elaborate"
+    },
+    "assumptions_made": {
+      "granularity": "One meaningful component interaction per story, showing method calls, file loading, state management",
+      "detail_level": "Component-to-component interactions with specific method names and file paths, following the same detail level as existing stories in the story map",
+      "breakdown_approach": "Break down the 3 existing high-level stories into 8-12 detailed stories showing internal system behavior"
+    }
+  },
+  "exploration": {
+    "decisions_made": {
+      "granularity_level": "User-System Behavioral – Focus on each point of interaction (user input, system response). Ideal when precision in behavior is key.",
+      "ac_count_criteria": "Stop when criteria capture a full back-and-forth (user-system-user). Ensures atomic and testable slices. AND Ensure each criteria can be validated independently. Supports automated testability.",
+      "ac_consolidation": "Same logic, different data → Consolidate. Different formulas → Keep separate. Different validation rules → Keep separate."
+    },
+    "assumptions_made": {
+      "story_structure": "Each story should include both behavioral and domain acceptance criteria",
+      "ac_scope": "Acceptance criteria define the end-to-end flow, not just isolated rules",
+      "behavioral_format": "Behavioral criteria follow a 'When trigger, Then response' format",
+      "domain_format": "Domain criteria describe structured responsibilities or rules around business concepts",
+      "story_reshaping": "Exploration will result in story reshaping: merging, splitting, or re-scoping is expected",
+      "ac_consolidation_rules": "ACs with same logic but different data should be consolidated. ACs with different formulas should remain separate",
+      "ac_levels": "Domain AC belongs at increment level (aggregated from features), Behavioral AC at story level",
+      "specification_phase": "Story documentation (scenarios) belongs in specification phase, NOT exploration phase"
+    }
+  },
+  "specification": {
+    "decisions_made": {
+      "specification_approach": "Full Spec Coverage - includes all realistic variations and negative cases, with emphasis on edge cases that prevent crashes and ensure proper functionality (this has been a very buggy part of the code)",
+      "background_usage": "Yes - 3+ scenarios share Given steps",
+      "scenario_outline_usage": "Yes - formulas/calculations need multiple data points OR domain has named entities from source, encourage reuse through parameterization using tables rather than exhaustive behavior split"
+    },
+    "assumptions_made": {
+      "one_story_at_a_time": "One story is specified at a time",
+      "acceptance_criteria_quality": "Acceptance criteria must be testable, unambiguous, and executable",
+      "gherkin_syntax": "Gherkin syntax or structured language (Given/When/Then) is preferred",
+      "example_tables": "Example tables and permutations are required for completeness",
+      "specification_drives_design": "Specification drives both design and test — not written after implementation. Specifications will drive refactoring - we already have the code but we are going to refactor it around where we are saying which things do",
+      "scenario_coverage": "Scenarios must cover both behavior and domain policy",
+      "cross_functional_review": "Cross-functional review is required before considering the story ready for development",
+      "edge_case_focus": "Focus on edge cases that can help ensure things do not crash and that things work properly, as this has been a very buggy part of the code",
+      "reuse_encouragement": "Encourage reuse through parameterization using tables rather than exhaustive behavior split"
+    }
+  },
+  "specification_tests": {
+    "decisions_made": {
+      "test_scope_level": "Component/Service level - test individual components/services in isolation (minimum)",
+      "mocking_strategy": "No mocking - use real implementations for everything (for whole solution)"
+    },
+    "assumptions_made": {
+      "tests_match_feature_files_exactly": true,
+      "step_definitions_use_exact_text": true,
+      "assertions_verify_step_content": true,
+      "use_real_implementations_by_default": true,
+      "no_mocking_requested": true,
+      "ascii_only_characters": true,
+      "call_production_code_directly": true
+    }
+  }
+}

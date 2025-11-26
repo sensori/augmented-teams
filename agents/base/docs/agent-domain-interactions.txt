@@ -1,0 +1,294 @@
+ACTORS:
+- User
+- AI Chat
+- Agent (code)
+- Story Agent (code, extends Agent)
+- AI
+- Project
+
+---
+
+SCENARIO: Agent Starts Workflow
+
+TRIGGER: User requests agent behavior execution
+
+FLOW:
+1. User speaks in the chat box
+2. AI Chat determines that an agent needs to be invoked
+3. Agent (code) receives request to execute behavior
+4. Agent (code) initializes with agent_name, loads Configuration from agent.json (Config Data: rules, behaviors with order, guardrails, content configs)
+5. Agent (code) creates Project with activity_area based on agent_name
+6. Agent (code) initializes Workflow with behaviors dictionary, Workflow derives stages from behaviors sorted by order property
+7. Agent (code) starts workflow at initial stage (see "Agent Orchestrates Workflow" scenario)
+8. Agent (code) provides instructions to AI Chat via properties (clarification_instructions, planning_instructions, generate_instructions)
+
+Based on the instructions, AI Chat will do one or all of the following:
+9a. AI Chat provides information to the user for further input
+9b. AI Chat processes instructions and then calls the agent again, smartly filling in parameters based on context
+9c. AI Chat informs the user of current progress/output etc
+
+---
+
+SCENARIO: Agent Orchestrates Workflow
+
+TRIGGER: Agent needs to manage workflow behavior
+
+FLOW:
+1. Agent (code) creates Workflow with behaviors dictionary
+2. Workflow (code) derives behavior names from behaviors sorted by order property (behaviors contain order, guardrails, rules, actions, content)
+3. Agent (code) accesses current_behavior property which returns Behavior from behaviors dictionary based on workflow.current_behavior_name
+4. Agent (code) can start workflow at specified behavior via workflow.start(behavior_name)
+5. Agent (code) can move to next behavior via workflow.next_behavior()
+6. Agent (code) can approve current behavior via workflow.approve_current()
+7. Agent (code) can skip current behavior via workflow.skip_current()
+8. Agent (code) can move to specific action within current behavior via workflow.move_to_action(action_name)
+9. Agent (code) accesses instructions property which delegates to workflow.current_action.instructions
+10. Workflow (code) tracks activity via Project.track_activity() for each behavior transition
+
+RULES:
+- Workflow behavior names are derived from behaviors dictionary sorted by order property
+- Each behavior has: order, guardrails, rules, actions, content
+- Each behavior has actions (clarification, planning, build_structure, render_output, validate, correct)
+- Behavior transitions follow order unless skipped
+- Behavior approval marks behavior as complete
+- All behavior transitions are tracked in Project activity_log
+- Instructions come from current_action.instructions
+
+RESULT: Workflow behavior transitioned as requested, activity logged in Project
+
+---
+
+SCENARIO: Context Clarification
+
+TRIGGER: Agent needs to clarify context
+
+FLOW:
+1. User speaks in the chat box, User provides initial context for content generation
+2. AI Chat receives user input, AI Chat determines that an agent can be used to create content and some initial context has been provided
+3. AI Chat sends request to generate content to Agent (code) or to explicitly clarify context
+4. Agent (code) receives request to generate content
+5. Agent (code) accesses current_behavior property to get Behavior for current workflow stage
+6. Agent (code) accesses clarification_instructions property which delegates to current_behavior.guardrails.requirements_clarification_instructions
+7. GuardRails (code) generates requirements_clarification_instructions property which returns dict with content_data (key_questions, evidence) and instructions string
+8. GuardRails (code) uses RequiredClarification from guardrails config to get key_questions and evidence lists
+9. GuardRails (code) formats instructions with intro from BaseInstructions, lists required questions and evidence
+10. Agent (code) returns clarification_instructions dict to AI Chat
+11. AI Chat follows the instructions, performing the context→requirements analysis
+12. If key questions and evidence incomplete: AI Chat prompts user to provide missing requirements
+13. User provides missing key questions and evidence
+14. AI Chat calls Agent.store_clarification(key_questions_answered, evidence_provided)
+15. Agent (code) delegates to Project.store_clarification() which updates Project.clarification dict
+16. If key questions and evidence complete: AI Chat instructs Agent (code) to proceed
+17. Agent (code) orchestrates Workflow to next stage (see "Agent Orchestrates Workflow" scenario)
+
+RULES:
+- Key questions and evidence must be provided before proceeding
+- Clarification instructions come from GuardRails.requirements_clarification_instructions property
+- GuardRails uses RequiredClarification from behavior's guardrails config
+- AI Chat performs context→requirements analysis based on instructions
+- Stored clarification data is kept in Project.clarification dict
+- AI Chat communicates with user and Agent (code)
+
+RESULT: Key questions and evidence validated and confirmed, stored in Project, ready for planning
+
+---
+
+SCENARIO:  Planning
+
+TRIGGER: Context clarified, ready for planning
+
+FLOW:
+1. User confirms context is complete OR AI Chat determines planning is needed
+2. AI Chat receives confirmation or determines planning needed, AI Chat determines that planning stage should be initiated
+3. AI Chat sends request to proceed to planning to Agent (code) or a simple generate request
+4. Agent (code) receives request to proceed to planning
+5. Agent (code) accesses current_behavior property to get Behavior for current workflow stage
+6. Agent (code) accesses planning_instructions property which delegates to current_behavior.guardrails.get_planning_instructions
+7. GuardRails (code) generates get_planning_instructions property which returns dict with content_data (assumptions, decision_criteria) and instructions string
+8. GuardRails (code) uses planning config from guardrails to get typical_assumptions and decision_making_criteria
+9. GuardRails (code) formats instructions with intro from BaseInstructions, lists assumptions and decision criteria with options
+10. Agent (code) returns planning_instructions string to AI Chat
+
+Planning Loop (iterates until user confirms):
+11. AI Chat follows instructions, AI generates prompt text (assumptions list and decision criteria options OR high-level assessment text)
+12. AI Chat presents prompt to user
+13. User reads prompt, User reviews and can override assumptions, select from decision criteria options, make updates, OR User confirms approach
+14. User provides response (updated assumptions and decision criteria, feedback, or confirmation) to AI Chat
+15. AI Chat calls Agent.store_decisions_and_assumptions(decisions_made, assumptions_made)
+16. Agent (code) delegates to Project.store_planning() which updates Project.planning dict
+17. If user requests changes: loops to step 11
+18. If user confirms: AI Chat instructs Agent (code) to proceed
+
+19. Agent (code) orchestrates Workflow to next stage (see "Agent Orchestrates Workflow" scenario)
+
+RULES:
+- User can override assumptions
+- User must confirm decision criteria before proceeding
+- Planning instructions come from GuardRails.get_planning_instructions property
+- GuardRails uses planning config (typical_assumptions, decision_making_criteria) from behavior's guardrails config
+- Stored planning data is kept in Project.planning dict
+- Agent (code) provides instructions, AI Chat follows instructions and generates prompts, AI generates text
+- Complete cycle: Agent provides instructions → AI Chat follows → AI generates → AI Chat presents → User responds → AI Chat stores via Agent → Agent processes
+
+RESULT: Assumptions and decision criteria validated and confirmed, stored in Project, ready for content generation
+
+---
+
+SCENARIO: Agent Generates Content
+
+TRIGGER: Context validated and planning confirmed
+
+FLOW:
+1. User confirms planning is complete OR AI Chat determines content generation is needed
+2. AI Chat receives confirmation or determines generation needed, AI Chat determines that generation stage should be initiated
+3. AI Chat sends request to proceed to generation to Agent (code)
+4. Agent (code) receives request to proceed to generation
+5. Agent (code) accesses current_behavior property to get Behavior for current workflow behavior
+6. Agent (code) moves to build_structure action via workflow.move_to_action("build_structure")
+7. Agent (code) accesses instructions property which delegates to workflow.current_action.instructions
+8. BuildStructureAction (code) returns build_instructions from current_behavior.content.build_instructions
+9. Content (code) generates build_instructions property which includes agent-level rules, behavior-level rules, structured_content instructions
+10. Agent (code) returns build_instructions string to AI Chat
+11. Agent (code) provides tools_and_instructions property to AI Chat (MCP tool names and usage instructions)
+
+Building Phase:
+12. AI Chat follows build_instructions, uses MCP tools to build initial structure
+13. AI Chat calls MCP build tool passing in parameters using context (assumptions and decision criteria from Project.planning)
+14. Agent (code) calls Content.build() to create initial structure (code-based building)
+15. Content (code) returns initial structure and build_instructions to AI Chat
+16. AI Chat uses instructions to finalize building the structure, AI generates remaining Content Data (JSON structure)
+17. AI Chat calls Agent.store_content(structured=content_data) with generated structured content
+18. Agent (code) delegates to current_behavior.content.structured setter which stores data and calls Content.store()
+19. Content (code) stores via Project.store_output() and creates traceability link
+20. Project (code) saves structured JSON to project_area/docs/content/structured.json
+
+Validation Phase:
+21. Agent (code) calls Content.validate() to validate Content Data structure (code-based schema validation)
+22. Content (code) validates Content Data against schema
+23. If validation fails: Agent (code) provides validation errors to AI Chat, loops to step 12
+24. If validation passes: Agent (code) proceeds to transformation phase
+
+Transformation Phase:
+25. Agent (code) moves to render_output action via workflow.move_to_action("render_output")
+26. Agent (code) accesses instructions property which delegates to workflow.current_action.instructions
+27. RenderOutputAction (code) returns transform_instructions from current_behavior.content.transform_instructions
+28. Content (code) generates transform_instructions property which includes instructions from each output's instructions field
+29. Agent (code) provides transformation instructions to AI Chat with set of documents to be built, templates to be used, and important parameters
+30. AI Chat follows transform_instructions, transforms structured content into rendered documents using templates
+31. For each output in Content.outputs: AI Chat uses output.transformer, output.template, and output.instructions to generate rendered document
+32. AI Chat generates markdown documentation from JSON configuration (command files, rule documentation) when specified in output instructions
+33. AI Chat ensures markdown docs are always in sync with structured JSON source of truth
+34. AI Chat calls Agent.store_content(rendered=rendered_docs) with rendered documents
+35. Agent (code) delegates to current_behavior.content.rendered setter which stores data and calls Content.store()
+36. Content (code) stores via Project.store_output() and creates traceability link
+37. Project (code) saves rendered documents to project_area/docs/content/{output_name}.md files (one file per output)
+
+34. AI Chat asks Agent to validate both structure and rendered content (see "Agent Validates with Rule" scenario)
+
+RULES:
+- Instructions come from workflow.current_action.instructions
+- BuildStructureAction provides build_instructions from Content.build_instructions
+- Build instructions include agent-level rules, behavior-level rules, and structured_content instructions
+- Content.build() creates initial structure (code-based)
+- Content.validate() validates Content Data structure (code-based)
+- RenderOutputAction provides transform_instructions from Content.transform_instructions
+- Transform instructions come from each output's instructions field in content config
+- Transformation uses output.transformer, output.template, and output.instructions for each output
+- Markdown generation from JSON ensures docs stay in sync with structured JSON source of truth
+- Content storage is done via Agent.store_content() which sets Content.structured or Content.rendered
+- Content.store() automatically calls Project.store_output() and creates traceability links
+- Project saves structured JSON to project_area/docs/content/structured.json
+- Project saves rendered markdown files to project_area/docs/content/{output_name}.md (one file per output)
+- All storage operations are code-based (no AI involvement)
+
+RESULT: Content Data created (JSON structure), validated against schema, transformed into documents (including markdown), stored in Project, ready for validation
+
+---
+
+SCENARIO: Agent Validates with Rule
+
+TRIGGER: User requests validation OR Content generated and ready for validation
+
+FLOW:
+1. User triggers validation (after generation OR independently requests validation via chat)
+2. AI Chat receives validation request or determines validation is needed, AI Chat determines that validation should be initiated
+3. AI Chat sends request to validate to Agent (code)
+4. Agent (code) receives request to validate
+5. Agent (code) loads Configuration (Config Data: prompt templates, workflow definitions, rules, behaviors) if not already loaded
+6. Agent (code) orchestrates Workflow and determines validation should be initiated (if validation is a workflow stage, see "Agent Orchestrates Workflow" scenario)
+7. Agent (code) scans for validations with code against Content Data (code-based validation)
+8. Story Agent (code) executes diagnostic methods on Content Data (code-based validation)
+9. Agent (code) assembles validation prompt (purpose: instruct AI to evaluate Content Data against rules and generate report) from Config Data templates with Content Data, examples, rules, and violations found by code
+10. Agent (code) provides prompt to AI Chat
+11. AI Chat follows prompt, AI evaluates Content Data against rules and creates validation report
+12. AI Chat presents validation report to user
+13. User reads validation report, User decides what to do (make fixes based on recommendations, adjust recommendations, or proceed if no violations)
+14. If user wants fixes: User provides decision (what to fix based on recommendations or adjusted recommendations) to AI Chat
+15. AI Chat implements fixes
+16. User again reviews and iterates and then agrees to proceed
+
+RULES:
+- Validation can be triggered by user independently OR linked from generation
+- Agent (code) performs code-based scanning for violations only
+- Agent (code) assembles prompts with examples, rules, violations, and content for AI evaluation
+- AI does all evaluation, report generation, fix generation, and example update decisions
+- Agent (code) saves validated fixes and example changes (code-based operations only)
+- User can trigger validation multiple times
+- Agents have no intelligence - they create prompts for AI to do the work
+
+RESULT: Content Data validated, Validation Data 
+
+---
+
+SCENARIO: Agent Corrects Rules and Examples
+
+TRIGGER: User requests correction OR corrections have been made to content
+
+FLOW:
+1. User requests correction OR AI Chat determines correction of rules/examples/prompts is needed
+2. AI Chat receives correction request or determines correction needed, AI Chat determines that correct stage should be initiated
+3. AI Chat sends request to correct to Agent (code)
+8. Agent (code) assembles correction prompt (purpose: instruct AI to go through original content that was created, the corrections that were made, evaluate against attached rules and instructions and examples, and provide a corrected set of rules, instructions, or prompts) with original Content Data, corrections made, rules, instructions, and examples
+9. Agent (code) provides prompt to AI Chat
+10. AI Chat follows prompt, AI evaluates original content, corrections, rules, instructions, and examples, AI generates corrected set of rules, instructions, and prompts
+11. AI Chat provides corrected rules, instructions, and prompts to Agent (code)
+12. Agent (code) updates rules, examples, and prompts in Config Data or Behavior Data (code-based update)
+
+RULES:
+- Correction can be triggered by user at any point OR automatically after corrections are made to content
+- Agent (code) assembles prompt with original content, corrections, and current rules/instructions/examples
+- AI evaluates and generates corrected rules, instructions, and prompts
+- Agent (code) saves updates to Config Data (agent-level) or Behavior Data (behavior-specific)
+- Updated rules, examples, and prompts improve future content generation and validation
+
+RESULT: Rules, examples, and prompts updated in Config Data or Behavior Data
+
+---
+
+SCENARIO: Project Tracks Activity and Stores Output
+
+TRIGGER: Agent completes workflow stage or content is stored
+
+FLOW:
+1. Agent (code) completes workflow behavior OR Content is stored
+2. Workflow (code) calls Project.track_activity(status, behavior_name) for behavior transitions (start, next, approved, skip)
+3. Project (code) creates activity entry with status and behavior name, appends to activity_log
+4. Content (code) calls Project.store_output(structured, rendered) when Content.structured or Content.rendered is set
+5. Project (code) saves structured JSON to project_area/docs/content/structured.json via _save_structured()
+6. Project (code) saves rendered markdown files to project_area/docs/content/{output_name}.md via _save_rendered()
+7. Content (code) calls Project.create_traceability_link(structured, rendered) after storing
+8. Project (code) creates traceability link between last activity entry and output data
+
+RULES:
+- Activity Data tracks all workflow behavior transitions (start, next, approved, skip)
+- Activity Data is stored in Project.activity_log list
+- Activity log is saved to project_area/docs/activity/activity.json
+- Output Data includes both structured JSON and rendered markdown files
+- Structured JSON is saved to project_area/docs/content/structured.json
+- Rendered documents are saved to project_area/docs/content/{output_name}.md (one file per output)
+- Traceability links connect activity entries to output data
+- Project organizes work by activity_area (derived from agent_name)
+- All tracking and storage operations are code-based (no AI involvement)
+- Project loads existing output data from filesystem on initialization
+
+RESULT: Project has Activity Data in activity_log and Output Data stored in filesystem for activity_area, with traceability links connecting them

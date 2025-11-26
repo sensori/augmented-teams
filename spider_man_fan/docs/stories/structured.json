@@ -1,0 +1,1238 @@
+{
+  "increments": [
+    {
+      "name": "Foundation & Discovery",
+      "priority": "NOW",
+      "relative_size": "Medium",
+      "approach": "Delivering End-to-End Journey",
+      "focus": "User accounts + basic profiles + basic search",
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "User Account",
+            "description": "A user's account record containing email address, password hash, account status (pending verification, active, inactive), and account creation timestamp"
+          },
+          {
+            "name": "User Profile",
+            "description": "A user's profile information including username, bio, profile picture URL, favorite character, and profile creation/update timestamps"
+          },
+          {
+            "name": "Email Verification",
+            "description": "The process of verifying a user's email address through a verification token sent via email service, which activates the account"
+          },
+          {
+            "name": "Search Query",
+            "description": "A user's search request containing search term, optional filters (users, merchandise, videos), and search parameters"
+          },
+          {
+            "name": "Search Results",
+            "description": "Grouped search results containing matching merchandise items, user profiles, and videos, organized by type"
+          },
+          {
+            "name": "Category",
+            "description": "A content category (Comics, Action Figures, Videos, etc.) that organizes merchandise and videos for browsing"
+          },
+          {
+            "name": "Profile Picture",
+            "description": "An image file uploaded by user, validated for format and size, stored in file storage/CDN, and displayed on user profile"
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "User Account",
+            "behavior": "User enters email and password on sign-up form, then system validates email format and password strength, creates account record in database with pending status, and email service sends verification email"
+          },
+          {
+            "concept": "Email Verification",
+            "behavior": "User clicks verification link in email, then system validates verification token, updates account status to active, and redirects user to profile creation"
+          },
+          {
+            "concept": "User Profile",
+            "behavior": "User enters username and bio, then system validates username uniqueness, saves profile information to database, and displays profile page with saved information"
+          },
+          {
+            "concept": "Profile Picture",
+            "behavior": "User selects image file and uploads, then system validates image format (JPEG, PNG) and size (max 5MB), uploads to file storage/CDN, saves URL to profile, and displays on profile page"
+          },
+          {
+            "concept": "Search Query",
+            "behavior": "User enters search term and optionally selects filter, then system queries search/indexing service across merchandise, users, and videos, and returns grouped results"
+          },
+          {
+            "concept": "Category",
+            "behavior": "User selects category, then system loads category content from database, applies pagination and optional sorting, and displays content with navigation controls"
+          }
+        ],
+        "rules": [
+          {
+            "concept": "User Account",
+            "rule": "Email addresses must be unique across all accounts"
+          },
+          {
+            "concept": "User Account",
+            "rule": "Passwords must meet strength requirements: minimum 8 characters, at least one uppercase letter, one lowercase letter, and one number"
+          },
+          {
+            "concept": "User Profile",
+            "rule": "Usernames must be unique across all profiles"
+          },
+          {
+            "concept": "Profile Picture",
+            "rule": "Profile pictures must be in JPEG or PNG format and cannot exceed 5MB in size"
+          },
+          {
+            "concept": "Search Query",
+            "rule": "Search must handle empty results gracefully by displaying a message and suggesting alternative searches"
+          },
+          {
+            "concept": "Category",
+            "rule": "Category content must be paginated with a maximum of 20 items per page"
+          }
+        ]
+      },
+      "stories": [
+        "Manage User Accounts/Create User Account",
+        "Manage User Accounts/Build User Profile",
+        "Search and Discover Content/Search Content",
+        "Search and Discover Content/Browse by Category"
+      ]
+    },
+    {
+      "name": "Merchandise Sharing",
+      "priority": "NOW",
+      "relative_size": "Large",
+      "approach": "Maximizing Earned Value",
+      "focus": "Upload merchandise photos + view posts + basic collections",
+      "domain_ac": {
+        "concepts": [],
+        "behaviors": [],
+        "rules": []
+      },
+      "stories": [
+        "Share Merchandise/Upload Merchandise Photos",
+        "Share Merchandise/Organize Collections",
+        "Share Merchandise/Interact with Merchandise Posts"
+      ]
+    },
+    {
+      "name": "Basic Trading",
+      "priority": "NOW",
+      "relative_size": "Large",
+      "approach": "Validating Impact-Feasibility",
+      "focus": "Mark items for trade + create/view proposals + basic completion",
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "Trade Proposal",
+            "description": "A request from one user to another to exchange specific items, including items offered and items requested"
+          },
+          {
+            "name": "Trade Status",
+            "description": "The current state of a trade: pending, accepted, rejected, completed, or cancelled"
+          },
+          {
+            "name": "Trade Completion",
+            "description": "The finalization of a trade where both users confirm receipt and items are marked as traded"
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "Trade Proposal",
+            "behavior": "User selects items from their collection and items from target user's collection, then system creates trade proposal and notifies target user"
+          },
+          {
+            "concept": "Trade Completion",
+            "behavior": "User accepts trade proposal, then system updates trade status to accepted, marks items as traded, and enables rating after completion"
+          }
+        ],
+        "rules": []
+      },
+      "stories": [
+        "Trade Items/Mark Items for Trade",
+        "Trade Items/Propose Trade/Create Trade Proposal",
+        "Trade Items/Propose Trade/View Trade Proposal",
+        "Trade Items/Complete Trade/Accept Trade Proposal"
+      ]
+    },
+    {
+      "name": "Fan Films",
+      "priority": "NOW",
+      "relative_size": "Medium",
+      "approach": "Delivering End-to-End Journey",
+      "focus": "Upload fan films + watch films + basic metadata",
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "Video Upload",
+            "description": "The process of transferring video file from user's device to system's video storage service"
+          },
+          {
+            "name": "Video Processing",
+            "description": "System processes uploaded video for streaming, including format conversion and thumbnail generation"
+          },
+          {
+            "name": "Video Streaming",
+            "description": "The delivery of video content from video storage service to user's browser for playback"
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "Video Upload",
+            "behavior": "User selects video file and uploads, then system validates file size and format, transfers to video storage service, and processes for streaming"
+          },
+          {
+            "concept": "Video Streaming",
+            "behavior": "User clicks play on video, then system requests video stream from video storage service and video player displays streaming content"
+          }
+        ],
+        "rules": []
+      },
+      "stories": [
+        "Upload and View Fan Movies/Upload Fan Film/Upload Video File",
+        "Upload and View Fan Movies/Upload Fan Film/Add Video Metadata",
+        "Upload and View Fan Movies/Upload Fan Film/Publish Fan Film",
+        "Upload and View Fan Movies/Watch Fan Films/Play Fan Film"
+      ]
+    },
+    {
+      "name": "Community Engagement",
+      "priority": "NEXT",
+      "relative_size": "Medium",
+      "approach": "Maximizing Earned Value",
+      "focus": "Forums + comments + ratings + notifications",
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "Forum Thread",
+            "description": "A discussion topic started by a user with a title and initial post, which other users can reply to"
+          },
+          {
+            "name": "Forum Reply",
+            "description": "A response to a forum thread that appears in chronological order within the thread"
+          },
+          {
+            "name": "Post Vote",
+            "description": "A user's upvote or downvote on a forum post that affects the post's visibility and ranking"
+          },
+          {
+            "name": "Email Notification",
+            "description": "An email message sent to user's email address via email service when specific events occur"
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "Forum Thread",
+            "behavior": "User writes post title and content, selects forum topic, then system creates new thread and displays it in forum topic list"
+          },
+          {
+            "concept": "Forum Reply",
+            "behavior": "User writes reply content, then system adds reply to thread in chronological order and notifies thread creator"
+          },
+          {
+            "concept": "Post Vote",
+            "behavior": "User clicks upvote or downvote on post, then system records vote, updates post score, and adjusts post ranking in thread"
+          },
+          {
+            "concept": "Email Notification",
+            "behavior": "System detects trade event, checks user's notification preferences, then email service sends notification email to user's email address"
+          }
+        ],
+        "rules": []
+      },
+      "stories": [
+        "Participate in Community/Create Forum Post/Start Discussion Thread",
+        "Participate in Community/Reply to Thread/Post Thread Reply",
+        "Participate in Community/Vote on Posts/Vote on Forum Post",
+        "Manage Notifications/Receive Trade Notifications/Send Trade Proposal Email",
+        "Manage Notifications/Receive Trade Notifications/Send Trade Message Email",
+        "Manage Notifications/Receive Comment Notifications/Send Comment Notification Email"
+      ]
+    }
+  ],
+  "epics": [
+    {
+      "name": "Manage User Accounts",
+      "purpose": "Users create accounts, build profiles, and manage their identity on the platform",
+      "users": [
+        "Collectors",
+        "Traders",
+        "Content Creators",
+        "Community Members",
+        "Moderators"
+      ],
+      "features": [
+        {
+          "name": "Create User Account",
+          "purpose": "New users sign up and create their account",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": [
+            {
+              "name": "Sign Up with Email",
+              "description": "User enters email address and password on sign-up form, then system validates email format and password strength, creates account in database, and sends verification email via email service",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters email address and password on sign-up form and clicks submit, then system validates email format is valid",
+                "When system validates email format, then system validates password meets strength requirements (minimum 8 characters, at least one uppercase, one lowercase, and one number)",
+                "When email format is invalid, then system displays error message indicating invalid email format and does not create account",
+                "When password does not meet strength requirements, then system displays error message indicating password requirements and does not create account",
+                "When email format and password are valid, then system checks if email address already exists in database",
+                "When email address already exists, then system displays error message indicating email is already registered and does not create account",
+                "When email address is unique and credentials are valid, then system creates account record in database with pending status and sends verification email via email service",
+                "When system creates account, then system displays success message and redirects user to email verification page"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Verify Email Address",
+              "description": "User clicks verification link in email, then system verifies email address and activates account",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks verification link in email, then system extracts verification token from link",
+                "When system extracts verification token, then system validates token is valid and not expired",
+                "When verification token is invalid or expired, then system displays error message and does not activate account",
+                "When verification token is valid, then system updates account status from pending to active in database",
+                "When system activates account, then system redirects user to profile creation page and displays success message"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Log In to Account",
+              "description": "User enters email and password, then system authenticates credentials and logs user into their account",
+              "optional": false,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters email and password on login form and clicks submit, then system looks up account by email address in database",
+                "When account is not found, then system displays error message indicating invalid credentials and does not log in user",
+                "When account is found, then system verifies password hash matches stored password hash",
+                "When password does not match, then system displays error message indicating invalid credentials and does not log in user",
+                "When password matches, then system checks if account status is active",
+                "When account status is not active (pending verification), then system displays error message indicating email verification is required and does not log in user",
+                "When account status is active and credentials are valid, then system creates user session and logs user into their account",
+                "When system logs in user, then system redirects user to home page and displays welcome message"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Reset Forgotten Password",
+              "description": "User requests password reset, then system sends password reset email with link, and user sets new password",
+              "optional": true,
+              "sequential_order": 4,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters email address on password reset form and clicks submit, then system looks up account by email address",
+                "When account is not found, then system displays generic message indicating reset email will be sent (for security, does not reveal if email exists)",
+                "When account is found, then system generates password reset token and saves it to database with expiration time",
+                "When system generates reset token, then email service sends password reset email with reset link containing token to user's email address",
+                "When user clicks password reset link in email, then system extracts reset token from link and validates token is valid and not expired",
+                "When reset token is invalid or expired, then system displays error message and does not allow password reset",
+                "When reset token is valid, then system displays password reset form for user to enter new password",
+                "When user enters new password and confirms password on reset form and clicks submit, then system validates new password meets strength requirements",
+                "When new password does not meet strength requirements, then system displays error message indicating password requirements and does not reset password",
+                "When new password meets requirements, then system updates password hash in database and invalidates reset token",
+                "When system resets password, then system displays success message and redirects user to login page"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Log Out of Account",
+              "description": "User clicks log out, then system ends user session and redirects to home page",
+              "optional": false,
+              "sequential_order": 5,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks log out button, then system ends user session and clears session data",
+                "When system ends session, then system redirects user to home page and displays message indicating successful logout"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Build User Profile",
+          "purpose": "Users customize their profile with pictures, bio, and preferences",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": [
+            {
+              "name": "Create Basic Profile",
+              "description": "User enters username and bio after account creation, then system saves profile information and displays profile page",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters username and bio on profile creation form and clicks submit, then system validates username is not empty and meets length requirements",
+                "When username is empty or does not meet length requirements, then system displays error message and does not save profile",
+                "When username is valid, then system checks if username is unique across all profiles",
+                "When username already exists, then system displays error message indicating username is taken and does not save profile",
+                "When username is unique and valid, then system saves profile information to database and links it to user account",
+                "When system saves profile, then system displays profile page with saved username and bio information"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Upload Profile Picture",
+              "description": "User selects image file and uploads, then system validates image format and size, uploads to file storage, and displays on profile",
+              "optional": true,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects image file and clicks upload, then system validates image file format is JPEG or PNG",
+                "When image format is not JPEG or PNG, then system displays error message indicating invalid format and does not upload file",
+                "When image format is valid, then system validates image file size does not exceed 5MB",
+                "When image file size exceeds 5MB, then system displays error message indicating file is too large and does not upload file",
+                "When image format and size are valid, then system uploads image file to file storage/CDN",
+                "When file upload completes, then system saves image URL to user profile in database",
+                "When system saves image URL, then system displays profile picture on user profile page"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Edit Profile Information",
+              "description": "User updates username, bio, or other profile fields, then system validates changes and saves updated profile",
+              "optional": false,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user updates username, bio, or other profile fields on edit form and clicks save, then system validates username is not empty if username is being changed",
+                "When username is being changed and new username is empty, then system displays error message and does not save changes",
+                "When username is being changed and new username is valid, then system checks if new username is unique across all profiles",
+                "When new username already exists, then system displays error message indicating username is taken and does not save changes",
+                "When username is unique or not being changed, then system validates all profile fields meet requirements",
+                "When profile fields are valid, then system saves updated profile information to database",
+                "When system saves updated profile, then system displays updated profile page with saved changes and displays success message"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View User Profile",
+              "description": "User navigates to profile page, then system displays profile information including username, bio, profile picture, and account creation date",
+              "optional": false,
+              "sequential_order": 4,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user navigates to their profile page, then system loads profile information from database",
+                "When system loads profile, then system displays profile page with username, bio, profile picture (if uploaded), favorite character (if set), and account creation date"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View Other User Profile",
+              "description": "User clicks on another user's name or profile link, then system displays that user's public profile information",
+              "optional": false,
+              "sequential_order": 5,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks on another user's name or profile link, then system loads that user's public profile information from database",
+                "When system loads other user's profile, then system displays public profile page with username, bio, profile picture (if uploaded), favorite character (if set), and account creation date",
+                "When other user's profile does not exist, then system displays error message indicating profile not found"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Set Favorite Character",
+              "description": "User selects favorite Spider-Man character from list, then system saves preference and displays on profile",
+              "optional": true,
+              "sequential_order": 6,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects favorite Spider-Man character from dropdown list and clicks save, then system validates selected character is from allowed list",
+                "When selected character is valid, then system saves favorite character preference to user profile in database",
+                "When system saves favorite character, then system displays selected character on user profile page and displays success message"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Manage Privacy Settings",
+          "purpose": "Users control who can see their collection and profile information",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Share Merchandise",
+      "purpose": "Users post photos of their Spider-Man merchandise collections and organize them",
+      "users": [
+        "Collectors",
+        "Community Members"
+      ],
+      "features": [
+        {
+          "name": "Upload Merchandise Photos",
+          "purpose": "Users upload multiple photos of merchandise items with descriptions",
+          "story_count": "~5 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "Organize Collections",
+          "purpose": "Users group merchandise posts into collections like 'Vintage Comics' or 'Action Figures'",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "Interact with Merchandise Posts",
+          "purpose": "Users like and comment on merchandise posts from other users",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Trade Items",
+      "purpose": "Users propose trades, negotiate deals, complete trades, and build trading reputation",
+      "users": [
+        "Traders",
+        "Collectors"
+      ],
+      "features": [
+        {
+          "name": "Mark Items for Trade",
+          "purpose": "Users mark merchandise items as available for trade",
+          "story_count": "~3 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "Propose Trade",
+          "purpose": "User proposes a trade with another user, selecting items from both collections",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Trade Proposal",
+                "description": "A request from one user to another to exchange specific items, including items offered and items requested"
+              },
+              {
+                "name": "Trade Status",
+                "description": "The current state of a trade: pending, accepted, rejected, completed, or cancelled"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Trade Proposal",
+                "behavior": "User selects items from their collection and items from target user's collection, then system creates trade proposal and notifies target user"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Create Trade Proposal",
+              "description": "User selects items from their collection and items from another user's available-for-trade collection, then system creates trade proposal and sends notification to target user",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects items from their collection and items from target user's available-for-trade collection, then system creates trade proposal with status 'pending'",
+                "When system creates trade proposal, then system sends notification to target user",
+                "When user submits trade proposal with invalid items, then system displays error message and does not create proposal"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View Trade Proposal",
+              "description": "User receives notification of trade proposal, then system displays proposal details showing items offered and items requested",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks on trade proposal notification, then system displays proposal page with items offered and items requested",
+                "When system displays trade proposal, then system shows proposal status, creation date, and both users' profiles",
+                "When user views trade proposal, then system enables accept, reject, and message actions"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Negotiate Trade",
+          "purpose": "Users discuss trade details through messaging system before accepting or rejecting",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Trade Message",
+                "description": "A message sent between users as part of a trade negotiation, linked to a specific trade proposal"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Trade Message",
+                "behavior": "User sends message about trade proposal, then system delivers message to other user and links it to the trade proposal"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Send Trade Message",
+              "description": "User types message about trade proposal and clicks send, then system delivers message to other user and links it to the trade proposal thread",
+              "optional": false,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user types message in trade proposal thread and clicks send, then system saves message and links it to trade proposal",
+                "When system saves trade message, then system delivers message to other user and sends notification",
+                "When user sends empty message, then system displays validation error and does not send message"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Receive Trade Message",
+              "description": "System receives trade message from other user, then system displays message in trade thread and sends notification to recipient user",
+              "optional": false,
+              "sequential_order": 4,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When system receives trade message from other user, then system displays message in trade thread in chronological order",
+                "When system displays new trade message, then system sends notification to recipient user based on their notification preferences",
+                "When user views trade thread, then system marks all messages in thread as read"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Complete Trade",
+          "purpose": "Users accept trade, mark items as traded, and complete the transaction",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Trade Completion",
+                "description": "The finalization of a trade where both users confirm receipt and items are marked as traded"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Trade Completion",
+                "behavior": "User accepts trade proposal, then system updates trade status to accepted, marks items as traded, and enables rating after completion"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Accept Trade Proposal",
+              "description": "User clicks accept on trade proposal, then system updates trade status to accepted, marks both users' items as traded, and enables rating option for both users",
+              "optional": false,
+              "sequential_order": 5,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks accept on trade proposal, then system updates trade status to 'accepted'",
+                "When system updates trade status to accepted, then system marks both users' items as 'traded' and removes them from available-for-trade collections",
+                "When trade is accepted, then system enables rating option for both users and sends confirmation notification to both users"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Rate Trade Partner",
+              "description": "User selects rating and writes feedback after trade completion, then system saves rating to trade partner's profile and updates their trading reputation",
+              "optional": false,
+              "sequential_order": 6,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects rating (1-5 stars) and writes feedback after trade completion, then system saves rating and feedback to trade partner's profile",
+                "When system saves rating, then system recalculates trade partner's average rating and updates their trading reputation score",
+                "When user submits rating without selecting a star rating, then system displays validation error and does not save rating"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "View Trade History",
+          "purpose": "Users view their completed trades and trading reputation",
+          "story_count": "~3 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "Manage Wishlist",
+          "purpose": "Users list items they are looking for to help other users find trading opportunities",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Upload and View Fan Movies",
+      "purpose": "Content creators upload fan-made Spider-Man films and viewers watch, rate, and organize them",
+      "features": [
+        {
+          "name": "Upload Fan Film",
+          "purpose": "Content creator uploads video file, adds metadata, and publishes fan film",
+          "users": [
+            "Content Creators"
+          ],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Video Upload",
+                "description": "The process of transferring video file from user's device to system's video storage service"
+              },
+              {
+                "name": "Video Processing",
+                "description": "System processes uploaded video for streaming, including format conversion and thumbnail generation"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Video Upload",
+                "behavior": "User selects video file and uploads, then system validates file size and format, transfers to video storage service, and processes for streaming"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Upload Video File",
+              "description": "User selects video file and clicks upload, then system validates file size and format, transfers file to video storage service, and initiates video processing",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects video file and clicks upload, then system validates file size is within limits and format is supported",
+                "When file validation passes, then system transfers file to video storage service and displays upload progress",
+                "When file transfer completes, then system initiates video processing and displays processing status",
+                "When user uploads file that exceeds size limit or unsupported format, then system displays error message and does not upload file"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Add Video Metadata",
+              "description": "User enters title, description, category, and character tags for video, then system saves metadata and links it to video file",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters title, description, category, and character tags for video, then system saves metadata and links it to video file",
+                "When user submits metadata form with required title field empty, then system displays validation error and does not save metadata",
+                "When system saves metadata, then system enables publish button for user"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Publish Fan Film",
+              "description": "User clicks publish after video processing completes, then system makes video available for viewing and adds it to creator's profile",
+              "optional": false,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks publish after video processing completes, then system makes video available for public viewing",
+                "When system publishes video, then system adds video to creator's profile and makes it discoverable in search and browse",
+                "When user tries to publish video before processing completes, then system displays message that video is still processing"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Watch Fan Films",
+          "purpose": "Users watch fan films using video player and interact with content",
+          "story_count": "~4 stories",
+          "users": [
+            "Community Members"
+          ],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Video Streaming",
+                "description": "The delivery of video content from video storage service to user's browser for playback"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Video Streaming",
+                "behavior": "User clicks play on video, then system requests video stream from video storage service and video player displays streaming content"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Play Fan Film",
+              "description": "User clicks play button on video, then system requests video stream from video storage service and video player displays streaming content with playback controls",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks play button on video, then system requests video stream from video storage service",
+                "When system receives video stream, then video player displays streaming content with playback controls (play, pause, volume, fullscreen)",
+                "When video stream fails to load, then system displays error message and retry option"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Organize Playlists",
+          "purpose": "Users create and manage playlists of favorite fan films",
+          "users": [
+            "Community Members"
+          ],
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "Rate and Comment on Videos",
+          "purpose": "Users provide feedback on fan films through ratings and comments",
+          "users": [
+            "Community Members"
+          ],
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Participate in Community",
+      "purpose": "Users engage in discussions, share news, and connect through forums and message boards",
+      "features": [
+        {
+          "name": "Create Forum Post",
+          "purpose": "User creates new discussion thread in forum topic",
+          "users": [
+            "Community Members"
+          ],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Forum Thread",
+                "description": "A discussion topic started by a user with a title and initial post, which other users can reply to"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Forum Thread",
+                "behavior": "User writes post title and content, selects forum topic, then system creates new thread and displays it in forum topic list"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Start Discussion Thread",
+              "description": "User writes post title and content, selects forum topic category, then system creates new thread, adds it to forum topic list, and displays thread to other users",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user writes post title and content, selects forum topic category, and clicks submit, then system creates new thread",
+                "When system creates new thread, then system adds thread to forum topic list and displays it to other users",
+                "When user submits thread without title or content, then system displays validation error and does not create thread"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Reply to Thread",
+          "purpose": "Users respond to discussion threads with replies",
+          "users": [
+            "Community Members"
+          ],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Forum Reply",
+                "description": "A response to a forum thread that appears in chronological order within the thread"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Forum Reply",
+                "behavior": "User writes reply content, then system adds reply to thread in chronological order and notifies thread creator"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Post Thread Reply",
+              "description": "User writes reply content and clicks post, then system adds reply to thread in chronological order, updates thread activity timestamp, and sends notification to thread creator",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user writes reply content and clicks post, then system adds reply to thread in chronological order",
+                "When system adds reply, then system updates thread activity timestamp and sends notification to thread creator",
+                "When user submits empty reply, then system displays validation error and does not post reply"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Vote on Posts",
+          "purpose": "Users upvote or downvote helpful posts to surface quality content",
+          "users": [
+            "Community Members"
+          ],
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Post Vote",
+                "description": "A user's upvote or downvote on a forum post that affects the post's visibility and ranking"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Post Vote",
+                "behavior": "User clicks upvote or downvote on post, then system records vote, updates post score, and adjusts post ranking in thread"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Vote on Forum Post",
+              "description": "User clicks upvote or downvote button on post, then system records vote, updates post score, recalculates post ranking in thread, and updates display order",
+              "optional": false,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks upvote or downvote button on post, then system records vote and updates post score",
+                "When system updates post score, then system recalculates post ranking in thread and updates display order",
+                "When user votes on their own post, then system displays error message and does not record vote"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Moderate Content",
+          "purpose": "Moderators review reported content and enforce community guidelines",
+          "users": [
+            "Moderators"
+          ],
+          "story_count": "~5 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Search and Discover Content",
+      "purpose": "Users find merchandise, videos, users, and content through search and browsing",
+      "users": [
+        "Collectors",
+        "Traders",
+        "Content Creators",
+        "Community Members",
+        "Moderators"
+      ],
+      "features": [
+        {
+          "name": "Search Content",
+          "purpose": "Users search for specific items, users, or videos using search bar",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": [
+            {
+              "name": "Search by Keyword",
+              "description": "User enters search term in search bar and clicks search, then system searches across merchandise, users, and videos and displays matching results",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user enters search term in search bar and clicks search, then system validates search term is not empty",
+                "When search term is empty, then system displays error message and does not perform search",
+                "When search term is valid, then system queries search/indexing service across merchandise, user profiles, and videos",
+                "When system receives search results, then system groups results by type (merchandise, users, videos) and displays grouped results to user"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View Search Results",
+              "description": "System displays search results grouped by type (merchandise, users, videos), then user can click on any result to view details",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When system displays search results grouped by type, then system shows merchandise results section, users results section, and videos results section",
+                "When user clicks on a merchandise result, then system navigates to merchandise detail page",
+                "When user clicks on a user profile result, then system navigates to that user's public profile page",
+                "When user clicks on a video result, then system navigates to video detail page"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Search for Users",
+              "description": "User selects 'Users' filter and enters search term, then system searches user profiles and displays matching users",
+              "optional": true,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects 'Users' filter and enters search term and clicks search, then system validates search term is not empty",
+                "When search term is valid, then system queries search/indexing service for user profiles matching search term",
+                "When system receives user profile results, then system displays matching users with profile information (username, profile picture, favorite character)"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Search for Merchandise",
+              "description": "User selects 'Merchandise' filter and enters search term, then system searches merchandise posts and displays matching items",
+              "optional": true,
+              "sequential_order": 4,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects 'Merchandise' filter and enters search term and clicks search, then system validates search term is not empty",
+                "When search term is valid, then system queries search/indexing service for merchandise posts matching search term",
+                "When system receives merchandise results, then system displays matching merchandise items with photos and descriptions"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View Empty Search Results",
+              "description": "User searches for term with no matches, then system displays message indicating no results found and suggests alternative searches",
+              "optional": false,
+              "sequential_order": 5,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user searches for term with no matches, then system displays message indicating no results found for search term",
+                "When system displays empty results, then system suggests alternative searches or popular categories to help user discover content"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Browse by Category",
+          "purpose": "Users browse merchandise and videos organized by categories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": [
+            {
+              "name": "Browse Category List",
+              "description": "User navigates to browse page, then system displays list of available categories (Comics, Action Figures, Videos, etc.)",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user navigates to browse page, then system loads list of available categories from database",
+                "When system loads categories, then system displays category list with category names (Comics, Action Figures, Videos, etc.) and item counts for each category"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "View Category Content",
+              "description": "User clicks on category, then system displays all merchandise and videos in that category with pagination",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks on category, then system loads merchandise and videos for that category from database",
+                "When system loads category content, then system applies pagination with maximum 20 items per page",
+                "When system applies pagination, then system displays first page of category content with pagination controls (next page, page numbers)"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Sort Category Results",
+              "description": "User selects sort option (newest, oldest, most popular), then system reorders category content and displays sorted results",
+              "optional": true,
+              "sequential_order": 3,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user selects sort option (newest, oldest, most popular) from dropdown, then system applies sort order to category content",
+                "When system applies sort order, then system reorders category content according to selected sort option",
+                "When system reorders content, then system displays sorted results on current page with pagination maintained"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Navigate Category Pages",
+              "description": "User clicks next page or page number, then system loads and displays next page of category content",
+              "optional": false,
+              "sequential_order": 4,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When user clicks next page button or page number, then system loads next page of category content from database",
+                "When system loads next page, then system displays next page of category content with updated pagination controls",
+                "When user clicks on last page, then system displays last page of content and disables next page button"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Filter Search Results",
+          "purpose": "Users apply filters to narrow search results by condition, year, or other criteria",
+          "story_count": "~4 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        },
+        {
+          "name": "View Featured Content",
+          "purpose": "Users discover highlighted collections and popular fan films",
+          "story_count": "~3 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    },
+    {
+      "name": "Manage Notifications",
+      "purpose": "Users receive alerts about comments, trades, and activity through email or in-app notifications",
+      "users": [
+        "Collectors",
+        "Traders",
+        "Content Creators",
+        "Community Members",
+        "Moderators"
+      ],
+      "features": [
+        {
+          "name": "Receive Trade Notifications",
+          "purpose": "Users get notified when someone proposes a trade or sends trade message",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Email Notification",
+                "description": "An email message sent to user's email address via email service when specific events occur"
+              },
+              {
+                "name": "Notification Preference",
+                "description": "User's choice of how to receive notifications: email only, in-app only, or both"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Email Notification",
+                "behavior": "System detects trade event, checks user's notification preferences, then email service sends notification email to user's email address"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Send Trade Proposal Email",
+              "description": "System detects new trade proposal, checks recipient's notification preferences, then email service sends notification email with trade details to recipient's email address",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When system detects new trade proposal, then system checks recipient's notification preferences",
+                "When recipient's notification preferences include email, then email service sends notification email with trade details to recipient's email address",
+                "When recipient's notification preferences are in-app only, then system does not send email and only sends in-app notification"
+              ],
+              "scenarios": []
+            },
+            {
+              "name": "Send Trade Message Email",
+              "description": "System detects new trade message, checks recipient's notification preferences, then email service sends notification email with message preview to recipient's email address",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When system detects new trade message, then system checks recipient's notification preferences",
+                "When recipient's notification preferences include email, then email service sends notification email with message preview to recipient's email address",
+                "When email service fails to send email, then system logs error and continues with in-app notification"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Receive Comment Notifications",
+          "purpose": "Users get notified when someone comments on their merchandise posts or fan films",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": [
+              {
+                "concept": "Email Notification",
+                "behavior": "System detects comment on user's content, checks user's notification preferences, then email service sends notification email to user's email address"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Send Comment Notification Email",
+              "description": "System detects comment on user's merchandise post or fan film, checks user's notification preferences, then email service sends notification email with comment preview to user's email address",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "behavioral_ac": [
+                "When system detects comment on user's merchandise post or fan film, then system checks user's notification preferences",
+                "When user's notification preferences include email, then email service sends notification email with comment preview to user's email address",
+                "When user has disabled comment notifications, then system does not send email or in-app notification"
+              ],
+              "scenarios": []
+            }
+          ]
+        },
+        {
+          "name": "Manage Notification Preferences",
+          "purpose": "Users configure how they want to receive notifications",
+          "story_count": "~3 stories",
+          "domain_ac": {
+            "concepts": [],
+            "behaviors": []
+          },
+          "stories": []
+        }
+      ],
+      "sub_epics": []
+    }
+  ],
+  "solution": {
+    "name": "Spider-Man Fan Community Website",
+    "purpose": "A social network platform where Spider-Man fans can share merchandise, trade collectibles, upload fan-made films, and connect with other fans"
+  }
+}

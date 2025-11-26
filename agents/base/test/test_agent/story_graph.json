@@ -1,0 +1,102 @@
+{
+  "solution": {
+    "name": "",
+    "purpose": ""
+  },
+  "epics": [
+    {
+      "name": "",
+      "purpose": "",
+      "features": [
+        {
+          "name": "",
+          "purpose": "",
+          "story_count": "",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "",
+                "description": ""
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "",
+                "behavior": ""
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "",
+              "behavioral_ac": [
+                ""
+              ],
+              "scenarios": [
+                {
+                  "name": "",
+                  "steps": [
+                    ""
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "",
+          "purpose": "",
+          "features": [
+            {
+              "name": "",
+              "purpose": "",
+              "story_count": "",
+              "domain_ac": {
+                "concepts": [
+                  {
+                    "name": "",
+                    "description": ""
+                  }
+                ],
+                "behaviors": [
+                  {
+                    "concept": "",
+                    "behavior": ""
+                  }
+                ]
+              },
+              "stories": [
+                {
+                  "name": "",
+                  "behavioral_ac": [
+                    ""
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "",
+                      "steps": [
+                        ""
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "",
+      "priority": "",
+      "stories": [
+        ""
+      ],
+      "relative_size": ""
+    }
+  ]
+}

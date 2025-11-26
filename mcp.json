@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "agent-stories": {
+      "command": "python",
+      "args": [
+        "agents/base/src/agent_mcp_server.py",
+        "stories"
+      ],
+      "cwd": "C:\\dev\\augmented-teams",
+      "env": {
+        "AGENT_NAME": "stories",
+        "PYTHONPATH": "C:\\dev\\augmented-teams"
+      }
+    },
+    "agent-clean_code": {
+      "command": "python",
+      "args": [
+        "agents/base/src/agent_mcp_server.py",
+        "clean_code"
+      ],
+      "cwd": "C:\\dev\\augmented-teams",
+      "env": {
+        "AGENT_NAME": "clean_code",
+        "PYTHONPATH": "C:\\dev\\augmented-teams"
+      }
+    },
+    "agent-test_agent": {
+      "command": "python",
+      "args": [
+        "agents/base/src/agent_mcp_server.py",
+        "test_agent"
+      ],
+      "cwd": "C:\\dev\\augmented-teams",
+      "env": {
+        "AGENT_NAME": "test_agent",
+        "PYTHONPATH": "C:\\dev\\augmented-teams"
+      }
+    },
+    "mutants-and-masterminds-character-helper": {
+      "command": "python",
+      "args": [
+        "behaviors/character/code/character_mcp_server.py"
+      ],
+      "cwd": "C:\\dev\\augmented-teams",
+      "env": {
+        "PYTHONPATH": "C:\\dev\\augmented-teams"
+      }
+    }
+  }
+}

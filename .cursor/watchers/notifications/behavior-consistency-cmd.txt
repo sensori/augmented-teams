@@ -1,0 +1,41 @@
+👀 Watching: features\code-agent-behavior\code-agent-behaviors
+
+✅ File watcher started. Monitoring behavior files for changes...
+   Press Ctrl+C to stop
+
+👀 Watching: features\code-agent-behavior\code-agent-behaviors
+
+✅ File watcher started. Monitoring behavior files for changes...
+   Press Ctrl+C to stop
+
+
+🔍 Detected change: code-agent-behavior-structure-validate-cmd.md
+   Running behavior consistency check...
+✅ Consistency check completed
+
+
+🔍 Detected change: code-agent-behavior-structure-validate-cmd.md
+   Running behavior consistency check...
+✅ Consistency check completed
+
+
+🔍 Detected change: code-agent-behavior-index-cmd.md
+   Running behavior consistency check...
+✅ Consistency check completed
+
+👀 Watching: features\code-agent-behavior\code-agent-behaviors
+
+✅ File watcher started. Monitoring behavior files for changes...
+   Press Ctrl+C to stop
+
+👀 Watching: features\code-agent-behavior\code-agent-behaviors
+
+✅ File watcher started. Monitoring behavior files for changes...
+   Press Ctrl+C to stop
+
+👀 Watching: behaviors\bdd
+👀 Watching: behaviors\code-agent
+
+✅ File watcher started. Monitoring behavior files for changes...
+   Press Ctrl+C to stop
+

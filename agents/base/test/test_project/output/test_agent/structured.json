@@ -1,0 +1,143 @@
+{
+  "epics": [
+    {
+      "name": "Manage Orders",
+      "purpose": "Handle order lifecycle from creation to fulfillment",
+      "features": [
+        {
+          "name": "Place Order",
+          "purpose": "Allow customers to create and submit orders",
+          "domain_ac": {
+            "concepts": [
+              {
+                "name": "Order",
+                "description": "Customer purchase request with items and payment"
+              },
+              {
+                "name": "Cart",
+                "description": "Temporary collection of items before order creation"
+              },
+              {
+                "name": "Payment",
+                "description": "Financial transaction to complete order"
+              }
+            ],
+            "behaviors": [
+              {
+                "concept": "Order",
+                "behavior": "Order is created when customer submits cart"
+              },
+              {
+                "concept": "Payment",
+                "behavior": "Payment is validated before order confirmation"
+              }
+            ]
+          },
+          "stories": [
+            {
+              "name": "Customer places order",
+              "behavioral_ac": [
+                "When customer submits order, then system validates payment information",
+                "When payment is valid, then system creates order with unique ID",
+                "When order is created, then system sends confirmation email to customer"
+              ],
+              "scenarios": [
+                {
+                  "name": "Happy path order placement",
+                  "steps": [
+                    "Given customer has items in cart",
+                    "When customer submits order with valid payment",
+                    "Then system creates order",
+                    "And system sends confirmation email"
+                  ]
+                },
+                {
+                  "name": "Invalid payment",
+                  "steps": [
+                    "Given customer has items in cart",
+                    "When customer submits order with invalid payment",
+                    "Then system rejects order",
+                    "And system displays payment error message"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "System validates payment",
+              "behavioral_ac": [
+                "When payment information is provided, then system checks payment method validity",
+                "When payment method is valid, then system authorizes payment amount",
+                "When authorization succeeds, then system reserves funds for order"
+              ]
+            },
+            {
+              "name": "System calculates order total",
+              "behavioral_ac": [
+                "When items are in cart, then system calculates subtotal",
+                "When subtotal is calculated, then system applies applicable taxes",
+                "When taxes are applied, then system calculates final total"
+              ]
+            },
+            {
+              "name": "System applies discount codes",
+              "behavioral_ac": [
+                "When customer enters discount code, then system validates code",
+                "When code is valid, then system applies discount to order total"
+              ]
+            },
+            {
+              "name": "Customer reviews order before submission",
+              "behavioral_ac": [
+                "When customer views order summary, then system displays all items and totals",
+                "When customer confirms order, then system proceeds to payment"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Track Order Status",
+          "purpose": "Provide visibility into order processing and delivery",
+          "story_count": "~3 stories",
+          "stories": [
+            {
+              "name": "Customer views order status"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Manage Products",
+      "purpose": "Enable product catalog management and browsing",
+      "features": [
+        {
+          "name": "View Product Details",
+          "purpose": "Display comprehensive product information",
+          "story_count": "~3 stories",
+          "stories": [
+            {
+              "name": "Customer views product details"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "Basic Order Flow",
+      "priority": "NOW",
+      "stories": [
+        "Customer places order",
+        "System validates payment",
+        "System calculates order total",
+        "Customer reviews order before submission"
+      ],
+      "relative_size": "Small"
+    }
+  ],
+  "solution": {
+    "name": "E-Commerce Platform",
+    "purpose": "Enable customers to browse, purchase, and manage orders online"
+  }
+}

@@ -1,0 +1,653 @@
+<?xml version="1.0" ?>
+<mxfile host="65bd71144e">
+    <diagram id="story-map-exploration" name="Story Map Exploration">
+        <mxGraphModel dx="2656" dy="1035" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="4000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="0" y="0" width="1" height="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_epic1_Collectors" value="Collectors" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="25" y="70" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic1" value="Manage User Accounts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="20" y="130" width="820" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1" value="Create User Account" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="200" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1" value="Sign Up with Email" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters email address and password on sign-up form and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates email format is valid&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system validates email format,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates password meets strength requirements (minimum 8 characters, at least one uppercase, one lowercase, and one number)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;email format is invalid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating invalid email format and does not create account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;password does not meet strength requirements,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating password requirements and does not create account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;email format and password are valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system checks if email address already exists in database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;email address already exists,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating email is already registered and does not create account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac7" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;email address is unique and credentials are valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system creates account record in database with pending status and sends verification email via email service&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="690" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1ac8" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system creates account,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays success message and redirects user to email verification page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="750" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2" value="Verify Email Address" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks verification link in email,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system extracts verification token from link&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system extracts verification token,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system validates token is valid and not expired&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;verification token is invalid or expired,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not activate account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;verification token is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system updates account status from pending to active in database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system activates account,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system redirects user to profile creation page and displays success message&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3" value="Log In to Account" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters email and password on login form and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system looks up account by email address in database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;account is not found,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating invalid credentials and does not log in user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;account is found,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system verifies password hash matches stored password hash&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;password does not match,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating invalid credentials and does not log in user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 5px;&quot;&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;When &lt;/b&gt;password matches,&lt;br&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;Then &lt;/b&gt;system checks if account status is active&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;account status is not active (pending verification),&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating email verification is required and does not log in user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac7" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;account status is active and credentials are valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system creates user session and logs user into their account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="690" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3ac8" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system logs in user,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system redirects user to home page and displays welcome message&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="750" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4" value="Reset Forgotten Password" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters email address on password reset form and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system looks up account by email address&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;account is not found,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays generic message indicating reset email will be sent (for security, does not reveal if email exists)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;account is found,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system generates password reset token and saves it to database with expiration time&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system generates reset token,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;email service sends password reset email with reset link containing token to user's email address&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user clicks password reset link in email,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system extracts reset token from link and validates token is valid and not expired&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;reset token is invalid or expired,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not allow password reset&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac7" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;reset token is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays password reset form for user to enter new password&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="690" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac8" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters new password and confirms password on reset form and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates new password meets strength requirements&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="750" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac9" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;new password does not meet strength requirements,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating password requirements and does not reset password&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="810" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac10" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;new password meets requirements,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system updates password hash in database and invalidates reset token&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="870" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4ac11" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system resets password,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays success message and redirects user to login page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="930" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s5" value="Log Out of Account" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="272" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s5ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks log out button,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system ends user session and clears session data&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="272" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s5ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system ends session,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system redirects user to home page and displays message indicating successful logout&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="272" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2" value="Build User Profile" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1" value="Create Basic Profile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters username and bio on profile creation form and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates username is not empty and meets length requirements&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;username is empty or does not meet length requirements,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not save profile&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;username is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system checks if username is unique across all profiles&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;username already exists,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating username is taken and does not save profile&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;username is unique and valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system saves profile information to database and links it to user account&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system saves profile,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays profile page with saved username and bio information&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="362" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2" value="Upload Profile Picture" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user selects image file and clicks upload,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system validates image file format is JPEG or PNG&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;image format is not JPEG or PNG,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating invalid format and does not upload file&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;image format is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system validates image file size does not exceed 5MB&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;image file size exceeds 5MB,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating file is too large and does not upload file&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;image format and size are valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system uploads image file to file storage/CDN&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;file upload completes,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system saves image URL to user profile in database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2ac7" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system saves image URL,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays profile picture on user profile page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="690" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3" value="Edit Profile Information" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user updates username, bio, or other profile fields on edit form and clicks save,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates username is not empty if username is being changed&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;username is being changed and new username is empty,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not save changes&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;username is being changed and new username is valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system checks if new username is unique across all profiles&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;new username already exists,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating username is taken and does not save changes&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac5" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;username is unique or not being changed,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system validates all profile fields meet requirements&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="570" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac6" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;profile fields are valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system saves updated profile information to database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="630" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3ac7" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system saves updated profile,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays updated profile page with saved changes and displays success message&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="690" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s4" value="View User Profile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="542" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s4ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user navigates to their profile page,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system loads profile information from database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="542" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s4ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system loads profile,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays profile page with username, bio, profile picture (if uploaded), favorite character (if set), and account creation date&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="542" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s5" value="View Other User Profile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="602" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s5ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user clicks on another user's name or profile link,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system loads that user's public profile information from database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="602" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s5ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system loads other user's profile,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays public profile page with username, bio, profile picture (if uploaded), favorite character (if set), and account creation date&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="602" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s5ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;other user's profile does not exist,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message indicating profile not found&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="602" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s6" value="Set Favorite Character" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="662" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s6ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects favorite Spider-Man character from dropdown list and clicks save,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates selected character is from allowed list&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="662" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s6ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;selected character is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system saves favorite character preference to user profile in database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="662" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s6ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system saves favorite character,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays selected character on user profile page and displays success message&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="662" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f3" value="Manage Privacy Settings&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="750" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_epic2_Community Members" value="Community Members" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="865" y="70" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic2" value="Share Merchandise" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="860" y="130" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1" value="Upload Merchandise Photos&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~5 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="870" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2" value="Organize Collections&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3" value="Interact with Merchandise Posts&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1050" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_epic3_Traders" value="Traders" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1165" y="70" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic3" value="Trade Items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="1160" y="130" width="1090" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1" value="Mark Items for Trade&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~3 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1170" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2" value="Propose Trade" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1260" y="200" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s1" value="Create Trade Proposal" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1262" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects items from their collection and items from target user's available-for-trade collection,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system creates trade proposal with status 'pending'&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1262" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 5px;&quot;&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;When &lt;/b&gt;system creates trade proposal,&lt;br&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;Then &lt;/b&gt;system sends notification to target user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1262" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user submits trade proposal with invalid items,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not create proposal&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1262" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s2" value="View Trade Proposal" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1322" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user clicks on trade proposal notification,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays proposal page with items offered and items requested&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1322" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system displays trade proposal,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system shows proposal status, creation date, and both users' profiles&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1322" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user views trade proposal,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system enables accept, reject, and message actions&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1322" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3" value="Negotiate Trade&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1410" y="200" width="260" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s1" value="Send Trade Message" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1532" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user types message in trade proposal thread and clicks send,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system saves message and links it to trade proposal&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1532" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system saves trade message,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system delivers message to other user and sends notification&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1532" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user sends empty message,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays validation error and does not send message&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1532" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s2" value="Receive Trade Message" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1592" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system receives trade message from other user,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays message in trade thread in chronological order&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1592" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system displays new trade message,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system sends notification to recipient user based on their notification preferences&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1592" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f3s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 5px;&quot;&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;When &lt;/b&gt;user views trade thread,&lt;br&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;Then &lt;/b&gt;system marks all messages in thread as read&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1592" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4" value="Complete Trade&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s1" value="Accept Trade Proposal" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1922" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks accept on trade proposal,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system updates trade status to 'accepted'&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1922" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system updates trade status to accepted,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system marks both users' items as 'traded' and removes them from available-for-trade collections&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1922" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;trade is accepted,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system enables rating option for both users and sends confirmation notification to both users&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1922" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s2" value="Rate Trade Partner" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1982" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects rating (1-5 stars) and writes feedback after trade completion,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system saves rating and feedback to trade partner's profile&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1982" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system saves rating,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system recalculates trade partner's average rating and updates their trading reputation score&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1982" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f4s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user submits rating without selecting a star rating,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays validation error and does not save rating&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="1982" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f5" value="View Trade History&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~3 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2070" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f6" value="Manage Wishlist&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2160" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic4" value="Upload and View Fan Movies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="2270" y="130" width="490" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_e4f1_Content Creators" value="Content Creators" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2285" y="140" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1" value="Upload Fan Film" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2280" y="200" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1" value="Upload Video File" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects video file and clicks upload,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates file size is within limits and format is supported&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;file validation passes,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system transfers file to video storage service and displays upload progress&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;file transfer completes,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system initiates video processing and displays processing status&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user uploads file that exceeds size limit or unsupported format,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not upload file&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s2" value="Add Video Metadata" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2342" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user enters title, description, category, and character tags for video,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system saves metadata and links it to video file&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2342" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user submits metadata form with required title field empty,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays validation error and does not save metadata&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2342" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 5px;&quot;&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;When &lt;/b&gt;system saves metadata,&lt;br&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;Then &lt;/b&gt;system enables publish button for user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2342" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s3" value="Publish Fan Film" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2402" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s3ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks publish after video processing completes,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system makes video available for public viewing&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2402" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s3ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system publishes video,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system adds video to creator's profile and makes it discoverable in search and browse&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2402" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s3ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user tries to publish video before processing completes,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays message that video is still processing&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2402" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f2" value="Watch Fan Films&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2490" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f2s1" value="Play Fan Film" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2492" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks play button on video,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system requests video stream from video storage service&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2492" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system receives video stream,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;video player displays streaming content with playback controls (play, pause, volume, fullscreen)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2492" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f2s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;video stream fails to load,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message and retry option&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2492" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f3" value="Organize Playlists&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2580" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f4" value="Rate and Comment on Videos&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2670" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic5" value="Participate in Community" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="2780" y="130" width="550" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f1" value="Create Forum Post" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2790" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f1s1" value="Start Discussion Thread" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2792" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f1s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user writes post title and content, selects forum topic category, and clicks submit,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system creates new thread&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2792" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f1s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system creates new thread,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system adds thread to forum topic list and displays it to other users&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2792" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f1s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user submits thread without title or content,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays validation error and does not create thread&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2792" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f2" value="Reply to Thread" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="2880" y="200" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f2s1" value="Post Thread Reply" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="2942" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user writes reply content and clicks post,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system adds reply to thread in chronological order&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2942" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system adds reply,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system updates thread activity timestamp and sends notification to thread creator&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2942" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f2s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user submits empty reply,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays validation error and does not post reply&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="2942" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f3" value="Vote on Posts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="3030" y="200" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f3s1" value="Vote on Forum Post" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3152" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f3s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks upvote or downvote button on post,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system records vote and updates post score&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3152" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f3s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system updates post score,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system recalculates post ranking in thread and updates display order&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3152" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f3s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user votes on their own post,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not record vote&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3152" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_e5f4_Moderators" value="Moderators" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3245" y="140" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5f4" value="Moderate Content&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~5 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="3240" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic6" value="Search and Discover Content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="3350" y="130" width="790" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1" value="Search Content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="3360" y="200" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s1" value="Search by Keyword" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3362" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user enters search term in search bar and clicks search,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system validates search term is not empty&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3362" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;search term is empty,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays error message and does not perform search&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3362" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;search term is valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system queries search/indexing service across merchandise, user profiles, and videos&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3362" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s1ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system receives search results,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system groups results by type (merchandise, users, videos) and displays grouped results to user&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3362" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s2" value="View Search Results" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3422" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system displays search results grouped by type,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system shows merchandise results section, users results section, and videos results section&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3422" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks on a merchandise result,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system navigates to merchandise detail page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3422" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks on a user profile result,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system navigates to that user's public profile page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3422" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s2ac4" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 5px;&quot;&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;When &lt;/b&gt;user clicks on a video result,&lt;br&gt;&lt;b style=&quot;font-size: 5px;&quot;&gt;Then &lt;/b&gt;system navigates to video detail page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3422" y="510" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s3" value="Search for Users" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3482" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s3ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects 'Users' filter and enters search term and clicks search,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates search term is not empty&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3482" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s3ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;search term is valid,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system queries search/indexing service for user profiles matching search term&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3482" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s3ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system receives user profile results,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays matching users with profile information (username, profile picture, favorite character)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3482" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s4" value="Search for Merchandise" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3542" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s4ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects 'Merchandise' filter and enters search term and clicks search,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system validates search term is not empty&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3542" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s4ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;search term is valid,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system queries search/indexing service for merchandise posts matching search term&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3542" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s4ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system receives merchandise results,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays matching merchandise items with photos and descriptions&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3542" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s5" value="View Empty Search Results" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3602" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s5ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user searches for term with no matches,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays message indicating no results found for search term&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3602" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f1s5ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system displays empty results,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system suggests alternative searches or popular categories to help user discover content&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3602" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2" value="Browse by Category" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="3690" y="200" width="260" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s1" value="Browse Category List" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3692" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user navigates to browse page,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system loads list of available categories from database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3692" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system loads categories,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays category list with category names (Comics, Action Figures, Videos, etc.) and item counts for each category&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3692" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s2" value="View Category Content" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3752" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks on category,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system loads merchandise and videos for that category from database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3752" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system loads category content,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system applies pagination with maximum 20 items per page&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3752" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system applies pagination,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays first page of category content with pagination controls (next page, page numbers)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3752" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s3" value="Sort Category Results" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3812" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s3ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user selects sort option (newest, oldest, most popular) from dropdown,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system applies sort order to category content&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3812" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s3ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system applies sort order,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system reorders category content according to selected sort option&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3812" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s3ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system reorders content,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays sorted results on current page with pagination maintained&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3812" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s4" value="Navigate Category Pages" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="3872" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s4ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks next page button or page number,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system loads next page of category content from database&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3872" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s4ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system loads next page,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system displays next page of category content with updated pagination controls&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3872" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f2s4ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user clicks on last page,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system displays last page of content and disables next page button&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="3872" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f3" value="Filter Search Results&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~4 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="3960" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6f4" value="View Featured Content&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~3 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="4050" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic7" value="Manage Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="4160" y="130" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1" value="Receive Trade Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="4170" y="200" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s1" value="Send Trade Proposal Email" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="4172" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system detects new trade proposal,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system checks recipient's notification preferences&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4172" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;recipient's notification preferences include email,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;email service sends notification email with trade details to recipient's email address&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4172" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;recipient's notification preferences are in-app only,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system does not send email and only sends in-app notification&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4172" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s2" value="Send Trade Message Email" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="4232" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s2ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;system detects new trade message,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system checks recipient's notification preferences&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4232" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s2ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;recipient's notification preferences include email,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;email service sends notification email with message preview to recipient's email address&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4232" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f1s2ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;email service fails to send email,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system logs error and continues with in-app notification&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4232" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f2" value="Receive Comment Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="4320" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f2s1" value="Send Comment Notification Email" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="4322" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f2s1ac1" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;system detects comment on user's merchandise post or fan film,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;system checks user's notification preferences&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4322" y="330" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f2s1ac2" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 3px;&quot;&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;When &lt;/b&gt;user's notification preferences include email,&lt;br&gt;&lt;b style=&quot;font-size: 3px;&quot;&gt;Then &lt;/b&gt;email service sends notification email with comment preview to user's email address&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4322" y="390" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f2s1ac3" value="&lt;font color=&quot;#080808&quot; style=&quot;font-size: 4px;&quot;&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;When &lt;/b&gt;user has disabled comment notifications,&lt;br&gt;&lt;b style=&quot;font-size: 4px;&quot;&gt;Then &lt;/b&gt;system does not send email or in-app notification&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;align=left;fontSize=6;fontColor=#080808;" parent="1" vertex="1">
+                    <mxGeometry x="4322" y="450" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7f3" value="Manage Notification Preferences&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;~3 stories&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="4410" y="200" width="80" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

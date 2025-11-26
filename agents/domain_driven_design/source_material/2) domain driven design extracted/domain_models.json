@@ -1,0 +1,979 @@
+{
+  "source_folder": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted",
+  "total_slides": 24,
+  "domain_model_slides": 24,
+  "domain_model_entries": [
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 2,
+        "images": [
+          "slide_002_image_1.jpg",
+          "slide_002_image_1.png"
+        ]
+      },
+      "extracted_text": "Domain Modeling With Class Responsibility Cards and Domain Driven Design",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Modeling",
+          "With",
+          "Class",
+          "Responsibility",
+          "Cards",
+          "Driven"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 2 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 3,
+        "images": [
+          "slide_003_image_1.wmf"
+        ]
+      },
+      "extracted_text": "The number one reason for failure of software projects is a failure of people to communicate Language wall between clients and developers) Domain Models are a Ubiquitous Language, tight collaboration from both business and delivery teams drawn in the language of the business constrained by technology, using technical structure One model for the code, the diagrams, and the language people use! Business terms, concepts, etc, used by solution Business Logic layer of solution Business logic layer of solution Business aspects of all layers of the solution (UI, DB, etc) Business terms not part of the scope of the solution Business terms part of the of the solution, that are not explicit in the solution",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "The",
+          "Language",
+          "Models",
+          "Ubiquitous",
+          "One",
+          "Business",
+          "Logic",
+          "UI",
+          "DB"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 5,
+        "images": []
+      },
+      "extracted_text": "Two Agile Methods Key to Building A Domain Model Domain Driven Design An agile methodology for evolving a software system that closely aligns  to business requirements A Practice to Maintain a Domain Model A selective abstraction of knowledge from business domain experts Responsible for representing business concepts, information about business situations, business state, and business rules Evolves to represent the constraints of the technical solution as it becomes more well understood A common, ubiquitous language to express business terms using a vocabulary that both technical and business can use Class responsibility Card Modelling An Agile Modelling technique to visually represent whole or part of an application or problem domain Quickly explore, shape, and discard domain concepts We will be using CRC to practice Domain Driven Design",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Two",
+          "Agile",
+          "Methods",
+          "Key",
+          "Building",
+          "Driven",
+          "An",
+          "Practice",
+          "Maintain",
+          "Responsible",
+          "Evolves",
+          "Class",
+          "Card",
+          "Modelling",
+          "Quickly",
+          "We",
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 6,
+        "images": []
+      },
+      "extracted_text": "Domain Modelling with CRC",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Modelling",
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 7,
+        "images": [
+          "slide_007_image_1.jpg"
+        ]
+      },
+      "extracted_text": "Starting Simple: Using A Domain model to elaborate on our story map",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Starting",
+          "Simple",
+          "Using"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 8,
+        "images": []
+      },
+      "extracted_text": "Starting Simple: Using A Domain model to elaborate on our story map Payments Customer Sign Up For Payments Products Make A Payment Reverse A Payment Payments Admin Review Customer Payment Maintain Customer",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Customer",
+                "purpose": "Customer aggregate",
+                "entities": [
+                  {
+                    "name": "Customer",
+                    "root": true,
+                    "description": "Customer entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              },
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "Starting",
+          "Simple",
+          "Using",
+          "Payments",
+          "Customer",
+          "Sign",
+          "Up",
+          "For",
+          "Products",
+          "Make",
+          "Payment",
+          "Reverse",
+          "Admin",
+          "Review",
+          "Maintain"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 9,
+        "images": []
+      },
+      "extracted_text": "Starting Simple: Using A Domain model to elaborate on our story map Payments Customer Sign Up For Payments Products Make A Payment Reverse A Payment Payments Admin Review Customer Payment Maintain Customer What do  we mean by a payments customer? User? Company? Department?  Representative? How Do we ID one? What Information is required to make a payment? What needs to be tracked What States can a Payment have?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Customer",
+                "purpose": "Customer aggregate",
+                "entities": [
+                  {
+                    "name": "Customer",
+                    "root": true,
+                    "description": "Customer entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              },
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "Starting",
+          "Simple",
+          "Using",
+          "Payments",
+          "Customer",
+          "Sign",
+          "Up",
+          "For",
+          "Products",
+          "Make",
+          "Payment",
+          "Reverse",
+          "Admin",
+          "Review",
+          "Maintain",
+          "What",
+          "User",
+          "Company",
+          "Department",
+          "Representative",
+          "How",
+          "Do",
+          "ID",
+          "Information",
+          "States"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 10,
+        "images": [
+          "slide_010_image_1.jpg",
+          "slide_010_image_1.png"
+        ]
+      },
+      "extracted_text": "Payments Customer Sign Up For Payments Products Make A Payment Reverse A Payment Payments Admin Review Customer Payment Maintain Customer Account Belongs to a Customer | Customer Has An Account Type | <DDA, Saving, Checking, etc) Product PMT Agreement Agreed To By A Customer | Customer To Use Products Is Owned | Payment Product Owner Customer Identified By Direct Deposit Account | Account Agrees to Use Payment Product | Payment Product Agreement Answers to these questions can be captured in a Domain Model, using CRC notation",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Customer",
+                "purpose": "Customer aggregate",
+                "entities": [
+                  {
+                    "name": "Customer",
+                    "root": true,
+                    "description": "Customer entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              },
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "Payments",
+          "Customer",
+          "Sign",
+          "Up",
+          "For",
+          "Products",
+          "Make",
+          "Payment",
+          "Reverse",
+          "Admin",
+          "Review",
+          "Maintain",
+          "Account",
+          "Belongs",
+          "Has",
+          "An",
+          "Type",
+          "DDA",
+          "Saving",
+          "Checking",
+          "Product",
+          "PMT",
+          "Agreement",
+          "Agreed",
+          "To",
+          "By",
+          "Use",
+          "Is",
+          "Owned",
+          "Owner",
+          "Identified",
+          "Direct",
+          "Deposit",
+          "Agrees",
+          "Answers",
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 2 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 11,
+        "images": [
+          "slide_011_image_1.jpg"
+        ]
+      },
+      "extracted_text": "Answers to these questions can be captured in a Domain Model, using CRC notation",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Answers",
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 12,
+        "images": [
+          "slide_012_image_1.jpg"
+        ]
+      },
+      "extracted_text": "Answers to these questions can be captured in a Domain Model, using CRC notation",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Answers",
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 13,
+        "images": [
+          "slide_013_image_1.jpg"
+        ]
+      },
+      "extracted_text": "A good Domain Model dramatically increases the pace of story discovery and exploration, domain concepts are captured in one place as understanding increases",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 18,
+        "images": []
+      },
+      "extracted_text": "CRC components 101",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "CRC"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 25,
+        "images": []
+      },
+      "extracted_text": "Domain Modelling throughout the agile lifecycle",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Modelling"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 26,
+        "images": []
+      },
+      "extracted_text": "Start by modelling functional behaviour (story map, acceptance criteria, spec by example, etc) Ask domain related questions What do you mean by X? Explain the difference between an X and a Y Describe all the different types of XWhat happens When X does Y? What the F&@@!& is an X again? Rephrase the answer in the domain model format (ah ha! So an X is for/does/behaves like….) Update your model to capture the insight Update your stories as necessary Pause every so often and walk the model Flesh out your domain model in parallel with story exploration",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Start",
+          "Ask",
+          "What",
+          "Explain",
+          "Describe",
+          "XWhat",
+          "When",
+          "Rephrase",
+          "So",
+          "Update",
+          "Pause",
+          "Flesh"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 28,
+        "images": []
+      },
+      "extracted_text": "Walk through your story map and build out an initial domain model Don’t worry about being complete or precise, focus on major concepts and responsibilities Exercise: Outline your Domain Model",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Walk",
+          "Don",
+          "Exercise",
+          "Outline"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 31,
+        "images": []
+      },
+      "extracted_text": "Refine your story map to a greater level Add details around some key functions and stories, try to tack each major domain area in part Refine the domain model to answer domain questions across each story Exercise: Flesh out your Domain Model",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Refine",
+          "Add",
+          "Exercise",
+          "Flesh"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 32,
+        "images": [
+          "slide_032_image_1.jpg"
+        ]
+      },
+      "extracted_text": "Validate the domain model by walking through individual stories, tracing the connections and collaborators in the map to see if there is a missing concept",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Validate"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 33,
+        "images": []
+      },
+      "extracted_text": "Can the class take a crack at walking the domain model using this story? Does it reveal any missing pieces in the model?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Can",
+          "Does"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 34,
+        "images": []
+      },
+      "extracted_text": "Take a set of stories and walk the model to validate the model is complete Take note of missing sections and update your model as necessary Refine the domain model to answer domain questions across each story Present the model to the class Exercise: Validate your domain model through walkthroughs",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Take",
+          "Refine",
+          "Present",
+          "Exercise",
+          "Validate"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 35,
+        "images": []
+      },
+      "extracted_text": "Apply For a Payment Product Agreement Story Acceptance Criteria The Customer must provide a valid DDA Account that the Customer owns The Customer may apply for one or more Payment Products, each application results in a separate Payment Product Agreement Each Ap The Customer must specify an Owner, providing the necessary Contact Details Idea Discovery Delivery Customer Identified By Direct Deposit Account | Account Agrees to Use Payment Product | Payment Product Agreement Product PMT Agreement Agreed To By A Customer | Customer To Use Products Is Owned | Payment Product Owner Owner Contacted Using | Contact Details Has A Role Owns Agreements | Payment Role = Owner Product PMT Agreement Acceptance criteria are easier to do with a domain model in place Acceptance criteria also provide excellent input into your domain model! Account Belongs to a Customer | Customer Has An Account Type | <DDA, Saving, Checking, etc)",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Apply",
+          "For",
+          "Payment",
+          "Product",
+          "Agreement",
+          "Acceptance",
+          "Criteria",
+          "The",
+          "Customer",
+          "DDA",
+          "Account",
+          "Products",
+          "Each",
+          "Ap",
+          "Owner",
+          "Contact",
+          "Details",
+          "Idea",
+          "Discovery",
+          "Delivery",
+          "Identified",
+          "By",
+          "Direct",
+          "Deposit",
+          "Agrees",
+          "Use",
+          "PMT",
+          "Agreed",
+          "To",
+          "Is",
+          "Owned",
+          "Contacted",
+          "Using",
+          "Has",
+          "Role",
+          "Owns",
+          "Agreements",
+          "Belongs",
+          "An",
+          "Type",
+          "Saving",
+          "Checking"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 36,
+        "images": [
+          "slide_036_image_1.png"
+        ]
+      },
+      "extracted_text": "Idea Discovery Delivery Detailed Domain Modelling and Spec by Example can be done in parallel Acceptance criteria are also an excellent time to build and refine your domain model! Apply For a Payment Product Agreement Story Scenario Given the following Payments Products exist And the following Customer exist With a valid DDA Account When the Customer applies for a Payment Product Agreement using his DDA Account with an Owner that has the following Contact Details Then the Payment Product Agreement will be submitted to…",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": [
+          {
+            "name": "Payments",
+            "purpose": "Payment processing domain",
+            "aggregates": [
+              {
+                "name": "Customer",
+                "purpose": "Customer aggregate",
+                "entities": [
+                  {
+                    "name": "Customer",
+                    "root": true,
+                    "description": "Customer entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              },
+              {
+                "name": "Payment",
+                "purpose": "Payment aggregate",
+                "entities": [
+                  {
+                    "name": "Payment",
+                    "root": true,
+                    "description": "Payment entity",
+                    "responsibilities": [],
+                    "collaborators": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "identified_concepts": {
+        "entities": [
+          "Idea",
+          "Discovery",
+          "Delivery",
+          "Detailed",
+          "Modelling",
+          "Spec",
+          "Example",
+          "Acceptance",
+          "Apply",
+          "For",
+          "Payment",
+          "Product",
+          "Agreement",
+          "Scenario",
+          "Given",
+          "Payments",
+          "Products",
+          "And",
+          "Customer",
+          "With",
+          "DDA",
+          "Account",
+          "When",
+          "Owner",
+          "Contact",
+          "Details",
+          "Then"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 37,
+        "images": []
+      },
+      "extracted_text": "Take an individual story and define it in terms of Acceptance Criteria and / or Specification Scenarios Write each AC / Scenario step in a way that explicitly calls out the concepts in your domain model Elaborate / refine the domain model as you go Validate the domain model by walking through the story Exercise: Detail the Domain Model",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Take",
+          "Acceptance",
+          "Criteria",
+          "Specification",
+          "Scenarios",
+          "Write",
+          "AC",
+          "Scenario",
+          "Elaborate",
+          "Validate",
+          "Exercise",
+          "Detail"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 39,
+        "images": []
+      },
+      "extracted_text": "Avoid many to many relationship create a card to represent the relationship Avoid dependency magnets break up classes with to many responsibilities into discrete domain concepts Evolve “generic” responsibilities  into domain specific ones Use Abstractions Push behavior found in multiple places into a common class; use inheritance to “inject” the common behavior into these subject areas Meta Layer consider moving the configurable part into a separate set of classes, known as a “meta layer” Walk the Model whenever getting “lost in the model ground the conversation by walking the model through a scenario Connect to architecture “Annotate and inject” common functionality through inheritance, and collect common behavior into a set of requirements that influence the choice of technology, patterns and/or APIs Establish boundaries Where multiple teams / systems connect and overlap, call out mapping and integration mechanism; try to express dependencies in terms of specific domain concepts There are a lot of traps to avoid when writing a domain models, follow these best practices: As a Class which of these do we want to explore?",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "Avoid",
+          "Evolve",
+          "Use",
+          "Abstractions",
+          "Push",
+          "Meta",
+          "Layer",
+          "Walk",
+          "Connect",
+          "Annotate",
+          "APIs",
+          "Establish",
+          "Where",
+          "There",
+          "As",
+          "Class"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": []
+    },
+    {
+      "source": {
+        "file": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\extracted_content.md",
+        "slide_number": 46,
+        "images": [
+          "slide_046_image_1.jpg"
+        ]
+      },
+      "extracted_text": "When walking a CRC model in support of a user story or scenario, start with the class that represents a persona, person or role. Make sure that the responsibilities of this “boundary” class aligns to a user story on the story map",
+      "domain_model_structure": {
+        "solution": {
+          "name": "",
+          "purpose": ""
+        },
+        "bounded_contexts": []
+      },
+      "identified_concepts": {
+        "entities": [
+          "When",
+          "CRC",
+          "Make"
+        ],
+        "value_objects": [],
+        "aggregates": [],
+        "bounded_contexts": []
+      },
+      "notes": [
+        "Contains 1 image(s) that may show domain model diagrams"
+      ]
+    }
+  ]
+}
