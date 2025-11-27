@@ -15,7 +15,7 @@
                 "Human tells Bot to generate server",
                 "Agile Bot triggers MCP Bot Server Generator",
                 "MCP Bot Server Generator reads Bot Config from Bot Config file (agent.json)",
-                "MCP Bot Server Generator creates Bot MCP Server Class from Bot Config"
+                "MCP Bot Server Generator creates MCP Bot Server Class from Bot Config"
               ]
             },
             {

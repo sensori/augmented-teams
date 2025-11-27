@@ -9,6 +9,8 @@ IMPORTANT: Epics and Features belong to ALL increments - only Stories and Actors
 
 import xml.etree.ElementTree as ET
 import re
+import os
+import sys
 from collections import defaultdict
 
 def get_geometry(cell):
@@ -40,22 +42,39 @@ def extract_story_map(drawio_file, output_file):
     ACTOR_COLOR = '#dae8fc'  # Blue
     
     # Extract increments first to establish swim lane boundaries
+    # Increment names are in white boxes (strokeColor=#f8f7f7) positioned to the left of epics (negative X)
     increments = {}
-    for cell in root.findall('.//mxCell[@id]'):
-        cell_id = cell.get('id', '')
-        if cell_id.startswith('increment_') and not cell_id.endswith('_line'):
-            value = cell.get('value', '').strip().replace('&amp;nbsp;', ' ')
-            inc_match = re.match(r'increment_(\d+)', cell_id)
-            if inc_match and value:
-                inc_num = int(inc_match.group(1))
-                x, y = get_geometry(cell)
-                if y is not None:
-                    increments[inc_num] = {'name': value, 'y': y}
+    generic_increments = {}  # Store generic increment_* cells as fallback
     
-    # Sort increments by Y to establish boundaries (swim lanes)
+    # First pass: find white boxes with negative X (these are the descriptive increment names)
+    for cell in root.findall('.//mxCell'):
+        value = cell.get('value', '').strip()
+        if not value:
+            continue
+        # Handle HTML entities
+        value = value.replace('&amp;nbsp;', ' ').replace('&amp;', '&').replace('&lt;br&gt;', ' ').replace('&lt;', '<').replace('&gt;', '>').replace('\n', ' ').replace('\r', ' ').strip()
+        style = cell.get('style', '')
+        x, y = get_geometry(cell)
+        
+        # Check if this is an increment name cell: white box (strokeColor=#f8f7f7) to the left of epics (negative X)
+        if 'strokeColor=#f8f7f7' in style and value and x is not None and y is not None:
+            if x < 0:
+                # This is a descriptive increment name - prioritize these
+                increments[y] = {'name': value, 'y': y, 'x': x}
+            elif cell.get('id', '').startswith('increment_') and not cell.get('id', '').endswith('_line'):
+                # This is a generic increment_* cell - store as fallback
+                generic_increments[y] = {'name': value, 'y': y, 'x': x}
+    
+    # Second pass: use generic increment_* cells only for Y positions we didn't find descriptive names
+    for y, inc_data in generic_increments.items():
+        if y not in increments:
+            increments[y] = inc_data
+    
+    # Sort increments by Y to establish boundaries (swim lanes) and assign increment numbers
     sorted_increments = sorted(increments.items(), key=lambda x: x[1]['y'])
     increment_boundaries = []
-    for i, (inc_num, inc_data) in enumerate(sorted_increments):
+    for i, (y_key, inc_data) in enumerate(sorted_increments):
+        inc_num = i + 1  # Assign increment number based on Y position order
         y_start = inc_data['y']
         if i + 1 < len(sorted_increments):
             y_end = (inc_data['y'] + sorted_increments[i + 1][1]['y']) / 2
@@ -156,25 +175,19 @@ def extract_story_map(drawio_file, output_file):
         f.write("Increment\n")
         f.write("    Epic (Purple)\n")
         f.write("        Feature (Green)\n")
+        f.write("            Actor (Blue) - above Story\n")
         f.write("            Story (Yellow)\n")
-        f.write("        Actor (Blue)\n")
         f.write("\n")
         
         # Write each increment
         for inc_num, _, _, inc_name in increment_boundaries:
-            f.write(f"## {inc_name}\n\n")
+            f.write(f"## Increment {inc_num} : {inc_name}\n\n")
             
             # Get all epics, sorted by X (horizontal grouping)
             epic_items = sorted(epics.items(), key=lambda x: x[1]['x'])
             
             for epic_id, epic_data in epic_items:
                 f.write(f"{epic_data['name']}\n")
-                
-                # Write actors for this epic in this increment (blue)
-                actors_list = sorted(actors_by_increment[inc_num].get(epic_id, []),
-                                  key=lambda a: a['x'])
-                for actor in actors_list:
-                    f.write(f"\t{actor['name']}\n")
                 
                 # Get features for this epic, sorted by X (horizontal grouping)
                 feature_list = sorted(features_by_epic[epic_id],
@@ -183,15 +196,64 @@ def extract_story_map(drawio_file, output_file):
                 for feat_id, feat_data in feature_list:
                     f.write(f"\t{feat_data['name']}\n")
                     
-                    # Get stories for this feature in this increment, sorted by X
+                    # Get stories and actors for this feature in this increment
                     story_list = sorted(stories_by_increment[inc_num].get(feat_id, []),
                                       key=lambda s: s['x'])
+                    actors_for_epic = sorted(actors_by_increment[inc_num].get(epic_id, []),
+                                           key=lambda a: a['x'])
+                    
+                    # Match actors to stories by X position (actor above story)
+                    # Create pairs: (actor, story) sorted by X position
+                    pairs = []
+                    used_stories = set()
+                    
+                    # Match each actor to closest story by X position
+                    for actor in actors_for_epic:
+                        available_stories = [s for s in story_list if s['id'] not in used_stories]
+                        if available_stories:
+                            closest_story = min(available_stories, key=lambda s: abs(s['x'] - actor['x']))
+                            pairs.append((actor, closest_story))
+                            used_stories.add(closest_story['id'])
+                        else:
+                            pairs.append((actor, None))
+                    
+                    # Add unmatched stories
                     for story in story_list:
-                        f.write(f"\t\t{story['name']}\n")
+                        if story['id'] not in used_stories:
+                            pairs.append((None, story))
+                    
+                    # Sort pairs by X position (use actor x or story x)
+                    pairs.sort(key=lambda p: p[0]['x'] if p[0] else p[1]['x'])
+                    
+                    # Write pairs: actor above story
+                    for actor, story in pairs:
+                        if actor:
+                            f.write(f"\t\t{actor['name']}\n")
+                        if story:
+                            f.write(f"\t\t\t{story['name']}\n")
                 
                 f.write("\n")
             
             f.write("\n")
 
 if __name__ == '__main__':
-    extract_story_map('story-map.drawio', 'story-map-required-from-drawio.md')
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Allow input file to be specified as command line argument, or use default
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+        if not os.path.isabs(input_file):
+            input_file = os.path.join(script_dir, input_file)
+    else:
+        input_file = os.path.join(script_dir, 'story-map.drawio')
+    
+    # Allow output file to be specified as second argument, or use default
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+        if not os.path.isabs(output_file):
+            output_file = os.path.join(script_dir, output_file)
+    else:
+        output_file = os.path.join(script_dir, 'story-map-required-from-drawio.md')
+    
+    extract_story_map(input_file, output_file)

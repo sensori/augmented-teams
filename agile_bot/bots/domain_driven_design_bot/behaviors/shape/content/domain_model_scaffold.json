@@ -1,0 +1,7 @@
+{
+  "name": "domain_model_scaffold",
+  "path": "src",
+  "template": null,
+  "instructions": "Generate source code scaffold files in the src directory based on the structured domain map from domain_graph.json. Create actual source code files (Python .py files, TypeScript .ts files, or appropriate language files) for each bounded context and aggregate."
+}
+
