@@ -1,0 +1,30 @@
+{
+  "description": "Examples tables must have exact test data values. NO placeholders, NO empty cells, NO \"(same as base)\" or similar vague values. Every cell must have a concrete test value.",
+  "examples": [
+    {
+      "do": {
+        "description": "Exact test data values",
+        "content": [
+          "Examples:",
+          "| request_message | detected_keywords | selected_tool |",
+          "|----------------|-------------------|--------------|",
+          "| start shaping | shaping | agent_get_instructions |",
+          "| plan new project | planning,new project | agent_get_instructions |"
+        ]
+      },
+      "dont": {
+        "description": "Placeholders or vague values",
+        "content": [
+          "Examples:",
+          "| request_message | detected_keywords |",
+          "|----------------|-------------------|",
+          "| <message> | <keywords> |",
+          "(WRONG - placeholders instead of actual values)",
+          "OR",
+          "| (same as base) |",
+          "(WRONG - vague value)"
+        ]
+      }
+    }
+  ]
+}

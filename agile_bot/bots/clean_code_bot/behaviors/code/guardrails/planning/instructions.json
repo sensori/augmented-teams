@@ -1,0 +1,18 @@
+{
+  "behaviorName": "code",
+  "rulesFileName": "clean-code-rule.mdc",
+  "instructions": [
+    "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+    "",
+    "1. Review all decision making criteria with the user",
+    "2. Ask user to select preferred options for each decision point",
+    "3. Store planning decisions using agent_store_planning() MCP tool",
+    "4. Apply planning decisions to code design or analysis",
+    "",
+    "Planning decisions override default patterns - you MUST apply them directly to your code design."
+  ]
+}
+
+
+
+

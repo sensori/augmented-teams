@@ -1,0 +1,30 @@
+{
+  "description": "CRITICAL: Every variable used in scenario steps MUST have a corresponding column in the Examples table. Missing variables in Examples table is a defect.",
+  "examples": [
+    {
+      "do": {
+        "description": "All variables in Examples table",
+        "content": [
+          "Steps: Given user types request message \"<request_message>\"",
+          "And MCP Server is unavailable due to \"<unavailability_reason>\"",
+          "Then user receives error \"<expected_error_message>\"",
+          "",
+          "Examples:",
+          "| request_message | unavailability_reason | expected_error_message |",
+          "|----------------|----------------------|----------------------|",
+          "| build story map | server_not_running | \"MCP Server is not available. Please check server status.\" |"
+        ]
+      },
+      "dont": {
+        "description": "Missing variables in Examples table",
+        "content": [
+          "Steps: Given user types \"<request_message>\"",
+          "Then system processes",
+          "",
+          "Examples: | request_message |",
+          "(WRONG - missing expected_error_message or other output variables)"
+        ]
+      }
+    }
+  ]
+}

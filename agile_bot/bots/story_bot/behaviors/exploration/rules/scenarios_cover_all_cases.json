@@ -1,0 +1,15 @@
+{
+  "description": "Scenarios must cover happy path, edge cases, and error cases based on acceptance criteria.",
+  "examples": [
+    {
+      "do": {
+        "description": "Complete scenario coverage",
+        "content": "Happy path: User enters valid data → System saves. Edge case: User enters boundary value → System validates. Error case: User enters invalid data → System shows error."
+      },
+      "dont": {
+        "description": "Don't skip scenario types",
+        "content": "Only happy path scenarios (missing edge cases and error cases)"
+      }
+    }
+  ]
+}

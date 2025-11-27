@@ -1,0 +1,13 @@
+{
+  "description": "Recommended human activities for event storming behavior",
+  "activities": [
+    "Review identified events to verify they represent true business occurrences",
+    "Validate commands and their relationships to events",
+    "Review aggregate boundaries identified from event flow",
+    "Confirm event flow matches business process understanding"
+  ]
+}
+
+
+
+

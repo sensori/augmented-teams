@@ -1,0 +1,15 @@
+{
+  "description": "Behavioral AC belongs at story level, written in increment exploration document (NOT story documents). Use When/Then format (NO Given clauses - save for scenarios).",
+  "examples": [
+    {
+      "do": {
+        "description": "AC in increment exploration document with When/Then format",
+        "content": "Increment exploration document: Story 1 - Acceptance Criteria: When user enters name, then system saves to character sheet"
+      },
+      "dont": {
+        "description": "Don't put AC in story documents or use Given clauses",
+        "content": "Story document: Acceptance Criteria: Given user is logged in, When... (WRONG - AC in story doc, has Given)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+Stories System
+	Purpose: Enable creation, validation, and management of user stories following agile story writing practices
+
+Story Shaping
+	Purpose: Create story map structure and identify marketable increments of value
+	
+	Story Shape Command
+		Purpose: Create story map shell and elaborate/extrapolate scope
+		Actors: StoryShapeCommand (extends Command), CodeAugmentedStoryShapeCommand (wrapper)
+		Properties:
+			- content: Content object with story map file path
+			- base_rule: BaseRule from stories-rule.mdc
+			- prompting_questions: List of questions to gather required context
+			- generate_instructions: AI instructions for generation
+			- validate_instructions: AI instructions for validation
+		Methods:
+			- generate: Creates story map shell and elaborates scope
+				- Checks prompting questions are answered
+				- Creates initial epic/feature/story hierarchy structure
+				- Focuses on user AND system activities (not tasks)
+				- Uses business language (verb/noun, specific and precise)
+				- Elaborates on shell to understand full scope
+				- Extrapolates how many epics, features, and stories make up increments
+				- Balances fine-grained with testable/valuable
+				- Ensures stories are sized appropriately (3-12 day range)
+				- Returns AI instructions with principles
+			- validate: Validates story map structure and content
+				- Checks epic/feature/story hierarchy structure
+				- Validates user/system focus (not tasks)
+				- Checks business language usage
+				- Validates scope extrapolation and story sizing
+				- Returns validation instructions with violations if found
+			- execute: Orchestrates generate then validate workflow
+		Prompting Questions:
+			- What is the product or feature vision?
+			- Who are the target users or stakeholders?
+			- What are the main user goals or outcomes?
+			- What is the scope boundary (what's in/out)?
+	
+	Story Market Increments Command
+		Purpose: Identify marketable increments of value
+		Actors: StoryMarketIncrementsCommand (extends Command), CodeAugmentedStoryMarketIncrementsCommand (wrapper)
+		Properties:
+			- content: Content object with story map file path
+			- base_rule: BaseRule from stories-rule.mdc
+			- prompting_questions: List of questions to gather required context
+			- generate_instructions: AI instructions for generation
+			- validate_instructions: AI instructions for validation
+		Methods:
+			- generate: Identifies marketable increments of value
+				- Checks prompting questions are answered
+				- Identifies marketable increments of value
+				- Places increments around the story map
+				- Prioritizes increments
+				- Performs relative sizing at initiative/increment level (compare against previous work)
+				- Returns AI instructions with principles
+			- validate: Validates increment identification and prioritization
+				- Validates marketable increment identification
+				- Checks relative sizing approach
+				- Validates increment prioritization
+				- Returns validation instructions with violations if found
+			- execute: Orchestrates generate then validate workflow
+		Prompting Questions:
+			- Is there an existing story map shell to work with?
+			- What are the business priorities or strategic goals?
+			- What are the market constraints or deadlines?
+			- Are there any dependencies between increments?
+
+Story Map
+	Purpose: Hierarchical structure representing epic/feature/story organization
+	Properties:
+		- Epic: High-level business capability or initiative
+		- Feature: Cohesive set of functionality within epic
+		- Story: Small increment of behavior within feature
+	Structure:
+		- Epic → Feature → Story hierarchy
+		- User activities: Actions users perform
+		- System activities: Observable system behaviors
+		- Marketable increments: Horizontal slices across features
+	Validation:
+		- Must have both user AND system activities
+		- Stories sized 3-12 day range
+		- Uses business language (verb/noun, specific and precise)
+		- Focuses on behaviors, not tasks
+
+Marketable Increment
+	Purpose: Horizontal slice across features that delivers value together
+	Properties:
+		- Increment name: Descriptive name for the increment
+		- Stories: Stories that belong to this increment
+		- Priority: Business priority level
+		- Relative size: Comparison against previous similar work
+		- Dependencies: Other increments this depends on
+	Validation:
+		- Must be well-defined with clear boundaries
+		- Must deliver measurable value
+		- Stories must be appropriately sized
+		- Dependencies must be identified
+
+Validation
+	Purpose: Ensure story maps and increments follow story writing principles
+	
+	Story Shape Heuristic
+		Purpose: Validate story shape command output
+		Checks:
+			- Epic/feature/story hierarchy structure exists
+			- User/system focus (not tasks)
+			- Business language usage
+			- Scope extrapolation and story sizing (3-12 day range)
+			- Fine-grained/testable balance
+	
+	Story Market Increments Heuristic
+		Purpose: Validate market increments command output
+		Checks:
+			- Marketable increment identification
+			- Increment prioritization
+			- Relative sizing approach at initiative/increment level
+
+Command Execution
+	Purpose: Provide common patterns for executing story commands
+	
+	Basic Execution
+		Purpose: Foundation for all command execution
+		Properties:
+			- Content being processed with file path and violations
+			- Rule with principles and examples
+			- Instructions for generation and validation
+			- Execution state tracking
+		Operations:
+			- generate: Returns instructions with principles and examples
+			- validate: Returns validation instructions with principles
+			- execute: Orchestrates generate then validate workflow
+	
+	Prompting Questions Check
+		Purpose: Ensure required context is available before command execution
+		Properties:
+			- prompting_questions: List of questions to check
+			- context: User-provided context to check against
+		Operations:
+			- check_prompting_questions: Checks if questions are answered in context
+				- If not answered: Generates prompts to ask user
+				- If answered: Proceeds with normal flow
+		Integration:
+			- Runs automatically before generate/plan via CodeAugmentedCommand
+			- Questions are command-specific (defined per command)
+	
+	Code-Validated Execution
+		Purpose: Add automated code validation using heuristics
+		Pattern: Wraps any command to add validation
+		Properties:
+			- Wrapped command instance
+			- Rule with principles
+			- Detected violations list
+		Operations:
+			- generate: Delegates to wrapped command, no violation scanning
+			- validate: Scans for violations, formats report
+				- Calls wrapped command validate
+				- Scans content using heuristics from principles
+				- Enhances violations with principle info and code snippets
+				- Formats violations as checklist or detailed report
+				- Appends violations to validation instructions
+			- execute: Delegates to wrapped command
+		Behavior:
+			- Loads heuristics from principles at initialization
+			- Attaches heuristics to principles
+			- Scans for violations only during validation
+			- Provides violation checklist to AI for fixing
+
+CLI Entry Point
+	Purpose: Provide command-line access to all story operations
+	Properties:
+		- Command type
+		- Command arguments
+	Operations:
+		- Parses command-line arguments
+		- Routes to appropriate command class
+		- Determines action: generate, validate, execute
+		- Executes command method
+	Commands:
+		- execute-shape: Execute story-shape command
+		- generate-shape: Generate story map only
+		- validate-shape: Validate story map only
+		- execute-market-increments: Execute story-market-increments command
+		- generate-market-increments: Generate increments only
+		- validate-market-increments: Validate increments only
+	Error Handling:
+		- No arguments displays usage, exits with error
+		- Unknown command displays error message, exits with error
+
+

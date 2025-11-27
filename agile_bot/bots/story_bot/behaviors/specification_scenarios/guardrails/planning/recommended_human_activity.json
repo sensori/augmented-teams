@@ -1,0 +1,8 @@
+{
+  "recommended_human_activity": [
+    "Review the AI-generated scenarios to verify they accurately reflect step-by-step user-system interactions",
+    "Validate that the AI has correctly identified domain rules and data constraints in real-world terms",
+    "Review the AI's approach to scope definition to verify it covers appropriate flows and edge cases",
+    "Review the AI's acceptance criteria with dev and test teams to verify feasibility, clarity, and testability"
+  ]
+}

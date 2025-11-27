@@ -1,0 +1,125 @@
+Stories System
+	Purpose: Enable creation, validation, and management of user stories following agile story writing practices
+
+		describe Story Map Generation
+			
+			describe that has all questions answered in provided context
+				it should have epic feature story hierarchy instructions generated
+				it should have user AND system activities focus included in instructions
+				it should have business language requirements included in instructions
+				it should have fine-grained balanced with testable valuable requirements included
+				it should have story sizing in 3 to 12 day range included
+				it should have principles from rule file included
+		
+		describe that has questions not answered in context
+				it should have prompts generated to ask user for missing information
+				it should have generation paused until questions answered	
+
+		describe Story Map File 
+		    that has missing epic feature story hierarchy
+				it should have hierarchy structure violation returned
+			
+			 that has task focus instead of user system activities
+				it should have task focus violation returned
+			
+			 that has technical jargon instead of business language
+				it should have business language violation returned
+			
+			that has stories not sized in 3 to 12 day range
+				it should have story sizing violation returned
+			
+			that has stories not balanced between fine-grained testable valuable
+				it should have balance violation returned
+			
+			that has no violations
+				it should have empty violations list returned
+			
+		    that has changes being arranged
+				
+				describe with Epics
+					
+					describe that have been added to map
+						it should have epic folders created with emoji prefix and Title Case
+						it should have folders created inside map directory
+						it should have feature folders created for new epics
+					
+					describe that have been removed from map
+						it should have epic folders moved to z_archive with timestamp
+						it should have full folder structure preserved when archiving
+						it should have files never deleted only archived
+					
+					describe that have been renamed in map
+						it should have epic folders renamed to match new names
+						it should have feature folders moved with epic folders
+				
+				describe with Features
+					
+					describe that have been added to epic
+						it should have feature folders created with emoji prefix and Title Case
+						it should have feature folders created inside epic folders
+					
+					describe that have been removed from epic
+						it should have feature folders moved to z_archive with timestamp
+						it should have story files preserved in archive
+					
+					describe that have been moved to different epic
+						it should have feature folders moved to new epic folders
+						it should have story files moved with feature folders
+					
+					describe that have been renamed in map
+						it should have feature folders renamed to match new names
+						it should have story files moved with renamed features
+				
+				describe with Stories
+					
+					describe that have been added to feature
+						it should have story markdown files created
+						it should have story files use emoji prefix and Title Case
+						it should have story files populated with template content
+						it should have epic and feature metadata included in story files
+						it should have acceptance criteria sections included
+					
+					describe that have been removed from feature
+						it should have story files moved to z_archive with timestamp
+						it should have epic and feature structure preserved in archive
+					
+					describe that have been moved to different feature
+						it should have story files moved to new feature folders
+						it should have story file content preserved when moving
+						it should have epic and feature metadata updated after move
+					
+					describe that already exist
+						it should have story file creation skipped
+						it should have existing file content preserved
+			
+		
+		describe Folder Structure that has been validated
+			it should have validation report with epic folder checks returned
+			it should have validation report with feature folder checks returned
+			it should have missing folders list returned
+			it should have extra folders list returned
+			it should have naming violations list returned
+			it should have pass or fail status returned
+		
+		describe Arrangement Operations that have been completed
+			it should have folders created count returned
+			it should have story files created count returned
+			it should have stories moved count returned
+			it should have obsolete folders archived count returned
+			it should have orphaned stories archived count returned
+			it should have archive location with timestamp returned
+			it should have Unicode encoding errors handled gracefully in output
+		describe Marketable Increments Generation
+			
+			that has business priorities provided
+				it should have increment identification instructions generated
+				it should have increment placement around story map requested
+				it should have increment prioritization by business priorities requested
+				it should have relative sizing at initiative or increment level requested
+				it should have comparison against previous work requested
+				it should have principles from rule file included
+			
+			 that has questions not answered
+				it should have prompts generated for missing business priorities
+				it should have prompts generated for missing constraints or deadlines
+		

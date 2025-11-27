@@ -1,0 +1,24 @@
+{
+  "description": "Add missing domain responsibility when story step has no mapping",
+  "do": {
+    "examples": [
+      {
+        "description": "Identify story step without domain responsibility",
+        "content": "Story step 'MCP Bot Server Intercept with a Project Check' missing responsibility - Add 'MCP Bot Server: Intercepts Tool Calls With Project Check: Project, Bot Tool, Behavior Tool, Behavior Action Tool'"
+      },
+      {
+        "description": "Add responsibility to appropriate domain concept",
+        "content": "Story step 'Behavior Tool determines active or next Behavior/Action' missing responsibility - Add 'Behavior Tool: Determines Active Or Next Behavior Action: Workflow State, Workflow, Bot Config'"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't leave story steps without domain responsibility mapping",
+        "content": "Story step 'System processes request' - No domain concept 'System' exists, should add domain concept or update story step"
+      }
+    ]
+  }
+}
+

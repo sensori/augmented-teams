@@ -1,0 +1,23 @@
+{
+  "behaviorName": "shape",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+    "",
+    "Perform each instruction action as specified in base_actions, tweaked for the shape behavior.",
+    "",
+    "**Action Sequence:**",
+    "1. Initialize Project - Follow base_actions/1_initialize_project/instructions.json, shape: story map creation setup",
+    "2. Gather Context - Follow base_actions/2_gather_context/instructions.json, 1_shape/guardrails/required_context/instructions.json",
+    "3. Decide Planning Criteria - Follow base_actions/3_decide_planning_criteria/instructions.json, 1_shape/guardrails/planning/instructions.json",
+    "4. Build Knowledge - Follow base_actions/4_build_knowledge/instructions.json, shape: build story map structure",
+    "5. Render Output - Follow base_actions/5_render_output/instructions.json, shape: render story map document",
+    "6. Validate Rules - Follow base_actions/7_validate_rules/instructions.json, shape: validate hierarchy and story structure",
+    "7. Correct Bot - Follow base_actions/6_correct_bot/instructions.json, shape: correct story map structure",
+    "",
+    "**Workflow Control:**",
+    "- **STOP for human feedback** when told to stop or when action requires user input",
+    "- **CONTINUE to next action** when told to proceed",
+    "- **STOP when complete** when all actions are finished"
+  ]
+}

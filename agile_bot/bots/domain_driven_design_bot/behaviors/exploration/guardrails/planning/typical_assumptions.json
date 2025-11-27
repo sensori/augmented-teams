@@ -1,0 +1,19 @@
+{
+  "description": "Typical assumptions for exploration behavior",
+  "assumptions": [
+    "Domain exploration happens after story exploration stage in story shaping",
+    "Acceptance criteria from story exploration are the primary input for creating behavioral acceptance criteria",
+    "Behavioral acceptance criteria use the format 'When <trigger> Then <outcome>'",
+    "Domain descriptions explain how concepts interact using the form '<A Concept> <interacts with> <another Concept>'",
+    "Domain model and description are updated based on behavioral acceptance criteria and domain descriptions",
+    "Domain exploration creates a domain exploration document similar to story exploration documents",
+    "Domain graph is updated with behavioral acceptance criteria, domain descriptions, and updated domain concepts",
+    "Focus on domain concepts that appear in acceptance criteria",
+    "Domain descriptions should use natural language that domain experts understand",
+    "Behavioral acceptance criteria should specify outcomes that result from user and system triggers"
+  ]
+}
+
+
+
+

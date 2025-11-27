@@ -1,0 +1,14 @@
+{
+  "description": "Behavior-level trigger words - specific to domain discovery behavior",
+  "patterns": [
+    "discover.*domain.*objects",
+    "identify.*core.*domain.*objects",
+    "determine.*relationships.*responsibilities",
+    "domain.*discovery"
+  ],
+  "priority": 10
+}
+
+
+
+

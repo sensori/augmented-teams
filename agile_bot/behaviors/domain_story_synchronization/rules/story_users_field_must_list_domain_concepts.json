@@ -1,0 +1,24 @@
+{
+  "description": "Story users field must list domain concepts",
+  "do": {
+    "examples": [
+      {
+        "description": "List domain concepts from matching responsibilities",
+        "content": "Story 'Generate MCP Bot Server' has users: Human, Agile Bot, MCP Bot Server Generator, Bot Config - All are domain concepts from matching responsibilities"
+      },
+      {
+        "description": "Use capitalized domain concept names in users field",
+        "content": "Story 'Project Generates Project Scaffold' has users: Project, Project Bot State, File System - Match collaborators from 'Project: Provides Project Scaffold: File System'"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use lowercase or abbreviated concept names",
+        "content": "Story 'Generate Server' has users: user, generator, config - Not using capitalized domain concept names"
+      }
+    ]
+  }
+}
+

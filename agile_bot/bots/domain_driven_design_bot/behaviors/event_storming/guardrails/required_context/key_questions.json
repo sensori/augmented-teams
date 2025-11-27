@@ -1,0 +1,16 @@
+{
+  "description": "Key questions that must be answered before this behavior can proceed",
+  "questions": [
+    "What is the scope of the event storming? (An increment, epic, feature, collection of stories, or entire story map?)",
+    "What story map or story collection should be used as the primary input? (Load from docs/stories/map/ or docs/stories/increments/)",
+    "If no story map is available, what logical sequence of commands, reactions, events can be inferred from the domain model?",
+    "What are the key business events that occur in this domain flow?",
+    "What commands trigger these events? (Commands often represent user or external domain interactions)",
+    "What reactions occur after events? (Reactions are things that need to happen in response to an event, always described in imperative)",
+    "What aggregates or bounded contexts are involved in processing commands and producing events?"
+  ]
+}
+
+
+
+

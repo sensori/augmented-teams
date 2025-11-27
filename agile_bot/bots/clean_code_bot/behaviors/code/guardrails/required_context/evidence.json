@@ -1,0 +1,20 @@
+{
+  "description": "Evidence types that support this behavior",
+  "evidence": [
+    "User stories or story documents (from story writing phase)",
+    "Domain maps or domain model documents (from DDD documentation)",
+    "BDD test files or test specifications (from BDD or TDD tests)",
+    "Existing source code files",
+    "API specifications or interface definitions",
+    "Architecture diagrams, design documents / diagrams, or Architecture templates",
+    "Code style guides or conventions",
+    "Project documentation",
+    "Previous code reviews or feedback",
+    "Team coding standards",
+    "Language-specific style guides (PEP 8, Airbnb JS, etc.)"
+  ]
+}
+
+
+
+

@@ -1,0 +1,15 @@
+{
+  "description": "Evidence types that support this behavior",
+  "evidence": [
+    "Business process documentation",
+    "Domain expert interviews",
+    "Existing system documentation",
+    "Business glossaries or dictionaries",
+    "Financial statements",
+    "industry literature",
+    "Event storming outputs",
+    "Domain models from similar systems"
+  ]
+}
+
+

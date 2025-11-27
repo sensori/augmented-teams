@@ -1,0 +1,15 @@
+{
+  "description": "Behavior-level trigger words - specific to bounded context mapping behavior",
+  "patterns": [
+    "bounded.*context.*map",
+    "create.*bounded.*context.*map",
+    "define.*integration.*patterns",
+    "map.*bounded.*contexts",
+    "context.*mapping"
+  ],
+  "priority": 10
+}
+
+
+
+

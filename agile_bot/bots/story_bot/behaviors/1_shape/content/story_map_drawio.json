@@ -1,0 +1,7 @@
+{
+  "name": "story_map_drawio",
+  "path": "docs/stories",
+  "template": "story-map.drawio",
+  "builder": "story_map_drawio_builder.py",
+  "output": "story-map.drawio"
+}

@@ -1,0 +1,18 @@
+{
+  "shape": {
+    "decisions_made": {
+      "drill_down_areas": "Drill down where: Architectural uncertainty is high, Business complexity is significant, Uniqueness creates risk, Integration complexity exists, User behavior is highly variable",
+      "scope_level": "End-to-end user-system behavior – One user interaction followed by one system response",
+      "drill_down_depth": "Approximate story limit: 10-15 stories",
+      "coverage_limits": "Approximate story limit: 10-15 stories"
+    },
+    "assumptions_made": {
+      "focus": "Focus on user flow over internal systems",
+      "coverage": "Cover the end-to-end scenario",
+      "prioritize": "Prioritize customer-facing features",
+      "testability": "Assume stories should be independently testable",
+      "value": "Assume each story delivers user value",
+      "infrastructure": "Assume technical infrastructure stories are implicit"
+    }
+  }
+}

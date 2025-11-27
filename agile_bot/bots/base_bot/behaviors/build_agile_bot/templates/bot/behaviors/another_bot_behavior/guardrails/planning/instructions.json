@@ -1,0 +1,16 @@
+{
+  "behaviorName": "{behavior_name}",
+  "rulesFileName": "{rules_file_path}",
+  "instructions": [
+    "{Main instruction sentence describing the overall goal}",
+    "",
+    "1. {Step 1 description}",
+    "2. {Step 2 description}",
+    "3. {Step 3 description}",
+    "",
+    "{Additional guidance or notes}",
+    "",
+    "{Output format or requirements}"
+  ]
+}
+

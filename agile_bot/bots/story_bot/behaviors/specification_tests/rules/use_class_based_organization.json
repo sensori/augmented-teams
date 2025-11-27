@@ -1,0 +1,29 @@
+{
+  "description": "Use class-based organization in single test file. Organize step definitions into classes (AgentSteps, ProjectSteps, WorkflowSteps) and helpers into factory classes (AgentFactory, ProjectFactory). All code in src/stories_acceptance_tests.py.",
+  "examples": [
+    {
+      "do": {
+        "description": "Class-based organization",
+        "content": [
+          "class AgentSteps:",
+          "    @given(\"Agent is initialized with agent_name='story_bot'\")",
+          "    def given_agent_initialized(self, context, agent_name):",
+          "        context.agent = AgentFactory.create_agent(agent_name=agent_name, workspace_root=context.workspace_root)",
+          "",
+          "class AgentFactory:",
+          "    @staticmethod",
+          "    def create_agent(agent_name='story_bot', workspace_root=None):",
+          "        return Agent(agent_name=agent_name, workspace_root=workspace_root)"
+        ]
+      },
+      "dont": {
+        "description": "Flat organization or multiple files",
+        "content": [
+          "# DON'T: All steps at module level without organization",
+          "# DON'T: Separate files for steps, helpers, fixtures",
+          "# DON'T: conftest.py for fixtures (use test file instead)"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "description": "Create folders and files from structured Story Graph JSON, not from markdown parsing. Builder reads JSON structure directly.",
+  "examples": [
+    {
+      "do": {
+        "description": "Read from structured JSON",
+        "content": "Builder reads structured.json → Iterates epics[] → Creates folders for each epic and its features"
+      },
+      "dont": {
+        "description": "Don't parse markdown for folder creation",
+        "content": "Parse story-map.md markdown file to extract hierarchy (WRONG - use structured JSON)"
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,241 @@
+{
+  "concepts": [
+    {
+      "name": "Agile Bot",
+      "responsibilities": [
+        {
+          "name": "Loads Workflow",
+          "collaborators": ["Workflow", "Bot Config"]
+        },
+        {
+          "name": "Loads Project",
+          "collaborators": ["Project", "Workflow"]
+        },
+        {
+          "name": "Loads Behaviors",
+          "collaborators": ["Behaviors", "Bot Config"]
+        },
+        {
+          "name": "Generates MCP Server",
+          "collaborators": ["MCP Bot Server Generator"]
+        }
+      ]
+    },
+    {
+      "name": "Bot Behavior",
+      "responsibilities": [
+        {
+          "name": "Defines Action Steps",
+          "collaborators": ["Bot Config"]
+        }
+      ]
+    },
+    {
+      "name": "Project",
+      "responsibilities": [
+        {
+          "name": "Manages Project State",
+          "collaborators": ["Project Bot State", "File System"]
+        },
+        {
+          "name": "Manages Workflow State",
+          "collaborators": ["Workflow", "Project Bot State", "File System"]
+        },
+        {
+          "name": "Provides Project Scaffold",
+          "collaborators": ["File System"]
+        },
+        {
+          "name": "Tracks Bot State And Activity",
+          "collaborators": ["Project Bot State", "Bot Activity", "File System"]
+        }
+      ]
+    },
+    {
+      "name": "Project Bot State",
+      "responsibilities": [
+        {
+          "name": "Stores Project Area",
+          "collaborators": ["File System"]
+        },
+        {
+          "name": "For A Bot",
+          "collaborators": ["Bot Name"]
+        },
+        {
+          "name": "Stores Activities",
+          "collaborators": ["Bot Activity", "File System"]
+        },
+        {
+          "name": "Stores Workflow State",
+          "collaborators": ["Workflow State", "File System"]
+        }
+      ]
+    },
+    {
+      "name": "Workflow State",
+      "responsibilities": [
+        {
+          "name": "Stores Current Behavior Name",
+          "collaborators": ["Behavior"]
+        },
+        {
+          "name": "Stores Current Action Name",
+          "collaborators": ["Action"]
+        }
+      ]
+    },
+    {
+      "name": "Workflow",
+      "responsibilities": [
+        {
+          "name": "Orders Behavior Action Steps",
+          "collaborators": ["Agile Bot", "Bot Behavior"]
+        }
+      ]
+    },
+    {
+      "name": "MCP Bot Server Generator",
+      "responsibilities": [
+        {
+          "name": "Generates MCP Bot Server",
+          "collaborators": ["Bot Config", "MCP Bot Server"]
+        },
+        {
+          "name": "Generates Bot Tools",
+          "collaborators": ["Bot Config", "MCP Bot Server", "Bot Tool", "Trigger Words"]
+        },
+        {
+          "name": "Generates Behavior Tools",
+          "collaborators": ["Bot Config", "MCP Bot Server", "Behavior Tool", "Bot Behavior", "Behavior Trigger Words"]
+        },
+        {
+          "name": "Generates Behavior Action Tools",
+          "collaborators": ["Bot Config", "MCP Bot Server", "Behavior Action Tool", "Behavior", "Action", "Behavior Action Trigger Words"]
+        }
+      ]
+    },
+    {
+      "name": "MCP Bot Server",
+      "responsibilities": [
+        {
+          "name": "Created By Bot",
+          "collaborators": ["Agile Bot"]
+        },
+        {
+          "name": "Instantiates Bot For Project",
+          "collaborators": ["Bot Config", "Bot", "Project"]
+        },
+        {
+          "name": "Intercepts Tool Calls With Project Check",
+          "collaborators": ["Project", "Bot Tool", "Behavior Tool", "Behavior Action Tool"]
+        },
+        {
+          "name": "Returns Project Location For Confirmation Or Display",
+          "collaborators": ["Project", "AI Chat"]
+        },
+        {
+          "name": "Provides Bot Behavior Actions MCP Tools",
+          "collaborators": ["Bot Behavior Action Tool"]
+        },
+        {
+          "name": "Provides Bot Behavior Tools",
+          "collaborators": ["Bot Behavior Tool"]
+        },
+        {
+          "name": "Provides Bot Tools",
+          "collaborators": ["Bot Tool"]
+        },
+        {
+          "name": "Provides Project State Tool",
+          "collaborators": ["Project State Tool"]
+        },
+        {
+          "name": "Routes Tool Calls",
+          "collaborators": ["AI Chat", "Bot Tools"]
+        },
+        {
+          "name": "Routes To Specific MCP Tool Based On Trigger Words",
+          "collaborators": ["AI Chat", "Bot Tool", "Behavior Tool", "Behavior Action Tool"]
+        }
+      ]
+    },
+    {
+      "name": "Bot Tool",
+      "examples": ["story_bot"],
+      "responsibilities": [
+        {
+          "name": "Runs Active Action On Active Behavior",
+          "collaborators": ["Agile Bot", "Project", "Project Bot State", "Workflow State", "Bot Behavior", "Bot Action"]
+        },
+        {
+          "name": "Moves To Next Action If Done",
+          "collaborators": ["Agile Bot", "Project", "Workflow State", "Workflow"]
+        },
+        {
+          "name": "Moves To Next Behavior If Done",
+          "collaborators": ["Workflow", "Agile Bot", "Project", "Workflow State"]
+        }
+      ]
+    },
+    {
+      "name": "Behavior Tool",
+      "examples": ["story_bot_shape"],
+      "responsibilities": [
+        {
+          "name": "Determines Active Or Next Behavior Action",
+          "collaborators": ["Workflow State", "Workflow", "Bot Config"]
+        },
+        {
+          "name": "Runs Active Action On Behavior",
+          "collaborators": ["Agile Bot", "Project", "Project Bot State", "Workflow State", "Bot Behavior", "Bot Action"]
+        },
+        {
+          "name": "Moves To Next Action If Done",
+          "collaborators": ["Workflow", "Project Bot State", "Workflow State"]
+        },
+        {
+          "name": "Moves To Next Behavior If Done",
+          "collaborators": ["Workflow", "Project Bot State", "Workflow State"]
+        }
+      ]
+    },
+    {
+      "name": "Behavior Action Tool",
+      "examples": ["story_bot_shape_clarification"],
+      "responsibilities": [
+        {
+          "name": "Runs Specific Behavior Action",
+          "collaborators": ["Agile Bot", "Bot Behavior", "Bot Action"]
+        }
+      ]
+    },
+    {
+      "name": "Project State Tool",
+      "responsibilities": [
+        {
+          "name": "Reads Project State",
+          "collaborators": ["Project Bot State", "Workflow State", "File System"]
+        },
+        {
+          "name": "Returns Current State",
+          "collaborators": ["AI Chat", "MCP Bot Server"]
+        }
+      ]
+    },
+    {
+      "name": "AI Chat",
+      "responsibilities": [
+        {
+          "name": "Detects Trigger Words And Routes To Tools",
+          "collaborators": ["Human", "Bot Server", "MCP Bot Tools", "Bot Tool", "Project State Tool", "Behavior Tool", "Behavior Action Tool"]
+        },
+        {
+          "name": "Presents Information To Human",
+          "collaborators": ["Human", "All tools"]
+        }
+      ]
+    }
+  ]
+}
+

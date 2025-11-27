@@ -1,0 +1,21 @@
+{
+  "description": "Agent-level trigger words - general terms that indicate when to use the BDD bot",
+  "patterns": [
+    "bdd",
+    "behavior.*driven.*development",
+    "test.*driven.*development",
+    "tdd",
+    "write.*tests",
+    "create.*test.*scenarios",
+    "bdd.*workflow",
+    "red.*green.*refactor",
+    "bdd.*scaffold",
+    "bdd.*signature",
+    "bdd.*test"
+  ],
+  "priority": 5
+}
+
+
+
+

@@ -1,0 +1,15 @@
+{
+  "description": "Enumerate ALL stories for increment(s) in focus explicitly (no ~X stories notation). Use story counts (~X stories) for other increments. CRITICAL: When applying new approach (especially System /back office), you MUST review existing stories and expand/break them down into component-interaction stories. The number of stories WILL change based on the new granularity approach.",
+  "examples": [
+    {
+      "do": {
+        "description": "List all stories explicitly for focus increment, including newly expanded stories",
+        "content": "Increment 1 (FOCUS): Story 1, Story 2, Story 3... (all listed, including component-interaction stories). Increment 2: ~15 stories (count only). Example expansion: 'Group tokens from canvas into mob' becomes: 'Group tokens from canvas into mob' (user action), 'Mob manager creates mob with selected tokens' (system), 'System assigns leader randomly' (system)"
+      },
+      "dont": {
+        "description": "Don't use ~X notation for focus increment or keep original stories without expansion",
+        "content": "Increment 1 (FOCUS): ~8 stories (WRONG - should list all) OR keeping original 'Group tokens from canvas into mob' without breaking down into component stories (WRONG - should expand based on approach)"
+      }
+    }
+  ]
+}

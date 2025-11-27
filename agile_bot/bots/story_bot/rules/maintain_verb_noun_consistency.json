@@ -1,0 +1,47 @@
+{
+  "description": "Maintain verb-noun consistency from epic to feature to story to scenario",
+  "do": {
+    "examples": [
+      {
+        "description": "Use consistent verb-noun language across all levels",
+        "content": [
+          "Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Scenario: When customer places order..."
+        ]
+      },
+      {
+        "description": "Maintain consistent terminology throughout hierarchy",
+        "content": [
+          "Epic, feature, story, and scenario all use same verb-noun pattern"
+        ]
+      },
+      {
+        "description": "Use verb-noun language in scenario sentences",
+        "content": [
+          "When user submits form, then system validates data"
+        ]
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't switch formats between levels",
+        "content": [
+          "Epic: Order Management → Feature: Place Order (inconsistent format)"
+        ]
+      },
+      {
+        "description": "Don't mix verb-noun with other formats",
+        "content": [
+          "Epic uses verb-noun, but feature uses noun-only format"
+        ]
+      },
+      {
+        "description": "Don't use different terminology at different levels",
+        "content": [
+          "Epic says 'Orders', feature says 'Order Processing', story says 'Process Order'"
+        ]
+      }
+    ]
+  }
+}

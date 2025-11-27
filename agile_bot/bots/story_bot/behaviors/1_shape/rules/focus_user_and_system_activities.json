@@ -1,0 +1,36 @@
+{
+  "description": "Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.",
+  "examples": [
+    {
+      "do": {
+        "description": "Include both user and system activities in story descriptions",
+        "content": [
+          "User submits order, System validates payment",
+          "Customer views products, System displays inventory",
+          "Use user activity patterns: User submits, Customer places",
+          "Use system activity patterns: System validates, System sends",
+          "Focus stories on user interactions and how the system behaves as observed by users",
+          "Example: Customer places order with payment details"
+        ]
+      },
+      "dont": {
+        "description": "Avoid task-oriented language that describes implementation",
+        "content": [
+          "Avoid task-oriented language that describes implementation",
+          "Don't use task language for building or setting up",
+          "Don't focus only on user activities (ignore system activities)",
+          "Don't focus only on tasks (instead of activities)",
+          "Don't use development task language: implement, create, refactor, optimize, fix, build, set up",
+          "Don't use technical implementation details: query database, call API, update table",
+          "",
+          "Wrong Examples:",
+          "- Only user activities: User submits order, User views products (missing system activities)",
+          "- Only tasks: Implement order submission, Create payment validation (not activities)",
+          "- Implement order submission, Create payment validation",
+          "- Build product listing page, Set up inventory display"
+        ]
+      }
+    }
+  ]
+}
+

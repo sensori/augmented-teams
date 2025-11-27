@@ -1,0 +1,56 @@
+{
+  "description": "CRITICAL: All step definitions and assertions must match exactly what's in the feature files. We are NOT creating new steps - we are implementing existing steps from specification behaviors. Copy step text exactly from feature files (including quotes, capitalization, punctuation). Use exact variable names from Examples tables.",
+  "examples": [
+    {
+      "do": {
+        "description": "Step definition matches feature file exactly",
+        "content": [
+          "Feature file: Given Agent is initialized with agent_name='story_bot'",
+          "",
+          "Step definition:",
+          "@given(\"Agent is initialized with agent_name='story_bot'\")",
+          "def given_agent_initialized(context, agent_name='story_bot'):",
+          "    context.agent = Agent(agent_name=agent_name)"
+        ]
+      },
+      "dont": {
+        "description": "Step definition doesn't match feature file",
+        "content": [
+          "Feature file: Given Agent is initialized with agent_name='story_bot'",
+          "",
+          "Step definition:",
+          "@given(\"Agent is initialized\")  # WRONG - missing parameter",
+          "OR",
+          "@given(\"agent is initialized with agent_name='story_bot'\")  # WRONG - wrong capitalization",
+          "OR",
+          "@given(\"Agent is initialized with agent_name=story_bot\")  # WRONG - missing quotes"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Assertions verify what steps say",
+        "content": [
+          "Feature file: Then Agent sets up base agent configuration path at agents/base/agent.json",
+          "",
+          "Step definition:",
+          "@then(\"Agent sets up base agent configuration path at agents/base/agent.json\")",
+          "def then_agent_sets_base_config_path(context):",
+          "    expected_path = context.workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "    assert context.agent._agent_config_path == expected_path"
+        ]
+      },
+      "dont": {
+        "description": "Assertions for things not in steps",
+        "content": [
+          "Feature file: Then Agent sets up base agent configuration path",
+          "",
+          "Step definition:",
+          "@then(\"Agent sets up base agent configuration path\")",
+          "def then_agent_sets_path(context):",
+          "    assert context.agent._internal_flag == True  # WRONG - not mentioned in step"
+        ]
+      }
+    }
+  ]
+}

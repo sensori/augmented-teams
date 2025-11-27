@@ -1,0 +1,29 @@
+{
+  "actionName": "validate_rules",
+  "instructions": [
+    "**MANDATORY: Before validating any content, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements and decisions that MUST be checked against during validation.**",
+    "",
+    "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work.**",
+    "",
+    "**Instructions:**",
+    "1. Load and review clarification.json and planning.json to understand all requirements and decisions",
+    "2. Check planning.json for the current behavior's decisions_made and assumptions_made sections",
+    "3. Evaluate the Content Data against all rules listed above",
+    "4. Check for violations of each rule",
+    "5. Verify that Content Data incorporates all requirements from clarification.json and planning.json (especially the current behavior's decisions_made and assumptions_made)",
+    "6. Generate a validation report with:",
+    "   - List of all violations found (if any)",
+    "   - Specific examples from the Content Data that violate rules",
+    "   - Any missing requirements from clarification.json or planning.json (including stage-specific decisions/assumptions)",
+    "   - Recommendations for fixing violations",
+    "7. If no violations found, confirm that Content Data follows all rules and incorporates all requirements"
+  ],
+  "templates": {
+    "validation_results": {
+      "template": "Validation Results:\n\n**Status:** {{validation_status}}\n\n**Violations Found:**\n{{violations_list}}\n\n**Suggested Corrections:**\n{{suggested_corrections}}\n\nYou may request a second validation pass with corrections applied.",
+      "description": "Used to present validation results to user"
+    }
+  }
+}
+
+

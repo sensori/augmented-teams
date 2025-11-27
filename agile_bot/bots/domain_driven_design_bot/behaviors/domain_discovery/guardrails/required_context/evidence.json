@@ -1,0 +1,14 @@
+{
+  "description": "Evidence types that support this behavior",
+  "evidence": [
+    "Increments from story agent prioritization phase (BEST SOURCE for determining discovery scope)",
+    "Story map from story agent (docs/stories/map/)",
+    "Story graph JSON (docs/stories/story_graph.json)",
+    "Domain model from Shaping stage (for reference only - discovery does not modify it)",
+    "Domain expert knowledge"
+  ]
+}
+
+
+
+

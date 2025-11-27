@@ -1,0 +1,5 @@
+{
+  "name": "story",
+  "path": "docs/stories/map",
+  "template": "story-doc-examples-template.md"
+}

@@ -1,0 +1,83 @@
+{
+  "description": "Decision making criteria for domain partitioning behavior",
+  "criteria": [
+    {
+      "description": "Aggregate design and root identification",
+      "question": "How should aggregates be designed and what should be aggregate roots?",
+      "outcome": "Determines aggregate granularity, boundaries, and which entities become aggregate roots",
+      "options": [
+        "One aggregate per major business concept (default) - each major business concept has its own aggregate with its own root",
+        "Fine-grained aggregates - smaller aggregates based on reusable abstractions",
+        "Decoupled fine-grained aggregates - aggregates decoupled and fine-grained based on external systems that have their own boundaries",
+        "Business transaction boundaries - aggregates match business transaction boundaries"
+      ]
+    },
+    {
+      "description": "Cross-aggregate dependency synchronization",
+      "question": "How should cross-aggregate dependencies be synchronized?",
+      "outcome": "Determines how aggregates coordinate changes and maintain consistency across boundaries",
+      "options": [
+        "Event-driven - use domain events for asynchronous synchronization across aggregates",
+        "Services - use direct service calls for immediate consistency",
+        "Explicit interfaces - aggregates communicate only through a very particular set of publicly available methods and operations",
+        "Batch processes - aggregates synchronized through batch processes",
+        "CQRS pattern - aggregates synchronized through the CQRS pattern using commands",
+        "Bounded context patterns - use context mapping patterns (shared kernel, customer-supplier, conformist, etc.)",
+        "Eventual consistency - allow temporary inconsistency, synchronize eventually through events",
+        "Hybrid approach - combine events for cross-context, synchronous for within-context"
+      ]
+    },
+    {
+      "description": "Bounded context strategy",
+      "question": "How should bounded contexts be defined?",
+      "outcome": "Determines boundaries and organization of bounded contexts",
+      "options": [
+        "Organize around domains - group by business domain and business capabilities",
+        "Organize around systems - align with external systems that have their own boundaries",
+        "By organizational structure - align with teams or departments",
+        "By data ownership - group by who owns the data",
+        "By domain complexity - separate complex from simple domains",
+        "Hybrid approach - combine domain organization with system boundaries"
+      ]
+    },
+    {
+      "description": "Service identification and exposure",
+      "question": "How should domain operations be exposed to external consumers?",
+      "outcome": "Determines whether to use domain services as gatekeepers or expose aggregate roots directly",
+      "options": [
+        "Service-oriented architecture - domain service represents every external action including getting data exposed by the bounded context",
+        "Direct aggregate exposure - aggregate roots are exposed directly and used by consumers (same deployment environment)",
+        "Hybrid - services for cross-context operations, direct aggregate access within same context",
+        "Business logic gatekeeper - services only for complex business rules and validation that don't fit in entities",
+        "Integration gatekeeper - services only for operations exposed to other bounded contexts"
+      ]
+    },
+    {
+      "description": "Event strategy and cross-domain communication",
+      "question": "How should cross-domain and cross-context communication be handled?",
+      "outcome": "Determines whether to use events, direct service calls, or direct domain communication",
+      "options": [
+        "Event-driven - use domain events for all cross-context communication (asynchronous)",
+        "Direct service-to-service - use synchronous service calls between bounded contexts",
+        "Direct domain-to-domain - expose aggregate roots directly for cross-domain access (same deployment)",
+        "No events - use only direct communication (service calls or domain access)",
+        "Hybrid - events for cross-context, direct calls for within-context",
+        "Selective events - events only for specific state changes or business milestones, direct calls for others"
+      ]
+    },
+    {
+      "description": "Repository design",
+      "question": "How should repositories be organized?",
+      "outcome": "Determines repository structure and whether aggregates share repositories",
+      "options": [
+        "One repository per aggregate (default) - each domain aggregate has its own repository",
+        "Shared repository within bounded context - multiple aggregates share the same repository within a bounded context (rare cases only)",
+        "Global repository across several bounded contacts (done for legacy reasons only)"
+      ]
+    }
+  ]
+}
+
+
+
+

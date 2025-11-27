@@ -1,0 +1,15 @@
+{
+  "description": "Domain AC belongs at increment level using increment-scoped domain perspective. Aggregate domain concepts, behaviors, and rules from all features in the increment. Define only facets THIS increment operates on, not entire domain model.",
+  "examples": [
+    {
+      "do": {
+        "description": "Increment-scoped domain concepts",
+        "content": "Increment: Basic Character Creation → Domain AC aggregates concepts from Establish Identity feature (name, concept, descriptor) and Save Character feature (persistence states). Defines Character through increment's combined lens."
+      },
+      "dont": {
+        "description": "Don't copy entire domain model",
+        "content": "Increment: Basic Character Creation → Domain AC includes ALL Character properties from entire system (wrong - only increment-relevant)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "outputs": [
+    {
+      "name": "story_refinement_recommendations",
+      "path": "docs/domain/discovery",
+      "template": null,
+      "instructions": "Generate story refinement recommendations document that presents proposed changes to story_graph.json and story map files. The document should list all recommended story changes with clear rationale, show proposed updates to domain_ac concepts and behaviors, show proposed updates to story descriptions and acceptance criteria, and identify any new stories or story splits needed based on discoveries."
+    }
+  ]
+}
+
+
+
+

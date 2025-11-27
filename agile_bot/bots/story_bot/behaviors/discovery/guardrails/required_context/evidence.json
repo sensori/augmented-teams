@@ -1,0 +1,12 @@
+{
+  "description": "Evidence or artifacts that must be present or validated before this behavior can proceed",
+  "evidence": [
+    "Story map from Shape stage (overarching epics, features, and stories)",
+    "Increments document from Prioritization stage (defined slices with priorities and sizing)",
+    "User experience and customer journey maps",
+    "Workflow diagrams or journey maps",
+    "Program increment plans or release outlines",
+    "Architecture or integration diagrams",
+    "Dependency trackers or milestone maps"
+  ]
+}

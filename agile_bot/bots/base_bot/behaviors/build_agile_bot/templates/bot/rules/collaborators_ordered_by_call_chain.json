@@ -1,0 +1,31 @@
+{
+  "description": "Domain Structure Collaborators Are Ordered By Likely Call Chain",
+  "examples": [
+    {
+      "do": {
+        "description": "Order collaborators to show the sequence of interactions",
+        "content": [
+          "Order collaborators to show the sequence of interactions",
+          "Correct: Bot Tool: Moves To Next Action If Done: Workflow, Agile Bot, Project, Workflow State",
+          "Shows call chain: Bot Tool → Workflow → Agile Bot → Project → Workflow State",
+          "First collaborator is typically the direct interaction, subsequent ones show the chain",
+          "Correct: Behavior Tool: Runs Active Action On Behavior: Agile Bot, Project, Project Bot State, Workflow State, Bot Behavior, Bot Action",
+          "Call chain order helps understand the flow of responsibility",
+          "Correct: Agile Bot: Loads Workflow: Workflow, Bot Config"
+        ]
+      },
+      "dont": {
+        "description": "Don't order collaborators alphabetically or randomly",
+        "content": [
+          "Don't order collaborators alphabetically or randomly",
+          "Wrong: Bot Tool: Moves To Next Action: Agile Bot, Project, Workflow, Workflow State",
+          "If call chain is Workflow → Agile Bot → Project → Workflow State, order should reflect that",
+          "Don't mix up the sequence - first collaborator is the direct call, not the end of the chain",
+          "Wrong: Bot Tool: Moves To Next Action: Workflow State, Project, Agile Bot, Workflow",
+          "Should start with direct interaction, not the final state"
+        ]
+      }
+    }
+  ]
+}
+

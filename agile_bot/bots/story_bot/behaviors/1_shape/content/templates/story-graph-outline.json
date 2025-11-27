@@ -1,0 +1,43 @@
+{
+  "epics": [
+    {
+      "name": "",
+      "users": [],
+      "sub_epics": [
+        {
+          "name": "",
+          "users": [],
+          "features": [
+            {
+              "name": "",
+              "users": [],
+              "stories": [
+                {
+                  "name": "",
+                  "users": [],
+                  "optional": false,
+                  "priority": 1
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "features": [
+        {
+          "name": "",
+          "users": [],
+          "stories": [
+            {
+              "name": "",
+              "users": [],
+              "optional": false,
+              "priority": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

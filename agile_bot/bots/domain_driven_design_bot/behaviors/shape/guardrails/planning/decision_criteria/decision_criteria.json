@@ -1,0 +1,29 @@
+{
+  "description": "Decision making criteria for shaping behavior",
+  "criteria": [
+    {
+      "description": "Bounded context identification strategy",
+      "question": "How are we identifying and defining bounded contexts?",
+      "outcome": "Determines how domain boundaries are established",
+      "options": [
+        "By business capability - group by what the business does",
+        "By organizational structure - align with teams or departments",
+        "By data ownership - group by who owns the data",
+        "By integration patterns - group by how systems interact",
+        "By domain complexity - separate complex from simple domains"
+      ]
+    },
+    {
+      "description": "Structure exploration depth",
+      "question": "What level of domain acceptance criteria should be explored for structure-focused areas?",
+      "outcome": "Determines whether to explore only domain acceptance criteria or include business acceptance criteria",
+      "options": [
+        "Structure -> Explore Domain AC only",
+        "Behavioral -> Explore Business and Domain AC"
+      ],
+      "note": "Structure focuses on domain structure and relationships. Behavioral includes business behavior and outcomes."
+    }
+  ]
+}
+
+

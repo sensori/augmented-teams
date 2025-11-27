@@ -1,0 +1,29 @@
+{
+  "description": "Behavior-level trigger words - specific to exploration/acceptance criteria behavior",
+  "patterns": [
+    "explore.*increment",
+    "explore.*increment.*flow",
+    "define.*acceptance.*criteria",
+    "walk.*through.*user.*steps",
+    "discover.*story.*details",
+    "model.*user.*behavior",
+    "what.*does.*user.*do",
+    "understand.*increment.*usage",
+    "map.*happy.*path",
+    "capture.*steps.*to.*complete",
+    "refine.*acceptance.*logic",
+    "describe.*usage.*scenario",
+    "define.*done.*for.*feature",
+    "explore.*workflow.*steps",
+    "user.*journey.*through.*feature",
+    "define.*success.*criteria",
+    "collaborate.*on.*acceptance",
+    "write.*acceptance.*examples",
+    "map.*real.*world.*usage",
+    "exploration",
+    "explore",
+    "story.*explore",
+    "acceptance.*criteria"
+  ],
+  "priority": 11
+}

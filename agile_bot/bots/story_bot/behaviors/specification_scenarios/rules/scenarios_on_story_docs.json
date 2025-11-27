@@ -1,0 +1,19 @@
+{
+  "description": "CRITICAL SCOPE: Scenarios work on STORY documents (📝 *.md files), NOT feature documents. NEVER creates feature specification documents.",
+  "examples": [
+    {
+      "do": {
+        "description": "Add scenarios to story documents",
+        "content": [
+          "docs/stories/map/Epic/Feature/📝 Story Name.md - Scenarios section added"
+        ]
+      },
+      "dont": {
+        "description": "Don't create feature specification documents",
+        "content": [
+          "docs/stories/map/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story docs)"
+        ]
+      }
+    }
+  ]
+}

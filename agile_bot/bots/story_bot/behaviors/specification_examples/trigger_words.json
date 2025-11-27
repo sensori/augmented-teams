@@ -1,0 +1,20 @@
+{
+  "description": "Behavior-level trigger words - specific to specification examples/test data behavior",
+  "patterns": [
+    "specify.*story.*examples",
+    "add.*test.*data",
+    "define.*test.*data",
+    "write.*examples.*for.*story",
+    "create.*examples.*table",
+    "add.*variables.*to.*scenarios",
+    "convert.*to.*scenario.*outline",
+    "add.*examples.*to.*scenarios",
+    "define.*story.*inputs",
+    "define.*expected.*outcome",
+    "capture.*data.*needs",
+    "specification.*examples",
+    "story.*examples",
+    "test.*data.*for.*story"
+  ],
+  "priority": 13
+}

@@ -1,0 +1,32 @@
+{
+  "description": "Story steps must be granular enough to map to specific responsibilities",
+  "do": {
+    "examples": [
+      {
+        "description": "Use specific story steps that clearly map to responsibilities",
+        "content": "Project checks project_area parameter if provided in context"
+      },
+      {
+        "description": "Include enough detail to identify the responsibility",
+        "content": "Project checks current directory for Project Bot State files"
+      },
+      {
+        "description": "Be specific about what the step does",
+        "content": "Project validates project exists in current directory"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use overly granular steps that are too small",
+        "content": "Project checks parameter, Project reads file, Project validates value"
+      },
+      {
+        "description": "Don't use vague steps that can't map to responsibilities",
+        "content": "Project does something, System processes, Tool handles request"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,24 @@
+{
+  "outputs": [
+    {
+      "name": "domain_model_description",
+      "path": "docs/domain/shaping",
+      "template": "templates/domain-model-description-template.md",
+      "instructions": "Transform the structured domain map into a domain model description markdown document using the domain-model-description-template.md template file. The description should use natural language that domain experts understand, explaining what each concept represents in the business domain, describing relationships and constraints between concepts, and using examples to illustrate domain concepts. Follow the example format provided in the template."
+    },
+    {
+      "name": "domain_model_diagram",
+      "path": "docs/domain/shaping",
+      "template": "templates/domain-model-diagram-template.md",
+      "instructions": "Transform the structured domain map into a domain model diagram markdown document using the domain-model-diagram-template.md template file. Generate Mermaid diagrams from the domain_graph.json structure."
+    },
+    {
+      "name": "domain_model_scaffold",
+      "path": "src",
+      "template": null,
+      "instructions": "Generate source code scaffold files in the src directory based on the structured domain map from domain_graph.json. Create actual source code files (Python .py files, TypeScript .ts files, or appropriate language files) for each bounded context and aggregate."
+    }
+  ]
+}
+
+

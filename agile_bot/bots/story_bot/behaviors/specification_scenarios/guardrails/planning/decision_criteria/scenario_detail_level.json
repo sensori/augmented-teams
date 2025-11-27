@@ -1,0 +1,14 @@
+{
+  "description": "Scenario detail level",
+  "question": "What approach are we using to define the right level of detail and coverage for this story's scenarios?",
+  "outcome": "Determines whether the scenarios are granular, domain-focused, or integration-heavy",
+  "options": [
+    "User-System Behavioral Flow — ensures full traceability from trigger to response",
+    "Domain Rules-Centric — validates business correctness through rule clarity",
+    "System-Centric — defines system-to-system interactions with clear request/response templates",
+    "Minimal Path Plus Alternates — covers happy path plus targeted exceptions only",
+    "Full Spec Coverage — includes all realistic variations and negative cases",
+    "Very Trustable Story — maximizes testability by scoping tight atomic flows with few steps and precise acceptance criteria",
+    "Exhaustive Behavior Split — repeats each unique behavior even when similar, discourages reuse to maximize coverage visibility"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "description": "Test observable behavior, not implementation details. Assertions must verify what the steps say they verify - test outcomes and state changes that are visible externally, not internal methods or private attributes.",
+  "examples": [
+    {
+      "do": {
+        "description": "Test observable outcome",
+        "content": [
+          "@then(\"Agent sets up base agent configuration path at agents/base/agent.json\")",
+          "def then_agent_sets_base_config_path(context):",
+          "    expected_path = context.workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "    assert context.agent._agent_config_path == expected_path",
+          "    assert context.agent._agent_config_path.exists()"
+        ]
+      },
+      "dont": {
+        "description": "Test implementation details",
+        "content": [
+          "@then(\"Agent sets up base agent configuration path\")",
+          "def then_agent_sets_path(context):",
+          "    # DON'T: Test internal implementation",
+          "    assert context.agent._setup_config_path.called  # WRONG",
+          "    assert context.agent._internal_flag == True  # WRONG",
+          "    assert context.agent._validate.called  # WRONG"
+        ]
+      }
+    }
+  ]
+}

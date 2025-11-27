@@ -1,0 +1,10 @@
+{
+  "typical_assumptions": [
+    "Examples tables must include ALL variables used in scenario steps",
+    "Examples tables must have exact values for both input AND output variables",
+    "Every variable in scenario steps must have a corresponding column in Examples table",
+    "Examples tables must have actual test data, not placeholders",
+    "Output/expected result variables must be included in Examples tables",
+    "Examples drive both design and test — not written after implementation"
+  ]
+}

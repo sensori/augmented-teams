@@ -1,0 +1,28 @@
+{
+  "description": "Call production code directly - let tests fail naturally if code doesn't exist. Don't comment out production code calls or mock internal business logic. Tests should call real code and fail with clear error messages if code is missing.",
+  "examples": [
+    {
+      "do": {
+        "description": "Call production code directly",
+        "content": [
+          "@when(\"Agent initializes\")",
+          "def when_agent_initializes(context):",
+          "    # Call production code directly",
+          "    context.agent.initialize()",
+          "    # If initialize() doesn't exist, test fails with AttributeError"
+        ]
+      },
+      "dont": {
+        "description": "Comment out or mock production code",
+        "content": [
+          "@when(\"Agent initializes\")",
+          "def when_agent_initializes(context):",
+          "    # DON'T: Comment out production code",
+          "    # context.agent.initialize()  # WRONG",
+          "    # DON'T: Fake the state",
+          "    context.agent._initialized = True  # WRONG"
+        ]
+      }
+    }
+  ]
+}

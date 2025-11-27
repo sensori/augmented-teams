@@ -1,0 +1,34 @@
+{
+  "description": "Define fixtures in the test file, not in separate conftest.py. Use pytest fixtures for shared setup. Truly reusable fixtures (file operations, location helpers) belong in agents/base/src/conftest.py.",
+  "examples": [
+    {
+      "do": {
+        "description": "Fixtures in test file",
+        "content": [
+          "# In src/stories_acceptance_tests.py",
+          "import pytest",
+          "",
+          "@pytest.fixture",
+          "def workspace_root(tmp_path):",
+          "    workspace = tmp_path / \"workspace\"",
+          "    workspace.mkdir()",
+          "    return workspace",
+          "",
+          "@pytest.fixture",
+          "def base_config_path(workspace_root):",
+          "    config_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "    config_path.parent.mkdir(parents=True, exist_ok=True)",
+          "    config_path.write_text('{\"name\": \"base\"}')",
+          "    return config_path"
+        ]
+      },
+      "dont": {
+        "description": "Separate conftest.py for agent-specific fixtures",
+        "content": [
+          "# DON'T: Create src/conftest.py for agent-specific fixtures",
+          "# Use test file instead, or agents/base/src/conftest.py for reusable ones"
+        ]
+      }
+    }
+  ]
+}

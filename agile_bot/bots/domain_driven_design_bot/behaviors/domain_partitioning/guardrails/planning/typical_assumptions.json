@@ -1,0 +1,19 @@
+{
+  "description": "Typical assumptions for domain partitioning behavior",
+  "assumptions": [
+    "Entities require identity management beyond simple attributes",
+    "Value objects are immutable and shared across entities",
+    "Aggregates should be small enough to maintain consistency boundaries",
+    "Aggregate roots are the only entry points for accessing aggregate contents",
+    "Domain services encapsulate business logic that doesn't fit in entities",
+    "Domain events support asynchronous integration across contexts",
+    "Repositories provide business-specific interfaces, beyond generic CRUD",
+    "Bounded contexts ensure consistency of domain language and model",
+    "Partitioning decisions should be based on business questions, not technical assumptions",
+    "Design constraints (immutability for value objects, identity operations for entities) must be followed"
+  ]
+}
+
+
+
+

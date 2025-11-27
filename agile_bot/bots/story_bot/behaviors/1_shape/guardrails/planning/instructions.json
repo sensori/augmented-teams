@@ -1,0 +1,7 @@
+{
+  "behaviorName": "shape",
+  "instructions": [
+    "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point."
+  ]
+}
+

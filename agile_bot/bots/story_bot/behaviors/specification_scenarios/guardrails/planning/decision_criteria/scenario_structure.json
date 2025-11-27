@@ -1,0 +1,9 @@
+{
+  "description": "Scenario structure",
+  "question": "Should scenarios use Background for repeated Given steps?",
+  "outcome": "Determines Background section creation",
+  "options": [
+    "Yes - 3+ scenarios share Given steps",
+    "No - Given steps are unique per scenario"
+  ]
+}

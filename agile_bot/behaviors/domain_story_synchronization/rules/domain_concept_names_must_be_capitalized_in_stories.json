@@ -1,0 +1,44 @@
+{
+  "description": "Domain concept names must be capitalized in stories",
+  "do": {
+    "examples": [
+      {
+        "description": "Use exact capitalization from domain model",
+        "content": "Project stores Project Area and Bot Name"
+      },
+      {
+        "description": "Capitalize all words in multi-word domain concepts",
+        "content": "Agile Bot loads Workflow from Bot Config"
+      },
+      {
+        "description": "Use full capitalized domain concept names",
+        "content": "MCP Bot Server exposes Bot Tool via FastMCP"
+      },
+      {
+        "description": "Reference domain concepts with exact capitalization",
+        "content": "Project Bot State stores Project Area to File System"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use lowercase for domain concept names",
+        "content": "project stores project_area"
+      },
+      {
+        "description": "Don't use partial capitalization",
+        "content": "agile bot loads workflow"
+      },
+      {
+        "description": "Don't abbreviate domain concept names",
+        "content": "mcp bot server exposes bot tool"
+      },
+      {
+        "description": "Don't use generic terms instead of domain concepts",
+        "content": "project bot state stores area"
+      }
+    ]
+  }
+}
+

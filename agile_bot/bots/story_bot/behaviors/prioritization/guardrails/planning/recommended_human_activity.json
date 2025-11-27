@@ -1,0 +1,8 @@
+{
+  "recommended_human_activity": [
+    "Review the AI-generated slice strategies to verify they are visually coherent and align with the intended approach",
+    "Validate that each AI-proposed slice serves a clear learning, value, or risk-reduction goal",
+    "Review the AI's sequencing logic to verify it optimizes both insight and momentum rather than following a simplistic order",
+    "Validate the scope of stories to verify they are appropriate for the slice"
+  ]
+}

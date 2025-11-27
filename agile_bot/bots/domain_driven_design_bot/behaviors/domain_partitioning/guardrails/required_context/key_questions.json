@@ -1,0 +1,16 @@
+{
+  "description": "Key questions that must be answered before this behavior can proceed",
+  "questions": [
+    "**Questions for Identifying Entities:** If two instances of a thing have the same name, are they automatically the same thing? What business concepts are identified by more than the value of their attributes? What attributes or rules can we use to establish/verify the identity of a thing?",
+    "**Questions for Identifying Value Objects:** What business concepts are identified ONLY by the value of their attributes? Which elements are really just fancy primitives? What parts of the system can we assume are immutable?",
+    "**Questions for Identifying Aggregates:** Which parts of our domain can we directly access? Which domain concepts get updated together as a single cohesive unit?",
+    "**Questions for Identifying Bounded Contexts:** Where do similar concepts get represented in different ways? How do we resolve dependencies between domain elements that exist across multiple contexts?",
+    "**Questions for Identifying Domain Services:** What business logic doesn't naturally fit in a single entity? What operations need to be exposed to the rest of the system?",
+    "**Questions for Identifying Domain Events:** What conditions and state changes happen within this domain that other parts of the system need to know about?",
+    "**Questions for Identifying Repositories:** What aggregates need persistence? What business-specific search/access/modify operations are needed?"
+  ]
+}
+
+
+
+

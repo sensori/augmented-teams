@@ -1,0 +1,21 @@
+{
+  "description": "Given statements must use state-oriented language (not action-oriented). Given describes STATE, not actions.",
+  "examples": [
+    {
+      "do": {
+        "description": "Given uses state language",
+        "content": [
+          "Given user is logged in (state)",
+          "Given character sheet exists (state)"
+        ]
+      },
+      "dont": {
+        "description": "Given doesn't use action language",
+        "content": [
+          "Given user logs in (action - WRONG)",
+          "Given system creates character (action - WRONG)"
+        ]
+      }
+    }
+  ]
+}

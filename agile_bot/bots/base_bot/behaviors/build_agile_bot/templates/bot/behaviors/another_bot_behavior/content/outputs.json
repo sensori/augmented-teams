@@ -1,0 +1,6 @@
+{
+  "name": "{output_name}",
+  "path": "{output_path}",
+  "template": "{template_file_name}"
+}
+

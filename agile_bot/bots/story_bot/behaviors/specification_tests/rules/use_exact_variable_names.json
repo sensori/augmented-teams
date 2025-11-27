@@ -1,0 +1,30 @@
+{
+  "description": "Use exact variable names from Examples tables in feature files. When steps reference variables like \"<variable_name>\", use the exact same variable name in step definitions and parameter names.",
+  "examples": [
+    {
+      "do": {
+        "description": "Exact variable names from Examples",
+        "content": [
+          "Feature file:",
+          "Given test project area is set up at \"<test_project_area>\"",
+          "Examples:",
+          "| test_project_area |",
+          "|-------------------|",
+          "| test_data/projects/valid-project |",
+          "",
+          "Step definition:",
+          "@given(parsers.parse(\"test project area is set up at '{test_project_area}'\"))",
+          "def given_test_project_area(context, test_project_area):",
+          "    context.project_area = Path(test_project_area)"
+        ]
+      },
+      "dont": {
+        "description": "Different variable names",
+        "content": [
+          "Feature file: <test_project_area>",
+          "Step definition: def given_test_project_area(context, project_area):  # WRONG - different name"
+        ]
+      }
+    }
+  ]
+}

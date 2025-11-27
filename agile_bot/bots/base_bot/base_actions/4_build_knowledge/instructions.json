@@ -1,0 +1,34 @@
+{
+  "actionName": "build_knowledge",
+  "instructions": [
+    "**MANDATORY: Before generating any content, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.**",
+    "",
+    "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work (e.g., discovery decisions affect exploration).**",
+    "",
+    "Generate structured content following the rules and schema provided.",
+    "",
+    "**Agent-level rules:**",
+    "{{agent_rules}}  --> load from behavior data files",
+    "",
+    "**Behavior-level rules:**",
+    "{{behavior_rules}}  --> load from `{bot}/behaviors/{behavior}/rules/` directory",
+    "",
+    "**Schema:** Use schema '{{schema}}'  --> load from behavior data files",
+    "",
+    "**Description:** {{description}}  --> load from behavior data files",
+    "",
+    "**Instructions:** {{instructions}}  --> load from behavior data files",
+    "",
+    "Generate the structured content according to the schema and rules from the data files, ensuring all requirements from clarification.json and planning.json (especially the current behavior's decisions_made and assumptions_made) are incorporated.",
+    "",
+    "**AUTOMATIC PROGRESSION: After completing build_structure and storing the structured content, automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**"
+  ],
+  "templates": {
+    "initial_prompt": {
+      "template": "Generate {{content_type}} with the following context:\n\n**Confirmed Assumptions:**\n{{confirmed_assumptions}}\n\n**Decision Criteria Applied:**\n{{applied_criteria}}\n\n**Approach:**\n{{approach_summary}}\n\n{{behavior_specific_instructions}}",
+      "description": "Base prompt for generation, gets behavior-specific instructions injected"
+    }
+  }
+}
+
+

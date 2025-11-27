@@ -1,0 +1,16 @@
+{
+  "description": "Evidence types that support this behavior",
+  "evidence": [
+    "Acceptance criteria from story exploration stage (PRIMARY SOURCE) - at increment, epic, or feature level",
+    "Story exploration documents from story agent (after story shaping exploration)",
+    "Domain map from Domain Partitioning stage",
+    "Domain model from Domain Discovery stage",
+    "Domain expert knowledge",
+    "Business rules documentation",
+    "Event storming outputs"
+  ]
+}
+
+
+
+

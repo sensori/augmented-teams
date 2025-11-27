@@ -1,0 +1,28 @@
+{
+  "description": "Distinguish implementation details from domain responsibilities",
+  "do": {
+    "examples": [
+      {
+        "description": "Story steps describing WHAT a concept does need domain mapping",
+        "content": "Project manages Project Bot State, Workflow orders Behavior Action Steps, Project creates folder structure"
+      },
+      {
+        "description": "Story steps describing HOW something is stored may not need domain responsibility",
+        "content": "Project Bot State stores to File System, Workflow State stores Current Behavior Name, File System writes file"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't require domain responsibility for pure implementation details",
+        "content": "File System writes file - This is implementation detail, may not need domain responsibility"
+      },
+      {
+        "description": "Don't skip domain mapping for behavioral responsibilities",
+        "content": "Project manages Project Bot State - This describes WHAT Project does, needs domain responsibility"
+      }
+    ]
+  }
+}
+

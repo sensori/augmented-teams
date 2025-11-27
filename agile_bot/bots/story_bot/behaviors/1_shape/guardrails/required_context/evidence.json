@@ -1,0 +1,18 @@
+{
+  "description": "Evidence or artifacts that must be present or validated before this behavior can proceed",
+  "evidence": [
+    "Business model canvas",
+    "Journey maps or other design thinking artifacts",
+    "Technical specifications",
+    "Product charters",
+    "Business cases",
+    "Business models",
+    "Impact maps",
+    "R&D maps",
+    "User research",
+    "User journey maps",
+    "Similar systems",
+    "User interviews"
+  ]
+}
+

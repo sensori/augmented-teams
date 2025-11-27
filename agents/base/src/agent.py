@@ -3365,18 +3365,40 @@ class Project:
             if activity_dir:
                 activity_dir.mkdir(parents=True, exist_ok=True)
     
-    def present_project_area_to_user(self) -> Dict[str, Any]:
+    def present_project_area_to_user(self) -> Optional[Dict[str, Any]]:
         """Present determined project_area to user for confirmation.
         
         SIMPLIFIED: Always presents for confirmation on new projects.
         Matches story: "Project presents determined project_area to user for confirmation"
         
         Returns:
-            Dict with message and suggested_project_area for user confirmation
+            Dict with message and suggested_project_area for user confirmation, or None if already confirmed
         """
         determined_area = self._path_manager.project_area
         
-        # SIMPLIFIED: Always present for confirmation on new projects
+        # Check if project_area is already set and confirmed (not default current dir)
+        # If project_area is explicitly set (not default), check if it's been persisted
+        if determined_area and determined_area != str(Path.cwd().resolve()):
+            # Check if there's an agent_state.json with this project_area - means it's been set
+            activity_dir = self._get_activity_dir()
+            agent_state_path = activity_dir / "agent_state.json"
+            if agent_state_path.exists():
+                try:
+                    with open(agent_state_path, 'r', encoding='utf-8') as f:
+                        state = json.load(f)
+                        saved_area = state.get("project_area")
+                        agent_name_match = state.get("agent_name") == self._agent_name
+                        # Compare resolved paths
+                        if saved_area and agent_name_match:
+                            saved_resolved = str(Path(saved_area).resolve())
+                            determined_resolved = str(Path(determined_area).resolve())
+                            if saved_resolved == determined_resolved:
+                                # Project area is already set and persisted - no confirmation needed
+                                return None
+                except (json.JSONDecodeError, IOError, OSError):
+                    pass
+        
+        # SIMPLIFIED: Present for confirmation on new projects
         # Load template from agent.json
         base_config_path = Path(__file__).parent.parent / "agent.json"
         message_template = ""

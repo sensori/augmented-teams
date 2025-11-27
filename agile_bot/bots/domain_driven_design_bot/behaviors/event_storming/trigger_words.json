@@ -1,0 +1,15 @@
+{
+  "description": "Behavior-level trigger words - specific to event storming discovery behavior",
+  "patterns": [
+    "event.*storming",
+    "identify.*domain.*events",
+    "discover.*events",
+    "event.*timeline",
+    "map.*event.*flow"
+  ],
+  "priority": 9
+}
+
+
+
+

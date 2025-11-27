@@ -1,0 +1,8 @@
+{
+  "recommended_human_activity": [
+    "Review the AI-generated Examples tables to verify they contain all variables from scenario steps",
+    "Validate that Examples tables include both input AND output values with exact test data",
+    "Review the AI's approach to identify which scenarios need Scenario Outlines",
+    "Review the AI-generated Examples to verify they can be incorporated directly into automated test frameworks"
+  ]
+}

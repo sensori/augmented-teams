@@ -1,0 +1,15 @@
+{
+  "description": "Use Scenario Outline with Examples when story warrants concrete data: formulas need validation, domain has named entities, parameter variations exist.",
+  "examples": [
+    {
+      "do": {
+        "description": "Scenario Outline for formulas or domain entities",
+        "content": "Scenario Outline: Calculate ability modifier - Examples table with Rank 10→0, Rank 12→+1, Rank 14→+2"
+      },
+      "dont": {
+        "description": "Don't use Scenario Outline for simple behaviors without data variations",
+        "content": "Scenario Outline: User clicks button (too simple - use regular scenario)"
+      }
+    }
+  ]
+}

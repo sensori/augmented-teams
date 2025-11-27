@@ -1,0 +1,16 @@
+{
+  "behaviorName": "bounded_context_mapping",
+  "rulesFileName": "ddd-rule.mdc",
+  "instructions": [
+    "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions.",
+    "",
+    "1. Review all decision making criteria with the user",
+    "2. Ask user to select preferred options for each decision point",
+    "3. Store planning decisions using agent_store_planning() MCP tool",
+    "4. Apply planning decisions to bounded context mapping work"
+  ]
+}
+
+
+
+

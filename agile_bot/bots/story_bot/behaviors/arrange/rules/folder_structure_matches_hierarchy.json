@@ -1,0 +1,16 @@
+{
+  "description": "Folder structure must exactly match story graph hierarchy. Epic/feature folders created inside docs/stories/map/ directory from structured JSON.",
+  "examples": [
+    {
+      "do": {
+        "description": "Create folders matching story graph structure",
+        "content": "Read structured.json → Create docs/stories/map/🎯 Epic Name/⚙️ Feature Name/ folders"
+      },
+      "dont": {
+        "description": "Don't create folders at wrong level or with wrong names",
+        "content": "docs/stories/🎯 Epic Name/ (wrong level) OR docs/stories/map/Epic Name/ (missing emoji)"
+      }
+    }
+  ]
+}
+

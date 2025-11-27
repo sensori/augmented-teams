@@ -1,0 +1,10 @@
+{
+  "description": "Test scope level",
+  "question": "What scope level should acceptance tests cover?",
+  "outcome": "Determines test implementation approach",
+  "options": [
+    "Component/Service level - test individual components/services in isolation (minimum)",
+    "System level - test full system with external systems mocked out",
+    "Whole solution - test entire solution including external systems"
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "solution": {
+    "name": "Behavior-First MCP Interface",
+    "purpose": "Refactor MCP interface to use behavior-first tools that return settled instructions, with workflow coordination tools and dynamic tool generation from agent.json. Remove chatty navigation tools and MCP-side file saving - AI handles all file operations."
+  },
+  "epics": [
+    {
+      "name": "Create Behavior-First Tools",
+      "purpose": "Generate specific MCP tools for each behavior-action combination (e.g., shaping-clarify, shaping-planning) that return settled instructions ready for AI execution",
+      "users": ["AI Chat"],
+      "features": [
+        {
+          "name": "Generate Behavior-Action Tools Dynamically",
+          "purpose": "MCP server dynamically generates tools from agent.json behaviors, creating {behavior}-{action} tool names for each behavior-action combination",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Discover Behaviors from Agent Config",
+              "description": "MCP server loads agent.json, discovers all behaviors and their actions, generates tool names in format {behavior}-{action}",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "MCP server loads agent.json configuration",
+                "MCP server extracts behaviors dictionary from config",
+                "MCP server iterates through each behavior",
+                "MCP server extracts actions list from each behavior",
+                "MCP server generates tool name: {behavior_name}-{action_name}",
+                "MCP server registers tool with FastMCP"
+              ]
+            },
+            {
+              "name": "Return Settled Instructions from Behavior-Action Tool",
+              "description": "When AI calls {behavior}-{action} tool, MCP server moves agent to that behavior and action, retrieves instructions, formats as settled instructions JSON with next_action_hint",
+              "optional": false,
+              "sequential_order": 2,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "AI Chat calls shaping-clarify tool",
+                "MCP server moves agent workflow to shape behavior",
+                "MCP server moves agent workflow to clarification action",
+                "MCP server retrieves action.instructions from agent",
+                "MCP server formats response as settled instructions JSON",
+                "MCP server includes next_action_hint in response",
+                "MCP server returns JSON to AI Chat"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Remove Legacy Navigation Tools",
+          "purpose": "Remove chatty navigation tools (agent_move_to_behavior, agent_move_to_action, agent_next_action, agent_next_behavior) that create too many hops",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Remove Navigation Tool Registration",
+              "description": "MCP server removes registration of agent_move_to_behavior, agent_move_to_action, agent_next_action, agent_next_behavior tools from ToolRegistry",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "MCP server removes _register_navigation_tools method",
+                "MCP server removes navigation tool implementations",
+                "MCP server removes navigation tool registration calls"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Add Workflow Coordination Tools",
+      "purpose": "Provide generalized workflow management tools (story-bot-finish, story-bot-status) for workflow state management and progression",
+      "users": ["AI Chat"],
+      "features": [
+        {
+          "name": "Implement Story-Bot-Finish Tool",
+          "purpose": "Create story-bot-finish tool that marks current action complete, auto-advances to next action, and if last action in behavior, advances to next behavior",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Finish Current Action and Advance",
+              "description": "AI calls story-bot-finish, MCP server marks current action complete, advances workflow to next action, returns status with next action hint",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "AI Chat calls story-bot-finish tool",
+                "MCP server gets current behavior and action from agent",
+                "MCP server calls agent.workflow.next_action()",
+                "MCP server checks if next action exists",
+                "If next action exists: MCP server returns status with next action name and hint",
+                "If no next action: MCP server calls agent.workflow.next_behavior()",
+                "MCP server returns status indicating behavior complete or all complete"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Implement Story-Bot-Status Tool",
+          "purpose": "Create story-bot-status tool that returns current behavior, action, and project area status",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Get Current Workflow Status",
+              "description": "AI calls story-bot-status, MCP server returns current behavior name, current action name, project area, and available behaviors list",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "AI Chat calls story-bot-status tool",
+                "MCP server gets agent instance",
+                "MCP server gets current_behavior.name from agent",
+                "MCP server gets current_action.name from agent.workflow",
+                "MCP server gets project_area from agent",
+                "MCP server gets available behaviors list from agent.behaviors",
+                "MCP server returns JSON with status information"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Remove MCP File Saving",
+      "purpose": "Remove all agent_store_* tools - AI Chat is responsible for generating instructions and saving files directly",
+      "users": ["AI Chat"],
+      "features": [
+        {
+          "name": "Remove Storage Tools",
+          "purpose": "Remove agent_store_clarification, agent_store_planning, agent_store_action_output tools - AI saves files directly",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Remove Storage Tool Registration",
+              "description": "MCP server removes _register_storage_tools method and all agent_store_* tool implementations",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "MCP server removes _register_storage_tools method",
+                "MCP server removes agent_store_clarification implementation",
+                "MCP server removes agent_store_planning implementation",
+                "MCP server removes agent_store_action_output implementation",
+                "MCP server removes storage tool registration calls"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Update Instructions to Include File Saving",
+          "purpose": "Update settled instructions returned by behavior-action tools to include explicit file saving instructions for AI",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Add File Saving Instructions to Settled Instructions",
+              "description": "MCP server includes file saving instructions in settled instructions response, telling AI to save clarification.json, planning.json, or structured.json as appropriate",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "MCP server formats settled instructions for clarification action",
+                "MCP server includes instruction: 'After gathering clarification, save to {project_area}/docs/activity/{agent_name}/clarification.json'",
+                "MCP server formats settled instructions for planning action",
+                "MCP server includes instruction: 'After user confirms planning decisions, save to {project_area}/docs/activity/{agent_name}/planning.json'",
+                "MCP server includes file paths in instructions"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Simplify Tool Response Format",
+      "purpose": "Ensure all tools return consistent settled instructions format with instructions, context, and next_action_hint",
+      "users": ["AI Chat"],
+      "features": [
+        {
+          "name": "Standardize Settled Instructions Format",
+          "purpose": "All behavior-action tools return JSON with instructions field (ready-to-use), context field (relevant data), and next_action_hint field (workflow guidance)",
+          "users": ["AI Chat"],
+          "stories": [
+            {
+              "name": "Format Behavior-Action Tool Response",
+              "description": "MCP server formats behavior-action tool response as JSON with instructions (string), context (dict with behavior/action names), and next_action_hint (string with next tool to call)",
+              "optional": false,
+              "sequential_order": 1,
+              "vertical_order": null,
+              "users": [],
+              "behavioral_ac": [
+                "MCP server retrieves action instructions from agent",
+                "MCP server determines next action in behavior workflow",
+                "MCP server builds next_action_hint string",
+                "MCP server formats JSON response with instructions, context, next_action_hint",
+                "MCP server returns formatted JSON to AI Chat"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "Foundation: Behavior-First Tools and Workflow Coordination",
+      "priority": "NOW",
+      "relative_size": "Large",
+      "approach": "Implement dynamic behavior-action tool generation, add workflow coordination tools (story-bot-finish, story-bot-status), and remove legacy navigation tools. Establish foundation for new MCP interface.",
+      "focus": "Enable behavior-first tool calling with settled instructions and workflow coordination. Remove chatty navigation tools.",
+      "stories": [
+        "Discover Behaviors from Agent Config",
+        "Return Settled Instructions from Behavior-Action Tool",
+        "Finish Current Action and Advance",
+        "Get Current Workflow Status",
+        "Remove Navigation Tool Registration"
+      ],
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "Behavior-Action Tool",
+            "description": "MCP tool named {behavior}-{action} that moves agent to specific behavior and action, then returns settled instructions for AI execution."
+          },
+          {
+            "name": "Settled Instructions",
+            "description": "Ready-to-use instructions JSON returned by MCP tools containing instructions field (action instructions), context field (behavior/action metadata), and next_action_hint field (workflow guidance)."
+          },
+          {
+            "name": "Workflow Coordination Tool",
+            "description": "Generalized MCP tool (story-bot-finish, story-bot-status) for managing workflow state and progression without behavior-specific knowledge."
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "Behavior-Action Tool",
+            "behavior": "MCP server generates tool name from behavior and action, registers with FastMCP, returns settled instructions when called"
+          },
+          {
+            "concept": "Settled Instructions",
+            "behavior": "MCP server formats action instructions as JSON with context and workflow hints, returns to AI Chat"
+          },
+          {
+            "concept": "Workflow Coordination Tool",
+            "behavior": "MCP server provides finish and status tools that manage workflow progression and state queries"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Remove MCP File Operations",
+      "priority": "NEXT",
+      "relative_size": "Medium",
+      "approach": "Remove all agent_store_* tools and update instructions to include file saving guidance for AI. Ensure AI handles all file operations directly.",
+      "focus": "Eliminate MCP-side file saving, make AI responsible for all file operations with clear instructions.",
+      "stories": [
+        "Remove Storage Tool Registration",
+        "Add File Saving Instructions to Settled Instructions"
+      ],
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "AI File Operations",
+            "description": "AI Chat directly saves files (clarification.json, planning.json, structured.json) to project area based on instructions in settled instructions response."
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "AI File Operations",
+            "behavior": "AI Chat reads file saving instructions from settled instructions, uses write tool to save files to specified paths"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Standardize Tool Responses",
+      "priority": "NEXT",
+      "relative_size": "Small",
+      "approach": "Ensure all tools return consistent settled instructions format with instructions, context, and next_action_hint fields.",
+      "focus": "Standardize all tool responses to use settled instructions format for consistency.",
+      "stories": [
+        "Format Behavior-Action Tool Response"
+      ],
+      "domain_ac": {
+        "concepts": [
+          {
+            "name": "Standardized Tool Response",
+            "description": "All MCP tools return JSON with instructions (string), context (dict), and next_action_hint (string) fields for consistent AI consumption."
+          }
+        ],
+        "behaviors": [
+          {
+            "concept": "Standardized Tool Response",
+            "behavior": "MCP server formats all tool responses using consistent JSON structure with required fields"
+          }
+        ]
+      }
+    }
+  ]
+}

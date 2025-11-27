@@ -1,0 +1,1265 @@
+{
+  "epics": [
+    {
+      "name": "Build Agile Bots",
+      "users": ["Human", "Agile Bot", "MCP Bot Server Generator", "MCP Bot Server", "Bot Config"],
+      "features": [
+        {
+          "name": "Generate MCP Bot Server And Tools",
+          "users": ["Human", "Agile Bot", "MCP Bot Server Generator", "MCP Bot Server", "Bot Config"],
+          "stories": [
+            {
+              "name": "Generate MCP Bot Server",
+              "users": ["Human", "Agile Bot", "MCP Bot Server Generator", "Bot Config"],
+              "Steps": [
+                "Human tells Bot to generate server",
+                "Agile Bot triggers MCP Bot Server Generator",
+                "MCP Bot Server Generator reads Bot Config from Bot Config file (agent.json)",
+                "MCP Bot Server Generator creates Bot MCP Server Class from Bot Config"
+              ]
+            },
+            {
+              "name": "Generate Bot Tools",
+              "users": ["MCP Bot Server Generator", "Bot Config", "MCP Bot Server"],
+              "Steps": [
+                "MCP Bot Server Generator reads Bot Config",
+                "MCP Bot Server Generator creates Bot Tool with trigger words in tool description docstring, and tool name",
+                "MCP Bot Server Generates code that routes to active or next behavior and action of agent"
+              ]
+            },
+            {
+              "name": "Generate Behavior Tools",
+              "users": ["MCP Bot Server Generator", "Bot Config", "MCP Bot Server"],
+              "Steps": [
+                "MCP Bot Server Generator reads Bot Config",
+                "MCP Bot Server Generator creates Behavior Tool for each Bot Behavior with trigger words in tool description docstring, and tool name",
+                "MCP Bot Server Generates code that routes to active or next action of Bot Behavior"
+              ]
+            },
+            {
+              "name": "Generate Behavior Action Tools",
+              "users": ["MCP Bot Server Generator", "Bot Config", "MCP Bot Server"],
+              "Steps": [
+                "MCP Bot Server Generator reads Bot Config",
+                "MCP Bot Server Generator creates Behavior Action Tool for each Bot Behavior-Action combination with aggregated trigger words in tool description docstring, and tool name",
+                "MCP Bot Server Generates code that routes to specific Bot Behavior and Bot Action"
+              ]
+            },
+            {
+              "name": "Deploy MCP BOT Server",
+              "users": ["MCP Bot Server"],
+              "Steps": [
+                "Bot MCP Server exposes Bot Tool via FastMCP",
+                "Bot MCP Server exposes Behavior Tools via FastMCP",
+                "Bot MCP Server exposes Behavior Action Tools via FastMCP",
+                "Bot MCP Server exposes Project State Tool via FastMCP"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoke MCP Bot Server",
+      "users": ["Human", "AI Chat", "MCP Bot Server", "Project", "Agile Bot"],
+      "features": [
+        {
+          "name": "New Project",
+          "users": ["Human", "AI Chat", "MCP Bot Server", "Project", "Project Bot State"],
+          "stories": [
+            {
+              "name": "Human Triggers Agile Bot Tool for New",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Project"],
+              "Steps": [
+                "MCP Bot Server Intercept with a Project Check",
+                "Project Determines Project Location From Context",
+                "Project checks project_area parameter if provided in context (ex: \"C:\\dev\\augmented-teams\\agents\\base\")",
+                "Project stores project_area and bot_name",
+                "MCP Bot Server returns Project Location to AI for confirmation Instructions"
+              ]
+            },
+            {
+              "name": "Human Confirms Project Location",
+              "users": ["Human", "AI Chat", "Project"],
+              "Steps": [
+                "AI Chat presents discovered Project Location to Human",
+                "Human confirms or provides different Project Location"
+              ]
+            },
+            {
+              "name": "Project Generates Project Scaffold",
+              "users": ["Project", "Project Bot State", "File System"],
+              "Steps": [
+                "Project creates project folder structure in project location",
+                "Project creates Bot activity subfolder (docs/activity/{bot_name}/)",
+                "Project Bot State stores Project Area and Bot Name to File System",
+                "MCP Bot Server Routes to MCP Tool based on trigger words"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Resume Existing Project",
+          "users": ["Human", "AI Chat", "MCP Bot Server", "Project", "Project Bot State"],
+          "stories": [
+            {
+              "name": "Human Triggers Agile Bot Tool for Existing",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Project"],
+              "Steps": [
+                "MCP Bot Server Intercept with a Project Check",
+                "Project validates project exists in current directory  (looks for Project Bot State files in folder)"
+              ]
+            },
+            {
+              "name": "Project Locates Existing Project Bot State",
+              "users": ["Project", "Project Bot State", "MCP Bot Server", "AI Chat"],
+              "Steps": [
+                "Project checks project_area parameter if provided in context (ex: \"C:\\dev\\augmented-teams\\agents\\base\")",
+                "Project checks current directory for Project Bot State files (docs/activity/{bot_name}/agent_state.json)",
+                "MCP Bot Server returns existing Project Location to AI for display purposes",
+                "MCP Bot Server Routes to MCP Tool based on trigger words"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Invoke Bot Tool",
+          "users": ["Human", "AI Chat", "MCP Bot Server", "Agile Bot", "Project", "Workflow State"],
+          "stories": [
+            {
+              "name": "Initialize Bot For Project",
+              "users": ["MCP Bot Server", "Agile Bot", "Project", "Bot Config", "Workflow"],
+              "Steps": [
+                "MCP Bot Server instantiates Bot if not done before",
+                "Agile Bot loads Workflow from Bot Config (ordered Behavior and Actions)",
+                "Agile Bot loads Project and tells it to initialize",
+                "Project now knows current Project and Workflow State",
+                "Agile Bot loads Behaviors from Bot Config",
+                "Agile Bot loads Action steps for each Behavior"
+              ]
+            },
+            {
+              "name": "Invoke Bot Behavior Action Tool",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Behavior Action Tool"],
+              "Steps": [
+                "Human speaks to AI Chat with trigger words including Bot Behavior and Bot Action (ex: \"start shaping for project xx\"), including context",
+                "AI Chat detects trigger words and routes to Behavior Action Tool via Bot MCP Server",
+                "Behavior Action Tool receives invocation with context"
+              ]
+            },
+            {
+              "name": "Invoke Behavior Tool",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Behavior Tool"],
+              "Steps": [
+                "Human speaks to AI Chat with trigger words including Bot Behavior but no Bot Action (ex: \"start stories for project xx\"), including context",
+                "AI Chat routes request to Behavior Tool via Bot MCP Server",
+                "Behavior Tool determines active or next Behavior/Action",
+                "Behavior Tool receives invocation with context"
+              ]
+            },
+            {
+              "name": "Invoke Bot Tool",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Bot Tool", "Workflow State"],
+              "Steps": [
+                "Human speaks to AI Chat with trigger words for Bot but no Bot Behavior (ex: \"start stories for project xx\"), including context",
+                "AI Chat detects trigger words and routes to Bot Tool via Bot MCP Server",
+                "Bot Tool receives invocation with context and determines active Bot Behavior from Workflow State"
+              ]
+            },
+            {
+              "name": "Bot Tool Determines Active Step To Invoke",
+              "users": ["Bot Tool", "Project", "Workflow", "Workflow State"],
+              "Steps": [
+                "Bot Tool asks Bot Project if current action is done",
+                "Bot Tool asks Bot Project to move to next Workflow step (Behavior or Action)",
+                "Project determines next Behavior or Action from Workflow",
+                "If no next action in current behavior, moves to next behavior",
+                "If no next behavior, workflow is complete",
+                "Project stores updated Workflow State to File System",
+                "Bot sets current step to Behavior-Action"
+              ]
+            },
+            {
+              "name": "Requests Project State",
+              "users": ["Human", "AI Chat", "MCP Bot Server", "Project State Tool", "Project"],
+              "Steps": [
+                "Human asks for project state via AI Chat",
+                "AI Chat detects request and routes to Project State Tool via Bot MCP Server",
+                "Project State Tool routes to Bot Project which gets Bot Project State and Workflow State",
+                "Project State Tool returns current state (project_area, bot_name, current_behavior, current_action) to AI Chat",
+                "AI Chat presents project state information to Human"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Execute Behavior Actions",
+      "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior Content"],
+      "features": [
+        {
+          "name": "Initialize Project Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Initialize Project",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Initialize Project Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Project Validates or Determines Project Location",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Initialize Project Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Project Area Confirmation",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Presents Project Area to Human",
+              "users": ["AI Chat", "Human", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Human Confirms or Provides Project Location",
+              "users": ["Human", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Method with Project Area",
+              "users": ["AI Chat", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Updates Project Area and Creates Directory Structure",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Saves Project Area to Agent State File",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Initialize Project Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Gather Context Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Gather Context",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Gather Context Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses GuardRails Required Context Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Gather Context Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Key Questions from GuardRails Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Evidence Requirements from GuardRails Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Key Questions and Evidence",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Reviews Available Context",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Answers Key Questions Based on Context",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Presents Questions and Answers to Human",
+              "users": ["AI Chat", "Human"],
+              "Steps": []
+            },
+            {
+              "name": "Human Reviews and Confirms or Corrects Answers",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Clarification Method",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Clarification Data to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Gather Context Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Decide Planning Criteria Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Decide Planning Criteria",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Decide Planning Criteria Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses GuardRails Planning Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Clarification Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Previous Planning Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Decide Planning Criteria Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Typical Assumptions from GuardRails Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Decision Criteria from GuardRails Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Assumptions and Decision Criteria",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Presents Assumptions to Human",
+              "users": ["AI Chat", "Human"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Presents Decision Criteria Options to Human",
+              "users": ["AI Chat", "Human"],
+              "Steps": []
+            },
+            {
+              "name": "Human Reviews Assumptions and Selects Decision Criteria Options",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Planning Method",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Planning Data to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Decide Planning Criteria Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Build Knowledge Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior", "Behavior Content", "Bot Config"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Build Knowledge",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Build Knowledge Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses Content Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Clarification Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Agent Rules from Bot Config",
+              "users": ["Action", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Behavior Rules from Behavior Configuration",
+              "users": ["Action", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Build Knowledge Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Structured Content Schema from Content Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Builder Method Reference from Content Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Rules Schema and Builder",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Generates Structured Content",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Method with Structured Content",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Content Stores Structured Content",
+              "users": ["Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Structured Content to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Creates Traceability Link",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Build Knowledge Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Render Output Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior", "Behavior Content"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Render Output",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Render Output Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses Content Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Clarification Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Structured Content from Behavior Content",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Render Output Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Output Templates from Content Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Transformer Method References from Content Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Executes Output Builders if Configured",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Templates and Transformers",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Transforms Structured Content",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Method with Rendered Content",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Content Stores Rendered Content",
+              "users": ["Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Rendered Content to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Creates Traceability Link",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Render Output Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Validate Rules Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior", "Behavior Content", "Bot Config"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Validate Rules",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Validate Rules Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses Rules Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Clarification Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Structured Content from Behavior Content",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Rendered Content from Behavior Content",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Agent Rules from Bot Config",
+              "users": ["Action", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Behavior Rules from Behavior Configuration",
+              "users": ["Action", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Executes Code Diagnostics for Violations",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Validate Rules Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Rules Examples and Violations",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Evaluates Content Against Rules",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Generates Validation Report",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Presents Validation Report to Human",
+              "users": ["AI Chat", "Human"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Validate Rules Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Correct Bot Action",
+          "users": ["Human", "AI Chat", "MCP Tool", "MCP Bot Server", "Agile Bot", "Project", "Action", "Workflow State", "Workflow", "Behavior", "Behavior Content"],
+          "stories": [
+            {
+              "name": "Human Provides Input for Correct Bot",
+              "users": ["Human"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Tool Invokes Correct Bot Action",
+              "users": ["MCP Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "MCP Bot Server Intercepts Tool Call With Project Check",
+              "users": ["MCP Bot Server", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behavior and Action from Workflow State",
+              "users": ["Agile Bot", "Workflow State", "Workflow", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Accesses Rules Configuration",
+              "users": ["Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Clarification Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Validation Violations from Previous Action",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads User Feedback from Context",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Original Content from Behavior Content",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Accesses Correct Bot Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Generates Instructions with Violations and Feedback",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Receives Instructions and Applies Corrections",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "AI Chat Calls Agent Store Method with Corrected Content",
+              "users": ["AI Chat"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Content Stores Corrected Content",
+              "users": ["Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Corrected Content to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Creates Traceability Link",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Tracks Activity for Correct Bot Action",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Manage Workflow State",
+      "users": ["Bot Tool", "Behavior Tool", "Behavior Action Tool", "Project", "Workflow State", "Workflow"],
+      "features": [
+        {
+          "name": "Determine Active Behavior and Action",
+          "users": ["Bot Tool", "Behavior Tool", "Behavior Action Tool", "Workflow State", "Workflow"],
+          "stories": [
+            {
+              "name": "Bot Tool Determines Active Behavior from Workflow State",
+              "users": ["Bot Tool", "Workflow State"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Tool Determines Active or Next Action from Workflow State",
+              "users": ["Behavior Tool", "Workflow State", "Workflow"],
+              "Steps": []
+            },
+            {
+              "name": "Behavior Action Tool Uses Specific Behavior and Action from Context",
+              "users": ["Behavior Action Tool"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Validate Workflow State",
+          "users": ["Bot Tool", "Project", "Workflow State"],
+          "stories": [
+            {
+              "name": "Bot Tool Validates Current Action is Complete",
+              "users": ["Bot Tool", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Project Checks if Action Can Advance",
+              "users": ["Project", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Project Checks if Behavior Can Advance",
+              "users": ["Project", "Behavior"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Transition Workflow State",
+          "users": ["Bot Tool", "Project", "Workflow State", "Workflow"],
+          "stories": [
+            {
+              "name": "Bot Tool Moves to Next Action if Current Action Done",
+              "users": ["Bot Tool", "Workflow"],
+              "Steps": []
+            },
+            {
+              "name": "Bot Tool Moves to Next Behavior if Current Behavior Done",
+              "users": ["Bot Tool", "Workflow"],
+              "Steps": []
+            },
+            {
+              "name": "Project Updates Workflow State in File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Saves Workflow State to Agent State File",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Manage Project State",
+      "users": ["Project", "Project Bot State", "File System"],
+      "features": [
+        {
+          "name": "Store Project State",
+          "users": ["Project", "Project Bot State"],
+          "stories": [
+            {
+              "name": "Project Stores Project Area to Agent State File",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Bot Name to Agent State File",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Activity Area to Agent State File",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Store Workflow State",
+          "users": ["Project", "Workflow State"],
+          "stories": [
+            {
+              "name": "Project Stores Current Behavior Name to Workflow State File",
+              "users": ["Project", "Workflow State"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Current Action Name to Workflow State File",
+              "users": ["Project", "Workflow State"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Store Activity Data",
+          "users": ["Project"],
+          "stories": [
+            {
+              "name": "Project Tracks Activity with Status and Behavior Name",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Creates Activity Entry in Activity Log",
+              "users": ["Project"],
+              "Steps": []
+            },
+            {
+              "name": "Project Saves Activity Log to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Store Output Data",
+          "users": ["Project", "File System"],
+          "stories": [
+            {
+              "name": "Project Stores Structured Content to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Stores Rendered Content to File System",
+              "users": ["Project", "File System"],
+              "Steps": []
+            },
+            {
+              "name": "Project Creates Traceability Links Between Activity and Output",
+              "users": ["Project"],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Load Configuration",
+      "users": ["Agile Bot", "Bot Config", "Behavior", "Action"],
+      "features": [
+        {
+          "name": "Load Bot Config",
+          "users": ["Agile Bot", "Bot Config"],
+          "stories": [
+            {
+              "name": "Agile Bot Loads Bot Config from Agent JSON File",
+              "users": ["Agile Bot", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Behaviors from Bot Config",
+              "users": ["Agile Bot", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Agent Rules from Bot Config",
+              "users": ["Agile Bot", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Trigger Words from Bot Config",
+              "users": ["Agile Bot", "Bot Config"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Load Behavior Configuration",
+          "users": ["Agile Bot", "Bot Config", "Behavior"],
+          "stories": [
+            {
+              "name": "Agile Bot Loads Behavior Order from Bot Config",
+              "users": ["Agile Bot", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads GuardRails from Behavior Configuration",
+              "users": ["Agile Bot", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Rules from Behavior Configuration",
+              "users": ["Agile Bot", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Actions from Behavior Configuration",
+              "users": ["Agile Bot", "Behavior", "Action"],
+              "Steps": []
+            },
+            {
+              "name": "Agile Bot Loads Content Configuration from Behavior Configuration",
+              "users": ["Agile Bot", "Behavior"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Load Action Instructions",
+          "users": ["Action"],
+          "stories": [
+            {
+              "name": "Action Loads Instructions Template from Base Actions",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Instructions Template from Behavior Actions",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Substitutes Template Variables with Project Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Load Templates and Rules",
+          "users": ["Action", "Bot Config", "Behavior"],
+          "stories": [
+            {
+              "name": "Action Loads Output Templates from Content Configuration",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Agent Rules from Bot Config",
+              "users": ["Action", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Behavior Rules from Behavior Configuration",
+              "users": ["Action", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Examples from Rules Configuration",
+              "users": ["Action"],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Generate Instructions",
+      "users": ["Action", "Project", "Behavior", "MCP Tool"],
+      "features": [
+        {
+          "name": "Generate Action Instructions",
+          "users": ["Action", "Project", "Behavior", "MCP Tool"],
+          "stories": [
+            {
+              "name": "Action Accesses Instructions Template",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Required Data from Project",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Required Data from Behavior",
+              "users": ["Action", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Substitutes Template Variables",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Prepends Common Instructions",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Returns Instructions to MCP Tool",
+              "users": ["Action", "MCP Tool"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Generate Build Instructions",
+          "users": ["Action", "Project", "Bot Config", "Behavior"],
+          "stories": [
+            {
+              "name": "Action Loads Clarification Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Agent Rules",
+              "users": ["Action", "Bot Config"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Behavior Rules",
+              "users": ["Action", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Structured Content Schema",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Assembles Build Instructions",
+              "users": ["Action"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Generate Transform Instructions",
+          "users": ["Action", "Project", "Behavior Content"],
+          "stories": [
+            {
+              "name": "Action Loads Clarification Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Structured Content",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Output Templates",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Transformer Methods",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Assembles Transform Instructions",
+              "users": ["Action"],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Generate Validation Instructions",
+          "users": ["Action", "Project", "Behavior Content", "Bot Config", "Behavior"],
+          "stories": [
+            {
+              "name": "Action Loads Clarification Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Planning Data",
+              "users": ["Action", "Project"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Content Data",
+              "users": ["Action", "Behavior Content"],
+              "Steps": []
+            },
+            {
+              "name": "Action Loads Rules and Examples",
+              "users": ["Action", "Bot Config", "Behavior"],
+              "Steps": []
+            },
+            {
+              "name": "Action Executes Code Diagnostics",
+              "users": ["Action"],
+              "Steps": []
+            },
+            {
+              "name": "Action Assembles Validation Instructions",
+              "users": ["Action"],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

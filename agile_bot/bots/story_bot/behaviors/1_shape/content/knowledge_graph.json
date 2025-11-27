@@ -1,0 +1,7 @@
+{
+  "name": "knowledge_graph",
+  "path": "docs/stories/map",
+  "template": "story-graph-outline.json",
+  "output": "story-graph.json"
+}
+

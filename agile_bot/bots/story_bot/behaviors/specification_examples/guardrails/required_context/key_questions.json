@@ -1,0 +1,13 @@
+{
+  "description": "Key questions that must be answered before this behavior can proceed",
+  "questions": [
+    "What data variations (e.g., boundary conditions, common examples) are required for test coverage?",
+    "What are the input values needed to test each scenario?",
+    "What are the expected output values for each input?",
+    "Are there formulas or calculations that need multiple data points to validate?",
+    "Are there domain entities with named values that should be tested?",
+    "What are the boundary conditions (min, max, edge cases) for each data point?",
+    "Who is responsible for writing or validating these examples (e.g., BA, Dev, QC)?",
+    "Do scenarios need to be converted to Scenario Outlines with Examples tables?"
+  ]
+}

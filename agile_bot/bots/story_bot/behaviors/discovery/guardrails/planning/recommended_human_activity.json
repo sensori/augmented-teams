@@ -1,0 +1,8 @@
+{
+  "recommended_human_activity": [
+    "Review the AI-generated story sequence to verify it accurately reflects the full flow across roles and systems",
+    "Validate that the AI has correctly identified boundaries, transitions, and integration points",
+    "Verify the AI's inventory matches a coherent, realistic flow and review its approach to story identification",
+    "Review the AI's granularity decisions to confirm the slice granularity is appropriate before moving into exploration"
+  ]
+}

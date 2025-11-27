@@ -145,20 +145,763 @@
           ]
         }
       },
+      "rules": [
+        {
+          "description": "Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.",
+          "do": {
+            "examples": [
+              {
+                "description": "Include both user and system activities in story descriptions",
+                "content": "User submits order, System validates payment"
+              },
+              {
+                "description": "Show user actions and corresponding system responses",
+                "content": "Customer views products, System displays inventory"
+              },
+              {
+                "description": "Use user activity patterns",
+                "content": "User submits, Customer places"
+              },
+              {
+                "description": "Use system activity patterns",
+                "content": "System validates, System sends"
+              },
+              {
+                "description": "Focus stories on user interactions and how the system behaves as observed by users",
+                "content": "Customer places order with payment details"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid task-oriented language that describes implementation",
+                "content": "Implement order submission, Create payment validation"
+              },
+              {
+                "description": "Don't use task language for building or setting up",
+                "content": "Build product listing page, Set up inventory display"
+              },
+              {
+                "description": "Don't focus only on user activities (ignore system activities)",
+                "content": "Only user activities: User submits order, User views products (missing system activities)"
+              },
+              {
+                "description": "Don't focus only on tasks (instead of activities)",
+                "content": "Only tasks: Implement order submission, Create payment validation (not activities)"
+              },
+              {
+                "description": "Don't use development task language",
+                "content": "implement, create, refactor, optimize, fix, build, set up"
+              },
+              {
+                "description": "Don't use technical implementation details",
+                "content": "query database, call API, update table"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.",
+          "do": {
+            "examples": [
+              {
+                "description": "Create stories that represent complete flows within the effort range",
+                "content": "Customer places order (complete flow, 3-5 days)"
+              },
+              {
+                "description": "Break/group stories so that most fall into a 3-12 day effort range",
+                "content": "Enable frequent feedback by decomposing the work into smaller items"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid stories that are too large and span multiple weeks",
+                "content": "Order management system (too large, 20+ days)"
+              },
+              {
+                "description": "Don't arbitrarily decompose stories to a functional level, regardless of size",
+                "content": "Create stories that are too small without considering value"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Balance fine-grained stories with testable and valuable independent units. Stories must deliver value and be independently testable.",
+          "do": {
+            "examples": [
+              {
+                "description": "Create stories that are complete interactions with value",
+                "content": "Customer places order (complete interaction, testable, valuable)"
+              },
+              {
+                "description": "Balance fine-grained stories with testable/valuable stories",
+                "content": "Ensure stories are fine-grained enough to enable frequent feedback"
+              },
+              {
+                "description": "Ensure stories are grouped into meaningful chunks for high quality feedback",
+                "content": "Stories that deliver measurable value independently"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid stories that are too small and have no value alone",
+                "content": "Add order button (too fine-grained, no value alone)"
+              },
+              {
+                "description": "Don't create stories that are too fine-grained without being testable or valuable",
+                "content": "Change button color (too fine-grained, no value)"
+              },
+              {
+                "description": "Don't create stories that are too large to be testable or deliverable quickly",
+                "content": "Customer places order and views history and updates profile (too large, multiple flows)"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.",
+          "do": {
+            "examples": [
+              {
+                "description": "Maintain hierarchy within the 7±2 cognitive limit range",
+                "content": "Epic with 6 features, each feature with 5-7 stories"
+              },
+              {
+                "description": "Epic: Contains 4-9 features - Split into Sub-Epics when > 9 features, Merge with another epic when < 4 features",
+                "content": "Manage Orders (10 features → SPLIT) → Manage Customer Orders (6 features) ✓ + Manage Order Fulfillment (4 features) ✓"
+              },
+              {
+                "description": "Feature: Contains 4-9 stories - Split into 2 features when > 9 stories, Merge with another feature when < 4 stories",
+                "content": "Place Order (12 stories → SPLIT) → Initiate Order (6 stories) ✓ + Complete Order (6 stories) ✓"
+              },
+              {
+                "description": "Story: Contains 2-9 acceptance criteria - Split into 2 stories when > 9 AC, Merge with another story when < 2 AC",
+                "content": "Validate Payment (11 AC → SPLIT) → Check Payment Method (5 AC) ✓ + Process Payment Transaction (6 AC) ✓"
+              },
+              {
+                "description": "Apply 7±2 cognitive limit principle",
+                "content": "Optimal range: 5-9 items per level, acceptable: 4-9"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Split when hierarchy exceeds the maximum threshold",
+                "content": "Epic with 12 features (split into 2 epics), feature with 15 stories (split into 2 features)"
+              },
+              {
+                "description": "Don't create epics with > 9 features (use Sub-Epics instead)",
+                "content": "Epic with 15 features (too many, use Sub-Epics)"
+              },
+              {
+                "description": "Don't create features with > 9 stories (split the feature)",
+                "content": "Feature with 15 stories (too many, split feature)"
+              },
+              {
+                "description": "Don't create stories with > 9 acceptance criteria (split the story)",
+                "content": "Story with 15 AC (too many, split story)"
+              },
+              {
+                "description": "Don't create very small stories with < 2 AC (merge with related story)",
+                "content": "Story with 1 AC (too small, merge with related story)"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
+          "do": {
+            "examples": [
+              {
+                "description": "Use action verbs to describe what happens",
+                "content": "User submits order, System validates payment"
+              },
+              {
+                "description": "Favor active behavioral language over functional/capability breakup",
+                "content": "Use story maps to outline user and system behavior (NOT tasks)"
+              },
+              {
+                "description": "Use action verbs",
+                "content": "submits, views, validates, sends, displays"
+              },
+              {
+                "description": "Describe behaviors",
+                "content": "[Actor] [action] [object]"
+              },
+              {
+                "description": "Use active behavior language",
+                "content": "Place order (active behavior), Validate payment (active behavior)"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid capability nouns that describe functions rather than behaviors",
+                "content": "Order Management, Payment Processing (capability nouns)"
+              },
+              {
+                "description": "Don't use functional or capability-based language instead of behavioral language",
+                "content": "Focus on tasks instead of behaviors"
+              },
+              {
+                "description": "Don't use capability nouns",
+                "content": "Management, Processing, Administration"
+              },
+              {
+                "description": "Don't use task verbs",
+                "content": "implement, create, build, set up"
+              },
+              {
+                "description": "Don't use task language",
+                "content": "Order Management (capability), Implement order placement (task)"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Ensure business experts can understand the language of stories. Use business domain language, not technical implementation details.",
+          "do": {
+            "examples": [
+              {
+                "description": "Use business language that stakeholders understand",
+                "content": "Customer places order with payment details"
+              },
+              {
+                "description": "Ground the map in business language that is specific and precise",
+                "content": "Focus the language on the business domain"
+              },
+              {
+                "description": "Use verb/noun language",
+                "content": "Use language that emphasizes performing an operation on an explicit thing"
+              },
+              {
+                "description": "Use domain-specific terms",
+                "content": "order, customer, payment, inventory"
+              },
+              {
+                "description": "Use specific verb/noun combinations",
+                "content": "[Actor] [specific verb] [specific noun]"
+              },
+              {
+                "description": "Use business domain language",
+                "content": "Customer places order, System validates payment, User views dashboard"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid technical API and implementation details",
+                "content": "POST /api/orders with JSON payload containing payment object"
+              },
+              {
+                "description": "Don't use generic functions, verbs, nouns without context",
+                "content": "Process order (generic), Order Management (static)"
+              },
+              {
+                "description": "Don't use overly technical IT concepts, unless core to domain being discussed",
+                "content": "getOrder() (code pattern), API, database, endpoint, query, call"
+              },
+              {
+                "description": "Don't use static functional concepts",
+                "content": "[Noun] Management, [Noun] Processing"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Create lightweight but precise documentation during shaping. Focus on structure and scope, not detailed specifications.",
+          "do": {
+            "examples": [
+              {
+                "description": "Document the hierarchy and structure during shaping",
+                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order"
+              },
+              {
+                "description": "Create lightweight but precise documentation",
+                "content": "Focus on structure and scope, not detailed specifications"
+              },
+              {
+                "description": "Make the map easy to walk through",
+                "content": "It tells a story"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid detailed technical specifications during shaping phase",
+                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Detailed API specs, database schema, UI mockups"
+              },
+              {
+                "description": "Don't over-elaborate story mapping during shaping",
+                "content": "Skip increment identification"
+              }
+            ]
+          },
+          "diagnostic": "story_agent_validate_story_shape"
+        },
+        {
+          "description": "Identify marketable increments with business priorities and relative sizing. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers).",
+          "do": {
+            "examples": [
+              {
+                "description": "Define increments with business value and priorities as vertical slices",
+                "content": "Marketable increment: Basic Order Flow (NOW priority, Small relative size) - includes PARTIAL features from MULTIPLE epics delivering complete end-to-end flow"
+              },
+              {
+                "description": "Design increments as VERTICAL SLICES across multiple epics/features (thin end-to-end flows)",
+                "content": "Ensure each increment delivers a complete working flow from start to finish"
+              },
+              {
+                "description": "Include PARTIAL features from multiple epics in each increment",
+                "content": "Build increments that demonstrate end-to-end capability (data entry → processing → validation → persistence → display)"
+              },
+              {
+                "description": "Start with simplest end-to-end flow",
+                "content": "Basic happy path for simplest user/scenario"
+              },
+              {
+                "description": "Order increments by delivery priority",
+                "content": "NOW/NEXT/LATER (use NOW/NEXT/LATER instead of High/Medium/Low)"
+              },
+              {
+                "description": "Use relative sizing to compare increments against previously delivered work",
+                "content": "MVI 1 Relative Size: Compared to Payment System v1 (delivered Q3 2024)"
+              },
+              {
+                "description": "Example: Vertical Slice (End-to-End)",
+                "content": "Value Increment 1: Basic Character Creation Flow - NOW\n    🎯 Epic: Create Character (PARTIAL - minimal creation)\n      ⚙️ Feature: Enter Basic Info (2 stories - name, archetype only)\n      ⚙️ Feature: Assign Abilities (1 story - simple point buy)\n    🎯 Epic: Manage Character (PARTIAL - basic persistence)\n      ⚙️ Feature: Save Character (1 story - save to file)\n      ⚙️ Feature: Load Character (1 story - load from file)\n    🎯 Epic: Display Character (PARTIAL - basic view)\n      ⚙️ Feature: View Character Sheet (1 story - show basic info)\n  ✅ Why: Each increment delivers COMPLETE END-TO-END flow. Increment 1 = basic creation → save → load → view."
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Avoid technical increments without business value or horizontal layers",
+                "content": "Increment: API endpoints (no priority, no sizing) OR Complete Epic A then Epic B (horizontal layers)"
+              },
+              {
+                "description": "Don't design increments as horizontal layers (complete Feature A, then Feature B, then Feature C)",
+                "content": "Build one epic/feature completely before touching another"
+              },
+              {
+                "description": "Don't create increments that only touch one area of the system",
+                "content": "Build increments that can't demonstrate working end-to-end flow"
+              },
+              {
+                "description": "Example: Horizontal Layer (Feature-by-Feature)",
+                "content": "Value Increment 1: Character Creation - NOW\n    🎯 Epic: Create Character (COMPLETE)\n      ⚙️ Feature: Enter Basic Info (ALL stories)\n      ⚙️ Feature: Assign Abilities (ALL stories)\n      ⚙️ Feature: Select Skills (ALL stories)\n  ❌ Why: Increment 1 can't be tested end-to-end (no save/load). Can't deliver working software until Increment 2."
+              },
+              {
+                "description": "Don't use High/Medium/Low (use NOW/NEXT/LATER instead)",
+                "content": "Skip increment identification"
+              }
+            ]
+          },
+          "diagnostic": "story_agent_validate_market_increments"
+        },
+        {
+          "description": "Domain Structure Organization: Global vs Epic vs Feature Level Placement",
+          "do": {
+            "examples": [
+              {
+                "description": "Place concepts at global level when used across entire system or multiple epics",
+                "content": "Global: User (used across all epics), Authentication (system-wide), Configuration (affects all capabilities)"
+              },
+              {
+                "description": "Place concepts at epic level when used across multiple features within one epic",
+                "content": "Epic: Order Processing → Order (used by Create Order, Update Order, Cancel Order features)"
+              },
+              {
+                "description": "Place concepts at feature level when specific to one feature",
+                "content": "Feature: Payment Processing → Payment Gateway Integration (specific to this feature only)"
+              },
+              {
+                "description": "Order by user mental model: what users encounter first and what builds on what",
+                "content": "Global: User → Epic: User Profile Management → Feature: Update Profile → Story: User updates email"
+              },
+              {
+                "description": "Organize by domain concepts (what things ARE and what you DO with them), not file structure",
+                "content": "Epic: Order Management → Feature: Create Order → Story: Customer creates order"
+              },
+              {
+                "description": "Lead with domain-specific concepts, put system infrastructure at the end",
+                "content": "Epic: Order Processing → Epic: Payment Processing → Epic: System Configuration"
+              },
+              {
+                "description": "Group related concepts that serve the same functional goal together",
+                "content": "Epic: Authentication → Feature: Login → Feature: Logout → Feature: Password Reset (all serve authentication goal)"
+              },
+              {
+                "description": "Nest implementation details under the feature they serve",
+                "content": "Feature: Payment Processing → Story: Process credit card payment → Story: Validate payment gateway response"
+              },
+              {
+                "description": "Name domain concepts as nouns, describe behaviors as verbs",
+                "content": "Epic: Order (noun) → Feature: Create Order (verb-noun) → Story: Customer creates order (actor-verb-noun)"
+              },
+              {
+                "description": "Prefer integration: nest related capabilities under one domain rather than creating parallel domains",
+                "content": "Epic: Order Management → Feature: Create Order → Feature: Update Order → Feature: Cancel Order (all nested under Order Management)"
+              },
+              {
+                "description": "Focus on functional outcomes and what concepts accomplish for users, not technical mechanisms",
+                "content": "Epic: Customer places order (functional outcome) → Feature: Validate payment (business capability)"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't place system-wide concepts at epic or feature level",
+                "content": "Epic: User Management (WRONG - User is global), Feature: System Configuration (WRONG - Configuration is global)"
+              },
+              {
+                "description": "Don't place epic-scoped concepts at global or feature level",
+                "content": "Global: Order (WRONG - only used in Order Processing epic), Feature: Order (WRONG - used by multiple features in epic)"
+              },
+              {
+                "description": "Don't place feature-specific concepts at global or epic level",
+                "content": "Global: Payment Gateway Integration (WRONG - only used in one feature), Epic: Payment Gateway Integration (WRONG - specific to one feature)"
+              },
+              {
+                "description": "Don't order by code structure or technical layers",
+                "content": "Epic: Data Layer → Epic: Business Logic → Epic: Presentation Layer (WRONG - technical structure, not user model)"
+              },
+              {
+                "description": "Don't organize by file types or code organization",
+                "content": "Epic: Models → Epic: Services → Epic: Controllers (WRONG - file structure, not domain concepts)"
+              },
+              {
+                "description": "Don't lead with system concepts or technical infrastructure",
+                "content": "Epic: Database Layer → Epic: API Services → Epic: Order Processing (WRONG - infrastructure first)"
+              },
+              {
+                "description": "Don't separate related concepts into different major sections",
+                "content": "Epic: Login → Epic: Logout → Epic: Password Reset (WRONG - should be grouped under Authentication epic)"
+              },
+              {
+                "description": "Don't create separate sections for implementation details",
+                "content": "Epic: Payment Processing → Epic: Payment Gateway Integration (WRONG - integration is implementation detail, should be nested)"
+              },
+              {
+                "description": "Don't use verbs or gerunds for concept names",
+                "content": "Epic: Ordering (WRONG - gerund), Feature: Creating Orders (WRONG - verb form), Story: Order Creation (WRONG - should be 'Create Order')"
+              },
+              {
+                "description": "Don't create parallel domains with same root noun",
+                "content": "Epic: Order Creation → Epic: Order Update → Epic: Order Cancellation (WRONG - should be nested under Order Management epic)"
+              },
+              {
+                "description": "Don't focus on technical implementation or mechanisms",
+                "content": "Epic: Process HTTP POST request (WRONG - technical mechanism), Feature: Call payment API (WRONG - implementation detail)"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Use Outcome Verbs, Not Communication Verbs",
+          "do": {
+            "examples": [
+              {
+                "description": "Use verbs that describe artifacts/outcomes",
+                "content": "Animation, Feedback, Indicators, Configuration"
+              },
+              {
+                "description": "Name concepts by what they ARE or CREATE",
+                "content": "Power Activation Animation, Combat Outcome Feedback"
+              },
+              {
+                "description": "Focus on tangible results",
+                "content": "Hit Indicators, Save Result Feedback"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't use generic communication verbs",
+                "content": "showing, displaying, visualizing, presenting"
+              },
+              {
+                "description": "Don't use vague enablement verbs",
+                "content": "providing, enabling, allowing"
+              },
+              {
+                "description": "Don't name concepts by their mechanism",
+                "content": "Visualizing Power Activation, Showing Combat Results"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Order by User Mental Model, Not Code Structure",
+          "do": {
+            "examples": [
+              {
+                "description": "Order concepts by user encounter sequence",
+                "content": "Put foundational objects BEFORE features that use them"
+              },
+              {
+                "description": "Start with core domain objects",
+                "content": "User, Vehicle, PowerItem"
+              },
+              {
+                "description": "Follow with operations on those objects",
+                "content": "End with supporting infrastructure"
+              },
+              {
+                "description": "Ask from user perspective",
+                "content": "What builds on what?"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't order by code structure",
+                "content": "models, services, controllers"
+              },
+              {
+                "description": "Don't hide core objects in Technical Implementation sections",
+                "content": "Start with features before introducing the objects they operate on"
+              },
+              {
+                "description": "Don't follow code dependency graphs instead of user understanding flow",
+                "content": "Focus on technical structure rather than user mental model"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Organize by Domain First, System Support Second",
+          "do": {
+            "examples": [
+              {
+                "description": "Lead with domain-specific concepts",
+                "content": "Powers, Combat, Vehicles, Users"
+              },
+              {
+                "description": "Name sections by business capabilities",
+                "content": "Power Activation, Payment Processing"
+              },
+              {
+                "description": "Group related domain concepts together",
+                "content": "Put system infrastructure at the end"
+              },
+              {
+                "description": "Frame purpose from functional perspective",
+                "content": "Make powers feel distinct"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't lead with system concepts",
+                "content": "Events, UI, Services, Data Layer"
+              },
+              {
+                "description": "Don't name sections by technical layers",
+                "content": "Presentation Layer, Business Logic"
+              },
+              {
+                "description": "Don't mix domain and system concepts at same level",
+                "content": "Frame purpose from technical perspective: Render visual effects"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Refine Scope to Functional Accomplishment",
+          "do": {
+            "examples": [
+              {
+                "description": "Focus on functional outcomes, not mechanisms",
+                "content": "Frame domains by what they accomplish for users"
+              },
+              {
+                "description": "Ask about user enablement",
+                "content": "What does this enable the user to do or understand?"
+              },
+              {
+                "description": "State the transformation or capability provided",
+                "content": "Be specific about the functional benefit"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't frame domains by their technical implementation",
+                "content": "Focus on 'how' before 'what'"
+              },
+              {
+                "description": "Don't use generic system capabilities as domain names",
+                "content": "Describe mechanisms instead of outcomes"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Maximize Integration of Related Concepts",
+          "do": {
+            "examples": [
+              {
+                "description": "Group concepts that the user sees as one capability",
+                "content": "Nest implementation details under the feature they serve"
+              },
+              {
+                "description": "Keep related data and operations together",
+                "content": "Eliminate artificial boundaries based on code organization"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't separate related concepts into different major sections",
+                "content": "Split based on code layers (data, business, presentation)"
+              },
+              {
+                "description": "Don't duplicate related concepts across multiple sections",
+                "content": "Create gaps that break the user's mental model"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Domain Concepts Are Nouns, Behaviors Are Verbs",
+          "do": {
+            "examples": [
+              {
+                "description": "Name domain concepts as nouns",
+                "content": "Animation, Power Item, Sequence, Configuration"
+              },
+              {
+                "description": "Describe what the concept IS first, then what it DOES",
+                "content": "Use verbs to describe behaviors on concepts: Resolves animation, Executes when triggered"
+              },
+              {
+                "description": "If a verb has its own state/logic, make it a noun concept",
+                "content": "Transform actions into domain concepts when they have state"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't name domain concepts as verbs or gerunds",
+                "content": "Animation Resolution, Animation Execution"
+              },
+              {
+                "description": "Don't use '-ing' forms for concept names",
+                "content": "Animating, Resolving, Processing"
+              },
+              {
+                "description": "Don't create separate concepts for 'Doing X' vs 'X'",
+                "content": "Combine them - always lead with what the thing IS"
+              },
+              {
+                "description": "Don't hide the noun form",
+                "content": "Always lead with what the thing IS"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Avoid Noun Redundancy in Domain and Concept Names",
+          "do": {
+            "examples": [
+              {
+                "description": "INTEGRATE first: nest related capabilities under one domain (90% of cases)",
+                "content": "Only then rename: use distinct nouns ONLY when integration doesn't make sense"
+              },
+              {
+                "description": "Test for uniqueness",
+                "content": "Can you remove the qualifier and still know what it is?"
+              },
+              {
+                "description": "Use subject-area nouns when domains are genuinely separate",
+                "content": "Only when integration truly doesn't make sense"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't rename without considering integration (this hides the real issue)",
+                "content": "Repeat same noun with different prefixes: X Animation, Y Animation, Z Animation"
+              },
+              {
+                "description": "Don't use vague qualifiers to avoid integration",
+                "content": "Animation 1, Animation System"
+              },
+              {
+                "description": "Don't create parallel domains that should be nested",
+                "content": "Integrate related concepts rather than creating redundant structures"
+              }
+            ]
+          }
+        },
+        {
+          "description": "Organization: Domain Concepts Over File Structure",
+          "do": {
+            "examples": [
+              {
+                "description": "Organize by domain concepts",
+                "content": "Behavior with nested capabilities"
+              },
+              {
+                "description": "Ask about domain purpose",
+                "content": "What is this domain about? not What files does it have?"
+              },
+              {
+                "description": "Group by functional capability",
+                "content": "Name sections by what they accomplish: Validation, Creation, Deployment"
+              }
+            ]
+          },
+          "dont": {
+            "examples": [
+              {
+                "description": "Don't organize by file types",
+                "content": "Rule Files, Command Files, Runner Files"
+              },
+              {
+                "description": "Don't organize by technical structure",
+                "content": "Configuration Layer, Execution Layer"
+              },
+              {
+                "description": "Don't split capabilities across multiple sections",
+                "content": "Name sections by artifacts: Documentation, Scripts, Configs"
+              }
+            ]
+          }
+        }
+      ],
       "content": {
         "structured_content": {
-          "schema": "story_graph.json",
+          "schema": "minimal-story-graph.json",
           "path": "docs/stories",
-          "description": "Shared structured content schema across all story behaviors",
-          "instructions": "Build the structured story map content. READ the story_graph.json schema file to understand the required structure - this schema file defines the exact format you must follow. CRITICAL: In build_structure phase, you MUST: (1) Build the complete story graph JSON data following the schema, (2) Write the JSON data directly to structured.json using the write tool at the exact location: {project_area}/docs/stories/structured.json (replace {project_area} with the actual project area path), (3) After writing, validate that the file exists and is valid JSON using the read_file tool to confirm it was saved correctly. DO NOT render any documentation, DO NOT create markdown files, DO NOT perform any transformation work. All documentation rendering and transformation happens in the render_output phase. Your only task here is to build the structured JSON content, write it directly to structured.json using the write tool, and validate the file exists. MANDATORY: You MUST review ALL planning decisions and assumptions provided above. These planning decisions contain critical constraints and strategies that MUST guide your story generation. For example, if planning decisions specify 'focus on drilling down 1-2 stories that cross all components, then extrapolate the rest', you MUST follow this strategy: enumerate only 1-2 stories that demonstrate component interactions, and use 'story_count' notation (e.g., '~5 stories') for all other features. DO NOT enumerate all stories unless planning decisions explicitly require it. Planning decisions override default patterns - you MUST apply them directly to your story generation. ADDITIONAL QUESTIONS REQUIREMENT: Load clarification.json and check for 'additional_questions_answered' section. Use these detailed workflow questions and answers to inform story creation, especially for features that involve Foundry system interactions (canvas, tokens, actors, combat tracker, UI panels). The additional_questions_answered contain detailed workflow information that should be reflected in story behavioral acceptance criteria and story purposes. MANDATORY STORY NAMING FORMAT - CRITICAL: ALL stories MUST follow Actor-Verb-Noun format. This is NOT optional. Every story MUST have: (1) Story name field: Concise Verb-Noun format (e.g., 'Create Mob from Selected Tokens', 'Display Mob Grouping in Combat Tracker', 'Execute Mob Attack with Strategy', 'Apply Attack Common Target Strategy'). The name should be action-oriented and concise. (2) Description field: Component interaction description in plain text showing component-to-component interactions (e.g., 'GM selects multiple minion tokens on canvas and Mob manager creates mob with selected tokens and assigns random leader'). The description field is MANDATORY and MUST show how components interact. DO NOT create stories without both name and description fields. DO NOT use long narrative story names - use concise Verb-Noun format for names, put component interactions in description field. MANDATORY USER IDENTIFICATION AND AGGREGATION - CRITICAL: You MUST identify and aggregate users/actors at the appropriate hierarchical level. Load clarification.json and extract user types from 'key_questions_answered' (especially 'Who are the distinct types of users?'). For each epic, feature, and story, identify which user types are involved. AGGREGATION RULES: (1) If ALL stories in a feature have the SAME user(s), put the users array at the FEATURE level and leave story users arrays empty. (2) If ALL features in an epic have the SAME user(s), put the users array at the EPIC level and leave feature/story users arrays empty. (3) If stories within a feature have DIFFERENT users, put users at the STORY level for each story. (4) If features within an epic have DIFFERENT users, put users at the FEATURE level for each feature. (5) Always aggregate users upward when they are consistent - this reduces duplication and makes the diagram cleaner. The users field is an array of strings (e.g., ['Collector', 'Trader'] or ['Content Creator']). Users will be displayed in the diagram above the first story/feature/epic where they appear."
+          "description": "Minimal story graph schema for shaping - only epics, features, stories, and users",
+          "instructions": "Build the minimal structured story map content. READ the minimal-story-graph.json schema file to understand the required structure - this schema file defines the exact format you must follow. Use actor-verb-noun language only. CRITICAL: In build_structure phase, you MUST: (1) Build the minimal story graph JSON data following the schema (only name and users fields), (2) Write the JSON data directly to structured.json using the write tool at the exact location: {project_area}/docs/stories/structured.json (replace {project_area} with the actual project area path), (3) After writing, validate that the file exists and is valid JSON using the read_file tool to confirm it was saved correctly. DO NOT render any documentation, DO NOT create markdown files, DO NOT perform any transformation work. All documentation rendering and transformation happens in the render_output phase. **DOMAIN STRUCTURE ORGANIZATION:** When organizing epics and features, apply domain-driven design principles: (1) Identify high-level domain concepts first - these are the core business concepts that define what the system is about, (2) Place main concepts used across multiple epics at EPIC level, concepts specific to one epic at FEATURE level, (3) For domain models: place at GLOBAL level when used across entire system, EPIC level when used across multiple features in epic, FEATURE level when specific to single feature - ask 'What is the reuse scope?' to determine placement, (4) Order by user mental model - what users encounter first and what builds on what, (5) Organize by domain concepts (what things ARE and what you DO with them), not file structure, (6) Lead with domain-specific concepts, put system infrastructure at the end, (7) Group related concepts that serve the same functional goal together, (8) Name domain concepts as nouns, describe behaviors as verbs, (9) Prefer integration - nest related capabilities under one domain rather than creating parallel domains, (10) Focus on functional outcomes and what concepts accomplish for users, not technical mechanisms."
         },
         "outputs": [
           {
             "name": "story_map",
             "path": "docs/stories/map",
             "transformer": "story_agent_transform_story_map_to_markdown",
-            "template": "templates/story-map-decomposition-template.md",
-            "instructions": "Transform the structured story map into a markdown document using the story-map-decomposition-template.md template file. The template file contains the complete formatting rules and structure. Follow the template exactly, filling in the structured content data. CRITICAL: Story map MUST use '## Story Map Structure' as single section header with ALL epics in body (NOT individual ## headers per epic). CRITICAL HIERARCHY FORMATTING: The epic_hierarchy section MUST use tree structure characters (│, ├─, └─) to show visual hierarchy. Epic format: 🎯 **Epic Name** (X features, ~Y stories)  . Feature format: ├─ ⚙️ **Feature Name** (~Z stories)  for items with siblings, └─ ⚙️ **Feature Name** (~Z stories)  for last item. Story format: ├─ 📝 Story: Story Name  followed by italicized description on next line: │  *description text*  . All lines MUST end with TWO SPACES for proper line breaks. STORY FORMAT: Each story MUST be displayed as: ├─ 📝 Story: [Verb-Noun Name]  followed by │  *[Component interaction description]*  on the next line. The story name should be concise (Verb-Noun format), and the description should show component-to-component interactions in italics. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/story-map.md (replace {project_area} with the actual project area path). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+            "template": "templates/minimal-story-graph-minimal-outline-template.md",
+            "instructions": "Transform the structured story map into a minimal hierarchical outline using tab-based indentation. Use actor-verb-noun language only. No emojis, no boilerplate, just hierarchical structure with tabs. Epic names at root level, feature names indented with one tab, story names indented with two tabs. After transforming, write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/story-map.md (replace {project_area} with the actual project area path)."
           },
           {
             "name": "drawio.story_shape",
@@ -251,141 +994,7 @@
           "undertake.*new"
         ],
         "priority": 8
-      },
-      "rules": [
-        {
-          "description": "Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.",
-          "examples": [
-            {
-              "do": {
-                "description": "Include both user and system activities in story descriptions",
-                "content": "User submits order, System validates payment"
-              },
-              "dont": {
-                "description": "Avoid task-oriented language that describes implementation",
-                "content": "Implement order submission, Create payment validation"
-              }
-            },
-            {
-              "do": {
-                "description": "Show user actions and corresponding system responses",
-                "content": "Customer views products, System displays inventory"
-              },
-              "dont": {
-                "description": "Don't use task language for building or setting up",
-                "content": "Build product listing page, Set up inventory display"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.",
-          "examples": [
-            {
-              "do": {
-                "description": "Create stories that represent complete flows within the effort range",
-                "content": "Customer places order (complete flow, 3-5 days)"
-              },
-              "dont": {
-                "description": "Avoid stories that are too large and span multiple weeks",
-                "content": "Order management system (too large, 20+ days)"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Balance fine-grained stories with testable and valuable independent units. Stories must deliver value and be independently testable.",
-          "examples": [
-            {
-              "do": {
-                "description": "Create stories that are complete interactions with value",
-                "content": "Customer places order (complete interaction, testable, valuable)"
-              },
-              "dont": {
-                "description": "Avoid stories that are too small and have no value alone",
-                "content": "Add order button (too fine-grained, no value alone)"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.",
-          "examples": [
-            {
-              "do": {
-                "description": "Maintain hierarchy within the 7±2 cognitive limit range",
-                "content": "Epic with 6 features, each feature with 5-7 stories"
-              },
-              "dont": {
-                "description": "Split when hierarchy exceeds the maximum threshold",
-                "content": "Epic with 12 features (split into 2 epics), feature with 15 stories (split into 2 features)"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
-          "examples": [
-            {
-              "do": {
-                "description": "Use action verbs to describe what happens",
-                "content": "User submits order, System validates payment"
-              },
-              "dont": {
-                "description": "Avoid capability nouns that describe functions rather than behaviors",
-                "content": "Order Management, Payment Processing (capability nouns)"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Ensure business experts can understand the language of stories. Use business domain language, not technical implementation details.",
-          "examples": [
-            {
-              "do": {
-                "description": "Use business language that stakeholders understand",
-                "content": "Customer places order with payment details"
-              },
-              "dont": {
-                "description": "Avoid technical API and implementation details",
-                "content": "POST /api/orders with JSON payload containing payment object"
-              }
-            }
-          ]
-        },
-        {
-          "description": "Create lightweight but precise documentation during shaping. Focus on structure and scope, not detailed specifications.",
-          "examples": [
-            {
-              "do": {
-                "description": "Document the hierarchy and structure during shaping",
-                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order"
-              },
-              "dont": {
-                "description": "Avoid detailed technical specifications during shaping phase",
-                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Detailed API specs, database schema, UI mockups"
-              }
-            }
-          ],
-          "diagnostic": "story_agent_validate_story_shape"
-        },
-        {
-          "description": "Identify marketable increments with business priorities and relative sizing. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers).",
-          "examples": [
-            {
-              "do": {
-                "description": "Define increments with business value and priorities as vertical slices",
-                "content": "Marketable increment: Basic Order Flow (NOW priority, Small relative size) - includes PARTIAL features from MULTIPLE epics delivering complete end-to-end flow"
-              },
-              "dont": {
-                "description": "Avoid technical increments without business value or horizontal layers",
-                "content": "Increment: API endpoints (no priority, no sizing) OR Complete Epic A then Epic B (horizontal layers)"
-              }
-            }
-          ],
-          "diagnostic": "story_agent_validate_market_increments"
-        }
-      ]
+      }
     },
     "prioritization": {
       "order": 2,
@@ -683,8 +1292,8 @@
             "name": "story_map",
             "path": "docs/stories/map",
             "transformer": "story_agent_transform_story_map_to_markdown",
-            "template": "templates/story-map-decomposition-template.md",
-            "instructions": "Update the EXISTING story map markdown (mob-rule-story-map.md) with discovery refinements. Include all stories for increment(s) in focus, including any newly identified/expanded stories from the discovery process. Enumerate all stories explicitly (no ~X stories notation) for increment(s) in focus. Update source material section with Discovery Refinements subsection that documents:\n- What stories were added, broken down, or refined\n- Why stories were expanded (component interactions, system/back office approach, etc.)\n- How the new granularity approach changed the story inventory\n\nCRITICAL: This updates the EXISTING story map document, NOT creates a new discovery document. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/{product_name}-story-map.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+            "template": "templates/minimal-story-graph-minimal-outline-template.md",
+            "instructions": "Update the EXISTING story map markdown with discovery refinements using minimal hierarchical outline format. Use tab-based indentation, actor-verb-noun language only. No emojis, no boilerplate. After transforming, write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/{product_name}-story-map.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json)."
           },
           {
             "name": "increments",

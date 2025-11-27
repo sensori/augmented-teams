@@ -1,0 +1,21 @@
+{
+  "description": "Folder structure must exactly match story map hierarchy. Epic/feature folders created inside docs/stories/map/ directory.",
+  "examples": [
+    {
+      "do": {
+        "description": "Create folders matching story map structure",
+        "content": [
+          "docs/stories/map/🎯 Epic Name/⚙️ Feature Name/"
+        ]
+      },
+      "dont": {
+        "description": "Don't create folders at wrong level or with wrong names",
+        "content": [
+          "docs/stories/🎯 Epic Name/ (wrong level)",
+          "OR",
+          "docs/stories/map/Epic Name/ (missing emoji)"
+        ]
+      }
+    }
+  ]
+}

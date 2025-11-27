@@ -1,0 +1,32 @@
+{
+  "description": "Use Arrange-Act-Assert structure in step definitions. Each step should have clear Arrange (setup), Act (call production code), and Assert (verify) sections where appropriate.",
+  "examples": [
+    {
+      "do": {
+        "description": "Arrange-Act-Assert structure",
+        "content": [
+          "@given(\"Agent is initialized with agent_name='story_bot'\")",
+          "def given_agent_initialized(context, agent_name):",
+          "    # Arrange: Set up test data",
+          "    context.agent_name = agent_name",
+          "    context.workspace_root = Path(\"/test/workspace\")",
+          "    ",
+          "    # Act: Call production code",
+          "    context.agent = Agent(agent_name=agent_name, workspace_root=context.workspace_root)",
+          "    ",
+          "    # Assert: Verify initial state",
+          "    assert context.agent.agent_name == agent_name"
+        ]
+      },
+      "dont": {
+        "description": "Missing structure or mocking what we test",
+        "content": [
+          "@given(\"Agent is initialized\")",
+          "def given_agent(context):",
+          "    # Missing arrange/act/assert structure",
+          "    context.agent = Mock()  # WRONG - mocking what we should test"
+        ]
+      }
+    }
+  ]
+}

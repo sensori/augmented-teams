@@ -1,0 +1,58 @@
+{
+  "actionName": "gather_context",
+  "instructions": [
+    "**CRITICAL WORKFLOW ENFORCEMENT - NO EXCEPTIONS:**",
+    "",
+    "When moving to ANY behavior, you MUST start at the clarification action (first action). Do NOT skip clarification or planning stages. Do NOT make assumptions about whether clarification/planning has been done. The user can explicitly tell you to skip, but you must NEVER skip on your own initiative.",
+    "",
+    "**MANDATORY WORKFLOW RULE:**",
+    "- You MUST go through clarification for EVERY behavior",
+    "- Do NOT skip clarification stage",
+    "- Do NOT make assumptions about whether clarification has been done",
+    "- The user can explicitly tell you to skip, but you must NEVER skip on your own",
+    "- Present ALL required questions and wait for answers before proceeding",
+    "",
+    "**MANDATORY CLARIFICATION PROCESS:**",
+    "1. Review all provided context (story maps, increments documents, existing files, conversation history, etc.)",
+    "2. For EACH required question below, THOUGHTFULLY attempt to answer it yourself using the available context",
+    "3. When answering questions:",
+    "   - ACTUALLY ANSWER THE QUESTION - don't just list available options without answering",
+    "   - If the question asks \"what is the scope\", answer what the scope IS based on context",
+    "   - If the question requires a CHOICE/DECISION from the user, identify the available options/deltas and ask the user to choose",
+    "   - Be thoughtful and specific in your answers based on what's available in context",
+    "4. Place your answers directly with each question in the format:",
+    "   **Question:** [question text]",
+    "   **Answer:** [your thoughtful answer based on context]",
+    "   OR if a choice is needed:",
+    "   **Answer:** [your answer based on context]. **Available options:** [list options]. **Which option do you want to choose?**",
+    "   OR if information is missing:",
+    "   **Answer:** ⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT**",
+    "5. Be EXPLICIT and CLEAR when you cannot answer a question - use \"⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT**\" so the user knows they must provide this information",
+    "6. Do NOT guess or infer answers - if information is not clearly available in context, state that user input is required",
+    "7. When a question requires a decision/choice, identify the available deltas/options from context and ask the user to select",
+    "8. Present ALL questions with your answers to the user",
+    "9. Ask the user to review, confirm, correct, or provide missing answers",
+    "10. Do NOT proceed until the user has reviewed and confirmed/corrected all answers",
+    "",
+    "Assess the provided context against the required questions and evidence below.",
+    "",
+    "**Required Key Questions:**",
+    "{{key_questions}}   --> load from `{bot}/behaviors/{behavior}/guardrails/required_context/key_questions.json`",
+    "",
+    "**Required Evidence:**",
+    "{{evidence}}  --> load from `{bot}/behaviors/{behavior}/guardrails/required_context/evidence.json`",
+    "",
+    "For each question, provide a thoughtful answer based on available context. If the question requires a choice/decision, identify available options and ask the user to choose. If the answer cannot be determined from available context, clearly state \"⚠️ **NOT ENOUGH INFORMATION - REQUIRES USER INPUT\"."
+  ],
+  "templates": {
+    "context_sufficient": {
+      "template": "Context validation complete. The following key questions were answered:\n{{key_questions_answered}}\n\nThe following evidence was provided:\n{{evidence_provided}}\n\nProceeding to planning stage.",
+      "description": "Used when context is sufficient to proceed"
+    },
+    "context_insufficient": {
+      "template": "Context validation indicates missing information. The following key questions still need answers:\n{{missing_key_questions}}\n\nThe following evidence is still required:\n{{missing_evidence}}\n\nPlease provide the missing information to proceed.",
+      "description": "Used when context is insufficient and more information is needed"
+    }
+  }
+}
+

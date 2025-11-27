@@ -1,0 +1,40 @@
+{
+  "description": "Domain responsibilities must be reflected in stories",
+  "do": {
+    "examples": [
+      {
+        "description": "Domain responsibility reflected in epic",
+        "content": "Responsibility 'Agile Bot: Generates MCP Server' is reflected in Epic 'Manage Agile Bots'"
+      },
+      {
+        "description": "Domain responsibility reflected in feature",
+        "content": "Responsibility 'MCP Bot Server Generator: Generates MCP Bot Server' is reflected in Feature 'Generate MCP Bot Server And Tools'"
+      },
+      {
+        "description": "Domain responsibility reflected in story",
+        "content": "Responsibility 'Project: Provides Project Scaffold' is reflected in Story 'Project Generates Project Scaffold'"
+      },
+      {
+        "description": "Domain responsibility reflected in story step",
+        "content": "Responsibility 'Agile Bot: Loads Workflow' is reflected in story step 'Agile Bot loads Workflow from Bot Config'"
+      },
+      {
+        "description": "Domain responsibility can be reflected in multiple story steps",
+        "content": "Responsibility 'Project: Manages Project State' is reflected in story steps 'Project checks project_area parameter', 'Project stores project_area and bot_name', 'Project validates project exists'"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't leave domain responsibilities without story reflection",
+        "content": "Responsibility 'Agile Bot: Loads Workflow' missing story step - Add 'Agile Bot loads Workflow from Bot Config' in story 'Initialize Bot For Project'"
+      },
+      {
+        "description": "Don't ignore domain responsibilities that need story steps",
+        "content": "Responsibility 'Bot Tool: Moves To Next Action If Done' missing story - Add story 'Bot Tool Determines Active Step To Invoke' with step 'Bot Tool moves Workflow to next action'"
+      }
+    ]
+  }
+}
+

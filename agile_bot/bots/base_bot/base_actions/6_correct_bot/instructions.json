@@ -1,0 +1,24 @@
+{
+  "actionName": "correct_bot",
+  "instructions": [
+    "**MANDATORY: Before applying corrections, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements and decisions that MUST be maintained and incorporated when correcting content.**",
+    "",
+    "Apply corrections based on the violations and user feedback provided.",
+    "",
+    "**Violations:**",
+    "{{violations}}",
+    "",
+    "**User Feedback:**",
+    "{{user_feedback}}",
+    "",
+    "Regenerate the content with corrections applied to address all violations and incorporate user feedback, following the correction instructions from the data file, ensuring all requirements from clarification.json and planning.json are maintained and properly incorporated."
+  ],
+  "templates": {
+    "correction_prompt": {
+      "template": "Applying corrections based on:\n\n**Violations:**\n{{violations}}\n\n**User Feedback:**\n{{user_feedback}}\n\nRegenerating content with corrections applied.",
+      "description": "Used when applying corrections"
+    }
+  }
+}
+
+

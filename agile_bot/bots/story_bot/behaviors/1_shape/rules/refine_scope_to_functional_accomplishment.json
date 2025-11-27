@@ -1,0 +1,27 @@
+{
+  "description": "Refine Scope to Functional Accomplishment",
+  "examples": [
+    {
+      "do": {
+        "description": "Focus on functional outcomes, not mechanisms",
+        "content": [
+          "Focus on functional outcomes, not mechanisms",
+          "Frame domains by what they accomplish for users",
+          "Ask about user enablement: What does this enable the user to do or understand?",
+          "State the transformation or capability provided",
+          "Be specific about the functional benefit"
+        ]
+      },
+      "dont": {
+        "description": "Don't frame domains by their technical implementation",
+        "content": [
+          "Don't frame domains by their technical implementation",
+          "Wrong: Focus on 'how' before 'what'",
+          "Don't use generic system capabilities as domain names",
+          "Wrong: Describe mechanisms instead of outcomes"
+        ]
+      }
+    }
+  ]
+}
+

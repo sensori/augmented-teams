@@ -1,0 +1,10 @@
+{
+  "description": "Evidence or artifacts that must be present or validated before this behavior can proceed",
+  "evidence": [
+    "Scenarios from Specification Scenarios stage (plain English Given/When/Then structure with Background)",
+    "Acceptance criteria from Exploration stage",
+    "Domain models or ubiquitous language",
+    "Test fixtures or automation setup",
+    "Cross-functional walkthrough outputs"
+  ]
+}

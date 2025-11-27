@@ -1,0 +1,14 @@
+{
+  "description": "Recommended human activities for bounded context mapping behavior",
+  "activities": [
+    "Review bounded context map to verify boundaries align with team structure",
+    "Validate integration patterns match team collaboration needs",
+    "Review event flows to ensure they align with bounded context boundaries",
+    "Confirm bounded context map reflects organizational reality",
+    "Validate that integration patterns support team autonomy"
+  ]
+}
+
+
+
+

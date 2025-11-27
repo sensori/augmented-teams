@@ -1,0 +1,24 @@
+{
+  "description": "Add missing story step when domain responsibility has no reflection",
+  "do": {
+    "examples": [
+      {
+        "description": "Identify domain responsibility without story step",
+        "content": "Responsibility 'Agile Bot: Loads Workflow: Workflow, Bot Config' missing story step - Add 'Agile Bot loads Workflow from Bot Config (ordered Behavior and Actions)' in story 'Initialize Bot For Project'"
+      },
+      {
+        "description": "Add story step to appropriate epic and feature",
+        "content": "Responsibility 'Bot Tool: Moves To Next Action If Done' missing story - Add story 'Bot Tool Determines Active Step To Invoke' with step 'Bot Tool moves Workflow to next action' in feature 'Invoke Bot Tool'"
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't leave domain responsibilities without story reflection",
+        "content": "Responsibility 'Agile Bot: Loads Workflow' should be reflected in at least one story step"
+      }
+    ]
+  }
+}
+

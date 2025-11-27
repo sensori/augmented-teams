@@ -1,0 +1,1328 @@
+---
+description: Story writing practices and standards for agile teams
+globs: ["**/*story*.md", "**/*story*.txt", "**/story-map*.md", "**/story-map*.txt", "**/*epic*.md", "**/*feature*.md"]
+alwaysApply: false
+---
+**When** writing user stories for agile development,
+**then** follow these principles to ensure stories are well-structured, testable, valuable, and properly sized for effective planning and delivery.
+
+Stories should be written in business language that stakeholders understand, focus on user and system behavior rather than tasks, be appropriately sized for planning (3-12 day range), and include clear acceptance criteria that define when a story is complete.
+
+**Executing Commands:**
+* `/story-shape` — Create story map shell with decomposition and increments, elaborate/extrapolate scope
+* `/story-arrange` — Arrange and validate folder structure to match story map hierarchy
+* `/story-discovery` — Refine increments, apply practices, groom stories for next increment
+* `/story-explore` — Write acceptance criteria (Domain AC + Behavioral AC), refine map
+* `/story-specification` — Create story specifications with Given/When/Then scenarios and examples
+* `/story-specification-examples` — Create example specifications (completes spec)
+*
+## Conventions
+
+Naming conventions, file locations, and structural conventions for stories and story maps.
+
+* **Story Map Structure**: Epic → Feature → Story hierarchy
+* **Folder Structure** (EXACT structure for all projects):
+  ```
+  <solution-folder>/
+  └── docs/
+      └── stories/
+          ├── map/
+          │   ├── [product-name]-story-map.md
+          │   ├── 🎯 Epic Name/
+          │   │   ├── ⚙️ Feature Name/
+          │   │   │   └── 📝 Story Name.md
+          │   │   └── ⚙️ Another Feature/
+          │   └── 🎯 Another Epic/
+          └── increments/
+              └── [product-name]-story-map-increments.md
+  ```
+* **Solution Folder Detection**: Infer from context (recently viewed files, open files, current directory)
+  - Example: Working in `demo/mm3e/` → Use `demo/mm3e/` as solution folder
+  - Example: At workspace root → Create new solution folder
+* **Story File Naming**: Use emoji prefixes: `📝 Story Name.md`, `⚙️ Feature Name/`, `🎯 Epic Name/`
+* **Acceptance Criteria Format**: Written in behavior form using "When...then..." or "Given...When...Then..." format
+* **Story Size Range**: Most stories should fall into a 3-12 day effort range
+* **Story Title Pattern**: Use verb/noun format (e.g., "Place order", "Validate payment")
+
+## Section 0: Universal Principles
+
+⚠️ **Universal** - These principles apply to ALL commands across ALL stages
+
+## 0.1. Stories Are Action-Oriented and Describe Interactions
+
+Stories must focus on user interactions and observable system behavior, not development tasks or system internals.
+
+**[DO]** (Agent-Relevant):
+* Focus stories on user interactions and how the system behaves as observed by users
+* Describe interactions between users and systems
+* Write stories so they can be tested
+* Ensure stories can be developed and tested in a matter of days
+* Make stories action-oriented statements of user and system behavior
+* Use behavioral language: "submits", "views", "validates", "sends", "displays"
+* Describe observable behavior: "User submits order", "System validates payment"
+
+**[DON'T]** (Agent-Relevant):
+* Focus on delivery or development tasks required to build a system
+* Focus on system internals (technical stories)
+* Write stories that don't represent a small increment of system behavior in response to an end user action
+* Use development task language: "implement", "create", "refactor", "optimize", "fix", "build", "set up"
+* Use technical implementation details: "query database", "call API", "update table", "refactor code"
+* Write technical stories that describe low-level internal behavior we don't care about
+
+**[Structural Patterns]**:
+* **Action-Oriented Pattern**: `[Actor] [action] [object]` or `System [behavioral verb] [noun]`
+* **System Story Pattern** (✅): `System [validates|sends|processes|displays] [noun]` - Observable behavior
+* **Technical Story Pattern** (❌): `[implement|create|refactor|optimize|fix|build] [component]` - Development task
+
+**[Examples]**:
+* ✅ **DO** (User/System Stories): "Customer places order", "System validates payment", "User views dashboard", "Payment service processes transaction"
+* ❌ **DON'T** (Technical Stories): "Implement order placement", "Create payment validation", "Build dashboard view", "Refactor payment service", "Optimize database queries"
+
+## 0.2. INVEST Principles
+
+Stories must follow INVEST principles: Independent, Negotiable, Valuable, Estimable, Small, Testable.
+
+**[DO]** (Agent-Relevant):
+* Ensure stories are Negotiable, Testable, Valuable, Estimate-able, Small, and Independent
+* Write stories that are a unit of scope and value
+* Deliver stories in features and increments
+* Write stories so they can be tested
+* Ensure stories can be developed and tested in a matter of days
+
+**[DON'T]** (Agent-Relevant):
+* Create stories that violate INVEST principles
+* Write stories that are too large or interdependent
+
+**[Structural Patterns]**:
+* **Small**: 3-12 day effort range, complete interaction flow, 2-5 acceptance criteria
+* **Independent**: Can be delivered without other stories, no blocking dependencies
+* **Testable**: Has acceptance criteria in behavior form, observable outcomes
+* **Valuable**: Delivers measurable value independently
+* **Negotiable**: Details can be discussed (not over-specified)
+* **Estimate-able**: Team can assess effort/complexity
+
+**[Examples]**:
+* ✅ **DO**: Story with 3-5 acceptance criteria, complete flow, independent value
+* ❌ **DON'T**: Story with 8+ acceptance criteria, multiple flows, requires other stories
+
+**[Further Recommendations for Humans]**:
+* Ensure stories are worked on by the entire team (requires team assignment)
+* Use stories as placeholders for conversations and collaboration (requires team interaction)
+
+## Section 0.5: All Phases Principles
+
+⚠️ **All Phases** - These principles apply to ALL commands across Story Shaping, Discovery, and Exploration
+
+## 0.5.1. Epic/Feature/Story Hierarchy
+
+Story maps must use a consistent Epic → Feature → Story hierarchy structure.
+
+**[DO]** (Agent-Relevant):
+* Use Epic, Feature, Story hierarchy structure
+* Organize stories within features and features within epics
+
+**[DON'T]** (Agent-Relevant):
+* Skip hierarchy levels without justification
+* Mix hierarchy levels inconsistently
+
+**[Structural Patterns]**:
+* **Format**: Epic → Sub-Epic (optional) → Feature → Story (nested hierarchy)
+* **Epic**: [Verb] [Noun] *[optional clarifier] - High-level business capability or initiative
+* **Sub-Epic**: [Actor] [Noun] *[optional clarifier] - Sub-capability within epic (optional level)
+* **Feature**: [Verb] [Noun] *[optional clarifier] - Cohesive set of functionality within epic or sub-epic
+* **Story**: [Verb] [Noun] - Small increment of behavior within feature
+* **Detection**: Check for proper nesting, consistent level naming
+* **Story Counting**: Use (~X stories) notation for unexplored areas at Epic/Sub-Epic/Feature levels
+
+**[Examples]**:
+* ✅ **DO**:
+  ```
+  🎯 **Manage Orders** (2 features, ~8 stories)
+  │
+  ├─ ⚙️ **Place Order** (~4 stories)
+  │  ├─ 📝 Story: Customer places order
+  │  └─ 📝 Story: System validates payment
+  │
+  └─ ⚙️ **Fulfill Order** (~4 stories)
+     └─ 📝 Story: System processes order
+  ```
+* ❌ **DON'T**: Stories at epic level, features missing, no tree structure, missing emojis
+
+## Section 1: Story Shaping Principles
+
+⚠️ **Stage: Story Shaping** - These principles apply to all Story Shaping stage commands
+
+## 1.1. Focus Story Maps on User AND System Activities
+
+⚠️ **Commands: story-shape**
+
+Story maps must outline both user and system activities, not tasks. Stories should balance being fine-grained while remaining testable and valuable.
+
+**[DO]** (Agent-Relevant):
+* Focus story maps on both user AND system activities
+* Use story maps to outline user and system behavior
+* Break/group stories so that most fall into a 3-12 day effort range
+* Enable frequent feedback by decomposing the work into smaller items
+* Enable high quality feedback by grouping work into meaningful chunks
+* Include both user activity patterns ("User submits", "Customer places") AND system activity patterns ("System validates", "System sends")
+
+**[DON'T]** (Agent-Relevant):
+* Arbitrarily decompose stories to a functional level, regardless of size
+* Focus only on user activities (ignore system activities)
+* Focus only on tasks (instead of activities)
+* Arbitrarily decompose stories to a functional level, regardless of size, whenever some content is available
+
+**[Structural Patterns]**:
+* **User Activity Detection**: Contains patterns like `^(User|Customer|Admin|\w+)\s+\w+` with user actions (submits, views, places)
+* **System Activity Detection**: Contains patterns like `^(System|\w+)\s+(validates|sends|processes|displays|notifies)`
+* **Task Detection** (avoid): Contains `\b(implement|create|build|set up|write|develop)\b`
+* **Validation**: Story map must contain BOTH user activity patterns AND system activity patterns
+
+**[Examples]**:
+* ✅ **DO**:
+  - User activities: "User submits order", "Customer views products"
+  - System activities: "System validates payment", "System sends confirmation"
+* ❌ **DON'T**:
+  - Only user activities: "User submits order", "User views products" (missing system activities)
+  - Only tasks: "Implement order submission", "Create payment validation" (not activities)
+
+**[Further Recommendations for Humans]**:
+* Ask "how big or small are the stories in the map?" when promoted to production
+* **DON'T**: Build the map in absence of the people who can estimate the work
+
+## 1.2. Balance Fine-Grained with Testable/Valuable
+
+⚠️ **Commands: story-shape**
+
+Stories must balance being fine-grained enough for frequent delivery while remaining testable and valuable as independent units.
+
+**[DO]** (Agent-Relevant):
+* Balance fine-grained stories with testable/valuable stories
+* Ensure stories are fine-grained enough to enable frequent feedback
+* Ensure stories are grouped into meaningful chunks for high quality feedback
+* Validate that a business expert can understand the language of most of the stories
+* Focus the language on the business domain
+* Create lightweight but precise documentation
+
+**[DON'T]** (Agent-Relevant):
+* Create stories that are too fine-grained without being testable or valuable
+* Create stories that are too large to be testable or deliverable quickly
+* Use generic function, verbs, nouns without context
+* Use overly technical, IT concepts, unless core to domain being discussed
+
+**[Structural Patterns]**:
+* **Too Fine-Grained**: Single element, no value, can't test independently, 1 acceptance criterion
+* **Appropriate**: Complete interaction flow, 2-5 acceptance criteria, delivers value, testable independently
+* **Too Large**: Multiple flows, 6+ acceptance criteria, multiple components, requires multiple stories
+
+**[Examples]**:
+* ✅ **DO**: "Customer places order" (complete flow, testable, valuable)
+* ❌ **DON'T**: "Change button color" (too fine-grained, no value)
+* ❌ **DON'T**: "Customer places order and views history and updates profile" (too large, multiple flows)
+
+## 1.3. Use Business Language That is Specific and Precise
+
+⚠️ **Commands: story-shape**
+
+Stories should use business language that is specific, precise, and understandable by business experts. Language should emphasize performing operations on explicit things.
+
+**[DO]** (Agent-Relevant):
+* Ground the map in business language that is specific and precise
+* Focus the language on the business domain
+* Use verb/noun language
+* Use language that emphasizes performing an operation on an explicit thing
+* Make the map easy to walk through (it tells a story)
+* Use domain-specific terms: "order", "customer", "payment", "inventory"
+* Use specific verb/noun combinations: "[Actor] [specific verb] [specific noun]"
+
+**[DON'T]** (Agent-Relevant):
+* Use generic functions, verbs, nouns without context
+* Use overly technical IT concepts, unless core to domain being discussed
+* Use static functional concepts
+
+**[Structural Patterns]**:
+* **Business Language Pattern**: `[Actor] [specific verb] [specific noun]` (e.g., "Customer places order")
+* **Generic Pattern** (avoid): `^\s*(Process|Handle|Manage|Get|Set)\s*$` or single word
+* **Technical Pattern** (avoid): `\b(API|database|endpoint|query|call)\b`, `\w+\(\)`
+* **Static Functional** (avoid): "[Noun] Management", "[Noun] Processing"
+* **Active Behavioral** (prefer): "[Verb] [noun]" (e.g., "Place order", "Validate payment")
+
+**[Examples]**:
+* ✅ **DO**: "Customer places order", "System validates payment", "User views dashboard"
+* ❌ **DON'T**: "Process order" (generic), "Order Management" (static), "getOrder()" (code pattern)
+
+## 1.4. Use Active Behavioral Language
+
+⚠️ **Commands: story-shape**
+
+Stories should favor active behavioral language over functional/capability language.
+
+**[DO]** (Agent-Relevant):
+* Favor active behavioral language over functional/capability breakup
+* Use story maps to outline user and system behavior (NOT tasks)
+* Use action verbs: "submits", "views", "validates", "sends", "displays"
+* Describe behaviors: "[Actor] [action] [object]"
+
+**[DON'T]** (Agent-Relevant):
+* Use functional or capability-based language instead of behavioral language
+* Focus on tasks instead of behaviors
+* Use capability nouns: "Management", "Processing", "Administration"
+* Use task verbs: "implement", "create", "build", "set up"
+
+**[Examples]**:
+* ✅ **DO**: "Place order" (active behavior), "Validate payment" (active behavior)
+* ❌ **DON'T**: "Order Management" (capability), "Implement order placement" (task)
+
+## 1.5. Hierarchy Sizing Thresholds (7±2 Rule)
+
+⚠️ **Commands: story-shape, story-discovery, story-explore**
+
+Size hierarchy levels so each contains no more than 7-9 items of the next level. Split when exceeding thresholds, merge when below minimum.
+
+**[DO]** (Agent-Relevant):
+* **Epic**: Contains 4-9 features
+  - **Split into Sub-Epics** when > 9 features
+  - **Merge with another epic** when < 4 features
+* **Feature**: Contains 4-9 stories
+  - **Split into 2 features** when > 9 stories
+  - **Merge with another feature** when < 4 stories
+* **Story**: Contains 2-9 acceptance criteria
+  - **Split into 2 stories** when > 9 AC
+  - **Merge with another story** when < 2 AC (single AC stories are too small)
+* Apply 7±2 cognitive limit principle (optimal range: 5-9, acceptable: 4-9)
+
+**[DON'T]** (Agent-Relevant):
+* Create epics with > 9 features (use Sub-Epics instead)
+* Create features with > 9 stories (split the feature)
+* Create stories with > 9 acceptance criteria (split the story)
+* Create very small stories with < 2 AC (merge with related story)
+* Ignore sizing thresholds during shaping, discovery, or exploration
+
+**[Examples]**:
+* ✅ **DO**:
+  ```
+  🎯 **Manage Orders** (10 features → SPLIT)
+  │
+  ├─ 📂 **Manage Customer Orders** (6 features) ✓
+  └─ 📂 **Manage Order Fulfillment** (4 features) ✓
+  
+  ⚙️ **Place Order** (12 stories → SPLIT)
+     → Split into: **Initiate Order** (6 stories) ✓
+                   **Complete Order** (6 stories) ✓
+  
+  📝 Story: Validate Payment (11 AC → SPLIT)
+     → Split into: Check Payment Method (5 AC) ✓
+                   Process Payment Transaction (6 AC) ✓
+  ```
+* ❌ **DON'T**:
+  - 🎯 Epic with 15 features (too many, use Sub-Epics 📂)
+  - ⚙️ Feature with 15 stories (too many, split feature)
+  - 📝 Story with 15 AC (too many, split story)
+  - 📝 Story with 1 AC (too small, merge with related story)
+
+**[Further Recommendations for Humans]**:
+* 7±2 rule based on cognitive limits (Miller's Law)
+* Optimal range: 5-9 items per level
+* Review and adjust during Discovery and Exploration
+
+## 1.6. Story Counting for Unexplored Areas
+
+⚠️ **Commands: story-shape**
+
+Use story counts (~X stories) to extrapolate scope for unexplored areas rather than detailed decomposition.
+
+**[DO]** (Agent-Relevant):
+* Add story counts to epics and features where exact stories are unknown
+* Use (~X stories) or (approx X stories) notation
+* Mark areas as "EXPLORED" when fully decomposed vs counts for unexplored
+* Only decompose 10-20% of stories during shaping (critical/unique/architecturally critical)
+* Use story counts to understand scope without full decomposition
+
+**[DON'T]** (Agent-Relevant):
+* Require complete story decomposition during shaping
+* Create detailed stories for all features (only 10-20% highlights)
+* Use point-based estimation, velocity tracking, or detailed planning
+
+**[Examples]**:
+* ✅ **DO**: 
+  ```
+  Epic: Order Management (6 features, 45 stories)
+    Feature: Order Placement (approx 15 stories)
+      Story: Customer places order (5d)
+      Story: System validates payment (3d)
+      ... [13 more stories - extrapolated]
+    Feature: Order Fulfillment (~20 stories - not yet decomposed)
+  ```
+* ❌ **DON'T**: Decompose all 45 stories during shaping
+
+## 1.7. Identifying Marketable Increments of Value
+
+⚠️ **Commands: story-shape**
+
+Identify and organize marketable increments of value during Story Shaping, creating increment-organized view of the story map.
+
+**[DO]**:
+* Identify marketable increments of value during Story Shaping
+* Create story-map-increments.md with MVI as top level
+* Order increments by delivery priority (NOW/NEXT/LATER)
+* Do just enough story mapping to extrapolate how many epics, features, and stories make up an increment
+* Can have partial epics/features in an increment
+* Use relative sizing to compare increments against previously delivered work
+
+**[DON'T]**:
+* Over-elaborate story mapping during shaping
+* Skip increment identification
+* Use High/Medium/Low (use NOW/NEXT/LATER instead)
+
+**[Examples]**:
+* ✅ **DO**:
+  ```
+  MVI 1: Basic Billing - NOW
+    Relative Size: Compared to Payment System v1
+    Epic: Direct Pay Billing (PARTIAL - 1 of 2 features)
+      Feature: Generate Customer Billing (5 stories)
+  
+  MVI 2: Advanced Features - NEXT
+    Epic: Direct Pay Billing (PARTIAL - remaining feature)
+      Feature: Configure Pricing (approx 5 stories)
+  ```
+
+## 1.7.1. End-to-End Value Increments (Vertical Slices)
+
+⚠️ **Commands: story-shape**
+
+**CRITICAL CONCEPT**: Increments MUST be designed as vertical slices that deliver end-to-end working flows across multiple features/epics, NOT horizontal layers that complete one feature/epic at a time.
+
+**[DO]**:
+* Design increments as VERTICAL SLICES across multiple epics/features (thin end-to-end flows)
+* Ensure each increment delivers a complete working flow from start to finish
+* Include PARTIAL features from multiple epics in each increment
+* Build increments that demonstrate end-to-end capability (data entry → processing → validation → persistence → display)
+* Start with simplest end-to-end flow (basic happy path for simplest user/scenario)
+* Layer subsequent increments to add complexity, additional users, edge cases, variations
+* Think "What's the thinnest slice that demonstrates the entire system working together?"
+
+**[DON'T]**:
+* Design increments as horizontal layers (complete Feature A, then Feature B, then Feature C)
+* Build one epic/feature completely before touching another
+* Create increments that only touch one area of the system
+* Build increments that can't demonstrate working end-to-end flow
+* Complete all features for one user type before starting another user type
+
+**[Why This Matters]**:
+* Enables early integration testing and risk reduction
+* Provides working software sooner (can demo complete flow)
+* Reveals integration issues early (not at the end)
+* Allows for course correction based on real working system
+* Delivers actual value (working flow) vs partial capability (one complete feature)
+
+**[Examples]**:
+* ✅ **DO - Vertical Slice (End-to-End)**:
+  ```
+  Value Increment 1: Basic Character Creation Flow - NOW
+    🎯 Epic: Create Character (PARTIAL - minimal creation)
+      ⚙️ Feature: Enter Basic Info (2 stories - name, archetype only)
+      ⚙️ Feature: Assign Abilities (1 story - simple point buy)
+    🎯 Epic: Manage Character (PARTIAL - basic persistence)
+      ⚙️ Feature: Save Character (1 story - save to file)
+      ⚙️ Feature: Load Character (1 story - load from file)
+    🎯 Epic: Display Character (PARTIAL - basic view)
+      ⚙️ Feature: View Character Sheet (1 story - show basic info)
+  
+  Value Increment 2: Enhanced Character Options - NEXT
+    🎯 Epic: Create Character (PARTIAL - add complexity)
+      ⚙️ Feature: Enter Basic Info (2 more stories - origin, description)
+      ⚙️ Feature: Assign Abilities (3 more stories - validation, limits, recalc)
+      ⚙️ Feature: Select Skills (4 stories - skill list, ranks, specialties)
+    🎯 Epic: Manage Character (PARTIAL - add features)
+      ⚙️ Feature: Save Character (1 story - auto-save)
+      ⚙️ Feature: Export Character (2 stories - PDF, share)
+    🎯 Epic: Display Character (PARTIAL - richer display)
+      ⚙️ Feature: View Character Sheet (2 stories - skills section, calculated values)
+  ```
+  ✅ **Why**: Each increment delivers COMPLETE END-TO-END flow. Increment 1 = basic creation → save → load → view. Increment 2 builds on that working foundation.
+
+* ❌ **DON'T - Horizontal Layer (Feature-by-Feature)**:
+  ```
+  Value Increment 1: Character Creation - NOW
+    🎯 Epic: Create Character (COMPLETE)
+      ⚙️ Feature: Enter Basic Info (ALL stories)
+      ⚙️ Feature: Assign Abilities (ALL stories)
+      ⚙️ Feature: Select Skills (ALL stories)
+      ⚙️ Feature: Choose Powers (ALL stories)
+  
+  Value Increment 2: Character Management - NEXT
+    🎯 Epic: Manage Character (COMPLETE)
+      ⚙️ Feature: Save Character (ALL stories)
+      ⚙️ Feature: Load Character (ALL stories)
+      ⚙️ Feature: Export Character (ALL stories)
+  ```
+  ❌ **Why**: Increment 1 can't be tested end-to-end (no save/load). Can't deliver working software until Increment 2. Integration risks discovered late.
+
+**[Layering Strategy]**:
+* **Increment 1**: Simplest user + simplest scenario + happy path only → Full end-to-end
+* **Increment 2**: Add complexity (more options, validations) + Additional user types → Full end-to-end
+* **Increment 3**: Add edge cases + Error handling + Advanced features → Full end-to-end
+* **Increment 4**: Add variations + Alternative flows + Optimizations → Full end-to-end
+
+**[Integration Points to Consider]**:
+Each increment should demonstrate these end-to-end concerns (even if minimal):
+* Data entry/input
+* Business logic/processing
+* Validation/error handling
+* Persistence/storage
+* Retrieval/loading
+* Display/output
+
+## 1.8. Relative Sizing Upstream
+
+⚠️ **Commands: story-shape**
+
+Use relative sizing upstream for larger buckets of scope by comparing against previously completed work.
+
+**[DO]**:
+* Use relative sizing upstream for increments and initiatives
+* Compare and contrast new work against previously completed work
+* Relatively size increments against previously delivered increments similar in platform and team skills
+* Conduct relative sizing where size actually matters (upstream, larger scope)
+* Include relative sizing notes in increment documents
+
+**[DON'T]**:
+* Use relative sizing only at story level
+* Size work without comparing to similar previously completed work
+
+**[Examples]**:
+* ✅ **DO**: "MVI 1 Relative Size: Compared to Payment System v1 (delivered Q3 2024)"
+* ❌ **DON'T**: No relative sizing reference
+
+## Section 2: Discovery Principles
+
+⚠️ **Stage: Discovery** - These principles apply to all Discovery stage commands
+
+## 2.1. Refining Marketable Increments on Story Map
+
+⚠️ **Commands: story-discovery**
+
+Refine marketable increments on the story map during Discovery based on new insights.
+
+**[DO]**:
+* Refine marketable increments on story map during Discovery
+* Update story map based on discovery insights
+* Ensure increments are well-defined
+* Continually identify and refine marketable increments
+
+**[DON'T]**:
+* Skip increment refinement during discovery
+* Ignore discovery insights when updating story map
+
+## 2.2. Story Mapping Practices
+
+⚠️ **Commands: story-discovery**
+
+Apply story mapping practices that encourage good practices and avoid anti-patterns when refining story maps, planning, and refining stories.
+
+**[DO]** (Agent-Relevant):
+* Focus on user AND system activities (not just user activities or tasks)
+* Balance fine-grained stories with testable/valuable stories (3-12 day range where applicable)
+* Use business language that is specific, precise, and behavioral
+* Use active behavioral language to describe story activities
+
+**[DON'T]** (Agent-Relevant):
+* Arbitrarily decompose stories regardless of size whenever some content is available
+* Use generic functions, verbs, nouns without context
+* Use overly technical IT concepts
+* Use static functional concepts
+
+**[Further Recommendations for Humans]**:
+* **DON'T**: Build map without people who can estimate
+
+## 2.3. Story Mapping Estimation and Counting
+
+⚠️ **Commands: story-discovery**
+
+Use story counts and throughput-based planning rather than detailed estimation for every story. Discovery does NOT add day estimates - those require human input and comparison.
+
+**[DO]** (Agent-Relevant):
+* Add story counts to epics and features where exact stories are unknown (extrapolation)
+* Use story counts instead of detailed story lists when completing the full map is not desired
+* Mark extrapolated story counts (e.g., "~X stories" or "Extrapolated: ~X stories")
+* Use relative sizing upstream (initiative/increment level)
+* Switch from estimating story details to simply counting stories
+* Preserve existing day estimates if already present (entered by humans)
+
+**[DON'T]** (Agent-Relevant):
+* Add day estimates (Xd) during Discovery - estimates require human entry and comparison
+* Require complete story decomposition before adding counts to the map
+* Estimate only at story level (should add counts upstream)
+* Focus on detailed story estimation when mapping (use counts instead)
+* Generate or invent day estimates without human input
+
+## 2.4. Story Refinement
+
+⚠️ **Commands: story-discovery**
+
+Refine stories to identify potentially ambiguous or complex stories. Story refinement during Discovery focuses on identifying issues, NOT estimating effort.
+
+**[DO]** (Agent-Relevant):
+* Identify stories that are potentially ambiguous based on description complexity
+* Identify stories that combine multiple responsibilities (suggest splits)
+* Flag stories that lack clear scope or acceptance criteria path
+* Note stories that may be complex based on description (e.g., multiple validations, integrations)
+* Preserve existing day estimates if already entered by humans
+
+**[DON'T]** (Agent-Relevant):
+* Add day estimates to identify "too large" stories - estimates require human entry
+* Accept stories that are clearly ambiguous without flagging them
+* Invent sizing criteria without human comparison data
+
+**[Examples]**:
+* ✅ **DO**: "Story 'System calculates hero points from complications' combines selection, calculation, and validation - suggest splitting"
+* ✅ **DO**: "Story 'User configures power array' is ambiguous - needs clarity on array types"
+* ❌ **DON'T**: "Story is 8 days, too large" (without human-entered estimate)
+
+**[Further Recommendations for Humans]**:
+* Use sprint planning and story refinement as opportunity to reject stories that are too ambiguous
+* Size enough work based on actual throughput
+* Add day estimates during Discovery based on team knowledge and comparison to previous work
+
+## 2.5. Exhaustive Logic Decomposition
+
+⚠️ **Commands: story-discovery**
+
+During Discovery, decompose stories exhaustively by identifying all distinct software logic areas, not just data categories.
+
+**[Core Decomposition Rules]**:
+1. **Same logic, different data, same data structure** → ONE Story (consolidate identical UI/validation/calculation)
+2. **Different formulas/rules/algorithms/structure** → SEPARATE Stories (split when logic differs)
+3. **Enumerate ALL permutations** (identify every different path through requirements)
+4. **Cascading updates** → Own story when significant (complex multi-value updates)
+
+**[DO]** (Agent-Relevant):
+* Consolidate same logic, different data into ONE story
+* Separate different formulas/rules/algorithms into SEPARATE stories
+* Enumerate ALL permutations (prerequisite types, validation rules, calculation paths)
+* Make cascading updates their own story when significant
+* Seek significant differences in business logic, state management, rules, data structure
+* Ask "What fundamentally different code must be built?"
+* Rule of thumb: If significantly different code with different classes/functions/algorithms would be written, it's a different story
+
+**[DON'T]** (Agent-Relevant):
+* Decompose by data categories without considering logic similarity
+* Assume similar-sounding operations have the same logic
+* Split user action and immediate system response into two stories
+* Add implementation notes instead of creating separate stories for different logic
+
+**[Seek Significant Differences In]**:
+* **Business Logic**: Different algorithms, workflows, processes
+* **State Management**: Different state transitions or lifecycle
+* **Business Rules**: Different constraints or validation rules
+* **Data Structure**: Different data models or relationships
+
+**[Structural Patterns]**:
+* **Story Title**: "User [verb] [noun]" or "System [verb] [noun] when [trigger]"
+* **Single "and" clause**: "- and system [immediate response]"
+* **NO extra notes**: NO examples, NO data lists in story map (save for exploration)
+
+**[Examples - DO (SEPARATE stories)]**:
+* ✅ "Calculate standard defense" vs "Calculate Toughness defense"
+  - Standard: 10 + ability mod + ranks
+  - Toughness: ability mod only
+  - Different formulas = different stories
+
+* ✅ "User selects advantage without prerequisites" vs "User selects advantage with ability prerequisite"
+  - Without: Simple add logic
+  - With: Validation logic
+  - Different permutations = different stories
+
+* ✅ "Turn car" vs "Turn plane"
+  - Car: 2D steering, friction-based physics
+  - Plane: 3D maneuvering, banking/pitch/yaw
+  - Fundamentally different algorithms = different stories
+
+* ✅ "Process credit card payment" vs "Process cryptocurrency payment"
+  - Different validation rules (CVV vs blockchain)
+  - Different state machines (auth/capture vs confirmation blocks)
+  - Different data structures (card vs wallet address)
+  - Different business logic = different stories
+
+**[Examples - DON'T (CONSOLIDATE into ONE story)]**:
+* ❌ "User enters name" vs "User enters real name" vs "User enters concept" = ONE story "User enters character identity fields"
+  - Same text input logic, same validation, same state management
+  - Same logic, different data = ONE story
+
+* ❌ "Edit customer name" vs "Edit customer email" = ONE story "Edit customer field"
+  - Same validation pattern (required field, string input)
+  - Same state management (edit → save)
+  - Same data structure approach (text field update)
+
+* ❌ "User selects Flight" vs "User selects Speed" vs "User selects Teleport" = ONE story "User selects movement effect"
+  - All use distance calculation
+  - Same cost formula
+  - Same data structure
+  - Same logic, different data = ONE story
+
+* ❌ "System validates ability points budget" vs "System validates skill points budget" vs "System validates advantage points budget" = ONE story "System validates category points budget"
+  - Same validation formula: spent ≤ budget
+  - Same error handling: flag overspend
+  - Same logic, different category = ONE story
+  
+* ❌ "System calculates unspent ability points" vs "System calculates unspent skill points" vs "System calculates unspent advantage points" = ONE story "System calculates unspent points by category"
+  - Same calculation: budget - spent = unspent
+  - Same display logic
+  - Same logic, different category = ONE story
+
+* ❌ "System groups skills by strength" vs "System groups skills by agility" vs "System groups skills by intellect" = ONE story "System groups skills by ability category"
+  - Same grouping algorithm
+  - Same display pattern
+  - Same logic, different grouping key = ONE story
+
+**[Examples - User Action + System Response = ONE Story]**:
+* ❌ **DON'T**: "User selects power level" + "System calculates budget" (2 stories)
+* ✅ **DO**: "User selects power level - and system calculates and displays budget" (1 story)
+* **Rule**: User action with immediate calculation/display is atomic interaction
+
+**[Examples - System Stories]**:
+* ✅ **DO**: "Payment service validates with fraud detection service" (system-to-system communication)
+* ❌ **DON'T**: "System calculates cost" as separate from "User adjusts value" (immediate response, not separate story)
+
+**[Key Questions for Exhaustive Discovery]**:
+* What are ALL the different calculation formulas?
+* What are ALL the different validation rules?
+* What are ALL the different state transitions?
+* What are ALL the different data structures?
+* What business rules apply uniquely to each type?
+* What are ALL the permutations/paths through requirements?
+* What are ALL the exception cases?
+* What are ALL the cascading effects?
+
+**[Further Recommendations for Humans]**:
+* For increment in focus: Decompose 100% of stories exhaustively
+* For other increments: Use story counts (~X stories)
+* Ask "Can we say 'we've thought of everything' for this increment?"
+
+## 2.5.1. Critical Complexity Detection in Collections
+
+⚠️ **Commands: story-discovery**
+
+When encountering large collections of similar items (catalogs, product types, rule types), decompose by behavioral type, not by individual collection items.
+
+**[DO]** (Agent-Relevant):
+* Create stories per TYPE of behavior, not per collection item
+* Identify behavioral types within collections (different logic patterns)
+* Estimate story counts based on behavioral variation within collection
+* Look for collections that hide complexity (catalogs, product types, inventory types, rule types)
+* Apply complexity estimation guidelines based on collection size
+
+**[DON'T]** (Agent-Relevant):
+* Create one generic story for 80+ items that have different behavioral types
+* Assume all items in a collection have identical behavior
+* Underestimate complexity when collections are large (>30 items)
+* Use single CRUD story for entities with different state models
+
+**[Complexity Estimation by Collection Size]**:
+* **10-20 items** → 3-5 stories (2-3 behavioral types)
+* **20-40 items** → 5-8 stories (3-5 behavioral types)
+* **40-80 items** → 8-15 stories (5-8 behavioral types with variation)
+* **80+ items** → 15-25 stories (8-12 behavioral types with complex variations)
+
+**[Examples of Collections That Hide Complexity]**:
+* Catalogs: advantages, powers, equipment, inventory items
+* Product types: physical goods, digital goods, services, subscriptions
+* Inventory types: raw materials, work-in-progress, finished goods
+* Rule types: validation rules, calculation rules, business rules
+* Entity types: users, organizations, teams, projects
+* Configuration types: settings, preferences, policies
+
+**[Red Flags for Underestimation]**:
+* ~X items where X > 30 handled in < 5 stories
+* "Collection", "catalog", or "types" without breaking down by behavioral type
+* Single validation story for multiple validation types
+* Single calculation story for multiple formulas
+* Single CRUD story for entities with different state models
+* Pages of requirements per story (should be many stories per page, not the reverse)
+
+**[Examples]**:
+* ✅ **DO**: "Select Advantages" catalog with 80 items
+  - Story: User selects advantage without prerequisites (30 items)
+  - Story: User selects advantage with ability prerequisite (20 items)
+  - Story: User selects advantage with skill prerequisite (15 items)
+  - Story: User selects advantage with power prerequisite (10 items)
+  - Story: User selects ranked advantage (5 items)
+  - Result: 5 behavioral types = 5-8 stories
+
+* ❌ **DON'T**: "User selects advantage" (single story for 80 different advantages with different prerequisites and behaviors)
+
+## 2.5.2. Decomposition Level - Shaping vs Discovery
+
+⚠️ **Commands: story-shape, story-discovery**
+
+Apply different decomposition levels during Shaping vs Discovery phases.
+
+**[DO - SHAPING Phase (10-20% decomposition)]**:
+* Create representative samples showing main patterns
+* Use story counts (~X stories) for most areas
+* Capture main flow, acknowledge variations exist
+* Identify critical/unique/architecturally significant stories only
+
+**[DO - DISCOVERY Phase (100% decomposition for increment in focus)]**:
+* Enumerate ALL logic permutations exhaustively
+* List ALL stories explicitly (no ~X stories notation)
+* Apply exhaustive discovery questions
+* Ask "Have we thought of everything for this increment?"
+* Use story counts (~X stories) ONLY for increments NOT in focus
+
+**[DON'T]**:
+* Use same decomposition level for both phases
+* Use story counts (~X) for increment(s) in focus during Discovery
+* Over-decompose during Shaping (creates analysis paralysis)
+* Under-decompose during Discovery for focused increment (creates surprises)
+
+**[Examples]**:
+* ✅ **SHAPING**: "Purchase Skills (~9 stories)" - high-level count, 2-3 example stories
+* ✅ **DISCOVERY (increment in focus)**: "Purchase Skills" - ALL 9 stories listed explicitly with full permutation coverage
+* ✅ **DISCOVERY (other increments)**: "Configure Equipment (~12 stories)" - still using counts
+
+## 2.6. Story Format and Clarity
+
+⚠️ **Commands: story-discovery**
+
+Stories must follow a clean, consistent format that makes the user/system interaction clear.
+
+**[DO]** (Agent-Relevant):
+* Use format: "User [verb] [noun]" or "System [verb] [noun] when [trigger]"
+* Add single "and" clause showing immediate system response: "- and system [response]"
+* Keep story map clean: NO examples, NO data lists, NO extra notes
+* Save detailed information for Exploration phase
+
+**[DON'T]** (Agent-Relevant):
+* Add multiple notes or examples under stories in story map
+* List all data values or catalog items in story map
+* Split user action and immediate system response into two stories
+* Use "Status: DISCOVERY" or other status markers
+
+**[Examples]**:
+* ✅ **DO**: 
+  ```
+  📝 User selects power level
+     - and system calculates and displays budget
+  ```
+
+* ✅ **DO**:
+  ```
+  📝 System updates dependent values when ability changes
+     - Updates skills, relevant attacks, damage, and defenses
+  ```
+
+* ❌ **DON'T**:
+  ```
+  📝 User selects power level
+     - Formula: 15 points × PL
+     - Categories: Abilities, Skills, Advantages, Powers
+     - Example: PL 10 = 150 points
+     - Status: DISCOVERY
+  ```
+
+## Section 3: Story Exploration Principles
+
+⚠️ **Stage: Story Exploration** - These principles apply to all Story Exploration stage commands
+
+## 3.1. Writing Acceptance Criteria (Domain and Behavioral)
+
+⚠️ **Commands: story-explore**
+
+Define two types of acceptance criteria: Domain AC (feature level) and Behavioral AC (story level). **CRITICAL: ALL acceptance criteria belong in FEATURE documents, NOT in story documents.**
+
+**[DO]** (Agent-Relevant):
+* **Domain Acceptance Criteria** (Hierarchical - Feature/Sub-Epic/Epic/Solution levels):
+  - **Domain AC is hierarchical**: Shared concepts move UP to appropriate level
+    - **Solution-level** (story map): Core concepts used across ALL epics (Character, User, System)
+    - **Epic-level** (epic document `🎯 [Epic] - Epic Overview.md`): Concepts shared across features in epic
+    - **Sub-Epic-level** (sub-epic document `📂 [Sub-Epic] - Sub-Epic Overview.md`): Concepts shared across features in sub-epic (when epic has > 9 features)
+    - **Feature-level** (feature document `⚙️ [Feature] - Feature Overview.md`): Concepts specific to THIS feature only
+  - **Check higher levels first**: 
+    - Check story map for solution-level Domain AC
+    - Check epic document for epic-level Domain AC (if exists)
+    - Check sub-epic document for sub-epic-level Domain AC (if exists)
+    - Reference higher-level concepts, don't duplicate
+  - **Structure as mini domain map**: Identify core BUSINESS CONCEPTS first, then behaviors on those concepts
+  - **Check for existing domain map** (`<solution-folder>/<system-name>-domain-map.txt`) and extract relevant business concepts
+  - **Check for domain interactions** (`<solution-folder>/<system-name>-domain-interactions.txt`) if available
+  - **For Feature-level Domain AC** (⭐ FEATURE-SCOPED DOMAIN PERSPECTIVE):
+    - **CRITICAL PATTERN**: Define domain concepts through the lens of THIS feature's concerns
+    - Reference shared concepts from higher levels
+    - Define only feature-specific concepts and ONLY THE FACETS relevant to this feature
+    - **DO NOT** copy entire domain model - define only aspects THIS feature operates on
+    - **Same concept, different facets per feature** (Character in "Establish Identity" shows identity fields; Character in "Save Character" shows persistence states)
+    - **Core Domain Concepts** (nouns): Business objects specific to this feature - ONLY the facets/attributes this feature touches
+    - **Domain Behaviors** (verbs on concepts): Operations specific to this feature
+    - **Domain Rules**: Formulas, patterns, constraints specific to this feature
+    - **Canonical Reference**: See `demo/mm3e/docs/stories/map/⚙️ [Feature] - Feature Overview.md` files for examples of feature-scoped domain perspective
+  - Use domain-driven principles: see `behaviors/ddd/ddd-rule.mdc` Principles 1, 4, 5, 7, 10
+  - Place in feature document (e.g., "Feature Overview.md")
+  - Document consolidation decisions and logic patterns
+  - **NOT** technical implementation: no API endpoints, database schemas, JSON structures
+  - **NOT** operations-first: Don't start with operations without defining WHAT is being operated on
+  - **NOT** full domain model duplication: Don't copy every attribute of a concept into every feature
+* **Acceptance Criteria** (Story level - always behavioral):
+  - Define acceptance criteria for every story
+  - Use "When...then..." format (NO "Given" clauses at AC level - save for spec)
+  - Write in behavioral language (user/system interactions)
+  - Place in feature document under each story section
+  - Group related ACs with descriptive section headers
+  - Ensure criteria are testable and define clear boundaries
+  - Label as "#### Acceptance Criteria" (NOT "Behavioral" - redundant at story level)
+* **Story Documents**:
+  - Story documents contain story description and notes only
+  - Story documents reference feature document for AC
+  - AC lives in feature document, NOT duplicated in story documents
+* **Feature Document Structure**:
+  - **CRITICAL**: All notes, consolidation decisions, domain rules, and source material go BELOW all acceptance criteria
+  - Order: Feature Purpose → Domain AC → Stories (with Behavioral AC) → Notes → Consolidation Decisions → Domain Rules Referenced → Source Material
+
+**[DON'T]** (Agent-Relevant):
+* Skip acceptance criteria for stories
+* Write acceptance criteria in technical or task-oriented language
+* Put behavioral AC in story documents (they go ONLY in feature docs)
+* Skip domain AC in feature documents
+* Use "Given" clauses in acceptance criteria (save context for specifications)
+* Duplicate AC from feature document into story documents
+
+**[Structural Patterns]**:
+* **Domain AC Location**: Feature document, Domain AC section (feature level)
+* **Behavioral AC Location**: Feature document, under each story (story level)
+* **Domain AC Format**: 
+  - Domain rules, constraints, relationships
+  - Formulas, validation patterns, state machines
+  - Consolidation decisions documented
+* **Behavioral AC Format**: 
+  - `When [condition/action], then [outcome]` (preferred)
+  - NO "Given" clauses (context goes in specs, not AC)
+  - Uses behavioral language, observable outcomes
+
+**[Examples]**:
+* ✅ **DO - Domain AC** (Feature document, Domain AC section):
+  - **Save API Contract**: Single save endpoint with create/update modes
+  - **Validation Philosophy**: "Warn, Don't Prevent" - errors warn but never block
+  - **Auto-Save Mechanism**: 2-minute timer, non-intrusive, silent retry
+* ✅ **DO - Behavioral AC** (Feature document, under story):
+  - **When** user clicks Save button for character that does not exist, **then** system creates new character record
+  - **When** save operation completes successfully, **then** system displays "Saved" status with timestamp
+* ✅ **DO - Story Document**:
+  ```
+  # 📝 User saves character to cloud storage
+  
+  ## Story Description
+  User saves character to cloud storage - and system creates or updates record
+  
+  ## Acceptance Criteria
+  **AC are located in feature document**
+  See: Save Character - Feature Overview.md
+  ```
+* ❌ **DON'T**:
+  - Put AC in story documents (they go in feature docs ONLY)
+  - Use "Given" clauses at AC level: "Given user clicks button, When save starts..." (save "Given" for specs)
+  - Technical language: "When API endpoint called, then return JSON"
+
+**[Further Recommendations for Humans]**:
+* Share common understanding of the next feature/slice starting delivery (requires team collaboration)
+
+## 3.2. Apply Logic Decomposition and Consolidation at Acceptance Criteria Level
+
+⚠️ **Commands: story-explore**
+
+Apply Principle 2.5 (Exhaustive Logic Decomposition) when writing acceptance criteria. Decompose, document assumptions, consolidate, and ask clarifying questions before proceeding.
+
+**[DO]** (Agent-Relevant):
+* Apply exhaustive logic decomposition at acceptance criteria level (same as Principle 2.5)
+* Enumerate all permutations of business logic within each story's acceptance criteria
+* Document assumptions about same logic vs different logic
+* Present consolidation opportunities to user with decision matrix
+* Ask clarifying questions about logic similarity before consolidating
+* Reference `behaviors/stories/discovery/consolidation-checklist.md` for patterns
+* Wait for user confirmation before finalizing acceptance criteria
+* Apply same consolidation rules: Same logic/formula/algorithm → consolidate, Different logic → separate
+
+**[DON'T]** (Agent-Relevant):
+* Decompose acceptance criteria by data categories without considering logic similarity
+* Assume logic is same/different without documenting assumptions
+* Consolidate acceptance criteria without user confirmation
+* Skip presenting consolidation review at AC level
+* Proceed with AC finalization before clarifying questions are answered
+
+**[Reference]**:
+* See Principle 2.5: Exhaustive Logic Decomposition for core decomposition rules
+* See `behaviors/stories/discovery/consolidation-checklist.md` for consolidation patterns
+
+**[Examples]**:
+* ✅ **DO**: Document assumption "All ability prerequisite checks use same validation (rank >= requirement) - consolidate to 1 AC?" → Wait for user confirmation
+* ❌ **DON'T**: Assume all validations are same and consolidate without asking
+
+## 3.3. Refining Story Map During Exploration
+
+⚠️ **Commands: story-explore**
+
+Refine, merge, or split stories during exploration to ensure they are at an appropriate level of detail.
+
+**[DO]**:
+* Refine/merge/split stories as necessary during exploration
+* Ensure stories expressed at small/similar level of details
+* Update story map based on exploration insights
+* Keep focus on completeness from user/system behavior perspective
+
+**[DON'T]**:
+* Skip story refinement during exploration
+* Leave stories at inconsistent levels of detail
+* Lose focus on user/system behavior completeness
+
+## 3.4. Defining System Level Stories
+
+⚠️ **Commands: story-explore**
+
+Identify and define system-level stories, not just user-facing stories.
+
+**[DO]**:
+* Identify and define system-level stories (not just user-facing)
+* Ensure system behavior is captured
+* Focus on how system behaves in response to user interactions
+* Document system activities alongside user activities
+
+**[DON'T]**:
+* Focus only on user-facing stories
+* Ignore system behavior
+* Skip system-level story definition
+
+## 3.5. Story Specification
+
+⚠️ **Commands: story-specification**
+
+Document story specifications with scenarios and examples that provide detailed context for implementation.
+
+**[DO]** (Agent-Relevant):
+* Refine understanding of stories and their solution
+* Document story specifications with scenarios and examples
+* Create specification scenarios that describe detailed interactions
+* Use normal examples for concrete, specific use cases
+* Use parameterized examples when multiple similar cases differ only in data
+* Link scenarios to stories (one story can have multiple scenarios)
+* Link examples to scenarios (scenarios contain examples)
+* Cover happy path, edge cases, and error cases in scenarios
+
+**[DON'T]** (Agent-Relevant):
+* Skip documenting story specifications
+* Create scenarios without examples
+* Use parameterized examples when normal examples would be clearer
+* Create examples without linking them to scenarios
+* Skip scenarios for stories (scenarios provide detailed context)
+
+**[Structural Patterns]**:
+* **Story → Scenario Relationship**: One story can have multiple scenarios
+* **Scenario → Example Relationship**: Scenarios contain examples (normal and/or parameterized)
+* **Normal Example Format**: Concrete values, specific data points
+* **Parameterized Example Format**: `<parameter>` placeholders with Examples table
+* **Scenario Format**: Given/When/Then structure with narrative flow
+
+**[Examples]**:
+* ✅ **DO**:
+  - Story with multiple scenarios covering different paths
+  - Scenarios with normal examples for concrete cases
+  - Parameterized examples for validation rules with multiple inputs
+* ❌ **DON'T**:
+  - Stories without scenarios
+  - Scenarios without examples
+  - Examples not linked to scenarios
+
+**[Further Recommendations for Humans]**:
+* Ensure subset of team takes ownership, estimates, commits to start
+
+### Principle 3.6: Story Format and Structure
+
+⚠️ **Commands: story-explore**
+
+Use appropriate story format depending on whether story maps are present, with focus on acceptance criteria.
+
+**[DO]** (Agent-Relevant):
+* Use simple title to convey meaning (when story maps are in place)
+* Make acceptance criteria the main focus
+* Use story summary only to provide context
+* Write stories that represent a small increment of system behavior
+
+**[DON'T]** (Agent-Relevant):
+* Write "stories" that don't represent a small increment of system behavior
+* Make story summary the main focus (acceptance criteria should be primary)
+* Use story template redundantly when story maps are in place
+
+**[Structural Patterns]**:
+* **With Story Maps**: Simple title format: `[Verb] [Noun]` (e.g., "Place order")
+* **Without Story Maps**: Full format: `As a [User] I want to [Action] So that [Value]`
+* **Required Fields**: Title (verb/noun), Acceptance Criteria (behavior form)
+* **Optional Fields**: Summary/Description (provides context only)
+
+**[Examples]**:
+* ✅ **DO** (With Story Maps):
+  ```
+  Title: Place order
+  Acceptance Criteria:
+    When user submits order, then system validates payment
+    When payment is valid, then system sends confirmation
+  ```
+* ✅ **DO** (Without Story Maps):
+  ```
+  As a customer
+  I want to place an order
+  So that I can purchase items
+  
+  Acceptance Criteria:
+    When user submits order, then system validates payment
+    When payment is valid, then system sends confirmation
+  ```
+* ❌ **DON'T**: Missing acceptance criteria, summary is main focus
+
+**[Further Recommendations for Humans]**:
+* Use format that gives team insight into mind of end user (requires team discussion)
+
+## Section 4: Specification Scenarios Principles
+
+⚠️ **Commands: story-specification** - These principles apply to story specification
+
+## 4.1. Given Statements Describe States (BDD-Inspired)
+
+⚠️ **Commands: story-specification**
+
+**CRITICAL**: Given statements describe STATES, not actions. This principle is borrowed from BDD test practices where describe blocks use state-oriented language.
+
+**[DO]** (Agent-Relevant):
+* Write Given statements that describe current state or context
+* Use state patterns (from `behaviors/bdd/bdd-rule.mdc` Section 2):
+  - **"that has been [past participle]"** - completed states
+    - ✅ "Given character has been created"
+    - ✅ "Given user has been authenticated"
+  - **"that is being [verb]"** - ongoing states
+    - ✅ "Given character is being edited"
+    - ✅ "Given form is being validated"
+  - **"that is [adjective/noun]"** - current states
+    - ✅ "Given screen is displayed"
+    - ✅ "Given user is authenticated"
+    - ✅ "Given field is empty"
+  - **"that has [noun]"** - possession states
+    - ✅ "Given character has invalid data"
+    - ✅ "Given form has validation errors"
+* Describe WHAT state exists, not HOW it got there
+* Focus on observable state that can be verified
+
+**[DON'T]** (Agent-Relevant):
+* Use action-oriented language in Given statements
+* Imply navigation or user actions in state descriptions
+* Describe HOW the state was reached (Given is about current state, not past actions)
+* Use past tense verbs that describe completed actions rather than resulting states
+
+**[Examples]**:
+* ✅ **DO - State-Oriented**:
+  - "Given character is being edited" (ongoing state)
+  - "Given identity fields are displayed" (current state)
+  - "Given user is authenticated" (completed state)
+  - "Given character has been created" (completed state)
+  - "Given field is empty" (current state)
+  - "Given textbook is in stock" (current state)
+* ❌ **DON'T - Action-Oriented**:
+  - "Given user is on the character creation screen" (implies navigation action - use "Given character creation screen is displayed")
+  - "Given user logged in" (action - use "Given user is authenticated")
+  - "Given user navigated to page" (action - use "Given page is displayed")
+  - "Given user clicked button" (action - belongs in When, not Given)
+
+**[Rationale]**:
+This principle is borrowed from BDD testing practices where test describe blocks use state-oriented language to create readable, maintainable hierarchies. States are verifiable and testable, while actions are transient. By describing states in Given, we create specifications that focus on observable conditions rather than implementation details of how those conditions were reached.
+
+**[Reference]**:
+- See `behaviors/bdd/bdd-rule.mdc` Section 2 (Fluency, Hierarchy, and Storytelling) for state pattern details
+- State patterns ensure Given statements are about "being in a state" not "having completed actions"
+
+---
+
+## 4.2. Scenario Structure and Gherkin Keywords
+
+⚠️ **Commands: story-specification**
+
+Use proper Gherkin structure with Given/When/Then keywords, Background for repeated steps, and Scenario Outline for parameterized scenarios.
+
+**[DO]** (Agent-Relevant):
+* Create specification scenarios that describe detailed interactions between users and system
+* Use proper Gherkin keywords: Given/When/Then/And/But
+* Use Background for repeated Given steps across scenarios (3+ scenarios with same Given)
+* Use Scenario Outline for parameterized scenarios (3+ similar cases with different data)
+* Include Examples table with Scenario Outline (use | column | format)
+* Link scenarios to stories (one story can have multiple scenarios)
+* Each scenario should have clear Given (STATE), When (ACTION), Then (OUTCOME)
+* Apply Principle 4.1 (Given Statements Describe States) when writing Given steps
+
+**[DON'T]** (Agent-Relevant):
+* Skip documenting scenarios
+* Skip scenarios for stories (scenarios provide detailed context)
+* Create scenarios without proper Given/When/Then structure
+* Use Background for non-Given steps (Background = Given/And only)
+* Use Scenario Outline without Examples table
+* Add examples in this phase (examples come in Phase 5 - separate command)
+* Violate Principle 4.1 by using action-oriented language in Given statements
+
+## 4.3. Scenario Coverage (Happy Path, Edge Cases, Error Cases)
+
+⚠️ **Commands: story-specification**
+
+Cover happy path, edge cases, and error cases to ensure comprehensive scenario documentation.
+
+**[DO]** (Agent-Relevant):
+* Cover happy path scenarios (main success flow)
+* Cover edge case scenarios (boundary conditions, special cases)
+* Cover error case scenarios (failure conditions, error handling)
+* Link scenarios to acceptance criteria from feature document
+* Explore remaining key risks/unknowns/assumptions through scenarios
+* Ensure all acceptance criteria have corresponding scenarios
+
+**[DON'T]** (Agent-Relevant):
+* Skip edge cases or error cases
+* Only document happy path (insufficient coverage)
+* Create scenarios that don't link to acceptance criteria
+* Leave acceptance criteria uncovered by scenarios
+
+## 4.4. Behavioral Language in Scenarios
+
+⚠️ **Commands: story-specification**
+
+Write scenarios in behavioral language that describes observable behavior, not technical implementation.
+
+**[DO]** (Agent-Relevant):
+* Write scenarios in behavioral language (observable behavior)
+* Use user/system interaction language
+* Each scenario should be understandable by non-technical stakeholders
+* Describe what user sees/experiences
+* Describe what system does (observable actions)
+* Focus on business domain language
+
+**[DON'T]** (Agent-Relevant):
+* Use technical language or code patterns in scenarios
+* Write scenarios that require technical knowledge to understand
+* Use implementation details (API, database, JSON, endpoints)
+* Use code syntax (function(), method(), .save())
+* Create overly complex scenarios (split into multiple scenarios instead)
+
+**[Structural Patterns]**:
+* **Story → Scenario Relationship**: One story can have multiple scenarios (happy path, edge cases, error cases)
+* **Scenario Format**: Background (optional) + Given/When/Then/But/And structure
+* **Scenario Outline**: Parameterized scenarios with <parameter> placeholders and Examples table
+* **Background**: Shared Given steps that run before each scenario (optional)
+* **Gherkin Keywords**: Given (context), When (action), Then (outcome), And (continuation), But (negative assertion)
+
+**[Examples]**:
+* ✅ **DO** (Happy Path Scenario - State-oriented Given):
+  ```
+  ### Scenario 1: Successful textbook purchase
+  
+  **Given** student is authenticated
+  **And** textbook exists in catalog
+  **And** textbook is in stock
+  **When** the student selects that textbook for purchase
+  **And** the student specifies shipping information
+  **And** the student confirms purchase
+  **Then** the system sends payment information to 3rd party
+  **And** the system sends Order Details to bookstore application
+  **And** success message is displayed to student
+  ```
+* ✅ **DO** (Error Case Scenario - State-oriented Given):
+  ```
+  ### Scenario 2: Textbook out of stock
+  
+  **Given** student is authenticated
+  **And** textbook is out of stock
+  **When** student attempts to purchase textbook
+  **Then** system displays "Out of stock" message
+  **But** payment is not processed
+  ```
+* ✅ **DO** (Using Background - State-oriented):
+  ```
+  ### Background
+  **Given** student is authenticated
+  **And** textbook catalog is displayed
+  
+  ### Scenario 1: Purchase available textbook
+  **Given** textbook is in stock
+  **When** student selects textbook
+  **Then** purchase proceeds
+  
+  ### Scenario 2: Purchase out of stock textbook
+  **Given** textbook is out of stock
+  **When** student selects textbook
+  **Then** out of stock message is displayed
+  ```
+* ✅ **DO** (Scenario Outline):
+  ```
+  ### Scenario Outline: Bill generation for preferences
+  
+  **Given** a Customer has billing preferences set to <format>
+  **And** a Billing Period is completed
+  **When** the System generates a Customer Bill
+  **Then** the bill is rendered in <format> format
+  
+  **Examples**:
+  | format |
+  |--------|
+  | PDF    |
+  | HTML   |
+  | Email  |
+  ```
+* ❌ **DON'T** (Technical Language):
+  ```
+  ### Scenario: API call
+  **When** POST /orders endpoint is called
+  **Then** database record is created
+  ```
+* ❌ **DON'T** (Missing structure):
+  ```
+  ### Scenario: Order placement
+  User places order and it works
+  ```
+
+**[PowerPoint References]**:
+* Slide 16: Story specification guidance
+* Slides 149-154: Scenario patterns and examples
+* Slide 154: Purchase Textbook (concrete scenario example)
+
+**[Further Recommendations for Humans]**:
+* Use scenarios to facilitate conversation and shared understanding (requires team collaboration)
+* Scenarios are living documentation - update as understanding evolves
+
+## Templates
+
+Templates for story artifacts:
+
+* Story map template: `behaviors/stories/map/story-map-template.md`
+* Story template: `behaviors/stories/write/story-template.md`
+* Acceptance criteria template: `behaviors/stories/acceptance/acceptance-criteria-template.md`
+
+## Commands
+
+Commands that implement or use this rule:
+
+* `/story-shape` — Create and validate story maps with epic/feature/story hierarchy
+* `/story-shape-generate` — Generate story map structure
+* `/story-shape-validate` — Validate story map follows principles
+* `/story-arrange` — Arrange and validate folder structure to match story map
+* `/story-arrange-generate` — Generate folder structure
+* `/story-arrange-validate` — Validate folder structure matches story map
+* `/story-market-increments` — Identify and prioritize marketable increments
+* `/story-market-increments-generate` — Generate increment identification
+* `/story-market-increments-validate` — Validate increment structure
+* `/story-discovery` — Refine increments and groom stories
+* `/story-discovery-generate` — Generate discovery artifacts
+* `/story-discovery-validate` — Validate discovery completeness
+* `/story-explore` — Write acceptance criteria and define system stories
+* `/story-explore-generate` — Generate exploration artifacts
+* `/story-explore-validate` — Validate exploration completeness
+* `/story-specification` — Create story specifications with scenarios and examples
+* `/story-specification-generate` — Generate specifications
+* `/story-specification-validate` — Validate specifications
+* `/story-specification-examples` — Create example-based specifications
+* `/story-specification-examples-generate` — Generate examples
+* `/story-specification-examples-validate` — Validate examples
+* `/story-discovery-explore` — Combined discovery and exploration workflow
+
+## Executing Commands
+* /stories-story-arrange — Arrange and validate story files within folder structure based on story map document

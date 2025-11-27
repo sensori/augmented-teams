@@ -1,0 +1,14 @@
+{
+  "outputs": [
+    {
+      "name": "domain_model_diagram",
+      "path": "docs/domain/partitioning",
+      "template": "templates/domain-model-diagram-template.md",
+      "instructions": "Generate domain model diagram using Mermaid that shows bounded context boundaries, aggregates within bounded contexts, entities within aggregates (marking root entities), value objects, domain services, repositories, domain events, and relationships between entities."
+    }
+  ]
+}
+
+
+
+

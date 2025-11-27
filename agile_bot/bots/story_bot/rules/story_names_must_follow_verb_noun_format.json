@@ -1,0 +1,53 @@
+{
+  "description": "CRITICAL: Story names MUST follow Verb-Noun format (e.g., 'Move To Mob Leaders Turn', 'Determines Target from Strategy', 'Initiate Mob Attack'), and include italicized description showing component interactions (e.g., '*Combat Tracker moves to any mob member's turn, auto moves to mob leader's turn*'). The story name should be concise and action-oriented, while the description shows the component-to-component interactions.",
+  "do": {
+    "examples": [
+      {
+        "description": "Use concise Verb-Noun format for story names",
+        "content": [
+          "Move To Mob Leaders Turn, Determines Target from Strategy, Initiate Mob Attack"
+        ]
+      },
+      {
+        "description": "Include italicized description showing component interactions",
+        "content": [
+          "*Combat Tracker moves to any mob member's turn, auto moves to mob leader's turn*"
+        ]
+      },
+      {
+        "description": "Make story name concise and action-oriented",
+        "content": [
+          "Story name: 'Initiate Mob Attack' - concise and action-oriented"
+        ]
+      },
+      {
+        "description": "Show component interactions in description",
+        "content": [
+          "Story description shows how components interact with each other"
+        ]
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use long descriptive names without Verb-Noun format",
+        "content": [
+          "The system should allow users to move to mob leaders turn when..."
+        ]
+      },
+      {
+        "description": "Don't omit component interaction descriptions",
+        "content": [
+          "Story name without italicized description of component interactions"
+        ]
+      },
+      {
+        "description": "Don't use vague or non-action-oriented names",
+        "content": [
+          "Mob Leader Turn System, Attack Mechanism"
+        ]
+      }
+    ]
+  }
+}

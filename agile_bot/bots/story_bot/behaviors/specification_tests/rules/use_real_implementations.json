@@ -1,0 +1,51 @@
+{
+  "description": "Use real implementations by default. Only mock when explicitly asked to assume e2e tests or for uncontrollable external dependencies (file I/O, network, APIs). Create real files in temporary test workspace instead of mocking file operations.",
+  "examples": [
+    {
+      "do": {
+        "description": "Real implementation with temporary test data",
+        "content": [
+          "@given(\"agents/base/agent.json exists and is valid\")",
+          "def given_base_config_exists(context, workspace_root):",
+          "    # Create real file in test workspace",
+          "    config_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "    config_path.parent.mkdir(parents=True, exist_ok=True)",
+          "    config_path.write_text('{\"name\": \"base\"}')"
+        ]
+      },
+      "dont": {
+        "description": "Mocking when real implementation is possible",
+        "content": [
+          "@given(\"agents/base/agent.json exists and is valid\")",
+          "def given_base_config_exists(context):",
+          "    # DON'T: Mock when real implementation is possible",
+          "    with patch('pathlib.Path.exists', return_value=True):",
+          "        pass"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Mock only external boundaries when asked for e2e",
+        "content": [
+          "# Only when explicitly asked for e2e tests:",
+          "@given(\"agents/base/agent.json exists and is valid\")",
+          "def given_base_config_exists(context):",
+          "    # Mock file I/O (external boundary) - only when e2e tests specified",
+          "    with patch('pathlib.Path.exists', return_value=True):",
+          "        with patch('pathlib.Path.read_text', return_value='{\"valid\": \"json\"}'):",
+          "            context.base_config_path = Path(\"agents/base/agent.json\")"
+        ]
+      },
+      "dont": {
+        "description": "Mock internal business logic",
+        "content": [
+          "@given(\"Agent is initialized\")",
+          "def given_agent(context):",
+          "    # DON'T: Mock the class we're testing",
+          "    context.agent = Mock(spec=Agent)  # WRONG"
+        ]
+      }
+    }
+  ]
+}

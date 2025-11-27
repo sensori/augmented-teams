@@ -1,0 +1,18 @@
+{
+  "description": "Story drill down",
+  "question": "What areas of the story map do you want to explore more deeply as a part of shaping?",
+  "outcome": "Determines which epics/stories get detailed breakdown",
+  "options": [
+    "Dig deep on business complexity",
+    "Dig deep on system interactions",
+    "Dig deep on architectural pieces",
+    "Dig deep on user workflows",
+    "High and wide across all epics",
+    "Focus on highest value areas",
+    "Dig deep on behavioral complexity",
+    "Dig deep on data and reporting needs",
+    "Dig deep on change management or training impact",
+    "Dig deep on system-of-record versus system-of-engagement boundaries"
+  ]
+}
+

@@ -1,0 +1,18 @@
+[
+  {
+    "status": "store_structured_store_rendered",
+    "stage": null,
+    "inputs": {
+      "saved_paths": {
+        "structured_path": "C:\\dev\\augmented-teams\\demo\\cheap_wealth_online\\docs\\stories\\structured.json"
+      }
+    },
+    "reasoning": {}
+  },
+  {
+    "status": "start",
+    "stage": "shape",
+    "inputs": {},
+    "reasoning": {}
+  }
+]

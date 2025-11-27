@@ -1,0 +1,17 @@
+{
+  "behaviorName": "domain_specification",
+  "instructions": [
+    "CRITICAL: For the domain_specification behavior, you MUST ask the user these questions.",
+    "",
+    "**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**",
+    "1. Present each required question to the user clearly and explicitly in the chat window",
+    "2. Wait for the user to answer each question",
+    "3. Present questions and answers in the chat window for review",
+    "4. Store clarification data using agent_store_clarification() MCP tool",
+    "5. DO NOT proceed until all questions have complete, unambiguous answers"
+  ]
+}
+
+
+
+

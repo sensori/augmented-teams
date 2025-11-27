@@ -1,0 +1,15 @@
+{
+  "description": "When creating variables, use descriptive names that match the data being tested. Variable names should be clear and indicate what they represent.",
+  "examples": [
+    {
+      "do": {
+        "description": "Descriptive variable names",
+        "content": "Given test project area is set up at \"<test_project_area>\"\nAnd base agent.json has error condition \"<error_condition>\"\nThen error \"<expected_error_message>\" is presented"
+      },
+      "dont": {
+        "description": "Vague or unclear variable names",
+        "content": "Given area is \"<area>\"\nAnd file has \"<condition>\"\nThen \"<message>\" is shown\n(WRONG - variable names too vague)"
+      }
+    }
+  ]
+}

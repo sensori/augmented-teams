@@ -1,0 +1,54 @@
+{
+  "description": "Use verb-noun format for all story elements (epic names, feature names, story titles)",
+  "do": {
+    "examples": [
+      {
+        "description": "Use verb-noun format for epic names",
+        "content": [
+          "Manage Orders, Create Character, Process Payment"
+        ]
+      },
+      {
+        "description": "Use verb-noun format for feature names",
+        "content": [
+          "Place Order, Validate Payment, Save Character"
+        ]
+      },
+      {
+        "description": "Use verb-noun format for story titles",
+        "content": [
+          "Customer places order, System validates payment, User saves character"
+        ]
+      },
+      {
+        "description": "Use verb-noun format for scenario sentences",
+        "content": [
+          "User submits form, System processes request"
+        ]
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use noun-only or capability-based names",
+        "content": [
+          "Order Management, Payment Processing, Character System"
+        ]
+      },
+      {
+        "description": "Don't mix verb-noun with other formats",
+        "content": [
+          "Order Management and Place Order (mixed format)"
+        ]
+      },
+      {
+        "description": "Don't use gerund forms",
+        "content": [
+          "Ordering, Processing Payments, Creating Characters"
+        ]
+      }
+    ]
+  }
+}
+

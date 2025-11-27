@@ -1,0 +1,8 @@
+{
+  "typical_assumptions": [
+    "Default granularity is one Meaningful user/system interaction per story",
+    "Story granularity may vary based on technical or functional complexity",
+    "Coarse-grained stories are acceptable where functionality is easily enabled",
+    "Fine-grained slicing is required where architectural or integration uncertainty is high"
+  ]
+}

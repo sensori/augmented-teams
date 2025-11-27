@@ -1,0 +1,11 @@
+{
+  "typical_assumptions": [
+    "One story is specified at a time",
+    "Acceptance criteria must be testable, unambiguous, and executable",
+    "Gherkin syntax or structured language (Given/When/Then) is preferred",
+    "Scenarios are written in plain English without variables or test data",
+    "Specification drives both design and test — not written after implementation",
+    "Scenarios must cover both behavior and domain policy",
+    "Cross-functional review is required before considering the story ready for development"
+  ]
+}

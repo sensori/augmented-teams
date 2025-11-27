@@ -1,0 +1,18 @@
+{
+  "description": "Agent-level trigger words - general terms that indicate when to use the DDD bot",
+  "patterns": [
+    "domain.*driven.*design",
+    "ddd",
+    "domain.*modeling",
+    "bounded.*context",
+    "aggregate",
+    "domain.*event",
+    "ubiquitous.*language",
+    "domain.*expert"
+  ],
+  "priority": 5
+}
+
+
+
+

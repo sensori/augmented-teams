@@ -1,0 +1,14 @@
+{
+  "behaviorName": "discovery",
+  "instructions": [
+    "Present the assumptions, decision making criteria, and recommended human activities to the user and ask them to confirm how stories will be grouped, aligned, and validated as a complete flow.",
+    "",
+    "1. Load typical assumptions from `typical_assumptions.json` and review them with the user",
+    "2. Load recommended human activities from `recommended_human_activity.json` and present them",
+    "3. Load each decision criteria from `decision_criteria/` folder and present its options",
+    "4. Ask user to confirm story scope definition approach",
+    "5. Ask user to confirm story granularity level",
+    "6. Validate that story grouping and alignment reflect complete flow"
+  ]
+}
+

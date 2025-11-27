@@ -1,0 +1,19 @@
+{
+  "description": "Domain Partitioning takes domain objects and partitions them into DDD structures (entities, value objects, aggregates, services, events, repositories, bounded contexts) following the definitions from slide 39.",
+  "examples": [
+    {
+      "do": {
+        "description": "Ask business questions to properly partition domain objects into DDD structures",
+        "content": "For each DDD structure type (entities, value objects, aggregates, services, events, repositories, bounded contexts), ask the specific business questions provided in key_questions.json and use the answers to classify and organize domain objects"
+      },
+      "dont": {
+        "description": "Don't skip business questions or make technical assumptions without asking the business",
+        "content": "Skip asking business questions and assume technical answers, create generic CRUD repositories instead of asking business-specific questions, skip value objects without asking about immutability"
+      }
+    }
+  ]
+}
+
+
+
+

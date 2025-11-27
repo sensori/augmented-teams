@@ -1,0 +1,14 @@
+{
+  "validate": {
+    "patterns": [
+      "check.*against.*rule",
+      "validate.*content",
+      "verify.*compliance"
+    ],
+    "priority": 5
+  }
+}
+
+
+
+

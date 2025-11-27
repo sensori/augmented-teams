@@ -1,0 +1,23 @@
+{
+  "behaviorName": "domain_discovery",
+  "instructions": [
+    "CRITICAL: For the domain discovery behavior, you MUST ask the user these questions.",
+    "",
+    "**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**",
+    "1. Present each required question to the user clearly and explicitly in the chat window",
+    "2. Wait for the user to answer each question",
+    "3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:",
+    "   - **Questions Asked:** List each question you asked the user",
+    "   - **Answers Provided:** Show the exact answers the user provided for each question",
+    "   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail",
+    "   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail",
+    "4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification",
+    "5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers",
+    "6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool",
+    "7. DO NOT proceed to planning until all questions have complete, unambiguous answers confirmed by the user"
+  ]
+}
+
+
+
+

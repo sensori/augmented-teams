@@ -1,0 +1,10 @@
+{
+  "behaviorName": "{behavior_name}",
+  "instructions": [
+    "{Main instruction sentence for required context/clarification}",
+    "",
+    "1. {Step 1 description}",
+    "2. {Step 2 description}",
+    ""
+  ]
+}

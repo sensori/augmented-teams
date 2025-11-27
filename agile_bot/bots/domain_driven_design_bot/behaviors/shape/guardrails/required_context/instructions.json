@@ -1,0 +1,27 @@
+{
+  "behaviorName": "shaping",
+  "instructions": [
+    "CRITICAL: For the shaping behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.",
+    "",
+    "**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**",
+    "1. Present each required question to the user clearly and explicitly in the chat window",
+    "2. Wait for the user to answer each question",
+    "3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:",
+    "   - **Questions Asked:** List each question you asked the user",
+    "   - **Answers Provided:** Show the exact answers the user provided for each question",
+    "   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail",
+    "   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail",
+    "4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification",
+    "5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers",
+    "6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool with:",
+    "   - `key_questions_answered`: dict mapping question keys to answer strings",
+    "   - `evidence_provided`: dict mapping evidence types to evidence content",
+    "7. DO NOT proceed to planning until:",
+    "   - You have presented questions and answers in the chat window",
+    "   - The user has reviewed and confirmed or corrected the answers",
+    "   - ALL questions have complete, unambiguous answers confirmed by the user",
+    "   - You have successfully stored the clarification data using `agent_store_clarification()`"
+  ]
+}
+
+

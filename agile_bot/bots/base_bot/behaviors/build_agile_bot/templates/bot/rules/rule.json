@@ -1,0 +1,37 @@
+{
+  "description": "{Rule description}",
+  "do": {
+    "examples": [
+      {
+        "description": "{Description of correct example}",
+        "content": [
+          "{Line 1 of example content showing correct usage}",
+          "{Line 2 of example content if multi-line}"
+        ]
+      },
+      {
+        "description": "{Another correct example description}",
+        "content": [
+          "{Another correct example content}"
+        ]
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "{Description of incorrect example}",
+        "content": [
+          "{Line 1 of example content showing incorrect usage}",
+          "{Line 2 if multi-line}"
+        ]
+      },
+      {
+        "description": "{Another incorrect example description}",
+        "content": [
+          "{Another incorrect example content}"
+        ]
+      }
+    ]
+  }
+}

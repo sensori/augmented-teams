@@ -1,0 +1,13 @@
+{
+  "description": "Story scope definition",
+  "question": "What's your preferred approach for defining the full set of stories in the increment and ensuring their order and alignment reflect end-to-end flow?",
+  "outcome": "Determines story inventory structure and sequencing logic",
+  "options": [
+    "Hierarchical — Go from left to right through every step of system and user interactions, including each alternate option. Start with top-level steps and drill down completely before moving to the next step.",
+    "Skinny then Elaborate — Create the smallest spine you can (minimal viable flow) and then go back and add different alternates and options. Build the core path first, then expand.",
+    "User and System Only — Focus exclusively on user-system interaction points. Skip internal system processing and back-office details.",
+    "System /back office — Deep dive into system internals and back-office components. Include detailed component interactions, data flows, and system-to-system communication.",
+    "Template — Create a few templated flows as patterns, then Use deltas for the rest of the flow.",
+    "Changes only — Only define areas where the system requires development/config work. Skip out-of-the-box functionality, and pre-existing capabilities."
+  ]
+}

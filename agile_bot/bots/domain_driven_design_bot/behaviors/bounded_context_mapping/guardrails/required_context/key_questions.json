@@ -1,0 +1,18 @@
+{
+  "description": "Key questions that must be answered before this behavior can proceed",
+  "questions": [
+    "Do different parts of the business think about the same thing differently? (Where do similar concepts get represented in different ways, or where the same terms can mean different things?)",
+    "Does the state of something need to be different in different areas? (For example, do we care about very different things when managing a lead versus managing a real customer?)",
+    "How related are things transactionally? (Do transactions occur at dramatically different rates?)",
+    "How coupled are these concepts from a business perspective? (Which domain concepts get updated together as a single cohesive unit? Which get updated separately?)",
+    "What are the most important subject areas of the business? (What are the concrete business concepts that matter to stakeholders who directly serve the market?)",
+    "Are there regulatory or compliance requirements that span multiple domains but should be in their own bounded context?",
+    "Do different market actors (customer segments, user personas) have different enough needs to warrant separate bounded contexts?",
+    "What events flow between bounded contexts? (From event storming map - which events cross context boundaries?)",
+    "What are the team structures and ownership? (Which teams, departments, or communities should own which bounded contexts?)"
+  ]
+}
+
+
+
+

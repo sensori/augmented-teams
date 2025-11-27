@@ -1,0 +1,36 @@
+{
+  "description": "Decision making criteria for event storming behavior",
+  "criteria": [
+    {
+      "description": "Event storming scope and source",
+      "question": "What is the scope and source for the event storming session?",
+      "outcome": "Determines which stories or logical flow to use as input and how to structure the event storming map",
+      "options": [
+        "Increment-level scope - event storming for all stories in an increment (from story agent prioritization)",
+        "Epic-level scope - event storming across all stories in an epic",
+        "Feature-level scope - event storming for stories within a feature",
+        "Collection of stories - event storming for a specific set of related stories",
+        "Full story map - comprehensive event storming across entire story map",
+        "Logical sequence - event storming from logical ordering of commands/reactions/events (no story map available)"
+      ]
+    },
+    {
+      "description": "Story decomposition strategy",
+      "question": "What is the approach to decomposing a single story into commands, reactions, and events?",
+      "outcome": "Determines how stories are broken down into event storming elements and which stories become commands vs events vs reactions",
+      "options": [
+        "One story = One command - Each story becomes a single command that triggers events and reactions",
+        "Story as user journey - Decompose story into multiple commands representing user interactions, with events and reactions for each step",
+        "Story as business process - Break story into commands (triggers), events (state changes), and reactions (responses) following business process flow",
+        "Story as aggregate operation - Each story maps to an aggregate operation (command), producing events that trigger reactions in other aggregates",
+        "Story as bounded context interaction - Stories span multiple bounded contexts, decompose into commands/events/reactions crossing context boundaries",
+        "Granular decomposition - Break each story into fine-grained commands, events, and reactions for detailed event storming",
+        "Coarse-grained decomposition - Keep stories at high level, identify only major commands, events, and reactions"
+      ]
+    }
+  ]
+}
+
+
+
+

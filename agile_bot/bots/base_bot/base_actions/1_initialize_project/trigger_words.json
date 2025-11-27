@@ -1,0 +1,21 @@
+{
+  "update_project_location": {
+    "patterns": [
+      "moved.*project.*location",
+      "move.*project.*to",
+      "project.*location.*to",
+      "update.*project.*location",
+      "change.*project.*location",
+      "set.*project.*to",
+      "project.*directory.*to",
+      "project.*folder.*to",
+      "all.*documentation.*there",
+      "documentation.*there"
+    ],
+    "priority": 15
+  }
+}
+
+
+
+

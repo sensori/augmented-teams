@@ -1,0 +1,15 @@
+{
+  "description": "Present AC consolidation review BEFORE finalizing. Identify similar ACs, ask domain expert questions, wait for user confirmation.",
+  "examples": [
+    {
+      "do": {
+        "description": "Present AC consolidation questions and wait for answers",
+        "content": "CONSOLIDATION REVIEW: These ACs use same logic? [List ACs] → User answers → Apply decisions"
+      },
+      "dont": {
+        "description": "Don't automatically consolidate ACs without user confirmation",
+        "content": "Auto-consolidate similar ACs (WRONG - must ask user first)"
+      }
+    }
+  ]
+}

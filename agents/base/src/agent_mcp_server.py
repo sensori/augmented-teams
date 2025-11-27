@@ -425,9 +425,8 @@ class ToolRegistry:
     def register_all(self) -> None:
         """Register all tool categories."""
         self._register_state_tools()
-        self._register_navigation_tools()
-        self._register_instruction_tools()
-        self._register_storage_tools()
+        self._register_workflow_tools()
+        self._register_shaping_tools()
         self._register_query_tools()
     
     def _register_state_tools(self) -> None:
@@ -838,10 +837,21 @@ class AgentMCPServer:
                 agent_name=agent.agent_name
             )
         
-        if not agent.workflow.current_action:
-            return "No current action"
-        
+        # Call agent.instructions first - it will auto-start workflow if needed
         instructions = agent.instructions
+        
+        # If instructions is None or empty after auto-start attempt, return error
+        if instructions is None:
+            return "No current action - workflow could not be started"
+        
+        # If instructions is a dict with error, return it
+        if isinstance(instructions, dict) and instructions.get("error"):
+            return ResponseFormatter.error(
+                instructions.get("error", "Unknown error"),
+                instructions.get("instructions", "Unknown error occurred"),
+                agent_name=agent.agent_name
+            )
+        
         verbose_mode = getattr(agent, 'verbose_mode', False)
         
         InstructionsFileWriter.write_if_verbose(agent, instructions)

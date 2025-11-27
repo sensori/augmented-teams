@@ -1,0 +1,12 @@
+{
+  "description": "{Decision criteria description}",
+  "question": "{Question to ask the user}",
+  "outcome": "{What this decision determines}",
+  "options": [
+    "{Option 1}",
+    "{Option 2}",
+    "{Option 3}"
+  ],
+  "note": "{Optional note with additional guidance}"
+}
+

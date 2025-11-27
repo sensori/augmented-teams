@@ -1,0 +1,16 @@
+{
+  "description": "Typical assumptions for bounded context mapping behavior",
+  "assumptions": [
+    "Bounded context map illustrates relationships across solution and different teams",
+    "Bounded context map shows how dependencies are managed on large scale programs",
+    "Integration patterns determine interaction model between teams",
+    "Event flows from event storming inform bounded context relationships",
+    "Bounded contexts may span entire system, portion of system, or across several systems",
+    "Bounded context map identifies where contexts may be shared across teams",
+    "Bounded context map determines appropriate integration strategies"
+  ]
+}
+
+
+
+

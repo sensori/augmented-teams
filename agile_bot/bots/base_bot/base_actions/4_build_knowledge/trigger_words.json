@@ -1,0 +1,13 @@
+{
+  "build_structure": {
+    "patterns": [
+      "create.*structure",
+      "build.*content"
+    ],
+    "priority": 5
+  }
+}
+
+
+
+

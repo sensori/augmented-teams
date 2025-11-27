@@ -1,0 +1,27 @@
+{
+  "description": "Use descriptive step definition function names that match step text. Function names should clearly indicate what step they implement.",
+  "examples": [
+    {
+      "do": {
+        "description": "Descriptive function names",
+        "content": [
+          "@given(\"Agent is initialized with agent_name='story_bot'\")",
+          "def given_agent_initialized_with_name(context, agent_name):",
+          "    pass",
+          "",
+          "@when(\"MCP Server requests Agent instance from AgentStateManager\")",
+          "def when_mcp_requests_agent_from_manager(context):",
+          "    pass"
+        ]
+      },
+      "dont": {
+        "description": "Non-descriptive or abbreviated names",
+        "content": [
+          "@given(\"Agent is initialized\")",
+          "def step1(context):  # WRONG - non-descriptive",
+          "def agent_init(context):  # WRONG - abbreviated"
+        ]
+      }
+    }
+  ]
+}

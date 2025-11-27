@@ -1,0 +1,15 @@
+{
+  "description": "Examples tables must have at least 2 rows of test data to demonstrate variations. Single row Examples tables should be regular scenarios instead.",
+  "examples": [
+    {
+      "do": {
+        "description": "Multiple rows of test data",
+        "content": "Examples:\n| request_message | detected_keywords |\n|----------------|-------------------|\n| start shaping | shaping |\n| plan new project | planning,new project |\n| build story map | story map |"
+      },
+      "dont": {
+        "description": "Single row Examples table",
+        "content": "Examples:\n| request_message |\n|----------------|\n| start shaping |\n(WRONG - only one row, should be regular scenario)"
+      }
+    }
+  ]
+}

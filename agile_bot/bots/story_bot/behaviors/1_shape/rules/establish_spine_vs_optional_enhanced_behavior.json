@@ -1,0 +1,41 @@
+{
+  "description": "Establish mandatory spine stories vs optional/enhanced behavior stories. Mandatory stories form the sequential spine (story AND story AND story). Optional stories are alternatives or enhancements (story OR story) that branch from the spine and can return to it.",
+  "examples": [
+    {
+      "do": {
+        "description": "Establish spine first, then identify optional/enhanced behaviors",
+        "content": [
+          "Establish the mandatory spine: Story1 AND Story2 AND Story3 (sequential chain of required behaviors)",
+          "Identify optional/enhanced behaviors that branch from the spine: Story1 OR Story2 OR Story3 (alternatives or enhancements)",
+          "Optional/enhanced stories can return to the spine after completion",
+          "Sort optional/enhanced stories by priority of delivery within the same feature",
+          "Mark optional/enhanced stories with 'optional: true' in story structure",
+          "Explicitly distinguish between spine (mandatory) and optional/enhanced behaviors",
+          "",
+          "Correct Examples:",
+          "- Spine: User creates account (mandatory) AND User logs in (mandatory) AND User views dashboard (mandatory)",
+          "- Optional branch: User creates account (mandatory) OR User signs in with social media (optional, priority 1) OR User signs in with email (optional, priority 2)",
+          "- Enhanced behavior: User views dashboard (mandatory) AND User customizes dashboard (optional, priority 1) AND User shares dashboard (optional, priority 2)"
+        ]
+      },
+      "dont": {
+        "description": "Avoid marking all stories as mandatory or omitting spine vs optional distinction",
+        "content": [
+          "Don't mark all stories as mandatory when some are alternatives or enhancements",
+          "Don't omit the optional marker - be explicit about spine vs optional/enhanced behaviors",
+          "Don't create features where every story is mandatory when alternatives or enhancements exist",
+          "Don't mix optional and mandatory stories without clear distinction",
+          "Don't fail to establish the spine before adding optional/enhanced behaviors",
+          "",
+          "Wrong Examples:",
+          "- All stories marked mandatory when some are alternatives or enhancements",
+          "- User creates account (mandatory) AND User signs in with social media (mandatory) - should be OR with optional",
+          "- Missing optional markers on alternative flows or enhanced behaviors",
+          "- Optional/enhanced stories not sorted by priority",
+          "- No clear spine established before adding optional behaviors"
+        ]
+      }
+    }
+  ]
+}
+

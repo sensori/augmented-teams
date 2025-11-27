@@ -1,0 +1,15 @@
+{
+  "description": "CRITICAL: Examples tables MUST include BOTH input variables AND output/expected result variables. Examples tables must have exact test data values for all variables, especially outcome/expected result variables.",
+  "examples": [
+    {
+      "do": {
+        "description": "Examples with input and output variables",
+        "content": "Examples:\n| test_project_area | error_condition | expected_error_message |\n|-------------------|-----------------|----------------------|\n| test_data/projects/valid-project | file_not_found | \"Error: Could not load base agent configuration from test_data/agents/base-missing/agent.json: File not found\" |"
+      },
+      "dont": {
+        "description": "Missing output variables or missing data values",
+        "content": "Examples:\n| test_project_area | error_condition |\n|-------------------|-----------------|\n| test_data/projects/valid-project | file_not_found |\n(WRONG - missing expected_error_message column, missing data in rows)"
+      }
+    }
+  ]
+}

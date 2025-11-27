@@ -1,0 +1,31 @@
+{
+  "description": "Order by User Mental Model, Not Code Structure",
+  "examples": [
+    {
+      "do": {
+        "description": "Order concepts by user encounter sequence",
+        "content": [
+          "Order concepts by user encounter sequence",
+          "Put foundational objects BEFORE features that use them",
+          "Start with core domain objects",
+          "Examples: User, Vehicle, PowerItem",
+          "Follow with operations on those objects",
+          "End with supporting infrastructure",
+          "Ask from user perspective: What builds on what?"
+        ]
+      },
+      "dont": {
+        "description": "Don't order by code structure",
+        "content": [
+          "Don't order by code structure",
+          "Wrong: models, services, controllers",
+          "Don't hide core objects in Technical Implementation sections",
+          "Wrong: Start with features before introducing the objects they operate on",
+          "Don't follow code dependency graphs instead of user understanding flow",
+          "Wrong: Focus on technical structure rather than user mental model"
+        ]
+      }
+    }
+  ]
+}
+
