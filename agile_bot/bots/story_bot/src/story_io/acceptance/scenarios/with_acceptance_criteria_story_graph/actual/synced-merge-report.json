@@ -1,0 +1,218 @@
+{
+  "timestamp": "2025-11-29T00:48:17.648785",
+  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\src\\story_io\\acceptance\\scenarios\\with_acceptance_criteria_story_graph\\actual\\synced.json",
+  "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\src\\story_io\\acceptance\\scenarios\\with_acceptance_criteria_story_graph\\expected_story_graph.json",
+  "summary": {
+    "total_extracted_stories": 28,
+    "total_original_stories": 5,
+    "exact_matches": 3,
+    "fuzzy_matches": 2,
+    "new_stories": 6,
+    "removed_stories": 0
+  },
+  "exact_matches": [
+    {
+      "extracted": {
+        "name": "Customer pays with credit card",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Payment Processing",
+        "feature_name": "Credit Card Payment"
+      },
+      "original": {
+        "name": "Customer pays with credit card",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [
+          "Customer enters credit card number",
+          "Customer enters expiration date",
+          "Customer enters CVV",
+          "System validates card information",
+          "System processes payment",
+          "System sends confirmation"
+        ],
+        "epic_name": "Payment Processing",
+        "feature_name": "Credit Card Payment"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Admin ships order",
+        "users": [
+          "Admin"
+        ],
+        "sequential_order": 4,
+        "epic_name": "Order Fulfillment",
+        "feature_name": "Shipping"
+      },
+      "original": {
+        "name": "Admin ships order",
+        "users": [
+          "Admin"
+        ],
+        "Steps": [
+          "Admin views pending orders",
+          "Admin selects order to ship",
+          "Admin generates shipping label",
+          "Admin marks order as shipped",
+          "System sends tracking number to customer"
+        ],
+        "epic_name": "Order Fulfillment",
+        "feature_name": "Shipping"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Customer tracks shipment",
+        "users": [
+          "Admin"
+        ],
+        "sequential_order": 5,
+        "epic_name": "Order Fulfillment",
+        "feature_name": "Shipping"
+      },
+      "original": {
+        "name": "Customer tracks shipment",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [
+          "Customer views order details",
+          "Customer clicks track shipment",
+          "System shows current location",
+          "System shows estimated delivery"
+        ],
+        "epic_name": "Order Fulfillment",
+        "feature_name": "Shipping"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    }
+  ],
+  "fuzzy_matches": [
+    {
+      "extracted": {
+        "name": "When System validates card informationThen ...",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1.4,
+        "epic_name": "Payment Processing",
+        "feature_name": "Credit Card Payment"
+      },
+      "original": {
+        "name": "Customer saves card for later",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [
+          "Customer checks save card option",
+          "System encrypts card details",
+          "System stores card securely"
+        ],
+        "epic_name": "Payment Processing",
+        "feature_name": "Credit Card Payment"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.78
+    },
+    {
+      "extracted": {
+        "name": "When System processes paymentThen ...",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1.5,
+        "epic_name": "Payment Processing",
+        "feature_name": "Credit Card Payment"
+      },
+      "original": {
+        "name": "System verifies payment",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [
+          "System receives payment request",
+          "System checks card balance",
+          "System contacts payment gateway",
+          "System receives authorization",
+          "System creates transaction record"
+        ],
+        "epic_name": "Payment Processing",
+        "feature_name": "Payment Verification"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.8
+    }
+  ],
+  "new_stories": [
+    {
+      "name": "When System sends confirmationThen ...",
+      "users": [
+        "Customer"
+      ],
+      "sequential_order": 1.6,
+      "epic_name": "Payment Processing",
+      "feature_name": "Credit Card Payment"
+    },
+    {
+      "name": "When System encrypts card detailsThen ...",
+      "users": [
+        "Customer"
+      ],
+      "sequential_order": 2.2,
+      "epic_name": "Payment Processing",
+      "feature_name": "Credit Card Payment"
+    },
+    {
+      "name": "When System sends tracking number to customerThen ...",
+      "users": [
+        "Admin"
+      ],
+      "sequential_order": 4.5,
+      "epic_name": "Order Fulfillment",
+      "feature_name": "Shipping"
+    },
+    {
+      "name": "When Customer views order detailsThen ...",
+      "users": [
+        "Admin"
+      ],
+      "sequential_order": 5.1,
+      "epic_name": "Order Fulfillment",
+      "feature_name": "Shipping"
+    },
+    {
+      "name": "When System shows current locationThen ...",
+      "users": [
+        "Admin"
+      ],
+      "sequential_order": 5.3,
+      "epic_name": "Order Fulfillment",
+      "feature_name": "Shipping"
+    },
+    {
+      "name": "When System shows estimated deliveryThen ...",
+      "users": [
+        "Admin"
+      ],
+      "sequential_order": 5.4,
+      "epic_name": "Order Fulfillment",
+      "feature_name": "Shipping"
+    }
+  ],
+  "removed_stories": [],
+  "large_deletions": {
+    "missing_epics": [],
+    "missing_features": [],
+    "epics_with_many_missing_stories": [],
+    "features_with_many_missing_stories": []
+  }
+}

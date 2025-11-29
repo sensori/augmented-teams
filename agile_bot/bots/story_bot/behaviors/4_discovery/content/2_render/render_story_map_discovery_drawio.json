@@ -1,0 +1,13 @@
+{
+  "name": "render_story_map_discovery_drawio",
+  "description": "Render discovery story map to DrawIO diagram.",
+  "path": "docs/stories",
+  "template": "story-graph.json",
+  "renderer": "story_io",
+  "renderer_command": "render-discovery",
+  "output": "story-map-discovery.drawio"
+}
+
+
+
+

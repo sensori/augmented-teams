@@ -1,0 +1,25 @@
+{
+  "behaviorName": "shape",
+  "instructions": [
+    "**BUILD KNOWLEDGE GRAPH - STORY GRAPH CREATION:**",
+    "",
+    "Build the initial story graph structure from gathered context and planning decisions.",
+    "",
+    "**Configuration:**",
+    "- Reference: build_story_graph_outline.json",
+    "- Template: story-graph-outline.json",
+    "",
+    "**Process:**",
+    "1. Use clarification data from docs/story-io-synch/stories/clarification.json",
+    "2. Use planning decisions from docs/story-io-synch/stories/planning.json",
+    "3. Build story graph structure following the template in story-graph-outline.json",
+    "4. Create story-graph.json in project area docs/stories/",
+    "",
+    "**Output:**",
+    "- File: {project_area}/docs/stories/story-graph.json",
+    "- Format: JSON story graph with epics, features, and stories",
+    "",
+    "**Next Step:** Proceed to render step after story graph is created."
+  ]
+}
+

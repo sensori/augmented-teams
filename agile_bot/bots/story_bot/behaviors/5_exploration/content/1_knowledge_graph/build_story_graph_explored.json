@@ -1,0 +1,7 @@
+{
+  "name": "build_story_graph_explored",
+  "path": "docs/stories",
+  "template": "story-graph-explored-outline.json",
+  "output": "story-graph-explored.json"
+}
+

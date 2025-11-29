@@ -1,0 +1,263 @@
+{
+  "epics": [
+    {
+      "name": "Payment Processing",
+      "sequential_order": 1.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Credit Card Payment",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Customer pays with credit card",
+              "sequential_order": 1.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer enters credit card numberThen ...",
+              "sequential_order": 2.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer enters expiration dateThen ...",
+              "sequential_order": 3.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer enters CVVThen ...",
+              "sequential_order": 4.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System validates card informationThen ...",
+              "sequential_order": 5.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System processes paymentThen ...",
+              "sequential_order": 6.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System sends confirmationThen ...",
+              "sequential_order": 7.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Customer saves card for later",
+              "sequential_order": 8.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer checks save card optionThen ...",
+              "sequential_order": 9.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System encrypts card detailsThen ...",
+              "sequential_order": 10.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System stores card securelyThen ...",
+              "sequential_order": 11.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Payment Verification",
+          "sequential_order": 2.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "System verifies payment",
+              "sequential_order": 1.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System receives payment requestThen ...",
+              "sequential_order": 2.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System checks card balanceThen ...",
+              "sequential_order": 3.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System contacts payment gatewayThen ...",
+              "sequential_order": 4.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System receives authorizationThen ...",
+              "sequential_order": 5.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System creates transaction recordThen ...",
+              "sequential_order": 6.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Order Fulfillment",
+      "sequential_order": 2.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Shipping",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Admin ships order",
+              "sequential_order": 1.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Admin views pending ordersThen ...",
+              "sequential_order": 2.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Admin selects order to shipThen ...",
+              "sequential_order": 3.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Admin generates shipping labelThen ...",
+              "sequential_order": 4.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Admin marks order as shippedThen ...",
+              "sequential_order": 5.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System sends tracking number to customerThen ...",
+              "sequential_order": 6.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Customer tracks shipment",
+              "sequential_order": 7.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer views order detailsThen ...",
+              "sequential_order": 8.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When Customer clicks track shipmentThen ...",
+              "sequential_order": 9.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System shows current locationThen ...",
+              "sequential_order": 10.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When System shows estimated deliveryThen ...",
+              "sequential_order": 11.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

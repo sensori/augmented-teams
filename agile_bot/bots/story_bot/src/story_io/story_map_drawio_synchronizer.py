@@ -171,122 +171,78 @@ def get_epics_features_and_boundaries(drawio_path: Path) -> Dict[str, Any]:
             continue
         
         # Epics: purple boxes (fillColor=#e1d5e7)
-        # Handle both standard epic IDs and increment-specific IDs (inc#_epic#)
+        # NEVER match by ID - extract all epics by position/containment only
         if 'fillColor=#e1d5e7' in style:
-            # Check for increment-specific epic pattern (inc#_epic#)
-            inc_epic_match = re.match(r'inc(\d+)_epic(\d+)', cell_id)
-            if inc_epic_match:
-                epic_num = int(inc_epic_match.group(2))
-                epic_data = {
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': epic_num,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'width': geom['width'],
-                    'height': geom['height'],
-                    'increment_context': int(inc_epic_match.group(1))  # Track which increment
-                }
-                # Extract estimated_stories/total_stories from cell HTML value (top-right for increments)
-                estimated_stories = extract_story_count_from_value(cell)
-                if estimated_stories:
-                    epic_data['estimated_stories'] = estimated_stories
-                    epic_data['total_stories'] = estimated_stories  # Also set total_stories
-                epics.append(epic_data)
-            # Check for standard epic pattern
-            elif cell_id.startswith('epic'):
-                match = re.match(r'epic(\d+)', cell_id)
-                if match:
-                    epic_num = int(match.group(1))
-                    epic_data = {
-                        'id': cell_id,
-                        'name': value,
-                        'epic_num': epic_num,
-                        'x': geom['x'],
-                        'y': geom['y'],
-                        'width': geom['width'],
-                        'height': geom['height']
-                    }
-                    # Extract estimated_stories from cell HTML value
-                    estimated_stories = extract_story_count_from_value(cell)
-                    if estimated_stories:
-                        epic_data['estimated_stories'] = estimated_stories
-                    epics.append(epic_data)
+            epic_data = {
+                'id': cell_id,
+                'name': value,
+                'epic_num': None,  # Will assign by position/order
+                'x': geom['x'],
+                'y': geom['y'],
+                'width': geom['width'],
+                'height': geom['height']
+            }
+            # Extract estimated_stories from cell HTML value
+            estimated_stories = extract_story_count_from_value(cell)
+            if estimated_stories:
+                epic_data['estimated_stories'] = estimated_stories
+                epic_data['total_stories'] = estimated_stories  # Also set total_stories
+            epics.append(epic_data)
         
         # Features: green boxes (fillColor=#d5e8d4)
+        # NEVER match by ID - extract all features by position/containment only
         elif 'fillColor=#d5e8d4' in style:
-            # Check for increment-specific feature pattern (inc#_epic#_feat#)
-            inc_feat_match = re.match(r'inc(\d+)_epic(\d+)_feat(\d+)', cell_id)
-            if inc_feat_match:
-                epic_num = int(inc_feat_match.group(2))
-                feat_num = int(inc_feat_match.group(3))
-                feature_data = {
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': epic_num,
-                    'feat_num': feat_num,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'width': geom['width'],
-                    'height': geom['height'],
-                    'increment_context': int(inc_feat_match.group(1))  # Track which increment
-                }
-                # Extract estimated_stories/total_stories from cell HTML value (top-right for increments)
-                estimated_stories = extract_story_count_from_value(cell)
-                if estimated_stories:
-                    feature_data['estimated_stories'] = estimated_stories
-                    feature_data['story_count'] = estimated_stories  # Legacy field
-                    feature_data['total_stories'] = estimated_stories  # Also set total_stories
-                features.append(feature_data)
-            # Check for standard e#f# pattern
-            match = re.match(r'e(\d+)f(\d+)', cell_id)
-            if match:
-                epic_num = int(match.group(1))
-                feat_num = int(match.group(2))
-                feature_data = {
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': epic_num,
-                    'feat_num': feat_num,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'width': geom['width'],
-                    'height': geom['height']
-                }
-                # Extract estimated_stories (story_count) from cell HTML value
-                estimated_stories = extract_story_count_from_value(cell)
-                if estimated_stories:
-                    feature_data['estimated_stories'] = estimated_stories
-                    feature_data['story_count'] = estimated_stories  # Also set legacy field
-                features.append(feature_data)
-            else:
-                # Feature without standard ID pattern - determine epic from X position
-                features.append({
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': None,  # Will assign later
-                    'feat_num': None,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'width': geom['width'],
-                    'height': geom['height']
-                })
+            feature_data = {
+                'id': cell_id,
+                'name': value,
+                'epic_num': None,  # Will assign by position/containment
+                'feat_num': None,  # Will assign by position/order within epic
+                'x': geom['x'],
+                'y': geom['y'],
+                'width': geom['width'],
+                'height': geom['height']
+            }
+            # Extract estimated_stories (story_count) from cell HTML value
+            estimated_stories = extract_story_count_from_value(cell)
+            if estimated_stories:
+                feature_data['estimated_stories'] = estimated_stories
+                feature_data['story_count'] = estimated_stories  # Legacy field
+                feature_data['total_stories'] = estimated_stories  # Also set total_stories
+            features.append(feature_data)
     
-    # Sort epics by epic_num
-    epics.sort(key=lambda x: x['epic_num'])
+    # Assign epic_num to epics by position/order (left to right, top to bottom)
+    epics.sort(key=lambda x: (x['x'], x['y']))
+    for idx, epic in enumerate(epics, 1):
+        if epic.get('epic_num') is None:
+            epic['epic_num'] = idx
     
-    # Assign epic_num to features without standard ID pattern
+    # Assign epic_num to features by position/containment (X coordinate within epic bounds)
     for feature in features:
         if feature['epic_num'] is None:
-            # Find which epic this feature belongs to based on X position
-            for epic in epics:
-                if feature['x'] >= epic['x']:
+            # Find which epic contains this feature based on X position/containment
+            feature_x = feature['x']
+            for epic in sorted(epics, key=lambda e: e['x']):
+                epic_x = epic['x']
+                epic_width = epic.get('width', 0)
+                epic_right = epic_x + epic_width if epic_width > 0 else float('inf')
+                # Feature belongs to epic if it's within epic's horizontal bounds
+                if epic_x <= feature_x <= epic_right:
                     feature['epic_num'] = epic['epic_num']
-                else:
                     break
-            # If still None, assign to last epic
+            # If still None, assign to closest epic by X position
             if feature['epic_num'] is None and epics:
-                feature['epic_num'] = epics[-1]['epic_num']
+                closest_epic = min(epics, key=lambda e: abs(e['x'] - feature['x']))
+                feature['epic_num'] = closest_epic['epic_num']
+    
+    # Assign feat_num to features by position/order within each epic (left to right)
+    for epic in epics:
+        epic_features = [f for f in features if f['epic_num'] == epic['epic_num']]
+        # Sort by X position to get order
+        epic_features.sort(key=lambda f: f['x'])
+        # Assign feat_num based on order (starting from 1)
+        for idx, feature in enumerate(epic_features, 1):
+            if feature.get('feat_num') is None:
+                feature['feat_num'] = idx
     
     # Sort features by epic_num, then feat_num, then x
     features.sort(key=lambda x: (x['epic_num'] if x['epic_num'] is not None else 999, 
@@ -333,38 +289,39 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
         if geom is None:
             continue
         
-        # Stories: detect by fillColor (yellow #fff2cc, dark blue #1a237e, black #000000)
-        is_story = ('fillColor=#fff2cc' in style or 'fillColor=#1a237e' in style or 'fillColor=#000000' in style or 'fillColor=#000' in style)
-        if is_story and re.match(r'e\d+f\d+s\d+', cell_id):
-            match = re.match(r'e(\d+)f(\d+)s(\d+)', cell_id)
-            if match:
-                epic_num = int(match.group(1))
-                feat_num = int(match.group(2))
-                story_num = int(match.group(3))
-                story_type = extract_story_type_from_style(style)
-                all_stories.append({
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': epic_num,
-                    'feat_num': feat_num,
-                    'story_num': story_num,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'width': geom['width'],
-                    'height': geom['height'],
-                    'story_type': story_type
-                })
+        # Acceptance criteria: wider boxes (width > 100, height > 50, rounded=0, yellow fill)
+        # These appear below stories in exploration mode
+        # Check for AC boxes first to exclude them from story detection
+        is_ac_box = (cell_id.startswith('ac_') or 
+                    ('fillColor=#fff2cc' in style and 'rounded=0' in style and 
+                     geom['width'] > 100 and geom['height'] > 50))
         
-        # Also capture stories without standard ID pattern
-        elif is_story and not re.match(r'e\d+f\d+s\d+', cell_id):
-            # Story without standard pattern - determine epic/feature from position
+        if is_ac_box:
+            # This is an acceptance criteria box
+            # Extract step text from value (handles "When ... Then ..." format)
+            ac_text = value
+            acceptance_criteria_cells.append({
+                'id': cell_id,
+                'text': ac_text,
+                'x': geom['x'],
+                'y': geom['y'],
+                'width': geom['width'],
+                'height': geom['height']
+            })
+            continue  # Skip story detection for AC boxes
+        
+        # Stories: detect by fillColor (yellow #fff2cc, dark blue #1a237e, black #000000)
+        # NEVER match by ID - extract all stories by position/containment only
+        # Exclude AC boxes (already handled above)
+        is_story = ('fillColor=#fff2cc' in style or 'fillColor=#1a237e' in style or 'fillColor=#000000' in style or 'fillColor=#000' in style)
+        if is_story:
+            # Extract all stories - will assign to features by name matching and position/containment
             story_type = extract_story_type_from_style(style)
             all_stories.append({
                 'id': cell_id,
                 'name': value,
-                'epic_num': None,  # Will assign later
-                'feat_num': None,
-                'story_num': None,
+                'epic_num': None,  # Will assign by position/containment
+                'feat_num': None,  # Will assign by name matching and position/containment
                 'x': geom['x'],
                 'y': geom['y'],
                 'width': geom['width'],
@@ -372,8 +329,7 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
                 'story_type': story_type
             })
         
-        # Acceptance criteria: wider boxes (width > 100, height > 50, rounded=0, yellow fill)
-        # These appear below stories in exploration mode
+        # Legacy AC detection (should not be reached if AC boxes are detected above)
         elif ('fillColor=#fff2cc' in style and 'rounded=0' in style and 
               geom['width'] > 100 and geom['height'] > 50):
             # This is likely an acceptance criteria box
@@ -399,25 +355,72 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
                     'y': geom['y']
                 })
     
-    # Assign epic/feature to stories without standard ID pattern
+    # Assign epic/feature to stories by position/containment and name matching (NEVER by ID)
     for story in all_stories:
+        story_x = story['x']
+        story_y = story['y']
+        story_name = story['name'].lower()
+        
+        # Assign epic by position/containment (X coordinate within epic bounds)
         if story['epic_num'] is None:
-            # Find which epic this story belongs to based on X position
-            for epic in epics:
-                if story['x'] >= epic['x']:
+            for epic in sorted(epics, key=lambda e: e['x']):
+                epic_x = epic['x']
+                epic_width = epic.get('width', 0)
+                epic_right = epic_x + epic_width if epic_width > 0 else float('inf')
+                # Story belongs to epic if it's within epic's horizontal bounds
+                if epic_x <= story_x <= epic_right:
                     story['epic_num'] = epic['epic_num']
-                else:
                     break
+            # If still None, assign to closest epic by X position
             if story['epic_num'] is None and epics:
-                story['epic_num'] = epics[-1]['epic_num']
-            
-            # Find which feature this story belongs to based on X position
+                closest_epic = min(epics, key=lambda e: abs(e['x'] - story_x))
+                story['epic_num'] = closest_epic['epic_num']
+        
+        # Assign feature by name matching (fuzzy) AND position/containment
+        if story['epic_num'] is not None:
             epic_features = [f for f in features if f['epic_num'] == story['epic_num']]
-            for feature in epic_features:
-                if story['x'] >= feature['x']:
-                    story['feat_num'] = feature.get('feat_num', 0)
-                else:
-                    break
+            if epic_features:
+                # First, try to match by name (fuzzy matching)
+                best_match = None
+                best_similarity = 0.0
+                
+                for feature in epic_features:
+                    feature_name = feature['name'].lower()
+                    # Check if story name contains feature name or vice versa (exact match)
+                    if feature_name in story_name or story_name in feature_name:
+                        similarity = 1.0
+                    else:
+                        # Fuzzy match using SequenceMatcher
+                        similarity = difflib.SequenceMatcher(None, story_name, feature_name).ratio()
+                    
+                    if similarity > best_similarity:
+                        best_similarity = similarity
+                        best_match = feature
+                
+                # If fuzzy match found (similarity > 0.3), verify by position/containment
+                if best_match and best_similarity > 0.3:
+                    feature_x = best_match['x']
+                    feature_width = best_match.get('width', 200)
+                    feature_right = feature_x + feature_width
+                    # Verify story is within feature's horizontal bounds
+                    if feature_x <= story_x <= feature_right:
+                        story['feat_num'] = best_match.get('feat_num', 0)
+                
+                # If no fuzzy match or position doesn't match, assign by position/containment only
+                if story['feat_num'] is None:
+                    for feature in sorted(epic_features, key=lambda f: f['x']):
+                        feature_x = feature['x']
+                        feature_width = feature.get('width', 200)
+                        feature_right = feature_x + feature_width
+                        # Story belongs to feature if it's within feature's horizontal bounds
+                        if feature_x <= story_x <= feature_right:
+                            story['feat_num'] = feature.get('feat_num', 0)
+                            break
+                    
+                    # If still None, assign to closest feature by X position
+                    if story['feat_num'] is None:
+                        closest_feature = min(epic_features, key=lambda f: abs(f['x'] - story_x))
+                        story['feat_num'] = closest_feature.get('feat_num', 0)
     
     # Match users to stories based on X position alignment
     stories_with_users = {}
@@ -481,6 +484,9 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
     # Build epic/feature/story hierarchy
     result = {'epics': []}
     
+    # Track which stories have been assigned to prevent duplicates
+    assigned_story_ids = set()
+    
     for epic in sorted_epics:
         epic_data = {
             'name': epic['name'],
@@ -521,9 +527,9 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
                 feature_data['story_count'] = feature['story_count']
                 feature_data['estimated_stories'] = feature['story_count']  # New field
             
-            # Get feature-level users
+            # Get stories for this feature based on feat_num (assigned by position earlier)
             feat_stories = [s for s in epic_stories 
-                          if s['epic_num'] == epic['epic_num'] and s['feat_num'] == feature.get('feat_num')]
+                          if s['epic_num'] == epic['epic_num'] and s.get('feat_num') == feature.get('feat_num')]
             if feat_stories:
                 first_story = min(feat_stories, key=lambda s: (s['x'], s['y']))
                 if first_story['id'] in stories_with_users:
@@ -536,6 +542,10 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
             ))
             
             for story in feat_stories:
+                # Skip if this story has already been assigned to another feature (prevent duplicates)
+                if story['id'] in assigned_story_ids:
+                    continue
+                
                 story_data = {
                     'name': story['name'],
                     'users': stories_with_users.get(story['id'], [])
@@ -571,6 +581,7 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
                     story_data['Steps'] = story_steps
                 
                 feature_data['stories'].append(story_data)
+                assigned_story_ids.add(story['id'])  # Mark this story as assigned
             
             epic_data['features'].append(feature_data)
         
@@ -768,36 +779,28 @@ def build_stories_for_increments(drawio_path: Path, increments: List[Dict],
         if geom is None:
             continue
         
+        # Skip acceptance criteria boxes (they have IDs starting with 'ac_' or are wide yellow boxes)
+        is_ac_box = (cell_id.startswith('ac_') or 
+                    ('fillColor=#fff2cc' in style and 'rounded=0' in style and 
+                     geom['width'] > 100 and geom['height'] > 50))
+        if is_ac_box:
+            continue  # Skip AC boxes in increments mode too
+        
         # Stories: detect by fillColor (yellow #fff2cc, dark blue #1a237e, black #000000)
+        # NEVER match by ID - extract all stories by position/containment only
+        # Exclude AC boxes (already handled above)
         is_story = ('fillColor=#fff2cc' in style or 'fillColor=#1a237e' in style or 'fillColor=#000000' in style or 'fillColor=#000' in style)
         if is_story:
-            if re.match(r'e\d+f\d+s\d+', cell_id):
-                match = re.match(r'e(\d+)f(\d+)s(\d+)', cell_id)
-                if match:
-                    story_type = extract_story_type_from_style(style)
-                    all_stories.append({
-                        'id': cell_id,
-                        'name': value,
-                        'epic_num': int(match.group(1)),
-                        'feat_num': int(match.group(2)),
-                        'story_num': int(match.group(3)),
-                        'x': geom['x'],
-                        'y': geom['y'],
-                        'story_type': story_type
-                    })
-            else:
-                # Story without standard pattern
-                story_type = extract_story_type_from_style(style)
-                all_stories.append({
-                    'id': cell_id,
-                    'name': value,
-                    'epic_num': None,
-                    'feat_num': None,
-                    'story_num': None,
-                    'x': geom['x'],
-                    'y': geom['y'],
-                    'story_type': story_type
-                })
+            story_type = extract_story_type_from_style(style)
+            all_stories.append({
+                'id': cell_id,
+                'name': value,
+                'epic_num': None,  # Will assign by position/containment
+                'feat_num': None,  # Will assign by name matching and position/containment
+                'x': geom['x'],
+                'y': geom['y'],
+                'story_type': story_type
+            })
         
         # Users: blue boxes
         elif 'fillColor=#dae8fc' in style:
@@ -810,23 +813,72 @@ def build_stories_for_increments(drawio_path: Path, increments: List[Dict],
                     'y': geom['y']
                 })
     
-    # Assign epic/feature to stories without standard ID pattern
+    # Assign epic/feature to stories by position/containment and name matching (NEVER by ID)
     for story in all_stories:
+        story_x = story['x']
+        story_y = story['y']
+        story_name = story['name'].lower()
+        
+        # Assign epic by position/containment (X coordinate within epic bounds)
         if story['epic_num'] is None:
-            for epic in epics:
-                if story['x'] >= epic['x']:
+            for epic in sorted(epics, key=lambda e: e['x']):
+                epic_x = epic['x']
+                epic_width = epic.get('width', 0)
+                epic_right = epic_x + epic_width if epic_width > 0 else float('inf')
+                # Story belongs to epic if it's within epic's horizontal bounds
+                if epic_x <= story_x <= epic_right:
                     story['epic_num'] = epic['epic_num']
-                else:
                     break
+            # If still None, assign to closest epic by X position
             if story['epic_num'] is None and epics:
-                story['epic_num'] = epics[-1]['epic_num']
-            
+                closest_epic = min(epics, key=lambda e: abs(e['x'] - story_x))
+                story['epic_num'] = closest_epic['epic_num']
+        
+        # Assign feature by name matching (fuzzy) AND position/containment
+        if story['epic_num'] is not None:
             epic_features = [f for f in features if f['epic_num'] == story['epic_num']]
-            for feature in epic_features:
-                if story['x'] >= feature['x']:
-                    story['feat_num'] = feature.get('feat_num', 0)
-                else:
-                    break
+            if epic_features:
+                # First, try to match by name (fuzzy matching)
+                best_match = None
+                best_similarity = 0.0
+                
+                for feature in epic_features:
+                    feature_name = feature['name'].lower()
+                    # Check if story name contains feature name or vice versa (exact match)
+                    if feature_name in story_name or story_name in feature_name:
+                        similarity = 1.0
+                    else:
+                        # Fuzzy match using SequenceMatcher
+                        similarity = difflib.SequenceMatcher(None, story_name, feature_name).ratio()
+                    
+                    if similarity > best_similarity:
+                        best_similarity = similarity
+                        best_match = feature
+                
+                # If fuzzy match found (similarity > 0.3), verify by position/containment
+                if best_match and best_similarity > 0.3:
+                    feature_x = best_match['x']
+                    feature_width = best_match.get('width', 200)
+                    feature_right = feature_x + feature_width
+                    # Verify story is within feature's horizontal bounds
+                    if feature_x <= story_x <= feature_right:
+                        story['feat_num'] = best_match.get('feat_num', 0)
+                
+                # If no fuzzy match or position doesn't match, assign by position/containment only
+                if story['feat_num'] is None:
+                    for feature in sorted(epic_features, key=lambda f: f['x']):
+                        feature_x = feature['x']
+                        feature_width = feature.get('width', 200)
+                        feature_right = feature_x + feature_width
+                        # Story belongs to feature if it's within feature's horizontal bounds
+                        if feature_x <= story_x <= feature_right:
+                            story['feat_num'] = feature.get('feat_num', 0)
+                            break
+                    
+                    # If still None, assign to closest feature by X position
+                    if story['feat_num'] is None:
+                        closest_feature = min(epic_features, key=lambda f: abs(f['x'] - story_x))
+                        story['feat_num'] = closest_feature.get('feat_num', 0)
     
     # Match users to stories
     stories_with_users = {}
@@ -1500,16 +1552,39 @@ def synchronize_story_graph_from_drawio_outline(
     
     # Write extracted JSON
     if output_path:
-        output_path = Path(output_path)
+        output_path = Path(output_path).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
         
         # Write separate layout JSON file
-        layout_path = output_path.parent / f"{output_path.stem}-layout.json"
-        with open(layout_path, 'w', encoding='utf-8') as f:
-            json.dump(layout_data, f, indent=2, ensure_ascii=False)
-        print(f"Layout data saved to: {layout_path}")
+        layout_path = output_path.parent.resolve() / f"{output_path.stem}-layout.json"
+        # Ensure parent directory exists and is accessible
+        try:
+            layout_path.parent.mkdir(parents=True, exist_ok=True)
+            # Use a temporary file in a shorter path if the target path is too long
+            if len(str(layout_path)) > 260:  # Windows MAX_PATH limit
+                import tempfile
+                temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8')
+                json.dump(layout_data, temp_file, indent=2, ensure_ascii=False)
+                temp_file.close()
+                import shutil
+                shutil.move(temp_file.name, str(layout_path))
+            else:
+                with open(str(layout_path), 'w', encoding='utf-8') as f:
+                    json.dump(layout_data, f, indent=2, ensure_ascii=False)
+            print(f"Layout data saved to: {layout_path}")
+        except Exception as e:
+            print(f"Warning: Could not save layout file to {layout_path}: {e}")
+            # Try saving to a shorter path as fallback
+            try:
+                import tempfile
+                fallback_path = Path(tempfile.gettempdir()) / f"{output_path.stem}-layout.json"
+                with open(str(fallback_path), 'w', encoding='utf-8') as f:
+                    json.dump(layout_data, f, indent=2, ensure_ascii=False)
+                print(f"Layout data saved to fallback location: {fallback_path}")
+            except Exception as e2:
+                print(f"Error: Could not save layout file even to fallback location: {e2}")
         
         # Generate merge report and detect large deletions if original path provided
         if original_path and original_path.exists():

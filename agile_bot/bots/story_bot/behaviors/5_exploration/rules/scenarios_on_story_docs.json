@@ -4,11 +4,11 @@
     {
       "do": {
         "description": "Add scenarios to story documents",
-        "content": "docs/stories/map/Epic/Feature/📝 Story Name.md - Scenarios section added"
+        "content": "docs/stories/Epic/Feature/📝 Story Name.md - Scenarios section added"
       },
       "dont": {
         "description": "Don't create feature specification documents",
-        "content": "docs/stories/map/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story docs)"
+        "content": "docs/stories/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story docs)"
       }
     }
   ]

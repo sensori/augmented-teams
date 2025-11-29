@@ -10,17 +10,17 @@ All render and synchronize configurations now use the **story_io** CLI.
    - Command: `render-increments`
    - Input: `story_graph_increments.json`
    - Output: `story-map-increments.drawio`
-   - Path: `docs/stories/map`
+   - Path: `docs/stories`
 
 ### Markdown Rendering (templates only)
 
 2. **render_increments.json**
    - Template: `story-map-increments-template.md`
-   - Path: `docs/stories/increments`
+   - Path: `docs/stories`
 
 3. **render_increments_backlog.json**
    - Template: `story-map-increments-backlog-template.md`
-   - Path: `docs/stories/increments`
+   - Path: `docs/stories`
 
 ## Synchronize Configurations
 

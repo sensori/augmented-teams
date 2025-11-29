@@ -1,0 +1,46 @@
+{
+  "EPIC|Multi-User System": {
+    "x": 10.0,
+    "y": 130.0,
+    "width": 340.0,
+    "height": 60.0
+  },
+  "FEATURE|Multi-User System|User Actions": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "Multi-User System|User Actions|Admin manages users": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "Multi-User System|User Actions|Human views content": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "Multi-User System|User Actions|Guest browses site": {
+    "x": 152.0,
+    "y": 350.0
+  },
+  "Multi-User System|User Actions|Admin and Human collaborate": {
+    "x": 212.0,
+    "y": 350.0
+  },
+  "Multi-User System|User Actions|Admin manages users|Admin": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "Multi-User System|User Actions|Human views content|Human": {
+    "x": 92.0,
+    "y": 290.0
+  },
+  "Multi-User System|User Actions|Guest browses site|Guest": {
+    "x": 152.0,
+    "y": 290.0
+  },
+  "Multi-User System|User Actions|Admin and Human collaborate|Admin": {
+    "x": 212.0,
+    "y": 290.0
+  }
+}

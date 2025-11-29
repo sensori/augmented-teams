@@ -1,0 +1,95 @@
+{
+  "epics": [
+    {
+      "name": "",
+      "users": [],
+      "sub_epics": [
+        {
+          "name": "",
+          "users": [],
+          "features": [
+            {
+              "name": "",
+              "users": [],
+              "stories": [
+                {
+                  "name": "",
+                  "users": [],
+                  "scenarios": [
+                    {
+                      "name": "",
+                      "type": "happy_path|edge_case|error_case",
+                      "background": [
+                        "Given <common_setup_step>",
+                        "And <another_common_setup>"
+                      ],
+                      "steps": [
+                        "Given <scenario_specific_state>",
+                        "And <scenario_specific_setup>",
+                        "When <user_action_or_system_event>",
+                        "Then <expected_outcome>",
+                        "And <another_expected_outcome>"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "features": [
+        {
+          "name": "",
+          "users": [],
+          "stories": [
+            {
+              "name": "",
+              "users": [],
+              "scenarios": [
+                {
+                  "name": "",
+                  "type": "happy_path|edge_case|error_case",
+                  "background": [
+                    "Given <common_setup_step>",
+                    "And <another_common_setup>"
+                  ],
+                  "steps": [
+                    "Given <scenario_specific_state>",
+                    "And <scenario_specific_setup>",
+                    "When <user_action_or_system_event>",
+                    "Then <expected_outcome>",
+                    "And <another_expected_outcome>"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "generated_artifacts": {
+    "story_documents": {
+      "description": "Story documents with scenarios section added",
+      "location": "docs/stories/{epic_name}/{feature_name}/{story_name}.md",
+      "content": [
+        "Story description",
+        "Acceptance criteria",
+        "Background (common setup steps)",
+        "Scenarios (happy path, edge cases, error cases)"
+      ]
+    },
+    "structured_data": {
+      "description": "JSON representation of scenarios structure",
+      "location": "docs/stories/{epic_name}/{feature_name}/structured.json",
+      "content": [
+        "Epic/feature/story hierarchy",
+        "Scenario definitions with steps",
+        "Background steps per story",
+        "Scenario types (happy_path, edge_case, error_case)"
+      ]
+    }
+  }
+}
+

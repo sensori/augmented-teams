@@ -1,6 +1,0 @@
-{
-  "name": "build_story_io_architecture",
-  "path": "docs/stories/map",
-  "template": "story-graph-outline.json",
-  "output": "story-io-architecture-story-graph.json"
-}

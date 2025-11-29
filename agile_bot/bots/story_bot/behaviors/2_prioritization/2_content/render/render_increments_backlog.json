@@ -1,6 +1,6 @@
 {
   "name": "render_increments_backlog",
-  "path": "docs/stories/increments",
+  "path": "docs/stories",
   "template": "story-map-increments-backlog-template.md"
 }
 

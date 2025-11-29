@@ -1,0 +1,29 @@
+{
+  "behaviorName": "shape",
+  "instructions": [
+    "**RENDER STORY MAP - DRAWIO AND MARKDOWN GENERATION:**",
+    "",
+    "Render the story graph to visual DrawIO diagram and markdown document.",
+    "",
+    "**Configuration Files:**",
+    "- Markdown render: render_story_map.json",
+    "- DrawIO render: render_story_map_outline_drawio.json",
+    "- Templates: templates/story-map-outline.drawio, templates/story-map-simple.md",
+    "",
+    "**Process:**",
+    "1. Read story-graph.json from docs/stories/map/",
+    "2. Render to DrawIO diagram using story_io render-outline command",
+    "3. Render to markdown document using template",
+    "4. Generate both outputs in project area docs/stories/map/",
+    "",
+    "**Outputs:**",
+    "- File: {project_area}/docs/stories/map/story-map-outline.drawio",
+    "- File: {project_area}/docs/stories/map/story-map.md",
+    "",
+    "**Next Step:** Proceed to synchronize step after rendering is complete."
+  ]
+}
+
+
+
+

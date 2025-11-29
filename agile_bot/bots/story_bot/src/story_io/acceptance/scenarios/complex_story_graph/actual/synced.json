@@ -1,0 +1,203 @@
+{
+  "epics": [
+    {
+      "name": "User Management",
+      "sequential_order": 1.0,
+      "users": [],
+      "features": [
+        {
+          "name": "User Registration",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "User creates account",
+              "sequential_order": 1.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When ...Then ...",
+              "sequential_order": 2.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When ...Then ...",
+              "sequential_order": 3.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "When ...Then ...",
+              "sequential_order": 4.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "User verifies email",
+              "sequential_order": 5.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "User Authentication",
+          "sequential_order": 2.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "User logs in",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "User logs out",
+              "sequential_order": 2.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "User resets password",
+              "sequential_order": 3.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "User Profile",
+          "sequential_order": 3.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "User views profile",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "User edits profile",
+              "sequential_order": 2.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Content Management",
+      "sequential_order": 2.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Create Content",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Admin creates article",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Admin creates video",
+              "sequential_order": 2.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        },
+        {
+          "name": "Manage Content",
+          "sequential_order": 2.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Admin edits content",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Admin deletes content",
+              "sequential_order": 2.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Admin publishes content",
+              "sequential_order": 3.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Search and Discovery",
+      "sequential_order": 3.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Search Functionality",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "User searches by keyword",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "User filters results",
+              "sequential_order": 2.0,
+              "users": [
+                "Human"
+              ],
+              "Steps": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

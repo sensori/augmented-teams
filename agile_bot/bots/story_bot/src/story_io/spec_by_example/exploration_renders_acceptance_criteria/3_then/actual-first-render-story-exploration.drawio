@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+<mxfile host="65bd71144e">
+    <diagram id="story-map" name="Story Map">
+        <mxGraphModel dx="2656" dy="1035" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="0" y="0" width="880.0" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic1" value="&lt;div style=&quot;display: flex; align-items: center; justify-content: center; width: 100%;&quot;&gt;Render Diagram&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="20" y="130" width="562" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1" value="&lt;div style=&quot;display: flex; align-items: center; justify-content: center; width: 100%;&quot;&gt;Render Story IO Diagram&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="200" width="562" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_e1f1s1_Story IO MCP Server" value="Story IO MCP Server" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="290" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1" value="Handle Render Outline" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=#333333;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="350" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; MCP tool receives render_outline request with story_graph_path, drawio_path, output_path, and layout_json parameters&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool validates that story_graph_path is provided&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="410" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; story_graph_path is None&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool raises ValueError('story_graph_path is required')&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="480" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; story_graph_path is provided&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool calls StoryIODiagram.load_from_story_graph(Path(story_graph_path), Path(drawio_path) if drawio_path else None)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="550" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; layout_json parameter is provided&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool parses layout_json string using json.loads() to create layout_data dict&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="620" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_4" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; layout_json is None&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool sets layout_data to None&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="690" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_5" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; diagram.render_outline(output_path=Path(output_path), layout_data=layout_data) is called&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; renderer generates DrawIO XML and saves to output_path&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="760" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_6" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; render completes successfully&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool returns JSON string with success=True, output_path, and summary containing epics count&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="830" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s1_7" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; render raises exception&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool catches exception and returns JSON string with success=False and error message&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="900" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_e1f1s2_Story IO CLI" value="Story IO CLI" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="301" y="290" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2" value="Invoke Render Outline from CLI" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=#333333;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="350" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; argparse parses 'render-outline' command with --story-graph and --output arguments&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; argparse creates args object with story_graph Path and output Path attributes&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="410" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; render_outline_command function receives args object&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; function calls StoryIODiagram.load_from_story_graph(args.story_graph, args.drawio_file)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="480" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; layout file is not provided in args&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; function auto-detects layout by checking output_path.stem-layout.json, story-graph-drawio-extracted-layout.json, and output_path.stem-drawio-extracted-layout.json patterns&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="550" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; layout file exists&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; function loads layout_data from JSON file&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="620" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_4" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; diagram.render_outline(output_path, layout_data) is called&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; renderer generates DrawIO XML and saves to output_path&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="690" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_5" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; render completes&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; function prints 'Generated DrawIO diagram: {output_path}' and 'Epics: {count}' to stdout&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="760" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e1f1s2_6" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; render succeeds&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; function returns exit code 0&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="302" y="830" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic2" value="&lt;div style=&quot;display: flex; align-items: center; justify-content: center; width: 100%;&quot;&gt;Synchronize Graph&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="epic-group" vertex="1">
+                    <mxGeometry x="612" y="130" width="268" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1" value="&lt;div style=&quot;display: flex; align-items: center; justify-content: center; width: 100%;&quot;&gt;Synchronize Story Graph&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="612" y="200" width="268" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="user_e2f1s1_Story IO MCP Server" value="Story IO MCP Server" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="290" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s1" value="Handle Synchronize Outline" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=#333333;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="350" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; MCP tool receives synchronize_outline request with drawio_path, original_path, and output_path parameters&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool creates StoryIODiagram instance with drawio_file=Path(drawio_path)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="410" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; original_path parameter is provided&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool sets original to Path(original_path)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="480" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; original_path is None&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool sets original to None&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="550" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; diagram.synchronize_outline(drawio_path=Path(drawio_path), original_path=original) is called&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; synchronizer extracts story graph from DrawIO XML and compares with original if provided&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="620" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_4" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; output_path parameter is provided&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool calls diagram.save_story_graph(Path(output_path)) to save synchronized graph&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="690" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_5" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; synchronize completes successfully&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool returns JSON string with success=True, epics_count from result, and output_path&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="760" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ac_e2f1s1_6" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;When&lt;/b&gt; synchronize raises exception&lt;br&gt;&lt;b&gt;Then&lt;/b&gt; tool catches exception and returns JSON string with success=False and error message&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="624" y="830" width="250" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,67 @@
+{
+  "epics": [
+    {
+      "name": "E-commerce Platform",
+      "sequential_order": 1,
+      "users": ["Customer", "Admin"],
+      "estimated_stories": 25,
+      "features": [
+        {
+          "name": "Product Catalog",
+          "sequential_order": 1,
+          "estimated_stories": 8,
+          "stories": [
+            {
+              "name": "Customer browses products",
+              "sequential_order": 1,
+              "users": ["Customer"]
+            },
+            {
+              "name": "Customer views product details",
+              "sequential_order": 2,
+              "users": ["Customer"]
+            }
+          ]
+        },
+        {
+          "name": "Shopping Cart",
+          "sequential_order": 2,
+          "estimated_stories": 5,
+          "stories": [
+            {
+              "name": "Customer adds item to cart",
+              "sequential_order": 1,
+              "users": ["Customer"]
+            }
+          ]
+        },
+        {
+          "name": "Checkout Process",
+          "sequential_order": 3,
+          "estimated_stories": 12
+        }
+      ]
+    },
+    {
+      "name": "Order Management",
+      "sequential_order": 2,
+      "users": ["Admin", "Customer"],
+      "estimated_stories": 15,
+      "features": [
+        {
+          "name": "Order Tracking",
+          "sequential_order": 1,
+          "estimated_stories": 6,
+          "stories": [
+            {
+              "name": "Customer views order status",
+              "sequential_order": 1,
+              "users": ["Customer"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

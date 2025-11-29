@@ -3,7 +3,7 @@
 **Navigation:** [📋 Story Map](../map/{product_name_slug}-story-map.md)
 
 **File Name**: `{product_name_slug}-story-map-increments.md`
-**Location**: `{solution_folder}/docs/stories/increments/{product_name_slug}-story-map-increments.md`
+**Location**: `{solution_folder}/docs/stories/{product_name_slug}-story-map-increments.md`
 
 > **CRITICAL MARKDOWN FORMATTING**: All tree structure lines MUST end with TWO SPACES (  ) for proper line breaks. Without two spaces, markdown will wrap lines together into one long line, breaking the visual tree structure.
 

@@ -1,0 +1,7 @@
+{
+  "name": "render_story_map_increments_backlog",
+  "path": "docs/stories",
+  "template": "story-map-increments-backlog.md",
+  "output": "{product_name_slug}-story-map-increments-backlog.md"
+}
+

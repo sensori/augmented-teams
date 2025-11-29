@@ -1,6 +1,6 @@
 {
   "name": "render_story_map",
-  "path": "docs/stories/map",
+  "path": "docs/stories",
   "template": "story-map-outline.md",
   "output": "story-map.md"
 }

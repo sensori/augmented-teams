@@ -1,0 +1,42 @@
+{
+  "EPIC|User Management1 stories": {
+    "x": 1262.0,
+    "y": 440.0,
+    "width": 668.0,
+    "height": 60.0
+  },
+  "EPIC|User Management2 stories": {
+    "x": 1262.0,
+    "y": 840.0,
+    "width": 668.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management1 stories|User Registration1 stories": {
+    "x": 1272.0,
+    "y": 890.0,
+    "width": 300.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management1 stories|User Authentication1 stories": {
+    "x": 1582.0,
+    "y": 890.0,
+    "width": 300.0,
+    "height": 60.0
+  },
+  "User Management1 stories|User Registration1 stories|User creates account": {
+    "x": 1282.0,
+    "y": 960.0
+  },
+  "User Management1 stories|User Authentication1 stories|User logs in": {
+    "x": 1592.0,
+    "y": 960.0
+  },
+  "User Management1 stories|User Registration1 stories|User creates account|Human": {
+    "x": 1282.0,
+    "y": 900.0
+  },
+  "User Management1 stories|User Authentication1 stories|User logs in|Human": {
+    "x": 1592.0,
+    "y": 900.0
+  }
+}

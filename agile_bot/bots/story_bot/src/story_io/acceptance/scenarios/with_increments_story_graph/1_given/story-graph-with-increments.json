@@ -1,0 +1,84 @@
+{
+  "epics": [
+    {
+      "name": "User Management",
+      "sequential_order": 1,
+      "users": ["Human"],
+      "features": [
+        {
+          "name": "User Registration",
+          "sequential_order": 1,
+          "stories": [
+            {
+              "name": "User creates account",
+              "sequential_order": 1,
+              "users": ["Human"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "MVP Release",
+      "priority": 1,
+      "epics": [
+        {
+          "name": "User Management",
+          "sequential_order": 1,
+          "users": ["Human"],
+          "features": [
+            {
+              "name": "User Registration",
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "User creates account",
+                  "sequential_order": 1,
+                  "users": ["Human"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Feature Release",
+      "priority": 2,
+      "epics": [
+        {
+          "name": "User Management",
+          "sequential_order": 1,
+          "users": ["Human"],
+          "features": [
+            {
+              "name": "User Registration",
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "User creates account",
+                  "sequential_order": 1,
+                  "users": ["Human"]
+                }
+              ]
+            },
+            {
+              "name": "User Authentication",
+              "sequential_order": 2,
+              "stories": [
+                {
+                  "name": "User logs in",
+                  "sequential_order": 1,
+                  "users": ["Human"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

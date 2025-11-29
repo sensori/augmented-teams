@@ -1,0 +1,62 @@
+{
+  "epics": [
+    {
+      "name": "Create Character",
+      "sequential_order": 1,
+      "users": ["Human"],
+      "features": [
+        {
+          "name": "Establish Identity",
+          "sequential_order": 1,
+          "stories": [
+            {
+              "name": "User enters name",
+              "sequential_order": 1,
+              "users": ["Human"]
+            },
+            {
+              "name": "User selects appearance",
+              "sequential_order": 2,
+              "users": ["Human"]
+            }
+          ]
+        },
+        {
+          "name": "Set Attributes",
+          "sequential_order": 2,
+          "stories": [
+            {
+              "name": "User assigns stats",
+              "sequential_order": 1,
+              "users": ["Human"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Combat System",
+      "sequential_order": 2,
+      "users": ["Human"],
+      "features": [
+        {
+          "name": "Basic Combat",
+          "sequential_order": 1,
+          "stories": [
+            {
+              "name": "User attacks enemy",
+              "sequential_order": 1,
+              "users": ["Human"]
+            },
+            {
+              "name": "Enemy attacks user",
+              "sequential_order": 2,
+              "users": ["Human"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,152 @@
+{
+  "EPIC|User Management": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 312.0,
+    "height": 60.0
+  },
+  "EPIC|Content Management": {
+    "x": 332.0,
+    "y": 130.0,
+    "width": 648.0,
+    "height": 60.0
+  },
+  "EPIC|Search and Discovery": {
+    "x": 980.0,
+    "y": 130.0,
+    "width": 378.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Registration": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 362.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Authentication": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 632.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Profile": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 362.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Management|Create Content": {
+    "x": 342.0,
+    "y": 200.0,
+    "width": 338.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Management|Manage Content": {
+    "x": 342.0,
+    "y": 200.0,
+    "width": 608.0,
+    "height": 60.0
+  },
+  "FEATURE|Search and Discovery|Search Functionality": {
+    "x": 990.0,
+    "y": 200.0,
+    "width": 338.0,
+    "height": 60.0
+  },
+  "User Management|User Registration|User creates account": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "User Management|User Profile|User logs in": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "User Management|User Profile|User views profile": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "User Management|User Profile|User verifies email": {
+    "x": 302.0,
+    "y": 350.0
+  },
+  "User Management|User Profile|User logs out": {
+    "x": 302.0,
+    "y": 350.0
+  },
+  "User Management|User Profile|User edits profile": {
+    "x": 302.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|Admin creates article": {
+    "x": 354.0,
+    "y": 350.0
+  },
+  "Content Management|Manage Content|Admin edits content": {
+    "x": 354.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User resets password": {
+    "x": 572.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|Admin creates video": {
+    "x": 624.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|Admin deletes content": {
+    "x": 624.0,
+    "y": 350.0
+  },
+  "Content Management|Manage Content|Admin publishes content": {
+    "x": 894.0,
+    "y": 350.0
+  },
+  "Search and Discovery|Search Functionality|User searches by keyword": {
+    "x": 1002.0,
+    "y": 350.0
+  },
+  "Search and Discovery|Search Functionality|User filters results": {
+    "x": 1272.0,
+    "y": 350.0
+  },
+  "User Management|User Registration|User creates account|Admin": {
+    "x": 31.0,
+    "y": 290.0
+  },
+  "User Management|User Registration|User creates account|Human": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "User Management|User Registration|Human": {
+    "x": 91.0,
+    "y": 290.0
+  },
+  "User Management|User Profile|User verifies email|Human": {
+    "x": 301.0,
+    "y": 290.0
+  },
+  "Content Management|Create Content|Admin creates article|Admin": {
+    "x": 354.0,
+    "y": 290.0
+  },
+  "Content Management|Create Content|User resets password|Human": {
+    "x": 571.0,
+    "y": 290.0
+  },
+  "Content Management|Create Content|Admin creates video|Admin": {
+    "x": 623.0,
+    "y": 290.0
+  },
+  "Content Management|Manage Content|Admin publishes content|Admin": {
+    "x": 893.0,
+    "y": 290.0
+  },
+  "Search and Discovery|Search Functionality|User searches by keyword|Human": {
+    "x": 1002.0,
+    "y": 290.0
+  },
+  "Search and Discovery|Search Functionality|User filters results|Human": {
+    "x": 1271.0,
+    "y": 290.0
+  }
+}

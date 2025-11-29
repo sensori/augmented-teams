@@ -1,0 +1,152 @@
+{
+  "EPIC|Payment Processing": {
+    "x": 10.0,
+    "y": 130.0,
+    "width": 334.0,
+    "height": 60.0
+  },
+  "EPIC|Order Fulfillment": {
+    "x": 354.0,
+    "y": 130.0,
+    "width": 202.0,
+    "height": 60.0
+  },
+  "FEATURE|Payment Processing|Credit Card Payment": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 172.0,
+    "height": 60.0
+  },
+  "FEATURE|Payment Processing|Payment Verification": {
+    "x": 222.0,
+    "y": 200.0,
+    "width": 112.0,
+    "height": 60.0
+  },
+  "FEATURE|Order Fulfillment|Shipping": {
+    "x": 374.0,
+    "y": 200.0,
+    "width": 172.0,
+    "height": 60.0
+  },
+  "Payment Processing|Credit Card Payment|Customer pays with credit card": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "Payment Processing|Credit Card Payment|When Customer enters credit card numberThen ...": {
+    "x": 32.0,
+    "y": 410.0
+  },
+  "Payment Processing|Credit Card Payment|When Customer enters expiration dateThen ...": {
+    "x": 32.0,
+    "y": 480.0
+  },
+  "Payment Processing|Credit Card Payment|When Customer enters CVVThen ...": {
+    "x": 32.0,
+    "y": 550.0
+  },
+  "Payment Processing|Credit Card Payment|When System validates card informationThen ...": {
+    "x": 32.0,
+    "y": 620.0
+  },
+  "Payment Processing|Credit Card Payment|When System processes paymentThen ...": {
+    "x": 32.0,
+    "y": 690.0
+  },
+  "Payment Processing|Credit Card Payment|When System sends confirmationThen ...": {
+    "x": 32.0,
+    "y": 760.0
+  },
+  "Payment Processing|Credit Card Payment|Customer saves card for later": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "Payment Processing|Credit Card Payment|When Customer checks save card optionThen ...": {
+    "x": 92.0,
+    "y": 410.0
+  },
+  "Payment Processing|Credit Card Payment|When System encrypts card detailsThen ...": {
+    "x": 92.0,
+    "y": 480.0
+  },
+  "Payment Processing|Credit Card Payment|When System stores card securelyThen ...": {
+    "x": 92.0,
+    "y": 550.0
+  },
+  "Payment Processing|Payment Verification|System verifies payment": {
+    "x": 224.0,
+    "y": 350.0
+  },
+  "Payment Processing|Payment Verification|When System receives payment requestThen ...": {
+    "x": 224.0,
+    "y": 410.0
+  },
+  "Payment Processing|Payment Verification|When System checks card balanceThen ...": {
+    "x": 224.0,
+    "y": 480.0
+  },
+  "Payment Processing|Payment Verification|When System contacts payment gatewayThen ...": {
+    "x": 224.0,
+    "y": 550.0
+  },
+  "Payment Processing|Payment Verification|When System receives authorizationThen ...": {
+    "x": 224.0,
+    "y": 620.0
+  },
+  "Payment Processing|Payment Verification|When System creates transaction recordThen ...": {
+    "x": 224.0,
+    "y": 690.0
+  },
+  "Order Fulfillment|Shipping|Admin ships order": {
+    "x": 376.0,
+    "y": 350.0
+  },
+  "Order Fulfillment|Shipping|When Admin views pending ordersThen ...": {
+    "x": 376.0,
+    "y": 410.0
+  },
+  "Order Fulfillment|Shipping|When Admin selects order to shipThen ...": {
+    "x": 376.0,
+    "y": 480.0
+  },
+  "Order Fulfillment|Shipping|When Admin generates shipping labelThen ...": {
+    "x": 376.0,
+    "y": 550.0
+  },
+  "Order Fulfillment|Shipping|When Admin marks order as shippedThen ...": {
+    "x": 376.0,
+    "y": 620.0
+  },
+  "Order Fulfillment|Shipping|When System sends tracking number to customerThen ...": {
+    "x": 376.0,
+    "y": 690.0
+  },
+  "Order Fulfillment|Shipping|Customer tracks shipment": {
+    "x": 436.0,
+    "y": 350.0
+  },
+  "Order Fulfillment|Shipping|When Customer views order detailsThen ...": {
+    "x": 436.0,
+    "y": 410.0
+  },
+  "Order Fulfillment|Shipping|When Customer clicks track shipmentThen ...": {
+    "x": 436.0,
+    "y": 480.0
+  },
+  "Order Fulfillment|Shipping|When System shows current locationThen ...": {
+    "x": 436.0,
+    "y": 550.0
+  },
+  "Order Fulfillment|Shipping|When System shows estimated deliveryThen ...": {
+    "x": 436.0,
+    "y": 620.0
+  },
+  "Payment Processing|Credit Card Payment|Customer pays with credit card|Customer": {
+    "x": 20.0,
+    "y": 70.0
+  },
+  "Order Fulfillment|Shipping|Admin ships order|Admin": {
+    "x": 364.0,
+    "y": 70.0
+  }
+}

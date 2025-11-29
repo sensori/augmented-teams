@@ -27,6 +27,21 @@ def render_outline_command(args):
     if args.layout:
         with open(args.layout, 'r', encoding='utf-8') as f:
             layout_data = json.load(f)
+    else:
+        # Default: try to find layout file automatically
+        output_path = Path(args.output)
+        # Try multiple layout file naming patterns
+        layout_candidates = [
+            output_path.parent / f"{output_path.stem}-layout.json",
+            output_path.parent / "story-graph-drawio-extracted-layout.json",
+            output_path.parent / f"{output_path.stem}-drawio-extracted-layout.json"
+        ]
+        for layout_path in layout_candidates:
+            if layout_path.exists():
+                with open(layout_path, 'r', encoding='utf-8') as f:
+                    layout_data = json.load(f)
+                print(f"Using layout file: {layout_path}")
+                break
     
     result = diagram.render_outline(output_path=args.output, layout_data=layout_data)
     print(f"Generated DrawIO diagram: {result['output_path']}")
@@ -344,7 +359,7 @@ def sync_discovery_command(args):
 def render_exploration_command(args):
     """Render exploration acceptance criteria DrawIO diagram."""
     if args.story_graph:
-        diagram = StoryIODiagram.load_from_story_graph(args.story_graph, args.drawio_file)
+        diagram = StoryIODiagram.load_from_story_graph(args.story_graph, None)
     elif args.json:
         diagram = _load_from_json(args.json)
     else:
@@ -398,7 +413,7 @@ def main():
     render_outline_parser.add_argument('--json', type=Path, help='Story graph JSON file (alias)')
     render_outline_parser.add_argument('--drawio-file', type=Path, help='DrawIO file path')
     render_outline_parser.add_argument('--output', type=Path, required=True, help='Output DrawIO file')
-    render_outline_parser.add_argument('--layout', type=Path, help='Layout JSON file')
+    render_outline_parser.add_argument('--layout', type=Path, help='Layout JSON file (default: auto-detect from output filename)')
     
     # Render increments command
     render_inc_parser = subparsers.add_parser('render-increments', help='Render increments diagram')

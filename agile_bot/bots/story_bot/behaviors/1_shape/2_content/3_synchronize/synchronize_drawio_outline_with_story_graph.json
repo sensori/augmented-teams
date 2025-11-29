@@ -8,12 +8,12 @@
       "renderer_command": "synchronize",
       "description": "Synchronize story graph outline from DrawIO and generate merge report with large deletion detection",
       "parameters": {
-        "drawio_file": "{project_path}/docs/stories/map/story-map-outline.drawio",
-        "output": "{project_path}/docs/stories/map/story-graph-drawio-extracted.json",
-        "original": "{project_path}/docs/stories/map/story-io-story-graph.json",
+        "drawio_file": "{project_path}/docs/stories/story-map-outline.drawio",
+        "output": "{project_path}/docs/stories/story-graph-drawio-extracted.json",
+        "original": "{project_path}/docs/stories/story-io-story-graph.json",
         "type": "outline",
         "generate_report": true,
-        "report": "{project_path}/docs/stories/map/story-graph-drawio-extracted-merge-report.json"
+        "report": "{project_path}/docs/stories/story-graph-drawio-extracted-merge-report.json"
       }
     }
   ],

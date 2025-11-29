@@ -30,7 +30,7 @@ All behaviors now follow a consistent structure matching the `1_shape/2_content`
 ### 2_prioritization
 - **Render**: `render-increments` → `story-map-increments.drawio`
 - **Sync**: `synchronize` (type: increments)
-- **Path**: `docs/stories/map/`
+- **Path**: `docs/stories/`
 
 ### 4_discovery
 - **Render**: `render-discovery` → `story-map-discovery-increment-{increment_names}.drawio`

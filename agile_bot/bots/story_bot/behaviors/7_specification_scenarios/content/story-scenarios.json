@@ -1,0 +1,5 @@
+{
+  "name": "story-scenarios",
+  "path": "docs/stories",
+  "template": "story-doc-scenarios-template.md"
+}

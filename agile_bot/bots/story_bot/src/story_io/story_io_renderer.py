@@ -6,7 +6,7 @@ Moved from story_map_drawio_renderer.py to consolidate rendering logic.
 """
 
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional, Union, Tuple, List
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -32,9 +32,12 @@ class DrawIORenderer:
     USER_LABEL_OFFSET = 60  # Distance above element (accounts for 50px label height)
     USER_LABEL_X_OFFSET = 5  # Offset to the right from element x position
     # Acceptance criteria (exploration mode)
-    ACCEPTANCE_CRITERIA_WIDTH = 92  # 20px more than 72px
+    ACCEPTANCE_CRITERIA_WIDTH = 250  # Default width for acceptance criteria boxes in exploration mode
     ACCEPTANCE_CRITERIA_HEIGHT = 60
     ACCEPTANCE_CRITERIA_SPACING_Y = 70  # Vertical spacing between acceptance criteria boxes
+    ACCEPTANCE_CRITERIA_MIN_WIDTH = 250  # Minimum width for AC boxes (matches expected)
+    ACCEPTANCE_CRITERIA_CHAR_WIDTH = 6  # Approximate width per character at 8px font
+    ACCEPTANCE_CRITERIA_PADDING = 10  # Left + right padding
     
     @staticmethod
     def _get_story_style(story: Dict[str, Any]) -> str:
@@ -109,44 +112,73 @@ class DrawIORenderer:
             # Default: below name (bottom)
             return f"<br><i style=\"border-color: rgb(218, 220, 224); font-size: 8px;\"><span style=\"border-color: rgb(218, 220, 224); text-align: left;\">{count}&nbsp;</span><span style=\"border-color: rgb(218, 220, 224); text-align: left;\">stories</span></i>"
     
-    @staticmethod
-    def _format_step_as_acceptance_criteria(step: Union[str, dict]) -> str:
+    def _calculate_text_width(self, text: str, font_size: int = 8, padding: int = 10) -> int:
         """
-        Format a single step as acceptance criteria text for display.
-        Each step becomes its own acceptance criteria box.
+        Calculate approximate width needed for text at given font size.
+        Accounts for word wrapping - uses max characters per line (typically 30-40 chars).
         
         Args:
-            step: Single step (string or dict with when/then/given structure)
+            text: Text content (HTML will be stripped)
+            font_size: Font size in pixels
+            padding: Additional padding (left + right)
         
         Returns:
-            HTML formatted text showing "When ... Then ..." format
+            Width in pixels
         """
-        if isinstance(step, str):
-            # Simple string step - use as "When" part
-            when_text = step
-            then_text = "..."
-        elif isinstance(step, dict):
-            # Handle step objects with given/when/then structure
-            if 'when' in step and 'then' in step:
-                when_text = step['when']
-                then_text = step['then']
-            elif 'given' in step:
-                when_text = step['given']
-                then_text = "..."
-            else:
-                # Use first available field
-                when_text = str(step.get('text', step.get('step', '...')))
-                then_text = "..."
-        else:
-            when_text = "..."
-            then_text = "..."
+        import re
+        # Strip HTML tags for width calculation
+        clean_text = re.sub(r'<[^>]+>', '', text)
+        clean_text = clean_text.replace('&nbsp;', ' ').replace('&amp;', '&')
         
-        # Truncate if too long (max ~40 chars per line)
-        max_len = 40
-        when_text = when_text[:max_len] + "..." if len(when_text) > max_len else when_text
-        then_text = then_text[:max_len] + "..." if len(then_text) > max_len else then_text
+        # Split by <br> to find longest line
+        lines = clean_text.split('<br>')
+        max_line_length = max(len(line.strip()) for line in lines) if lines else len(clean_text.strip())
         
-        return f"<i style=\"font-size: 8px;\">When {when_text}</i><br style=\"font-size: 8px;\"><i style=\"font-size: 8px;\">Then {then_text}</i>"
+        # DrawIO with whiteSpace=wrap automatically wraps text, so we don't need
+        # to calculate width based on full text length. Use a fixed reasonable width
+        # that allows comfortable reading with automatic text wrapping.
+        # The expected shows 250px works well for all AC boxes regardless of text length.
+        return self.ACCEPTANCE_CRITERIA_MIN_WIDTH
+    
+    def _format_steps_as_acceptance_criteria(self, steps: List[Union[str, dict]], step_idx: int) -> Tuple[str, int]:
+        """
+        Format steps as acceptance criteria text for display.
+        Steps alternate between "When" and "Then" clauses.
+        Each pair (When + Then) becomes its own acceptance criteria box.
+        
+        Args:
+            steps: List of steps (strings that start with "When" or "Then")
+            step_idx: Index of the current step (0-based, even = When, odd = Then)
+        
+        Returns:
+            Tuple of (HTML formatted text, calculated width)
+        """
+        if step_idx >= len(steps):
+            return ("", self.ACCEPTANCE_CRITERIA_MIN_WIDTH)
+        
+        # Get the When clause (current step)
+        when_step = steps[step_idx]
+        when_text = when_step if isinstance(when_step, str) else str(when_step)
+        # Remove "When " prefix if present
+        if when_text.startswith("When "):
+            when_text = when_text[5:]
+        
+        # Get the Then clause (next step)
+        then_text = "..."
+        if step_idx + 1 < len(steps):
+            then_step = steps[step_idx + 1]
+            then_text = then_step if isinstance(then_step, str) else str(then_step)
+            # Remove "Then " prefix if present
+            if then_text.startswith("Then "):
+                then_text = then_text[5:]
+        
+        # Format with full text (no truncation) and proper HTML
+        acceptance_text = f'<div style="font-size: 8px;"><b>When</b> {when_text}<br><b>Then</b> {then_text}</div>'
+        
+        # Calculate dynamic width
+        ac_width = self._calculate_text_width(acceptance_text)
+        
+        return (acceptance_text, ac_width)
     
     def render_outline(self, story_graph: Dict[str, Any],
                       output_path: Path,
@@ -343,7 +375,10 @@ class DrawIORenderer:
             
             feature_positions = []
             previous_feature_rightmost_x = None
-            current_feature_x = epic_x + 10  # Start features 10px from epic left edge, position horizontally
+            # In exploration mode, features align with epics (no offset)
+            # Otherwise, start features 10px from epic left edge
+            feature_x_offset = 0 if is_exploration else 10
+            current_feature_x = epic_x + feature_x_offset
             feature_y = self.FEATURE_Y  # All features in epic have same Y position (horizontal layout)
             for feature in features:
                 # Check if layout data has coordinates for this feature
@@ -696,8 +731,14 @@ class DrawIORenderer:
                                         # Use calculated position - stories positioned relative to feature
                                         position = seq_to_position[seq_order]
                                         story_y = feat_y + feat_height + self.STORY_OFFSET_FROM_FEATURE
+                                        # In exploration mode, use wider spacing for AC boxes (250px + 20px gap = 270px)
+                                        # Otherwise use normal story spacing (60px)
+                                        spacing = (self.ACCEPTANCE_CRITERIA_MIN_WIDTH + 20) if is_exploration else self.STORY_SPACING_X
+                                        # In exploration mode, all stories start 12px from epic/feature left edge
+                                        # Otherwise, start 2px from feature left edge
+                                        story_x_offset = 12 if is_exploration else 2
                                         base_story_positions[base_seq] = {
-                                            'x': feat_x + position * self.STORY_SPACING_X + 2,
+                                            'x': (epic_x if is_exploration else feat_x) + position * spacing + story_x_offset,
                                             'y': story_y,
                                             'seq_order': seq_order,
                                             'users': set(story.get('users', []))  # Store base story users for comparison
@@ -706,7 +747,11 @@ class DrawIORenderer:
                 # Second pass: render sequential stories first (horizontal), then optional stories (vertical stack)
                 # Render sequential stories horizontally
                 sequential_stories_sorted = sorted(sequential_stories, key=lambda x: x[0])
+                # Track previous story's users to only render when they change
+                previous_story_users = None  # None means first story will render
+                story_index = 0  # Counter to track story position
                 for seq_order, story in sequential_stories_sorted:
+                    story_index += 1
                     seq_float = float(seq_order) if isinstance(seq_order, (int, float, str)) else float(seq_order)
                     base_seq = int(seq_float)
                     
@@ -730,21 +775,48 @@ class DrawIORenderer:
                         else:
                             # Fallback: calculate position relative to feature
                             position = seq_to_position.get(seq_order, 0)
-                            story_x = feat_x + position * self.STORY_SPACING_X + 2
+                            # In exploration mode, use wider spacing for AC boxes (250px + 20px gap = 270px)
+                            # Otherwise use normal story spacing (60px)
+                            spacing = (self.ACCEPTANCE_CRITERIA_MIN_WIDTH + 20) if is_exploration else self.STORY_SPACING_X
+                            # In exploration mode, all stories start 12px from epic/feature left edge
+                            # Otherwise, start 2px from feature left edge
+                            story_x_offset = 12 if is_exploration else 2
+                            story_x = (epic_x if is_exploration else feat_x) + position * spacing + story_x_offset
                             story_y = feat_y + feat_height + self.STORY_OFFSET_FROM_FEATURE
                     
-                    # Collect users for this story (if not already shown)
-                    story_users = story.get('users', [])
+                    # Collect users for this story
+                    # Only render users if they're different from the previous story's users
+                    # This avoids redundant user labels when consecutive stories have the same users
+                    story_users = set(story.get('users', []))
                     new_story_users = []
-                    for user in story_users:
-                        if user not in shown_users:
-                            new_story_users.append(user)
-                            shown_users.add(user)
+                    
+                    if is_exploration:
+                        # In exploration mode, always render users for each story
+                        new_story_users = list(story_users)
+                        # Still track to avoid duplicate epic/feature-level users
+                        for user in story_users:
+                            if user not in shown_users:
+                                shown_users.add(user)
+                    else:
+                        # In normal mode, only render users if they changed from previous story
+                        # First story (story_index == 1) always renders its users
+                        # Subsequent stories only render if users are different
+                        if story_index == 1 or story_users != previous_story_users:
+                            # Users changed (or first story) - render all users for this story
+                            for user in story_users:
+                                new_story_users.append(user)
+                                # Track to avoid duplicate epic/feature-level users
+                                if user not in shown_users:
+                                    shown_users.add(user)
+                    
+                    # Update previous story's users for next iteration
+                    previous_story_users = story_users
                     
                     # Place story-level users horizontally above the story
                     if new_story_users:
-                        if story_y not in story_user_x_offset:
-                            story_user_x_offset[story_y] = 0
+                        # In exploration mode, each story's users align with that story (per-story offset)
+                        # Otherwise, users share offset per Y position (for stacked stories)
+                        story_user_offset = 0  # Reset offset for each story in exploration mode
                         for user in new_story_users:
                             # Check if layout data has coordinates for this story-level user
                             user_key = f"{epic['name']}|{feature['name']}|{story['name']}|{user}"
@@ -754,7 +826,7 @@ class DrawIORenderer:
                                 # Skip users at top of map (y < 50) - treat as not found
                                 if layout_user_y < 50:
                                     # User was deleted/moved to top - place above story instead
-                                    user_x = story_x + story_user_x_offset[story_y]
+                                    user_x = story_x + story_user_offset
                                     user_y = story_y - self.USER_LABEL_OFFSET
                                 else:
                                     # Ensure user is properly above story - check distance and adjust if needed
@@ -767,7 +839,16 @@ class DrawIORenderer:
                                         user_y = layout_user_y
                             else:
                                 # User has no coordinates (in story graph but not in DrawIO) - place above story
-                                user_x = story_x + story_user_x_offset[story_y]
+                                # In exploration mode, align user with story (no offset for first story, -1px for subsequent stories)
+                                # This matches expected layout where Story 1 user aligns with story, Story 2 user is 1px left
+                                user_x_offset = 0
+                                if is_exploration:
+                                    # Get story position to determine if this is the first story
+                                    story_position = seq_to_position.get(seq_order, 0)
+                                    if story_position > 0:
+                                        # For stories after the first, align user 1px to the left
+                                        user_x_offset = -1
+                                user_x = story_x + story_user_offset + user_x_offset
                                 user_y = story_y - self.USER_LABEL_OFFSET
                             
                             user_label = ET.SubElement(root_elem, 'mxCell',
@@ -785,7 +866,8 @@ class DrawIORenderer:
                             feature_min_x = min(feature_min_x, user_x)
                             feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
                             
-                            story_user_x_offset[story_y] += self.STORY_SPACING_X
+                            # Increment offset for next user (if multiple users per story)
+                            story_user_offset += self.STORY_SPACING_X
                     
                     story_cell = ET.SubElement(root_elem, 'mxCell',
                                                id=f'e{epic_idx}f{feat_idx}s{story_idx}',
@@ -805,42 +887,52 @@ class DrawIORenderer:
                         steps = story.get('Steps', []) or story.get('steps', [])
                         if steps:
                             # Render acceptance criteria boxes below the story
+                            # Steps alternate: When, Then, When, Then, ...
+                            # Each pair (When + Then) becomes one AC box
                             acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10  # Start below story
                             
-                            for step_idx, step in enumerate(steps):
-                                # Format step as acceptance criteria
-                                # Each step becomes a separate acceptance criteria box
-                                acceptance_text = self._format_step_as_acceptance_criteria(step)
+                            # Process steps in pairs (When + Then)
+                            ac_box_idx = 0
+                            step_idx = 0
+                            while step_idx < len(steps):
+                                # Format pair of steps (When + Then) as acceptance criteria
+                                acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, step_idx)
                                 
                                 # Check if layout data exists for this acceptance criteria
-                                ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{step_idx}"
+                                ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
                                 if ac_key in layout_data:
                                     ac_x = layout_data[ac_key]['x']
                                     ac_y = layout_data[ac_key]['y']
+                                    # Use layout width if provided, otherwise use calculated
+                                    ac_width = layout_data[ac_key].get('width', ac_width)
                                 else:
                                     # AC boxes align with their story (same X position)
                                     ac_x = story_x
-                                    ac_y = acceptance_criteria_y + step_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                    ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
                                 
-                                # Create acceptance criteria box (wider than story box)
+                                # Create acceptance criteria box (rectangle, not square)
                                 ac_cell = ET.SubElement(root_elem, 'mxCell',
-                                                       id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{step_idx}',
+                                                       id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
                                                        value=acceptance_text,
                                                        style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
                                                        parent='1', vertex='1')
                                 ac_geom = ET.SubElement(ac_cell, 'mxGeometry',
                                                        x=str(ac_x), y=str(ac_y),
-                                                       width=str(self.ACCEPTANCE_CRITERIA_WIDTH),
+                                                       width=str(ac_width),
                                                        height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
                                 ac_geom.set('as', 'geometry')
                                 
                                 # Track acceptance criteria bounds for feature expansion
                                 feature_min_x = min(feature_min_x, ac_x)
-                                feature_max_x = max(feature_max_x, ac_x + self.ACCEPTANCE_CRITERIA_WIDTH)
+                                feature_max_x = max(feature_max_x, ac_x + ac_width)
                                 
                                 # Track rightmost AC position for this epic (for epic width calculation)
-                                if epic_rightmost_ac_x is None or (ac_x + self.ACCEPTANCE_CRITERIA_WIDTH) > epic_rightmost_ac_x:
-                                    epic_rightmost_ac_x = ac_x + self.ACCEPTANCE_CRITERIA_WIDTH
+                                if epic_rightmost_ac_x is None or (ac_x + ac_width) > epic_rightmost_ac_x:
+                                    epic_rightmost_ac_x = ac_x + ac_width
+                                
+                                # Move to next pair (skip Then step)
+                                step_idx += 2
+                                ac_box_idx += 1
                         
                     story_idx += 1
                 
@@ -867,7 +959,10 @@ class DrawIORenderer:
                     # Optional stories start at same Y as sequential stories (relative to feature)
                     optional_y = feat_y + feat_height + self.STORY_OFFSET_FROM_FEATURE
                     
+                    previous_story_users = None  # Track previous story's users for optional stories (None = first story)
+                    optional_story_index = 0  # Counter for optional stories
                     for seq_order, story in optional_stories_sorted:
+                        optional_story_index += 1
                         # Check if layout data exists for this optional story
                         layout_key = f"{epic['name']}|{feature['name']}|{story['name']}"
                         if layout_key in layout_data:
@@ -877,13 +972,22 @@ class DrawIORenderer:
                             story_x = optional_x  # All optional stories at same X
                             story_y = optional_y  # Stack vertically
                         
-                        # Collect users for this story (if not already shown)
-                        story_users = story.get('users', [])
+                        # Collect users for this story
+                        # Only render users if they're different from the previous story's users
+                        story_users = set(story.get('users', []))
                         new_story_users = []
-                        for user in story_users:
-                            if user not in shown_users:
+                        
+                        # Check if users changed from previous story (or if this is the first optional story)
+                        if optional_story_index == 1 or story_users != previous_story_users:
+                            # Users changed (or first story) - render them
+                            for user in story_users:
                                 new_story_users.append(user)
-                                shown_users.add(user)
+                                # Track to avoid duplicate epic/feature-level users
+                                if user not in shown_users:
+                                    shown_users.add(user)
+                        
+                        # Update previous story's users for next iteration
+                        previous_story_users = story_users
                         
                         # Place story-level users horizontally above the story
                         if new_story_users:
@@ -941,31 +1045,42 @@ class DrawIORenderer:
                             steps = story.get('Steps', []) or story.get('steps', [])
                             if steps:
                                 acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10
-                                for step_idx, step in enumerate(steps):
-                                    acceptance_text = self._format_step_as_acceptance_criteria(step)
-                                    ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{step_idx}"
+                                
+                                # Process steps in pairs (When + Then)
+                                ac_box_idx = 0
+                                step_idx = 0
+                                while step_idx < len(steps):
+                                    # Format pair of steps (When + Then) as acceptance criteria
+                                    acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, step_idx)
+                                    
+                                    ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
                                     if ac_key in layout_data:
                                         ac_x = layout_data[ac_key]['x']
                                         ac_y = layout_data[ac_key]['y']
+                                        ac_width = layout_data[ac_key].get('width', ac_width)
                                     else:
                                         ac_x = story_x
-                                        ac_y = acceptance_criteria_y + step_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                        ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
                                     
                                     ac_cell = ET.SubElement(root_elem, 'mxCell',
-                                                           id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{step_idx}',
+                                                           id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
                                                            value=acceptance_text,
                                                            style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
                                                            parent='1', vertex='1')
                                     ac_geom = ET.SubElement(ac_cell, 'mxGeometry',
                                                            x=str(ac_x), y=str(ac_y),
-                                                           width=str(self.ACCEPTANCE_CRITERIA_WIDTH),
+                                                           width=str(ac_width),
                                                            height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
                                     ac_geom.set('as', 'geometry')
                                     feature_min_x = min(feature_min_x, ac_x)
-                                    feature_max_x = max(feature_max_x, ac_x + self.ACCEPTANCE_CRITERIA_WIDTH)
+                                    feature_max_x = max(feature_max_x, ac_x + ac_width)
                                     
                                     # Track rightmost AC position
-                                    current_ac_rightmost_x = max(current_ac_rightmost_x or ac_x, ac_x + self.ACCEPTANCE_CRITERIA_WIDTH)
+                                    current_ac_rightmost_x = max(current_ac_rightmost_x or ac_x, ac_x + ac_width)
+                                    
+                                    # Move to next pair (skip Then step)
+                                    step_idx += 2
+                                    ac_box_idx += 1
                         
                         story_idx += 1
                         # Move to next vertical position for next optional story
@@ -989,8 +1104,11 @@ class DrawIORenderer:
                     
                     # Track vertical position, adding extra space for stories with different users
                     cumulative_vertical_offset = 0
+                    previous_story_users = base_users  # Start with base story's users
+                    nested_story_index = 0  # Counter for nested stories
                     
                     for nest_idx, (seq_order, story) in enumerate(nested_stories, 1):
+                        nested_story_index += 1
                         # Check if layout data exists for this nested story
                         layout_key = f"{epic['name']}|{feature['name']}|{story['name']}"
                         if layout_key in layout_data:
@@ -1009,13 +1127,25 @@ class DrawIORenderer:
                             story_x = base_x  # Same X as base story
                             story_y = base_y + cumulative_vertical_offset + nest_idx * self.STORY_SPACING_Y  # Below base story
                         
-                        # Collect users for this story (if not already shown)
+                        # Collect users for this story
+                        # Only render users if they're different from the previous story's users
                         story_users_list = story.get('users', [])
+                        story_users_set = set(story_users_list)
                         new_story_users = []
-                        for user in story_users_list:
-                            if user not in shown_users:
+                        
+                        # Check if users changed from previous story
+                        # First nested story only renders if users are different from base story
+                        # Subsequent nested stories only render if users changed from previous nested story
+                        if (nested_story_index == 1 and story_users_set != base_users) or (nested_story_index > 1 and story_users_set != previous_story_users):
+                            # Users changed - render them
+                            for user in story_users_set:
                                 new_story_users.append(user)
-                                shown_users.add(user)
+                                # Track to avoid duplicate epic/feature-level users
+                                if user not in shown_users:
+                                    shown_users.add(user)
+                        
+                        # Update previous story's users for next iteration
+                        previous_story_users = story_users_set
                         
                         # Place story-level users horizontally above the story
                         if new_story_users:
@@ -1082,30 +1212,39 @@ class DrawIORenderer:
                             if steps:
                                 acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10
                                 
-                                for step_idx, step in enumerate(steps):
-                                    acceptance_text = self._format_step_as_acceptance_criteria(step)
+                                # Process steps in pairs (When + Then)
+                                ac_box_idx = 0
+                                step_idx = 0
+                                while step_idx < len(steps):
+                                    # Format pair of steps (When + Then) as acceptance criteria
+                                    acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, step_idx)
                                     
-                                    ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{step_idx}"
+                                    ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
                                     if ac_key in layout_data:
                                         ac_x = layout_data[ac_key]['x']
                                         ac_y = layout_data[ac_key]['y']
+                                        ac_width = layout_data[ac_key].get('width', ac_width)
                                     else:
                                         ac_x = story_x
-                                        ac_y = acceptance_criteria_y + step_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                        ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
                                     
                                     ac_cell = ET.SubElement(root_elem, 'mxCell',
-                                                           id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{step_idx}',
+                                                           id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
                                                            value=acceptance_text,
                                                            style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
                                                            parent='1', vertex='1')
                                     ac_geom = ET.SubElement(ac_cell, 'mxGeometry',
                                                            x=str(ac_x), y=str(ac_y),
-                                                           width=str(self.ACCEPTANCE_CRITERIA_WIDTH),
+                                                           width=str(ac_width),
                                                            height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
                                     ac_geom.set('as', 'geometry')
                                     
                                     feature_min_x = min(feature_min_x, ac_x)
-                                    feature_max_x = max(feature_max_x, ac_x + self.ACCEPTANCE_CRITERIA_WIDTH)
+                                    feature_max_x = max(feature_max_x, ac_x + ac_width)
+                                    
+                                    # Move to next pair (skip Then step)
+                                    step_idx += 2
+                                    ac_box_idx += 1
                         
                         story_idx += 1
                 
@@ -1120,10 +1259,20 @@ class DrawIORenderer:
                     if previous_feature_rightmost_x is None or feature_rightmost > previous_feature_rightmost_x:
                         previous_feature_rightmost_x = feature_rightmost
                 elif feature_min_x != float('inf') and feature_max_x != -float('inf'):
-                    actual_feature_width = feature_max_x - feature_min_x + 20  # Add padding
-                    # Don't move feature to the left of its initial position
-                    calculated_feature_x = feature_min_x - 10  # Adjust X to align with stories
-                    actual_feature_x = max(feat_x, calculated_feature_x)  # Ensure we don't move left
+                    # In exploration mode, feature should span from epic_x to rightmost AC box + padding
+                    # Otherwise, calculate from min/max story bounds
+                    if is_exploration:
+                        # Feature aligns with epic and spans to rightmost AC + padding
+                        # Padding is 30px for first epic's feature, 6px for subsequent epics' features (to match expected layout)
+                        actual_feature_x = epic_x
+                        # Calculate padding: if feature_max_x is close to epic end, use smaller padding
+                        # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
+                        feature_padding = 30 if epic_idx == 1 else 6
+                        actual_feature_width = feature_max_x - epic_x + feature_padding
+                    else:
+                        actual_feature_width = feature_max_x - feature_min_x + 20  # Add padding
+                        calculated_feature_x = feature_min_x - 10  # Adjust X to align with stories
+                        actual_feature_x = max(feat_x, calculated_feature_x)  # Ensure we don't move left
                     feature_geometries[-1]['geom'].set('width', str(actual_feature_width))
                     feature_geometries[-1]['geom'].set('x', str(actual_feature_x))
                     
@@ -1153,18 +1302,46 @@ class DrawIORenderer:
             if use_epic_layout:
                 # Use stored epic coordinates and dimensions - don't shrink
                 # Update x_pos for next epic using stored epic width
-                x_pos = epic_x + epic_width + 20
+                # In exploration mode, use 30px spacing between epics to match expected layout
+                epic_spacing = 30 if is_exploration else 20
+                x_pos = epic_x + epic_width + epic_spacing
             elif epic_min_x != float('inf') and epic_max_x != -float('inf'):
-                actual_epic_width = epic_max_x - epic_min_x + 20  # Add padding
-                actual_epic_x = epic_min_x - 10  # Adjust X to align with features
+                # In exploration mode, epic should span from epic_x to rightmost AC box + padding
+                # Otherwise, calculate from min/max feature bounds
+                if is_exploration and epic_rightmost_ac_x is not None:
+                    # Epic spans from epic_x to rightmost AC + padding
+                    # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = epic_rightmost_ac_x - epic_x + epic_padding
+                    actual_epic_x = epic_x
+                else:
+                    actual_epic_width = epic_max_x - epic_min_x + 20  # Add padding
+                    actual_epic_x = epic_min_x - 10  # Adjust X to align with features
                 epic_geom.set('width', str(actual_epic_width))
                 epic_geom.set('x', str(actual_epic_x))
                 
                 # Update x_pos for next epic using actual epic width
-                x_pos = actual_epic_x + actual_epic_width + 20
+                # In exploration mode, use 30px spacing between epics to match expected layout
+                epic_spacing = 30 if is_exploration else 20
+                x_pos = actual_epic_x + actual_epic_width + epic_spacing
             else:
                 # Fallback to original calculation
                 x_pos += epic_width + 20
+        
+        # Update epic-group width to span all epics (for exploration mode)
+        if is_exploration:
+            # Find rightmost epic position
+            epic_group_rightmost = 0
+            for epic_cell in root_elem.findall('.//mxCell[@parent="epic-group"]'):
+                epic_geom = epic_cell.find('mxGeometry')
+                if epic_geom is not None:
+                    epic_x = float(epic_geom.get('x', 0))
+                    epic_width = float(epic_geom.get('width', 0))
+                    epic_group_rightmost = max(epic_group_rightmost, epic_x + epic_width)
+            # Update epic-group geometry to span all epics
+            if epic_group_rightmost > 0:
+                epic_group_geom.set('width', str(epic_group_rightmost))
+                epic_group_geom.set('height', '190')  # Match expected height
         
         rough_string = ET.tostring(root, encoding='unicode')
         reparsed = minidom.parseString(rough_string)

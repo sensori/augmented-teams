@@ -1,0 +1,36 @@
+{
+  "behaviorName": "shape",
+  "instructions": [
+    "**SYNCHRONIZE DRAWIO WITH STORY GRAPH - BIDIRECTIONAL SYNC:**",
+    "",
+    "Synchronize extracted DrawIO story graph outline with original story graph, preserving Steps from original.",
+    "",
+    "**Configuration:**",
+    "- Reference: synchronize_drawio_outline_with_story_graph.json",
+    "",
+    "**Process:**",
+    "1. Run extract_and_report script to synchronize DrawIO story map outline and generate merge report",
+    "2. Review merge report showing:",
+    "   - Exact matches",
+    "   - Fuzzy matches",
+    "   - New stories",
+    "   - Removed stories",
+    "   - Large deletion warnings",
+    "3. Pay special attention to large deletion warnings - entire epics or features missing may indicate accidental deletion",
+    "4. AI waits for user instructions to proceed with merge based on report",
+    "5. Merge preserves Steps from original stories where matches are found",
+    "6. New stories in extracted will have empty Steps array",
+    "7. User confirms merge before applying changes to story-graph.json",
+    "",
+    "**Outputs:**",
+    "- File: {project_area}/docs/stories/map/story-graph-drawio-extracted.json",
+    "- File: {project_area}/docs/stories/map/story-graph-drawio-extracted-merge-report.json",
+    "- Updated: {project_area}/docs/stories/map/story-graph.json (after user confirmation)",
+    "",
+    "**Critical:** DO NOT apply merge changes without user confirmation. Wait for explicit approval before updating story-graph.json."
+  ]
+}
+
+
+
+

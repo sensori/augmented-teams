@@ -1,0 +1,87 @@
+{
+  "epics": [
+    {
+      "name": "E-commerce Platform25 stories",
+      "sequential_order": 1.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Product Catalog8 stories",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Customer browses products",
+              "sequential_order": 1.0,
+              "users": [
+                "Customer"
+              ],
+              "Steps": []
+            },
+            {
+              "name": "Customer views product details",
+              "sequential_order": 2.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            }
+          ],
+          "story_count": 8,
+          "estimated_stories": 8
+        },
+        {
+          "name": "Shopping Cart5 stories",
+          "sequential_order": 2.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Customer adds item to cart",
+              "sequential_order": 1.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            }
+          ],
+          "story_count": 5,
+          "estimated_stories": 5
+        },
+        {
+          "name": "Checkout Process12 stories",
+          "sequential_order": 3.0,
+          "users": [],
+          "stories": [],
+          "story_count": 12,
+          "estimated_stories": 12
+        }
+      ],
+      "estimated_stories": 25
+    },
+    {
+      "name": "Order Management15 stories",
+      "sequential_order": 2.0,
+      "users": [],
+      "features": [
+        {
+          "name": "Order Tracking6 stories",
+          "sequential_order": 1.0,
+          "users": [],
+          "stories": [
+            {
+              "name": "Customer views order status",
+              "sequential_order": 1.0,
+              "users": [
+                "Admin"
+              ],
+              "Steps": []
+            }
+          ],
+          "story_count": 6,
+          "estimated_stories": 6
+        }
+      ],
+      "estimated_stories": 15
+    }
+  ]
+}

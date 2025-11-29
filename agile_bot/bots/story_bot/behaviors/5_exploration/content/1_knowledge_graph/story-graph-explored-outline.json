@@ -1,0 +1,61 @@
+{
+  "epics": [
+    {
+      "name": "",
+      "users": [],
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "",
+          "users": [],
+          "sequential_order": 1,
+          "features": [
+            {
+              "name": "",
+              "users": [],
+              "sequential_order": 1,
+              "estimated_stories": null,
+              "stories": [
+                {
+                  "name": "",
+                  "users": [],
+                  "sequential_order": 1,
+                  "optional": false,
+                  "priority": 1,
+                  "story_type": "",
+                  "Steps": null,
+                  "acceptance_criteria": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "features": [
+        {
+          "name": "",
+          "users": [],
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "stories": [
+            {
+              "name": "",
+              "users": [],
+              "sequential_order": 1,
+              "optional": false,
+              "priority": 1,
+              "story_type": "",
+              "Steps": null,
+              "acceptance_criteria": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+
+

@@ -601,6 +601,45 @@ class StoryIODiagram(StoryIOComponent):
         )
     
     @staticmethod
+    def render_exploration_from_graph(story_graph: Union[Dict[str, Any], str, Path],
+                                     output_path: Union[str, Path],
+                                     layout_data: Optional[Dict[str, Any]] = None,
+                                     scope: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Static method to render exploration diagram directly from story graph data.
+        
+        Args:
+            story_graph: Story graph dictionary, JSON file path, or Path object
+            output_path: Output DrawIO file path
+            layout_data: Optional layout data to preserve positions
+            scope: Optional scope identifier for filtering stories
+        
+        Returns:
+            Dictionary with output_path and summary
+        
+        Examples:
+            >>> graph = {"epics": [...]}
+            >>> StoryIODiagram.render_exploration_from_graph(graph, 'output.drawio')
+            >>> StoryIODiagram.render_exploration_from_graph('story_graph.json', 'output.drawio')
+        """
+        # Load story graph if it's a file path
+        if isinstance(story_graph, (str, Path)):
+            story_graph_path = Path(story_graph)
+            with open(story_graph_path, 'r', encoding='utf-8') as f:
+                import json
+                story_graph = json.load(f)
+        
+        # Create renderer and render
+        renderer = DrawIORenderer()
+        output_path = Path(output_path)
+        return renderer.render_exploration(
+            story_graph=story_graph,
+            output_path=output_path,
+            layout_data=layout_data,
+            scope=scope
+        )
+    
+    @staticmethod
     def render_increments_from_graph(story_graph: Union[Dict[str, Any], str, Path],
                                     output_path: Union[str, Path],
                                     layout_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
