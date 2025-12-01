@@ -1,0 +1,39 @@
+{
+  "name": "synchronize_txt_with_story_graph",
+  "description": "Synchronize parsed story map text file with original story graph, preserving acceptance_criteria and nested stories from original. Detects and flags large deletions.",
+  "scripts": [
+    {
+      "name": "parse_and_report",
+      "renderer": "story_io",
+      "renderer_command": "synchronize",
+      "description": "Parse story map text file and synchronize with original story graph, generating merge report with large deletion detection",
+      "parameters": {
+        "text_file": "{project_path}/docs/stories/story-map-in.txt",
+        "output": "{project_path}/docs/stories/story-graph-txt-extracted.json",
+        "original": "{project_path}/docs/stories/story-io-story-graph.json",
+        "type": "text",
+        "generate_report": true,
+        "report": "{project_path}/docs/stories/story-graph-txt-extracted-merge-report.json",
+        "parser_script": "{behavior_path}/behaviors/1_shape/2_content/3_synchronize/synchronize _story_map/2_when/test_round_trip.py",
+        "converter_script": "{behavior_path}/behaviors/1_shape/2_content/3_synchronize/synchronize _story_map/2_when/convert_story_graph.py"
+      }
+    }
+  ],
+  "templates": [],
+  "instructions": [
+    "1. Parser scripts are located in: behaviors/1_shape/2_content/3_synchronize/synchronize _story_map/2_when/",
+    "2. Parser: test_round_trip.py contains parse_story_map_text() function to parse text file to JSON",
+    "3. Converter: convert_story_graph.py converts parsed JSON to new story graph structure",
+    "4. Run parse_and_report script to parse story map text file and synchronize with original story graph",
+    "5. Review merge report showing exact matches, fuzzy matches, new stories, removed stories, and large deletion warnings",
+    "6. Pay special attention to large deletion warnings - entire epics or sub-epics missing may indicate accidental deletion",
+    "7. AI waits for user instructions to proceed with merge based on report",
+    "8. Merge preserves acceptance_criteria and nested stories from original stories where matches are found",
+    "9. New stories in extracted will have empty acceptance_criteria array",
+    "10. User confirms merge before applying changes to story-io-story-graph.json",
+    "11. Text file format: Uses (E) for epics/sub-epics, (S) for stories, (AC) for acceptance criteria",
+    "12. Connectors: 'and' is default (not shown), 'or' and 'opt' are shown explicitly",
+    "13. Actors: Stories and AC items use 'Actor --> Name' format"
+  ]
+}
+

@@ -1,0 +1,36 @@
+{
+  "epics": [
+    {
+      "name": "Create Character",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Establish Identity",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        },
+        {
+          "name": "Set Attributes",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Combat System",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Basic Combat",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

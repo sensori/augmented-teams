@@ -1,5 +1,5 @@
 {
-  "description": "CRITICAL: Stories must be specific about what, when, why, and who. Generic operations like 'Add Feature' or 'Read Epics' are insufficient - stories must include context and specificity.",
+  "description": "CRITICAL: Stories must be specific about what, when, why, and who. Generic operations like 'Add Sub-Epic' or 'Read Epics' are insufficient - stories must include context and specificity.",
   "examples": [
     {
       "do": {

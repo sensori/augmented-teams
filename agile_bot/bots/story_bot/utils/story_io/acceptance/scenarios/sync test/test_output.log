@@ -1,0 +1,64 @@
+Loading: demo\mm3e_animations\docs\story_graph.json
+
+Original increment:
+  Name: Core Animation System
+  Priority: NOW (str)
+  Story names count: 19
+
+Saved rendered data to: demo\mm3e_animations\docs\story_graph_test.json
+
+Reloaded increment:
+  Name: Core Animation System
+  Priority: NOW (str)
+  Story names count: 19
+
+[SUCCESS] Priority preserved correctly!
+[SUCCESS] Story names preserved correctly!
+
+Cleaned up test file: demo\mm3e_animations\docs\story_graph_test.json
+Increments loaded: 1
+
+Increment: Core Animation System
+  Priority (original): NOW (type: str)
+  Priority (int): 1
+  Story names: 19 stories
+    First few: ['Receive Power Characteristics', 'Request Base Templates', 'Instantiate Cast Template']...
+
+Rendered increment:
+  Priority: NOW (type: str)
+  Stories: 19 story names
+    First few: ['Receive Power Characteristics', 'Request Base Templates', 'Instantiate Cast Template']...
+
+[SUCCESS] Priority structure preserved!
+Loading: demo\mm3e_animations\docs\story_graph.json
+
+Original increment:
+  Name: Core Animation System
+  Priority: NOW (str)
+  Story names count: 19
+
+Saved rendered data to: demo\mm3e_animations\docs\story_graph_test.json
+
+Reloaded increment:
+  Name: Core Animation System
+  Priority: NOW (str)
+  Story names count: 19
+
+[SUCCESS] Priority preserved correctly!
+[SUCCESS] Story names preserved correctly!
+
+Cleaned up test file: demo\mm3e_animations\docs\story_graph_test.json
+Increments loaded: 1
+
+Increment: Core Animation System
+  Priority (original): NOW (type: str)
+  Priority (int): 1
+  Story names: 19 stories
+    First few: ['Receive Power Characteristics', 'Request Base Templates', 'Instantiate Cast Template']...
+
+Rendered increment:
+  Priority: NOW (type: str)
+  Stories: 19 story names
+    First few: ['Receive Power Characteristics', 'Request Base Templates', 'Instantiate Cast Template']...
+
+[SUCCESS] Priority structure preserved!

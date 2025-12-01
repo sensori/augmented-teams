@@ -1,0 +1,164 @@
+{
+  "EPIC|Build Agile Bots": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 520.0,
+    "height": 60.0
+  },
+  "EPIC|Invoke MCP Bot Server": {
+    "x": 560.0,
+    "y": 130.0,
+    "width": 1360.0,
+    "height": 60.0
+  },
+  "EPIC|Execute Behavior Actions": {
+    "x": 1940.0,
+    "y": 130.0,
+    "width": 7750.0,
+    "height": 60.0
+  },
+  "FEATURE|Build Agile Bots|Generate Bot Server And Tools": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 490.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Init Project": {
+    "x": 570.0,
+    "y": 200.0,
+    "width": 610.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Invoke Bot Tool": {
+    "x": 1200.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Perform Behavior Action": {
+    "x": 1470.0,
+    "y": 200.0,
+    "width": 430.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Gather Context": {
+    "x": 1950.0,
+    "y": 200.0,
+    "width": 910.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Review Context For Answers And Evidence": {
+    "x": 2880.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Provide Answers and Evidence": {
+    "x": 2970.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Decide Planning Criteria Action": {
+    "x": 3060.0,
+    "y": 200.0,
+    "width": 910.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Provide Decision Criteria and Assumptions": {
+    "x": 3990.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Make Decisons and Assumptions": {
+    "x": 4080.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Build Knowledge Action": {
+    "x": 4170.0,
+    "y": 200.0,
+    "width": 1150.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Clarifications and Planning Responses": {
+    "x": 5340.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Build Knowledge Graph": {
+    "x": 5430.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Validate With Rules": {
+    "x": 5520.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Edit Knowledge Graph": {
+    "x": 5610.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Read Render Output Instructions and Data": {
+    "x": 5700.0,
+    "y": 200.0,
+    "width": 970.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Render Output": {
+    "x": 6690.0,
+    "y": 200.0,
+    "width": 550.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Generate Rendered Outputs": {
+    "x": 7260.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Load Rendered Content": {
+    "x": 7350.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Validate Knowledge & Content Against Rules": {
+    "x": 7620.0,
+    "y": 200.0,
+    "width": 910.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Review Answers, Assumptions": {
+    "x": 8550.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Rules": {
+    "x": 8880.0,
+    "y": 200.0,
+    "width": 370.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Violations": {
+    "x": 9270.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Suggest Bot Corrections": {
+    "x": 9600.0,
+    "y": 200.0,
+    "width": 70.0,
+    "height": 60.0
+  }
+}

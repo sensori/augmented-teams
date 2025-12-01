@@ -15,7 +15,9 @@
           "Make the map easy to walk through (it tells a story)",
           "",
           "Example:",
-          "Epic: Manage Orders → Feature: Place Order → Story: Customer places order",
+          "(E) Manage Orders",
+          "  and (E) Place Order",
+          "    and (S) Customer --> places order",
           "(Shows hierarchy and structure, not detailed specs)"
         ]
       },
@@ -28,7 +30,9 @@
           "Over-elaborate story mapping during shaping",
           "",
           "Wrong Example:",
-          "Epic: Manage Orders → Feature: Place Order → Story: Customer places order",
+          "(E) Manage Orders",
+          "  and (E) Place Order",
+          "    and (S) Customer --> places order",
           "  → Detailed API specs, database schema, UI mockups",
           "(Too much detail for shaping phase)"
         ]

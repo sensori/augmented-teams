@@ -1,0 +1,36 @@
+{
+  "epics": [
+    {
+      "name": "User Management",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "User Registration",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        },
+        {
+          "name": "User Authentication",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Content Management",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Manage Content",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

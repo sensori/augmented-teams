@@ -1,0 +1,1060 @@
+{
+  "EPIC|Build Agile Bots": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 340.0,
+    "height": 60.0
+  },
+  "EPIC|Invoke MCP Bot Server": {
+    "x": 380.0,
+    "y": 130.0,
+    "width": 820.0,
+    "height": 60.0
+  },
+  "EPIC|Execute Behavior Actions": {
+    "x": 1220.0,
+    "y": 130.0,
+    "width": 5050.0,
+    "height": 60.0
+  },
+  "FEATURE|Build Agile Bots|Generate Bot Server And Tools": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Init Project": {
+    "x": 390.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Invoke Bot Tool": {
+    "x": 720.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|Invoke MCP Bot Server|Perform Behavior Action": {
+    "x": 930.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Gather Context": {
+    "x": 1230.0,
+    "y": 200.0,
+    "width": 610.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Review Context For Answers And Evidence": {
+    "x": 1860.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Provide Answers and Evidence": {
+    "x": 1950.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Decide Planning Criteria Action": {
+    "x": 2040.0,
+    "y": 200.0,
+    "width": 610.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Provide Decision Criteria and Assumptions": {
+    "x": 2670.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Make Decisons and Assumptions": {
+    "x": 2760.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Build Knowledge Action": {
+    "x": 2850.0,
+    "y": 200.0,
+    "width": 550.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Clarifications and Planning Responses": {
+    "x": 3420.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Build Knowledge Graph": {
+    "x": 3510.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Validate With Rules": {
+    "x": 3600.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Edit Knowledge Graph": {
+    "x": 3690.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Read Render Output Instructions and Data": {
+    "x": 3780.0,
+    "y": 200.0,
+    "width": 430.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Render Output": {
+    "x": 4230.0,
+    "y": 200.0,
+    "width": 430.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Generate Rendered Outputs": {
+    "x": 4680.0,
+    "y": 200.0,
+    "width": 80.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Load Rendered Content": {
+    "x": 4770.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Validate Knowledge & Content Against Rules": {
+    "x": 4980.0,
+    "y": 200.0,
+    "width": 610.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Review Answers, Assumptions": {
+    "x": 5610.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Rules": {
+    "x": 5820.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Reviews Violations": {
+    "x": 6030.0,
+    "y": 200.0,
+    "width": 130.0,
+    "height": 60.0
+  },
+  "FEATURE|Execute Behavior Actions|Suggest Bot Corrections": {
+    "x": 6180.0,
+    "y": 200.0,
+    "width": 70.0,
+    "height": 60.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Provides Context of New Bot": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Generate MCP Bot Server": {
+    "x": 92.0,
+    "y": 410.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Drop Bot Builder Behavior into Chat": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Create Bot Scaffolding": {
+    "x": 152.0,
+    "y": 350.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Generate Bot Tools": {
+    "x": 152.0,
+    "y": 410.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Deploy MCP BOT Server": {
+    "x": 212.0,
+    "y": 350.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Generate Behavior Action Tools": {
+    "x": 272.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Confirm Location": {
+    "x": 392.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Determines Working Area From Current Dir": {
+    "x": 452.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Shares Context and Project Location": {
+    "x": 512.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Speaks Trigger Words For Bot Tool": {
+    "x": 572.0,
+    "y": 410.0
+  },
+  "Invoke MCP Bot Server|Init Project|Drops Behavior Folder in Chat w/ relevant Bot Config": {
+    "x": 572.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Locates Existing Project  State": {
+    "x": 572.0,
+    "y": 470.0
+  },
+  "Invoke MCP Bot Server|Init Project|Route To Project Tool": {
+    "x": 572.0,
+    "y": 590.0
+  },
+  "Invoke MCP Bot Server|Init Project|Save Project In Context": {
+    "x": 632.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Move to Project": {
+    "x": 632.0,
+    "y": 410.0
+  },
+  "Invoke MCP Bot Server|Init Project|Stores Activity for Initialize Project Action": {
+    "x": 632.0,
+    "y": 470.0
+  },
+  "Invoke MCP Bot Server|Init Project|Create Project Folder": {
+    "x": 632.0,
+    "y": 590.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Provides addtnl Instructions": {
+    "x": 722.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invokes Correct Behavior Action (We Hope)": {
+    "x": 782.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Forward To Behavior Action": {
+    "x": 782.0,
+    "y": 410.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invoke Action In Behavior": {
+    "x": 842.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Correct, Feedback, Proceed": {
+    "x": 932.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Folllows Behavior Istructions From Context": {
+    "x": 992.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Inject Next behavor-Action to Instructions": {
+    "x": 992.0,
+    "y": 410.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Folllows Injected Instructions": {
+    "x": 992.0,
+    "y": 470.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|InjectsContent Into Instructions": {
+    "x": 992.0,
+    "y": 530.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Follows Enriched Instructions": {
+    "x": 992.0,
+    "y": 590.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Proceeds to Next Actions following instructions In Context": {
+    "x": 1052.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Saves Content": {
+    "x": 1052.0,
+    "y": 410.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Saves Behavior State": {
+    "x": 1052.0,
+    "y": 530.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Injects Instructions": {
+    "x": 1112.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Find Gather Context Instructions(hope)": {
+    "x": 1232.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Presents Answers and Evidence to User": {
+    "x": 1292.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Finds Questions and Evidence form Context": {
+    "x": 1352.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Answers Questions and Evidence": {
+    "x": 1412.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Gather Context|Answers Questions and Evidence from Context": {
+    "x": 1412.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Pause based on context": {
+    "x": 1472.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Proceeds to follow planning (we Hope)": {
+    "x": 1532.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Tracks Activity for Gather Context Action": {
+    "x": 1532.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Gather Context|Proceeds to follow planning": {
+    "x": 1532.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Gather Context|Saves Answers and Evidencein Context": {
+    "x": 1592.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Correct, Feedback, Proceed": {
+    "x": 1652.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Pauses": {
+    "x": 1652.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Gather Context|Injects Gather Context Instructions": {
+    "x": 1712.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Gather Context|Calls Behavior Planning Tool": {
+    "x": 1772.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Correct, Feedback, Proceed": {
+    "x": 2042.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Save Assumptions and Decisions using Context": {
+    "x": 2102.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Submit Final Assumptions and Decisions to Tools for Saving": {
+    "x": 2102.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Proceed to Build Knowledge using context": {
+    "x": 2162.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Track Activity for Planning Action": {
+    "x": 2162.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Pause based on context": {
+    "x": 2222.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Find Planning Instructions from Context": {
+    "x": 2282.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Read Injected Planning Instructions": {
+    "x": 2342.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Find Decision Criteria and Assumptions from Context": {
+    "x": 2342.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Make Assumptions and Decisions from Context": {
+    "x": 2402.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Present Assumptions and Decisions to User": {
+    "x": 2462.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Make Assumptions and Decisions": {
+    "x": 2462.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Call Build Knowledge Tool": {
+    "x": 2522.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Inject Planning Instructions": {
+    "x": 2582.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Find Decision Criteria and Assumptions from Context": {
+    "x": 2852.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Read Answers and Evidence from Context": {
+    "x": 2912.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Read Injected Decision Criteria and Assumptions": {
+    "x": 2912.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Read Injected Answers and Evidence": {
+    "x": 2912.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Correct, Feedback, Proceed": {
+    "x": 2972.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Submit Knowledge Graph to Build Knowledge Tools for Saving": {
+    "x": 3092.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Track Activity for Build Knowledge Action": {
+    "x": 3092.0,
+    "y": 650.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Save Knowledge Graph using Context": {
+    "x": 3032.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Save Knowledge Graph": {
+    "x": 3092.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Proceed to Build Knowledge using context": {
+    "x": 3092.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Call Render Output Tool": {
+    "x": 3092.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Find Knowledge Graph Template and Builder Instructions": {
+    "x": 3152.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Inject Knowledge Graph Template and Builder Instructions": {
+    "x": 3152.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Build Knowledge Graph From Context": {
+    "x": 3212.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Read Injected Build Knowledge Instructions": {
+    "x": 3212.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Creates Knowledge Graph Using Builder and Template": {
+    "x": 3212.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Inject Key Questions and Clarifications Loading Instructions": {
+    "x": 3272.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Inject Decision Criteria and Assumptions Loading Instructions": {
+    "x": 3332.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Load + Inject  Answers + Evidence": {
+    "x": 3332.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Find Structured Content in Context": {
+    "x": 3782.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Find Render Output Instructions in Context": {
+    "x": 3842.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Read  Injected Transformer Methods Instructions": {
+    "x": 3962.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Find Transformer Methods in Context": {
+    "x": 3902.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Read  Injected TemplateInstructions": {
+    "x": 3962.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Find Templates in Context": {
+    "x": 3962.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Inject Load Transformer Methods Instructuion": {
+    "x": 4022.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Inject  Load Template Instructuion": {
+    "x": 4082.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Load + Inject Template": {
+    "x": 4142.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Load +Inject Transformer Methods": {
+    "x": 4082.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Load +  Inject Srtuctured  Content": {
+    "x": 4082.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Inject Render Output Instructions": {
+    "x": 4142.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Render Outputs Using Components  In Context": {
+    "x": 4232.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Render Output Using Injected Componenents": {
+    "x": 4232.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Render Output|Render Outputs Using Builder": {
+    "x": 4232.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Render Output|Validate Rules Using Tool": {
+    "x": 4232.0,
+    "y": 650.0
+  },
+  "Execute Behavior Actions|Render Output|Find Rendered Outputs in Context and Display": {
+    "x": 4292.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Pause": {
+    "x": 4352.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Provide Feedback then Update": {
+    "x": 4412.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Update Rendered Outputs Based on Feedback": {
+    "x": 4472.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Submit Rendered Content to Tool for Saving": {
+    "x": 4472.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Render Output|Store Rendered Content to File System": {
+    "x": 4472.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Render Output|Track Activity for Render Output Action": {
+    "x": 4532.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Render Output|Create Traceability Link": {
+    "x": 4592.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Find Rendered Content Instructions from Context and Load": {
+    "x": 4772.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Follow Injected Instructions and Load Content": {
+    "x": 4772.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Review Built Knowledge": {
+    "x": 4832.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Review Answers, Assumptions": {
+    "x": 4892.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Proceed to Correct-Bot trough  context": {
+    "x": 4982.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Call Correct-Bot Action Tool": {
+    "x": 5342.0,
+    "y": 530.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Find  Behavior Specific Rules from Context": {
+    "x": 5042.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Find Common Bot Rules from Context": {
+    "x": 5102.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|FInd Content in Context": {
+    "x": 5162.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Validate Content vs Injected Diagnostics and Rules": {
+    "x": 5342.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Track Activity for Validate Rules Action": {
+    "x": 5342.0,
+    "y": 650.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Save Content": {
+    "x": 5402.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Submit Content to Tool for Saving": {
+    "x": 5342.0,
+    "y": 890.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Validate Content Using Injected Diagnostics + Rules": {
+    "x": 5342.0,
+    "y": 1010.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Find Rules in Context and validate against Rules": {
+    "x": 5222.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Read report and make changes": {
+    "x": 5282.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Pause": {
+    "x": 5342.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Save Content through Context": {
+    "x": 5402.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Inject Common Bot Rules Instructions": {
+    "x": 5462.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Inject Behavior Specific Rules Instructions": {
+    "x": 5522.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Load + Inject Diagnostics Results, Knowledge, Content Instructions": {
+    "x": 5522.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Find Original and Improved Work From Context": {
+    "x": 5612.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Inject Load Bot and Rules In Instructions": {
+    "x": 5612.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Read Original and Improved Work Usng Instructions": {
+    "x": 5612.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Inject Correct Bot Instructions": {
+    "x": 5672.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Injects Review Original and Improved Work Instructions": {
+    "x": 5732.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Finds Rules and Prompts In Context": {
+    "x": 5822.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Determine Issues From Context": {
+    "x": 5882.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Reads Injected Rules and Prompts": {
+    "x": 5882.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Suggest Corrections Based On Context": {
+    "x": 5942.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Determine Issues": {
+    "x": 5942.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Suggest Bot Corrections Based on Instructions": {
+    "x": 5942.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Review . Modifiy. Apprtove Correctins": {
+    "x": 6032.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Submit Bot Guidance and Rules Changes to Correct-Bot Tool": {
+    "x": 6092.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Makes Corrections to Found Rules and Instructions": {
+    "x": 6092.0,
+    "y": 350.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Save Correcions": {
+    "x": 6092.0,
+    "y": 470.0
+  },
+  "Execute Behavior Actions|Suggest Bot Corrections|Track Activity for Correct-Bot Action": {
+    "x": 6182.0,
+    "y": 350.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Provides Context of New Bot|Human": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Drop Bot Builder Behavior into Chat|AI CHat": {
+    "x": 92.0,
+    "y": 290.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Create Bot Scaffolding|Human": {
+    "x": 152.0,
+    "y": 290.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Create Bot Scaffolding|AI CHat": {
+    "x": 152.0,
+    "y": 290.0
+  },
+  "Build Agile Bots|Generate Bot Server And Tools|Generate Bot Tools|MCP Server Generator": {
+    "x": 152.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Confirm Location|AI Chat": {
+    "x": 392.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Init Project|Determines Working Area From Current Dir|Human": {
+    "x": 452.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Init Project|Shares Context and Project Location|Human": {
+    "x": 512.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Init Project|Speaks Trigger Words For Bot Tool|Bot": {
+    "x": 512.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Init Project|Drops Behavior Folder in Chat w/ relevant Bot Config|AI Chat": {
+    "x": 572.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Init Project|Save Project In Context|Human": {
+    "x": 632.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Init Project|Save Project In Context|AI Chat": {
+    "x": 632.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Provides addtnl Instructions|AI Chat": {
+    "x": 722.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invokes Correct Behavior Action (We Hope)|Human": {
+    "x": 782.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invokes Correct Behavior Action (We Hope)|AI Chat": {
+    "x": 782.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invoke Action In Behavior|Behavior Action Tool": {
+    "x": 842.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Human": {
+    "x": 902.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Forward To Behavior Action|Bot Behavior": {
+    "x": 782.0,
+    "y": 350.0
+  },
+  "Invoke MCP Bot Server|Invoke Bot Tool|Invoke Action In Behavior|Bot Behavior": {
+    "x": 842.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Behavior Action Tool": {
+    "x": 902.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Correct, Feedback, Proceed|AI Chat": {
+    "x": 932.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Folllows Behavior Istructions From Context|Human": {
+    "x": 992.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Proceeds to Next Actions following instructions In Context|AI Chat": {
+    "x": 1052.0,
+    "y": 290.0
+  },
+  "Invoke MCP Bot Server|Perform Behavior Action|Injects Instructions|Bot Behavior": {
+    "x": 1112.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Find Gather Context Instructions(hope)|AI Chat": {
+    "x": 1232.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Finds Questions and Evidence form Context|AI Chat": {
+    "x": 1352.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Pause based on context|Human": {
+    "x": 1472.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Proceeds to follow planning (we Hope)|AI Chat": {
+    "x": 1532.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Proceeds to follow planning|Bot-Behavior": {
+    "x": 1532.0,
+    "y": 410.0
+  },
+  "Execute Behavior Actions|Gather Context|Saves Answers and Evidencein Context|AI Chat": {
+    "x": 1592.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Correct, Feedback, Proceed|Human": {
+    "x": 1652.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Injects Gather Context Instructions|Bot  Behavor": {
+    "x": 1712.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Gather Context|Calls Behavior Planning Tool|Bot Behavior": {
+    "x": 1772.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Correct, Feedback, Proceed|AI Chat": {
+    "x": 2042.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Save Assumptions and Decisions using Context|Human": {
+    "x": 2102.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Save Assumptions and Decisions using Context|Bot Behavior": {
+    "x": 2102.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Proceed to Build Knowledge using context|AI Chat": {
+    "x": 2162.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Pause based on context|Human": {
+    "x": 2222.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Pause based on context|Bot-Behavior": {
+    "x": 2222.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Pause based on context|AI Chat": {
+    "x": 2222.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Find Planning Instructions from Context|Human": {
+    "x": 2282.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Find Planning Instructions from Context|AI Chat": {
+    "x": 2282.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Call Build Knowledge Tool|Bot Behavior": {
+    "x": 2522.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Decide Planning Criteria Action|Inject Planning Instructions|AI Chat": {
+    "x": 2582.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Provide Decision Criteria and Assumptions|Bot-Behavior": {
+    "x": 2642.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Find Decision Criteria and Assumptions from Context|AI Chat": {
+    "x": 2852.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Correct, Feedback, Proceed|AI Chat": {
+    "x": 2972.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Save Knowledge Graph using Context|Human": {
+    "x": 3032.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Save Knowledge Graph using Context|AI Chat": {
+    "x": 3032.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Proceed to Build Knowledge using context|Bot-Behavior": {
+    "x": 3092.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Find Knowledge Graph Template and Builder Instructions|Human": {
+    "x": 3152.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Proceed to Build Knowledge using context|AI Chat": {
+    "x": 3092.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Find Knowledge Graph Template and Builder Instructions|Bot-Behavior": {
+    "x": 3152.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Build Knowledge Graph From Context|AI Chat": {
+    "x": 3212.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Inject Key Questions and Clarifications Loading Instructions|AI Chat": {
+    "x": 3272.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Build Knowledge Action|Inject Decision Criteria and Assumptions Loading Instructions|Bot-Behavior": {
+    "x": 3332.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Find Structured Content in Context|AI Chat": {
+    "x": 3782.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Inject Load Transformer Methods Instructuion|Bot-Behavior": {
+    "x": 4022.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Read Render Output Instructions and Data|Inject Render Output Instructions|Bot-Behavior": {
+    "x": 4142.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Render Outputs Using Components  In Context|AI Chat": {
+    "x": 4232.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Pause|Human": {
+    "x": 4352.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Provide Feedback then Update|AI Chat": {
+    "x": 4412.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Update Rendered Outputs Based on Feedback|Human": {
+    "x": 4472.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Track Activity for Render Output Action|Bot-Behavior": {
+    "x": 4532.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Render Output|Create Traceability Link|Agile Bot": {
+    "x": 4592.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Find Rendered Content Instructions from Context and Load|AI Chat": {
+    "x": 4772.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Load Rendered Content|Review Built Knowledge|Agile Bot": {
+    "x": 4832.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Proceed to Correct-Bot trough  context|Bot-Behavior": {
+    "x": 4982.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Find  Behavior Specific Rules from Context|AI Chat": {
+    "x": 5042.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Read report and make changes|AI Chat": {
+    "x": 5282.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Pause|Human": {
+    "x": 5342.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Save Content through Context|AI Chat": {
+    "x": 5402.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Inject Common Bot Rules Instructions|Human": {
+    "x": 5462.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Inject Common Bot Rules Instructions|AI Chat": {
+    "x": 5462.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Validate Knowledge & Content Against Rules|Inject Behavior Specific Rules Instructions|Bot-Behavior": {
+    "x": 5522.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Find Original and Improved Work From Context|AI Chat": {
+    "x": 5612.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Review Answers, Assumptions|Inject Correct Bot Instructions|Bot-Behavior": {
+    "x": 5672.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Finds Rules and Prompts In Context|AI Chat": {
+    "x": 5822.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Reviews Rules|Suggest Corrections Based On Context|Human": {
+    "x": 5942.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Review . Modifiy. Apprtove Correctins|AI Chat": {
+    "x": 6032.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Makes Corrections to Found Rules and Instructions|Human": {
+    "x": 6092.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Reviews Violations|Makes Corrections to Found Rules and Instructions|AI Chat": {
+    "x": 6092.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Suggest Bot Corrections|Bot-Behavior": {
+    "x": 6152.0,
+    "y": 290.0
+  },
+  "Execute Behavior Actions|Suggest Bot Corrections|Track Activity for Correct-Bot Action|Bot-Behavior": {
+    "x": 6182.0,
+    "y": 290.0
+  }
+}

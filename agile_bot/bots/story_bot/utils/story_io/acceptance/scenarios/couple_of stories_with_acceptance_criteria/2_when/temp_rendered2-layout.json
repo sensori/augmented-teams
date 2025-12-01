@@ -1,0 +1,32 @@
+{
+  "EPIC|User Management": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 564.0,
+    "height": 60.0
+  },
+  "EPIC|Content Management": {
+    "x": 614.0,
+    "y": 130.0,
+    "width": 258.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Registration": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 282.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Authentication": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 564.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Management|Manage Content": {
+    "x": 614.0,
+    "y": 200.0,
+    "width": 258.0,
+    "height": 60.0
+  }
+}

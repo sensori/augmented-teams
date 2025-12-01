@@ -1,0 +1,53 @@
+{
+  "epics": [
+    {
+      "name": "User Authentication",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "Login Flow",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "User enters credentials",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "User clicks login",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System validates credentials",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

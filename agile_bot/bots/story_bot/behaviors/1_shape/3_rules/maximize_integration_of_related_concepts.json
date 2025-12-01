@@ -6,7 +6,7 @@
         "description": "Group concepts that the user sees as one capability",
         "content": [
           "Group concepts that the user sees as one capability",
-          "Nest implementation details under the feature they serve",
+          "Nest implementation details under the sub-epic they serve",
           "Keep related data and operations together",
           "Eliminate artificial boundaries based on code organization"
         ]

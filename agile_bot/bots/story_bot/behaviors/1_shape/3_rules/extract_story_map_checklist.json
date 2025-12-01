@@ -38,12 +38,12 @@
     },
     {
       "step": 4,
-      "title": "Create Features Based on Distinct Behaviors",
+      "title": "Create Sub-Epics Based on Distinct Behaviors",
       "checklist": [
         "For each epic, identify distinct behaviors (different ways to accomplish goal)",
-        "Group behaviors into features (different types, modes, contexts)",
-        "Each feature represents a distinct path or scenario",
-        "Validate: Feature name describes a behavior, not a technical mechanism"
+        "Group behaviors into sub-epics (different types, modes, contexts)",
+        "Each sub-epic represents a distinct path or scenario",
+        "Validate: Sub-epic name describes a behavior, not a technical mechanism"
       ]
     },
     {
@@ -80,11 +80,11 @@
       "checklist": [
         "Stories show user/system journey (not just list operations)",
         "Stories have context (when/why/outcome)",
-        "Stories are specific (not generic like 'Add Feature')",
+        "Stories are specific (not generic like 'Add Sub-Epic')",
         "Stories represent complete accomplishments (not data access)",
         "Implementation details are steps, not stories",
         "Order follows user journey, not technical sequential_order",
-        "Epics/features based on goals, not implementation structure"
+        "Epics/sub-epics based on goals, not implementation structure"
       ]
     }
   ],

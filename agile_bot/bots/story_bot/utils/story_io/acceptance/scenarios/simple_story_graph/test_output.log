@@ -1,0 +1,88 @@
+
+================================================================================
+SIMPLE STORY GRAPH ROUND-TRIP TEST
+================================================================================
+
+GIVEN: Verify input data exists...
+   [OK] Story graph: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\1_given\story-graph-simple.json
+
+WHEN: Run workflow script (render -> sync -> render)...
+
+================================================================================
+WHEN: Render story graph to DrawIO, sync back to JSON, then render again
+================================================================================
+Story graph: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\1_given\story-graph-simple.json
+
+1. Rendering story graph to DrawIO (first render, no layout)...
+   [OK] First render saved to: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\3_then\actual-first-render.drawio
+
+2. Syncing from DrawIO back to JSON...
+Layout data saved to: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph-layout.json
+
+================================================================================
+STORY GRAPH MERGE REPORT
+================================================================================
+Generated: 2025-12-01T01:09:32.301927
+Extracted: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph.json
+Original: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\1_given\story-graph-simple.json
+
+--------------------------------------------------------------------------------
+SUMMARY
+--------------------------------------------------------------------------------
+Total Extracted Stories: 5
+Total Original Stories: 5
+Exact Matches: 5
+Fuzzy Matches: 0
+New Stories (in extracted): 0
+Removed Stories (in original only): 0
+
+================================================================================
+NEXT STEPS:
+1. Review fuzzy matches above
+2. Confirm which matches are correct
+3. Run merge command to apply changes
+================================================================================
+
+
+Merge report saved to: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph-merge-report.json
+   [OK] Synced story graph saved to: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph.json
+   [OK] Extracted layout from: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph-layout.json
+
+3. Rendering synced JSON to DrawIO again (with layout)...
+   [OK] Second render saved to: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\3_then\actual-second-render.drawio
+
+================================================================================
+[OK] Workflow execution completed
+================================================================================
+First render:  c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\3_then\actual-first-render.drawio
+Synced JSON:   c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\synced-story-graph.json
+Second render: c:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\3_then\actual-second-render.drawio
+   [OK] Workflow script completed
+
+THEN: Run assertions...
+
+================================================================================
+THEN: Assert expected matches actual (JSON and DrawIO)
+================================================================================
+
+1. Asserting expected JSON matches synced JSON...
+   [OK] Expected JSON matches synced JSON!
+
+2. Extracting and comparing JSONs from rendered DrawIOs...
+Layout data saved to: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\temp_rendered1-layout.json
+Layout data saved to: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\simple_story_graph\2_when\temp_rendered2-layout.json
+   2a. Comparing expected JSON with extracted JSON from rendered1...
+   [OK] Expected JSON matches rendered1 extracted JSON!
+   2b. Comparing expected JSON with extracted JSON from rendered2...
+   [OK] Expected JSON matches rendered2 extracted JSON!
+
+3. Asserting DrawIOs match (layout preservation)...
+   [OK] First render matches second render (layout preserved)!
+
+================================================================================
+[OK] All assertions passed!
+================================================================================
+
+================================================================================
+[OK] All test steps completed successfully!
+================================================================================

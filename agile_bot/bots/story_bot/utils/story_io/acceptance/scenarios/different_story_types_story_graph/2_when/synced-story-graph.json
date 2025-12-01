@@ -1,0 +1,36 @@
+{
+  "epics": [
+    {
+      "name": "User Management System",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "User Registration",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        },
+        {
+          "name": "Authentication",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Content Delivery",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Media Streaming",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

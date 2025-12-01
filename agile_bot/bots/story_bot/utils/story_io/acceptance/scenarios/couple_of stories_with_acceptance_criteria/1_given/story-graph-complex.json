@@ -1,0 +1,208 @@
+{
+  "epics": [
+    {
+      "name": "User Management",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "User Registration",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "User creates account",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "Steps": [
+                    {
+                      "description": "Given user is on registration page",
+                      "type": "Given"
+                    },
+                    {
+                      "description": "When user enters email and password",
+                      "type": "When"
+                    },
+                    {
+                      "description": "Then account is created",
+                      "type": "Then"
+                    }
+                  ]
+                },
+                {
+                  "name": "User verifies email",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "User Authentication",
+          "sequential_order": 2,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "User logs in",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "Steps": [
+                    {
+                      "description": "Given user is on login page",
+                      "type": "Given"
+                    },
+                    {
+                      "description": "When user enters credentials",
+                      "type": "When"
+                    },
+                    {
+                      "description": "Then user is authenticated",
+                      "type": "Then"
+                    }
+                  ]
+                },
+                {
+                  "name": "User logs out",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "User resets password",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Content Management",
+      "sequential_order": 2,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "Create Content",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Admin creates article",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Admin"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Admin creates video",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Admin"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Manage Content",
+          "sequential_order": 2,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Admin edits content",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Admin"
+                  ],
+                  "story_type": "user",
+                  "Steps": [
+                    {
+                      "description": "Given admin is on content page",
+                      "type": "Given"
+                    },
+                    {
+                      "description": "When admin clicks edit",
+                      "type": "When"
+                    },
+                    {
+                      "description": "Then content is updated",
+                      "type": "Then"
+                    }
+                  ]
+                },
+                {
+                  "name": "Admin deletes content",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Admin"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Admin publishes content",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Admin"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

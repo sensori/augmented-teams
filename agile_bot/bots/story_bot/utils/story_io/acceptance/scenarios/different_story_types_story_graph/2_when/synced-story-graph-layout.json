@@ -1,0 +1,108 @@
+{
+  "EPIC|User Management System": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 490.0,
+    "height": 60.0
+  },
+  "EPIC|Content Delivery": {
+    "x": 530.0,
+    "y": 130.0,
+    "width": 280.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management System|User Registration": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management System|Authentication": {
+    "x": 240.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Delivery|Media Streaming": {
+    "x": 540.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "User Management System|User Registration|User creates account": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "User Management System|User Registration|System validates email format": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "User Management System|User Registration|System sends verification email": {
+    "x": 152.0,
+    "y": 350.0
+  },
+  "User Management System|Authentication|User logs in": {
+    "x": 242.0,
+    "y": 350.0
+  },
+  "User Management System|Authentication|System authenticates credentials": {
+    "x": 302.0,
+    "y": 350.0
+  },
+  "User Management System|Authentication|System generates session token": {
+    "x": 362.0,
+    "y": 350.0
+  },
+  "User Management System|Authentication|Upgrade authentication library": {
+    "x": 422.0,
+    "y": 350.0
+  },
+  "Content Delivery|Media Streaming|User streams video": {
+    "x": 542.0,
+    "y": 350.0
+  },
+  "Content Delivery|Media Streaming|System buffers video chunks": {
+    "x": 602.0,
+    "y": 350.0
+  },
+  "Content Delivery|Media Streaming|System adapts bitrate": {
+    "x": 662.0,
+    "y": 350.0
+  },
+  "Content Delivery|Media Streaming|Optimize video encoding settings": {
+    "x": 722.0,
+    "y": 350.0
+  },
+  "User Management System|User Registration|User creates account|Human": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "User Management System|User Registration|System validates email format|System": {
+    "x": 92.0,
+    "y": 290.0
+  },
+  "User Management System|Authentication|User logs in|Human": {
+    "x": 242.0,
+    "y": 290.0
+  },
+  "User Management System|Authentication|System authenticates credentials|System": {
+    "x": 302.0,
+    "y": 290.0
+  },
+  "User Management System|Authentication|Upgrade authentication library|Developer": {
+    "x": 422.0,
+    "y": 290.0
+  },
+  "Content Delivery|Media Streaming|User streams video|Human": {
+    "x": 542.0,
+    "y": 290.0
+  },
+  "Content Delivery|Media Streaming|System buffers video chunks|System": {
+    "x": 602.0,
+    "y": 290.0
+  },
+  "Content Delivery|Media Streaming|Optimize video encoding settings|Developer": {
+    "x": 722.0,
+    "y": 290.0
+  }
+}

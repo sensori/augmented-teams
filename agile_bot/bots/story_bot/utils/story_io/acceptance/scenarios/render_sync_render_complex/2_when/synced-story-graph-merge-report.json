@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-12-01T04:36:44.706850",
+  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\render_sync_render_complex\\2_when\\synced-story-graph.json",
+  "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\render_sync_render_complex\\1_given\\story-graph.json",
+  "summary": {
+    "total_extracted_stories": 0,
+    "total_original_stories": 0,
+    "exact_matches": 0,
+    "fuzzy_matches": 0,
+    "new_stories": 0,
+    "removed_stories": 0
+  },
+  "exact_matches": [],
+  "fuzzy_matches": [],
+  "new_stories": [],
+  "removed_stories": [],
+  "large_deletions": {
+    "missing_epics": [],
+    "missing_sub_epics": [],
+    "epics_with_many_missing_stories": [],
+    "sub_epics_with_many_missing_stories": []
+  }
+}

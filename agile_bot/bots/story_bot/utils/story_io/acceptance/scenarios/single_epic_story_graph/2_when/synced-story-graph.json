@@ -1,0 +1,17 @@
+{
+  "epics": [
+    {
+      "name": "User Authentication",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Login Flow",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

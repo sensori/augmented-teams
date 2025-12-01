@@ -1,0 +1,125 @@
+{
+  "epics": [
+    {
+      "name": "Render Diagram",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "Render Story IO Diagram",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Handle Render Outline",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Story IO MCP Server"
+                  ],
+                  "story_type": "technical",
+                  "Steps": [
+                    "When MCP tool receives render_outline request with story_graph_path, drawio_path, output_path, and layout_json parameters",
+                    "Then tool validates that story_graph_path is provided",
+                    "When story_graph_path is None",
+                    "Then tool raises ValueError('story_graph_path is required')",
+                    "When story_graph_path is provided",
+                    "Then tool calls StoryIODiagram.load_from_story_graph(Path(story_graph_path), Path(drawio_path) if drawio_path else None)",
+                    "When layout_json parameter is provided",
+                    "Then tool parses layout_json string using json.loads() to create layout_data dict",
+                    "When layout_json is None",
+                    "Then tool sets layout_data to None",
+                    "When diagram.render_outline(output_path=Path(output_path), layout_data=layout_data) is called",
+                    "Then renderer generates DrawIO XML and saves to output_path",
+                    "When render completes successfully",
+                    "Then tool returns JSON string with success=True, output_path, and summary containing epics count",
+                    "When render raises exception",
+                    "Then tool catches exception and returns JSON string with success=False and error message"
+                  ]
+                },
+                {
+                  "name": "Invoke Render Outline from CLI",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Story IO CLI"
+                  ],
+                  "story_type": "technical",
+                  "Steps": [
+                    "When argparse parses 'render-outline' command with --story-graph and --output arguments",
+                    "Then argparse creates args object with story_graph Path and output Path attributes",
+                    "When render_outline_command function receives args object",
+                    "Then function calls StoryIODiagram.load_from_story_graph(args.story_graph, args.drawio_file)",
+                    "When layout file is not provided in args",
+                    "Then function auto-detects layout by checking output_path.stem-layout.json, story-graph-drawio-extracted-layout.json, and output_path.stem-drawio-extracted-layout.json patterns",
+                    "When layout file exists",
+                    "Then function loads layout_data from JSON file",
+                    "When diagram.render_outline(output_path, layout_data) is called",
+                    "Then renderer generates DrawIO XML and saves to output_path",
+                    "When render completes",
+                    "Then function prints 'Generated DrawIO diagram: {output_path}' and 'Epics: {count}' to stdout",
+                    "When render succeeds",
+                    "Then function returns exit code 0"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Synchronize Graph",
+      "sequential_order": 3,
+      "estimated_stories": null,
+      "sub_epics": [
+        {
+          "name": "Synchronize Story Graph",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Handle Synchronize Outline",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [
+                    "Story IO MCP Server"
+                  ],
+                  "story_type": "technical",
+                  "Steps": [
+                    "When MCP tool receives synchronize_outline request with drawio_path, original_path, and output_path parameters",
+                    "Then tool creates StoryIODiagram instance with drawio_file=Path(drawio_path)",
+                    "When original_path parameter is provided",
+                    "Then tool sets original to Path(original_path)",
+                    "When original_path is None",
+                    "Then tool sets original to None",
+                    "When diagram.synchronize_outline(drawio_path=Path(drawio_path), original_path=original) is called",
+                    "Then synchronizer extracts story graph from DrawIO XML and compares with original if provided",
+                    "When output_path parameter is provided",
+                    "Then tool calls diagram.save_story_graph(Path(output_path)) to save synchronized graph",
+                    "When synchronize completes successfully",
+                    "Then tool returns JSON string with success=True, epics_count from result, and output_path",
+                    "When synchronize raises exception",
+                    "Then tool catches exception and returns JSON string with success=False and error message"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

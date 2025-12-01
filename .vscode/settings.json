@@ -14,5 +14,7 @@
         "--continue-on-collection-errors"
     ],
     "python.testing.cwd": "${workspaceFolder}",
-    "python.testing.autoTestDiscoverOnSaveEnabled": true
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "cursor.ai.autoAcceptFileWrites": true,
+    "cursor.general.autoAcceptFileWrites": true
 }

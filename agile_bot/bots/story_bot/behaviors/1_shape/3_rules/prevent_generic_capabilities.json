@@ -11,7 +11,7 @@
           "",
           "Correct Examples (specific behaviors with actors):",
           "- 'User invokes MCP tool and system routes to StoryIO handler' (specific: user, MCP tool, routing action)",
-          "- 'Developer adds feature Render Exploration to epic Render StoryGraph' (specific: developer, feature name, epic name)",
+          "- 'Developer adds sub-epic Render Exploration to epic Render StoryGraph' (specific: developer, sub-epic name, epic name)",
           "- 'System loads story graph from JSON file when user requests render' (specific: system, load action, trigger)",
           "- 'CLI determines workspace root from current directory' (specific: CLI, determine action, source)",
           "",

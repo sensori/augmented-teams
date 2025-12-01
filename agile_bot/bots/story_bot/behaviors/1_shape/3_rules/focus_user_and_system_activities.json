@@ -18,10 +18,10 @@
           "- Technical stories document class-to-class interactions where domain concepts act as actors",
           "",
           "CRITICAL NAMING RULE:",
-          "- Actor must NOT appear in Epic/Feature/Story name",
+          "- Actor must NOT appear in Epic/Sub-Epic/Story name",
           "- Name format: '[Verb] [Noun]' only",
           "- Examples: 'Loads StoryGraph' (actor: StoryIODiagram, documented separately)",
-          "- Examples: 'Adds Feature' (actor: Epic, documented separately)",
+          "- Examples: 'Adds Sub-Epic' (actor: Epic, documented separately)",
           "- Examples: 'Changes Parent' (actor: Component, documented separately)"
         ]
       },

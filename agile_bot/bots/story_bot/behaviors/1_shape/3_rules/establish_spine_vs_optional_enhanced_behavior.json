@@ -1,5 +1,5 @@
 {
-  "description": "Establish mandatory spine stories vs optional/enhanced behavior stories. When mapping stories, carefully distinguish between sequential spine (essential path) and optional paths, alternate routes, or additional functionality that is not strictly essential. Mandatory stories form the sequential spine (story AND story AND story). Optional stories are alternatives or enhancements (story OR story) that branch from the spine and can return to it. Sequential stories form the mandatory flow; optional stories are alternatives, enhancements, or non-essential features.",
+  "description": "Establish mandatory spine stories vs optional/enhanced behavior stories. When mapping stories, carefully distinguish between sequential spine (essential path) and optional paths, alternate routes, or additional functionality that is not strictly essential. Mandatory stories form the sequential spine (story AND story AND story). Optional stories are alternatives or enhancements (story OR story) that branch from the spine and can return to it. Sequential stories form the mandatory flow; optional stories are alternatives, enhancements, or non-essential sub-epics.",
   "examples": [
     {
       "do": {
@@ -8,7 +8,7 @@
           "Start by identifying the minimal essential path that delivers core value",
           "The spine represents the mandatory sequence: Story1 AND Story2 AND Story3",
           "Spine stories get sequential_order numbers (1, 2, 3, etc.)",
-          "Spine stories are required for the feature to deliver its core purpose",
+          "Spine stories are required for the sub-epic to deliver its core purpose",
           "Ask: 'What is the minimum path to deliver value?'",
           "Establish the mandatory spine before identifying optional/enhanced behaviors",
           "Explicitly distinguish between spine (mandatory) and optional/enhanced behaviors"
@@ -33,21 +33,21 @@
           "Optional stories branch from or enhance the spine but are not required",
           "Mark optional stories with 'optional: true' in the story structure",
           "Optional stories may have sequential_order if they're part of an alternative flow (e.g., 2.1, 3.1, etc.)",
-          "Optional stories represent: alternate routes, enhancements, nice-to-have features",
-          "Ask: 'Can the feature deliver value without this story?'",
+          "Optional stories represent: alternate routes, enhancements, nice-to-have sub-epics",
+          "Ask: 'Can the sub-epic deliver value without this story?'",
           "Optional/enhanced stories can return to the spine after completion",
-          "Sort optional/enhanced stories by priority of delivery within the same feature"
+          "Sort optional/enhanced stories by priority of delivery within the same sub-epic"
         ]
       },
       "dont": {
         "description": "Don't omit optional markers",
         "content": [
           "Don't leave optional stories unmarked - be explicit",
-          "Don't assume all stories in a feature are mandatory",
+          "Don't assume all stories in a sub-epic are mandatory",
           "Don't mix optional and mandatory without clear distinction",
           "Don't fail to identify the spine before adding optional paths",
           "Don't omit the optional marker - be explicit about spine vs optional/enhanced behaviors",
-          "Don't create features where every story is mandatory when alternatives or enhancements exist"
+          "Don't create sub-epics where every story is mandatory when alternatives or enhancements exist"
         ]
       }
     },
@@ -55,25 +55,34 @@
       "do": {
         "description": "Distinguish types of optional paths with concrete examples",
         "content": [
-          "Alternate routes: User logs in with email (sequential_order: 2) OR User logs in with social media (sequential_order: 2.1, optional: true)",
-          "Enhancements: User views dashboard (sequential_order: 3) AND User customizes dashboard (sequential_order: 3.1, optional: true)",
-          "Additional functionality: User views dashboard (sequential_order: 3) AND User shares dashboard (sequential_order: 3.2, optional: true)",
-          "Error handling: User enters invalid data (sequential_order: 4) AND System shows error message (sequential_order: 4.1, optional: true)",
+          "Spine (all stories with and), then OR optional branch (all stories with and), then OR enhanced (all stories with and):",
           "",
-          "Correct Examples:",
-          "- Spine: User creates account (mandatory) AND User logs in (mandatory) AND User views dashboard (mandatory)",
-          "- Optional branch: User creates account (mandatory) OR User signs in with social media (optional, priority 1) OR User signs in with email (optional, priority 2)",
-          "- Enhanced behavior: User views dashboard (mandatory) AND User customizes dashboard (optional, priority 1) AND User shares dashboard (optional, priority 2)"
+          "Correct Example:",
+          "Spine (all stories with and):",
+          "  (S) User --> creates account",
+          "  and (S) User --> logs in",
+          "  and (S) User --> views dashboard",
+          "OR optional branch (all stories with and):",
+          "  (S) User --> signs in with social media (optional)",
+          "  and (S) User --> signs in with email (optional)",
+          "OR enhanced (all stories with and):",
+          "  (S) User --> customizes dashboard (enhanced)",
+          "  and (S) User --> shares dashboard (enhanced)"
         ]
       },
       "dont": {
         "description": "Wrong mapping examples",
         "content": [
-          "Wrong: User creates account (1) AND User logs in with email (2) AND User logs in with social media (3) - social media should be optional",
-          "Wrong: User views dashboard (1) AND User customizes dashboard (2) AND User shares dashboard (3) - customization and sharing should be optional",
           "Wrong: All stories marked mandatory when some are clearly alternatives or enhancements",
-          "Wrong: No distinction between essential path and optional features",
-          "Wrong: User creates account (mandatory) AND User signs in with social media (mandatory) - should be OR with optional",
+          "  and (S) User --> creates account (1)",
+          "  and (S) User --> logs in with email (2)",
+          "  and (S) User --> logs in with social media (3) - social media should be optional",
+          "",
+          "Wrong: No distinction between essential path and optional sub-epics",
+          "  and (S) User --> views dashboard (1)",
+          "  and (S) User --> customizes dashboard (2)",
+          "  and (S) User --> shares dashboard (3) - customization and sharing should be optional",
+          "",
           "Wrong: Missing optional markers on alternative flows or enhanced behaviors",
           "Wrong: Optional/enhanced stories not sorted by priority",
           "Wrong: No clear spine established before adding optional behaviors"

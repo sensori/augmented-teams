@@ -1,0 +1,13 @@
+
+================================================================================
+SYNC RENDER WITH LAYOUT PRESERVATION TEST
+================================================================================
+
+GIVEN: Verify input data exists...
+   [OK] Story graph: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\sync_render_with_layout\1_given\story-graph.json
+
+WHEN: Run workflow script (render -> sync -> render)...
+   [OK] Workflow script completed
+
+THEN: Run assertions...
+[FAIL] Assertions failed with exit code 1

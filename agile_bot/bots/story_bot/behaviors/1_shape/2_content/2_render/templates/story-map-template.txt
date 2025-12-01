@@ -1,0 +1,47 @@
+(E) 
+    (E) Sub-Epic(s)
+        (E) Sub-Epic(s) - additional are optional
+            (S) Story
+                (AC) AC or steps
+
+(E) {epic_name}
+    (E) {sub_epic_name}
+        (S) {actor} --> {story_name}
+        (S) {actor} --> {story_name}
+        or (S) {actor} --> {story_name}
+            (AC) {actor} --> {acceptance_criteria}
+            (AC) {actor} --> {acceptance_criteria}
+            (AC) {actor} --> {acceptance_criteria}
+            (S) {actor} --> {story_name}
+                (AC) {actor} --> {acceptance_criteria}
+                (AC) {actor} --> {acceptance_criteria}
+        (S) {actor} --> {story_name}
+(E) {epic_name}
+    (E) {sub_epic_name}
+        (E) {nested_sub_epic_name}
+            (S) {actor} --> {story_name}
+            (S) {actor} --> {story_name}
+            or (S) {actor} --> {story_name}
+                (AC) {actor} --> {acceptance_criteria}
+        (E) {nested_sub_epic_name}
+            (S) {actor} --> {story_name}
+            (S) {actor} --> {story_name}
+
+Instructions:
+- Use (E) for Epics and Sub-Epics
+- Use (S) for Stories
+- Use (AC) for Acceptance Criteria
+- "and" is the default connector - do NOT show it in output (only stored in JSON)
+- Use "or" connector for alternative items (shown explicitly)
+- Use "opt" connector for optional items (shown explicitly)
+- Show actors with "--> " before story names (e.g., "Human --> Story Name")
+- Use hierarchical indentation (spaces, not tabs)
+- First item in a sequence has no connector
+- Stories can have nested sub-epics
+- Stories can have nested stories
+- Acceptance criteria are nested under stories
+- Use active behavioral language (verb-noun format)
+- Epic/Sub-Epic names: Verb-Noun format (actor NOT in name)
+- Story names: Actor-Verb-Noun format (actor in story with "-->")
+- Epics and Sub-Epics do NOT have connectors (only stories and AC items have connectors)
+

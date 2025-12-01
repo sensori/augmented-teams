@@ -1,0 +1,32 @@
+{
+  "EPIC|User Management System": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 490.0,
+    "height": 60.0
+  },
+  "EPIC|Content Delivery": {
+    "x": 530.0,
+    "y": 130.0,
+    "width": 280.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management System|User Registration": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 190.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management System|Authentication": {
+    "x": 240.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Delivery|Media Streaming": {
+    "x": 540.0,
+    "y": 200.0,
+    "width": 250.0,
+    "height": 60.0
+  }
+}

@@ -1,0 +1,281 @@
+(E) Build Agile Bots
+    (E) Generate Bot Server And Tools
+        (S) Human --> Provides Context of New Bot
+            (S) Human --> Generate MCP Bot Server
+        and (S) Human --> Drop Bot Builder Behavior into Chat
+            (S) Agile Bot --> Generate Bot Tools
+        and (S) Agile Bot --> Create Bot Scaffolding
+            (S) MCP Bot Server Generator --> Generate Behavior Tools
+        and (S) Bot Config --> Generate Behavior Action Tools
+        and (S) Bot Config --> Deploy MCP BOT Server
+and (E) Invoke MCP Bot Server
+    (E) Init Project
+        (S) Human --> Shares Context and Project Location
+            (S) Human --> Speaks Trigger Words For Project Tool
+                (S) Human --> Speaks Trigger Words For Bot Tool
+                    (S) Human --> Speaks Trigger Words For Bot Behavior Tool
+                        (S) Human --> Speaks Trigger Words For Bot Behavior Action Tool
+        and (S) AI Chat --> Route To Project Tool
+        and (S) AI Chat --> Determines Working Area From Current Dir
+            (S) Project Tool, AI Chat --> Injects Project  Move Instructions
+            and (S) Project Tool, AI Chat --> Injects Project  Folder Create Instructions
+            and (S) Project Tool, BotProject, AI Chat --> Generates Project Scaffold
+        and (S) Human --> Confirm Location
+        or (S) AI Chat --> Create Project Folder
+            (S) AI Chat --> Move to Project
+    and (E) Invoke Bot Tool
+        (S) Human --> Drops Behavior Folder in Chat w/ relevant Bot Config
+            (S) Human --> Speaks Trigger Words For Bot Behavior Tool
+                (S) Human --> Speaks Trigger Words For Bot Tool
+                    (S) Human --> Speaks Trigger Words For Bot Behavior Action Tool
+                        (S) Human --> Speaks Trigger Words For Project Tool
+            and (S) Human --> Forward To Behavior Action
+                (S) Human --> Forward To Behavior and Current Action
+                    (S) Human --> Forward To Current Behavior and Current Action
+            and (S) Human --> Route To Behavior Action
+                (S) AI Chat --> Route To MCP Behavior  Tool
+        and (S) Human --> Provides addtnl Instructions
+            (S) AI Chat --> AI  Route To MCP BotTool
+            and (S) AI Chat --> Route To MCP Bot Tool
+        and (S) Bot Tool --> Route To Behavior and  Action
+        and (S) AI Chat --> Invokes Correct Behavior Action (We Hope)
+            (S) Behavior Tool, AI Chat --> Route To Action
+        and (S) Behavior Tool, AI Chat --> Folllows Instructions from Folder configs (We Hope)
+            (S) Behavior Action Tool --> Routes To Behavior Action
+        and (S) BotBehavior --> Invoke Action In Behavior
+    and (E) Perform Behavior Action
+        (S) BotBehavior --> Injects Instructions
+        and (S) AI Chat --> Folllows Instructionsfrom Folder configs (We Hope)
+            (S) AI Chat --> Inject Next behavor-Action to Instructions
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Proceeds to Instructions from next Action in Folder (We Hope)
+            (S) AI Chat --> Calls Next MCP Behavior Action Tool
+                (S) AI Chat --> Submit Content Changes to Tools for Saving
+                and (S) Bot Behavior, AI Chat --> Saves Content
+            and (S) AI Chat --> Folllows Injected Instructions
+        and (S) Bot Behavior, AI Chat --> Saves Behavior State
+and (E) Execute Behavior Actions
+    (E) Gather Context
+        (S) AI Chat --> RetrievesQuestions And Evidence from Chat(hope)
+            (S) AI Chat, Gather Context Behavor --> Injects Gather Context Instructions
+        and (S) AI Chat, Gather Context Behavor --> Loads Questions and Evidence
+        and (S) AI Chat, Gather Context Behavor --> Answers Questions and Evidence from Context (hope)
+            (S) AI Chat --> Answers Questions and Evidence from Context
+        and (S) AI Chat --> Pauses we hope
+            (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+            (S) AI Chat --> Submit Answers and Evidence to Tools for Saving
+        and (S) AI Chat --> Updates Final Answers and Evidence (hope)
+            (S) AI Chat --> Updates Final Answers and Evidence
+        or (S) AI Chat --> Calls Behavior Planning Tool
+            (S) Gather Context Tool --> Proceeds to follow planning (we Hope)
+            and (S) Gather Context Tool --> Saves Answers and Evidence
+    and (E) Decide Planning Criteria Action
+        (S) BotProject --> Loads Next Behavior and Action from Workflow State
+        and (S) AI Chat --> Retrieves Decision Criteria and Evidence From Chat
+            (S) Planning Behavior Tool, AI Chat --> Injects Planning Instructions
+        and (S) Planning Behavior --> Loads Decsion Criteria and Evidence
+        and (S) Planning Behavior --> Makes Assumptions and Decisions from Context (hope)
+            (S) AI Chat --> Makes Assumptions and Decisions from Context
+        and (S) AI Chat --> Pauses we hope
+            (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Updates Assumpions and Decisions (hopr)
+            (S) AI Chat --> Updates Assumpions and Decisions
+            and (S) AI Chat --> Submits Final Assumptions andDecsions
+        and (S) AI Chat --> Proceeds to Build Knowledge (we Hope)
+            (S) AI Chat --> Calls Build Knowledge Tool
+            and (S) Planning Behavior --> Saves Final Assumptions  and Decisions
+    and (E) Build Knowledge
+        (S) Planning Behavior --> Loads Behavior and Action from Workflow State
+        and (S) AI Chat --> Displays Build Knowledge Instructions (we hope)
+        and (S) Planning Behavior --> Loads Clarification Data from Project
+        and (S) Planning Behavior --> Loads Planning Data from Project
+        and (S) Planning Behavior --> Loads Agent Rules from Bot Config
+        and (S) Planning Behavior --> Loads Behavior Rules from Behavior Configuration
+        and (S) Planning Behavior --> Accesses Content Configuration
+        and (S) Planning Behavior --> Accesses Build Knowledge Instructions Template
+        and (S) Planning Behavior --> Accesses Structured Content Schema from Content Configuration
+        and (S) Planning Behavior --> Accesses Builder Method Reference from Content Configuration
+        and (S) Planning Behavior, AI Chat --> Injects Build Knowledge Instructions
+        and (S) AI Chat --> Generates Instructions with Rules Schema and Builder
+        and (S) AI Chat --> Presents Generation Plan to User
+        and (S) AI Chat --> Pauses (we hope)
+        and (S) AI Chat --> Updates Generation Plan Based on Feedback
+        and (S) AI Chat --> Receives Instructions and Generates Structured Content
+        and (S) AI Chat --> Presents Generated Content to User
+        and (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Updates Generated Content Based on Feedback
+        and (S) AI Chat --> Submit Structured Content to Tools for Saving
+        and (S) Planning Behavior --> Calls Agent Store Method with Structured Content
+        and (S) Planning Behavior --> Stores Structured Content
+        and (S) Planning Behavior --> Stores Structured Content to File System
+        and (S) Planning Behavior --> Creates Traceability Link
+        and (S) Planning Behavior --> Tracks Activity for Build Knowledge Action
+        and (S) AI Chat --> Proceeds to Build Knowledge (we Hope)
+        and (S) AI Chat --> Calls Render Output Tool
+    and (E) Render Output Action
+        (S) Planning Behavior --> Loads Behavior and Action from Workflow State
+        and (S) AI Chat --> Displays Render Output Instructions (we hope)
+        and (S) Planning Behavior --> Loads Clarification Data from Project
+        and (S) Planning Behavior --> Loads Planning Data from Project
+        and (S) Planning Behavior --> Loads Structured Content from Behavior Content
+        and (S) Planning Behavior --> Accesses Content Configuration
+        and (S) Planning Behavior --> Accesses Render Output Instructions Template
+        and (S) Planning Behavior --> Accesses Output Templates from Content Configuration
+        and (S) Planning Behavior --> Accesses Transformer Method References from Content Configuration
+        and (S) Planning Behavior, AI Chat --> Injects Render Output Instructions
+        and (S) AI Chat --> Generates Instructions with Templates and Transformers
+        and (S) AI Chat --> Presents Rendering Plan to User
+        and (S) AI Chat --> Pauses (we hope)
+        and (S) AI Chat --> Updates Rendering Plan Based on Feedback
+        and (S) Planning Behavior --> Executes Output Builders if Configured
+        and (S) AI Chat --> Receives Instructions and Transforms Structured Content
+        and (S) AI Chat --> Presents Rendered Outputs to User
+        and (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Updates Rendered Outputs Based on Feedback
+        and (S) AI Chat --> Submit Rendered Content to Tools for Saving
+        and (S) Planning Behavior --> Calls Agent Store Method with Rendered Content
+        and (S) Planning Behavior --> Stores Rendered Content
+        and (S) Planning Behavior --> Stores Rendered Content to File System
+        and (S) Planning Behavior --> Creates Traceability Link
+        and (S) Planning Behavior --> Tracks Activity for Render Output Action
+        and (S) AI Chat --> Proceeds to Render Output (we Hope)
+        and (S) AI Chat --> Calls Validate Rules Tool
+    and (E) Validate Rules Action
+        (S) Planning Behavior --> Loads Behavior and Action from Workflow State
+        and (S) AI Chat --> Displays Validate Rules Instructions (we hope)
+        and (S) Planning Behavior --> Loads Clarification Data from Project
+        and (S) Planning Behavior --> Loads Planning Data from Project
+        and (S) Planning Behavior --> Loads Structured Content from Behavior Content
+        and (S) Planning Behavior --> Loads Rendered Content from Behavior Content
+        and (S) Planning Behavior --> Accesses Rules Configuration
+        and (S) Planning Behavior --> Loads Agent Rules from Bot Config
+        and (S) Planning Behavior --> Loads Behavior Rules from Behavior Configuration
+        and (S) Planning Behavior --> Executes Code Diagnostics for Violations
+        and (S) Planning Behavior --> Accesses Validate Rules Instructions Template
+        and (S) Planning Behavior, AI Chat --> Injects Validate Rules Instructions
+        and (S) AI Chat --> Generates Instructions with Rules Examples and Violations
+        and (S) AI Chat --> Presents Validation Plan to User
+        and (S) AI Chat --> Pauses (we hope)
+        and (S) AI Chat --> Updates Validation Plan Based on Feedback
+        and (S) AI Chat --> Receives Instructions and Evaluates Content Against Rules
+        and (S) AI Chat --> Generates Validation Report
+        and (S) AI Chat --> Presents Validation Report to User
+        and (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Updates Validation Report Based on Feedback
+        and (S) AI Chat --> Submit Validation Report to Tools for Saving
+        and (S) Planning Behavior --> Tracks Activity for Validate Rules Action
+        and (S) AI Chat --> Proceeds to Validate Rules (we Hope)
+        and (S) AI Chat --> Calls Correct Bot Tool (if violations found)
+    and (E) Correct Bot Action
+        (S) Planning Behavior --> Loads Behavior and Action from Workflow State
+        and (S) AI Chat --> Displays Correct Bot Instructions (we hope)
+        and (S) Planning Behavior --> Loads Clarification Data from Project
+        and (S) Planning Behavior --> Loads Planning Data from Project
+        and (S) Planning Behavior --> Loads Validation Violations from Previous Action
+        and (S) Planning Behavior --> Loads User Feedback from Context
+        and (S) Planning Behavior --> Loads Original Content from Behavior Content
+        and (S) Planning Behavior --> Accesses Rules Configuration
+        and (S) Planning Behavior --> Accesses Correct Bot Instructions Template
+        and (S) Planning Behavior, AI Chat --> Injects Correct Bot Instructions
+        and (S) AI Chat --> Generates Instructions with Violations and Feedback
+        and (S) AI Chat --> Presents Correction Plan to User
+        and (S) AI Chat --> Pauses (we hope)
+        and (S) AI Chat --> Updates Correction Plan Based on Feedback
+        and (S) AI Chat --> Receives Instructions and Applies Corrections
+        and (S) AI Chat --> Presents Corrected Content to User
+        and (S) AI Chat --> Pauses
+        and (S) Human --> Correct, Feedback, Proceed
+        and (S) AI Chat --> Updates Corrected Content Based on Feedback
+        and (S) AI Chat --> Submit Corrected Content to Tools for Saving
+        and (S) Planning Behavior --> Calls Agent Store Method with Corrected Content
+        and (S) Planning Behavior --> Stores Corrected Content
+        and (S) Planning Behavior --> Stores Corrected Content to File System
+        and (S) Planning Behavior --> Creates Traceability Link
+        and (S) Planning Behavior --> Tracks Activity for Correct Bot Action
+        and (S) AI Chat --> Proceeds to Correct Bot (we Hope)
+        and (S) AI Chat --> Calls Next Action Tool
+and (E) Manage Workflow State
+    (E) Determine Active Behavior and Action
+        (S) Planning Behavior --> Determines Active Behavior from Workflow State
+        and (S) Planning Behavior --> Determines Active or Next Action from Workflow State
+        and (S) Planning Behavior --> Uses Specific Behavior and Action from Context
+    and (E) Validate Workflow State
+        (S) Planning Behavior --> Validates Current Action is Complete
+        and (S) Planning Behavior --> Checks if Action Can Advance
+        and (S) Planning Behavior --> Checks if Behavior Can Advance
+    and (E) Transition Workflow State
+        (S) Planning Behavior --> Moves to Next Action if Current Action Done
+        and (S) Planning Behavior --> Moves to Next Behavior if Current Behavior Done
+        and (S) Planning Behavior --> Updates Workflow State in File System
+        and (S) Planning Behavior --> Saves Workflow State to Agent State File
+and (E) Manage Project State
+    (E) Store Project State
+        (S) Planning Behavior --> Stores Project Area to Agent State File
+        and (S) Planning Behavior --> Stores Bot Name to Agent State File
+        and (S) Planning Behavior --> Stores Activity Area to Agent State File
+    and (E) Store Workflow State
+        (S) Planning Behavior --> Stores Current Behavior Name to Workflow State File
+        and (S) Planning Behavior --> Stores Current Action Name to Workflow State File
+    and (E) Store Activity Data
+        (S) Planning Behavior --> Tracks Activity with Status and Behavior Name
+        and (S) Planning Behavior --> Creates Activity Entry in Activity Log
+        and (S) Planning Behavior --> Saves Activity Log to File System
+    and (E) Store Output Data
+        (S) Planning Behavior --> Stores Structured Content to File System
+        and (S) Planning Behavior --> Stores Rendered Content to File System
+        and (S) Planning Behavior --> Creates Traceability Links Between Activity and Output
+and (E) Load Configuration
+    (E) Load Bot Config
+        (S) Planning Behavior --> Loads Bot Config from Agent JSON File
+        and (S) Planning Behavior --> Loads Behaviors from Bot Config
+        and (S) Planning Behavior --> Loads Agent Rules from Bot Config
+        and (S) Planning Behavior --> Loads Trigger Words from Bot Config
+    and (E) Load Behavior Configuration
+        (S) Planning Behavior --> Loads Behavior Order from Bot Config
+        and (S) Planning Behavior --> Loads GuardRails from Behavior Configuration
+        and (S) Planning Behavior --> Loads Rules from Behavior Configuration
+        and (S) Planning Behavior --> Loads Actions from Behavior Configuration
+        and (S) Planning Behavior --> Loads Content Configuration from Behavior Configuration
+    and (E) Load Action Instructions
+        (S) Planning Behavior --> Loads Instructions Template from Base Actions
+        and (S) Planning Behavior --> Loads Instructions Template from Behavior Actions
+        and (S) Planning Behavior --> Substitutes Template Variables with Project Data
+    and (E) Load Templates and Rules
+        (S) Planning Behavior --> Loads Output Templates from Content Configuration
+        and (S) Planning Behavior --> Loads Agent Rules from Bot Config
+        and (S) Planning Behavior --> Loads Behavior Rules from Behavior Configuration
+        and (S) Planning Behavior --> Loads Examples from Rules Configuration
+and (E) Generate Instructions
+    (E) Generate Action Instructions
+        (S) Planning Behavior --> Accesses Instructions Template
+        and (S) Planning Behavior --> Loads Required Data from Project
+        and (S) Planning Behavior --> Loads Required Data from Behavior
+        and (S) Planning Behavior --> Substitutes Template Variables
+        and (S) Planning Behavior --> Prepends Common Instructions
+        and (S) Planning Behavior --> Returns Instructions to MCP Tool
+    and (E) Generate Build Instructions
+        (S) Planning Behavior --> Loads Clarification Data
+        and (S) Planning Behavior --> Loads Planning Data
+        and (S) Planning Behavior --> Loads Agent Rules
+        and (S) Planning Behavior --> Loads Behavior Rules
+        and (S) Planning Behavior --> Loads Structured Content Schema
+        and (S) Planning Behavior --> Assembles Build Instructions
+    and (E) Generate Transform Instructions
+        (S) Planning Behavior --> Loads Clarification Data
+        and (S) Planning Behavior --> Loads Planning Data
+        and (S) Planning Behavior --> Loads Structured Content
+        and (S) Planning Behavior --> Loads Output Templates
+        and (S) Planning Behavior --> Loads Transformer Methods
+        and (S) Planning Behavior --> Assembles Transform Instructions
+    and (E) Generate Validation Instructions
+        (S) Planning Behavior --> Loads Clarification Data
+        and (S) Planning Behavior --> Loads Planning Data
+        and (S) Planning Behavior --> Loads Content Data
+        and (S) Planning Behavior --> Loads Rules and Examples
+        and (S) Planning Behavior --> Executes Code Diagnostics
+        and (S) Planning Behavior --> Assembles Validation Instructions

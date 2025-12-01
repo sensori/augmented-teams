@@ -1,0 +1,56 @@
+{
+  "EPIC|User Management": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 564.0,
+    "height": 60.0
+  },
+  "EPIC|Content Management": {
+    "x": 614.0,
+    "y": 130.0,
+    "width": 258.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Registration": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 282.0,
+    "height": 60.0
+  },
+  "FEATURE|User Management|User Authentication": {
+    "x": 20.0,
+    "y": 200.0,
+    "width": 564.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Management|Manage Content": {
+    "x": 614.0,
+    "y": 200.0,
+    "width": 258.0,
+    "height": 60.0
+  },
+  "User Management|User Registration|User creates account": {
+    "x": 22.0,
+    "y": 350.0
+  },
+  "User Management|User Authentication|User logs in": {
+    "x": 304.0,
+    "y": 350.0
+  },
+  "Content Management|Manage Content|Admin edits content": {
+    "x": 616.0,
+    "y": 350.0
+  },
+  "User Management|User Registration|User creates account|Human": {
+    "x": 22.0,
+    "y": 290.0
+  },
+  "User Management|User Authentication|User logs in|Human": {
+    "x": 304.0,
+    "y": 290.0
+  },
+  "Content Management|Manage Content|Admin edits content|Admin": {
+    "x": 616.0,
+    "y": 290.0
+  }
+}

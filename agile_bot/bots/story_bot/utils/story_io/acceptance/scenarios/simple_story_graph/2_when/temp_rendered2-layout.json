@@ -1,0 +1,32 @@
+{
+  "EPIC|Create Character": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 250.0,
+    "height": 60.0
+  },
+  "EPIC|Combat System": {
+    "x": 290.0,
+    "y": 130.0,
+    "width": 160.0,
+    "height": 60.0
+  },
+  "FEATURE|Create Character|Establish Identity": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 130.0,
+    "height": 60.0
+  },
+  "FEATURE|Create Character|Set Attributes": {
+    "x": 180.0,
+    "y": 200.0,
+    "width": 70.0,
+    "height": 60.0
+  },
+  "FEATURE|Combat System|Basic Combat": {
+    "x": 300.0,
+    "y": 200.0,
+    "width": 130.0,
+    "height": 60.0
+  }
+}

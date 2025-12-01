@@ -1,0 +1,85 @@
+{
+  "epics": [
+    {
+      "name": "Create Character",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Establish Identity",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": [
+            {
+              "name": "User enters name",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "story_type": "user",
+              "connector": "and",
+              "acceptance_criteria": []
+            },
+            {
+              "name": "User selects appearance",
+              "sequential_order": 2.0,
+              "users": [],
+              "story_type": "user",
+              "connector": "or",
+              "acceptance_criteria": []
+            }
+          ]
+        },
+        {
+          "name": "Set Attributes",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": [
+            {
+              "name": "User assigns stats",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "story_type": "user",
+              "connector": "and",
+              "acceptance_criteria": []
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Combat System",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Basic Combat",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": [
+            {
+              "name": "User attacks enemy",
+              "sequential_order": 1.0,
+              "users": [
+                "Human"
+              ],
+              "story_type": "user",
+              "connector": "and",
+              "acceptance_criteria": []
+            },
+            {
+              "name": "Enemy attacks user",
+              "sequential_order": 2.0,
+              "users": [],
+              "story_type": "user",
+              "connector": "or",
+              "acceptance_criteria": []
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

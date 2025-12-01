@@ -1,49 +1,49 @@
 {
-  "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.",
+  "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 sub-epics, sub-epics contain 4-9 stories. Split when exceeding, merge when below minimum.",
   "examples": [
     {
       "do": {
         "description": "Maintain hierarchy within the 7±2 cognitive limit range",
         "content": [
-          "Epic: Contains 4-9 features",
-          "  - Split into Sub-Epics when > 9 features",
-          "  - Merge with another epic when < 4 features",
-          "Feature: Contains 4-9 stories",
-          "  - Split into 2 features when > 9 stories",
-          "  - Merge with another feature when < 4 stories",
-          "Story: Contains 2-9 acceptance criteria",
+          "(E) Epic: Contains 4-9 sub-epics",
+          "  - Split into additional Sub-Epics when > 9 sub-epics",
+          "  - Merge with another epic when < 4 sub-epics",
+          "(E) Sub-Epic: Contains 4-9 stories",
+          "  - Split into 2 sub-epics when > 9 stories",
+          "  - Merge with another sub-epic when < 4 stories",
+          "(S) Story: Contains 2-9 acceptance criteria",
           "  - Split into 2 stories when > 9 AC",
           "  - Merge with another story when < 2 AC (single AC stories are too small)",
           "Apply 7±2 cognitive limit principle (optimal range: 5-9, acceptable: 4-9)",
           "",
           "Example:",
-          "Manage Orders (10 features → SPLIT)",
-          "  ├─ Manage Customer Orders (6 features) ✓",
-          "  └─ Manage Order Fulfillment (4 features) ✓",
+          "(E) Manage Orders (10 sub-epics → SPLIT)",
+          "  and (E) Manage Customer Orders (6 stories) ✓",
+          "  and (E) Manage Order Fulfillment (4 stories) ✓",
           "",
-          "Place Order (12 stories → SPLIT)",
-          "  → Split into: Initiate Order (6 stories) ✓",
-          "                Complete Order (6 stories) ✓",
+          "(E) Place Order (12 stories → SPLIT)",
+          "  and (S) Initiate Order (6 AC) ✓",
+          "  and (S) Complete Order (6 AC) ✓",
           "",
-          "Story: Validate Payment (11 AC → SPLIT)",
-          "  → Split into: Check Payment Method (5 AC) ✓",
-          "                Process Payment Transaction (6 AC) ✓"
+          "(S) Validate Payment (11 AC → SPLIT)",
+          "  and (AC) Check Payment Method (5 steps) ✓",
+          "  and (AC) Process Payment Transaction (6 steps) ✓"
         ]
       },
       "dont": {
         "description": "Don't exceed thresholds or create items below minimum",
         "content": [
-          "Create epics with > 9 features (use Sub-Epics instead)",
-          "Create features with > 9 stories (split the feature)",
+          "Create epics with > 9 sub-epics (use additional Sub-Epics instead)",
+          "Create sub-epics with > 9 stories (split the sub-epic)",
           "Create stories with > 9 acceptance criteria (split the story)",
           "Create very small stories with < 2 AC (merge with related story)",
           "Ignore sizing thresholds during shaping, discovery, or exploration",
           "",
           "Wrong Examples:",
-          "- Epic with 15 features (too many, use Sub-Epics)",
-          "- Feature with 15 stories (too many, split feature)",
-          "- Story with 15 AC (too many, split story)",
-          "- Story with 1 AC (too small, merge with related story)"
+          "- (E) Epic with 15 sub-epics (too many, use additional Sub-Epics)",
+          "- (E) Sub-Epic with 15 stories (too many, split sub-epic)",
+          "- (S) Story with 15 AC (too many, split story)",
+          "- (S) Story with 1 AC (too small, merge with related story)"
         ]
       }
     }
