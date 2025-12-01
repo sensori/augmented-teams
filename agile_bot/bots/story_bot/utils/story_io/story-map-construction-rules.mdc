@@ -16,31 +16,37 @@ A story graph is a hierarchical JSON structure containing epics, sub-epics (feat
 ## 1. Graph Structure Hierarchy
 
 The story graph follows this hierarchy:
-- **Epics** (top level) → contain `sub_epics` and `stories`
-- **Sub-Epics** (also called "features") → contain `stories`  can have multiple levels a sub-epics can contain a sub-epic
-- **Stories** → contain nested `stories` (optional) and `acceptance_criteria` (optional)
+- **Epics** (top level) → contain `sub_epics`
+- **Sub-Epics** (also called "features") → contain `story_groups` (can have multiple levels - a sub-epic can contain sub-epics)
+- **Story Groups** → contain `stories` and have `type` (and/or) and `connector` (and/or/opt/null)
+- **Stories** → contain `acceptance_criteria` (optional) - **NO nested stories**
 
 ### Graph JSON Properties
 
 **Epic Properties:**
 - `name`: Epic name (string)
 - `sequential_order`: Order for horizontal positioning (integer)
-- `sub_epics`: Array of sub-epics (or `features` for backward compatibility)
-- `stories`: Array of epic-level stories (optional)
+- `sub_epics`: Array of sub-epics
 
 **Sub-Epic Properties:**
 - `name`: Sub-epic name (string)
 - `sequential_order`: Order for horizontal positioning within epic (integer)
-- `stories`: Array of stories
+- `sub_epics`: Array of nested sub-epics (optional, for multi-level nesting)
+- `story_groups`: Array of story groups (required)
+
+**Story Group Properties:**
+- `type`: Layout type - `"and"` (horizontal, left-to-right) or `"or"` (vertical, top-to-bottom)
+- `connector`: How this group connects to previous group - `"and"` (horizontal), `"or"` (vertical), `"opt"` (optional), or `null` (first group)
+- `stories`: Array of stories within this group
 
 **Story Properties:**
 - `name`: Story name (string)
-- `sequential_order`: Order for horizontal positioning (integer)
+- `sequential_order`: Order for positioning within story group (integer)
 - `connector`: Flow type - `"and"` (sequential), `"or"` (alternative), `"opt"` (optional)
 - `users`: Array of user names (strings)
 - `story_type`: `"user"`, `"system"`, or `"technical"` (default: `"user"`)
-- `stories`: Array of nested stories (optional)
 - `acceptance_criteria`: Array of acceptance criteria objects (optional)
+- **NO nested stories** - stories are flat within story groups
 
 ---
 
@@ -58,8 +64,12 @@ The story graph follows this hierarchy:
 - Stories with `connector="opt"` (optional): Place below sequential stories
   - First optional story: `y = 402` (65px below base story row at y=337)
   - Additional optional stories: Stack vertically with ~55px spacing according to `sequential_order`
-- Nested stories: Only if a story HAS nested stories (sub-stories), then the parent story and its nested stories are considered together as a unit. Nesting has no impact on positioning - nested stories follow normal connector-based positioning rules.
-- Stories with `connector="or"` (alternatives): Position identically to `connector="opt"` stories - appear below sequential stories. The connector type does not affect grouping - only the presence of nested sub-stories causes grouping.
+- Stories with `connector="or"` (alternatives): Position identically to `connector="opt"` stories - appear below sequential stories
+- **Story Groups**: Story groups are traversed left-to-right, top-to-bottom (same as stories)
+  - Story groups with `type="and"`: Stories arranged horizontally (left-to-right)
+  - Story groups with `type="or"`: Stories arranged vertically (top-to-bottom)
+  - Story groups with `connector="or"`: Positioned below previous group (vertical stacking)
+  - Story groups with `connector="and"`: Positioned to the right of previous group (horizontal flow)
 
 ### 2.2 Horizontal Positioning (X-axis)
 
@@ -69,8 +79,16 @@ The story graph follows this hierarchy:
   - **Nested Sub-Epics**: Sub-epics can contain sub-epics (sub-sub, sub-sub-sub, etc.)
     - First level of nested sub-epics: Narrow the Y-position on the parent sub-epic
     - If more nested levels exist: Widen the whole sub-epic area to accommodate Y-positions and add nested sub-epic layer below its parent
-- **Stories**: Arranged left-to-right by `sequential_order` within their sub-epic
-  - Base spacing: `60px` between story centers (`STORY_SPACING_X = 60`)
+- **Story Groups**: Traversed left-to-right, top-to-bottom within their sub-epic
+  - Story groups with `connector="and"` or `connector=null`: Positioned horizontally (left-to-right)
+  - Story groups with `connector="or"`: Positioned vertically (top-to-bottom, below previous group)
+  - Story groups with `type="and"`: Stories within group arranged horizontally (left-to-right)
+  - Story groups with `type="or"`: Stories within group arranged vertically (top-to-bottom)
+- **Stories**: Arranged within their story group according to group `type` and story `sequential_order`
+  - In `type="and"` groups: Left-to-right by `sequential_order`
+  - In `type="or"` groups: Top-to-bottom by `sequential_order`
+  - Base spacing: `60px` between story centers horizontally (`STORY_SPACING_X = 60`)
+  - Vertical spacing: ~55px between stories vertically
   - Stories start at sub-epic's `x + 12` (to align with epic's left edge)
 
 **Width Calculation:**
@@ -78,10 +96,13 @@ The story graph follows this hierarchy:
   - **Important**: Start with wider epics (generous width estimates) - you can shrink them later if needed
   - Better to have extra space than overlapping elements
   - Width should accommodate all sub-epics horizontally without overlap
-- **Sub-epic width**: Spans all its stories plus padding
+- **Sub-epic width**: Spans all its story groups plus padding
   - **Important**: Start with wider sub-epics - you can shrink them later if needed
-  - Must accommodate all stories horizontally without overlap
+  - Must accommodate all story groups horizontally (for `connector="and"` groups) and vertically (for `connector="or"` groups)
   - If sub-epic contains nested sub-epics, width must span all nested sub-epics
+- **Story Group width**: Spans all its stories plus padding
+  - For `type="and"` groups: Width = sum of story widths + spacing
+  - For `type="or"` groups: Width = widest story (usually 50px)
 - **Story width**: Fixed `50px` (square)
 
 ---
@@ -126,13 +147,22 @@ The story graph follows this hierarchy:
 
 ## 4. Connector-Based Layout Rules
 
-### 4.1 Sequential Stories (`connector="and"`)
-- **Position**: Horizontal flow, left-to-right by `sequential_order`
-- **Y-position**: Base story row (y=337) - ordinarily AND stories are always at the top
-- **Exception**: If an AND story is nested inside an OR story, the AND story starts to the right of the OR story (not at y=337, not to the right of the top-level story)
-- **Spacing**: 60px between story centers
+### 4.1 Story Group Traversal
+- **Story Groups**: Traversed left-to-right, top-to-bottom (same approach as stories)
+- **Group Connector**: Determines how groups connect to each other
+  - `connector="and"` or `null`: Horizontal connection (next group to the right)
+  - `connector="or"`: Vertical connection (next group below)
+  - `connector="opt"`: Optional connection (next group below, optional path)
+- **Group Type**: Determines how stories are arranged within the group
+  - `type="and"`: Stories arranged horizontally (left-to-right)
+  - `type="or"`: Stories arranged vertically (top-to-bottom)
 
-### 4.2 Optional Stories (`connector="opt"`)
+### 4.2 Sequential Stories (`connector="and"`)
+- **Position**: Within `type="and"` story groups: horizontal flow, left-to-right by `sequential_order`
+- **Y-position**: Base story row (y=337) for first group, or below for subsequent groups with `connector="or"`
+- **Spacing**: 60px between story centers horizontally
+
+### 4.3 Optional Stories (`connector="opt"`)
 - **Position**: Below sequential stories
 - **Y-position**: Start at y=402 (65px below base row)
 - **Stacking**: Multiple optional stories stack vertically with ~55px spacing according to `sequential_order`
@@ -143,26 +173,32 @@ The story graph follows this hierarchy:
 - Optional story at sequential_order=4: y=402 (below)
 - Optional story at sequential_order=5: y=518.75 (further below)
 
-### 4.3 Alternative Stories (`connector="or"`)
+### 4.4 Alternative Stories (`connector="or"`)
 - **Position**: Appear below sequential stories (positioned identically to `connector="opt"` stories)
 - **Y-position**: Below (y=404.75, y=462, y=526.37, y=645.37)
 - **Stacking**: Multiple alternative stories stack vertically with ~55px spacing according to `sequential_order`
 - **X-position**: Aligned with the sequential story they relate to
 - **Visual**: Indicates alternative paths in the workflow
-- **Note**: The connector type ("or", "and", "opt") only affects visual positioning, not grouping. Only nested sub-stories cause stories to be grouped together.
 
 ---
 
-## 5. Nested Stories Layout
+## 5. Story Groups Layout
 
-### 5.1 Nested Story Positioning
-- **Nested Stories Rule**: Only if a story HAS nested stories (sub-stories), then the parent story and its nested stories are considered together as a unit. The parent story and its nested children are grouped together for purposes of "and", "or", or "opt" connectors.
-- **Positioning Rule**: Nesting has no impact on positioning - nested stories follow normal connector-based positioning rules (AND stories at y=337, OR/OPT stories below).
-- **Exception - AND nested in OR**: If an AND story is nested inside an OR story, the AND story starts to the right of the OR story (not to the right of the top-level story). Ordinarily AND stories are always at the top (y=337), but NOT if nested inside an OR story.
+### 5.1 Story Group Positioning
+- **Story Groups**: Sub-epics contain story groups, not direct stories
+- **Group Connector**: Determines positioning relative to previous group
+  - First group: `connector=null`, positioned at base story row (y=337)
+  - `connector="and"`: Positioned horizontally to the right of previous group
+  - `connector="or"`: Positioned vertically below previous group
+  - `connector="opt"`: Positioned vertically below previous group (optional path)
+- **Group Type**: Determines story arrangement within group
+  - `type="and"`: Stories flow horizontally (left-to-right)
+  - `type="or"`: Stories flow vertically (top-to-bottom)
 
-### 5.2 Nested Story Flow
-- Nested stories maintain their own `sequential_order` within the parent
-- They are positioned relative to the parent story's x-position (except AND nested in OR, which starts to the right of the OR story)
+### 5.2 Story Group Traversal
+- Story groups are traversed left-to-right, top-to-bottom (same as stories)
+- Process groups in order: first group at base row, subsequent groups based on `connector`
+- Within each group, process stories according to group `type` and story `sequential_order`
 
 ---
 
@@ -209,29 +245,40 @@ The story graph follows this hierarchy:
 - X-position: Start at epic's x + 10px, then add sub-epic widths sequentially
 
 ### 8.2 Sub-Epic Width
-- Sub-epic width = sum of story widths + spacing + padding
-- Width must accommodate all stories horizontally
-- **Important**: Always verify which stories belong to which sub-epic/epic before positioning
+- Sub-epic width = sum of story group widths + spacing + padding
+- Width must accommodate all story groups horizontally (for `connector="and"` groups) and vertically (for `connector="or"` groups)
+- **Important**: Always verify which story groups belong to which sub-epic before positioning
   - Check the story graph JSON hierarchy to ensure correct parent-child relationships
-  - Stories belong to the sub-epic/epic that contains them in the JSON structure
-  - Nested stories belong to their parent story, not the top-level sub-epic
+  - Story groups belong to the sub-epic that contains them in the JSON structure
+  - Stories belong to their story group, not directly to the sub-epic
 - Example: 520px (for "Generate Bot Server And Tools"), 420px (for "Init Project")
 
 ---
 
-## 9. Story Positioning Within Sub-Epic
+## 9. Story Group and Story Positioning Within Sub-Epic
 
-### 9.1 Sequential Story Flow
-- Stories are arranged horizontally by `sequential_order`
-- Base Y-position: y=337
-- X-position: Start at sub-epic's x + 12px, then add 60px per story
+### 9.1 Story Group Flow
+- Story groups are traversed left-to-right, top-to-bottom
+- First group: `connector=null`, positioned at base story row (y=337)
+- Subsequent groups: Positioned based on `connector` (and/or/opt)
+  - `connector="and"`: To the right of previous group (horizontal)
+  - `connector="or"`: Below previous group (vertical)
+  - `connector="opt"`: Below previous group (vertical, optional)
 
-### 9.2 Optional Story Stacking
+### 9.2 Story Flow Within Story Group
+- **Type "and" groups**: Stories arranged horizontally (left-to-right) by `sequential_order`
+  - Base Y-position: y=337 (or below if group has `connector="or"`)
+  - X-position: Start at sub-epic's x + 12px, then add 60px per story
+- **Type "or" groups**: Stories arranged vertically (top-to-bottom) by `sequential_order`
+  - X-position: Aligned with group start
+  - Y-position: Start at base row, then add ~55px per story vertically
+
+### 9.3 Optional Story Stacking
 - Stories with `connector="opt"` stack vertically below sequential stories
 - They share the same X-position (or align with related sequential story)
 - Vertical spacing: ~55-65px between optional stories
 
-### 9.3 Alternative Story Positioning
+### 9.4 Alternative Story Positioning
 - Stories with `connector="or"` always appear below sequential stories
 - Y-position: Below sequential stories (y=404.75, y=462, y=526.37, y=645.37, etc.)
 - X-position: Aligned with the sequential story they relate to
@@ -279,17 +326,23 @@ The story graph follows this hierarchy:
    - Process sub-epics in `sequential_order` order
    - For each sub-epic:
      - Create sub-epic rectangle at y=200
-     - Process stories in `sequential_order` order
-     - Separate stories by connector type:
-       - Sequential (`connector="and"`): Place at y=337
-       - Optional (`connector="opt"`): Place below at y=402+
-       - Alternative (`connector="or"`): Place below at y=402+
-     - Process nested stories recursively
+     - Process story groups left-to-right, top-to-bottom
+     - For each story group:
+       - Determine group position based on `connector` (and/or/opt/null)
+       - Process stories within group according to group `type`:
+         - `type="and"`: Arrange stories horizontally (left-to-right) by `sequential_order`
+         - `type="or"`: Arrange stories vertically (top-to-bottom) by `sequential_order`
+       - Separate stories by connector type:
+         - Sequential (`connector="and"`): Place at y=337 (or below if group has `connector="or"`)
+         - Optional (`connector="opt"`): Place below at y=402+
+         - Alternative (`connector="or"`): Place below at y=402+
    - Extract and position users above stories
 
 ### 12.2 Width Calculation
 - Calculate epic width: Sum of sub-epic widths + spacing
-- Calculate sub-epic width: Sum of story positions + spacing + padding
+- Calculate sub-epic width: Sum of story group widths + spacing + padding
+  - For `type="and"` groups: Sum of story widths + spacing
+  - For `type="or"` groups: Widest story (usually 50px)
 - Epic width must span all its content horizontally
 
 ### 12.3 User Deduplication
@@ -312,10 +365,11 @@ The story graph follows this hierarchy:
 - Each unique user gets its own circle
 - Users are positioned above the story, potentially side-by-side if multiple
 
-### 13.3 Deeply Nested Stories
-- Stories can have nested stories, which can have nested stories
-- Each nesting level adds ~55-65px vertical offset
-- Maintain horizontal alignment with parent story's x-position
+### 13.3 Story Groups with Different Types
+- Story groups can have different `type` values (and/or) within the same sub-epic
+- `type="and"` groups: Stories flow horizontally
+- `type="or"` groups: Stories flow vertically
+- Groups are connected based on their `connector` value (and/or/opt/null)
 
 ### 13.4 Mixed Connector Types
 - A sub-epic can contain stories with different connector types
@@ -332,7 +386,7 @@ The story graph follows this hierarchy:
 - User row: y=277-290
 - Story base row: y=337
 - Optional story row: y=402+
-- Nested story rows: y=406+, y=462+, y=526.37+, y=645.37+
+- Story group rows (with connector="or"): y=402+, y=462+, y=526.37+, y=645.37+
 
 **Key X-Positions:**
 - Epic start: x=20
@@ -361,11 +415,15 @@ The story graph follows this hierarchy:
     "sub_epics": [{
       "name": "Generate Bot Server And Tools",
       "sequential_order": 1,
-      "stories": [{
-        "name": "Provides Context of New Bot",
-        "sequential_order": 1,
-        "connector": "and",
-        "users": ["Human"]
+      "story_groups": [{
+        "type": "and",
+        "connector": null,
+        "stories": [{
+          "name": "Provides Context of New Bot",
+          "sequential_order": 1,
+          "connector": "and",
+          "users": ["Human"]
+        }]
       }]
     }]
   }]
@@ -391,38 +449,54 @@ The story graph follows this hierarchy:
         {
           "name": "Generate Bot Server And Tools",
           "sequential_order": 1,
-          "stories": [
+          "story_groups": [
             {
-              "name": "Provides Context of New Bot",
-              "sequential_order": 1,
-              "connector": "and",
-              "users": ["Human"],
-              "story_type": "user"
-            },
-            {
-              "name": "Generates Project Scaffold",
-              "sequential_order": 2,
-              "connector": "and",
-              "users": ["Human"],
-              "story_type": "user"
-            },
-            {
-              "name": "Save Project State",
-              "sequential_order": 3,
-              "connector": "opt",
-              "users": ["Bot Project"],
-              "story_type": "system"
-            },
-            {
-              "name": "Intercepts Tool Call",
-              "sequential_order": 4,
-              "connector": "or",
-              "users": ["AI Chat"],
-              "story_type": "user",
+              "type": "and",
+              "connector": null,
               "stories": [
                 {
-                  "name": "Route To Project Tool",
+                  "name": "Provides Context of New Bot",
                   "sequential_order": 1,
+                  "connector": "and",
+                  "users": ["Human"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Generates Project Scaffold",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Human"],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "opt",
+              "stories": [
+                {
+                  "name": "Save Project State",
+                  "sequential_order": 1,
+                  "connector": "opt",
+                  "users": ["Bot Project"],
+                  "story_type": "system"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Intercepts Tool Call",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": ["AI Chat"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Route To Project Tool",
+                  "sequential_order": 2,
                   "connector": "and",
                   "users": ["Bot Project"],
                   "story_type": "system"
@@ -434,20 +508,32 @@ The story graph follows this hierarchy:
         {
           "name": "Init Project",
           "sequential_order": 2,
-          "stories": [
+          "story_groups": [
             {
-              "name": "Create Project Structure",
-              "sequential_order": 1,
-              "connector": "and",
-              "users": ["Human"],
-              "story_type": "user"
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Create Project Structure",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": ["Human"],
+                  "story_type": "user"
+                }
+              ]
             },
             {
-              "name": "Validate Configuration",
-              "sequential_order": 2,
+              "type": "and",
               "connector": "or",
-              "users": ["System"],
-              "story_type": "system"
+              "stories": [
+                {
+                  "name": "Validate Configuration",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": ["System"],
+                  "story_type": "system"
+                }
+              ]
             }
           ]
         }
@@ -460,13 +546,19 @@ The story graph follows this hierarchy:
         {
           "name": "MCP Integration",
           "sequential_order": 1,
-          "stories": [
+          "story_groups": [
             {
-              "name": "Connect to MCP Server",
-              "sequential_order": 1,
-              "connector": "and",
-              "users": ["Bot Server"],
-              "story_type": "technical"
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Connect to MCP Server",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": ["Bot Server"],
+                  "story_type": "technical"
+                }
+              ]
             }
           ]
         }
@@ -486,7 +578,7 @@ The story graph follows this hierarchy:
       - User "Bot Project": x=150, y=290, width=50, height=50
     - Story "Intercepts Tool Call": x=212, y=404.75, width=50, height=50 (yellow, alternative)
       - User "AI Chat": x=210, y=290, width=50, height=50
-      - Nested Story "Route To Project Tool": x=272, y=404.75, width=50, height=50 (dark blue, AND nested in OR, starts to right of OR story)
+    - Story "Route To Project Tool": x=272, y=404.75, width=50, height=50 (dark blue, in same story group as Intercepts Tool Call)
   - **Sub-epic 2 "Init Project"**: x=540, y=200, width=420, height=70
     - Story "Create Project Structure": x=552, y=337, width=50, height=50 (yellow)
       - User "Human": x=550, y=277, width=50, height=50 (shown again because user changed)
@@ -556,13 +648,15 @@ Legend:
 **Key Points Demonstrated:**
 1. Multiple epics arranged horizontally
 2. Multiple sub-epics within an epic
-3. Sequential AND stories flow horizontally (y=337)
-4. Optional story (opt) appears below (y=402)
-5. Alternative story (or) appears below (y=404.75)
-6. User "Human" shown only above first story, then again when user changes
-7. Nested story (AND in OR) starts to right of OR story, not at top level
-8. Different story types: user (yellow), system (dark blue), technical (black)
-9. Multiple users positioned above their stories
+3. Story groups with different types (and/or) and connectors (and/or/opt/null)
+4. Sequential AND stories flow horizontally (y=337) in type="and" groups
+5. Optional story group (connector="opt") appears below (y=402)
+6. Alternative story group (connector="or") appears below (y=404.75)
+7. Stories within story groups arranged by group type (and=horizontal, or=vertical)
+8. User "Human" shown only above first story, then again when user changes
+9. Different story types: user (yellow), system (dark blue), technical (black)
+10. Multiple users positioned above their stories
+11. **No nested stories** - all stories are flat within story groups
 
 ---
 
@@ -617,12 +711,14 @@ Apply this same column structure and vertical flow to "Provide Decision Criteria
 When constructing a story map, ensure:
 1. All epics are rendered in `sequential_order`
 2. All sub-epics are rendered within their epic in `sequential_order`
-3. All stories are rendered within their sub-epic in `sequential_order`
-4. Users are positioned above stories that reference them
-5. Optional stories appear below sequential stories
-6. Nested stories appear below their parent stories
-7. Epic width spans all sub-epics
-8. Sub-epic width spans all stories
-9. No overlapping elements (except intentional grouping)
-10. Visual hierarchy is clear (epics → sub-epics → stories)
-11. **Pattern consistency**: When patterns are detected and confirmed, apply them consistently to similar story groups
+3. All story groups are traversed left-to-right, top-to-bottom within their sub-epic
+4. Story groups are positioned based on their `connector` (and/or/opt/null)
+5. Stories within groups are arranged based on group `type` (and/or) and story `sequential_order`
+6. Users are positioned above stories that reference them
+7. Optional stories appear below sequential stories
+8. Epic width spans all sub-epics
+9. Sub-epic width spans all story groups
+10. No overlapping elements (except intentional grouping)
+11. Visual hierarchy is clear (epics → sub-epics → story groups → stories)
+12. **Pattern consistency**: When patterns are detected and confirmed, apply them consistently to similar story groups
+13. **No nested stories**: Stories are flat within story groups - stories do not contain other stories
