@@ -1,0 +1,112 @@
+{
+  "EPIC|User Account Features": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 722.0,
+    "height": 60.0
+  },
+  "EPIC|Content Management": {
+    "x": 762.0,
+    "y": 130.0,
+    "width": 400.0,
+    "height": 60.0
+  },
+  "FEATURE|User Account Features|Account Creation": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 370.0,
+    "height": 60.0
+  },
+  "FEATURE|User Account Features|Account Settings": {
+    "x": 412.0,
+    "y": 200.0,
+    "width": 310.0,
+    "height": 60.0
+  },
+  "FEATURE|Content Management|Create Content": {
+    "x": 772.0,
+    "y": 200.0,
+    "width": 370.0,
+    "height": 60.0
+  },
+  "User Account Features|Account Creation|User creates account": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User verifies email": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User sets up profile picture": {
+    "x": 152.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User adds bio": {
+    "x": 212.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User adds social links": {
+    "x": 272.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User sets timezone": {
+    "x": 332.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Settings|User changes password": {
+    "x": 414.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Settings|User enables two-factor auth": {
+    "x": 474.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Settings|User customizes theme": {
+    "x": 534.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Settings|User sets notification preferences": {
+    "x": 594.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Settings|User configures privacy settings": {
+    "x": 654.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User creates post": {
+    "x": 774.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User adds images": {
+    "x": 834.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User schedules post": {
+    "x": 894.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User adds tags": {
+    "x": 954.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User sets visibility": {
+    "x": 1014.0,
+    "y": 350.0
+  },
+  "Content Management|Create Content|User enables comments": {
+    "x": 1074.0,
+    "y": 350.0
+  },
+  "User Account Features|Account Creation|User creates account|Human": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "User Account Features|Account Settings|User changes password|Human": {
+    "x": 414.0,
+    "y": 290.0
+  },
+  "Content Management|Create Content|User creates post|Human": {
+    "x": 774.0,
+    "y": 290.0
+  }
+}

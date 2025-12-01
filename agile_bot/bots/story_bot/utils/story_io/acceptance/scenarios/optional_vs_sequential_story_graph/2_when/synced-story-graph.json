@@ -1,17 +1,17 @@
 {
   "epics": [
     {
-      "name": "User Management System",
+      "name": "User Account Features",
       "sequential_order": 1.0,
       "sub_epics": [
         {
-          "name": "User Registration",
+          "name": "Account Creation",
           "sequential_order": 1.0,
           "sub_epics": [],
           "stories": []
         },
         {
-          "name": "Authentication",
+          "name": "Account Settings",
           "sequential_order": 2.0,
           "sub_epics": [],
           "stories": []
@@ -20,11 +20,11 @@
       "stories": []
     },
     {
-      "name": "Content Delivery",
+      "name": "Content Management",
       "sequential_order": 2.0,
       "sub_epics": [
         {
-          "name": "Media Streaming",
+          "name": "Create Content",
           "sequential_order": 1.0,
           "sub_epics": [],
           "stories": []

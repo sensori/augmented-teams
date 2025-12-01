@@ -14,12 +14,14 @@ import sys
 from pathlib import Path
 
 # Add parent directories to path
-test_dir = Path(__file__).parent
-spec_dir = test_dir.parent.parent
-story_io_dir = spec_dir.parent
+when_dir = Path(__file__).parent
+scenario_dir = when_dir.parent
+acceptance_dir = scenario_dir.parent.parent
+story_io_dir = acceptance_dir.parent
 src_dir = story_io_dir.parent
 sys.path.insert(0, str(src_dir))
-sys.path.insert(0, str(spec_dir))
+sys.path.insert(0, str(acceptance_dir.parent / "spec_by_example"))
+sys.path.insert(0, str(scenario_dir.parent))  # Add scenarios directory for story_graph_layout_helper
 
 from story_io.story_io_diagram import StoryIODiagram
 from story_graph_layout_helper import load_story_graph, load_layout_data, find_extracted_layout
@@ -27,12 +29,13 @@ from story_graph_layout_helper import load_story_graph, load_layout_data, find_e
 def run_test():
     """Execute the exploration render workflow."""
     # Paths
-    given_dir = test_dir.parent / "1_given"
-    then_dir = test_dir.parent / "3_then"
+    scenario_dir = when_dir.parent
+    given_dir = scenario_dir / "1_given"
+    then_dir = scenario_dir / "3_then"
     
     # Input files
     story_graph_path = given_dir / "story-graph-with-acceptance-criteria.json"
-    layout_path = given_dir / "story-outline-drawio-with-acceptance-criteria-layout.json"
+    layout_path = given_dir / "story-outline-stories-right-beside-each-other-layout.json"
     
     # Output files
     then_dir.mkdir(parents=True, exist_ok=True)

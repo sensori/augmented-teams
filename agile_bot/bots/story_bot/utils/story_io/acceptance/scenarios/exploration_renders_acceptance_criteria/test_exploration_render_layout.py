@@ -26,7 +26,7 @@ def main():
     print("\nGIVEN: Verify input data exists...")
     given_dir = test_dir / "1_given"
     story_graph_path = given_dir / "story-graph-with-acceptance-criteria.json"
-    layout_path = given_dir / "story-outline-drawio-with-acceptance-criteria-layout.json"
+    layout_path = given_dir / "story-outline-stories-right-beside-each-other-layout.json"
     
     if not story_graph_path.exists():
         print(f"[ERROR] Story graph not found: {story_graph_path}")

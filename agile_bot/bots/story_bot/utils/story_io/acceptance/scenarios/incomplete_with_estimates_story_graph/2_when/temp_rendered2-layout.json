@@ -1,14 +1,14 @@
 {
-  "EPIC|Create Character": {
+  "EPIC|E-commerce Platform25 stories25 stories": {
     "x": 20.0,
     "y": 130.0,
     "width": 242.0,
     "height": 60.0
   },
-  "EPIC|Combat System": {
+  "EPIC|Order Management15 stories15 stories": {
     "x": 282.0,
     "y": 130.0,
-    "width": 160.0,
+    "width": 100.0,
     "height": 60.0
   }
 }

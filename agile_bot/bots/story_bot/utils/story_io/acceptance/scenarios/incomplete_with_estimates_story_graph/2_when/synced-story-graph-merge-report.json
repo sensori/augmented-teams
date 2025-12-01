@@ -1,0 +1,125 @@
+{
+  "timestamp": "2025-12-01T17:06:19.347569",
+  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\incomplete_with_estimates_story_graph\\2_when\\synced-story-graph.json",
+  "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\incomplete_with_estimates_story_graph\\1_given\\story-graph-incomplete-with-estimates.json",
+  "summary": {
+    "total_extracted_stories": 4,
+    "total_original_stories": 4,
+    "exact_matches": 4,
+    "fuzzy_matches": 0,
+    "new_stories": 0,
+    "removed_stories": 0
+  },
+  "exact_matches": [
+    {
+      "extracted": {
+        "name": "Customer browses products",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1,
+        "epic_name": "E-commerce Platform25 stories",
+        "sub_epic_name": "Product Catalog8 stories"
+      },
+      "original": {
+        "name": "Customer browses products",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Product Catalog"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Customer views product details",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "E-commerce Platform25 stories",
+        "sub_epic_name": "Product Catalog8 stories"
+      },
+      "original": {
+        "name": "Customer views product details",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Product Catalog"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Customer adds item to cart",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1,
+        "epic_name": "E-commerce Platform25 stories",
+        "sub_epic_name": "Shopping Cart5 stories"
+      },
+      "original": {
+        "name": "Customer adds item to cart",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Shopping Cart"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Customer views order status",
+        "users": [
+          "Customer"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Order Management15 stories",
+        "sub_epic_name": "Order Tracking6 stories"
+      },
+      "original": {
+        "name": "Customer views order status",
+        "users": [
+          "Customer"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Order Management",
+        "sub_epic_name": "Order Tracking"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    }
+  ],
+  "fuzzy_matches": [],
+  "new_stories": [],
+  "removed_stories": [],
+  "large_deletions": {
+    "missing_epics": [
+      {
+        "name": "E-commerce Platform",
+        "story_count": 0,
+        "sub_epic_count": 3
+      },
+      {
+        "name": "Order Management",
+        "story_count": 0,
+        "sub_epic_count": 1
+      }
+    ],
+    "missing_sub_epics": [],
+    "epics_with_many_missing_stories": [],
+    "sub_epics_with_many_missing_stories": []
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "epics": [
+    {
+      "name": "User Account Features",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Account Creation",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        },
+        {
+          "name": "Account Settings",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Content Management",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Create Content",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": []
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

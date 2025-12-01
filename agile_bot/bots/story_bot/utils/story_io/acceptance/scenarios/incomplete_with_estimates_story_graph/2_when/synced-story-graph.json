@@ -1,0 +1,41 @@
+{
+  "epics": [
+    {
+      "name": "E-commerce Platform25 stories",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Product Catalog8 stories",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": [],
+          "estimated_stories": 8
+        },
+        {
+          "name": "Shopping Cart5 stories",
+          "sequential_order": 2.0,
+          "sub_epics": [],
+          "stories": [],
+          "estimated_stories": 5
+        }
+      ],
+      "stories": [],
+      "estimated_stories": 25
+    },
+    {
+      "name": "Order Management15 stories",
+      "sequential_order": 2.0,
+      "sub_epics": [
+        {
+          "name": "Order Tracking6 stories",
+          "sequential_order": 1.0,
+          "sub_epics": [],
+          "stories": [],
+          "estimated_stories": 6
+        }
+      ],
+      "stories": [],
+      "estimated_stories": 15
+    }
+  ]
+}

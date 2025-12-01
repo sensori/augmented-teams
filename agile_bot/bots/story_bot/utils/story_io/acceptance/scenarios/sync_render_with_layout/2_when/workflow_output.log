@@ -13,19 +13,177 @@ Layout data saved to: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\stor
 ================================================================================
 STORY GRAPH MERGE REPORT
 ================================================================================
-Generated: 2025-12-01T04:36:46.901198
+Generated: 2025-12-01T16:10:08.606833
 Extracted: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\sync_render_with_layout\2_when\synced-story-graph.json
 Original: C:\dev\augmented-teams\agile_bot\bots\story_bot\utils\story_io\acceptance\scenarios\sync_render_with_layout\1_given\story-graph.json
 
 --------------------------------------------------------------------------------
 SUMMARY
 --------------------------------------------------------------------------------
-Total Extracted Stories: 0
-Total Original Stories: 0
-Exact Matches: 0
-Fuzzy Matches: 0
-New Stories (in extracted): 0
-Removed Stories (in original only): 0
+Total Extracted Stories: 139
+Total Original Stories: 139
+Exact Matches: 120
+Fuzzy Matches: 18
+New Stories (in extracted): 1
+Removed Stories (in original only): 1
+
+--------------------------------------------------------------------------------
+FUZZY MATCHES (Require Review)
+--------------------------------------------------------------------------------
+
+Extracted: Locates Existing Project  State
+  Epic: Invoke MCP Bot Server | Sub-Epic: Init Project
+Original: Locates Existing Project&nbsp; State
+  Epic: Invoke MCP Bot Server | Sub-Epic: Init Project
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Find Gather Context Instructions(hope)
+  Epic: Execute Behavior Actions | Sub-Epic: Gather Context
+Original: Find Gather Context Instructions<br>(hope)
+  Epic: Execute Behavior Actions | Sub-Epic: Gather Context
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Saves Answers and Evidencein Context
+  Epic: Execute Behavior Actions | Sub-Epic: Gather Context
+Original: Saves Answers and Evidence<br>in Context
+  Epic: Execute Behavior Actions | Sub-Epic: Gather Context
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Load + Inject  Answers + Evidence
+  Epic: Execute Behavior Actions | Sub-Epic: Build Knowledge Action
+Original: Load + Inject&nbsp; Answers + Evidence
+  Epic: Execute Behavior Actions | Sub-Epic: Build Knowledge Action
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Read  Injected Transformer Methods Instructions
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Read&nbsp; Injected Transformer Methods Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Read  Injected Transformer Methods Instructions
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Read&nbsp; Injected Transformer Methods Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Read  Injected TemplateInstructions
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Read&nbsp; Injected Template<br>Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Read  Injected Transformer Methods Instructions
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Read&nbsp; Injected Transformer Methods Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Read  Injected TemplateInstructions
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Read&nbsp; Injected Template<br>Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Inject  Load Template Instructuion
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Inject&nbsp; Load Template Instructuion
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Load +  Inject Srtuctured  Content
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Original: Load +&nbsp; Inject Srtuctured&nbsp; Content
+  Epic: Execute Behavior Actions | Sub-Epic: Read Render Output Instructions and Data
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Render Outputs Using Components  In Context
+  Epic: Execute Behavior Actions | Sub-Epic: Render Output
+Original: Render Outputs Using Components&nbsp; In Context
+  Epic: Execute Behavior Actions | Sub-Epic: Render Output
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Find Rendered Outputs in Context and Display
+  Epic: Execute Behavior Actions | Sub-Epic: Render Output
+Original: Find Rendered Outputs in Context and Display&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Render Output
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Review Built Knowledge
+  Epic: Execute Behavior Actions | Sub-Epic: Load Rendered Content
+Original: <span style="font-size: 8px;">Review Built Knowledge</span>
+  Epic: Execute Behavior Actions | Sub-Epic: Load Rendered Content
+Confidence: 79.32%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Proceed to Correct-Bot trough  context
+  Epic: Execute Behavior Actions | Sub-Epic: Validate Knowledge & Content Against Rules
+Original: Proceed to Correct-Bot trough&nbsp; context
+  Epic: Execute Behavior Actions | Sub-Epic: Validate Knowledge & Content Against Rules
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Find  Behavior Specific Rules from Context
+  Epic: Execute Behavior Actions | Sub-Epic: Validate Knowledge & Content Against Rules
+Original: Find&nbsp; Behavior Specific Rules from Context
+  Epic: Execute Behavior Actions | Sub-Epic: Validate Knowledge & Content Against Rules
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Inject Load Bot and Rules In Instructions
+  Epic: Execute Behavior Actions | Sub-Epic: Review Answers, Assumptions
+Original: Inject Load Bot and Rules In Instructions&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Review Answers, Assumptions
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+Extracted: Determine Issues
+  Epic: Execute Behavior Actions | Sub-Epic: Reviews Rules
+Original: Determine Issues&nbsp;
+  Epic: Execute Behavior Actions | Sub-Epic: Reviews Rules
+Confidence: 100.00%
+Has Steps: No
+Has Acceptance Criteria: No
+
+--------------------------------------------------------------------------------
+NEW STORIES (No match in original)
+--------------------------------------------------------------------------------
+  - Review Answers, Assumptions (Execute Behavior Actions > Load Rendered Content)
+
+--------------------------------------------------------------------------------
+REMOVED STORIES (In original but not in extracted)
+--------------------------------------------------------------------------------
+  - <span style="border-color: rgb(218, 220, 224); font-size: 8px;">Review Answers, Assumptions</span> (Execute Behavior Actions > Load Rendered Content)
 
 ================================================================================
 NEXT STEPS:

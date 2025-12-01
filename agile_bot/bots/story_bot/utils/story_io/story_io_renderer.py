@@ -63,7 +63,7 @@ class DrawIORenderer:
     def _calculate_total_stories_for_epic_in_increment(epic: Dict[str, Any]) -> int:
         """
         Calculate total stories for an epic within an increment scope.
-        Counts only stories in sub_epics within this increment.
+        Counts only stories in story_groups within sub_epics (no direct stories on epics or sub_epics).
         """
         # Helper to get sub_epics (supports both old 'features' and new 'sub_epics' format)
         def get_sub_epics(epic):
@@ -71,30 +71,31 @@ class DrawIORenderer:
         
         total = 0
         for sub_epic in get_sub_epics(epic):
-            # Count actual stories in sub_epic
-            sub_epic_stories = sub_epic.get('stories', [])
-            if sub_epic_stories:
-                total += len(sub_epic_stories)
+            # Count stories in story_groups (new structure only)
+            story_groups = sub_epic.get('story_groups', [])
+            if story_groups:
+                for story_group in story_groups:
+                    total += len(story_group.get('stories', []))
             elif sub_epic.get('estimated_stories'):
                 # Use estimate if no actual stories
                 total += sub_epic['estimated_stories']
-        # Add epic-level stories if any
-        epic_stories = epic.get('stories', [])
-        if epic_stories:
-            total += len(epic_stories)
-        elif epic.get('estimated_stories'):
-            # Use epic estimate if no stories
+        # Epics don't have direct stories - only through sub_epics -> story_groups
+        if not total and epic.get('estimated_stories'):
             total += epic['estimated_stories']
         return total
     
     @staticmethod
     def _calculate_total_stories_for_feature_in_increment(feature: Dict[str, Any]) -> int:
         """
-        Calculate total stories for a feature within an increment scope.
+        Calculate total stories for a feature (sub_epic) within an increment scope.
+        Counts only stories in story_groups (no direct stories on features).
         """
-        feature_stories = feature.get('stories', [])
-        if feature_stories:
-            return len(feature_stories)
+        story_groups = feature.get('story_groups', [])
+        if story_groups:
+            total = 0
+            for story_group in story_groups:
+                total += len(story_group.get('stories', []))
+            return total
         elif feature.get('estimated_stories'):
             return feature['estimated_stories']
         return 0
@@ -102,26 +103,21 @@ class DrawIORenderer:
     @staticmethod
     def _traverse_all_stories(story: Dict[str, Any], collected: List[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
-        Simple recursive algorithm to read through a story and follow all nested stories.
-        Uses story['stories'] array structure (not decimal sequential_order).
+        Simple algorithm to collect a story (no nested stories - stories are flat).
+        Legacy method kept for compatibility but no longer traverses nested stories.
         
         Args:
             story: Story dictionary
-            collected: List to collect all stories (including nested)
+            collected: List to collect stories
         
         Returns:
-            List of all stories (parent + all nested stories)
+            List containing only the story (no nested traversal)
         """
         if collected is None:
             collected = []
         
-        # Add current story
+        # Add current story only (no nested stories - stories are flat within story_groups)
         collected.append(story)
-        
-        # Follow nested stories recursively
-        nested_stories = story.get('stories', [])
-        for nested_story in nested_stories:
-            DrawIORenderer._traverse_all_stories(nested_story, collected)
         
         return collected
     
@@ -459,6 +455,11 @@ class DrawIORenderer:
                 if not story_groups:
                     continue
                 
+                # Initialize story_positions for this feature
+                story_positions = {}  # Maps story name -> {'x': x, 'y': y, 'width': width, 'height': height}
+                first_story_cell_ref = None  # Track first story/user cell to insert backgrounds before it
+                current_ac_rightmost_x = None  # Track rightmost position of AC boxes across all stories in this feature
+                
                 # Render feature
                 feature_cell = ET.SubElement(root_elem, 'mxCell',
                                             id=f'e{epic_idx}f{feat_idx}',
@@ -513,7 +514,19 @@ class DrawIORenderer:
                     for story_idx_in_group, story in enumerate(sorted_stories):
                         # Calculate story position based on group type
                         if group_type == 'and':
-                            story_x = group_x + story_idx_in_group * self.STORY_SPACING_X
+                            # Position stories accounting for AC boxes from previous stories
+                            if story_idx_in_group == 0:
+                                # First story in group starts at group_x
+                                story_x = group_x
+                            else:
+                                # Subsequent stories positioned after previous story's AC boxes
+                                if current_ac_rightmost_x is not None:
+                                    # Position after AC boxes with spacing (account for story width too)
+                                    # AC boxes end at current_ac_rightmost_x, add spacing, then position story
+                                    story_x = current_ac_rightmost_x + 20
+                                else:
+                                    # Fallback to normal spacing if no AC boxes yet
+                                    story_x = group_x + story_idx_in_group * self.STORY_SPACING_X
                             story_y = group_y
                         else:  # 'or'
                             story_x = group_x
@@ -544,6 +557,10 @@ class DrawIORenderer:
                                                          width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
                                 user_geom.set('as', 'geometry')
                                 
+                                # Track first user/story cell for inserting background rectangles before it
+                                if first_story_cell_ref is None:
+                                    first_story_cell_ref = user_label
+                                
                                 feature_min_x = min(feature_min_x, user_x)
                                 feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
                         
@@ -558,6 +575,18 @@ class DrawIORenderer:
                                                    width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
                         story_geom.set('as', 'geometry')
                         
+                        # Track first story cell if no user cell was tracked
+                        if first_story_cell_ref is None:
+                            first_story_cell_ref = story_cell
+                        
+                        # Track story position for grey background rectangles
+                        story_positions[story['name']] = {
+                            'x': story_x,
+                            'y': story_y,
+                            'width': self.STORY_WIDTH,
+                            'height': self.STORY_HEIGHT
+                        }
+                        
                         feature_min_x = min(feature_min_x, story_x)
                         feature_max_x = max(feature_max_x, story_x + self.STORY_WIDTH)
                         
@@ -569,13 +598,40 @@ class DrawIORenderer:
                             steps = sorted(steps, key=lambda s: s.get('sequential_order', 999))
                         if steps:
                             acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10
+                            # Determine starting x position for AC boxes - position sequentially to avoid overlap
+                            # Check layout_data first if available, otherwise use sequential positioning
+                            if current_ac_rightmost_x is not None:
+                                # Position after previous AC boxes with spacing
+                                ac_start_x = current_ac_rightmost_x + 20  # 20px spacing between story AC boxes
+                            else:
+                                # First story's AC boxes start aligned with story
+                                ac_start_x = story_x
+                            
                             for ac_box_idx in range(len(steps)):
                                 acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, ac_box_idx)
                                 if not acceptance_text:
                                     break
                                 
-                                ac_x = story_x
-                                ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                # Check layout_data for AC box position
+                                # Try both cell ID format and name-based format
+                                ac_key_cell_id = f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}'
+                                ac_key_name = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
+                                if layout_data and (ac_key_cell_id in layout_data or ac_key_name in layout_data):
+                                    # Use layout data if available
+                                    ac_layout = layout_data.get(ac_key_cell_id) or layout_data.get(ac_key_name)
+                                    if ac_layout:
+                                        ac_x = ac_layout['x']
+                                        ac_y = ac_layout['y']
+                                        ac_width = ac_layout.get('width', ac_width)
+                                    else:
+                                        ac_x = ac_start_x
+                                        ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                else:
+                                    ac_x = ac_start_x
+                                    ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                
+                                # Update rightmost AC position for this story's AC boxes
+                                current_ac_rightmost_x = max(current_ac_rightmost_x or 0, ac_x + ac_width)
                                 
                                 ac_cell = ET.SubElement(root_elem, 'mxCell',
                                                        id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
@@ -679,6 +735,9 @@ class DrawIORenderer:
         root_elem = ET.SubElement(graph_model, 'root')
         ET.SubElement(root_elem, 'mxCell', id='0')
         ET.SubElement(root_elem, 'mxCell', id='1', parent='0')
+        
+        # Collect all background rectangles here - will be inserted after root cells
+        all_background_rectangles = []
         
         # Handle increments mode
         if is_increments and 'increments' in story_graph:
@@ -1023,6 +1082,7 @@ class DrawIORenderer:
                 # Track story positions for rendering grey background rectangles (story groups)
                 story_positions = {}  # Maps story name -> {'x': x, 'y': y, 'width': width, 'height': height}
                 bg_rectangles_to_insert = []  # Collect grey background rectangles for this feature
+                first_story_cell_ref = None  # Track first story cell to insert backgrounds before it
                 
                 # Collect all users for this feature (epic/feature/story level)
                 all_feature_users = []
@@ -1255,6 +1315,10 @@ class DrawIORenderer:
                                                        width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
                             story_geom.set('as', 'geometry')
                             
+                            # Track first story cell for inserting background rectangles before it
+                            if first_story_cell_ref is None:
+                                first_story_cell_ref = story_cell
+                            
                             # Track story position for grey background rectangles
                             story_positions[story['name']] = {
                                 'x': story_x,
@@ -1406,6 +1470,40 @@ class DrawIORenderer:
                             bg_rectangles_to_insert.append((bg_rect_id, bg_rect))
                             bg_rect_id += 1
                     
+                    # Insert background rectangles into XML (behind everything, so insert before first story/user)
+                    # In DrawIO XML, elements that appear earlier are drawn behind later elements
+                    # Insert right after the sub-epic cell, before any users or stories
+                    if bg_rectangles_to_insert:
+                        # Find the sub-epic cell for this feature
+                        feature_cell_id = f'e{epic_idx}f{feat_idx}'
+                        children = list(root_elem)
+                        feature_cell = None
+                        for child in children:
+                            if child.get('id') == feature_cell_id:
+                                feature_cell = child
+                                break
+                        
+                        if feature_cell is not None:
+                            # Insert backgrounds right after the sub-epic cell
+                            feature_index = children.index(feature_cell)
+                            # Insert in reverse order so first group is at the back
+                            for bg_rect_id, bg_rect in reversed(bg_rectangles_to_insert):
+                                root_elem.insert(feature_index + 1, bg_rect)
+                        elif first_story_cell_ref is not None:
+                            # Fallback: insert before first story/user cell
+                            try:
+                                first_story_index = children.index(first_story_cell_ref)
+                                for bg_rect_id, bg_rect in reversed(bg_rectangles_to_insert):
+                                    root_elem.insert(first_story_index, bg_rect)
+                            except ValueError:
+                                # Last resort: append at end
+                                for bg_rect_id, bg_rect in bg_rectangles_to_insert:
+                                    root_elem.append(bg_rect)
+                    elif bg_rectangles_to_insert:
+                        # No stories rendered, just append backgrounds
+                        for bg_rect_id, bg_rect in bg_rectangles_to_insert:
+                            root_elem.append(bg_rect)
+                    
                     # Update feature geometry width and calculate next feature X position (if not using layout)
                     # Calculate feature width from feature_max_x
                     if not use_feature_layout:
@@ -1461,245 +1559,8 @@ class DrawIORenderer:
                 # All features now use story_groups structure - legacy path removed
                 
                 # Grey background rectangles are rendered above (in the story_groups rendering section)
-                        story_geom.set('as', 'geometry')
                         
-                        # Track story position for grey background rectangles
-                        story_positions[story['name']] = {
-                            'x': story_x,
-                            'y': story_y,
-                            'width': self.STORY_WIDTH,
-                            'height': self.STORY_HEIGHT
-                        }
-                        
-                        # Track story bounds for feature shrinking
-                        feature_min_x = min(feature_min_x, story_x)
-                        feature_max_x = max(feature_max_x, story_x + self.STORY_WIDTH)
-                        # Track sequential story positions (not including nested stories)
-                        leftmost_sequential_story_x = min(leftmost_sequential_story_x, story_x)
-                        rightmost_sequential_story_x = max(rightmost_sequential_story_x, story_x + self.STORY_WIDTH)
-                        
-                        # Render nested stories (stories within stories) - check for story['stories'] array
-                        # Nested stories have sequential_order 1, 2, 3 unique to their parent
-                        nested_stories_list = story.get('stories', [])
-                        if nested_stories_list:
-                            # Sort nested stories by their sequential_order (1, 2, 3 relative to parent)
-                            nested_stories_sorted = sorted(nested_stories_list, 
-                                                           key=lambda s: s.get('sequential_order', 999))
-                            
-                            # Render nested stories below this story
-                            # Group nested stories by their OWN connector, not parent's connector
-                            # "and" connector nested stories: stack vertically (top to bottom)
-                            # "or" connector nested stories: position left-to-right at same level
-                            nested_and_stories = []
-                            nested_or_stories = []
-                            
-                            for nested_story in nested_stories_sorted:
-                                nested_connector = nested_story.get('connector', 'and')
-                                if nested_connector == 'or':
-                                    nested_or_stories.append(nested_story)
-                                else:
-                                    nested_and_stories.append(nested_story)
-                            
-                            # Start position for nested stories (always below parent)
-                            nested_base_y = story_y + self.STORY_HEIGHT + 10
-                            nested_base_x = story_x  # Align with parent story
-                            nested_story_index = 0
-                            previous_nested_users = set(story.get('users', []))
-                            
-                            # Render "and" connector nested stories first (stacked vertically)
-                            for nested_story in nested_and_stories:
-                                nested_story_index += 1
-                                nested_story_users = set(nested_story.get('users', []))
-                                
-                                # Render user if it changed from previous nested story
-                                if nested_story_users != previous_nested_users:
-                                    for user in nested_story_users:
-                                        if user not in shown_users:
-                                            user_x = nested_base_x
-                                            user_y = nested_base_y - self.USER_LABEL_OFFSET
-                                            
-                                            user_label = ET.SubElement(root_elem, 'mxCell',
-                                                                      id=f'user_e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}_{user}',
-                                                                      value=user,
-                                                                      style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
-                                                                      parent='1', vertex='1')
-                                            user_geom = ET.SubElement(user_label, 'mxGeometry',
-                                                                     x=str(user_x), y=str(user_y),
-                                                                     width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                                            user_geom.set('as', 'geometry')
-                                            
-                                            feature_min_x = min(feature_min_x, user_x)
-                                            feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
-                                            shown_users.add(user)
-                                
-                                # Render nested story (stacked vertically)
-                                nested_story_cell = ET.SubElement(root_elem, 'mxCell',
-                                                                 id=f'e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}',
-                                                                 value=nested_story['name'],
-                                                                 style=self._get_story_style(nested_story),
-                                                                 parent='1', vertex='1')
-                                nested_story_geom = ET.SubElement(nested_story_cell, 'mxGeometry',
-                                                                  x=str(nested_base_x), y=str(nested_base_y),
-                                                                  width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                                nested_story_geom.set('as', 'geometry')
-                                
-                                # Track nested story bounds for positioning, but DON'T use for feature width calculation
-                                # Nested "and" connector stories stack vertically - they don't expand feature width horizontally
-                                # Only sequential stories determine feature width
-                                # feature_min_x = min(feature_min_x, nested_base_x)  # Disabled - don't expand feature width
-                                # feature_max_x = max(feature_max_x, nested_base_x + self.STORY_WIDTH)  # Disabled - don't expand feature width
-                                
-                                # Recursively render nested stories within nested stories (deep nesting)
-                                deep_nested = nested_story.get('stories', [])
-                                if deep_nested:
-                                    deep_y = nested_base_y + self.STORY_HEIGHT + 10
-                                    deep_idx = 0
-                                    for deep_story in sorted(deep_nested, key=lambda s: s.get('sequential_order', 999)):
-                                        deep_idx += 1
-                                        deep_connector = deep_story.get('connector', 'and')
-                                        if deep_connector == 'or':
-                                            # "or" nested stories: left to right
-                                            deep_x = nested_base_x + deep_idx * self.STORY_SPACING_X
-                                        else:
-                                            # "and" nested stories: stack vertically
-                                            deep_x = nested_base_x
-                                            deep_y += self.STORY_HEIGHT + 10
-                                        
-                                        deep_cell = ET.SubElement(root_elem, 'mxCell',
-                                                                  id=f'e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}_d{deep_idx}',
-                                                                  value=deep_story['name'],
-                                                                  style=self._get_story_style(deep_story),
-                                                                  parent='1', vertex='1')
-                                        deep_geom = ET.SubElement(deep_cell, 'mxGeometry',
-                                                                  x=str(deep_x), y=str(deep_y),
-                                                                  width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                                        deep_geom.set('as', 'geometry')
-                                        
-                                        # Don't expand feature width for deep nested stories - they stack below parent
-                                        # feature_min_x = min(feature_min_x, deep_x)  # Disabled
-                                        # feature_max_x = max(feature_max_x, deep_x + self.STORY_WIDTH)  # Disabled
-                                        
-                                        if deep_connector == 'and':
-                                            deep_y += self.STORY_HEIGHT + 10
-                                
-                                # Render acceptance criteria for nested story if present
-                                if is_exploration:
-                                    nested_steps = nested_story.get('acceptance_criteria', [])
-                                    if nested_steps:
-                                        nested_ac_y = nested_base_y + self.STORY_HEIGHT + 10
-                                        nested_ac_idx = 0
-                                        for ac_item in nested_steps:
-                                            if isinstance(ac_item, dict):
-                                                ac_desc = ac_item.get('description', '')
-                                                if ac_desc:
-                                                    ac_text = f'<div style="font-size: 8px;"><b>When</b> {ac_desc}</div>'
-                                                    ac_width = self.ACCEPTANCE_CRITERIA_MIN_WIDTH
-                                                    
-                                                    nested_ac_cell = ET.SubElement(root_elem, 'mxCell',
-                                                                                  id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}_{nested_ac_idx}',
-                                                                                  value=ac_text,
-                                                                                  style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
-                                                                                  parent='1', vertex='1')
-                                                    nested_ac_geom = ET.SubElement(nested_ac_cell, 'mxGeometry',
-                                                                                   x=str(nested_base_x), y=str(nested_ac_y + nested_ac_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y),
-                                                                                   width=str(ac_width), height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
-                                                    nested_ac_geom.set('as', 'geometry')
-                                                    
-                                                    # Don't expand feature width for nested story AC - they stack below parent
-                                                    # feature_min_x = min(feature_min_x, nested_base_x)  # Disabled
-                                                    # feature_max_x = max(feature_max_x, nested_base_x + ac_width)  # Disabled
-                                                    nested_ac_idx += 1
-                                
-                                # Move to next nested story position (vertical stacking for "and")
-                                nested_base_y += self.STORY_HEIGHT + 10
-                                if nested_story.get('acceptance_criteria'):
-                                    nested_base_y += len(nested_story.get('acceptance_criteria', [])) * self.ACCEPTANCE_CRITERIA_SPACING_Y
-                                
-                                previous_nested_users = nested_story_users
-                            
-                            # Render "or" connector nested stories (left-to-right at same level)
-                            if nested_or_stories:
-                                # Position "or" stories horizontally starting from nested_base_x
-                                or_story_x = nested_base_x
-                                or_story_y = nested_base_y  # Start at current Y position
-                                
-                                for nested_story in nested_or_stories:
-                                    nested_story_index += 1
-                                    nested_story_users = set(nested_story.get('users', []))
-                                    
-                                    # Render user if it changed from previous nested story
-                                    if nested_story_users != previous_nested_users:
-                                        for user in nested_story_users:
-                                            if user not in shown_users:
-                                                user_x = or_story_x
-                                                user_y = or_story_y - self.USER_LABEL_OFFSET
-                                                
-                                                user_label = ET.SubElement(root_elem, 'mxCell',
-                                                                          id=f'user_e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}_{user}',
-                                                                          value=user,
-                                                                          style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
-                                                                          parent='1', vertex='1')
-                                                user_geom = ET.SubElement(user_label, 'mxGeometry',
-                                                                         x=str(user_x), y=str(user_y),
-                                                                         width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                                                user_geom.set('as', 'geometry')
-                                                
-                                                feature_min_x = min(feature_min_x, user_x)
-                                                feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
-                                                shown_users.add(user)
-                                    
-                                    # Render nested story (left to right)
-                                    nested_story_cell = ET.SubElement(root_elem, 'mxCell',
-                                                                     id=f'e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}',
-                                                                     value=nested_story['name'],
-                                                                     style=self._get_story_style(nested_story),
-                                                                     parent='1', vertex='1')
-                                    nested_story_geom = ET.SubElement(nested_story_cell, 'mxGeometry',
-                                                                      x=str(or_story_x), y=str(or_story_y),
-                                                                      width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                                    nested_story_geom.set('as', 'geometry')
-                                    
-                                    # Track nested story bounds for positioning, but DON'T use for feature width calculation
-                                    # Nested "or" connector stories should not expand feature width - they stack below parent
-                                    # Only sequential stories determine feature width
-                                    # feature_min_x = min(feature_min_x, or_story_x)  # Disabled - don't expand feature width
-                                    # feature_max_x = max(feature_max_x, or_story_x + self.STORY_WIDTH)  # Disabled - don't expand feature width
-                                    
-                                    # Render acceptance criteria for nested story if present
-                                    if is_exploration:
-                                        nested_steps = nested_story.get('acceptance_criteria', [])
-                                        if nested_steps:
-                                            nested_ac_y = or_story_y + self.STORY_HEIGHT + 10
-                                            nested_ac_idx = 0
-                                            for ac_item in nested_steps:
-                                                if isinstance(ac_item, dict):
-                                                    ac_desc = ac_item.get('description', '')
-                                                    if ac_desc:
-                                                        ac_text = f'<div style="font-size: 8px;"><b>When</b> {ac_desc}</div>'
-                                                        ac_width = self.ACCEPTANCE_CRITERIA_MIN_WIDTH
-                                                        
-                                                        nested_ac_cell = ET.SubElement(root_elem, 'mxCell',
-                                                                                      id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_n{nested_story_index}_{nested_ac_idx}',
-                                                                                      value=ac_text,
-                                                                                      style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
-                                                                                      parent='1', vertex='1')
-                                                        nested_ac_geom = ET.SubElement(nested_ac_cell, 'mxGeometry',
-                                                                                       x=str(or_story_x), y=str(nested_ac_y + nested_ac_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y),
-                                                                                       width=str(ac_width), height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
-                                                        nested_ac_geom.set('as', 'geometry')
-                                                        
-                                                        # Don't expand feature width for nested story AC - they stack below parent
-                                                        # feature_min_x = min(feature_min_x, or_story_x)  # Disabled
-                                                        # feature_max_x = max(feature_max_x, or_story_x + ac_width)  # Disabled
-                                                        nested_ac_idx += 1
-                                    
-                                    # Move to next "or" story position (left to right)
-                                    or_story_x += self.STORY_SPACING_X
-                                    
-                                    previous_nested_users = nested_story_users
-                                
                         # Render acceptance criteria below story in exploration mode
-                        # If story has nested stories, AC should be below the nested stories, not the parent story
                         if is_exploration:
                             steps = story.get('acceptance_criteria', []) or story.get('Steps', []) or story.get('steps', [])
                             # Sort by sequential_order to ensure top-to-bottom rendering order
@@ -1707,12 +1568,7 @@ class DrawIORenderer:
                                 steps = sorted(steps, key=lambda s: s.get('sequential_order', 999))
                             if steps:
                                 # Render acceptance criteria boxes below the story
-                                # If nested stories exist, AC goes below them; otherwise below parent story
-                                if nested_stories_list:
-                                    # AC goes below nested stories - use nested_base_y which tracks the bottom of nested stories
-                                    acceptance_criteria_y = nested_base_y + 10
-                                else:
-                                    acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10  # Start below story
+                                acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10  # Start below story
                                 
                                 # Render all AC boxes in order
                                 for ac_box_idx in range(len(steps)):
@@ -1976,6 +1832,25 @@ class DrawIORenderer:
             if epic_group_rightmost > 0:
                 epic_group_geom.set('width', str(epic_group_rightmost))
                 epic_group_geom.set('height', '190')  # Match expected height
+        
+        # Insert all background rectangles right after root cells (id='0' and id='1'), before epic-group
+        # This ensures backgrounds are behind all other elements
+        if all_background_rectangles:
+            # Find epic-group element to insert before it
+            epic_group_elem = root_elem.find(".//mxCell[@id='epic-group']")
+            if epic_group_elem is not None:
+                # Get index of epic-group
+                epic_group_index = list(root_elem).index(epic_group_elem)
+                # Insert all backgrounds in reverse order (so first one is at the back)
+                for bg_rect_id, bg_rect in reversed(all_background_rectangles):
+                    root_elem.insert(epic_group_index, bg_rect)
+            else:
+                # Fallback: insert after id='1' cell
+                id1_elem = root_elem.find(".//mxCell[@id='1']")
+                if id1_elem is not None:
+                    id1_index = list(root_elem).index(id1_elem)
+                    for bg_rect_id, bg_rect in reversed(all_background_rectangles):
+                        root_elem.insert(id1_index + 1, bg_rect)
         
         rough_string = ET.tostring(root, encoding='unicode')
         reparsed = minidom.parseString(rough_string)

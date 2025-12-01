@@ -38,7 +38,7 @@ def render_then_sync_then_render_graph():
     # Output files - all actuals go to 3_then folder
     then_dir.mkdir(parents=True, exist_ok=True)
     rendered1_path = then_dir / "actual-first-render.drawio"
-    synced_json_path = when_dir / "synced-story-graph.json"
+    synced_json_path = then_dir / "actual-synced-story-graph.json"
     rendered2_path = then_dir / "actual-second-render.drawio"
     
     print(f"\n{'='*80}")
@@ -75,8 +75,9 @@ def render_then_sync_then_render_graph():
     print(f"   [OK] Synced story graph saved to: {synced_json_path}")
     
     # Load extracted layout (layout file is generated during sync)
+    # Layout file is saved in the same directory as synced_json_path
     from story_graph_layout_helper import find_extracted_layout, load_layout_data
-    extracted_layout_path = find_extracted_layout(synced_json_path)
+    extracted_layout_path = synced_json_path.parent / f"{synced_json_path.stem}-layout.json"
     layout_data = None
     if extracted_layout_path:
         layout_data = load_layout_data(extracted_layout_path)

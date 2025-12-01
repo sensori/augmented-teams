@@ -29,7 +29,7 @@ def assert_layout_preserved():
     print(f"{'='*80}")
     
     # Expected file
-    expected_path = test_dir / "expected-story-map-exploration.drawio"
+    expected_path = test_dir / "expected-story-exploration.drawio"
     
     # Actual files
     actual_first_path = test_dir / "actual-first-render-story-exploration.drawio"

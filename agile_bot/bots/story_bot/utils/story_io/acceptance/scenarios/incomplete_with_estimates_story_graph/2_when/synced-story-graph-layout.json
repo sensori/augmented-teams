@@ -1,0 +1,60 @@
+{
+  "EPIC|E-commerce Platform25 stories": {
+    "x": 20.0,
+    "y": 130.0,
+    "width": 242.0,
+    "height": 60.0
+  },
+  "EPIC|Order Management15 stories": {
+    "x": 282.0,
+    "y": 130.0,
+    "width": 100.0,
+    "height": 60.0
+  },
+  "FEATURE|E-commerce Platform25 stories|Product Catalog8 stories": {
+    "x": 30.0,
+    "y": 200.0,
+    "width": 130.0,
+    "height": 60.0
+  },
+  "FEATURE|E-commerce Platform25 stories|Shopping Cart5 stories": {
+    "x": 172.0,
+    "y": 200.0,
+    "width": 70.0,
+    "height": 60.0
+  },
+  "FEATURE|Order Management15 stories|Order Tracking6 stories": {
+    "x": 292.0,
+    "y": 200.0,
+    "width": 70.0,
+    "height": 60.0
+  },
+  "E-commerce Platform25 stories|Product Catalog8 stories|Customer browses products": {
+    "x": 32.0,
+    "y": 350.0
+  },
+  "E-commerce Platform25 stories|Product Catalog8 stories|Customer views product details": {
+    "x": 92.0,
+    "y": 350.0
+  },
+  "E-commerce Platform25 stories|Shopping Cart5 stories|Customer adds item to cart": {
+    "x": 174.0,
+    "y": 350.0
+  },
+  "Order Management15 stories|Order Tracking6 stories|Customer views order status": {
+    "x": 294.0,
+    "y": 350.0
+  },
+  "E-commerce Platform25 stories|Product Catalog8 stories|Customer browses products|Customer": {
+    "x": 32.0,
+    "y": 290.0
+  },
+  "E-commerce Platform25 stories|Shopping Cart5 stories|Customer adds item to cart|Customer": {
+    "x": 174.0,
+    "y": 290.0
+  },
+  "Order Management15 stories|Order Tracking6 stories|Customer views order status|Customer": {
+    "x": 294.0,
+    "y": 290.0
+  }
+}

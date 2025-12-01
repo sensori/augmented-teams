@@ -28,7 +28,7 @@ def get_story_graph() -> Dict[str, Any]:
     Returns:
         Story graph dictionary
     """
-    story_graph_path = given_dir / "story-graph-with-increments.json"
+    story_graph_path = given_dir / "story-graph.json"
     return load_story_graph(story_graph_path)
 
 
@@ -39,4 +39,4 @@ def get_story_graph_path() -> Path:
     Returns:
         Path to story graph JSON file
     """
-    return given_dir / "story-graph-with-increments.json"
+    return given_dir / "story-graph.json"

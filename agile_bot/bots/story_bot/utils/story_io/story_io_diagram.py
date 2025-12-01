@@ -876,10 +876,22 @@ class StoryIODiagram(StoryIOComponent):
             nested_feature = self._create_feature_from_sub_epic_data(nested_sub_epic_data, parent_epic)
             nested_feature.change_parent(feature)
         
-        # Handle stories in sub_epic
-        for story_data in data.get('stories', []):
-            story = self._create_story_from_data(story_data)
-            story.change_parent(feature)
+        # Handle story_groups in sub_epic (new format)
+        story_groups_data = data.get('story_groups', [])
+        if story_groups_data:
+            # Preserve story_groups structure for rendering
+            feature._story_groups_data = story_groups_data
+            # Also load stories as children for internal operations
+            for story_group_data in story_groups_data:
+                group_stories = story_group_data.get('stories', [])
+                for story_data in group_stories:
+                    story = self._create_story_from_data(story_data)
+                    story.change_parent(feature)
+        else:
+            # Handle stories in sub_epic (legacy format, for backward compatibility)
+            for story_data in data.get('stories', []):
+                story = self._create_story_from_data(story_data)
+                story.change_parent(feature)
         
         return feature
     

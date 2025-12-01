@@ -99,8 +99,10 @@ class Feature(StoryIOComponent):
             'name': self.name,
             'sequential_order': self.sequential_order,
             'users': [],  # Feature-level users from first story
-            'stories': [s.render() for s in self.stories]
         }
+        # Only include stories if there are any (never empty array)
+        if self.stories:
+            result['stories'] = [s.render() for s in self.stories]
         if self._story_count is not None:
             result['story_count'] = self._story_count
             result['estimated_stories'] = self._story_count
@@ -111,9 +113,20 @@ class Feature(StoryIOComponent):
         result = {
             'name': self.name,
             'sequential_order': self.sequential_order,
-            'sub_epics': [f.render_as_sub_epic() for f in self.features],
-            'stories': [s.render() for s in self.stories]
         }
+        
+        # Sub_epics have EITHER sub_epics OR story_groups, never both, never stories
+        nested_features = [f.render_as_sub_epic() for f in self.features]
+        
+        # Priority: story_groups > nested sub_epics
+        if hasattr(self, '_story_groups_data') and self._story_groups_data:
+            # Has story_groups - don't include sub_epics
+            result['story_groups'] = self._story_groups_data
+        elif nested_features:
+            # Has nested sub_epics - don't include story_groups
+            result['sub_epics'] = nested_features
+        # If no story_groups and no sub_epics, don't include any field
+        
         if self._story_count is not None:
             result['estimated_stories'] = self._story_count
         return result

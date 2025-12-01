@@ -996,78 +996,7 @@ def build_stories_for_epics_features(drawio_path: Path, epics: List[Dict], featu
             
             epic_data['sub_epics'].append(sub_epic_data)
         
-        # Handle stories directly under epic (not in any sub_epic)
-        epic_stories = [s for s in all_stories if s['epic_num'] == epic['epic_num'] and s.get('feat_num') is None]
-        epic_stories.sort(key=lambda s: (
-            s.get('sequential_order', 999) if isinstance(s.get('sequential_order'), (int, float)) else 999,
-            s['x']
-        ))
-        
-        for story in epic_stories:
-            if story['id'] in assigned_story_ids:
-                continue
-            
-            story_data = {
-                'name': story['name'],
-                'sequential_order': story.get('sequential_order', 1),
-                'connector': 'and',  # Default to 'and' (can be determined from position if needed)
-                'users': stories_with_users.get(story['id'], []),
-                'story_type': story.get('story_type', 'user')
-            }
-            
-            # Match acceptance criteria to this story (same logic as sub_epic stories)
-            story_x = story['x']
-            story_y = story['y']
-            story_ac = []
-            tolerance_x = 100  # Increased tolerance for AC boxes
-            story_height = 50
-            
-            for ac in acceptance_criteria_cells:
-                if ac['id'] in assigned_ac_ids:
-                    continue
-                
-                ac_x = ac['x']
-                ac_y = ac['y']
-                ac_right = ac_x + ac['width']
-                story_right = story_x + story.get('width', 100)
-                
-                is_below = ac_y > story_y + story_height
-                max_distance_below = story_y + story_height + 500  # Max 500px below story
-                is_within_range = ac_y < max_distance_below
-                is_aligned = (abs(ac_x - story_x) < tolerance_x or 
-                             (ac_x <= story_x <= ac_right) or 
-                             (story_x <= ac_x <= story_right))
-                
-                # Check if AC box ID matches this story's ID pattern (more reliable than position)
-                ac_id = ac['id']
-                story_id_pattern = story['id']  # e.g., "e1f1s1"
-                ac_matches_story = ac_id.startswith(f'ac_{story_id_pattern}_')
-                
-                if (is_below and is_within_range and is_aligned) or ac_matches_story:
-                    # Extract all text from AC box - keep as one entry (don't split by <br>)
-                    import re
-                    ac_text = ac['text']
-                    # Replace <br> tags with newlines to preserve line breaks
-                    ac_text_clean = ac_text.replace('<br>', '\n').replace('<br/>', '\n').replace('<br />', '\n')
-                    ac_text_clean = re.sub(r'<[^>]+>', '', ac_text_clean)  # Remove HTML tags
-                    # Normalize whitespace but preserve newlines
-                    ac_text_clean = re.sub(r'[ \t]+', ' ', ac_text_clean)  # Normalize spaces/tabs
-                    ac_text_clean = re.sub(r' *\n *', '\n', ac_text_clean)  # Clean up around newlines
-                    ac_text_clean = ac_text_clean.strip()  # Remove leading/trailing whitespace
-                    
-                    if ac_text_clean:
-                        story_ac.append({
-                            'description': ac_text_clean,
-                            'sequential_order': len(story_ac) + 1
-                        })
-                    
-                    assigned_ac_ids.add(ac['id'])
-            
-            if story_ac:
-                story_data['acceptance_criteria'] = story_ac
-            
-            epic_data['stories'].append(story_data)
-            assigned_story_ids.add(story['id'])
+        # Epics don't have direct stories - only through sub_epics -> story_groups (legacy code removed)
         
         result['epics'].append(epic_data)
     

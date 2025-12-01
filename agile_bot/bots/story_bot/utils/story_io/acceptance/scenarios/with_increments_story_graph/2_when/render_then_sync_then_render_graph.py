@@ -20,6 +20,7 @@ story_io_dir = acceptance_dir.parent
 src_dir = story_io_dir.parent
 sys.path.insert(0, str(src_dir))
 sys.path.insert(0, str(acceptance_dir.parent / "spec_by_example"))
+sys.path.insert(0, str(scenario_dir.parent))  # Add scenarios directory for story_graph_layout_helper
 
 from story_io.story_io_diagram import StoryIODiagram
 from story_graph_layout_helper import load_story_graph, load_layout_data, find_extracted_layout

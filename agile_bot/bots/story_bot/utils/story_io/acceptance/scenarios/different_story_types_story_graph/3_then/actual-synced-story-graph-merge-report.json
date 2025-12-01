@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-12-01T15:59:31.308709",
-  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\different_story_types_story_graph\\2_when\\synced-story-graph.json",
+  "timestamp": "2025-12-01T17:23:22.908197",
+  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\different_story_types_story_graph\\3_then\\actual-synced-story-graph.json",
   "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\different_story_types_story_graph\\1_given\\story-graph-different-story-types.json",
   "summary": {
     "total_extracted_stories": 11,

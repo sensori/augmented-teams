@@ -110,8 +110,10 @@ class Epic(StoryIOComponent):
             'name': self.name,
             'sequential_order': self.sequential_order,
             'sub_epics': [f.render_as_sub_epic() for f in self.features],
-            'stories': [s.render() for s in self.stories]
         }
+        # Only include stories if there are any (epics typically don't have direct stories)
+        if self.stories:
+            result['stories'] = [s.render() for s in self.stories]
         if self._estimated_stories is not None:
             result['estimated_stories'] = self._estimated_stories
         return result

@@ -26,7 +26,7 @@ def main():
     # Step 1: Given - verify input data exists
     print("\nGIVEN: Verify input data exists...")
     given_dir = test_dir / "1_given"
-    story_graph_path = given_dir / "story-graph-with-increments.json"
+    story_graph_path = given_dir / "story-graph.json"
     
     if not story_graph_path.exists():
         print(f"[ERROR] Story graph not found: {story_graph_path}")
