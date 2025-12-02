@@ -1,0 +1,9 @@
+{
+  "name": "extract_story_map_exploration",
+  "path": "docs/stories",
+  "input": "story-map-exploration.drawio",
+  "extractor": "story_io",
+  "extractor_command": "extract-exploration",
+  "output": "story-graph-exploration.json"
+}
+
