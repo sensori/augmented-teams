@@ -763,7 +763,7 @@
                       "sequential_order": 1,
                       "connector": "opt",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
@@ -772,7 +772,7 @@
                       "sequential_order": 2,
                       "connector": "opt",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
@@ -1253,7 +1253,9 @@
                       "name": "Inject  Load Structured Content Instructions",
                       "sequential_order": 4,
                       "connector": "opt",
-                      "users": [],
+                      "users": [
+                        "Bot Behavior"
+                      ],
                       "story_type": "user"
                     },
                     {
@@ -1518,7 +1520,7 @@
                       "sequential_order": 1,
                       "connector": "or",
                       "users": [
-                        "Bot"
+                        "Bot Behavior"
                       ],
                       "story_type": "user"
                     },
@@ -1671,7 +1673,9 @@
                   "name": "Inject Behavior Specific Rules Instructions",
                   "sequential_order": 2,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "Bot Behavior"
+                  ],
                   "story_type": "user"
                 }
               ]
@@ -2779,15 +2783,6 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Inject Next behavor-Action to Instructions",
-                  "sequential_order": 6,
-                  "connector": "or",
-                  "users": [
-                    "Bot Behavior"
-                  ],
-                  "story_type": "user"
-                },
-                {
                   "name": "Folllows Injected Instructions",
                   "sequential_order": 7,
                   "connector": "or",
@@ -2979,7 +2974,9 @@
                       "name": "Inject  Load Structured Content Instructions",
                       "sequential_order": 6,
                       "connector": "or",
-                      "users": [],
+                      "users": [
+                        "Bot Behavior"
+                      ],
                       "story_type": "user"
                     },
                     {
@@ -3064,7 +3061,9 @@
                       "name": "Inject  Load Rendered Content Instructions",
                       "sequential_order": 1,
                       "connector": "or",
-                      "users": [],
+                      "users": [
+                        "Bot Behavior"
+                      ],
                       "story_type": "user"
                     },
                     {
@@ -3099,7 +3098,9 @@
                   "name": "Inject Behavior Specific Rules Instructions",
                   "sequential_order": 2,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "Bot Behavior"
+                  ],
                   "story_type": "user"
                 },
                 {
@@ -3273,6 +3274,15 @@
               "sequential_order": 3,
               "sub_epics": [],
               "stories": [
+                {
+                  "name": "Inject Next behavor-Action to Instructions",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
                 {
                   "name": "Saves Behavior State",
                   "sequential_order": 8,

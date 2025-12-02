@@ -1,0 +1,157 @@
+# Incremental Backlog
+
+## Increment 1: User Manually Drops Config In to AI Chat
+
+- Human --> Provides Context of New Bot
+- Human --> Drop Bot Builder Behavior into Chat
+- Create Bot Scaffolding
+- Human --> Shares Context and Project Location
+- Human --> Drops Behavior Folder in Chat w/ relevant Bot Config
+- AI Chat --> Determines Working Area From Current Dir
+- AI Chat --> Confirm Location
+- AI Chat --> Save Project In Context
+- Provides addtnl Instructions
+- AI Chat --> Invokes Correct Behavior Action (We Hope)
+- Correct, Feedback, Proceed
+- Folllows Behavior Istructions From Context
+- Saves Content
+- AI Chat --> Proceeds to Next Actions following instructions In Context
+- AI Chat --> Finds Questions and Evidence form Context
+- Answers Questions and Evidence from Context
+- Presents Answers and Evidence to User
+- AI Chat --> Find Gather Context Instructions(hope)
+- Pause based on context
+- AI Chat --> Proceeds to follow planning (we Hope)
+- AI Chat --> Saves Answers and Evidencein Context
+- Human --> Correct, Feedback, Proceed
+- Present Assumptions and Decisions to User
+- AI Chat --> Find Planning Instructions from Context
+- AI Chat --> Find Decision Criteria and Assumptions from Context
+- Make Assumptions and Decisions from Context
+- AI Chat --> Save Assumptions and Decisions using Context
+- Correct, Feedback, Proceed
+- AI Chat --> Proceed to Build Knowledge using context
+- Pause based on context
+- AI Chat --> Find Key Questions Clarifications from context
+- AI Chat --> Find Decision Criteria and Assumptions from Context
+- Read Answers and Evidence from Context
+- AI Chat --> Find Knowledge Graph Template and Builder Instructions
+- AI Chat --> Build Knowledge Graph From Context
+- Human --> Correct, Feedback, Proceed
+- AI Chat --> Save Knowledge Graph using Context
+- AI Chat --> Proceed to Build Knowledge using context
+- Find Structured Content in Context
+- AI Chat --> Find Render Output Instructions in Context
+- AI Chat --> Find Transformer Methods in Context
+- Find Templates in Context
+- Find Rendered Outputs in Context and Display
+- Pause
+- Provide Feedback then Update
+- AI Chat --> Update Rendered Outputs Based on Feedback
+- AI Chat --> Render Outputs Using Components  In Context
+- AI Chat --> Find Rendered Content Instructions from Context and Load
+- Agile Bot --> Review Answers, Assumptions
+- Agile Bot --> Review Built Knowledge
+- AI Chat --> Find  Behavior Specific Rules from Context
+- AI Chat --> Find Common Bot Rules from Context
+- FInd Content in Context
+- Pause
+- Human --> Read report and make changes
+- Human --> Save Content through Context
+- Proceed to Correct-Bot trough  context
+- Find Rules in Context and validate against Rules
+- AI Chat --> Find Original and Improved Work From Context
+- AI Chat --> Finds Rules and Prompts In Context
+- Determine Issues From Context
+- Human --> Review . Modifiy. Apprtove Correctins
+- AI Chat --> Makes Corrections to Found Rules and Instructions
+- Human --> Provide Suggested Bot Corrections
+- AI Chat --> Save Correcions in Context
+- Suggest Corrections Based On Context
+
+## Increment 2: Simplest MCP
+
+- MCP Server Generator --> Generate Behavior Action Tools
+- Deploy MCP BOT Server
+- Human --> Generate MCP Bot Server
+- Human --> Speaks Trigger Words For Bot Tool
+- Invoke Action In Behavior
+- AI Chat --> Route To Behavior Action
+- AI Chat --> Forward To Behavior Action
+- Bot Behavior --> Injects Instructions
+- Folllows Injected Instructions
+- AI Chat --> Read Questions And Answers
+- Answers Questions and Evidence
+- Bot  Behavor --> Injects Gather Context Instructions
+- AI Chat --> Reads Injected Gather Context Instructions
+- Bot  Behavor --> Inject  Questions and Evidence
+- AI Chat --> Inject Planning Instructions
+- AI Chat --> Inject Decision Criteria and Assumptions
+- AI Chat --> Read Injected Planning Instructions
+- AI Chat --> Read Injected Decision Criteria and Assumptions
+- Make Assumptions and Decisions
+- AI Chat --> Inject Decision Criteria and Assumptions Loading Instructions
+- Inject Key Questions and Clarifications Loading Instructions
+- AI Chat --> Read Injected Key Questions Clarifications
+- AI Chat --> Read Injected Decision Criteria and Assumptions
+- AI Chat --> Read Injected Render Output Instructions
+- Bot Behavior --> Inject  Load Structured Content Instructions
+- Bot-Behavior --> Inject Load Transformer Methods Instructuion
+- Inject  Load Template Instructuion
+- Bot-Behavior --> Inject Render Output Instructions
+- AI Chat --> Read  Injected Transformer Methods Instructions
+- Read  Injected TemplateInstructions
+- Read  Injected Structured ContentInstructions
+- AI Chat --> Render Output Using Injected Componenents
+- Inject  Load Rendered Content Instructions
+- AI Chat --> Follow Injected Instructions and Load Content
+- AI Chat --> Inject Common Bot Rules Instructions
+- Inject Behavior Specific Rules Instructions
+- Validate Content vs Injected Diagnostics and Rules
+- Bot-Behavior --> Inject Correct Bot Instructions
+- Bot-Behavior --> Injects Review Original and Improved Work Instructions
+- Inject Load Bot and Rules In Instructions
+- AI Chat --> Read Original and Improved Work Usng Instructions
+- AI Chat --> Reads Injected Rules and Prompts
+- Determine Issues
+- Suggest Bot Corrections Based on Instructions
+- AI Chat --> Submit Bot Guidance and Rules Changes to Correct-Bot Tool
+- Bot-Behavior --> Track Activity for Correct-Bot Action
+
+## Increment 3: Workflow
+
+- MCP Server Generator --> Generate Bot Tools
+- MCP Server Generator --> Generate Behavior Tools
+- AI Chat --> Route To MCP Behavior  Tool
+- AI Chat --> Forward To Behavior and Current Action
+- Bot Behavior --> Inject Next behavor-Action to Instructions
+- Bot Behavior --> Saves Behavior State
+- Call Correct-Bot Action Tool
+- Track Activity for Validate Rules Action
+- Bot-Behavior --> Submit Content to Tool for Saving
+
+## Increment 4: Inject Content
+
+- AI Chat --> Route To MCP BotTool
+- AI Chat --> Forward To Current Behavior and Current Action
+- Bot Behavior --> InjectsContent Into Instructions
+- Follows Enriched Instructions
+- AI Chat --> Read Instructions Injected Structured Content
+- Present Rendered Outputs to User
+
+## Increment 5: Save Content
+
+- Bot Behavior --> Persists Content
+- Bot Behavior --> Submit Content Changes to Tools for Saving
+- AI Chat --> Submit Answers and Evidence to Tools for Saving
+- AI Chat --> Saves Answers and Evidence
+- AI Chat --> Save Final Assumptions and Decisions
+- Bot-Behavior --> Save Knowledge Graph
+- Bot --> Load + Inject Rendered Content
+- Bot --> Present Rendered Content
+- Bot-Behavior --> Save Content
+- Bot-Behavior --> Load + Inject Diagnostics Results, Knowledge, Content Instructions
+- Validate Content Using Injected Diagnostics + Rules
+
+## Increment 6: Later
+
