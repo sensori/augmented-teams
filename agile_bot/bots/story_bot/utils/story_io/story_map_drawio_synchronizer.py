@@ -2122,6 +2122,44 @@ def synchronize_story_graph_from_drawio_outline(
         # No increments for outline
     }
     
+    # If original_path is provided, merge in features that exist in original but not in DrawIO
+    # (e.g., features with no stories that weren't rendered)
+    if original_path and original_path.exists():
+        with open(original_path, 'r', encoding='utf-8') as f:
+            original_data = json.load(f)
+        
+        # For each epic in result, check if all features from original are present
+        for epic_result in result['epics']:
+            # Find matching epic in original
+            original_epic = next((e for e in original_data.get('epics', []) 
+                                if e['name'] == epic_result['name']), None)
+            if not original_epic:
+                continue
+            
+            # Get list of feature names that were extracted
+            extracted_feature_names = {feat['name'] for feat in epic_result.get('sub_epics', [])}
+            
+            # Add features from original that are missing in extracted (features with no stories)
+            for original_feat in original_epic.get('sub_epics', []):
+                if original_feat['name'] not in extracted_feature_names:
+                    # This feature wasn't extracted (likely has no stories), preserve it from original
+                    preserved_feat = {
+                        'name': original_feat['name'],
+                        'sequential_order': float(original_feat.get('sequential_order', 1)),
+                        'estimated_stories': original_feat.get('estimated_stories'),
+                        'sub_epics': [],
+                        'story_groups': original_feat.get('story_groups', [])  # Preserve empty story_groups from original
+                    }
+                    # Insert at correct position based on sequential_order
+                    inserted = False
+                    for idx, existing_feat in enumerate(epic_result.get('sub_epics', [])):
+                        if existing_feat.get('sequential_order', 999) > preserved_feat['sequential_order']:
+                            epic_result['sub_epics'].insert(idx, preserved_feat)
+                            inserted = True
+                            break
+                    if not inserted:
+                        epic_result['sub_epics'].append(preserved_feat)
+    
     layout_data = epics_with_stories.get('layout', {})
     
     # Write extracted JSON

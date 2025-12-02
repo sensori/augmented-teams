@@ -21,6 +21,7 @@ story_io_dir = acceptance_dir.parent
 src_dir = story_io_dir.parent
 sys.path.insert(0, str(src_dir))
 sys.path.insert(0, str(acceptance_dir.parent / "spec_by_example"))
+sys.path.insert(0, str(scenario_dir.parent))  # Add scenarios directory for drawio_comparison
 
 from drawio_comparison import compare_drawios
 from story_io.story_io_diagram import StoryIODiagram
@@ -91,12 +92,12 @@ def _assert_jsons_match(expected_path: Path, actual_path: Path) -> dict:
 def assert_story_graph_round_trip():
     """Assert that story graph is preserved through render → sync → render round-trip."""
     print(f"\n{'='*80}")
-    print("THEN: Assert expected matches actual (JSON and DrawIO)")
+    print("THEN: Assert given matches actual (JSON and DrawIO)")
     print(f"{'='*80}")
     
-    # Expected file
+    # Given file (original input)
     given_dir = scenario_dir / "1_given"
-    expected_json_path = given_dir / "story-graph-multiple-epics-features.json"
+    given_json_path = given_dir / "story-graph-multiple-epics-features.json"
     
     # Actual files
     when_dir = scenario_dir / "2_when"
@@ -104,8 +105,8 @@ def assert_story_graph_round_trip():
     rendered1_path = then_dir / "actual-first-render.drawio"
     rendered2_path = then_dir / "actual-second-render.drawio"
     
-    if not expected_json_path.exists():
-        print(f"[ERROR] Expected JSON not found: {expected_json_path}")
+    if not given_json_path.exists():
+        print(f"[ERROR] Given JSON not found: {given_json_path}")
         return False
     
     if not synced_json_path.exists():
@@ -122,13 +123,13 @@ def assert_story_graph_round_trip():
     
     all_passed = True
     
-    # Assert 1: Expected JSON matches synced JSON
-    print(f"\n1. Asserting expected JSON matches synced JSON...")
-    json_match = _assert_jsons_match(expected_json_path, synced_json_path)
+    # Assert 1: Given JSON matches synced JSON
+    print(f"\n1. Asserting given JSON matches synced JSON...")
+    json_match = _assert_jsons_match(given_json_path, synced_json_path)
     if json_match['match']:
-        print(f"   [OK] Expected JSON matches synced JSON!")
+        print(f"   [OK] Given JSON matches synced JSON!")
     else:
-        print(f"   [FAIL] Expected JSON doesn't match synced JSON: {json_match.get('message', 'Unknown error')}")
+        print(f"   [FAIL] Given JSON doesn't match synced JSON: {json_match.get('message', 'Unknown error')}")
         all_passed = False
     
     # Assert 2: Extract JSONs from rendered DrawIOs and compare
@@ -146,22 +147,22 @@ def assert_story_graph_round_trip():
     diagram2.synchronize_outline(drawio_path=rendered2_path, output_path=temp_json2)
     diagram2.save_story_graph(temp_json2)
     
-    # Compare expected with extracted from rendered1
-    print(f"   2a. Comparing expected JSON with extracted JSON from rendered1...")
-    json_match_rendered1 = _assert_jsons_match(expected_json_path, temp_json1)
+    # Compare given with extracted from rendered1
+    print(f"   2a. Comparing given JSON with extracted JSON from rendered1...")
+    json_match_rendered1 = _assert_jsons_match(given_json_path, temp_json1)
     if json_match_rendered1['match']:
-        print(f"   [OK] Expected JSON matches rendered1 extracted JSON!")
+        print(f"   [OK] Given JSON matches rendered1 extracted JSON!")
     else:
-        print(f"   [FAIL] Expected JSON doesn't match rendered1 extracted JSON")
+        print(f"   [FAIL] Given JSON doesn't match rendered1 extracted JSON")
         all_passed = False
     
-    # Compare expected with extracted from rendered2
-    print(f"   2b. Comparing expected JSON with extracted JSON from rendered2...")
-    json_match_rendered2 = _assert_jsons_match(expected_json_path, temp_json2)
+    # Compare given with extracted from rendered2
+    print(f"   2b. Comparing given JSON with extracted JSON from rendered2...")
+    json_match_rendered2 = _assert_jsons_match(given_json_path, temp_json2)
     if json_match_rendered2['match']:
-        print(f"   [OK] Expected JSON matches rendered2 extracted JSON!")
+        print(f"   [OK] Given JSON matches rendered2 extracted JSON!")
     else:
-        print(f"   [FAIL] Expected JSON doesn't match rendered2 extracted JSON")
+        print(f"   [FAIL] Given JSON doesn't match rendered2 extracted JSON")
         all_passed = False
     
     # Assert 3: DrawIOs match (layout preservation)

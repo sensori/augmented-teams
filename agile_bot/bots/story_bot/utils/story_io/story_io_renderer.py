@@ -883,9 +883,7 @@ class DrawIORenderer:
                 # Skip feature if no stories AND no estimated_stories (in exploration mode, skip if no stories with AC)
                 if is_exploration and len(stories) == 0:
                     continue
-                # In outline mode: render features with estimated_stories even if no story_groups
-                elif not is_exploration and not story_groups and not feature.get('estimated_stories'):
-                    continue  # Skip features without story_groups and without estimated_stories
+                # In outline mode: always render features (even if no story_groups) - only skip in exploration mode
                 
                 # Group stories by sequential_order and create a mapping to position index
                 stories_by_seq = {}
@@ -1334,9 +1332,8 @@ class DrawIORenderer:
                 
                 # All features now use story_groups structure
                 feature_story_groups = feature.get('story_groups', [])
-                if not feature_story_groups:
-                    # Skip features without story_groups
-                    continue
+                # In outline mode: render all features (even if no story_groups)
+                # In exploration mode: skip features without story_groups (handled earlier in filtered_features)
                 
                 if True:  # Always use story_groups path
                     # NEW STRUCTURE: Process story groups

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-01T16:10:05.735906",
+  "timestamp": "2025-12-01T19:32:08.246224",
   "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\multiple_epics_features_test\\2_when\\synced-story-graph.json",
   "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\multiple_epics_features_test\\1_given\\story-graph-multiple-epics-features.json",
   "summary": {
@@ -321,13 +321,7 @@
   "removed_stories": [],
   "large_deletions": {
     "missing_epics": [],
-    "missing_sub_epics": [
-      {
-        "epic": "Epic 4 - Empty Features",
-        "name": "Feature 4A - No Stories",
-        "story_count": 0
-      }
-    ],
+    "missing_sub_epics": [],
     "epics_with_many_missing_stories": [],
     "sub_epics_with_many_missing_stories": []
   }
