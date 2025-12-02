@@ -2176,33 +2176,57 @@ def merge_story_graphs(
                         # Preserve acceptance_criteria from original (don't overwrite)
                         # The original AC is already in the story since we started with original
     
-    # Merge increments (if present) - only use story_groups (no legacy direct stories support)
+    # Merge increments (if present)
+    # Increments use direct stories arrays (no story_groups)
+    def merge_sub_epic_stories(sub_epic, epic_name, sub_epic_name):
+        """Recursively merge stories in sub_epic (handles both story_groups and direct stories)"""
+        # Handle story_groups format (epics section)
+        for story_group in sub_epic.get('story_groups', []):
+            for story in story_group.get('stories', []):
+                story_name = story.get('name', '')
+                key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                
+                if key in extracted_full_story_map:
+                    ext_story = extracted_full_story_map[key]
+                    if 'users' in ext_story:
+                        story['users'] = ext_story['users']
+                    if 'connector' in ext_story:
+                        story['connector'] = ext_story['connector']
+                    if 'sequential_order' in ext_story:
+                        story['sequential_order'] = ext_story['sequential_order']
+                    if 'story_type' in ext_story:
+                        story['story_type'] = ext_story['story_type']
+        
+        # Handle direct stories array format (increments section)
+        for story in sub_epic.get('stories', []):
+            story_name = story.get('name', '')
+            key = f"{epic_name}|{sub_epic_name}|{story_name}"
+            
+            if key in extracted_full_story_map:
+                ext_story = extracted_full_story_map[key]
+                if 'users' in ext_story:
+                    story['users'] = ext_story['users']
+                if 'connector' in ext_story:
+                    story['connector'] = ext_story['connector']
+                if 'sequential_order' in ext_story:
+                    story['sequential_order'] = ext_story['sequential_order']
+                if 'story_type' in ext_story:
+                    story['story_type'] = ext_story['story_type']
+        
+        # Recursively handle nested sub_epics
+        for nested_sub_epic in sub_epic.get('sub_epics', []):
+            merge_sub_epic_stories(nested_sub_epic, epic_name, nested_sub_epic.get('name', ''))
+    
     for increment in merged_data.get('increments', []):
         for epic in increment.get('epics', []):
             epic_name = epic.get('name', '')
             for sub_epic in epic.get('sub_epics', []):
                 sub_epic_name = sub_epic.get('name', '')
-                
-                # Merge stories in story_groups
-                for story_group in sub_epic.get('story_groups', []):
-                    for story in story_group.get('stories', []):
-                        story_name = story.get('name', '')
-                        key = f"{epic_name}|{sub_epic_name}|{story_name}"
-                        
-                        # If we have a match, update story with extracted data (users, connector, etc.)
-                        # but preserve acceptance_criteria from original
-                        if key in extracted_full_story_map:
-                            ext_story = extracted_full_story_map[key]
-                            # Update with extracted data (users, connector, sequential_order, etc.)
-                            if 'users' in ext_story:
-                                story['users'] = ext_story['users']
-                            if 'connector' in ext_story:
-                                story['connector'] = ext_story['connector']
-                            if 'sequential_order' in ext_story:
-                                story['sequential_order'] = ext_story['sequential_order']
-                            if 'story_type' in ext_story:
-                                story['story_type'] = ext_story['story_type']
-                            # Preserve acceptance_criteria from original (don't overwrite)
+                merge_sub_epic_stories(sub_epic, epic_name, sub_epic_name)
+    
+    # If original doesn't have increments but extracted does, add them
+    if 'increments' not in merged_data and 'increments' in extracted_data:
+        merged_data['increments'] = extracted_data['increments']
     
     # Write merged result
     output_path = Path(output_path)
