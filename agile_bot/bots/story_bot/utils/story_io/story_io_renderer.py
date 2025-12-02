@@ -867,6 +867,9 @@ class DrawIORenderer:
                     features_to_render.extend(nested_with_stories)
                 # Features with no story_groups and no nested sub_epics are skipped
             
+            # Sort all features by sequential_order to maintain correct order (parent then children)
+            features_to_render.sort(key=lambda x: x.get('sequential_order', 999))
+            
             for feat_idx, feature in enumerate(features_to_render, 1):
                 
                 # Check if layout data has coordinates for this feature
