@@ -103,14 +103,13 @@
 - Read  Injected TemplateInstructions
 - Read  Injected Structured ContentInstructions
 - AI Chat --> Render Output Using Injected Componenents
-- Inject  Load Rendered Content Instructions
+- Bot Behavior --> Inject  Load Rendered Content Instructions
 - AI Chat --> Follow Injected Instructions and Load Content
 - AI Chat --> Inject Common Bot Rules Instructions
-- Inject Behavior Specific Rules Instructions
+- Bot Behavior --> Inject Behavior Specific Rules Instructions
 - Validate Content vs Injected Diagnostics and Rules
 - Bot-Behavior --> Inject Correct Bot Instructions
 - Bot-Behavior --> Injects Review Original and Improved Work Instructions
-- Inject Load Bot and Rules In Instructions
 - AI Chat --> Read Original and Improved Work Usng Instructions
 - AI Chat --> Reads Injected Rules and Prompts
 - Determine Issues
@@ -136,6 +135,7 @@
 - AI Chat --> Forward To Current Behavior and Current Action
 - Bot Behavior --> InjectsContent Into Instructions
 - Follows Enriched Instructions
+- Bot Behavior --> Inject Load Bot and Rules In Instructions
 - AI Chat --> Read Instructions Injected Structured Content
 - Present Rendered Outputs to User
 

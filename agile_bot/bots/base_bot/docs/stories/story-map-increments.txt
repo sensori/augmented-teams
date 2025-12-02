@@ -107,7 +107,6 @@
         (S) AI Chat --> Forward To Behavior Action
     (E) Perform Behavior Action
         (S) Bot Behavior --> Injects Instructions
-        (S) Bot Behavior --> Inject Next behavor-Action to Instructions
         (S) Folllows Injected Instructions
 
 (E) Execute Behavior Actions
@@ -130,7 +129,7 @@
             (S) AI Chat --> Read Injected Decision Criteria and Assumptions
         (E) Read Render Output Instructions and Data
             (S) AI Chat --> Read Injected Render Output Instructions
-            (S) Inject  Load Structured Content Instructions
+            (S) Bot Behavior --> Inject  Load Structured Content Instructions
             (S) Bot-Behavior --> Inject Load Transformer Methods Instructuion
             (S) Inject  Load Template Instructuion
             (S) Bot-Behavior --> Inject Render Output Instructions
@@ -140,16 +139,15 @@
         (E) Generate Rendered Outputs
             (S) AI Chat --> Render Output Using Injected Componenents
         (E) Load Rendered Content
-            (S) Inject  Load Rendered Content Instructions
+            (S) Bot Behavior --> Inject  Load Rendered Content Instructions
             (S) AI Chat --> Follow Injected Instructions and Load Content
     (E) Validate Knowledge & Content Against Rules
         (S) AI Chat --> Inject Common Bot Rules Instructions
-        (S) Inject Behavior Specific Rules Instructions
+        (S) Bot Behavior --> Inject Behavior Specific Rules Instructions
         (S) Validate Content vs Injected Diagnostics and Rules
     (E) Review Answers, Assumptions
         (S) Bot-Behavior --> Inject Correct Bot Instructions
         (S) Bot-Behavior --> Injects Review Original and Improved Work Instructions
-        (S) Inject Load Bot and Rules In Instructions
         (S) AI Chat --> Read Original and Improved Work Usng Instructions
         (S) AI Chat --> Reads Injected Rules and Prompts
         (S) Determine Issues
@@ -171,6 +169,7 @@
         (S) AI Chat --> Route To MCP Behavior  Tool
         (S) AI Chat --> Forward To Behavior and Current Action
     (E) Perform Behavior Action
+        (S) Bot Behavior --> Inject Next behavor-Action to Instructions
         (S) Bot Behavior --> Saves Behavior State
 
 (E) Execute Behavior Actions
@@ -192,6 +191,7 @@
 
 (E) Execute Behavior Actions
         (E) Read Render Output Instructions and Data
+            (S) Bot Behavior --> Inject Load Bot and Rules In Instructions
             (S) AI Chat --> Read Instructions Injected Structured Content
         (E) Generate Rendered Outputs
             (S) Present Rendered Outputs to User

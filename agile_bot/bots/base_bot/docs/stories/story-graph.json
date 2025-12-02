@@ -1790,13 +1790,6 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Inject Load Bot and Rules In Instructions",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
                   "name": "Read Original and Improved Work Usng Instructions",
                   "sequential_order": 4,
                   "connector": "or",
@@ -3136,13 +3129,6 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Inject Load Bot and Rules In Instructions",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
                   "name": "Read Original and Improved Work Usng Instructions",
                   "sequential_order": 4,
                   "connector": "or",
@@ -3405,6 +3391,15 @@
                   "sequential_order": 12,
                   "sub_epics": [],
                   "stories": [
+                    {
+                      "name": "Inject Load Bot and Rules In Instructions",
+                      "sequential_order": 3,
+                      "connector": "or",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
                     {
                       "name": "Read Instructions Injected Structured Content",
                       "sequential_order": 13,
