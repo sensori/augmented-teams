@@ -165,14 +165,18 @@ def assert_story_graph_round_trip():
         print(f"   [FAIL] Expected JSON doesn't match rendered2 extracted JSON")
         all_passed = False
     
-    # Assert 3: DrawIOs match (layout preservation)
-    print(f"\n3. Asserting DrawIOs match (layout preservation)...")
-    drawio_match = compare_drawios(rendered1_path, rendered2_path)
-    if drawio_match['match']:
-        print(f"   [OK] First render matches second render (layout preserved)!")
+    # Assert 3: Second render matches expected DrawIO (layout correctness)
+    expected_drawio_path = then_dir / "expected-story-graph.drawio"
+    if expected_drawio_path.exists():
+        print(f"\n3. Asserting second render matches expected DrawIO...")
+        drawio_match = compare_drawios(expected_drawio_path, rendered2_path)
+        if drawio_match['match']:
+            print(f"   [OK] Second render matches expected DrawIO!")
+        else:
+            print(f"   [FAIL] Second render differs from expected DrawIO: {drawio_match.get('message', 'Unknown')}")
+            all_passed = False
     else:
-        print(f"   [INFO] First render differs from second render (layout may have been applied): {drawio_match.get('message', 'Unknown')}")
-        # This is informational - layout differences are expected
+        print(f"\n3. Skipping DrawIO comparison (expected file not found: {expected_drawio_path})")
     
     # Cleanup temp files
     if temp_json1.exists():

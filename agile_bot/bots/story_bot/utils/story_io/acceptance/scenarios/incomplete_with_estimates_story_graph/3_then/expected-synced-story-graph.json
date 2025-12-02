@@ -1,18 +1,18 @@
 {
   "epics": [
     {
-      "name": "E-commerce Platform25 stories",
+      "name": "E-commerce Platform",
       "sequential_order": 1.0,
       "sub_epics": [
         {
-          "name": "Product Catalog8 stories",
+          "name": "Product Catalog",
           "sequential_order": 1.0,
           "sub_epics": [],
           "stories": [],
           "estimated_stories": 8
         },
         {
-          "name": "Shopping Cart5 stories",
+          "name": "Shopping Cart",
           "sequential_order": 2.0,
           "sub_epics": [],
           "stories": [],
@@ -23,11 +23,11 @@
       "estimated_stories": 25
     },
     {
-      "name": "Order Management15 stories",
+      "name": "Order Management",
       "sequential_order": 2.0,
       "sub_epics": [
         {
-          "name": "Order Tracking6 stories",
+          "name": "Order Tracking",
           "sequential_order": 1.0,
           "sub_epics": [],
           "stories": [],

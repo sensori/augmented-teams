@@ -185,6 +185,23 @@ def get_epics_features_and_boundaries(drawio_path: Path) -> Dict[str, Any]:
     epics = []
     features = []
     
+    # First pass: collect all cells and build parent-child relationships
+    cell_map = {}  # id -> cell
+    parent_map = {}  # id -> parent_id
+    group_cells = {}  # group_id -> list of child cell ids
+    
+    for cell in cells:
+        cell_id = cell.get('id', '')
+        if cell_id:
+            cell_map[cell_id] = cell
+            parent_id = cell.get('parent', '')
+            if parent_id:
+                parent_map[cell_id] = parent_id
+                if parent_id not in group_cells:
+                    group_cells[parent_id] = []
+                group_cells[parent_id].append(cell_id)
+    
+    # Second pass: extract epics and features, and look for estimated stories in groups
     for cell in cells:
         cell_id = cell.get('id', '')
         style = cell.get('style', '')
@@ -197,17 +214,50 @@ def get_epics_features_and_boundaries(drawio_path: Path) -> Dict[str, Any]:
         # Epics: purple boxes (fillColor=#e1d5e7)
         # NEVER match by ID - extract all epics by position/containment only
         if 'fillColor=#e1d5e7' in style:
+            # If epic is in a group, use group's absolute position + epic's relative position
+            parent_id = parent_map.get(cell_id)
+            absolute_x = geom['x']
+            absolute_y = geom['y']
+            if parent_id:
+                parent_cell = cell_map.get(parent_id)
+                if parent_cell is not None:
+                    parent_geom = extract_geometry(parent_cell)
+                    if parent_geom:
+                        # Epic's x/y are relative to group, add group's absolute position
+                        absolute_x = parent_geom['x'] + geom['x']
+                        absolute_y = parent_geom['y'] + geom['y']
+            
             epic_data = {
                 'id': cell_id,
                 'name': value,
                 'epic_num': None,  # Will assign by position/order
-                'x': geom['x'],
-                'y': geom['y'],
+                'x': absolute_x,
+                'y': absolute_y,
                 'width': geom['width'],
                 'height': geom['height']
             }
-            # Extract estimated_stories from cell HTML value
+            # Extract estimated_stories from cell HTML value (legacy format)
             estimated_stories = extract_story_count_from_value(cell)
+            
+            # NEW: Also check for estimated stories text box in parent group
+            parent_id = parent_map.get(cell_id)
+            if parent_id and not estimated_stories:
+                # Look for text cells with pattern "~{number} stories" in the same group
+                group_children = group_cells.get(parent_id, [])
+                for child_id in group_children:
+                    child_cell = cell_map.get(child_id)
+                    if child_cell is None:
+                        continue
+                    child_style = child_cell.get('style', '')
+                    child_value = get_cell_value(child_cell)
+                    # Check if it's a text cell with estimated stories pattern
+                    if 'text;' in child_style or 'whiteSpace=wrap' in child_style:
+                        # Look for pattern "~{number} stories" in the value
+                        match = re.search(r'~(\d+)\s*stories', child_value, re.IGNORECASE)
+                        if match:
+                            estimated_stories = int(match.group(1))
+                            break
+            
             if estimated_stories:
                 epic_data['estimated_stories'] = estimated_stories
                 epic_data['total_stories'] = estimated_stories  # Also set total_stories
@@ -216,18 +266,51 @@ def get_epics_features_and_boundaries(drawio_path: Path) -> Dict[str, Any]:
         # Features: green boxes (fillColor=#d5e8d4)
         # NEVER match by ID - extract all features by position/containment only
         elif 'fillColor=#d5e8d4' in style:
+            # If feature is in a group, use group's absolute position + feature's relative position
+            parent_id = parent_map.get(cell_id)
+            absolute_x = geom['x']
+            absolute_y = geom['y']
+            if parent_id:
+                parent_cell = cell_map.get(parent_id)
+                if parent_cell is not None:
+                    parent_geom = extract_geometry(parent_cell)
+                    if parent_geom:
+                        # Feature's x/y are relative to group, add group's absolute position
+                        absolute_x = parent_geom['x'] + geom['x']
+                        absolute_y = parent_geom['y'] + geom['y']
+            
             feature_data = {
                 'id': cell_id,
                 'name': value,
                 'epic_num': None,  # Will assign by position/containment
                 'feat_num': None,  # Will assign by position/order within epic
-                'x': geom['x'],
-                'y': geom['y'],
+                'x': absolute_x,
+                'y': absolute_y,
                 'width': geom['width'],
                 'height': geom['height']
             }
-            # Extract estimated_stories (story_count) from cell HTML value
+            # Extract estimated_stories (story_count) from cell HTML value (legacy format)
             estimated_stories = extract_story_count_from_value(cell)
+            
+            # NEW: Also check for estimated stories text box in parent group
+            parent_id = parent_map.get(cell_id)
+            if parent_id and not estimated_stories:
+                # Look for text cells with pattern "~{number} stories" in the same group
+                group_children = group_cells.get(parent_id, [])
+                for child_id in group_children:
+                    child_cell = cell_map.get(child_id)
+                    if child_cell is None:
+                        continue
+                    child_style = child_cell.get('style', '')
+                    child_value = get_cell_value(child_cell)
+                    # Check if it's a text cell with estimated stories pattern
+                    if 'text;' in child_style or 'whiteSpace=wrap' in child_style:
+                        # Look for pattern "~{number} stories" in the value
+                        match = re.search(r'~(\d+)\s*stories', child_value, re.IGNORECASE)
+                        if match:
+                            estimated_stories = int(match.group(1))
+                            break
+            
             if estimated_stories:
                 feature_data['estimated_stories'] = estimated_stories
                 feature_data['story_count'] = estimated_stories  # Legacy field

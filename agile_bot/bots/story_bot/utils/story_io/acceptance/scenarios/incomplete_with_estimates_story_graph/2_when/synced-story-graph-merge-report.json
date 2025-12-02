@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-01T17:06:19.347569",
+  "timestamp": "2025-12-01T19:18:48.099104",
   "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\incomplete_with_estimates_story_graph\\2_when\\synced-story-graph.json",
   "original_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\story_bot\\utils\\story_io\\acceptance\\scenarios\\incomplete_with_estimates_story_graph\\1_given\\story-graph-incomplete-with-estimates.json",
   "summary": {
@@ -18,8 +18,8 @@
           "Customer"
         ],
         "sequential_order": 1,
-        "epic_name": "E-commerce Platform25 stories",
-        "sub_epic_name": "Product Catalog8 stories"
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Product Catalog"
       },
       "original": {
         "name": "Customer browses products",
@@ -39,8 +39,8 @@
         "name": "Customer views product details",
         "users": [],
         "sequential_order": 2,
-        "epic_name": "E-commerce Platform25 stories",
-        "sub_epic_name": "Product Catalog8 stories"
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Product Catalog"
       },
       "original": {
         "name": "Customer views product details",
@@ -62,8 +62,8 @@
           "Customer"
         ],
         "sequential_order": 1,
-        "epic_name": "E-commerce Platform25 stories",
-        "sub_epic_name": "Shopping Cart5 stories"
+        "epic_name": "E-commerce Platform",
+        "sub_epic_name": "Shopping Cart"
       },
       "original": {
         "name": "Customer adds item to cart",
@@ -85,8 +85,8 @@
           "Customer"
         ],
         "sequential_order": 1,
-        "epic_name": "Order Management15 stories",
-        "sub_epic_name": "Order Tracking6 stories"
+        "epic_name": "Order Management",
+        "sub_epic_name": "Order Tracking"
       },
       "original": {
         "name": "Customer views order status",
@@ -106,18 +106,7 @@
   "new_stories": [],
   "removed_stories": [],
   "large_deletions": {
-    "missing_epics": [
-      {
-        "name": "E-commerce Platform",
-        "story_count": 0,
-        "sub_epic_count": 3
-      },
-      {
-        "name": "Order Management",
-        "story_count": 0,
-        "sub_epic_count": 1
-      }
-    ],
+    "missing_epics": [],
     "missing_sub_epics": [],
     "epics_with_many_missing_stories": [],
     "sub_epics_with_many_missing_stories": []

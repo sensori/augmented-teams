@@ -25,7 +25,7 @@ class DrawIORenderer:
     FEATURE_HEIGHT = 60
     FEATURE_SPACING_X = 10
     FEATURE_SPACING_Y = 10  # Vertical spacing between features when stacking
-    EPIC_Y = 130
+    EPIC_Y = 120
     FEATURE_Y = 200
     STORY_START_Y = 350  # Legacy constant (not used for relative positioning)
     STORY_OFFSET_FROM_FEATURE = 90  # Vertical spacing from feature bottom to stories
@@ -760,6 +760,8 @@ class DrawIORenderer:
         
         x_pos = 20
         shown_users = set()  # Track which users have been shown
+        previous_epic_rightmost_x = None  # Track rightmost position of previous epic's features
+        previous_epic_right_edge = None  # Track right edge of previous epic (group or epic cell) for next epic positioning
         
         for epic_idx, epic in enumerate(story_graph.get('epics', []), 1):
             features = get_sub_epics(epic)  # Get sub_epics (or features for backwards compatibility)
@@ -803,7 +805,12 @@ class DrawIORenderer:
                 use_epic_layout = True
             else:
                 # Use calculated positions
-                epic_x = x_pos
+                # For Epic 2+, use previous_epic_right_edge if available (more accurate than x_pos)
+                # Use same gap as features (FEATURE_SPACING_X)
+                if epic_idx > 1 and previous_epic_right_edge is not None:
+                    epic_x = previous_epic_right_edge + self.FEATURE_SPACING_X
+                else:
+                    epic_x = x_pos
                 epic_y = self.EPIC_Y
                 epic_width = 0
                 epic_height = 60
@@ -826,7 +833,17 @@ class DrawIORenderer:
             # In exploration mode, features align with epics (no offset)
             # Otherwise, start features 10px from epic left edge
             feature_x_offset = 0 if is_exploration else 10
-            current_feature_x = epic_x + feature_x_offset
+            # For the first epic, start at epic_x + offset
+            # For subsequent epics, start after the previous epic's rightmost feature
+            if epic_idx == 1:
+                current_feature_x = epic_x + feature_x_offset
+            else:
+                # Start after previous epic's rightmost feature
+                # Use previous_epic_rightmost_x if available, otherwise fall back to x_pos
+                if previous_epic_rightmost_x is not None:
+                    current_feature_x = previous_epic_rightmost_x + self.FEATURE_SPACING_X
+                else:
+                    current_feature_x = max(x_pos, epic_x + feature_x_offset)
             # When AC is present, features stack vertically; otherwise horizontal
             current_feature_y = self.FEATURE_Y  # Start Y position for first feature
             for feature in features:
@@ -850,8 +867,6 @@ class DrawIORenderer:
                 
                 # Only use story_groups (no legacy direct stories support)
                 story_groups = feature.get('story_groups', [])
-                if not story_groups:
-                    continue  # Skip features without story_groups
                 
                 # Process story groups - flatten stories from all groups
                 stories = []
@@ -865,9 +880,12 @@ class DrawIORenderer:
                         ]
                     stories.extend(group_stories)
                 
-                # Skip feature if no stories after filtering (in exploration mode)
+                # Skip feature if no stories AND no estimated_stories (in exploration mode, skip if no stories with AC)
                 if is_exploration and len(stories) == 0:
                     continue
+                # In outline mode: render features with estimated_stories even if no story_groups
+                elif not is_exploration and not story_groups and not feature.get('estimated_stories'):
+                    continue  # Skip features without story_groups and without estimated_stories
                 
                 # Group stories by sequential_order and create a mapping to position index
                 stories_by_seq = {}
@@ -915,7 +933,11 @@ class DrawIORenderer:
                     )
                     
                     # Base width calculation
-                    base_width = (max_position + 1) * self.STORY_SPACING_X + 20
+                    # If no stories but has estimated_stories, use minimum width
+                    if max_position == 0 and not has_optional and feature.get('estimated_stories'):
+                        base_width = 100  # Minimum width for features with only estimated_stories
+                    else:
+                        base_width = (max_position + 1) * self.STORY_SPACING_X + 20
                     
                     # If AC is present, account for AC box width (120px) vs story width (50px)
                     # AC boxes align with stories but extend 70px beyond them
@@ -933,7 +955,8 @@ class DrawIORenderer:
                     'height': feat_height,
                     'stories_by_seq': stories_by_seq,
                     'seq_to_position': seq_to_position,
-                    'use_layout': use_feature_layout
+                    'use_layout': use_feature_layout,
+                    'has_estimated_stories': feature.get('estimated_stories') is not None
                 })
                 
                 # Calculate next feature X position (horizontal layout)
@@ -989,8 +1012,10 @@ class DrawIORenderer:
             
             # Calculate epic story display
             # For increments: show total_stories in top right
-            # For outline: show estimated_stories at bottom
+            # For outline: show estimated_stories as separate text box grouped with epic
             epic_story_text = ""
+            has_estimated_stories = False
+            estimated_stories_count = 0
             if is_increments:
                 # In increments mode: calculate total_stories and show in top right
                 epic_total_stories = self._calculate_total_stories_for_epic_in_increment(epic)
@@ -1000,20 +1025,65 @@ class DrawIORenderer:
                 else:
                     epic_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{epic['name']}</div>"
             else:
-                # Outline mode: show estimated_stories at top-right if provided
+                # Outline mode: show estimated_stories as separate text box grouped with epic
                 if 'estimated_stories' in epic and epic['estimated_stories']:
-                    epic_story_count_html = self._get_story_count_display_html(epic['estimated_stories'], position='top-right')
-                    epic_story_text = f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{epic['name']}</span>{epic_story_count_html}</div>"
+                    has_estimated_stories = True
+                    estimated_stories_count = epic['estimated_stories']
+                    epic_story_text = f"<span style=\"border-color: rgb(218, 220, 224); flex: 1 1 0%;\">{epic['name']}</span><div style=\"border-color: rgb(218, 220, 224); position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); z-index: 10;\"></div><div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\"></div>"
                 else:
                     epic_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{epic['name']}</div>"
             
-            epic_cell = ET.SubElement(root_elem, 'mxCell', id=f'epic{epic_idx}', 
-                                     value=epic_story_text,
-                                     style='rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;',
-                                     parent='epic-group', vertex='1')
-            epic_geom = ET.SubElement(epic_cell, 'mxGeometry', x=str(epic_x), y=str(epic_y), width=str(epic_width), 
-                         height=str(epic_height))
-            epic_geom.set('as', 'geometry')
+            # Create group for epic if it has estimated_stories
+            if has_estimated_stories and not is_increments:
+                # Create group cell
+                epic_group_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx + 100), value='', 
+                                               style='group', vertex='1', connectable='0', parent='1')
+                # Calculate group geometry (epic width + space for text box)
+                # Group width should match epic width (no extra padding)
+                group_width = epic_width
+                group_height = epic_height + 8  # Add space for text box above
+                # Group y position: expected shows group at y=120, epic cell at y=8 relative
+                # So group y = epic_y (which is EPIC_Y = 120), not epic_y - 8
+                epic_group_geom = ET.SubElement(epic_group_cell, 'mxGeometry', 
+                                               x=str(epic_x), y=str(epic_y), 
+                                               width=str(group_width), height=str(group_height))
+                epic_group_geom.set('as', 'geometry')
+                
+                # Epic cell as child of group (position relative to group, not absolute)
+                epic_cell = ET.SubElement(root_elem, 'mxCell', id=f'epic{epic_idx}', 
+                                         value=epic_story_text,
+                                         style='rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;',
+                                         parent=str(epic_idx + 100), vertex='1')
+                epic_geom = ET.SubElement(epic_cell, 'mxGeometry')
+                # NO x attribute - relative to group (x=0)
+                epic_geom.set('y', '8')
+                epic_geom.set('width', str(epic_width))
+                epic_geom.set('height', str(epic_height))
+                epic_geom.set('as', 'geometry')
+                
+                # Estimated stories text box as child of group
+                estimated_text = f"~{estimated_stories_count} stories"
+                estimated_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx + 200), 
+                                              value=f"<span style=\"font-family: Helvetica; font-size: 8px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;\">{estimated_text}</span>",
+                                              style='text;whiteSpace=wrap;html=1;align=right;verticalAlign=middle;fontColor=default;labelBackgroundColor=none;',
+                                              vertex='1', parent=str(epic_idx + 100))
+                # Position text box at top right of epic (relative to group)
+                # Align with epic's right edge: epic is at x=0 relative to group, width=epic_width
+                # Text box width is 60, so position at epic_width - 60 to align right edge
+                estimated_x = epic_width - 60  # Align right edge of text box with right edge of epic
+                estimated_geom = ET.SubElement(estimated_cell, 'mxGeometry', 
+                                              x=str(estimated_x), y='0', 
+                                              width='60', height='30')
+                estimated_geom.set('as', 'geometry')
+            else:
+                # No estimated stories - render epic normally
+                epic_cell = ET.SubElement(root_elem, 'mxCell', id=f'epic{epic_idx}', 
+                                         value=epic_story_text,
+                                         style='rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;',
+                                         parent='epic-group', vertex='1')
+                epic_geom = ET.SubElement(epic_cell, 'mxGeometry', x=str(epic_x), y=str(epic_y), width=str(epic_width), 
+                             height=str(epic_height))
+                epic_geom.set('as', 'geometry')
             
             # Render epic-level users above the epic box
             if epic_users_to_render:
@@ -1128,9 +1198,11 @@ class DrawIORenderer:
                     
                     user_x_offset += self.STORY_SPACING_X
                 
-                # Calculate feature story display
+                # Calculate sub-epic story display
                 # For increments: show total_stories in top right
-                # For outline: show story_count at bottom
+                # For outline: show estimated_stories as separate text box grouped with sub-epic
+                feature_has_estimated_stories = False
+                feature_estimated_stories_count = 0
                 if is_increments:
                     # In increments mode: calculate total_stories and show in top right
                     feature_total_stories = self._calculate_total_stories_for_feature_in_increment(feature)
@@ -1140,11 +1212,11 @@ class DrawIORenderer:
                     else:
                         feature_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{feature['name']}</div>"
                 else:
-                    # Outline mode: show estimated_stories at top-right if provided
+                    # Outline mode: show estimated_stories as separate text box grouped with feature
                     if 'estimated_stories' in feature and feature['estimated_stories']:
-                        # Estimated stories - show in top-right corner
-                        feature_story_count_html = self._get_story_count_display_html(feature['estimated_stories'], position='top-right')
-                        feature_story_text = f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{feature['name']}</span>{feature_story_count_html}</div>"
+                        feature_has_estimated_stories = True
+                        feature_estimated_stories_count = feature['estimated_stories']
+                        feature_story_text = f"<span style=\"border-color: rgb(218, 220, 224); flex: 1 1 0%;\">{feature['name']}</span><div style=\"border-color: rgb(218, 220, 224); position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); z-index: 10;\"></div><div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\"></div>"
                     elif 'story_count' in feature and feature['story_count']:
                         # Legacy field support - show in top-right corner
                         feature_story_count_html = self._get_story_count_display_html(feature['story_count'], position='top-right')
@@ -1159,16 +1231,95 @@ class DrawIORenderer:
                 # Features are horizontal in exploration mode (when AC is present)
                 # Y position is fixed at FEATURE_Y
                 
-                feature_cell = ET.SubElement(root_elem, 'mxCell', 
-                                             id=f'e{epic_idx}f{feat_idx}',
-                                             value=feature_story_text,
-                                             style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
-                                             parent='1', vertex='1')
                 # Use updated X position from feat_data if it was updated by previous feature
                 actual_feat_x = feat_data.get('x', feat_x)
-                feature_geom = ET.SubElement(feature_cell, 'mxGeometry', x=str(actual_feat_x), y=str(feat_y),
-                             width=str(feat_width), height=str(feat_height))
-                feature_geom.set('as', 'geometry')
+                
+                # For the first feature of an epic, align left edge with epic's left edge
+                # Epic group (if exists) is positioned at epic_x, so use epic_x directly
+                if feat_idx == 0:
+                    actual_feat_x = epic_x
+                
+                # If previous feature was in a group, update current_feature_x to use group's right edge
+                # This ensures proper spacing when a feature with no stories (but has estimated_stories) is in a group
+                if feat_idx > 0:
+                    prev_feature = features[feat_idx - 1]
+                    if prev_feature.get('estimated_stories') and not is_increments:
+                        # Previous feature was in a group - need to find its group and use its right edge
+                        prev_group_id = (epic_idx * 1000 + (feat_idx - 1) * 100)
+                        prev_group = root_elem.find(f'.//mxCell[@id="{prev_group_id}"]')
+                        if prev_group is not None:
+                            prev_group_geom = prev_group.find('mxGeometry')
+                            if prev_group_geom is not None:
+                                prev_group_x = float(prev_group_geom.get('x', 0))
+                                prev_group_width = float(prev_group_geom.get('width', 0))
+                                prev_group_right = prev_group_x + prev_group_width
+                                current_feature_x = prev_group_right + self.FEATURE_SPACING_X
+                                actual_feat_x = current_feature_x
+                
+                # Create group for sub-epic if it has estimated_stories
+                if feature_has_estimated_stories and not is_increments:
+                    # Create group cell
+                    feature_group_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx * 1000 + feat_idx * 100), value='', 
+                                                       style='group', vertex='1', connectable='0', parent='1')
+                    # Calculate group geometry (feature width + space for text box)
+                    # Group width should match feature width (no extra padding needed)
+                    group_width = feat_width
+                    group_height = feat_height + 8  # Add space for text box above
+                    # Group y position: feature cell is at y=3 relative to group, so group y = feat_y - 3
+                    feature_group_geom = ET.SubElement(feature_group_cell, 'mxGeometry', 
+                                                       x=str(actual_feat_x), y=str(feat_y - 3), 
+                                                       width=str(group_width), height=str(group_height))
+                    feature_group_geom.set('as', 'geometry')
+                    
+                    # Sub-epic cell as child of group (position relative to group, not absolute)
+                    feature_cell = ET.SubElement(root_elem, 'mxCell', 
+                                                 id=f'e{epic_idx}f{feat_idx}',
+                                                 value=feature_story_text,
+                                                 style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
+                                                 parent=str(epic_idx * 1000 + feat_idx * 100), vertex='1')
+                    feature_geom = ET.SubElement(feature_cell, 'mxGeometry')
+                    # Don't set x - it's relative to group (defaults to 0)
+                    feature_geom.set('y', '3')
+                    feature_geom.set('width', str(feat_width))
+                    feature_geom.set('height', str(feat_height))
+                    feature_geom.set('as', 'geometry')
+                    
+                    # Estimated stories text box as child of group
+                    estimated_text = f"~{feature_estimated_stories_count} stories"
+                    estimated_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx * 1000 + feat_idx * 100 + 10), 
+                                                  value=f"<span style=\"font-family: Helvetica; font-size: 8px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;\">{estimated_text}</span>",
+                                                  style='text;whiteSpace=wrap;html=1;align=right;verticalAlign=middle;fontColor=default;labelBackgroundColor=none;',
+                                                  vertex='1', parent=str(epic_idx * 1000 + feat_idx * 100))
+                    # Position text box above feature (negative y offset, relative to group)
+                    # For small features (width < 80), position at x=0 or x=-1 (no x attribute or negative)
+                    # For larger features, position near right edge
+                    if feat_width < 80:
+                        # Small features: don't set x (defaults to 0) or set to -1
+                        estimated_geom = ET.SubElement(estimated_cell, 'mxGeometry', 
+                                                      y='-5', 
+                                                      width='60', height='30')
+                        estimated_geom.set('as', 'geometry')
+                    else:
+                        # Larger features: position near right edge
+                        estimated_x = max(0, feat_width - 60)
+                        estimated_geom = ET.SubElement(estimated_cell, 'mxGeometry', 
+                                                      x=str(estimated_x), y='-3', 
+                                                      width='60', height='30')
+                        estimated_geom.set('as', 'geometry')
+                    # Update next feature X position - when feature is in a group, use group's right edge
+                    group_right_edge = actual_feat_x + group_width
+                    current_feature_x = group_right_edge + self.FEATURE_SPACING_X
+                else:
+                    # No estimated stories - render feature normally
+                    feature_cell = ET.SubElement(root_elem, 'mxCell', 
+                                                 id=f'e{epic_idx}f{feat_idx}',
+                                                 value=feature_story_text,
+                                                 style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
+                                                 parent='1', vertex='1')
+                    feature_geom = ET.SubElement(feature_cell, 'mxGeometry', x=str(actual_feat_x), y=str(feat_y),
+                                 width=str(feat_width), height=str(feat_height))
+                    feature_geom.set('as', 'geometry')
+                
                 # Update feat_x to use actual position for story rendering
                 feat_x = actual_feat_x
                 
@@ -1664,7 +1815,65 @@ class DrawIORenderer:
                                 calculated_feature_x = feature_min_x - 10  # Adjust X to align with stories
                         actual_feature_x = max(feat_x, calculated_feature_x)  # Ensure we don't move left
                     feature_geometries[-1]['geom'].set('width', str(actual_feature_width))
-                    feature_geometries[-1]['geom'].set('x', str(actual_feature_x))
+                    # Only set x if feature is NOT in a group (if parent is not a group ID like "1100", "1200")
+                    # Find the feature cell to check its parent
+                    feature_cell_found = root_elem.find(f'.//mxCell[@id="e{epic_idx}f{feat_idx}"]')
+                    if feature_cell_found is not None:
+                        feature_parent = feature_cell_found.get('parent', '')
+                        # Group IDs for features with estimated_stories are like "1100", "1200" (epic_idx * 1000 + feat_idx * 100)
+                        # If parent is a group ID (numeric string matching epic_idx * 1000 + feat_idx * 100), don't set x - it's relative to group
+                        expected_group_id = str(epic_idx * 1000 + feat_idx * 100)
+                        if feature_parent == expected_group_id:
+                            # Feature is in a group - don't set x, it's relative to group
+                            # Update group width to match finalized feature width
+                            group_cell = root_elem.find(f'.//mxCell[@id="{expected_group_id}"]')
+                            if group_cell is not None:
+                                group_geom = group_cell.find('mxGeometry')
+                                if group_geom is not None:
+                                    group_geom.set('width', str(actual_feature_width))
+                                    # Also update feature cell width and estimated stories text box position
+                                    feature_geom = feature_cell_found.find('mxGeometry')
+                                    if feature_geom is not None:
+                                        feature_geom.set('width', str(actual_feature_width))
+                                    # Update estimated stories text box position to align with feature's right edge
+                                    estimated_cell = root_elem.find(f'.//mxCell[@id="{epic_idx * 1000 + feat_idx * 100 + 10}"]')
+                                    if estimated_cell is not None and estimated_cell.get('parent') == expected_group_id:
+                                        estimated_geom = estimated_cell.find('mxGeometry')
+                                        if estimated_geom is not None:
+                                            # Align right edge of text box with feature's right edge
+                                            # Feature is at x=0 relative to group, width=actual_feature_width
+                                            # Text box width is 60, so position at actual_feature_width - 60
+                                            estimated_x = actual_feature_width - 60
+                                            estimated_geom.set('x', str(estimated_x))
+                                    # Update position of next feature if it exists (to account for updated group width)
+                                    if feat_idx + 1 < len(features):
+                                        next_feature = features[feat_idx + 1]
+                                        if next_feature.get('estimated_stories') and not is_increments:
+                                            # Next feature is also in a group - update its position
+                                            next_group_id = str(epic_idx * 1000 + (feat_idx + 1) * 100)
+                                            next_group = root_elem.find(f'.//mxCell[@id="{next_group_id}"]')
+                                            if next_group is not None:
+                                                next_group_geom = next_group.find('mxGeometry')
+                                                if next_group_geom is not None:
+                                                    # Position next feature after this feature's group
+                                                    group_x = float(group_geom.get('x', 0))
+                                                    group_right = group_x + actual_feature_width
+                                                    next_group_geom.set('x', str(group_right + self.FEATURE_SPACING_X))
+                                        else:
+                                            # Next feature is not in a group - update its position if it exists
+                                            next_feature_cell = root_elem.find(f'.//mxCell[@id="e{epic_idx}f{feat_idx + 1}"]')
+                                            if next_feature_cell is not None:
+                                                next_feature_geom = next_feature_cell.find('mxGeometry')
+                                                if next_feature_geom is not None:
+                                                    group_x = float(group_geom.get('x', 0))
+                                                    group_right = group_x + actual_feature_width
+                                                    next_feature_geom.set('x', str(group_right + self.FEATURE_SPACING_X))
+                        else:
+                            # Feature is not in a group - set absolute x
+                            feature_geometries[-1]['geom'].set('x', str(actual_feature_x))
+                    else:
+                        # Fallback: set x if we can't find the cell
+                        feature_geometries[-1]['geom'].set('x', str(actual_feature_x))
                     
                     # Update previous_feature_rightmost_x with actual rightmost position (including AC cards)
                     # This will be used to position the next feature
@@ -1708,14 +1917,45 @@ class DrawIORenderer:
                 constrained_ac_x = min(epic_rightmost_ac_x, max_feature_right + 100)  # Allow some AC expansion but cap it
                 epic_max_x = max(epic_max_x, constrained_ac_x)
             
+            # Track the leftmost and rightmost positions of all features in this epic
+            # Epic should align with leftmost feature's left edge and extend to rightmost feature's right edge
+            epic_leftmost_x = float('inf')
+            epic_rightmost_x = -float('inf')
+            for feat_idx, feat_data in enumerate(feature_positions, 1):
+                if feat_data.get('has_estimated_stories'):
+                    # Feature is in a group - find the group
+                    group_id = epic_idx * 1000 + feat_idx * 100
+                    group = root_elem.find(f'.//mxCell[@id="{group_id}"]')
+                    if group is not None:
+                        group_geom = group.find('mxGeometry')
+                        if group_geom is not None:
+                            group_x = float(group_geom.get('x', 0))
+                            group_width = float(group_geom.get('width', 0))
+                            group_right = group_x + group_width
+                            epic_leftmost_x = min(epic_leftmost_x, group_x)
+                            epic_rightmost_x = max(epic_rightmost_x, group_right)
+                else:
+                    # Feature is not in a group - use feature position
+                    feat_x = feat_data.get('x', 0)
+                    feat_width = feat_data.get('width', 0)
+                    feat_right = feat_x + feat_width
+                    epic_leftmost_x = min(epic_leftmost_x, feat_x)
+                    epic_rightmost_x = max(epic_rightmost_x, feat_right)
+            
+            # Store rightmost position for next epic's features (don't track parent epic position)
+            previous_epic_rightmost_x = epic_rightmost_x
+            
             # Shrink epic to fit actual feature bounds (with padding) - only if not using layout
             if use_epic_layout:
                 # Use stored epic coordinates and dimensions - don't shrink
-                # Update x_pos for next epic using stored epic width
-                # In exploration mode, use 30px spacing between epics to match expected layout
-                epic_spacing = 30 if is_exploration else 20
-                x_pos = epic_x + epic_width + epic_spacing
-            elif epic_min_x != float('inf') and epic_max_x != -float('inf'):
+                # But still update x_pos for next epic using the tracked rightmost feature position
+                # This ensures features from different epics don't overlap
+                x_pos = epic_rightmost_x + self.FEATURE_SPACING_X
+            else:
+                # Update x_pos for next epic to start after this epic's rightmost feature
+                x_pos = epic_rightmost_x + self.FEATURE_SPACING_X
+            
+            if not use_epic_layout and epic_min_x != float('inf') and epic_max_x != -float('inf'):
                 # In exploration mode, epic should span from epic_x to rightmost AC box + padding
                 # Otherwise, calculate from min/max feature bounds
                 if is_exploration and epic_rightmost_ac_x is not None:
@@ -1731,21 +1971,97 @@ class DrawIORenderer:
                     actual_epic_x = epic_x
                 else:
                     # Calculate width from actual rendered bounds
-                    # epic_min_x starts at epic_x, epic_max_x tracks rightmost content
-                    # When sub_epics (features) are present, epic width should be constrained to fit the widest feature
-                    # This prevents epics from becoming too wide when "or" connector nested stories extend horizontally
-                    actual_epic_width = epic_max_x - epic_min_x + 20  # Add padding
-                    actual_epic_x = epic_min_x  # Keep epic at its starting position (don't move left)
-                    # Ensure minimum width
-                    if actual_epic_width < 100:
-                        actual_epic_width = 100
+                    # Epic should align with leftmost feature's left edge and extend to rightmost feature's right edge
+                    if epic_leftmost_x != float('inf') and epic_rightmost_x != -float('inf'):
+                        actual_epic_x = epic_leftmost_x
+                        actual_epic_width = epic_rightmost_x - epic_leftmost_x
+                    else:
+                        # Fallback: use epic_x and epic_rightmost_x
+                        actual_epic_x = epic_x
+                        actual_epic_width = epic_rightmost_x - epic_x
+                    # No minimum width - epic width should exactly match feature bounds
                 epic_geom.set('width', str(actual_epic_width))
-                epic_geom.set('x', str(actual_epic_x))
+                # Only set x if epic is NOT in a group (if parent is not a group ID like "101", "102")
+                # Find the epic cell to check its parent
+                epic_cell_found = root_elem.find(f'.//mxCell[@id="epic{epic_idx}"]')
+                if epic_cell_found is not None:
+                    epic_parent = epic_cell_found.get('parent', '')
+                    # Group IDs for epics with estimated_stories are like "101", "102" (epic_idx + 100)
+                    # If parent is a group ID (numeric string matching epic_idx + 100), don't set x - it's relative to group
+                    expected_group_id = str(epic_idx + 100)
+                    if epic_parent == expected_group_id:
+                        # Epic is in a group - don't set x, it's relative to group
+                        # Update group width to match finalized epic width
+                        group_cell = root_elem.find(f'.//mxCell[@id="{expected_group_id}"]')
+                        if group_cell is not None:
+                            group_geom = group_cell.find('mxGeometry')
+                            if group_geom is not None:
+                                group_geom.set('width', str(actual_epic_width))
+                                # Also update estimated stories text box position to align with epic's right edge
+                                estimated_cell = root_elem.find(f'.//mxCell[@id="{epic_idx + 200}"]')
+                                if estimated_cell is not None and estimated_cell.get('parent') == expected_group_id:
+                                    estimated_geom = estimated_cell.find('mxGeometry')
+                                    if estimated_geom is not None:
+                                        estimated_x = actual_epic_width - 60  # Align right edge of text with epic right edge
+                                        estimated_geom.set('x', str(estimated_x))
+                                # Update epic group position to align with leftmost feature
+                                if epic_leftmost_x != float('inf'):
+                                    group_geom.set('x', str(epic_leftmost_x))
+                                # Store epic group's right edge for next epic positioning
+                                updated_group_x = float(group_geom.get('x', 0))
+                                previous_epic_right_edge = updated_group_x + actual_epic_width
+                                # Update Epic 2+ epic group position if it was already created
+                                if epic_idx < len(story_graph.get('epics', [])):
+                                    next_epic_idx = epic_idx + 1
+                                    next_epic = story_graph.get('epics', [])[next_epic_idx - 1] if next_epic_idx - 1 < len(story_graph.get('epics', [])) else None
+                                    if next_epic and 'estimated_stories' in next_epic and next_epic.get('estimated_stories') and not is_increments:
+                                        next_epic_group_id = str(next_epic_idx + 100)
+                                        next_epic_group = root_elem.find(f'.//mxCell[@id="{next_epic_group_id}"]')
+                                        if next_epic_group is not None:
+                                            next_epic_group_geom = next_epic_group.find('mxGeometry')
+                                            if next_epic_group_geom is not None:
+                                                # Use same gap as features (FEATURE_SPACING_X)
+                                                next_epic_x = previous_epic_right_edge + self.FEATURE_SPACING_X
+                                                next_epic_group_geom.set('x', str(next_epic_x))
+                                                # Update next epic's first feature position
+                                                # Group IDs are: epic_idx * 1000 + feat_idx * 100, where feat_idx is 0-based
+                                                # First feature has feat_idx=0, so group ID = next_epic_idx * 1000 + 0 * 100 = next_epic_idx * 1000
+                                                # But looking at actual IDs, 2100 = 2*1000 + 1*100, so feat_idx=1
+                                                # This means features are 1-indexed in the group ID calculation
+                                                # So first feature (index 0 in list) has group ID = next_epic_idx * 1000 + 1 * 100
+                                                # Actually, let me find the leftmost feature group for next epic
+                                                next_epic_features = get_sub_epics(next_epic)
+                                                if next_epic_features:
+                                                    # Find the leftmost feature group for next epic
+                                                    min_x = float('inf')
+                                                    leftmost_group = None
+                                                    for feat_idx, feature in enumerate(next_epic_features):
+                                                        if feature.get('estimated_stories'):
+                                                            feat_group_id = next_epic_idx * 1000 + (feat_idx + 1) * 100
+                                                            feat_group = root_elem.find(f'.//mxCell[@id="{feat_group_id}"]')
+                                                            if feat_group is not None:
+                                                                feat_group_geom = feat_group.find('mxGeometry')
+                                                                if feat_group_geom is not None:
+                                                                    feat_group_x = float(feat_group_geom.get('x', 0))
+                                                                    if feat_group_x < min_x:
+                                                                        min_x = feat_group_x
+                                                                        leftmost_group = feat_group_geom
+                                                    if leftmost_group is not None:
+                                                        leftmost_group.set('x', str(next_epic_x))
+                    else:
+                        # Epic is not in a group - set absolute x
+                        epic_geom.set('x', str(actual_epic_x))
+                        # Store epic's right edge for next epic positioning
+                        previous_epic_right_edge = actual_epic_x + actual_epic_width
+                else:
+                    # Fallback: set x if we can't find the cell
+                    epic_geom.set('x', str(actual_epic_x))
+                    # Store epic's right edge for next epic positioning
+                    previous_epic_right_edge = actual_epic_x + actual_epic_width
                 
                 # Update x_pos for next epic using actual epic width
-                # In exploration mode, use 30px spacing between epics to match expected layout
-                epic_spacing = 30 if is_exploration else 20
-                x_pos = actual_epic_x + actual_epic_width + epic_spacing
+                # Use same gap as features (FEATURE_SPACING_X)
+                x_pos = actual_epic_x + actual_epic_width + self.FEATURE_SPACING_X
             else:
                 # Fallback to original calculation
                 x_pos += epic_width + 20
