@@ -1575,24 +1575,35 @@ def _assign_sequential_order(all_stories: List[Dict]):
             current_order += 1
 
 
-def build_stories_for_increments(drawio_path: Path, increments: List[Dict], 
-                                 epics: List[Dict], features: List[Dict]) -> List[Dict[str, Any]]:
+def build_increments_from_extracted_epics(drawio_path: Path, increments: List[Dict], 
+                                          extracted_epics: List[Dict]) -> List[Dict[str, Any]]:
     """
-    Build stories for each increment based on Y position alignment with increment squares.
+    Build increments from already-extracted epics (with story_groups).
+    Post-processing step that flattens story_groups into direct stories array.
+    
+    Algorithm:
+    1. For each increment, iterate through all extracted epics
+    2. Recursively traverse epic → sub_epic → nested sub_epics (to bottom)
+    3. For each story in story_groups, check if Y position matches increment Y
+    4. If match, add story to parent sub_epic (ignore groups, flatten to direct stories array)
+    5. If parent not added yet, add parent first (build hierarchy on-demand)
+    6. Renumber sequential_order to reflect flat list (no grouping)
+    
+    Args:
+        drawio_path: Path to DrawIO file (for story Y position lookup)
+        increments: List of increment markers with Y positions
+        extracted_epics: Already-extracted epics with story_groups structure
     
     Returns:
-        List of increment dictionaries with epics, features, and stories
+        List of increment dictionaries with epics, sub_epics, and flattened stories
     """
     tree = ET.parse(drawio_path)
     root = tree.getroot()
     cells = root.findall('.//mxCell')
     
-    # Extract all stories
-    all_stories = []
-    user_cells = []
-    
+    # Build map of story name -> Y position from DrawIO
+    story_positions = {}
     for cell in cells:
-        cell_id = cell.get('id', '')
         style = cell.get('style', '')
         value = get_cell_value(cell)
         geom = extract_geometry(cell)
@@ -1600,184 +1611,29 @@ def build_stories_for_increments(drawio_path: Path, increments: List[Dict],
         if geom is None:
             continue
         
-        # Skip acceptance criteria boxes (they have IDs starting with 'ac_' or are wide yellow boxes)
-        is_ac_box = (cell_id.startswith('ac_') or 
-                    ('fillColor=#fff2cc' in style and 'rounded=0' in style and 
-                     geom['width'] > 100 and geom['height'] > 50))
-        if is_ac_box:
-            continue  # Skip AC boxes in increments mode too
+        # Stories: yellow boxes
+        is_story = 'fillColor=#fff2cc' in style and 'strokeColor=#d6b656' in style
+        if is_story and value:
+            story_positions[value] = geom['y']
+    
+    increment_tolerance = 100  # pixels
+    
+    # First pass: assign each story to its CLOSEST increment
+    story_to_increment = {}  # story_name -> increment_index
+    for story_name, story_y in story_positions.items():
+        closest_inc_idx = None
+        closest_distance = float('inf')
         
-        # Stories: detect by fillColor (yellow #fff2cc, dark blue #1a237e, black #000000)
-        # NEVER match by ID - extract all stories by position/containment only
-        # Exclude AC boxes (already handled above)
-        is_story = ('fillColor=#fff2cc' in style or 'fillColor=#1a237e' in style or 'fillColor=#000000' in style or 'fillColor=#000' in style)
-        if is_story:
-            story_type = extract_story_type_from_style(style)
-            all_stories.append({
-                'id': cell_id,
-                'name': value,
-                'epic_num': None,  # Will assign by position/containment
-                'feat_num': None,  # Will assign by name matching and position/containment
-                'x': geom['x'],
-                'y': geom['y'],
-                'story_type': story_type
-            })
+        for inc_idx, increment in enumerate(increments, 1):
+            distance = abs(story_y - increment['y'])
+            if distance <= increment_tolerance and distance < closest_distance:
+                closest_distance = distance
+                closest_inc_idx = inc_idx
         
-        # Users: blue boxes
-        elif 'fillColor=#dae8fc' in style:
-            user_name = value
-            if user_name:
-                user_cells.append({
-                    'id': cell_id,
-                    'name': user_name,
-                    'x': geom['x'],
-                    'y': geom['y']
-                })
+        if closest_inc_idx is not None:
+            story_to_increment[story_name] = closest_inc_idx
     
-    # Assign epic/feature to stories by position/containment and name matching (NEVER by ID)
-    for story in all_stories:
-        story_x = story['x']
-        story_y = story['y']
-        story_name = story['name'].lower()
-        
-        # Assign epic by position/containment (X coordinate within epic bounds)
-        if story['epic_num'] is None:
-            for epic in sorted(epics, key=lambda e: e['x']):
-                epic_x = epic['x']
-                epic_width = epic.get('width', 0)
-                epic_right = epic_x + epic_width if epic_width > 0 else float('inf')
-                # Story belongs to epic if it's within epic's horizontal bounds
-                if epic_x <= story_x <= epic_right:
-                    story['epic_num'] = epic['epic_num']
-                    break
-            # If still None, assign to closest epic by X position
-            if story['epic_num'] is None and epics:
-                closest_epic = min(epics, key=lambda e: abs(e['x'] - story_x))
-                story['epic_num'] = closest_epic['epic_num']
-        
-        # Assign feature by name matching (fuzzy) AND position/containment
-        if story['epic_num'] is not None:
-            epic_features = [f for f in features if f['epic_num'] == story['epic_num']]
-            if epic_features:
-                # First, try to match by name (fuzzy matching)
-                best_match = None
-                best_similarity = 0.0
-                
-                for feature in epic_features:
-                    feature_name = feature['name'].lower()
-                    # Check if story name contains feature name or vice versa (exact match)
-                    if feature_name in story_name or story_name in feature_name:
-                        similarity = 1.0
-                    else:
-                        # Fuzzy match using SequenceMatcher
-                        similarity = difflib.SequenceMatcher(None, story_name, feature_name).ratio()
-                    
-                    if similarity > best_similarity:
-                        best_similarity = similarity
-                        best_match = feature
-                
-                # If fuzzy match found (similarity > 0.3), verify by position/containment
-                if best_match and best_similarity > 0.3:
-                    feature_x = best_match['x']
-                    feature_width = best_match.get('width', 200)
-                    feature_right = feature_x + feature_width
-                    # Verify story is within feature's horizontal bounds
-                    if feature_x <= story_x <= feature_right:
-                        story['feat_num'] = best_match.get('feat_num', 0)
-                
-                # If no fuzzy match or position doesn't match, assign by position/containment only
-                if story['feat_num'] is None:
-                    for feature in sorted(epic_features, key=lambda f: f['x']):
-                        feature_x = feature['x']
-                        feature_width = feature.get('width', 200)
-                        feature_right = feature_x + feature_width
-                        # Story belongs to feature if it's within feature's horizontal bounds
-                        if feature_x <= story_x <= feature_right:
-                            story['feat_num'] = feature.get('feat_num', 0)
-                            break
-                    
-                    # If still None, assign to closest feature by X position
-                    if story['feat_num'] is None:
-                        closest_feature = min(epic_features, key=lambda f: abs(f['x'] - story_x))
-                        story['feat_num'] = closest_feature.get('feat_num', 0)
-    
-    # Match users to stories based on cell ID pattern (user_e{epic}f{feat}s{story}_{user})
-    # Fallback to position-based matching only if user cell doesn't match a different story
-    stories_with_users = {}
-    # Build set of all story IDs for quick lookup
-    all_story_ids = {story['id'] for story in all_stories}
-    
-    for story in all_stories:
-        story_x = story['x']
-        story_y = story['y']
-        tolerance = 25
-        
-        story_users = []
-        story_id = story['id']  # e.g., "e1f1s4"
-        for user_cell in user_cells:
-            user_cell_id = user_cell['id']  # e.g., "user_e1f1s4_User A"
-            user_name = user_cell['name']
-            user_x = user_cell['x']
-            user_y = user_cell['y']
-            
-            # First try: match by cell ID pattern (user_e{epic}f{feat}s{story}_{user})
-            if user_cell_id.startswith('user_') and story_id:
-                # Extract story pattern from user cell ID: user_e1f1s4_User C -> e1f1s4
-                # Pattern is: user_{story_id}_{user_name}
-                if user_cell_id.startswith(f'user_{story_id}_'):
-                    # Exact match by ID - this user belongs to this story
-                    if user_name not in story_users:
-                        story_users.append(user_name)
-                    continue  # Skip position-based matching
-                
-                # Check if this user cell ID matches a DIFFERENT story - if so, skip position matching
-                # Extract potential story ID from user cell: user_e1f1s1_User A -> e1f1s1
-                if '_' in user_cell_id:
-                    parts = user_cell_id.split('_', 2)  # ['user', 'e1f1s1', 'User A']
-                    if len(parts) >= 2:
-                        potential_story_id = parts[1]  # e1f1s1
-                        if potential_story_id in all_story_ids and potential_story_id != story_id:
-                            # This user cell belongs to a different story - don't match by position
-                            continue
-            
-            # Fallback: position-based matching (horizontally aligned and above story)
-            # Only use this if user cell doesn't have a story ID or doesn't match any story
-            if abs(user_x - story_x) <= tolerance and user_y < story_y:
-                if user_name not in story_users:
-                    story_users.append(user_name)
-        stories_with_users[story['id']] = story_users
-    
-    # Assign sequential order
-    _assign_sequential_order(all_stories)
-    
-    # Inherit users from previous story if current story has no users
-    # Sort all stories by sequential_order to process in order
-    sorted_stories = sorted(all_stories, key=lambda s: (
-        s.get('sequential_order', 999) if isinstance(s.get('sequential_order'), (int, float)) else 999,
-        s['x'], s['y']
-    ))
-    
-    last_users = []
-    for story in sorted_stories:
-        if not stories_with_users.get(story['id']):
-            # No users assigned, inherit from previous story
-            if last_users:
-                stories_with_users[story['id']] = last_users.copy()
-        else:
-            # Story has users, deduplicate and update last_users for next story
-            current_users = stories_with_users[story['id']]
-            # Remove duplicates while preserving order
-            deduplicated = []
-            for user in current_users:
-                if user not in deduplicated:
-                    deduplicated.append(user)
-            stories_with_users[story['id']] = deduplicated
-            last_users = deduplicated.copy()
-    
-    # Assign stories to increments based on Y position
-    # Stories belong to increment if their Y is close to increment's Y (within tolerance)
-    increment_tolerance = 100  # pixels - stories within this Y distance belong to increment
-    
+    # Build increments
     result = []
     for inc_idx, increment in enumerate(increments, 1):
         inc_data = {
@@ -1786,73 +1642,83 @@ def build_stories_for_increments(drawio_path: Path, increments: List[Dict],
             'epics': []
         }
         
-        # Find stories that belong to this increment
-        inc_stories = []
-        for story in all_stories:
-            # Check if story Y is within tolerance of increment Y
-            if abs(story['y'] - increment['y']) <= increment_tolerance:
-                inc_stories.append(story)
-        
-        # Build epic/feature/story structure for this increment
-        inc_epics = {}
-        for story in inc_stories:
-            epic_num = story['epic_num']
-            feat_num = story['feat_num']
+        # Iterate through all extracted epics
+        for epic in extracted_epics:
+            inc_epic = None  # Will create on-demand
             
-            if epic_num not in inc_epics:
-                epic = next((e for e in epics if e['epic_num'] == epic_num), None)
-                epic_name = epic['name'] if epic else f'Epic {epic_num}'
-                epic_order = epic.get('sequential_order', epic_num) if epic else epic_num
-                inc_epics[epic_num] = {
-                    'name': epic_name,
-                    'sequential_order': epic_order,
-                    'sub_epics': {}
-                }
+            # Recursively process sub_epics
+            def process_sub_epic(sub_epic):
+                """Recursively process sub_epic and return sub_epic with matching stories"""
+                collected_stories = []
+                nested_sub_epics_with_stories = []
+                
+                # Check stories in story_groups
+                for group in sub_epic.get('story_groups', []):
+                    for story in group.get('stories', []):
+                        story_name = story['name']
+                        
+                        # Only include if this story belongs to current increment
+                        if story_to_increment.get(story_name) == inc_idx:
+                            collected_stories.append(story.copy())
+                
+                # Recursively process nested sub_epics
+                for nested_sub_epic in sub_epic.get('sub_epics', []):
+                    nested_result = process_sub_epic(nested_sub_epic)
+                    if nested_result:  # Only include if it has stories
+                        nested_sub_epics_with_stories.append(nested_result)
+                
+                # Only return sub_epic if it has stories or nested sub_epics with stories
+                if collected_stories or nested_sub_epics_with_stories:
+                    return {
+                        'name': sub_epic['name'],
+                        'sequential_order': sub_epic.get('sequential_order', 1),
+                        'sub_epics': nested_sub_epics_with_stories,
+                        'stories': collected_stories
+                    }
+                return None
             
-            if feat_num not in inc_epics[epic_num]['sub_epics']:
-                feature = next((f for f in features 
-                                if f['epic_num'] == epic_num and f.get('feat_num') == feat_num), None)
-                feat_name = feature['name'] if feature else f'Sub-Epic {feat_num}'
-                feat_order = feature.get('sequential_order', feat_num) if feature else feat_num
-                inc_epics[epic_num]['sub_epics'][feat_num] = {
-                    'name': feat_name,
-                    'sequential_order': feat_order,
-                    'sub_epics': [],
-                    'stories': []
-                }
+            # Process all sub_epics in this epic
+            epic_sub_epics_with_stories = []
+            for sub_epic in epic.get('sub_epics', []):
+                result_sub_epic = process_sub_epic(sub_epic)
+                if result_sub_epic:
+                    epic_sub_epics_with_stories.append(result_sub_epic)
             
-            story_data = {
-                'name': story['name'],
-                'sequential_order': story.get('sequential_order', 1),
-                'users': stories_with_users.get(story['id'], []),
-                'story_type': story.get('story_type', 'user'),
-                'acceptance_criteria': [],
-                'stories': []
-            }
-            inc_epics[epic_num]['sub_epics'][feat_num]['stories'].append(story_data)
-        
-        # Convert to list format and sort by sequential_order
-        sorted_inc_epics = sorted(
-            inc_epics.items(),
-            key=lambda x: (x[1].get('sequential_order', 999), x[0])
-        )
-        for epic_num, epic_data in sorted_inc_epics:
-            # Sort sub_epics by sequential_order
-            sorted_sub_epics = sorted(
-                epic_data['sub_epics'].items(),
-                key=lambda x: (x[1].get('sequential_order', 999) if isinstance(x[1].get('sequential_order'), (int, float)) else 999,
-                              x[0] if x[0] is not None else 999)
-            )
-            # Sort stories by sequential_order within each sub_epic
-            for feat_num, sub_epic_data in sorted_sub_epics:
-                sub_epic_data['stories'].sort(key=lambda s: (
-                    s.get('sequential_order', 999) if isinstance(s.get('sequential_order'), (int, float)) else 999,
-                    s.get('sequential_order', '') if isinstance(s.get('sequential_order'), str) else ''
-                ))
-            epic_data['sub_epics'] = [sub_epic_data for feat_num, sub_epic_data in sorted_sub_epics]
-            inc_data['epics'].append(epic_data)
+            # Only add epic to increment if it has sub_epics with stories
+            if epic_sub_epics_with_stories:
+                inc_data['epics'].append({
+                    'name': epic['name'],
+                    'sequential_order': epic.get('sequential_order', 1),
+                    'sub_epics': epic_sub_epics_with_stories
+                })
         
         result.append(inc_data)
+    
+    # Final cleanup: recursively remove empty sub_epics (no stories, no nested sub_epics)
+    def cleanup_empty_sub_epics(sub_epics_list):
+        """Recursively remove empty sub_epics"""
+        cleaned = []
+        for se in sub_epics_list:
+            # Recursively clean nested sub_epics first
+            if se.get('sub_epics'):
+                se['sub_epics'] = cleanup_empty_sub_epics(se['sub_epics'])
+            
+            # Keep sub_epic if it has stories (non-empty list) OR non-empty nested sub_epics
+            has_stories = len(se.get('stories', [])) > 0
+            has_nested = len(se.get('sub_epics', [])) > 0
+            if has_stories or has_nested:
+                cleaned.append(se)
+        return cleaned
+    
+    for inc_data in result:
+        for epic in inc_data.get('epics', []):
+            epic['sub_epics'] = cleanup_empty_sub_epics(epic.get('sub_epics', []))
+        
+        # Remove epics that have no sub_epics after cleanup
+        inc_data['epics'] = [
+            epic for epic in inc_data.get('epics', [])
+            if epic.get('sub_epics')
+        ]
     
     return result
 
@@ -2600,8 +2466,8 @@ def synchronize_story_graph_from_drawio_increments(
     # Step 3: Build stories for epics/features
     epics_with_stories = build_stories_for_epics_features(drawio_path, epics, features)
     
-    # Step 4: Build stories for increments
-    increments_with_stories = build_stories_for_increments(drawio_path, increments, epics, features)
+    # Step 4: Build stories for increments (use already-extracted epics with story_groups)
+    increments_with_stories = build_increments_from_extracted_epics(drawio_path, increments, epics_with_stories['epics'])
     
     result = {
         'epics': epics_with_stories['epics'],

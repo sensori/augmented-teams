@@ -1,9 +1,0 @@
-{
-  "name": "extract_story_map_outline",
-  "path": "docs/stories",
-  "input": "story-map-outline.drawio",
-  "extractor": "story_io",
-  "extractor_command": "extract-outline",
-  "output": "story-graph.json"
-}
-

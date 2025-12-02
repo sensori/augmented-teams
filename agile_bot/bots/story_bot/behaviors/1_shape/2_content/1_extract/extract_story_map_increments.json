@@ -1,9 +1,0 @@
-{
-  "name": "extract_story_map_increments",
-  "path": "docs/stories",
-  "input": "story-map-increments.drawio",
-  "extractor": "story_io",
-  "extractor_command": "extract-outline",
-  "output": "story-graph-increments.json"
-}
-

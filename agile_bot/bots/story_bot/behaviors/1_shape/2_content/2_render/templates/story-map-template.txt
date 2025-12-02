@@ -1,31 +1,36 @@
 (E) 
     (E) Sub-Epic(s)
         (E) Sub-Epic(s) - additional are optional
-            (S) Story
-                (AC) AC or steps
+            [and] Story Group
+                (S) Story
+                    (AC) AC or steps
 
 (E) {epic_name}
     (E) {sub_epic_name}
-        (S) {actor} --> {story_name}
-        (S) {actor} --> {story_name}
-        or (S) {actor} --> {story_name}
-            (AC) {actor} --> {acceptance_criteria}
-            (AC) {actor} --> {acceptance_criteria}
-            (AC) {actor} --> {acceptance_criteria}
+        [and] Story Group
+            (S) {actor} --> {story_name}
+            (S) {actor} --> {story_name}
+        or [or] Story Group
             (S) {actor} --> {story_name}
                 (AC) {actor} --> {acceptance_criteria}
                 (AC) {actor} --> {acceptance_criteria}
-        (S) {actor} --> {story_name}
+            (S) {actor} --> {story_name}
+                (AC) {actor} --> {acceptance_criteria}
+        [and] Story Group
+            (S) {actor} --> {story_name}
 (E) {epic_name}
     (E) {sub_epic_name}
         (E) {nested_sub_epic_name}
-            (S) {actor} --> {story_name}
-            (S) {actor} --> {story_name}
-            or (S) {actor} --> {story_name}
-                (AC) {actor} --> {acceptance_criteria}
+            [and] Story Group
+                (S) {actor} --> {story_name}
+                (S) {actor} --> {story_name}
+            or [or] Story Group
+                (S) {actor} --> {story_name}
+                    (AC) {actor} --> {acceptance_criteria}
         (E) {nested_sub_epic_name}
-            (S) {actor} --> {story_name}
-            (S) {actor} --> {story_name}
+            [and] Story Group
+                (S) {actor} --> {story_name}
+                (S) {actor} --> {story_name}
 
 Instructions:
 - Use (E) for Epics and Sub-Epics

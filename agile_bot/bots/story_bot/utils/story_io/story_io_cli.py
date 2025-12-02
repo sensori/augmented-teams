@@ -118,13 +118,13 @@ def synchronize_increments_command(args):
     result = diagram.synchronize_increments(
         drawio_path=args.drawio_file,
         original_path=original_path,
+        output_path=args.output if args.output else None,
         generate_report=generate_report
     )
     
-    if args.output:
-        diagram.save_story_graph(args.output)
-        print(f"Saved story graph to: {args.output}")
-    else:
+    # Note: synchronize_increments already writes the file via output_path parameter
+    # Don't call save_story_graph() as it would overwrite with incorrect structure
+    if not args.output:
         print("Synchronized story graph (use --output to save)")
     
     if generate_report and report_path:

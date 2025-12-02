@@ -15,7 +15,7 @@
                 {
                   "name": "Provides Context of New Bot",
                   "sequential_order": 1,
-                  "connector": "and",
+                  "connector": "or",
                   "users": [
                     "Human"
                   ],
@@ -24,7 +24,7 @@
                 {
                   "name": "Drop Bot Builder Behavior into Chat",
                   "sequential_order": 2,
-                  "connector": "and",
+                  "connector": "or",
                   "users": [
                     "Human"
                   ],
@@ -33,21 +33,35 @@
                 {
                   "name": "Create Bot Scaffolding",
                   "sequential_order": 3,
-                  "connector": "and",
-                  "users": [
-                    "AI CHat"
-                  ],
+                  "connector": "or",
+                  "users": [],
                   "story_type": "user"
                 }
               ]
             },
             {
-              "type": "and",
-              "connector": "or",
+              "type": "or",
+              "connector": null,
               "stories": [
                 {
-                  "name": "Generate MCP Bot Server",
+                  "name": "Generate Behavior Action Tools",
                   "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Deploy MCP BOT Server",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Generate MCP Bot Server",
+                  "sequential_order": 3,
                   "connector": "or",
                   "users": [
                     "Human"
@@ -56,7 +70,7 @@
                 },
                 {
                   "name": "Generate Bot Tools",
-                  "sequential_order": 2,
+                  "sequential_order": 4,
                   "connector": "or",
                   "users": [
                     "MCP Server Generator"
@@ -65,25 +79,11 @@
                 },
                 {
                   "name": "Generate Behavior Tools",
-                  "sequential_order": 3,
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [
                     "MCP Server Generator"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Generate Behavior Action Tools",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Deploy MCP BOT Server",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [],
                   "story_type": "user"
                 }
               ]
@@ -177,7 +177,9 @@
                   "name": "Move to Project",
                   "sequential_order": 3,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 },
                 {
@@ -208,7 +210,9 @@
                   "name": "Create Project Folder",
                   "sequential_order": 2,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 }
               ]
@@ -221,7 +225,9 @@
                   "name": "Saves Project State to Agent State File",
                   "sequential_order": 1,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 }
               ]
@@ -234,7 +240,9 @@
                   "name": "Updates Project Area and Creates Directory Structure",
                   "sequential_order": 1,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 }
               ]
@@ -275,81 +283,75 @@
                   "name": "Invokes Correct Behavior Action (We Hope)",
                   "sequential_order": 2,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 }
               ]
             },
             {
-              "type": "and",
-              "connector": "or",
+              "type": "or",
+              "connector": null,
               "stories": [
                 {
-                  "name": "Route To Behavior Action",
+                  "name": "Invoke Action In Behavior",
                   "sequential_order": 1,
-                  "connector": "opt",
+                  "connector": "or",
                   "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Route To Behavior Action",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 },
                 {
                   "name": "Forward To Behavior Action",
-                  "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [
-                    "Behavior Action Tool"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Invoke Action In Behavior",
                   "sequential_order": 3,
-                  "connector": "opt",
-                  "users": [
-                    "Behavior Action Tool"
-                  ],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "or",
-              "stories": [
-                {
-                  "name": "Route To MCP BotTool",
-                  "sequential_order": 1,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 },
-                {
-                  "name": "Forward To Current Behavior and Current Action",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [
-                    "Bot Tool"
-                  ],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": null,
-              "stories": [
                 {
                   "name": "Route To MCP Behavior  Tool",
-                  "sequential_order": 1,
+                  "sequential_order": 4,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "AI Chat"
+                  ],
                   "story_type": "user"
                 },
                 {
                   "name": "Forward To Behavior and Current Action",
-                  "sequential_order": 2,
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [
-                    "Behavior Tool"
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Route To MCP BotTool",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Forward To Current Behavior and Current Action",
+                  "sequential_order": 7,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
                   ],
                   "story_type": "user"
                 }
@@ -362,44 +364,43 @@
           "sequential_order": 3.0,
           "story_groups": [
             {
-              "type": "and",
+              "type": "or",
               "connector": null,
               "stories": [
                 {
-                  "name": "Folllows Behavior Istructions From Context",
+                  "name": "Correct, Feedback, Proceed",
                   "sequential_order": 1,
-                  "connector": "and",
+                  "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Correct, Feedback, Proceed",
+                  "name": "Folllows Behavior Istructions From Context",
                   "sequential_order": 2,
-                  "connector": "and",
-                  "users": [
-                    "Human"
-                  ],
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Saves Content",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
                   "story_type": "user"
                 },
                 {
                   "name": "Proceeds to Next Actions following instructions In Context",
-                  "sequential_order": 3,
+                  "sequential_order": 4,
                   "connector": "or",
                   "users": [
                     "AI Chat"
                   ],
                   "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "and",
-              "stories": [
+                },
                 {
                   "name": "Injects Instructions",
-                  "sequential_order": 1,
-                  "connector": "opt",
+                  "sequential_order": 5,
+                  "connector": "or",
                   "users": [
                     "Bot Behavior"
                   ],
@@ -407,7 +408,7 @@
                 },
                 {
                   "name": "Inject Next behavor-Action to Instructions",
-                  "sequential_order": 2,
+                  "sequential_order": 6,
                   "connector": "or",
                   "users": [
                     "Bot Behavior"
@@ -416,29 +417,23 @@
                 },
                 {
                   "name": "Folllows Injected Instructions",
-                  "sequential_order": 3,
+                  "sequential_order": 7,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Saves Content",
-                  "sequential_order": 4,
+                  "name": "Saves Behavior State",
+                  "sequential_order": 8,
                   "connector": "or",
                   "users": [
-                    "Human"
+                    "Bot Behavior"
                   ],
                   "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "or",
-              "stories": [
+                },
                 {
                   "name": "InjectsContent Into Instructions",
-                  "sequential_order": 1,
+                  "sequential_order": 9,
                   "connector": "or",
                   "users": [
                     "Bot Behavior"
@@ -447,26 +442,26 @@
                 },
                 {
                   "name": "Follows Enriched Instructions",
-                  "sequential_order": 2,
+                  "sequential_order": 10,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Saves Behavior State",
-                  "sequential_order": 3,
+                  "name": "Persists Content",
+                  "sequential_order": 11,
                   "connector": "or",
                   "users": [
-                    "Human"
+                    "Bot Behavior"
                   ],
                   "story_type": "user"
                 },
                 {
                   "name": "Submit Content Changes to Tools for Saving",
-                  "sequential_order": 4,
+                  "sequential_order": 12,
                   "connector": "or",
                   "users": [
-                    "AI Chat"
+                    "Bot Behavior"
                   ],
                   "story_type": "user"
                 }
@@ -495,7 +490,7 @@
                     {
                       "name": "Finds Questions and Evidence form Context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -504,14 +499,14 @@
                     {
                       "name": "Answers Questions and Evidence from Context",
                       "sequential_order": 2,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Presents Answers and Evidence to User",
                       "sequential_order": 3,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     }
@@ -519,49 +514,15 @@
                 },
                 {
                   "type": "and",
-                  "connector": "and",
+                  "connector": "or",
                   "stories": [
                     {
-                      "name": "Injects Gather Context Instructions",
-                      "sequential_order": 1,
-                      "connector": "opt",
-                      "users": [
-                        "Bot  Behavor"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject  Questions and Evidence",
-                      "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "Bot  Behavor"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Reads Injected Gather Context Instructions",
-                      "sequential_order": 3,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
                       "name": "Read Questions And Answers",
-                      "sequential_order": 4,
-                      "connector": "opt",
+                      "sequential_order": 1,
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Answers Questions and Evidence",
-                      "sequential_order": 5,
-                      "connector": "opt",
-                      "users": [],
                       "story_type": "user"
                     }
                   ]
@@ -573,15 +534,40 @@
                     {
                       "name": "Find Gather Context Instructions(hope)",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
-                      "name": "Load + inject Questions and Evidence",
+                      "name": "Answers Questions and Evidence",
                       "sequential_order": 2,
+                      "connector": "or",
+                      "users": [],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Injects Gather Context Instructions",
+                      "sequential_order": 3,
+                      "connector": "or",
+                      "users": [
+                        "Bot  Behavor"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Reads Injected Gather Context Instructions",
+                      "sequential_order": 4,
+                      "connector": "or",
+                      "users": [
+                        "AI Chat"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Inject  Questions and Evidence",
+                      "sequential_order": 5,
                       "connector": "or",
                       "users": [
                         "Bot  Behavor"
@@ -603,92 +589,50 @@
                     {
                       "name": "Pause based on context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
-                      "name": "Pauses",
+                      "name": "Proceeds to follow planning (we Hope)",
                       "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Submit Answers and Evidence to Tools for Saving",
-                      "sequential_order": 1,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
-                        "Human"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Saves Answers and Evidence",
-                      "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Calls Behavior Planning Tool",
-                      "sequential_order": 3,
-                      "connector": "opt",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Tracks Activity for Gather Context Action",
-                      "sequential_order": 4,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Proceeds to follow planning",
-                      "sequential_order": 5,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": null,
-                  "stories": [
-                    {
-                      "name": "Correct, Feedback, Proceed",
-                      "sequential_order": 1,
-                      "connector": "and",
-                      "users": [
-                        "Human"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
                       "name": "Saves Answers and Evidencein Context",
-                      "sequential_order": 2,
-                      "connector": "and",
+                      "sequential_order": 3,
+                      "connector": "or",
+                      "users": [
+                        "AI Chat"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Correct, Feedback, Proceed",
+                      "sequential_order": 4,
+                      "connector": "or",
                       "users": [
                         "Human"
                       ],
                       "story_type": "user"
                     },
                     {
-                      "name": "Proceeds to follow planning (we Hope)",
-                      "sequential_order": 3,
-                      "connector": "and",
+                      "name": "Submit Answers and Evidence to Tools for Saving",
+                      "sequential_order": 5,
+                      "connector": "or",
+                      "users": [
+                        "AI Chat"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Saves Answers and Evidence",
+                      "sequential_order": 6,
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -710,15 +654,13 @@
               "story_groups": [
                 {
                   "type": "and",
-                  "connector": "and",
+                  "connector": null,
                   "stories": [
                     {
                       "name": "Present Assumptions and Decisions to User",
                       "sequential_order": 1,
-                      "connector": "and",
-                      "users": [
-                        "AI Chat"
-                      ],
+                      "connector": "or",
+                      "users": [],
                       "story_type": "user"
                     }
                   ]
@@ -730,7 +672,7 @@
                     {
                       "name": "Find Planning Instructions from Context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -739,7 +681,7 @@
                     {
                       "name": "Find Decision Criteria and Assumptions from Context",
                       "sequential_order": 2,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -748,7 +690,7 @@
                     {
                       "name": "Make Assumptions and Decisions from Context",
                       "sequential_order": 3,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     }
@@ -756,30 +698,30 @@
                 },
                 {
                   "type": "and",
-                  "connector": "or",
+                  "connector": null,
                   "stories": [
                     {
                       "name": "Inject Planning Instructions",
                       "sequential_order": 1,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
                       "name": "Inject Decision Criteria and Assumptions",
                       "sequential_order": 2,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
                       "name": "Read Injected Planning Instructions",
                       "sequential_order": 3,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -797,7 +739,7 @@
                     {
                       "name": "Make Assumptions and Decisions",
                       "sequential_order": 5,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     }
@@ -810,101 +752,48 @@
               "sequential_order": 2.0,
               "story_groups": [
                 {
-                  "type": "and",
+                  "type": "or",
                   "connector": null,
                   "stories": [
                     {
-                      "name": "Correct, Feedback, Proceed",
-                      "sequential_order": 1,
-                      "connector": "and",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
                       "name": "Save Assumptions and Decisions using Context",
-                      "sequential_order": 2,
-                      "connector": "and",
+                      "sequential_order": 1,
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Correct, Feedback, Proceed",
+                      "sequential_order": 2,
+                      "connector": "or",
+                      "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Proceed to Build Knowledge using context",
                       "sequential_order": 3,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
                       "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "or",
-                  "connector": "and",
-                  "stories": [
+                    },
                     {
                       "name": "Pause based on context",
-                      "sequential_order": 1,
-                      "connector": "and",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Pauses",
-                      "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Submit Final Assumptions and Decisions to Tools for Saving",
-                      "sequential_order": 1,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Save Final Assumptions and Decisions",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Call Build Knowledge Tool",
-                      "sequential_order": 3,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Track Activity for Planning Action",
                       "sequential_order": 4,
                       "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
-                      "name": "Proceed to Build Knowledge",
+                      "name": "Save Final Assumptions and Decisions",
                       "sequential_order": 5,
                       "connector": "or",
-                      "users": [],
+                      "users": [
+                        "AI Chat"
+                      ],
                       "story_type": "user"
                     }
                   ]
@@ -922,7 +811,7 @@
                     {
                       "name": "Find Key Questions Clarifications from context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -931,7 +820,7 @@
                     {
                       "name": "Find Decision Criteria and Assumptions from Context",
                       "sequential_order": 2,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -940,7 +829,7 @@
                     {
                       "name": "Read Answers and Evidence from Context",
                       "sequential_order": 3,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     }
@@ -948,30 +837,28 @@
                 },
                 {
                   "type": "and",
-                  "connector": "or",
+                  "connector": null,
                   "stories": [
                     {
                       "name": "Inject Decision Criteria and Assumptions Loading Instructions",
                       "sequential_order": 1,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
                       "name": "Inject Key Questions and Clarifications Loading Instructions",
                       "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
+                      "connector": "or",
+                      "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Read Injected Key Questions Clarifications",
                       "sequential_order": 3,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -980,32 +867,10 @@
                     {
                       "name": "Read Injected Decision Criteria and Assumptions",
                       "sequential_order": 4,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Load + Inject  Answers + Evidence",
-                      "sequential_order": 1,
-                      "connector": "or",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Answers and Evidence",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [],
                       "story_type": "user"
                     }
                   ]
@@ -1029,7 +894,7 @@
                     {
                       "name": "Find Knowledge Graph Template and Builder Instructions",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1038,45 +903,6 @@
                     {
                       "name": "Build Knowledge Graph From Context",
                       "sequential_order": 2,
-                      "connector": "and",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Inject Knowledge Graph Template and Builder Instructions",
-                      "sequential_order": 1,
-                      "connector": "opt",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Build Knowledge Instructions",
-                      "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Saves Knowledge Graph To Project",
-                      "sequential_order": 1,
                       "connector": "or",
                       "users": [
                         "AI Chat"
@@ -1096,13 +922,13 @@
               "sequential_order": 3.0,
               "story_groups": [
                 {
-                  "type": "and",
+                  "type": "or",
                   "connector": null,
                   "stories": [
                     {
                       "name": "Correct, Feedback, Proceed",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "Human"
                       ],
@@ -1111,7 +937,7 @@
                     {
                       "name": "Save Knowledge Graph using Context",
                       "sequential_order": 2,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1120,22 +946,7 @@
                     {
                       "name": "Proceed to Build Knowledge using context",
                       "sequential_order": 3,
-                      "connector": "and",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Submit Knowledge Graph to Build Knowledge Tools for Saving",
-                      "sequential_order": 1,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1143,31 +954,7 @@
                     },
                     {
                       "name": "Save Knowledge Graph",
-                      "sequential_order": 2,
-                      "connector": "opt",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Call Render Output Tool",
-                      "sequential_order": 3,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": null,
-                  "stories": [
-                    {
-                      "name": "Track Activity for Build Knowledge Action",
-                      "sequential_order": 1,
+                      "sequential_order": 4,
                       "connector": "or",
                       "users": [
                         "Bot-Behavior"
@@ -1183,13 +970,20 @@
               "sequential_order": 4.0,
               "story_groups": [
                 {
-                  "type": "and",
+                  "type": "or",
                   "connector": null,
                   "stories": [
                     {
-                      "name": "Find Render Output Instructions in Context",
+                      "name": "Find Structured Content in Context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
+                      "users": [],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Find Render Output Instructions in Context",
+                      "sequential_order": 2,
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1197,8 +991,8 @@
                     },
                     {
                       "name": "Find Transformer Methods in Context",
-                      "sequential_order": 2,
-                      "connector": "and",
+                      "sequential_order": 3,
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1206,37 +1000,31 @@
                     },
                     {
                       "name": "Find Templates in Context",
-                      "sequential_order": 3,
-                      "connector": "and",
+                      "sequential_order": 4,
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
-                      "name": "Find Structured Content in Context",
-                      "sequential_order": 4,
-                      "connector": "and",
-                      "users": [],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Inject Render Output Instructions",
-                      "sequential_order": 1,
-                      "connector": "opt",
+                      "name": "Read Injected Render Output Instructions",
+                      "sequential_order": 5,
+                      "connector": "or",
                       "users": [
-                        "Bot-Behavior"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     },
                     {
+                      "name": "Inject  Load Structured Content Instructions",
+                      "sequential_order": 6,
+                      "connector": "or",
+                      "users": [],
+                      "story_type": "user"
+                    },
+                    {
                       "name": "Inject Load Transformer Methods Instructuion",
-                      "sequential_order": 2,
-                      "connector": "opt",
+                      "sequential_order": 7,
+                      "connector": "or",
                       "users": [
                         "Bot-Behavior"
                       ],
@@ -1244,59 +1032,14 @@
                     },
                     {
                       "name": "Inject  Load Template Instructuion",
-                      "sequential_order": 3,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject  Load Structured Content Instructions",
-                      "sequential_order": 4,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Render Output Instructions",
-                      "sequential_order": 5,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected Transformer Methods Instructions",
-                      "sequential_order": 6,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected TemplateInstructions",
-                      "sequential_order": 7,
-                      "connector": "opt",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected Structured ContentInstructions",
                       "sequential_order": 8,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "and",
-                  "stories": [
+                    },
                     {
-                      "name": "Load + Inject Template",
-                      "sequential_order": 1,
+                      "name": "Inject Render Output Instructions",
+                      "sequential_order": 9,
                       "connector": "or",
                       "users": [
                         "Bot-Behavior"
@@ -1304,22 +1047,8 @@
                       "story_type": "user"
                     },
                     {
-                      "name": "Load +Inject Transformer Methods",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Load +  Inject Srtuctured  Content",
-                      "sequential_order": 3,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Template",
-                      "sequential_order": 4,
+                      "name": "Read  Injected Transformer Methods Instructions",
+                      "sequential_order": 10,
                       "connector": "or",
                       "users": [
                         "AI Chat"
@@ -1327,26 +1056,26 @@
                       "story_type": "user"
                     },
                     {
-                      "name": "Read Injected Template",
-                      "sequential_order": 5,
+                      "name": "Read  Injected TemplateInstructions",
+                      "sequential_order": 11,
                       "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
+                      "users": [],
                       "story_type": "user"
                     },
                     {
-                      "name": "Read Injected Transformer Methods",
-                      "sequential_order": 6,
+                      "name": "Read  Injected Structured ContentInstructions",
+                      "sequential_order": 12,
                       "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Read Instructions Injected Structured Content",
-                      "sequential_order": 7,
+                      "sequential_order": 13,
                       "connector": "or",
-                      "users": [],
+                      "users": [
+                        "AI Chat"
+                      ],
                       "story_type": "user"
                     }
                   ]
@@ -1370,28 +1099,28 @@
                     {
                       "name": "Find Rendered Outputs in Context and Display",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Pause",
                       "sequential_order": 2,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Provide Feedback then Update",
                       "sequential_order": 3,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [],
                       "story_type": "user"
                     },
                     {
                       "name": "Update Rendered Outputs Based on Feedback",
                       "sequential_order": 4,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
@@ -1400,66 +1129,32 @@
                   ]
                 },
                 {
-                  "type": "and",
-                  "connector": "and",
+                  "type": "or",
+                  "connector": null,
                   "stories": [
                     {
                       "name": "Render Outputs Using Components  In Context",
                       "sequential_order": 1,
-                      "connector": "and",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "or",
-                  "stories": [
-                    {
-                      "name": "Pause from Context",
-                      "sequential_order": 1,
-                      "connector": "opt",
-                      "users": [],
                       "story_type": "user"
                     },
                     {
-                      "name": "Submit Rendered Content to Tool for Saving",
+                      "name": "Render Output Using Injected Componenents",
                       "sequential_order": 2,
-                      "connector": "opt",
+                      "connector": "or",
                       "users": [
                         "AI Chat"
                       ],
                       "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": "and",
-                  "stories": [
+                    },
                     {
                       "name": "Present Rendered Outputs to User",
-                      "sequential_order": 1,
+                      "sequential_order": 3,
                       "connector": "or",
                       "users": [],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "type": "and",
-                  "connector": null,
-                  "stories": [
-                    {
-                      "name": "Render Output Using Injected Componenents",
-                      "sequential_order": 1,
-                      "connector": "opt",
-                      "users": [
-                        "AI Chat"
-                      ],
                       "story_type": "user"
                     }
                   ]
@@ -1517,9 +1212,7 @@
                       "name": "Inject  Load Rendered Content Instructions",
                       "sequential_order": 1,
                       "connector": "or",
-                      "users": [
-                        "Bot"
-                      ],
+                      "users": [],
                       "story_type": "user"
                     },
                     {
@@ -1527,7 +1220,7 @@
                       "sequential_order": 2,
                       "connector": "or",
                       "users": [
-                        "Bot"
+                        "AI Chat"
                       ],
                       "story_type": "user"
                     }
@@ -1535,7 +1228,7 @@
                 },
                 {
                   "type": "and",
-                  "connector": "or",
+                  "connector": null,
                   "stories": [
                     {
                       "name": "Load + Inject Rendered Content",
@@ -1597,33 +1290,6 @@
               ]
             },
             {
-              "type": "or",
-              "connector": "and",
-              "stories": [
-                {
-                  "name": "Find Rules in Context and validate against Rules",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Validate Content vs Injected Diagnostics and Rules",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Validate Content Using Injected Diagnostics + Rules",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
               "type": "and",
               "connector": "and",
               "stories": [
@@ -1663,7 +1329,7 @@
                   "sequential_order": 1,
                   "connector": "or",
                   "users": [
-                    "Bot-Behavior"
+                    "AI Chat"
                   ],
                   "story_type": "user"
                 },
@@ -1671,20 +1337,59 @@
                   "name": "Inject Behavior Specific Rules Instructions",
                   "sequential_order": 2,
                   "connector": "or",
-                  "users": [
-                    "Bot-Behavior"
-                  ],
+                  "users": [],
                   "story_type": "user"
                 }
               ]
             },
             {
               "type": "and",
-              "connector": "and",
+              "connector": "or",
               "stories": [
                 {
-                  "name": "Submit Content to Tool for Saving",
+                  "name": "Call Correct-Bot Action Tool",
                   "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Proceed to Correct-Bot trough  context",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Find Rules in Context and validate against Rules",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Validate Content vs Injected Diagnostics and Rules",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Validate Rules Action",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Submit Content to Tool for Saving",
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [
                     "Bot-Behavior"
@@ -1693,51 +1398,25 @@
                 },
                 {
                   "name": "Save Content",
-                  "sequential_order": 2,
+                  "sequential_order": 6,
                   "connector": "or",
                   "users": [
                     "Bot-Behavior"
                   ],
                   "story_type": "user"
                 },
-                {
-                  "name": "Track Activity for Validate Rules Action",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Call Correct-Bot Action Tool",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "and",
-              "stories": [
                 {
                   "name": "Load + Inject Diagnostics Results, Knowledge, Content Instructions",
-                  "sequential_order": 1,
+                  "sequential_order": 7,
                   "connector": "or",
                   "users": [
                     "Bot-Behavior"
                   ],
                   "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": null,
-              "stories": [
+                },
                 {
-                  "name": "Proceed to Correct-Bot trough  context",
-                  "sequential_order": 1,
+                  "name": "Validate Content Using Injected Diagnostics + Rules",
+                  "sequential_order": 8,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
@@ -1752,7 +1431,7 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": "and",
+              "connector": null,
               "stories": [
                 {
                   "name": "Find Original and Improved Work From Context",
@@ -1767,7 +1446,7 @@
             },
             {
               "type": "and",
-              "connector": "or",
+              "connector": "and",
               "stories": [
                 {
                   "name": "Inject Correct Bot Instructions",
@@ -1802,18 +1481,28 @@
                     "AI Chat"
                   ],
                   "story_type": "user"
+                },
+                {
+                  "name": "Reads Injected Rules and Prompts",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Determine Issues",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "Reviews Rules",
-          "sequential_order": 7.0,
-          "story_groups": [
+            },
             {
               "type": "and",
-              "connector": "and",
+              "connector": null,
               "stories": [
                 {
                   "name": "Finds Rules and Prompts In Context",
@@ -1830,10 +1519,22 @@
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
-                },
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Suggest Bot Corrections",
+          "sequential_order": 7.0,
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
                 {
-                  "name": "Suggest Corrections Based On Context",
-                  "sequential_order": 3,
+                  "name": "Suggest Bot Corrections Based on Instructions",
+                  "sequential_order": 1,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
@@ -1841,56 +1542,12 @@
               ]
             },
             {
-              "type": "and",
-              "connector": "and",
-              "stories": [
-                {
-                  "name": "Reads Injected Rules and Prompts",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Determine Issues",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Suggest Bot Corrections Based on Instructions",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Reviews Violations",
-          "sequential_order": 8.0,
-          "story_groups": [
-            {
-              "type": "and",
+              "type": "or",
               "connector": null,
               "stories": [
                 {
-                  "name": "Provide Suggested Bot Corrections",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "Human"
-                  ],
-                  "story_type": "user"
-                },
-                {
                   "name": "Review . Modifiy. Apprtove Correctins",
-                  "sequential_order": 2,
+                  "sequential_order": 1,
                   "connector": "or",
                   "users": [
                     "Human"
@@ -1899,27 +1556,50 @@
                 },
                 {
                   "name": "Makes Corrections to Found Rules and Instructions",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Provide Suggested Bot Corrections",
                   "sequential_order": 3,
                   "connector": "or",
-                  "users": [],
+                  "users": [
+                    "Human"
+                  ],
                   "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "and",
-              "stories": [
+                },
                 {
-                  "name": "Submit Bot Guidance and Rules Changes to Correct-Bot Tool",
-                  "sequential_order": 1,
+                  "name": "Save Correcions in Context",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Suggest Corrections Based On Context",
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Save Correcions",
-                  "sequential_order": 2,
+                  "name": "Submit Bot Guidance and Rules Changes to Correct-Bot Tool",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Correct-Bot Action",
+                  "sequential_order": 7,
                   "connector": "or",
                   "users": [
                     "Bot-Behavior"
@@ -1929,25 +1609,438 @@
               ]
             }
           ]
+        }
+      ]
+    }
+  ],
+  "increments": [
+    {
+      "name": "User Manually Drops Config In to AI Chat",
+      "priority": 1,
+      "epics": [
+        {
+          "name": "Build Agile Bots",
+          "sequential_order": 1.0,
+          "sub_epics": [
+            {
+              "name": "Generate Bot Server And Tools",
+              "sequential_order": 1.0
+            }
+          ]
         },
         {
-          "name": "Suggest Bot Corrections",
-          "sequential_order": 9.0,
-          "story_groups": [
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 2.0,
+          "sub_epics": [
             {
-              "type": "and",
-              "connector": null,
-              "stories": [
-                {
-                  "name": "Track Activity for Correct-Bot Action",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "Bot-Behavior"
-                  ],
-                  "story_type": "user"
-                }
-              ]
+              "name": "Init Project",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Invoke Bot Tool",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Perform Behavior Action",
+              "sequential_order": 3.0
+            }
+          ]
+        },
+        {
+          "name": "Execute Behavior Actions",
+          "sequential_order": 3.0,
+          "sub_epics": [
+            {
+              "name": "Gather Context",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Review Context For Answers And Evidence",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Provide Answers and Evidence",
+              "sequential_order": 3.0
+            },
+            {
+              "name": "Provide Decision Criteria and Assumptions",
+              "sequential_order": 4.0
+            },
+            {
+              "name": "Decide Planning Criteria Action",
+              "sequential_order": 5.0
+            },
+            {
+              "name": "Build Knowledge Action",
+              "sequential_order": 6.0
+            },
+            {
+              "name": "Reviews Clarifications and Planning Responses",
+              "sequential_order": 7.0
+            },
+            {
+              "name": "Build Knowledge Graph",
+              "sequential_order": 8.0
+            },
+            {
+              "name": "Edit Knowledge Graph",
+              "sequential_order": 9.0
+            },
+            {
+              "name": "Read Render Output Instructions and Data",
+              "sequential_order": 10.0
+            },
+            {
+              "name": "Render Output",
+              "sequential_order": 11.0
+            },
+            {
+              "name": "Generate Rendered Outputs",
+              "sequential_order": 12.0
+            },
+            {
+              "name": "Load Rendered Content",
+              "sequential_order": 13.0
+            },
+            {
+              "name": "Validate Knowledge & Content Against Rules",
+              "sequential_order": 14.0
+            },
+            {
+              "name": "Review Answers, Assumptions",
+              "sequential_order": 15.0
+            },
+            {
+              "name": "Suggest Bot Corrections",
+              "sequential_order": 16.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Simplest MCP",
+      "priority": 2,
+      "epics": [
+        {
+          "name": "Build Agile Bots",
+          "sequential_order": 1.0,
+          "sub_epics": [
+            {
+              "name": "Generate Bot Server And Tools",
+              "sequential_order": 1.0
+            }
+          ]
+        },
+        {
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 2.0,
+          "sub_epics": [
+            {
+              "name": "Init Project",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Invoke Bot Tool",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Perform Behavior Action",
+              "sequential_order": 3.0
+            }
+          ]
+        },
+        {
+          "name": "Execute Behavior Actions",
+          "sequential_order": 3.0,
+          "sub_epics": [
+            {
+              "name": "Gather Context",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Review Context For Answers And Evidence",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Provide Answers and Evidence",
+              "sequential_order": 3.0
+            },
+            {
+              "name": "Provide Decision Criteria and Assumptions",
+              "sequential_order": 4.0
+            },
+            {
+              "name": "Decide Planning Criteria Action",
+              "sequential_order": 5.0
+            },
+            {
+              "name": "Build Knowledge Action",
+              "sequential_order": 6.0
+            },
+            {
+              "name": "Reviews Clarifications and Planning Responses",
+              "sequential_order": 7.0
+            },
+            {
+              "name": "Build Knowledge Graph",
+              "sequential_order": 8.0
+            },
+            {
+              "name": "Edit Knowledge Graph",
+              "sequential_order": 9.0
+            },
+            {
+              "name": "Read Render Output Instructions and Data",
+              "sequential_order": 10.0
+            },
+            {
+              "name": "Render Output",
+              "sequential_order": 11.0
+            },
+            {
+              "name": "Generate Rendered Outputs",
+              "sequential_order": 12.0
+            },
+            {
+              "name": "Load Rendered Content",
+              "sequential_order": 13.0
+            },
+            {
+              "name": "Validate Knowledge & Content Against Rules",
+              "sequential_order": 14.0
+            },
+            {
+              "name": "Review Answers, Assumptions",
+              "sequential_order": 15.0
+            },
+            {
+              "name": "Suggest Bot Corrections",
+              "sequential_order": 16.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Workflow",
+      "priority": 3,
+      "epics": [
+        {
+          "name": "Build Agile Bots",
+          "sequential_order": 1.0,
+          "sub_epics": [
+            {
+              "name": "Generate Bot Server And Tools",
+              "sequential_order": 1.0
+            }
+          ]
+        },
+        {
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 2.0,
+          "sub_epics": [
+            {
+              "name": "Init Project",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Invoke Bot Tool",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Perform Behavior Action",
+              "sequential_order": 3.0
+            }
+          ]
+        },
+        {
+          "name": "Execute Behavior Actions",
+          "sequential_order": 3.0,
+          "sub_epics": [
+            {
+              "name": "Gather Context",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Review Context For Answers And Evidence",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Provide Decision Criteria and Assumptions",
+              "sequential_order": 3.0
+            },
+            {
+              "name": "Decide Planning Criteria Action",
+              "sequential_order": 4.0
+            },
+            {
+              "name": "Build Knowledge Action",
+              "sequential_order": 5.0
+            },
+            {
+              "name": "Reviews Clarifications and Planning Responses",
+              "sequential_order": 6.0
+            },
+            {
+              "name": "Read Render Output Instructions and Data",
+              "sequential_order": 7.0
+            },
+            {
+              "name": "Render Output",
+              "sequential_order": 8.0
+            },
+            {
+              "name": "Load Rendered Content",
+              "sequential_order": 9.0
+            },
+            {
+              "name": "Validate Knowledge & Content Against Rules",
+              "sequential_order": 10.0
+            },
+            {
+              "name": "Review Answers, Assumptions",
+              "sequential_order": 11.0
+            },
+            {
+              "name": "Suggest Bot Corrections",
+              "sequential_order": 12.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Inject Content",
+      "priority": 4,
+      "epics": [
+        {
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 1.0,
+          "sub_epics": [
+            {
+              "name": "Invoke Bot Tool",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Perform Behavior Action",
+              "sequential_order": 2.0
+            }
+          ]
+        },
+        {
+          "name": "Execute Behavior Actions",
+          "sequential_order": 2.0,
+          "sub_epics": [
+            {
+              "name": "Gather Context",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Provide Answers and Evidence",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Decide Planning Criteria Action",
+              "sequential_order": 3.0
+            },
+            {
+              "name": "Make Decisons and Assumptions",
+              "sequential_order": 4.0
+            },
+            {
+              "name": "Build Knowledge Action",
+              "sequential_order": 5.0
+            },
+            {
+              "name": "Edit Knowledge Graph",
+              "sequential_order": 6.0
+            },
+            {
+              "name": "Read Render Output Instructions and Data",
+              "sequential_order": 7.0
+            },
+            {
+              "name": "Render Output",
+              "sequential_order": 8.0
+            },
+            {
+              "name": "Generate Rendered Outputs",
+              "sequential_order": 9.0
+            },
+            {
+              "name": "Load Rendered Content",
+              "sequential_order": 10.0
+            },
+            {
+              "name": "Validate Knowledge & Content Against Rules",
+              "sequential_order": 11.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Save Content",
+      "priority": 5,
+      "epics": [
+        {
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 1.0,
+          "sub_epics": [
+            {
+              "name": "Perform Behavior Action",
+              "sequential_order": 1.0
+            }
+          ]
+        },
+        {
+          "name": "Execute Behavior Actions",
+          "sequential_order": 2.0,
+          "sub_epics": [
+            {
+              "name": "Gather Context",
+              "sequential_order": 1.0
+            },
+            {
+              "name": "Provide Answers and Evidence",
+              "sequential_order": 2.0
+            },
+            {
+              "name": "Decide Planning Criteria Action",
+              "sequential_order": 3.0
+            },
+            {
+              "name": "Make Decisons and Assumptions",
+              "sequential_order": 4.0
+            },
+            {
+              "name": "Build Knowledge Action",
+              "sequential_order": 5.0
+            },
+            {
+              "name": "Edit Knowledge Graph",
+              "sequential_order": 6.0
+            },
+            {
+              "name": "Read Render Output Instructions and Data",
+              "sequential_order": 7.0
+            },
+            {
+              "name": "Render Output",
+              "sequential_order": 8.0
+            },
+            {
+              "name": "Generate Rendered Outputs",
+              "sequential_order": 9.0
+            },
+            {
+              "name": "Load Rendered Content",
+              "sequential_order": 10.0
+            },
+            {
+              "name": "Validate Knowledge & Content Against Rules",
+              "sequential_order": 11.0
             }
           ]
         }

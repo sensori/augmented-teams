@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-12-02T11:54:15.255710",
+  "current_state": {
+    "diagram": "Story Map",
+    "epics_count": 3,
+    "features_count": 0,
+    "stories_count": 0,
+    "increments_count": 5,
+    "status": "ready"
+  },
+  "sync_summary": {
+    "status": "completed",
+    "source": "agile_bot\\bots\\base_bot\\docs\\stories\\story-map-increments.drawio"
+  },
+  "changes": {
+    "epics_count_delta": 3,
+    "features_count_delta": 0,
+    "stories_count_delta": 0,
+    "before": {
+      "epics_count": 0,
+      "features_count": 0,
+      "stories_count": 0,
+      "increments_count": 0
+    },
+    "after": {
+      "epics_count": 3,
+      "features_count": 0,
+      "stories_count": 0,
+      "increments_count": 5
+    },
+    "increments_count_delta": 5
+  },
+  "extracted": {
+    "epics_found": 3,
+    "increments_found": 5
+  },
+  "comparison": {
+    "original_file": "agile_bot\\bots\\base_bot\\docs\\stories\\story-graph.json",
+    "original_epics": 3,
+    "current_epics": 3,
+    "epics_match": true
+  }
+}
