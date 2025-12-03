@@ -1,0 +1,153 @@
+{
+  "description": "Use ONE word per concept across entire test suite. Pick consistent vocabulary for common operations: create (not build/make/construct), verify (not check/assert/validate), load (not fetch/get/retrieve). Inconsistent vocabulary confuses readers and makes codebase harder to navigate. From Clean Code Rule 2.2 and BDD Rule 1.",
+  "examples": [
+    {
+      "do": {
+        "description": "Consistent vocabulary across all helpers",
+        "content": [
+          "# Choose 'create_*' and use EVERYWHERE",
+          "def create_agent(name: str, workspace: Path) -> Agent:",
+          "    \"\"\"Helper: Create agent instance.\"\"\"",
+          "    return Agent(name=name, workspace_root=workspace)",
+          "",
+          "def create_config_file(workspace: Path, agent_name: str) -> Path:",
+          "    \"\"\"Helper: Create configuration file.\"\"\"",
+          "    config_path = workspace / 'config.json'",
+          "    config_path.write_text(f'{{\"name\": \"{agent_name}\"}}')",
+          "    return config_path",
+          "",
+          "def create_workspace_with_structure(tmp_path: Path) -> Path:",
+          "    \"\"\"Helper: Create workspace with directory structure.\"\"\"",
+          "    workspace = tmp_path / 'workspace'",
+          "    workspace.mkdir()",
+          "    (workspace / 'agents').mkdir()",
+          "    return workspace",
+          "",
+          "# Choose 'verify_*' and use EVERYWHERE",
+          "def verify_agent_initialized(agent: Agent):",
+          "    \"\"\"Helper: Verify agent is initialized.\"\"\"",
+          "    assert agent.is_initialized",
+          "    assert agent.config_path is not None",
+          "",
+          "def verify_config_valid(config: dict):",
+          "    \"\"\"Helper: Verify configuration is valid.\"\"\"",
+          "    assert 'name' in config",
+          "    assert 'workspace_root' in config",
+          "",
+          "def verify_file_exists(path: Path):",
+          "    \"\"\"Helper: Verify file exists at path.\"\"\"",
+          "    assert path.exists()",
+          "    assert path.is_file()"
+        ]
+      },
+      "dont": {
+        "description": "Mixed vocabulary for same concept",
+        "content": [
+          "# DON'T: Mix create/build/make/construct",
+          "def create_agent(...): ...",
+          "def build_config(...):  # WRONG - use create_config",
+          "def make_workspace(...):  # WRONG - use create_workspace",
+          "def construct_domain_graph(...):  # WRONG - use create_domain_graph",
+          "",
+          "# DON'T: Mix verify/check/assert/validate randomly",
+          "def verify_agent_initialized(...): ...",
+          "def check_config_valid(...):  # WRONG - use verify_config_valid",
+          "def assert_file_exists(...):  # WRONG - use verify_file_exists",
+          "def validate_workspace(...):  # WRONG - use verify_workspace_valid",
+          "",
+          "# DON'T: Mix load/fetch/get/retrieve",
+          "def load_config_from_file(...): ...",
+          "def fetch_domain_graph(...):  # WRONG - use load_domain_graph",
+          "def get_workspace_data(...):  # WRONG - use load_workspace_data",
+          "def retrieve_agent_state(...):  # WRONG - use load_agent_state"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Document vocabulary choices in test file docstring",
+        "content": [
+          "\"\"\"",
+          "Agent Configuration Tests",
+          "",
+          "Vocabulary conventions:",
+          "- create_* : Create test objects/files",
+          "- verify_* : Assert expected conditions",
+          "- load_*   : Load data from files",
+          "- setup_*  : Arrange test preconditions",
+          "",
+          "Example:",
+          "    workspace = create_workspace(tmp_path)",
+          "    config = load_config(workspace)",
+          "    agent = setup_agent_with_config(config)",
+          "    verify_agent_initialized(agent)",
+          "\"\"\"",
+          "import pytest",
+          "from pathlib import Path",
+          "",
+          "# All helpers follow documented vocabulary",
+          "def create_workspace(tmp_path): ...",
+          "def load_config(workspace): ...",
+          "def setup_agent_with_config(config): ...",
+          "def verify_agent_initialized(agent): ..."
+        ]
+      },
+      "dont": {
+        "description": "No vocabulary documentation or consistency",
+        "content": [
+          "# DON'T: No vocabulary conventions documented",
+          "\"\"\"Agent Configuration Tests\"\"\"",
+          "",
+          "# Functions use random different verbs",
+          "def build_workspace(tmp_path): ...",
+          "def fetch_config(workspace): ...",
+          "def initialize_agent(config): ...",
+          "def check_agent(agent): ...",
+          "# Reader must guess which verb to use!"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Standard vocabulary recommendations",
+        "content": [
+          "# Recommended vocabulary choices:",
+          "",
+          "# CREATION: create_*",
+          "create_agent(), create_config(), create_workspace()",
+          "",
+          "# VERIFICATION: verify_*",
+          "verify_initialized(), verify_valid(), verify_exists()",
+          "",
+          "# LOADING: load_*",
+          "load_config(), load_graph(), load_data()",
+          "",
+          "# SETUP: setup_* (for complex arrangements)",
+          "setup_test_environment(), setup_agent_with_dependencies()",
+          "",
+          "# CLEANUP: cleanup_* (when needed)",
+          "cleanup_temp_files(), cleanup_test_data()",
+          "",
+          "# These choices are clear, unambiguous, and parallel"
+        ]
+      },
+      "dont": {
+        "description": "Avoid these vocabulary anti-patterns",
+        "content": [
+          "# DON'T: Mix synonyms",
+          "create_agent(), build_config(), make_workspace(), construct_graph()",
+          "# Pick ONE: create_* for all",
+          "",
+          "# DON'T: Use vague generic verbs",
+          "do_agent(), handle_config(), process_data()",
+          "# Use specific verbs: create_agent(), load_config(), parse_data()",
+          "",
+          "# DON'T: Use technical acronyms inconsistently",
+          "init_agent(), initialize_config(), setup_workspace()",
+          "# Pick ONE: setup_* for all OR initialize_* for all"
+        ]
+      }
+    }
+  ]
+}
+

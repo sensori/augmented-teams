@@ -1,0 +1,58 @@
+{
+  "description": "CRITICAL: Each class should have one reason to change. Keep classes cohesive (methods/data interdependent), focus on single responsibility, and extract multi-responsibility classes.",
+  "examples": [
+    {
+      "do": {
+        "description": "Keep classes focused on single responsibility",
+        "content": [
+          "Keep classes cohesive (methods and data interdependent)",
+          "Focus on single responsibility",
+          "Extract multi-responsibility classes into separate classes",
+          "Each class has ONE reason to change",
+          "",
+          "Correct Examples (single responsibility):",
+          "- class OrderValidator { validate(order) {...} }",
+          "- class OrderRepository { save(order) {...} find(id) {...} }",
+          "- class OrderCalculator { calculateTotal(order) {...} }",
+          "",
+          "Single Responsibility Requirements:",
+          "- Class methods all serve same purpose",
+          "- Class data all related to same concept",
+          "- Class has one reason to change",
+          "- High cohesion: methods use most instance variables",
+          "- Clear, focused class name"
+        ]
+      },
+      "dont": {
+        "description": "Don't create god objects doing everything",
+        "content": [
+          "Don't create 'god objects' doing everything",
+          "Don't mix unrelated responsibilities",
+          "Don't keep private methods used by only few methods",
+          "",
+          "Wrong Examples (multiple responsibilities):",
+          "class OrderManager {",
+          "  validate() {...}        // validation responsibility",
+          "  calculateTotal() {...}  // calculation responsibility",
+          "  save() {...}           // persistence responsibility",
+          "  sendEmail() {...}      // notification responsibility",
+          "}",
+          "",
+          "Multiple Responsibility Indicators (REFACTOR):",
+          "- Class name with 'Manager', 'Handler', 'Util', 'Helper'",
+          "- Class has many methods doing unrelated things",
+          "- Low cohesion: methods use different subsets of instance variables",
+          "- Class changes for multiple reasons",
+          "- Class description uses 'and' or 'or'",
+          "",
+          "Refactoring Strategy:",
+          "- Extract each responsibility into separate class",
+          "- OrderValidator, OrderCalculator, OrderRepository, OrderNotifier",
+          "- Each class focused on ONE responsibility",
+          "- Use composition to combine behaviors"
+        ]
+      }
+    }
+  ]
+}
+

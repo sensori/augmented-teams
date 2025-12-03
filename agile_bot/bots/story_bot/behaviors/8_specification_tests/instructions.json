@@ -1,5 +1,9 @@
 {
   "behaviorName": "specification_tests",
+  "description": "Generate executable test code from scenarios/examples",
+  "goal": "Create automated tests that validate story behavior",
+  "inputs": "Scenarios from specification_scenarios or examples from specification_examples",
+  "outputs": "Test files (.py, .js, etc.) with executable test code",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

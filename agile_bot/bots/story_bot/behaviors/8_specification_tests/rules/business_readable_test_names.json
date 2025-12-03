@@ -1,0 +1,100 @@
+{
+  "description": "Test names must read like plain English business language. Use domain language stakeholders understand, not technical jargon. Test names should read naturally when spoken aloud. Describe WHAT happens (behavior), not HOW it works (implementation). Combines BDD Rule 1 (Business Readable Language) with pytest orchestrator pattern.",
+  "examples": [
+    {
+      "do": {
+        "description": "Business-readable test names with domain language",
+        "content": [
+          "def test_agent_loads_configuration_when_file_exists(self, workspace_root):",
+          "    \"\"\"",
+          "    Agent loads configuration when file exists.",
+          "    ",
+          "    Business stakeholders can understand:",
+          "    - 'agent' is domain concept",
+          "    - 'loads configuration' is business behavior",
+          "    - 'when file exists' is business condition",
+          "    \"\"\"",
+          "    # Given: Configuration file exists",
+          "    config_file = create_config_file(workspace_root, 'story_bot')",
+          "    ",
+          "    # When: Agent loads configuration",
+          "    agent = Agent('story_bot', workspace_root)",
+          "    agent.load_config(config_file)",
+          "    ",
+          "    # Then: Configuration is loaded",
+          "    assert agent.is_configured",
+          "",
+          "def test_character_has_initial_stats_when_created(self):",
+          "    \"\"\"Character has initial stats when created.\"\"\"",
+          "    # Reads naturally: 'character has initial stats when created'",
+          "",
+          "def test_validation_rejects_config_when_required_fields_missing(self):",
+          "    \"\"\"Validation rejects configuration when required fields missing.\"\"\"",
+          "    # Business-readable: what happens when condition occurs"
+        ]
+      },
+      "dont": {
+        "description": "Technical jargon or implementation-focused names",
+        "content": [
+          "# DON'T: Technical jargon",
+          "def test_agent_constructor_calls_load_method(self):",
+          "    # WRONG: 'constructor calls method' is implementation detail",
+          "",
+          "def test_char_init_sets_vars(self):",
+          "    # WRONG: Abbreviated, technical ('init', 'vars')",
+          "",
+          "def test_validates_json_schema(self):",
+          "    # WRONG: Too technical ('JSON schema')",
+          "    # Better: test_validation_accepts_valid_configuration",
+          "",
+          "def test_config_loader_execute(self):",
+          "    # WRONG: Technical class/method names",
+          "    # Better: test_agent_loads_configuration_from_file",
+          "",
+          "def test_parse_and_store(self):",
+          "    # WRONG: Implementation verbs ('parse', 'store')",
+          "    # Better: test_agent_saves_configuration_data",
+          "",
+          "def test_setup(self):",
+          "    # WRONG: Vague, no context",
+          "    # Better: test_agent_initializes_with_default_settings"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Use 'when' for conditions in test names",
+        "content": [
+          "def test_agent_raises_error_when_config_missing(self):",
+          "    \"\"\"Agent raises error when configuration file missing.\"\"\"",
+          "    # 'when' makes condition clear",
+          "",
+          "def test_character_applies_bonus_when_strength_above_threshold(self):",
+          "    \"\"\"Character applies bonus when strength above threshold.\"\"\"",
+          "    # Business condition is explicit",
+          "",
+          "def test_validation_succeeds_when_all_fields_present(self):",
+          "    \"\"\"Validation succeeds when all required fields present.\"\"\"",
+          "    # Clear condition and outcome"
+        ]
+      },
+      "dont": {
+        "description": "Vague or missing conditions",
+        "content": [
+          "def test_agent_error(self):",
+          "    # WRONG: When does error occur? What kind?",
+          "    # Better: test_agent_raises_error_when_config_missing",
+          "",
+          "def test_character_bonus(self):",
+          "    # WRONG: When is bonus applied? What condition?",
+          "    # Better: test_character_applies_bonus_when_strength_high",
+          "",
+          "def test_validation(self):",
+          "    # WRONG: Validates what? Under what condition?",
+          "    # Better: test_validation_succeeds_when_all_fields_present"
+        ]
+      }
+    }
+  ]
+}
+

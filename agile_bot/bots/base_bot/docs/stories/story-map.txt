@@ -1,236 +1,357 @@
+AGILE BOT STORY MAP
+
+=== OVERALL STORY MAP (All Increments) ===
+
 (E) Build Agile Bots
     (E) Generate Bot Server And Tools
-        (S) Human --> Provides Context of New Bot
-        and (S) Human --> Drop Bot Builder Behavior into Chat
-        and (S) Create Bot Scaffolding
-    or
-        (S) Human --> Generate MCP Bot Server
-        and (S) MCP Server Generator --> Generate Bot Tools
-        and (S) MCP Server Generator --> Generate Behavior Tools
-        and (S) MCP Server Generator --> Generate Behavior Action Tools
-        and (S) Deploy MCP BOT Server
+            (S) Human --> Provides Context of New Bot
+            or (S) Human --> Drop Bot Builder Behavior into Chat
+            or (S) System --> Create Bot Scaffolding
+        or
+            (S) MCP Server Generator --> Generate MCP Bot Server
+            and (AC) WHEN MCP Server Generator receives Bot Config
+            and (AC) THEN Generator generates unique MCP Server instance with Unique server name from bot name
+            and (AC) AND Generated server includes Bot Config reference
+            and (AC) AND Generated server leverages Specific Bot instantiation code
+        and
+            (S) MCP Server Generator --> Generate Behavior Action Tools
+            and (AC) WHEN Generator processes Bot Config
+            and (AC) THEN Generator creates tool code for each (behavior, action) pair
+            and (AC) AND Enumerates all behaviors and actions from Bot Config
+            and (AC) AND For each pair, generates tool code with unique name, trigger words, forwarding logic
+            and (AC) AND Tool catalog prepared with all generated tool instances
+        and
+            (S) System --> Deploy MCP BOT Server
+            and (AC) WHEN Generation Complete
+            and (AC) THEN Generator deploys/starts generated MCP Server
+            and (AC) AND Server initializes in separate thread
+            and (AC) AND Server registers with MCP Protocol Handler using unique server name
+            and (AC) AND Server publishes tool catalog to AI Chat
+            and (AC) AND Each tool entry includes name, description, trigger patterns, parameters
 
 (E) Invoke MCP Bot Server
     (E) Init Project
-        (S) Human --> Shares Context and Project Location
-        and (S) Human --> Drops Behavior Folder in Chat w/ relevant Bot Config
-        and (S) AI Chat --> Determines Working Area From Current Dir
-        and (S) AI Chat --> Confirm Location
-        and (S) AI Chat --> Save Project In Context
-    or
-        (S) Bot --> Locates Existing Project  State
-        and (S) Bot --> Intercepts Tool Call With Project Check
-        and (S) Move to Project
-        and (S) Stores Activity for Initialize Project Action
-    or
-        (S) Bot --> Route To Project Tool
-        and (S) Create Project Folder
-    or
-        (S) Saves Project State to Agent State File
-    or
-        (S) Updates Project Area and Creates Directory Structure
-        (S) Human --> Speaks Trigger Words For Bot Tool
+            (S) Human --> Shares Context and Project Location
+            or (S) Human --> Drops Behavior Folder in Chat w/ relevant Bot Config
+            or (S) AI Chat --> Determines Working Area From Current Dir
+            or (S) AI Chat --> Confirm Location
+            or (S) AI Chat --> Save Project In Context
+        or
+            (S) Bot --> Locates Existing Project State
+            or (S) Bot --> Intercepts Tool Call With Project Check
+            or (S) System --> Move to Project
+            or (S) System --> Stores Activity for Initialize Project Action
+        or
+            (S) Bot --> Route To Project Tool
+            or (S) System --> Create Project Folder
+        or
+            (S) System --> Saves Project State to Agent State File
+        or
+            (S) System --> Updates Project Area and Creates Directory Structure
+        or
+            (S) Human --> Speaks Trigger Words For Bot Tool
     (E) Invoke Bot Tool
-        (S) Provides addtnl Instructions
-        and (S) AI Chat --> Invokes Correct Behavior Action (We Hope)
-    or
-        (S) AI Chat --> Route To Behavior Action
-        and (S) AI Chat --> Forward To Behavior Action
-        and (S) Invoke Action In Behavior
-    or
-        (S) AI Chat --> Route To MCP BotTool
-        and (S) AI Chat --> Forward To Current Behavior and Current Action
-        (S) AI Chat --> Route To MCP Behavior  Tool
-        and (S) AI Chat --> Forward To Behavior and Current Action
+            (S) AI Chat --> Invoke MCP BOT Tool
+            and (AC) WHEN AI Chat invokes any generated tool
+            and (AC) THEN Tool uses inherited BaseTool logic to invoke correct behavior action on preloaded bot
+            and (AC) AND Bot class preloaded at server startup
+            and (AC) AND Tool directly routes to behavior action method of preloaded Bot class
+            and (AC) AND Bot.Behavior compiles and returns instructions
+            and (AC) AND MCP tool injects instructions into AI Chat context
     (E) Perform Behavior Action
-        (S) Folllows Behavior Istructions From Context
-        and (S) Correct, Feedback, Proceed
-        and (S) AI Chat --> Proceeds to Next Actions following instructions In Context
-    and
-        (S) Bot Behavior --> Injects Instructions
-        and (S) Bot Behavior --> Inject Next behavor-Action to Instructions
-        and (S) Folllows Injected Instructions
-        and (S) Saves Content
-    or
-        (S) Bot Behavior --> Injects Content Into Instructions
-        and (S) Follows Enriched Instructions
-        and (S) Bot Behavior --> Saves Behavior State
-        and (S) Bot Behavior --> Submit Content Changes to Tools for Saving
+            (S) Bot Behavior --> Inject Behavior Action Instructions
+            and (AC) WHEN Tool invokes Bot.Behavior.Action method
+            and (AC) THEN Behavior Action loads instructions from behavior and base_actions
+            and (AC) AND Action merges base instructions with behavior-specific instructions
+            and (AC) AND Compiled instructions returned for injection into AI Chat
+        and
+            (S) Bot Behavior --> Inject Guardrails as Part of Clarify Requirements
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Gather Context Action
+            and (AC) THEN Action checks for guardrails in behavior/guardrails/required_context/
+            and (AC) WHEN guardrails exist, THEN Action loads key_questions.json and evidence.json
+            and (AC) AND Action injects guardrails into clarify requirements section
+        and
+            (S) Bot Behavior --> Inject Planning Criteria Into Instructions
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Planning Action
+            and (AC) THEN Action checks for guardrails in behavior/guardrails/planning/
+            and (AC) WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files
+            and (AC) AND Action injects planning guardrails into planning section
+        and
+            (S) Bot Behavior --> Inject Knowledge Graph Template for Build Knowledge
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Build Knowledge Action
+            and (AC) THEN Action loads knowledge graph template from behavior/content/knowledge_graph/
+            and (AC) AND Action injects knowledge graph template path and build instructions
+            and (AC) AND Action injects validation rules reference
+        and
+            (S) Bot Behavior --> Inject Render Templates and Transformers
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Render Output Action
+            and (AC) THEN Action loads render templates and transformer methods
+            and (AC) AND Action injects template path, transformer path, and spec path
+        and
+            (S) Bot Behavior --> Inject Validation Rules for Validate Rules Action
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action
+            and (AC) THEN Action loads common bot rules from base_bot/rules/
+            and (AC) AND Action loads behavior-specific rules
+            and (AC) AND Action merges and injects rules into validation section
+        and
+            (S) Bot Behavior --> Inject Correct Bot Instructions
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action
+            and (AC) THEN Action loads correct bot instructions from base_actions
+            and (AC) AND Action injects correction instructions into compiled instructions
 
 (E) Execute Behavior Actions
     (E) Gather Context
         (E) Review Context For Answers And Evidence
-            (S) AI Chat --> Finds Questions and Evidence form Context
-            and (S) Answers Questions and Evidence from Context
-            and (S) Presents Answers and Evidence to User
-        and
-            (S) Bot  Behavor --> Injects Gather Context Instructions
-            and (S) Bot  Behavor --> Inject  Questions and Evidence
-            and (S) AI Chat --> Reads Injected Gather Context Instructions
-            and (S) AI Chat --> Read Questions And Answers
-            and (S) Answers Questions and Evidence
-            (S) AI Chat --> Find Gather Context Instructions(hope)
-            or (S) Bot  Behavor --> Load + inject Questions and Evidence
+                (S) AI Chat --> Finds Questions and Evidence form Context
+                and (S) System --> Answers Questions and Evidence from Context
+                and (S) System --> Presents Answers and Evidence to User
+            or
+                (S) Bot Behavior --> Injects Gather Context Instructions
+                opt (S) Bot Behavior --> Inject Questions and Evidence
+                opt (S) AI Chat --> Reads Injected Gather Context Instructions
+                opt (S) AI Chat --> Read Questions And Answers
+                opt (S) System --> Answers Questions and Evidence
+            or
+                (S) Bot Behavior --> Load + inject Questions and Evidence
+                or (S) AI Chat --> Find Gather Context Instructions(hope)
         (E) Provide Answers and Evidence
-            (S) Pause based on context
-            or (S) Pauses
-        or
-            (S) Human --> Submit Answers and Evidence to Tools for Saving
-            and (S) Bot Behavior --> Saves Answers and Evidence
-            and (S) Bot Behavior --> Calls Behavior Planning Tool
-            and (S) Tracks Activity for Gather Context Action
-            and (S) Proceeds to follow planning
-            (S) Human --> Correct, Feedback, Proceed
-            and (S) Human --> Saves Answers and Evidencein Context
-            and (S) AI Chat --> Proceeds to follow planning (we Hope)
+                (S) System --> Pause based on context
+                or (S) System --> Pauses
+            or
+                (S) Human --> Submit Answers and Evidence to Tools for Saving
+                opt (S) Bot Behavior --> Saves Answers and Evidence
+                opt (S) Bot Behavior --> Calls Behavior Planning Tool
+                opt (S) System --> Tracks Activity for Gather Context Action
+                opt (S) System --> Proceeds to follow planning
+            or
+                (S) Human --> Correct, Feedback, Proceed
+                and (S) Human --> Saves Answers and Evidencein Context
+                and (S) AI Chat --> Proceeds to follow planning (we Hope)
     (E) Decide Planning Criteria Action
         (E) Provide Decision Criteria and Assumptions
-            (S) AI Chat --> Present Assumptions and Decisions to User
-        and
-            (S) AI Chat --> Find Planning Instructions from Context
-            and (S) AI Chat --> Find Decision Criteria and Assumptions from Context
-            and (S) Make Assumptions and Decisions from Context
-        or
-            (S) Bot-Behavior --> Inject Planning Instructions
-            and (S) Bot-Behavior --> Inject Decision Criteria and Assumptions
-            and (S) AI Chat --> Read Injected Planning Instructions
-            and (S) AI Chat --> Read Injected Decision Criteria and Assumptions
-            and (S) Make Assumptions and Decisions
+                (S) AI Chat --> Present Assumptions and Decisions to User
+            and
+                (S) AI Chat --> Find Planning Instructions from Context
+                and (S) AI Chat --> Find Decision Criteria and Assumptions from Context
+                and (S) System --> Make Assumptions and Decisions from Context
+            or
+                (S) AI Chat --> Inject Planning Instructions
+                opt (S) AI Chat --> Inject Decision Criteria and Assumptions
+                opt (S) AI Chat --> Read Injected Planning Instructions
+                or (S) AI Chat --> Read Injected Decision Criteria and Assumptions
+                opt (S) System --> Make Assumptions and Decisions
         (E) Make Decisons and Assumptions
-            (S) Correct, Feedback, Proceed
-            and (S) AI Chat --> Save Assumptions and Decisions using Context
-            and (S) AI Chat --> Proceed to Build Knowledge using context
-        and
-            (S) AI Chat --> Pause based on context
-            or (S) AI Chat --> Pauses
-        or
-            (S) Submit Final Assumptions and Decisions to Tools for Saving
-            and (S) Bot Behavior --> Save Final Assumptions and Decisions
-            and (S) Bot Behavior --> Call Build Knowledge Tool
-            and (S) Track Activity for Planning Action
-            and (S) Proceed to Build Knowledge
+                (S) System --> Correct, Feedback, Proceed
+                and (S) AI Chat --> Save Assumptions and Decisions using Context
+                and (S) AI Chat --> Proceed to Build Knowledge using context
+            or
+                (S) AI Chat --> Pause based on context
+                and (S) AI Chat --> Pauses
+            or
+                (S) System --> Submit Final Assumptions and Decisions to Tools for Saving
+                or (S) Bot Behavior --> Save Final Assumptions and Decisions
+                or (S) Bot Behavior --> Call Build Knowledge Tool
+                or (S) System --> Track Activity for Planning Action
+                or (S) System --> Proceed to Build Knowledge
         (E) Reviews Clarifications and Planning Responses
-            (S) AI Chat --> Find Key Questions Clarifications from context
-            and (S) AI Chat --> Find Decision Criteria and Assumptions from Context
-            and (S) Read Answers and Evidence from Context
-        or
-            (S) Bot-Behavior --> Inject Decision Criteria and Assumptions Loading Instructions
-            and (S) Bot-Behavior --> Inject Key Questions and Clarifications Loading Instructions
-            and (S) AI Chat --> Read Injected Key Questions Clarifications
-            and (S) AI Chat --> Read Injected Decision Criteria and Assumptions
-        or
-            (S) Bot-Behavior --> Load + Inject  Answers + Evidence
-            and (S) Read Injected Answers and Evidence
+                (S) AI Chat --> Find Key Questions Clarifications from context
+                and (S) AI Chat --> Find Decision Criteria and Assumptions from Context
+                and (S) System --> Read Answers and Evidence from Context
+            or
+                (S) Bot-Behavior --> Inject Decision Criteria and Assumptions Loading Instructions
+                opt (S) Bot-Behavior --> Inject Key Questions and Clarifications Loading Instructions
+                opt (S) AI Chat --> Read Injected Key Questions Clarifications
+                opt (S) AI Chat --> Read Injected Decision Criteria and Assumptions
+            or
+                (S) Bot-Behavior --> Load + Inject Answers + Evidence
+                or (S) System --> Read Injected Answers and Evidence
     (E) Build Knowledge Action
         (E) Build Knowledge Graph
-            (S) AI Chat --> Find Knowledge Graph Template and Builder Instructions
-            and (S) AI Chat --> Build Knowledge Graph From Context
-        or
-            (S) Bot-Behavior --> Inject Knowledge Graph Template and Builder Instructions
-            and (S) AI Chat --> Read Injected Build Knowledge Instructions
-        or
-            (S) AI Chat --> Saves Knowledge Graph To Project
-        (E) Validate With Rules
+                (S) AI Chat --> Find Knowledge Graph Template and Builder Instructions
+                and (S) AI Chat --> Build Knowledge Graph From Context
+            or
+                (S) Bot-Behavior --> Inject Knowledge Graph Template and Builder Instructions
+                opt (S) AI Chat --> Read Injected Build Knowledge Instructions
+            or
+                (S) AI Chat --> Saves Knowledge Graph To Project
         (E) Edit Knowledge Graph
-            (S) Human --> Correct, Feedback, Proceed
-            and (S) AI Chat --> Save Knowledge Graph using Context
-            and (S) Bot-Behavior --> Proceed to Build Knowledge using context
-        or
-            (S) AI Chat --> Submit Knowledge Graph to Build Knowledge Tools for Saving
-            and (S) Bot-Behavior --> Save Knowledge Graph
-            and (S) AI Chat --> Call Render Output Tool
-            (S) Bot-Behavior --> Track Activity for Build Knowledge Action
+                (S) Human --> Correct, Feedback, Proceed
+                and (S) AI Chat --> Save Knowledge Graph using Context
+                and (S) Bot-Behavior --> Proceed to Build Knowledge using context
+            or
+                (S) AI Chat --> Submit Knowledge Graph to Build Knowledge Tools for Saving
+                opt (S) Bot-Behavior --> Save Knowledge Graph
+                opt (S) AI Chat --> Call Render Output Tool
+            or
+                (S) Bot-Behavior --> Track Activity for Build Knowledge Action
         (E) Read Render Output Instructions and Data
-            (S) AI Chat --> Find Render Output Instructions in Context
-            and (S) AI Chat --> Find Transformer Methods in Context
-            and (S) Find Templates in Context
-            and (S) Find Structured Content in Context
-        or
-            (S) Bot-Behavior --> Inject Render Output Instructions
-            and (S) Bot-Behavior --> Inject Load Transformer Methods Instructuion
-            and (S) Inject  Load Template Instructuion
-            and (S) Inject  Load Structured Content Instructions
-            and (S) AI Chat --> Read Injected Render Output Instructions
-            and (S) AI Chat --> Read  Injected Transformer Methods Instructions
-            and (S) Read  Injected TemplateInstructions
-            and (S) Read  Injected Structured ContentInstructions
-        and
-            (S) Bot-Behavior --> Load + Inject Template
-            and (S) Load +Inject Transformer Methods
-            and (S) Load +  Inject Srtuctured  Content
-            and (S) AI Chat --> Read Injected Template
-            and (S) AI Chat --> Read Injected Template
-            and (S) Read Injected Transformer Methods
-            and (S) Read Instructions Injected Structured Content
+                (S) AI Chat --> Find Render Output Instructions in Context
+                and (S) AI Chat --> Find Transformer Methods in Context
+                and (S) System --> Find Templates in Context
+                and (S) System --> Find Structured Content in Context
+            or
+                (S) Bot-Behavior --> Inject Render Output Instructions
+                opt (S) Bot-Behavior --> Inject Load Transformer Methods Instructuion
+                opt (S) System --> Inject Load Template Instructuion
+                opt (S) Bot Behavior --> Inject Load Structured Content Instructions
+                opt (S) AI Chat --> Read Injected Render Output Instructions
+                opt (S) AI Chat --> Read Injected Transformer Methods Instructions
+                opt (S) System --> Read Injected TemplateInstructions
+                opt (S) System --> Read Injected Structured ContentInstructions
+            and
+                (S) Bot-Behavior --> Load + Inject Template
+                or (S) System --> Load +Inject Transformer Methods
+                or (S) System --> Load + Inject Srtuctured Content
+                or (S) AI Chat --> Read Injected Template
+                or (S) AI Chat --> Read Injected Template
+                or (S) System --> Read Injected Transformer Methods
+                or (S) System --> Read Instructions Injected Structured Content
     (E) Render Output
         (E) Generate Rendered Outputs
-            (S) Find Rendered Outputs in Context and Display
-            and (S) Pause
-            and (S) Provide Feedback then Update
-            and (S) AI Chat --> Update Rendered Outputs Based on Feedback
-        and
-            (S) AI Chat --> Render Outputs Using Components  In Context
-        or
-            (S) Pause from Context
-            and (S) AI Chat --> Submit Rendered Content to Tool for Saving
-        and
-            (S) Present Rendered Outputs to User
-            (S) AI Chat --> Render Output Using Injected Componenents
+                (S) System --> Find Rendered Outputs in Context and Display
+                and (S) System --> Pause
+                and (S) System --> Provide Feedback then Update
+                and (S) AI Chat --> Update Rendered Outputs Based on Feedback
+            and
+                (S) AI Chat --> Render Outputs Using Components In Context
+            or
+                (S) System --> Pause from Context
+                opt (S) AI Chat --> Submit Rendered Content to Tool for Saving
+            and
+                (S) System --> Present Rendered Outputs to User
+            or
+                (S) AI Chat --> Render Output Using Injected Componenents
         (E) Load Rendered Content
-            (S) AI Chat --> Find Rendered Content Instructions from Context and Load
-        and
-            (S) Agile Bot --> Review Answers, Assumptions
-            and (S) Agile Bot --> Review Built Knowledge
-        or
-            (S) Bot --> Inject  Load Rendered Content Instructions
-            and (S) Bot --> Follow Injected Instructions and Load Content
-        or
-            (S) Bot --> Load + Inject Rendered Content
-            and (S) Bot --> Present Rendered Content
+                (S) AI Chat --> Find Rendered Content Instructions from Context and Load
+            and
+                (S) Agile Bot --> Review Answers, Assumptions
+                or (S) Agile Bot --> Review Built Knowledge
+            or
+                (S) Bot Behavior --> Inject Load Rendered Content Instructions
+                or (S) Bot --> Follow Injected Instructions and Load Content
+            or
+                (S) Bot --> Load + Inject Rendered Content
+                or (S) Bot --> Present Rendered Content
     (E) Validate Knowledge & Content Against Rules
-        (S) AI Chat --> Find  Behavior Specific Rules from Context
-        and (S) AI Chat --> Find Common Bot Rules from Context
-        and (S) FInd Content in Context
-    and
-        (S) Find Rules in Context and validate against Rules
-        or (S) Validate Content vs Injected Diagnostics and Rules
-        or (S) Validate Content Using Injected Diagnostics + Rules
-    and
-        (S) Pause
-        and (S) Human --> Read report and make changes
-        and (S) Human --> Save Content through Context
-    or
-        (S) AI Chat --> Inject Common Bot Rules Instructions
-        and (S) Inject Behavior Specific Rules Instructions
-    and
-        (S) Bot-Behavior --> Submit Content to Tool for Saving
-        and (S) Bot-Behavior --> Save Content
-        and (S) Track Activity for Validate Rules Action
-        and (S) Call Correct-Bot Action Tool
-    and
-        (S) Bot-Behavior --> Load + Inject Diagnostics Results, Knowledge, Content Instructions
-        (S) Proceed to Correct-Bot trough  context
+            (S) AI Chat --> Find Behavior Specific Rules from Context
+            or (S) AI Chat --> Find Common Bot Rules from Context
+            or (S) System --> FInd Content in Context
+        or
+            (S) System --> Find Rules in Context and validate against Rules
+            or (S) System --> Validate Content vs Injected Diagnostics and Rules
+            or (S) System --> Validate Content Using Injected Diagnostics + Rules
+        and
+            (S) System --> Pause
+            or (S) Human --> Read report and make changes
+            or (S) Human --> Save Content through Context
+        or
+            (S) AI Chat --> Inject Common Bot Rules Instructions
+            or (S) Bot Behavior --> Inject Behavior Specific Rules Instructions
+        and
+            (S) Bot-Behavior --> Submit Content to Tool for Saving
+            or (S) Bot-Behavior --> Save Content
+            or (S) System --> Track Activity for Validate Rules Action
+            or (S) System --> Call Correct-Bot Action Tool
+        and
+            (S) Bot-Behavior --> Load + Inject Diagnostics Results, Knowledge, Content Instructions
+        or
+            (S) System --> Proceed to Correct-Bot trough context
     (E) Review Answers, Assumptions
-        (S) AI Chat --> Find Original and Improved Work From Context
-    or
-        (S) Bot-Behavior --> Inject Correct Bot Instructions
-        and (S) Bot-Behavior --> Injects Review Original and Improved Work Instructions
-        and (S) Inject Load Bot and Rules In Instructions
-        and (S) AI Chat --> Read Original and Improved Work Usng Instructions
+            (S) AI Chat --> Find Original and Improved Work From Context
+        or
+            (S) Bot-Behavior --> Inject Correct Bot Instructions
+            or (S) Bot-Behavior --> Injects Review Original and Improved Work Instructions
+            or (S) AI Chat --> Read Original and Improved Work Usng Instructions
     (E) Reviews Rules
-        (S) AI Chat --> Finds Rules and Prompts In Context
-        and (S) Determine Issues From Context
-        and (S) Suggest Corrections Based On Context
-    and
-        (S) AI Chat --> Reads Injected Rules and Prompts
-        and (S) Determine Issues
-        and (S) Suggest Bot Corrections Based on Instructions
+            (S) AI Chat --> Finds Rules and Prompts In Context
+            or (S) System --> Determine Issues From Context
+            or (S) System --> Suggest Corrections Based On Context
+        and
+            (S) AI Chat --> Reads Injected Rules and Prompts
+            or (S) System --> Determine Issues
+            or (S) System --> Suggest Bot Corrections Based on Instructions
     (E) Reviews Violations
-        (S) Human --> Provide Suggested Bot Corrections
-        and (S) Human --> Review . Modifiy. Apprtove Correctins
-        and (S) Makes Corrections to Found Rules and Instructions
-    and
-        (S) Submit Bot Guidance and Rules Changes to Correct-Bot Tool
-        and (S) Bot-Behavior --> Save Correcions
+            (S) Human --> Provide Suggested Bot Corrections
+            or (S) Human --> Review . Modifiy. Apprtove Correctins
+            or (S) System --> Makes Corrections to Found Rules and Instructions
+        and
+            (S) System --> Submit Bot Guidance and Rules Changes to Correct-Bot Tool
+            or (S) Bot-Behavior --> Save Correcions
     (E) Suggest Bot Corrections
-        (S) Bot-Behavior --> Track Activity for Correct-Bot Action
+            (S) Bot-Behavior --> Track Activity for Correct-Bot Action
+
+
+=== INCREMENT 2: Simplest MCP ===
+
+(E) Build Agile Bots
+    (E) Generate Bot Server And Tools
+            (S) MCP Server Generator --> Generate MCP Bot Server
+            and (AC) WHEN MCP Server Generator receives Bot Config
+            and (AC) THEN Generator generates unique MCP Server instance with Unique server name from bot name
+            and (AC) AND Generated server includes Bot Config reference
+            and (AC) AND Generated server leverages Specific Bot instantiation code
+        and
+            (S) MCP Server Generator --> Generate Behavior Action Tools
+            and (AC) WHEN Generator processes Bot Config
+            and (AC) THEN Generator creates tool code for each (behavior, action) pair
+            and (AC) AND Enumerates all behaviors and actions from Bot Config
+            and (AC) AND For each pair, generates tool code with unique name, trigger words, forwarding logic
+            and (AC) AND Tool catalog prepared with all generated tool instances
+        and
+            (S) System --> Deploy MCP BOT Server
+            and (AC) WHEN Generation Complete
+            and (AC) THEN Generator deploys/starts generated MCP Server
+            and (AC) AND Server initializes in separate thread
+            and (AC) AND Server registers with MCP Protocol Handler using unique server name
+            and (AC) AND Server publishes tool catalog to AI Chat
+            and (AC) AND Each tool entry includes name, description, trigger patterns, parameters
+
+(E) Invoke MCP Bot Server
+    (E) Invoke Bot Tool
+            (S) AI Chat --> Invoke MCP BOT Tool
+            and (AC) WHEN AI Chat invokes any generated tool
+            and (AC) THEN Tool uses inherited BaseTool logic to invoke correct behavior action on preloaded bot
+            and (AC) AND Bot class preloaded at server startup
+            and (AC) AND Tool directly routes to behavior action method of preloaded Bot class
+            and (AC) AND Bot.Behavior compiles and returns instructions
+            and (AC) AND MCP tool injects instructions into AI Chat context
+    (E) Perform Behavior Action
+            (S) Bot Behavior --> Inject Behavior Action Instructions
+            and (AC) WHEN Tool invokes Bot.Behavior.Action method
+            and (AC) THEN Behavior Action loads instructions from behavior and base_actions
+            and (AC) AND Action merges base instructions with behavior-specific instructions
+            and (AC) AND Compiled instructions returned for injection into AI Chat
+        and
+            (S) Bot Behavior --> Inject Guardrails as Part of Clarify Requirements
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Gather Context Action
+            and (AC) THEN Action checks for guardrails in behavior/guardrails/required_context/
+            and (AC) WHEN guardrails exist, THEN Action loads key_questions.json and evidence.json
+            and (AC) AND Action injects guardrails into clarify requirements section
+        and
+            (S) Bot Behavior --> Inject Planning Criteria Into Instructions
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Planning Action
+            and (AC) THEN Action checks for guardrails in behavior/guardrails/planning/
+            and (AC) WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files
+            and (AC) AND Action injects planning guardrails into planning section
+        and
+            (S) Bot Behavior --> Inject Knowledge Graph Template for Build Knowledge
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Build Knowledge Action
+            and (AC) THEN Action loads knowledge graph template from behavior/content/knowledge_graph/
+            and (AC) AND Action injects knowledge graph template path and build instructions
+            and (AC) AND Action injects validation rules reference
+        and
+            (S) Bot Behavior --> Inject Render Templates and Transformers
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Render Output Action
+            and (AC) THEN Action loads render templates and transformer methods
+            and (AC) AND Action injects template path, transformer path, and spec path
+        and
+            (S) Bot Behavior --> Inject Validation Rules for Validate Rules Action
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action
+            and (AC) THEN Action loads common bot rules from base_bot/rules/
+            and (AC) AND Action loads behavior-specific rules
+            and (AC) AND Action merges and injects rules into validation section
+        and
+            (S) Bot Behavior --> Inject Correct Bot Instructions
+            and (AC) WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action
+            and (AC) THEN Action loads correct bot instructions from base_actions
+            and (AC) AND Action injects correction instructions into compiled instructions

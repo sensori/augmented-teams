@@ -1,5 +1,9 @@
 {
   "behaviorName": "prioritization",
+  "description": "Organize stories into delivery increments based on business value, dependencies, and risk",
+  "goal": "Prioritize stories into increments for iterative delivery",
+  "inputs": "story-graph.json (shaped story map), business priorities, dependencies",
+  "outputs": "story-graph.json (with increments), story-map-increments.drawio, story-map-increments.md",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

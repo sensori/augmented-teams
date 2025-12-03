@@ -1,0 +1,68 @@
+{
+  "description": "Some comments add genuine value. Explain business rules and complex algorithms, warn of consequences or performance issues, add TODO for near-term work, and include required legal/license comments.",
+  "examples": [
+    {
+      "do": {
+        "description": "Write comments that add genuine value",
+        "content": [
+          "Explain business rules and complex algorithms",
+          "Warn of consequences or performance issues",
+          "Add TODO for near-term work",
+          "Include required legal/license comments",
+          "",
+          "Correct Examples (valuable comments):",
+          "// Business Rule: Orders over $1000 require manager approval per policy 2024-05",
+          "if (order.total > 1000) { requireApproval(); }",
+          "",
+          "// WARNING: This operation is O(n^2). Consider caching for large datasets.",
+          "function calculateDistances(points) {...}",
+          "",
+          "// TODO: Refactor to use new payment API (ticket #1234, due: 2024-12-01)",
+          "",
+          "// Copyright (c) 2024 Company Name. Licensed under MIT.",
+          "",
+          "Good Comment Types:",
+          "- Explain WHY, not WHAT (code shows what)",
+          "- Document business rules with references",
+          "- Warn about consequences (performance, security)",
+          "- TODO with context (who, when, why, ticket)",
+          "- Legal notices and licenses"
+        ]
+      },
+      "dont": {
+        "description": "Don't add attribution, change history, or obvious documentation",
+        "content": [
+          "Don't add attribution or change history (use git)",
+          "Don't create closing-brace comments",
+          "Don't write extensive JavaDoc for obvious methods",
+          "",
+          "Wrong Examples (bad comments):",
+          "// Changed by: John Doe, 2024-03-15 - Fixed bug",
+          "// Modified: Added error handling",
+          "// Author: Jane Smith",
+          "(use git history instead)",
+          "",
+          "} // end if",
+          "} // end for",
+          "} // end class OrderService",
+          "(code should be small enough to not need these)",
+          "",
+          "/**",
+          " * Gets the name",
+          " * @returns the name",
+          " */",
+          "getName() { return this.name; }",
+          "(obvious, no value added)",
+          "",
+          "Bad Comment Indicators (DELETE):",
+          "- Change history (git has this)",
+          "- Attribution (git has this)",
+          "- Closing brace comments (make code smaller)",
+          "- JavaDoc that just rephrases method name",
+          "- Position markers (// ==== Section ====)"
+        ]
+      }
+    }
+  ]
+}
+

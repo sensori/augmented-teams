@@ -1,5 +1,9 @@
 {
   "behaviorName": "specification_scenarios",
+  "description": "Write detailed plain-English scenarios (Given/When/Then) that specify exact behavior for each story",
+  "goal": "Specify stories with detailed, testable scenarios using plain English",
+  "inputs": "Acceptance criteria from exploration, domain models, integration contracts",
+  "outputs": "Individual story .md files with detailed scenarios (no variables/examples tables)",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

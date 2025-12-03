@@ -22,11 +22,37 @@
       ]
     },
     {
+      "name": "Specific Bot",
+      "examples": ["story_bot", "bdd_bot", "domain_bot"],
+      "responsibilities": [
+        {
+          "name": "Loads Behavior Configuration",
+          "collaborators": ["Bot Config", "Behaviors"]
+        },
+        {
+          "name": "Provides Behavior List For Tool Generation",
+          "collaborators": ["Behaviors", "MCP Bot Server Generator"]
+        },
+        {
+          "name": "Provides Context For Tool Invocation",
+          "collaborators": ["BaseBehavioralActionTool", "Behavior", "Base Action"]
+        }
+      ]
+    },
+    {
       "name": "Bot Behavior",
       "responsibilities": [
         {
           "name": "Defines Action Steps",
           "collaborators": ["Bot Config"]
+        },
+        {
+          "name": "Compiles Instructions",
+          "collaborators": ["Base Action", "Instructions File"]
+        },
+        {
+          "name": "Returns Compiled Instructions",
+          "collaborators": ["BaseBehavioralActionTool"]
         }
       ]
     },
@@ -111,52 +137,57 @@
         },
         {
           "name": "Generates Behavior Action Tools",
-          "collaborators": ["Bot Config", "MCP Bot Server", "Behavior Action Tool", "Behavior", "Action", "Behavior Action Trigger Words"]
+          "collaborators": ["Bot Config", "MCP Bot Server", "BaseBehavioralActionTool", "Behavior", "Action", "Behavior Action Trigger Words"]
+        },
+        {
+          "name": "Deploys Generated MCP Server",
+          "collaborators": ["Generated MCP Server", "MCP Protocol Handler"]
         }
       ]
     },
     {
       "name": "MCP Bot Server",
+      "note": "Unique per bot with unique server name",
       "responsibilities": [
+        {
+          "name": "Has Unique Server Name",
+          "collaborators": ["Bot Name"]
+        },
         {
           "name": "Created By Bot",
           "collaborators": ["Agile Bot"]
         },
         {
+          "name": "Initializes In Separate Thread",
+          "collaborators": ["Thread Manager"]
+        },
+        {
+          "name": "Registers With Protocol Handler",
+          "collaborators": ["MCP Protocol Handler"]
+        },
+        {
           "name": "Instantiates Bot For Project",
-          "collaborators": ["Bot Config", "Bot", "Project"]
+          "collaborators": ["Bot Config", "Specific Bot", "Project"]
         },
         {
-          "name": "Intercepts Tool Calls With Project Check",
-          "collaborators": ["Project", "Bot Tool", "Behavior Tool", "Behavior Action Tool"]
+          "name": "Preloads Bot Class At Startup",
+          "collaborators": ["Specific Bot", "Bot Config"]
         },
         {
-          "name": "Returns Project Location For Confirmation Or Display",
-          "collaborators": ["Project", "AI Chat"]
+          "name": "Publishes Tool Catalog",
+          "collaborators": ["AI Chat", "Tool Catalog"]
         },
         {
           "name": "Provides Bot Behavior Actions MCP Tools",
-          "collaborators": ["Bot Behavior Action Tool"]
-        },
-        {
-          "name": "Provides Bot Behavior Tools",
-          "collaborators": ["Bot Behavior Tool"]
-        },
-        {
-          "name": "Provides Bot Tools",
-          "collaborators": ["Bot Tool"]
-        },
-        {
-          "name": "Provides Project State Tool",
-          "collaborators": ["Project State Tool"]
+          "collaborators": ["BaseBehavioralActionTool"]
         },
         {
           "name": "Routes Tool Calls",
-          "collaborators": ["AI Chat", "Bot Tools"]
+          "collaborators": ["AI Chat", "BaseBehavioralActionTool"]
         },
         {
           "name": "Routes To Specific MCP Tool Based On Trigger Words",
-          "collaborators": ["AI Chat", "Bot Tool", "Behavior Tool", "Behavior Action Tool"]
+          "collaborators": ["AI Chat", "BaseBehavioralActionTool", "Trigger Words"]
         }
       ]
     },
@@ -201,9 +232,42 @@
       ]
     },
     {
-      "name": "Behavior Action Tool",
-      "examples": ["story_bot_shape_clarification"],
+      "name": "BaseTool",
       "responsibilities": [
+        {
+          "name": "Provides Invocation Logic",
+          "collaborators": ["Bot", "Behavior", "Action"]
+        },
+        {
+          "name": "Routes To Preloaded Bot",
+          "collaborators": ["Specific Bot"]
+        },
+        {
+          "name": "Loads Instructions",
+          "collaborators": ["Instructions File", "File System"]
+        },
+        {
+          "name": "Injects Instructions",
+          "collaborators": ["AI Chat"]
+        }
+      ]
+    },
+    {
+      "name": "BaseBehavioralActionTool",
+      "examples": ["story_bot_shape_gather_context"],
+      "responsibilities": [
+        {
+          "name": "Inherits From BaseTool",
+          "collaborators": ["BaseTool"]
+        },
+        {
+          "name": "Forwards Invocation To Bot Behavior Action",
+          "collaborators": ["Specific Bot", "Behavior", "Base Action"]
+        },
+        {
+          "name": "Annotated With Trigger Words",
+          "collaborators": ["Trigger Words Config"]
+        },
         {
           "name": "Runs Specific Behavior Action",
           "collaborators": ["Agile Bot", "Bot Behavior", "Bot Action"]
@@ -224,11 +288,131 @@
       ]
     },
     {
+      "name": "Base Action",
+      "responsibilities": [
+        {
+          "name": "Loads Base Action Instructions",
+          "collaborators": ["Instructions File", "File System"]
+        },
+        {
+          "name": "Merges Base And Behavior Instructions",
+          "collaborators": ["Behavior Instructions", "Base Instructions"]
+        },
+        {
+          "name": "Returns Compiled Instructions",
+          "collaborators": ["Bot Behavior"]
+        }
+      ]
+    },
+    {
+      "name": "GatherContextAction",
+      "responsibilities": [
+        {
+          "name": "Loads Guardrails",
+          "collaborators": ["Guardrails", "Key Questions", "Evidence"]
+        },
+        {
+          "name": "Injects Guardrails Into Clarify Requirements",
+          "collaborators": ["Compiled Instructions"]
+        }
+      ]
+    },
+    {
+      "name": "PlanningAction",
+      "responsibilities": [
+        {
+          "name": "Loads Planning Guardrails",
+          "collaborators": ["Guardrails", "Typical Assumptions", "Decision Criteria"]
+        },
+        {
+          "name": "Injects Planning Guardrails",
+          "collaborators": ["Compiled Instructions"]
+        }
+      ]
+    },
+    {
+      "name": "BuildKnowledgeAction",
+      "responsibilities": [
+        {
+          "name": "Loads Knowledge Graph Template",
+          "collaborators": ["Knowledge Graph Template", "File System"]
+        },
+        {
+          "name": "Injects Template And Build Instructions",
+          "collaborators": ["Compiled Instructions"]
+        },
+        {
+          "name": "Injects Validation Rules Reference",
+          "collaborators": ["Validation Rules"]
+        }
+      ]
+    },
+    {
+      "name": "RenderOutputAction",
+      "responsibilities": [
+        {
+          "name": "Loads Render Templates",
+          "collaborators": ["Render Templates", "File System"]
+        },
+        {
+          "name": "Loads Transformer Methods",
+          "collaborators": ["Transformers", "File System"]
+        },
+        {
+          "name": "Injects Template And Transformer Paths",
+          "collaborators": ["Compiled Instructions"]
+        }
+      ]
+    },
+    {
+      "name": "ValidateRulesAction",
+      "responsibilities": [
+        {
+          "name": "Loads Common Bot Rules",
+          "collaborators": ["Common Rules", "File System"]
+        },
+        {
+          "name": "Loads Behavior Specific Rules",
+          "collaborators": ["Behavior Rules", "File System"]
+        },
+        {
+          "name": "Merges And Injects Rules",
+          "collaborators": ["Compiled Instructions"]
+        }
+      ]
+    },
+    {
+      "name": "CorrectBotAction",
+      "responsibilities": [
+        {
+          "name": "Loads Correct Bot Instructions",
+          "collaborators": ["Base Instructions", "File System"]
+        },
+        {
+          "name": "Injects Correction Instructions",
+          "collaborators": ["Compiled Instructions"]
+        }
+      ]
+    },
+    {
+      "name": "Guardrails",
+      "responsibilities": [
+        {
+          "name": "Provides Required Context",
+          "collaborators": ["Key Questions", "Evidence"]
+        },
+        {
+          "name": "Provides Planning Guidance",
+          "collaborators": ["Decision Criteria", "Assumptions"]
+        }
+      ]
+    },
+    {
       "name": "AI Chat",
       "responsibilities": [
         {
           "name": "Detects Trigger Words And Routes To Tools",
-          "collaborators": ["Human", "Bot Server", "MCP Bot Tools", "Bot Tool", "Project State Tool", "Behavior Tool", "Behavior Action Tool"]
+          "collaborators": ["Human", "Bot Server", "MCP Bot Tools", "BaseBehavioralActionTool"]
         },
         {
           "name": "Presents Information To Human",

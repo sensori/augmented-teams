@@ -1,0 +1,252 @@
+DOMAIN ↔ STORY SYNCHRONIZATION ANALYSIS
+INCREMENT 2: Simplest MCP (Focus Only)
+========================================================
+
+## MAPPED ITEMS (Story → Domain)
+
+### Story 1: Generate MCP Bot Server
+✅ AC: "Generator generates unique MCP Server instance"
+   → Domain: MCP Bot Server Generator: Generates MCP Bot Server (Bot Config, MCP Bot Server)
+
+✅ AC: "Generated server includes Bot Config reference"
+   → Domain: MCP Bot Server: Created By Bot, Instantiates Bot For Project (Bot Config, Bot, Project)
+
+✅ AC: "Generated server leverages Specific Bot instantiation code"
+   → Domain: Specific Bot concept (provides behaviors, config)
+
+### Story 2: Generate Behavior Action Tools
+✅ AC: "Generator creates tool code for each (behavior, action) pair"
+   → Domain: MCP Bot Server Generator: Generates Behavior Action Tools
+
+✅ AC: "Enumerates all behaviors and actions from Bot Config"
+   → Domain: Bot Config provides behaviors and actions
+
+✅ AC: "Generates tool code with unique name, trigger words, forwarding logic"
+   → Domain: BaseBehavioralActionTool (NEW - needs to be added to domain)
+
+✅ AC: "Tool catalog prepared with all generated tool instances"
+   → Domain: MCP Bot Server: Provides Bot Behavior Actions MCP Tools
+
+### Story 3: Deploy MCP BOT Server
+✅ AC: "Generator deploys/starts generated MCP Server"
+   → Domain: MCP Bot Server Generator (deployment responsibility)
+
+✅ AC: "Server initializes in separate thread"
+   → Domain: MCP Bot Server (initialization responsibility)
+
+✅ AC: "Server registers with MCP Protocol Handler"
+   → Domain: MCP Bot Server (registration responsibility - NEW)
+
+✅ AC: "Server publishes tool catalog to AI Chat"
+   → Domain: MCP Bot Server: Provides Bot Behavior Actions MCP Tools, Provides Bot Behavior Tools, Provides Bot Tools
+
+### Story 4: Invoke MCP BOT Tool
+✅ AC: "Tool uses inherited BaseTool logic"
+   → Domain: BaseTool concept (NEW - needs to be added to domain)
+
+✅ AC: "Bot class preloaded at server startup"
+   → Domain: MCP Bot Server: Instantiates Bot For Project
+
+✅ AC: "Tool routes to behavior action method of preloaded Bot class"
+   → Domain: BaseBehavioralActionTool (forwarding/routing responsibility - NEW)
+
+✅ AC: "Bot.Behavior compiles and returns instructions"
+   → Domain: Bot Behavior: Defines Action Steps OR Base Action: Inject Instructions
+
+### Story 5: Inject Behavior Action Instructions
+✅ AC: "Behavior Action loads instructions from behavior and base_actions"
+   → Domain: Base Action: Inject Instructions, Load Relevant Content + Inject Into Instructions
+
+✅ AC: "Action merges base instructions with behavior-specific instructions"
+   → Domain: Base Action: Load Relevant Content + Inject Into Instructions
+
+### Story 6: Inject Guardrails (Gather Context)
+✅ AC: "Action checks for guardrails in behavior/guardrails/required_context/"
+   → Domain: GatherContextAction: Inject gather context instructions, Inject questions and evidence
+
+✅ AC: "Action loads key_questions.json and evidence.json"
+   → Domain: Guardrails: Provide required context (Key Questions, Evidence)
+
+### Story 7: Inject Planning Criteria
+✅ AC: "Action loads typical_assumptions.json and decision_criteria files"
+   → Domain: PlanningAction: Inject planning instructions, Inject decision criteria and assumptions
+   → Domain: Guardrails: Guide planning decisions (Decision Criteria, Assumptions)
+
+### Story 8: Inject Knowledge Graph Template
+✅ AC: "Action loads knowledge graph template from behavior/content/knowledge_graph/"
+   → Domain: BuildKnowledgeAction: Inject knowledge graph template, Inject builder instructions
+
+✅ AC: "Action injects validation rules reference"
+   → Domain: BuildKnowledgeAction: Save Knowledge graph (includes validation)
+
+### Story 9: Inject Render Templates
+✅ AC: "Action loads render templates and transformer methods"
+   → Domain: RenderOutputAction: Inject render output instructions, Inject templates, Inject transformers
+
+### Story 10: Inject Validation Rules
+✅ AC: "Action loads common bot rules from base_bot/rules/"
+   → Domain: ValidateRulesAction: Inject common bot rules, Inject behavior specific and Bot rules
+
+✅ AC: "Action merges and injects rules into validation section"
+   → Domain: ValidateRulesAction: Load + inject content for validation
+
+### Story 11: Inject Correct Bot Instructions
+✅ AC: "Action loads correct bot instructions from base_actions"
+   → Domain: CorrectBotAction: Inject correct bot instructions, Load + inject diagnostics results
+
+---
+
+## GAPS: Missing Domain Concepts
+
+### 1. BaseTool (NEW CONCEPT NEEDED)
+**Why:** Story 4 references "inherited BaseTool logic" but no BaseTool concept exists
+**Responsibilities needed:**
+- Provides Invocation Logic: Bot, Behavior, Action
+- Routes To Preloaded Bot: Specific Bot
+- Loads Instructions: Instructions File
+- Injects Instructions: AI Chat
+
+**ACTION:** Add BaseTool concept to domain_graph.json
+
+---
+
+### 2. BaseBehavioralActionTool (NEW CONCEPT NEEDED - partially exists as "Behavior Action Tool")
+**Why:** Story 2 and 4 reference this explicitly
+**Responsibilities needed:**
+- Inherits From BaseTool: BaseTool
+- Forwards Invocation To Bot + Behavior + Action: Specific Bot, Behavior, Base Action
+- Annotated With Trigger Words: Trigger Words Config
+
+**ACTION:** Update domain_graph.json - rename/expand Behavior Action Tool to BaseBehavioralActionTool
+
+---
+
+### 3. MCP Bot Server Generator - Deployment Responsibility
+**Current:** Has generation responsibilities
+**Missing:** Deploys/Starts Generated Server
+**ACTION:** Add responsibility "Deploys Generated MCP Server: Generated MCP Server"
+
+---
+
+### 4. MCP Bot Server - Registration Responsibility
+**Current:** Has routing and tool provision responsibilities
+**Missing:** Registers With MCP Protocol Handler
+**ACTION:** Add responsibility "Registers With Protocol Handler: MCP Protocol Handler"
+
+---
+
+### 5. Generated MCP Server Name
+**Current:** Domain doesn't explicitly state servers are unique per bot
+**Missing:** Unique per bot, has unique server name
+**ACTION:** Update MCP Bot Server concept to clarify uniqueness and add "Has Unique Server Name: Bot Name"
+
+---
+
+## GAPS: Missing Story Steps
+
+### For Increment 2 ONLY:
+**NO CRITICAL GAPS** - All stories properly map to domain responsibilities
+
+**MINOR GAPS (Out of Scope for Increment 2):**
+- Workflow progression (future increment)
+- State persistence (future increment)
+- Project initialization (future increment)
+
+---
+
+## RECOMMENDATIONS
+
+### Update domain_graph.json:
+
+1. **Add BaseTool concept:**
+```json
+{
+  "name": "BaseTool",
+  "responsibilities": [
+    {
+      "name": "Provides Invocation Logic",
+      "collaborators": ["Bot", "Behavior", "Action"]
+    },
+    {
+      "name": "Routes To Preloaded Bot",
+      "collaborators": ["Specific Bot"]
+    },
+    {
+      "name": "Loads Instructions",
+      "collaborators": ["Instructions File", "File System"]
+    },
+    {
+      "name": "Injects Instructions",
+      "collaborators": ["AI Chat"]
+    }
+  ]
+}
+```
+
+2. **Add BaseBehavioralActionTool concept:**
+```json
+{
+  "name": "BaseBehavioralActionTool",
+  "responsibilities": [
+    {
+      "name": "Inherits From BaseTool",
+      "collaborators": ["BaseTool"]
+    },
+    {
+      "name": "Forwards Invocation To Bot Behavior Action",
+      "collaborators": ["Specific Bot", "Behavior", "Base Action"]
+    },
+    {
+      "name": "Annotated With Trigger Words",
+      "collaborators": ["Trigger Words Config"]
+    }
+  ]
+}
+```
+
+3. **Update MCP Bot Server Generator:**
+Add responsibility:
+```json
+{
+  "name": "Deploys Generated MCP Server",
+  "collaborators": ["Generated MCP Server", "MCP Protocol Handler"]
+}
+```
+
+4. **Update MCP Bot Server:**
+Add responsibilities:
+```json
+{
+  "name": "Has Unique Server Name",
+  "collaborators": ["Bot Name"]
+},
+{
+  "name": "Registers With Protocol Handler",
+  "collaborators": ["MCP Protocol Handler"]
+}
+```
+
+---
+
+## SUMMARY
+
+**Increment 2 Alignment Status:**
+- ✅ 11/11 stories properly map to domain concepts
+- ⚠️ 2 NEW domain concepts needed (BaseTool, BaseBehavioralActionTool)
+- ⚠️ 3 domain concepts need updated responsibilities (Generator, MCP Server)
+- ✅ NO missing story steps for Increment 2 scope
+
+**Priority Actions:**
+1. Add BaseTool and BaseBehavioralActionTool to domain_graph.json
+2. Update MCP Bot Server Generator with deployment responsibility
+3. Update MCP Bot Server with registration and naming responsibilities
+4. Document that MCP Server is unique per bot
+
+**Out of Scope (Future Increments):**
+- Workflow State management
+- Project State persistence
+- Activity tracking
+- Workflow progression logic
+
+All Increment 2 stories align well with domain model pending the above additions!
+

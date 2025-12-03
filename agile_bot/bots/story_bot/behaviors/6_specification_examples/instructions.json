@@ -1,5 +1,9 @@
 {
   "behaviorName": "specification_examples",
+  "description": "Create scenario and scenario outlines with examples tables for data-driven testing",
+  "goal": "Specify stories with scenario outlines and examples for parameterized testing",
+  "inputs": "Acceptance criteria from exploration, test data requirements",
+  "outputs": ".feature files with Scenario Outlines and Examples tables",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

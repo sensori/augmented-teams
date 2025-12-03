@@ -1,27 +1,61 @@
 {
-  "description": "Use class-based organization in single test file. Organize step definitions into classes (AgentSteps, ProjectSteps, WorkflowSteps) and helpers into factory classes (AgentFactory, ProjectFactory). All code in src/stories_acceptance_tests.py.",
+  "description": "Use class-based organization with pytest orchestrator pattern. Test classes contain orchestrator test methods that show the flow. Helper functions/fixtures provide reusable operations. Keep tests under 20 lines, helpers under 20 lines, classes under 300 lines.",
   "examples": [
     {
       "do": {
-        "description": "Class-based organization",
+        "description": "Orchestrator test with helpers",
         "content": [
-          "class AgentSteps:",
-          "    @given(\"Agent is initialized with agent_name='story_bot'\")",
-          "    def given_agent_initialized(self, context, agent_name):",
-          "        context.agent = AgentFactory.create_agent(agent_name=agent_name, workspace_root=context.workspace_root)",
+          "# ============================================================================",
+          "# HELPER FUNCTIONS - Reusable operations (under 20 lines each)",
+          "# ============================================================================",
           "",
-          "class AgentFactory:",
-          "    @staticmethod",
-          "    def create_agent(agent_name='story_bot', workspace_root=None):",
-          "        return Agent(agent_name=agent_name, workspace_root=workspace_root)"
+          "def create_agent_with_config(name: str, workspace_root: Path, config: dict) -> Agent:",
+          "    \"\"\"Helper: Create agent with configuration.\"\"\"",
+          "    agent = Agent(agent_name=name, workspace_root=workspace_root)",
+          "    agent.set_config(config)",
+          "    return agent",
+          "",
+          "@pytest.fixture",
+          "def workspace_root(tmp_path):",
+          "    \"\"\"Fixture: Temporary workspace directory.\"\"\"",
+          "    workspace = tmp_path / \"workspace\"",
+          "    workspace.mkdir()",
+          "    return workspace",
+          "",
+          "# ============================================================================",
+          "# ORCHESTRATOR TESTS - Readable test flows",
+          "# ============================================================================",
+          "",
+          "class TestAgentInitialization:",
+          "    \"\"\"Agent initialization scenarios.\"\"\"",
+          "    ",
+          "    def test_agent_initializes_with_base_config(self, workspace_root):",
+          "        \"\"\"",
+          "        SCENARIO: Agent initializes with base configuration",
+          "        GIVEN: Base agent configuration exists",
+          "        WHEN: Agent is initialized with agent_name='story_bot'",
+          "        THEN: Agent sets up configuration path correctly",
+          "        \"\"\"",
+          "        # Given",
+          "        config = create_base_config(workspace_root)",
+          "        ",
+          "        # When",
+          "        agent = create_agent_with_config('story_bot', workspace_root, config)",
+          "        ",
+          "        # Then",
+          "        expected_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "        assert agent.config_path == expected_path",
+          "        assert agent.config_path.exists()"
         ]
       },
       "dont": {
-        "description": "Flat organization or multiple files",
+        "description": "Scattered steps or monolithic tests",
         "content": [
-          "# DON'T: All steps at module level without organization",
-          "# DON'T: Separate files for steps, helpers, fixtures",
-          "# DON'T: conftest.py for fixtures (use test file instead)"
+          "# DON'T: Feature files with scattered step definitions",
+          "# DON'T: Monolithic test methods over 20 lines",
+          "# DON'T: Helper functions over 20 lines",
+          "# DON'T: Test classes over 300 lines",
+          "# DON'T: Tests without clear Given-When-Then structure"
         ]
       }
     }

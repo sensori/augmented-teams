@@ -1,25 +1,70 @@
 {
-  "description": "Use descriptive step definition function names that match step text. Function names should clearly indicate what step they implement.",
+  "description": "Use intention-revealing names that describe behavior, not implementation. Test names should describe WHAT happens WHEN. Helper names should describe their single responsibility. Follow clean code naming: searchable, pronounceable, one word per concept.",
   "examples": [
     {
       "do": {
-        "description": "Descriptive function names",
+        "description": "Descriptive behavior-focused names",
         "content": [
-          "@given(\"Agent is initialized with agent_name='story_bot'\")",
-          "def given_agent_initialized_with_name(context, agent_name):",
+          "# Test names: test_<behavior>_when_<condition>",
+          "def test_agent_initializes_with_base_config_when_config_exists(self):",
           "    pass",
           "",
-          "@when(\"MCP Server requests Agent instance from AgentStateManager\")",
-          "def when_mcp_requests_agent_from_manager(context):",
+          "def test_agent_loads_behavior_graph_when_domain_structure_available(self):",
+          "    pass",
+          "",
+          "# Helper names: <verb>_<noun> that reveals purpose",
+          "def create_agent_with_config(name: str, config: dict) -> Agent:",
+          "    pass",
+          "",
+          "def verify_config_path_exists(agent: Agent, expected_path: Path):",
           "    pass"
         ]
       },
       "dont": {
-        "description": "Non-descriptive or abbreviated names",
+        "description": "Abbreviated, vague, or implementation-focused names",
         "content": [
-          "@given(\"Agent is initialized\")",
-          "def step1(context):  # WRONG - non-descriptive",
-          "def agent_init(context):  # WRONG - abbreviated"
+          "# DON'T: Abbreviated or cryptic",
+          "def test_agt_init(self):  # WRONG - abbreviated",
+          "def test1(self):  # WRONG - meaningless",
+          "def test_xyz(self):  # WRONG - non-descriptive",
+          "",
+          "# DON'T: Implementation-focused instead of behavior",
+          "def test_constructor_sets_variables(self):  # WRONG - how, not what",
+          "def test_calls_setup_method(self):  # WRONG - implementation",
+          "",
+          "# DON'T: Vague helper names",
+          "def setup(data):  # WRONG - setup what?",
+          "def do_thing(obj):  # WRONG - what thing?",
+          "def handler(ctx):  # WRONG - handles what?"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Consistent vocabulary across codebase",
+        "content": [
+          "# Pick ONE word per concept and use consistently:",
+          "def create_agent(...)  # Use 'create' everywhere",
+          "def create_config(...)",
+          "def create_workspace(...)",
+          "",
+          "def verify_path_exists(...)  # Use 'verify' for assertions",
+          "def verify_config_valid(...)",
+          "def verify_agent_initialized(...)"
+        ]
+      },
+      "dont": {
+        "description": "Mixing synonyms for same concept",
+        "content": [
+          "# DON'T: Mix create/build/make/construct",
+          "def create_agent(...)",
+          "def build_config(...)  # WRONG - inconsistent with 'create'",
+          "def make_workspace(...)  # WRONG - use 'create'",
+          "",
+          "# DON'T: Mix verify/check/assert/validate randomly",
+          "def verify_path(...)",
+          "def check_config(...)  # WRONG - use 'verify'",
+          "def assert_agent(...)  # WRONG - use 'verify'"
         ]
       }
     }

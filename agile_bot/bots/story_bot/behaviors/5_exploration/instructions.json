@@ -1,5 +1,9 @@
 {
   "behaviorName": "exploration",
+  "description": "Define acceptance criteria (When/Then) for stories to establish clear success criteria",
+  "goal": "Explore each story to create testable acceptance criteria",
+  "inputs": "story-graph.json with discovery details, domain models, user flows",
+  "outputs": "story-graph.json (with acceptance criteria), individual story files with AC",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

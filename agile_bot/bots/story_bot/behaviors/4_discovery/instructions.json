@@ -1,5 +1,9 @@
 {
   "behaviorName": "discovery",
+  "description": "Create a complete list of stories with a well defined stroy flow for one increment",
+  "goal": "Align on problem solution illustrated through user-system interactions that can be developted and tested in small iterations",
+  "inputs": "story-graph.json (with increments), domain models, integration contracts, UX flows",
+  "outputs": "story-graph.json (with discovery details), story-map-discovery.drawio, feature/story detail documents",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

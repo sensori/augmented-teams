@@ -45,46 +45,49 @@
               "stories": [
                 {
                   "name": "Generate MCP Bot Server",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "Human"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Generate Bot Tools",
-                  "sequential_order": 4,
-                  "connector": "or",
+                  "sequential_order": 1,
+                  "connector": "and",
                   "users": [
                     "MCP Server Generator"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Generate Behavior Tools",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [
-                    "MCP Server Generator"
-                  ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Server Generator receives Bot Config",
+                    "THEN Generator generates unique MCP Server instance with Unique server name from bot name",
+                    "AND Generated server includes Bot Config reference",
+                    "AND Generated server leverages Specific Bot instantiation code"
+                  ]
                 },
                 {
                   "name": "Generate Behavior Action Tools",
-                  "sequential_order": 1,
-                  "connector": "or",
+                  "sequential_order": 2,
+                  "connector": "and",
                   "users": [
                     "MCP Server Generator"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Generator processes Bot Config",
+                    "THEN Generator creates tool code for each (behavior, action) pair",
+                    "AND Enumerates all behaviors and actions from Bot Config",
+                    "AND For each pair, generates tool code with unique name, trigger words, forwarding logic",
+                    "AND Tool catalog prepared with all generated tool instances"
+                  ]
                 },
                 {
                   "name": "Deploy MCP BOT Server",
-                  "sequential_order": 2,
-                  "connector": "or",
+                  "sequential_order": 3,
+                  "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Generation Complete",
+                    "THEN Generator deploys/starts generated MCP Server",
+                    "AND Server initializes in separate thread",
+                    "AND Server registers with MCP Protocol Handler using unique server name",
+                    "AND Server publishes tool catalog to AI Chat",
+                    "AND Each tool entry includes name, description, trigger patterns, parameters"
+                  ]
                 }
               ]
             }
@@ -263,99 +266,21 @@
               "connector": null,
               "stories": [
                 {
-                  "name": "Provides addtnl Instructions",
+                  "name": "Invoke MCP BOT Tool",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Invokes Correct Behavior Action (We Hope)",
-                  "sequential_order": 2,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "AI Chat"
                   ],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "or",
-              "stories": [
-                {
-                  "name": "Route To Behavior Action",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Forward To Behavior Action",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Invoke Action In Behavior",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "or",
-              "stories": [
-                {
-                  "name": "Route To MCP BotTool",
-                  "sequential_order": 6,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Forward To Current Behavior and Current Action",
-                  "sequential_order": 7,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": null,
-              "stories": [
-                {
-                  "name": "Route To MCP Behavior  Tool",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Forward To Behavior and Current Action",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN AI Chat invokes any generated tool",
+                    "THEN Tool uses inherited BaseTool logic to invoke correct behavior action on preloaded bot",
+                    "AND Bot class preloaded at server startup",
+                    "AND Tool directly routes to behavior action method of preloaded Bot class",
+                    "AND Bot.Behavior compiles and returns instructions",
+                    "AND MCP tool injects instructions into AI Chat context"
+                  ]
                 }
               ]
             }
@@ -370,105 +295,107 @@
               "connector": null,
               "stories": [
                 {
-                  "name": "Folllows Behavior Istructions From Context",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Correct, Feedback, Proceed",
+                  "name": "Inject Behavior Action Instructions",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Proceeds to Next Actions following instructions In Context",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "and",
-              "stories": [
-                {
-                  "name": "Injects Instructions",
-                  "sequential_order": 5,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Tool invokes Bot.Behavior.Action method",
+                    "THEN Behavior Action loads instructions from behavior and base_actions",
+                    "AND Action merges base instructions with behavior-specific instructions",
+                    "AND Compiled instructions returned for injection into AI Chat"
+                  ]
                 },
                 {
-                  "name": "Inject Next behavor-Action to Instructions",
-                  "sequential_order": 6,
-                  "connector": "or",
+                  "name": "Inject Guardrails as Part of Clarify Requirements",
+                  "sequential_order": 2,
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Gather Context Action",
+                    "THEN Action checks for guardrails in behavior/guardrails/required_context/",
+                    "WHEN guardrails exist, THEN Action loads key_questions.json and evidence.json",
+                    "AND Action injects guardrails into clarify requirements section"
+                  ]
                 },
                 {
-                  "name": "Folllows Injected Instructions",
-                  "sequential_order": 7,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Saves Content",
+                  "name": "Inject Planning Criteria Into Instructions",
                   "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            },
-            {
-              "type": "and",
-              "connector": "or",
-              "stories": [
-                {
-                  "name": "InjectsContent Into Instructions",
-                  "sequential_order": 9,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Planning Action",
+                    "THEN Action checks for guardrails in behavior/guardrails/planning/",
+                    "WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files",
+                    "AND Action injects planning guardrails into planning section"
+                  ]
                 },
                 {
-                  "name": "Follows Enriched Instructions",
-                  "sequential_order": 10,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Saves Behavior State",
-                  "sequential_order": 8,
-                  "connector": "or",
+                  "name": "Inject Knowledge Graph Template for Build Knowledge",
+                  "sequential_order": 4,
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Build Knowledge Action",
+                    "THEN Action loads knowledge graph template from behavior/content/knowledge_graph/",
+                    "AND Action injects knowledge graph template path and build instructions",
+                    "AND Action injects validation rules reference"
+                  ]
                 },
                 {
-                  "name": "Submit Content Changes to Tools for Saving",
-                  "sequential_order": 12,
-                  "connector": "or",
+                  "name": "Inject Render Templates and Transformers",
+                  "sequential_order": 5,
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Render Output Action",
+                    "THEN Action loads render templates and transformer methods",
+                    "AND Action injects template path, transformer path, and spec path"
+                  ]
+                },
+                {
+                  "name": "Inject Validation Rules for Validate Rules Action",
+                  "sequential_order": 6,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action",
+                    "THEN Action loads common bot rules from base_bot/rules/",
+                    "AND Action loads behavior-specific rules",
+                    "AND Action merges and injects rules into validation section"
+                  ]
+                },
+                {
+                  "name": "Inject Correct Bot Instructions",
+                  "sequential_order": 7,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action",
+                    "THEN Action loads correct bot instructions from base_actions",
+                    "AND Action injects correction instructions into compiled instructions"
+                  ]
                 }
               ]
             }
@@ -1661,22 +1588,19 @@
               "connector": "or",
               "stories": [
                 {
-                  "name": "Inject Common Bot Rules Instructions",
+                  "name": "Inject Validation Rules for Validate Rules Action",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Inject Behavior Specific Rules Instructions",
-                  "sequential_order": 2,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action",
+                    "THEN Action loads common bot rules from base_bot/rules/",
+                    "AND Action loads behavior-specific rules",
+                    "AND Action merges and injects rules into validation section"
+                  ]
                 }
               ]
             },
@@ -1774,29 +1698,16 @@
                 {
                   "name": "Inject Correct Bot Instructions",
                   "sequential_order": 1,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
-                    "Bot-Behavior"
+                    "Bot Behavior"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Injects Review Original and Improved Work Instructions",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [
-                    "Bot-Behavior"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Read Original and Improved Work Usng Instructions",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action",
+                    "THEN Action loads correct bot instructions from base_actions",
+                    "AND Action injects correction instructions into compiled instructions"
+                  ]
                 }
               ]
             }
@@ -2681,29 +2592,50 @@
               "sub_epics": [],
               "stories": [
                 {
-                  "name": "Generate Behavior Action Tools",
+                  "name": "Generate MCP Bot Server",
                   "sequential_order": 1,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "MCP Server Generator"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Server Generator receives Bot Config",
+                    "THEN Generator generates unique MCP Server instance with Unique server name from bot name",
+                    "AND Generated server includes Bot Config reference",
+                    "AND Generated server leverages Specific Bot instantiation code"
+                  ]
+                },
+                {
+                  "name": "Generate Behavior Action Tools",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Generator processes Bot Config",
+                    "THEN Generator creates tool code for each (behavior, action) pair",
+                    "AND Enumerates all behaviors and actions from Bot Config",
+                    "AND For each pair, generates tool code with unique name, trigger words, forwarding logic",
+                    "AND Tool catalog prepared with all generated tool instances"
+                  ]
                 },
                 {
                   "name": "Deploy MCP BOT Server",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Generate MCP Bot Server",
                   "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "Human"
-                  ],
-                  "story_type": "user"
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Generation Complete",
+                    "THEN Generator deploys/starts generated MCP Server",
+                    "AND Server initializes in separate thread",
+                    "AND Server registers with MCP Protocol Handler using unique server name",
+                    "AND Server publishes tool catalog to AI Chat",
+                    "AND Each tool entry includes name, description, trigger patterns, parameters"
+                  ]
                 }
               ]
             }
@@ -2735,29 +2667,21 @@
               "sub_epics": [],
               "stories": [
                 {
-                  "name": "Invoke Action In Behavior",
+                  "name": "Invoke MCP BOT Tool",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Route To Behavior Action",
-                  "sequential_order": 2,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "AI Chat"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Forward To Behavior Action",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN AI Chat invokes any generated tool",
+                    "THEN Tool uses inherited BaseTool logic to invoke correct behavior action on preloaded bot",
+                    "AND Bot class preloaded at server startup",
+                    "AND Tool directly routes to behavior action method of preloaded Bot class",
+                    "AND Bot.Behavior compiles and returns instructions",
+                    "AND MCP tool injects instructions into AI Chat context"
+                  ]
                 }
               ]
             },
@@ -2767,20 +2691,107 @@
               "sub_epics": [],
               "stories": [
                 {
-                  "name": "Injects Instructions",
-                  "sequential_order": 5,
-                  "connector": "or",
+                  "name": "Inject Behavior Action Instructions",
+                  "sequential_order": 1,
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Tool invokes Bot.Behavior.Action method",
+                    "THEN Behavior Action loads instructions from behavior and base_actions",
+                    "AND Action merges base instructions with behavior-specific instructions",
+                    "AND Compiled instructions returned for injection into AI Chat"
+                  ]
                 },
                 {
-                  "name": "Folllows Injected Instructions",
+                  "name": "Inject Guardrails as Part of Clarify Requirements",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Gather Context Action",
+                    "THEN Action checks for guardrails in behavior/guardrails/required_context/",
+                    "WHEN guardrails exist, THEN Action loads key_questions.json and evidence.json",
+                    "AND Action injects guardrails into clarify requirements section"
+                  ]
+                },
+                {
+                  "name": "Inject Planning Criteria Into Instructions",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Planning Action",
+                    "THEN Action checks for guardrails in behavior/guardrails/planning/",
+                    "WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files",
+                    "AND Action injects planning guardrails into planning section"
+                  ]
+                },
+                {
+                  "name": "Inject Knowledge Graph Template for Build Knowledge",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Build Knowledge Action",
+                    "THEN Action loads knowledge graph template from behavior/content/knowledge_graph/",
+                    "AND Action injects knowledge graph template path and build instructions",
+                    "AND Action injects validation rules reference"
+                  ]
+                },
+                {
+                  "name": "Inject Render Templates and Transformers",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Render Output Action",
+                    "THEN Action loads render templates and transformer methods",
+                    "AND Action injects template path, transformer path, and spec path"
+                  ]
+                },
+                {
+                  "name": "Inject Validation Rules for Validate Rules Action",
+                  "sequential_order": 6,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action",
+                    "THEN Action loads common bot rules from base_bot/rules/",
+                    "AND Action loads behavior-specific rules",
+                    "AND Action merges and injects rules into validation section"
+                  ]
+                },
+                {
+                  "name": "Inject Correct Bot Instructions",
                   "sequential_order": 7,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action",
+                    "THEN Action loads correct bot instructions from base_actions",
+                    "AND Action injects correction instructions into compiled instructions"
+                  ]
                 }
               ]
             }
@@ -2816,13 +2827,19 @@
                       "story_type": "user"
                     },
                     {
-                      "name": "Injects Gather Context Instructions",
+                      "name": "Inject Guardrails as Part of Clarify Requirements",
                       "sequential_order": 3,
                       "connector": "or",
                       "users": [
-                        "Bot  Behavor"
+                        "Bot Behavior"
                       ],
-                      "story_type": "user"
+                      "story_type": "system",
+                      "acceptance_criteria": [
+                        "WHEN MCP Specific Behavior Action Tool invokes Gather Context Action",
+                        "THEN Action checks for guardrails in behavior/guardrails/required_context/",
+                        "WHEN guardrails exist, THEN Action loads key_questions.json and evidence.json",
+                        "AND Action injects guardrails into clarify requirements section"
+                      ]
                     },
                     {
                       "name": "Reads Injected Gather Context Instructions",
@@ -2857,47 +2874,19 @@
                   "sub_epics": [],
                   "stories": [
                     {
-                      "name": "Inject Planning Instructions",
+                      "name": "Inject Planning Criteria Into Instructions",
                       "sequential_order": 1,
-                      "connector": "or",
+                      "connector": "and",
                       "users": [
-                        "AI Chat"
+                        "Bot Behavior"
                       ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject Decision Criteria and Assumptions",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Planning Instructions",
-                      "sequential_order": 3,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read Injected Decision Criteria and Assumptions",
-                      "sequential_order": 4,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Make Assumptions and Decisions",
-                      "sequential_order": 5,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
+                      "story_type": "system",
+                      "acceptance_criteria": [
+                        "WHEN MCP Specific Behavior Action Tool invokes Planning Action",
+                        "THEN Action checks for guardrails in behavior/guardrails/planning/",
+                        "WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files",
+                        "AND Action injects planning guardrails into planning section"
+                      ]
                     }
                   ]
                 },
@@ -2955,70 +2944,19 @@
                   "sub_epics": [],
                   "stories": [
                     {
-                      "name": "Read Injected Render Output Instructions",
-                      "sequential_order": 5,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject  Load Structured Content Instructions",
-                      "sequential_order": 6,
-                      "connector": "or",
+                      "name": "Inject Knowledge Graph Template for Build Knowledge",
+                      "sequential_order": 1,
+                      "connector": "and",
                       "users": [
                         "Bot Behavior"
                       ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject Load Transformer Methods Instructuion",
-                      "sequential_order": 7,
-                      "connector": "or",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject  Load Template Instructuion",
-                      "sequential_order": 8,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Inject Render Output Instructions",
-                      "sequential_order": 9,
-                      "connector": "or",
-                      "users": [
-                        "Bot-Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected Transformer Methods Instructions",
-                      "sequential_order": 10,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected TemplateInstructions",
-                      "sequential_order": 11,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Read  Injected Structured ContentInstructions",
-                      "sequential_order": 12,
-                      "connector": "or",
-                      "users": [],
-                      "story_type": "user"
+                      "story_type": "system",
+                      "acceptance_criteria": [
+                        "WHEN MCP Specific Behavior Action Tool invokes Build Knowledge Action",
+                        "THEN Action loads knowledge graph template from behavior/content/knowledge_graph/",
+                        "AND Action injects knowledge graph template path and build instructions",
+                        "AND Action injects validation rules reference"
+                      ]
                     }
                   ]
                 }
@@ -3035,38 +2973,18 @@
                   "sub_epics": [],
                   "stories": [
                     {
-                      "name": "Render Output Using Injected Componenents",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
-                },
-                {
-                  "name": "Load Rendered Content",
-                  "sequential_order": 15,
-                  "sub_epics": [],
-                  "stories": [
-                    {
-                      "name": "Inject  Load Rendered Content Instructions",
+                      "name": "Inject Render Templates and Transformers",
                       "sequential_order": 1,
-                      "connector": "or",
+                      "connector": "and",
                       "users": [
                         "Bot Behavior"
                       ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Follow Injected Instructions and Load Content",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [
-                        "AI Chat"
-                      ],
-                      "story_type": "user"
+                      "story_type": "system",
+                      "acceptance_criteria": [
+                        "WHEN MCP Specific Behavior Action Tool invokes Render Output Action",
+                        "THEN Action loads render templates and transformer methods",
+                        "AND Action injects template path, transformer path, and spec path"
+                      ]
                     }
                   ]
                 }
@@ -3079,29 +2997,19 @@
               "sub_epics": [],
               "stories": [
                 {
-                  "name": "Inject Common Bot Rules Instructions",
+                  "name": "Inject Validation Rules for Validate Rules Action",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Inject Behavior Specific Rules Instructions",
-                  "sequential_order": 2,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Validate Content vs Injected Diagnostics and Rules",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action",
+                    "THEN Action loads common bot rules from base_bot/rules/",
+                    "AND Action loads behavior-specific rules",
+                    "AND Action merges and injects rules into validation section"
+                  ]
                 }
               ]
             },
@@ -3113,45 +3021,16 @@
                 {
                   "name": "Inject Correct Bot Instructions",
                   "sequential_order": 1,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
-                    "Bot-Behavior"
+                    "Bot Behavior"
                   ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Injects Review Original and Improved Work Instructions",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [
-                    "Bot-Behavior"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Read Original and Improved Work Usng Instructions",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Reads Injected Rules and Prompts",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [
-                    "AI Chat"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Determine Issues",
-                  "sequential_order": 6,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN MCP Specific Behavior Action Tool invokes Correct Bot Action",
+                    "THEN Action loads correct bot instructions from base_actions",
+                    "AND Action injects correction instructions into compiled instructions"
+                  ]
                 }
               ]
             },

@@ -1,5 +1,9 @@
 {
   "behaviorName": "shape",
+  "description": "Create a story map outline that captures the user's journey through epics, features, and stories",
+  "goal": "Shape a story map from user context",
+  "inputs": "User context, interviews, vision documents, existing requirements",
+  "outputs": "story-graph.json, story-map.md, story-map-outline.drawio, story-map.txt",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",

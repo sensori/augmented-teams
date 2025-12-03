@@ -1,5 +1,9 @@
 {
   "behaviorName": "arrange",
+  "description": "Create folder structure to place individual epic, feature, and story documents in the correct location",
+  "goal": "Arrange stories for optimal delivery sequence within each increment",
+  "inputs": "story-graph.json (with increments), technical dependencies, team capacity",
+  "outputs": "story-graph.json (with story order), arranged story map visualizations",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
