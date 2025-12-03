@@ -1,0 +1,14 @@
+{
+  "name": "render_story_examples",
+  "description": "Render story documents with scenario outlines and examples",
+  "input": "docs/stories/story-graph.json",
+  "output": "docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md",
+  "template": "templates/story-doc-examples.md",
+  "process": [
+    "Load story graph from project area",
+    "For each story in graph, load existing story document",
+    "Add Scenario Outline sections with Examples tables",
+    "Save updated story documents to project area"
+  ]
+}
+

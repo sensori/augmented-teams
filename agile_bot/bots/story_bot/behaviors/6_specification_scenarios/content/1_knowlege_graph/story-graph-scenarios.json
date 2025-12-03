@@ -1,20 +1,32 @@
 {
+  "_explanation": {
+    "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
+    "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "scenarios": "Each story contains scenarios (happy_path, edge_case, error_case) with background and steps in Gherkin format."
+  },
   "epics": [
     {
       "name": "",
-      "users": [],
+      "sequential_order": 1,
+      "estimated_stories": null,
       "sub_epics": [
         {
           "name": "",
-          "users": [],
-          "features": [
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [],
+          "story_groups": [
             {
-              "name": "",
-              "users": [],
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
               "stories": [
                 {
                   "name": "",
+                  "sequential_order": 1,
+                  "connector": null,
                   "users": [],
+                  "story_type": "user",
                   "scenarios": [
                     {
                       "name": "",
@@ -38,41 +50,13 @@
           ]
         }
       ],
-      "features": [
-        {
-          "name": "",
-          "users": [],
-          "stories": [
-            {
-              "name": "",
-              "users": [],
-              "scenarios": [
-                {
-                  "name": "",
-                  "type": "happy_path|edge_case|error_case",
-                  "background": [
-                    "Given <common_setup_step>",
-                    "And <another_common_setup>"
-                  ],
-                  "steps": [
-                    "Given <scenario_specific_state>",
-                    "And <scenario_specific_setup>",
-                    "When <user_action_or_system_event>",
-                    "Then <expected_outcome>",
-                    "And <another_expected_outcome>"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "stories": []
     }
   ],
   "generated_artifacts": {
     "story_documents": {
       "description": "Story documents with scenarios section added",
-      "location": "docs/stories/{epic_name}/{feature_name}/{story_name}.md",
+      "location": "docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md",
       "content": [
         "Story description",
         "Acceptance criteria",
@@ -81,13 +65,14 @@
       ]
     },
     "structured_data": {
-      "description": "JSON representation of scenarios structure",
-      "location": "docs/stories/{epic_name}/{feature_name}/structured.json",
+      "description": "JSON representation of stoy graph with scenarios added",
+      "location": "docs/stories/story-graph.json",
       "content": [
-        "Epic/feature/story hierarchy",
+        "Epic/sub_epic/story_group/story hierarchy",
         "Scenario definitions with steps",
         "Background steps per story",
-        "Scenario types (happy_path, edge_case, error_case)"
+        "Scenario types (happy_path, edge_case, error_case)",
+        "Connectors for story groups and stories"
       ]
     }
   }

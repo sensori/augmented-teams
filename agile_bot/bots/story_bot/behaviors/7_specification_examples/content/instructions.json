@@ -1,0 +1,33 @@
+{
+  "behaviorName": "specification_examples",
+  "instructions": [
+    "**COMBINED CONTENT INSTRUCTIONS - KNOWLEDGE GRAPH + RENDER + SYNCHRONIZE:**",
+    "",
+    "This instruction combines scenario outline creation with examples, rendering, and synchronization steps. Execute all steps in sequence.",
+    "",
+    "**STEP 1: BUILD KNOWLEDGE GRAPH WITH SCENARIO OUTLINES AND EXAMPLES**",
+    "",
+    "Follow all instructions in: 1_knowlege_graph/instructions.json",
+    "",
+    "**Summary:** Convert appropriate scenarios to Scenario Outlines with Examples tables for data-driven testing. Add scenario_outlines to story-graph.json.",
+    "",
+    "**STEP 2: RENDER STORY DOCUMENTS AND FEATURE FILES**",
+    "",
+    "Follow all instructions in: 2_render/instructions.json",
+    "",
+    "**Summary:** Update story documents with Scenario Outline sections and Examples tables.",
+    "",
+    "**STEP 3: SYNCHRONIZE GRAPH WITH DOCUMENTS**",
+    "",
+    "Follow all instructions in: 3_synchronize/instructions.json",
+    "",
+    "**Summary:** Validate that story graph and rendered documents are synchronized. Validate Examples table quality. Generate sync report and resolve any discrepancies.",
+    "",
+    "**WORKFLOW:**",
+    "1. Execute STEP 1 (build knowledge graph) - add scenario outlines with examples to story-graph.json",
+    "2. Execute STEP 2 (render documents) - update story documents with scenario outlines and examples",
+    "3. Execute STEP 3 (synchronize) - validate sync between graph and documents",
+    "4. Proceed to next action in behavior workflow"
+  ]
+}
+

@@ -1,0 +1,15 @@
+{
+  "name": "build_story_scenarios",
+  "description": "Build story graph with scenarios added to each story",
+  "input": "docs/stories/story-graph.json",
+  "output": "docs/stories/story-graph.json",
+  "template": "story-graph-scenarios.json",
+  "process": [
+    "Load existing story graph from project area",
+    "For each story in graph, analyze acceptance criteria",
+    "Generate scenarios (happy_path, edge_case, error_case)",
+    "Add scenarios to story in graph",
+    "Save updated story graph to project area"
+  ]
+}
+

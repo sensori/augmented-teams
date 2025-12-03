@@ -1,0 +1,21 @@
+{
+  "name": "synchronize_story_examples",
+  "description": "Synchronize story graph examples with rendered story documents",
+  "input": [
+    "docs/stories/story-graph.json",
+    "docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md"
+  ],
+  "output": "Sync report and updated files if discrepancies found",
+  "process": [
+    "Load story graph from project area",
+    "For each story, load corresponding document",
+    "Extract scenario outlines and examples from document",
+    "Compare with scenario outlines and examples in graph",
+    "Validate Examples table quality (all variables, concrete data, etc.)",
+    "Generate sync report with discrepancies",
+    "If discrepancies found, ask user for resolution strategy",
+    "Apply synchronization updates",
+    "Save updated files to project area"
+  ]
+}
+

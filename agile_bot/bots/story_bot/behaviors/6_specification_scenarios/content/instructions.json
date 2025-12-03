@@ -1,0 +1,33 @@
+{
+  "behaviorName": "specification_scenarios",
+  "instructions": [
+    "**COMBINED CONTENT INSTRUCTIONS - KNOWLEDGE GRAPH + RENDER + SYNCHRONIZE:**",
+    "",
+    "This instruction combines scenario creation, rendering, and synchronization steps. Execute all steps in sequence.",
+    "",
+    "**STEP 1: BUILD KNOWLEDGE GRAPH WITH SCENARIOS**",
+    "",
+    "Follow all instructions in: 1_knowlege_graph/instructions.json",
+    "",
+    "**Summary:** Add scenarios (happy_path, edge_case, error_case) to each story in story-graph.json. Generate scenario steps using Gherkin format (Given/When/Then).",
+    "",
+    "**STEP 2: RENDER STORY DOCUMENTS**",
+    "",
+    "Follow all instructions in: 2_render/instructions.json",
+    "",
+    "**Summary:** Update existing story documents with Background and Scenarios sections. Generate story documents in docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md.",
+    "",
+    "**STEP 3: SYNCHRONIZE GRAPH WITH DOCUMENTS**",
+    "",
+    "Follow all instructions in: 3_synchronize/instructions.json",
+    "",
+    "**Summary:** Validate that story graph and rendered documents are synchronized. Generate sync report and resolve any discrepancies.",
+    "",
+    "**WORKFLOW:**",
+    "1. Execute STEP 1 (build knowledge graph) - add scenarios to story-graph.json",
+    "2. Execute STEP 2 (render documents) - update story documents with scenarios",
+    "3. Execute STEP 3 (synchronize) - validate sync between graph and documents",
+    "4. Proceed to next action in behavior workflow"
+  ]
+}
+

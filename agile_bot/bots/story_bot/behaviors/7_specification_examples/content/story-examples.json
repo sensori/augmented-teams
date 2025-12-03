@@ -1,0 +1,8 @@
+{
+  "name": "story-examples",
+  "path": "docs/stories",
+  "template": "2_render/templates/story-doc-examples.md",
+  "knowledge_graph_template": "1_knowlege_graph/story-graph-outline-examples.json",
+  "render_config": "2_render/render_story_examples.json"
+}
+
