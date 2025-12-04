@@ -204,6 +204,10 @@ class Behavior:
     def gather_context(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
         
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'gather_context':
+            self.workflow.machine.set_state('gather_context')
+        
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
         
@@ -225,6 +229,10 @@ class Behavior:
     def decide_planning_criteria(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.planning_action import PlanningAction
         
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'decide_planning_criteria':
+            self.workflow.machine.set_state('decide_planning_criteria')
+        
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
         
@@ -245,6 +253,10 @@ class Behavior:
     
     def build_knowledge(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.build_knowledge_action import BuildKnowledgeAction
+        
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'build_knowledge':
+            self.workflow.machine.set_state('build_knowledge')
         
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
@@ -272,6 +284,10 @@ class Behavior:
     def render_output(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
         
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'render_output':
+            self.workflow.machine.set_state('render_output')
+        
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
         
@@ -293,6 +309,10 @@ class Behavior:
     def validate_rules(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'validate_rules':
+            self.workflow.machine.set_state('validate_rules')
+        
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
         
@@ -312,6 +332,10 @@ class Behavior:
         )
     
     def correct_bot(self, parameters: Dict[str, Any] = None) -> BotResult:
+        # Set workflow to this action (in case called directly, not via forward)
+        if self.workflow.current_state != 'correct_bot':
+            self.workflow.machine.set_state('correct_bot')
+        
         # Save workflow state when action is invoked (sets current_behavior and current_action)
         self.workflow.save_state()
         
