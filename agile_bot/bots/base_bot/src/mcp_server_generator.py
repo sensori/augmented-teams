@@ -130,7 +130,7 @@ class MCPServerGenerator:
         return mcp_server
     
     def register_all_behavior_action_tools(self, mcp_server: FastMCP):
-        """Register tools for all behavior-action pairs.
+        """Register tools for all behavior-action pairs, plus bot and behavior tools.
         
         Args:
             mcp_server: FastMCP server instance
@@ -138,7 +138,14 @@ class MCPServerGenerator:
         bot_config = mcp_server.bot_config
         behaviors = bot_config.get('behaviors', [])
         
-        # Register all actions (workflow + independent)
+        # Register bot tool (routes to current behavior and current action)
+        self.register_bot_tool(mcp_server)
+        
+        # Register behavior tools (routes to current action within behavior)
+        for behavior in behaviors:
+            self.register_behavior_tool(mcp_server, behavior)
+        
+        # Register all behavior-action tools
         all_actions = self.workflow_actions + self.independent_actions
         
         for behavior in behaviors:
@@ -168,6 +175,68 @@ class MCPServerGenerator:
             name = name.replace(full, abbrev)
         
         return name
+    
+    def register_bot_tool(self, mcp_server: FastMCP):
+        """Register bot tool that routes to current behavior and current action."""
+        tool_name = f'{self.bot_name}_tool'
+        
+        @mcp_server.tool(name=tool_name, description=f'Bot tool for {self.bot_name} - routes to current behavior and action')
+        async def bot_tool(parameters: dict = None):
+            """Bot tool forwards to current behavior and current action."""
+            if parameters is None:
+                parameters = {}
+            
+            if self.bot is None:
+                return {"error": "Bot not initialized"}
+            
+            result = self.bot.forward_to_current_behavior_and_current_action()
+            
+            return {
+                "status": result.status,
+                "behavior": result.behavior,
+                "action": result.action,
+                "data": result.data
+            }
+        
+        self.registered_tools.append({
+            'name': tool_name,
+            'type': 'bot_tool',
+            'description': f'Routes to current behavior and action'
+        })
+    
+    def register_behavior_tool(self, mcp_server: FastMCP, behavior: str):
+        """Register behavior tool that routes to current action within behavior."""
+        normalized_behavior = self._normalize_name_for_tool(behavior)
+        tool_name = f'{self.bot_name}_{normalized_behavior}_tool'
+        
+        @mcp_server.tool(name=tool_name, description=f'{behavior} behavior tool for {self.bot_name} - routes to current action')
+        async def behavior_tool(parameters: dict = None):
+            """Behavior tool forwards to current action within this behavior."""
+            if parameters is None:
+                parameters = {}
+            
+            if self.bot is None:
+                return {"error": "Bot not initialized"}
+            
+            behavior_obj = getattr(self.bot, behavior, None)
+            if behavior_obj is None:
+                return {"error": f"Behavior {behavior} not found"}
+            
+            result = behavior_obj.forward_to_current_action()
+            
+            return {
+                "status": result.status,
+                "behavior": result.behavior,
+                "action": result.action,
+                "data": result.data
+            }
+        
+        self.registered_tools.append({
+            'name': tool_name,
+            'behavior': behavior,
+            'type': 'behavior_tool',
+            'description': f'Routes to current action in {behavior}'
+        })
     
     def register_behavior_action_tool(
         self,

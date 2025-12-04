@@ -133,6 +133,7 @@ class TestGenerateBotTools:
         AND: bot has 4 behaviors configured
         WHEN: Generator processes Bot Config
         THEN: Generator creates 1 bot tool instance
+        AND: Bot tool is registered with MCP server
         """
         # Given: a bot with name 'test_bot'
         bot_config = create_bot_config(
@@ -140,18 +141,21 @@ class TestGenerateBotTools:
             'test_bot',
             ['shape', 'discovery', 'exploration', 'specification']
         )
+        create_base_instructions(workspace_root)
         
-        # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.bot_tool_generator import BotToolGenerator
-        generator = BotToolGenerator(
-            bot_name='test_bot',
-            config_path=bot_config,
-            workspace_root=workspace_root
+        # When: MCP Server Generator registers bot tool
+        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        generator = MCPServerGenerator(
+            workspace_root=workspace_root,
+            bot_location='agile_bot/bots/test_bot'
         )
-        bot_tool = generator.create_bot_tool()
+        server = generator.create_server_instance()
+        generator.register_all_behavior_action_tools(server)
         
-        # Then: 1 bot tool instance created
-        assert bot_tool is not None
+        # Then: 1 bot tool registered with MCP
+        bot_tools = [t for t in generator.registered_tools if t.get('type') == 'bot_tool']
+        assert len(bot_tools) == 1
+        assert bot_tools[0]['name'] == 'test_bot_tool'
 
 
 class TestGenerateBehaviorTools:
@@ -304,8 +308,9 @@ class TestGenerateBehaviorActionTools:
         mcp_server = generator.create_server_instance()
         generator.register_all_behavior_action_tools(mcp_server)
         
-        # Then: Generator enumerates 24 (behavior, action) pairs
-        assert len(generator.registered_tools) == 24  # 4 behaviors × 6 actions
+        # Then: Generator creates tools for all behavior-action pairs plus bot and behavior tools
+        # 4 behaviors × 6 workflow actions + 1 bot tool + 4 behavior tools = 29 tools
+        assert len(generator.registered_tools) == 29
         
         # And Generator creates 24 tool instances with unique names
         tool_names = [tool['name'] for tool in generator.registered_tools]

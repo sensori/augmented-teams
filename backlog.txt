@@ -65,3 +65,6 @@ inject principls eg alays simplest code, least bespoke code, dont dsuppor tlegav
 
 
 Add manual test to flow - gove steps reqiuried to manually test te systew,
+
+
+validate state is not done when starting it again for a scoped item;  increment

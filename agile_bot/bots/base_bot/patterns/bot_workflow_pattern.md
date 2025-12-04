@@ -20,7 +20,7 @@ This document describes the pattern for using `transitions` state machine librar
 
 ## Pattern: Action Classes
 
-**Action classes contain pure business logic with NO Prefect knowledge.**
+**Action classes contain pure business logic with NO state knowledge.**
 
 ```python
 class {ActionName}Action:
@@ -44,72 +44,108 @@ class {ActionName}Action:
 
 ---
 
-## Pattern: Behavior Class
+## Pattern: Workflow Class
 
-**Behavior uses transitions state machine to track workflow state.**
+**Workflow encapsulates state machine and state persistence (Single Responsibility).**
 
 ```python
 from transitions import Machine
 
-class Behavior:
-    """
-    ONE Behavior class for all behaviors (no subclassing).
-    Instances created with different names: 'shape', 'prioritize', 'discovery'
-    State machine tracks current action and valid transitions.
-    """
+class Workflow:
+    """Manages workflow state machine and persistence."""
     
-    def __init__(self, name: str, bot_name: str, workspace_root: Path):
-        self.name = name  # 'shape', 'prioritize', 'discovery', etc.
+    def __init__(self, bot_name: str, behavior: str, workspace_root: Path,
+                 states: List[str], transitions: List[Dict]):
         self.bot_name = bot_name
+        self.behavior = behavior
         self.workspace_root = workspace_root
-        
-        # Load workflow states and transitions from action configs
-        states, transitions = load_workflow_states_and_transitions(workspace_root)
+        self.workflow_states = states
         
         # Initialize state machine
         self.machine = Machine(
             model=self,
             states=states,
             transitions=transitions,
-            initial=states[0],  # Start at first action
+            initial=states[0],
             auto_transitions=False
         )
         
-        # Load saved state if exists
-        self._load_state()
+        # Load saved state
+        self.load_state()
+    
+    @property
+    def current_state(self) -> str:
+        """Get current state from state machine."""
+        return self.state
+    
+    def transition_to_next(self):
+        """Transition to next state and save."""
+        try:
+            self.proceed()  # Trigger transition
+            self.save_state()
+        except Exception:
+            pass  # Already at final state
+    
+    def load_state(self):
+        """Load workflow state from file."""
+        state_file = self.workspace_root / 'project_area' / 'workflow_state.json'
+        if state_file.exists():
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+            action_name = state_data.get('current_action', '').split('.')[-1]
+            if action_name in self.workflow_states:
+                self.state = action_name
+    
+    def save_state(self):
+        """Save workflow state to file."""
+        state_file = self.workspace_root / 'project_area' / 'workflow_state.json'
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        state_file.write_text(json.dumps({
+            'current_behavior': f'{self.bot_name}.{self.behavior}',
+            'current_action': f'{self.bot_name}.{self.behavior}.{self.state}',
+            'timestamp': datetime.now().isoformat()
+        }), encoding='utf-8')
+```
+
+## Pattern: Behavior Class
+
+**Behavior focuses on action execution for a particular Behavior of a Bot, delegates workflow to Workflow object.**
+
+```python
+class Behavior:
+    """Behavior executes actions, delegates state management to Workflow."""
+    
+    def __init__(self, name: str, bot_name: str, workspace_root: Path):
+        self.name = name
+        self.bot_name = bot_name
+        self.workspace_root = workspace_root
+        
+        # Load workflow configuration
+        states, transitions = load_workflow_states_and_transitions(workspace_root)
+        
+        # Initialize workflow (contains state machine)
+        self.workflow = Workflow(bot_name, name, workspace_root, states, transitions)
+    
+    @property
+    def state(self):
+        """Delegate to workflow current state."""
+        return self.workflow.current_state
     
     def {action_name}(self, parameters: dict = None):
         """Execute {action_name} action."""
-        # Delegate to Action class for business logic
-        action = {ActionName}Action(
-            bot_name=self.bot_name,
-            behavior=self.name,
-            workspace_root=self.workspace_root
-        )
+        action = {ActionName}Action(self.bot_name, self.name, self.workspace_root)
         result = action.execute()
         
-        return BotResult(
-            status='completed',
-            behavior=self.name,
-            action='{action_name}',
-            data=result
-        )
+        return BotResult(status='completed', behavior=self.name, 
+                        action='{action_name}', data=result)
     
     def forward_to_current_action(self):
-        """Forward to current action using state machine."""
-        # State machine knows current state
-        current_action = self.state  # e.g., 'build_knowledge'
+        """Forward to current action using workflow."""
+        current_action = self.workflow.current_state
         
-        # Execute that action
         action_method = getattr(self, current_action)
         result = action_method()
         
-        # Transition to next state
-        try:
-            self.proceed()  # Transitions to next action
-            self._save_state()
-        except Exception:
-            pass  # Already at final state
+        self.workflow.transition_to_next()  # ← Delegate to workflow
         
         return result
 ```

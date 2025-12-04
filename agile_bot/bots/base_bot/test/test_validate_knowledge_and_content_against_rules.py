@@ -367,8 +367,7 @@ class TestCompleteValidateRulesAction:
         
         # When: Check workflow completion status
         from agile_bot.bots.base_bot.src.workflow import Workflow
-        workflow = Workflow(workspace_root=workspace_root)
-        is_complete = workflow.is_behavior_complete('exploration', state_file)
+        is_complete = Workflow.is_behavior_complete('exploration', state_file)
         
         # Then: Behavior workflow is complete
         assert is_complete

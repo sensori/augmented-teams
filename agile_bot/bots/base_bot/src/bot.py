@@ -29,9 +29,10 @@ def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str
     # Fallback if path doesn't exist (for tests with temp workspaces)
     if not base_actions_dir.exists():
         # Use hardcoded defaults
-        states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 
+        states = ['initialize_project', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 
                   'render_output', 'validate_rules', 'correct_bot']
         transitions = [
+            {'trigger': 'proceed', 'source': 'initialize_project', 'dest': 'gather_context'},
             {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
             {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
             {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
@@ -84,7 +85,7 @@ class BotResult:
 
 
 class Behavior:
-    """Behavior container with state machine for workflow management."""
+    """Behavior container for action execution."""
     
     def __init__(self, name: str, bot_name: str, workspace_root: Path):
         self.name = name
@@ -93,19 +94,63 @@ class Behavior:
         
         # Load workflow configuration
         states, transitions = load_workflow_states_and_transitions(self.workspace_root)
-        self.workflow_states = states
         
-        # Initialize state machine
-        self.machine = Machine(
-            model=self,
+        # Initialize workflow (contains state machine)
+        from agile_bot.bots.base_bot.src.workflow import Workflow
+        self.workflow = Workflow(
+            bot_name=bot_name,
+            behavior=name,
+            workspace_root=workspace_root,
             states=states,
-            transitions=transitions,
-            initial=states[0] if states else 'gather_context',
-            auto_transitions=False
+            transitions=transitions
+        )
+    
+    @property
+    def state(self):
+        """Delegate to workflow current state."""
+        return self.workflow.current_state
+    
+    @property
+    def workflow_states(self):
+        """Delegate to workflow states list."""
+        return self.workflow.workflow_states
+    
+    def proceed(self):
+        """Delegate to workflow transition."""
+        self.workflow.machine.proceed()
+    
+    def initialize_project(self, parameters: Dict[str, Any] = None) -> BotResult:
+        """Execute initialize project action with activity tracking and workflow state."""
+        from agile_bot.bots.base_bot.src.actions.initialize_project_action import InitializeProjectAction
+        
+        if parameters is None:
+            parameters = {}
+        
+        action = InitializeProjectAction(
+            bot_name=self.bot_name,
+            behavior=self.name,
+            workspace_root=self.workspace_root
         )
         
-        # Load saved state if exists
-        self._load_state()
+        # Track activity start
+        action.track_activity_on_start()
+        
+        # Initialize location
+        project_area = parameters.get('project_area')
+        data = action.initialize_location(project_area=project_area)
+        
+        # Track activity completion
+        action.track_activity_on_completion(outputs=data)
+        
+        # Save workflow state
+        action.save_state_on_completion()
+        
+        return BotResult(
+            status='completed',
+            behavior=self.name,
+            action='initialize_project',
+            data=data
+        )
     
     def gather_context(self, parameters: Dict[str, Any] = None) -> BotResult:
         """Execute gather context action as Prefect task."""
@@ -201,54 +246,56 @@ class Behavior:
         )
     
     def forward_to_current_action(self) -> BotResult:
-        """Forward to current action using state machine."""
-        # State machine knows current state (action)
-        current_action = self.state
+        """Forward to current action using workflow state machine."""
+        # Workflow knows current state (action)
+        current_action = self.workflow.current_state
         
         # Execute that action
         action_method = getattr(self, current_action)
         result = action_method()
         
         # Transition to next state and save
-        try:
-            self.proceed()  # Transition to next action
-            self._save_state()
-        except Exception:
-            # Already at final state
-            pass
+        self.workflow.transition_to_next()
         
         return result
     
-    def _load_state(self):
-        """Load state from file - sets state machine to correct state."""
-        state_file = self.workspace_root / 'project_area' / 'workflow_state.json'
+    def execute(self, action_class, action_name: str, 
+                execute_fn, parameters: Dict[str, Any] = None) -> BotResult:
+        """Template method: wraps action execution with activity tracking.
         
-        if state_file.exists():
-            try:
-                state_data = json.loads(state_file.read_text(encoding='utf-8'))
-                current_behavior = state_data.get('current_behavior', '')
-                current_action = state_data.get('current_action', '')
-                
-                # Check if this is the current behavior
-                if current_behavior == f'{self.bot_name}.{self.name}':
-                    # Extract action name
-                    action_name = current_action.split('.')[-1]
-                    if action_name in self.workflow_states:
-                        self.state = action_name
-            except Exception:
-                pass
-    
-    def _save_state(self):
-        """Save current state to file."""
-        state_dir = self.workspace_root / 'project_area'
-        state_dir.mkdir(parents=True, exist_ok=True)
-        state_file = state_dir / 'workflow_state.json'
+        Args:
+            action_class: Action class to instantiate
+            action_name: Name of the action
+            execute_fn: Function to execute on action instance
+            parameters: Optional parameters for execution
+            
+        Returns:
+            BotResult with execution details
+        """
+        action = action_class(
+            bot_name=self.bot_name,
+            behavior=self.name,
+            workspace_root=self.workspace_root
+        )
         
-        state_file.write_text(json.dumps({
-            'current_behavior': f'{self.bot_name}.{self.name}',
-            'current_action': f'{self.bot_name}.{self.name}.{self.state}',
-            'timestamp': '2025-12-04T10:00:00Z'
-        }), encoding='utf-8')
+        # Track start
+        action.track_activity_on_start()
+        
+        # Execute business logic
+        result = execute_fn(action, parameters)
+        
+        # Track completion
+        action.track_activity_on_completion(outputs=result if isinstance(result, dict) else {})
+        
+        # Save workflow state
+        action.save_state_on_completion()
+        
+        return BotResult(
+            status='completed',
+            behavior=self.name,
+            action=action_name,
+            data=result if isinstance(result, dict) else {}
+        )
 
 
 class Bot:

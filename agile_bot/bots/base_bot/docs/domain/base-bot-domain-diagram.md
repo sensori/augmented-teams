@@ -47,8 +47,6 @@ classDiagram
         +Inject Instructions()*
         +Load Relevant Content + Inject Into Instructions()*
         +Save content changes()*
-        +Loads Action Configuration()
-        +Injects Next Action Instructions()
     }
     
     class GatherContextAction {
@@ -136,39 +134,12 @@ classDiagram
         +Specialized examples()
     }
     
-    class ActionConfiguration {
-        +Specifies Action Name()
-        +Specifies Workflow Flag()
-        +Specifies Order In Workflow()
-        +Specifies Next Action()
-        +Stored In action_config.json()
-    }
-    
-    class Router {
-        +Checks Workflow State For Current Behavior()
-        +Loads workflow_state.json()
-        +Extracts current_behavior And current_action()
-        +Routes To Current Behavior's MCP Tool()
-        +Forwards To Bot.Behavior[].Action[]()
-        +Defaults To First Behavior/Action()
-    }
-    
-    class ActivityLog {
-        +Records Action Execution With Timestamp()
-        +Stores Behavior And Action Names()
-        +Stores Violations Count()
-        +Links Action To Content File Path()
-        +Provides Audit Trail()
-        +Persists To activity_log.json()
-    }
-    
     class WorkflowState {
-        +Stores Current Behavior Name()
-        +Stores Current Action Name()
-        +Stores Action State (started/completed)()
-        +Stores Completed Actions List()
-        +Stores Timestamp()
-        +Enables Workflow Resumption()
+        +Track current action()
+        +Track completed actions()
+        +Determine next action()
+        +Pause workflow()
+        +Resume workflow()
     }
     
     %% Inheritance
@@ -216,12 +187,6 @@ classDiagram
     
     Router --> Behavior : routes to
     Router --> BaseAction : routes to
-    Router --> WorkflowState : checks
-    
-    BaseAction --> ActionConfiguration : loads
-    BaseAction --> ActivityLog : records to
-    
-    ActivityLog --> Project : provides audit to
     
     Template --> Content : transforms
     Rule --> Content : validates

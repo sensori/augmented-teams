@@ -159,16 +159,34 @@
               "connector": "or",
               "stories": [
                 {
-                  "name": "Locates Existing Project  State",
+                  "name": "Initialize Project Location",
                   "sequential_order": 1,
-                  "connector": "or",
+                  "connector": "and",
                   "users": [
-                    "Bot"
+                    "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "(AC) WHEN Bot behavior is invoked for the first time (no saved location exists)",
+                    "(AC) THEN Bot detects current directory from context",
+                    "(AC) AND Bot presents location to user for confirmation",
+                    "(AC) AND Bot waits for user to confirm or provide different location",
+                    "(AC) AND Bot saves confirmed location to persistent storage",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory matches saved location",
+                    "(AC) THEN Bot uses saved location without asking for confirmation",
+                    "(AC) AND Bot proceeds directly to next action",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory is DIFFERENT from saved location",
+                    "(AC) THEN Bot presents new location to user for confirmation",
+                    "(AC) AND Bot asks if user wants to switch to new location",
+                    "(AC) AND Bot saves confirmed location if user approves change"
+                  ]
                 },
                 {
-                  "name": "Intercepts Tool Call With Project Check",
+                  "name": "Locates Existing Project  State",
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [
@@ -177,15 +195,24 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Move to Project",
+                  "name": "Intercepts Tool Call With Project Check",
                   "sequential_order": 3,
+                  "connector": "or",
+                  "users": [
+                    "Bot"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Move to Project",
+                  "sequential_order": 4,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
                   "name": "Stores Activity for Initialize Project Action",
-                  "sequential_order": 4,
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
@@ -3219,6 +3246,40 @@
           "name": "Invoke MCP Bot Server",
           "sequential_order": 2,
           "sub_epics": [
+            {
+              "name": "Init Project",
+              "sequential_order": 1,
+              "sub_epics": [],
+              "stories": [
+                {
+                  "name": "Initialize Project Location",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "(AC) WHEN Bot behavior is invoked for the first time (no saved location exists)",
+                    "(AC) THEN Bot detects current directory from context",
+                    "(AC) AND Bot presents location to user for confirmation",
+                    "(AC) AND Bot waits for user to confirm or provide different location",
+                    "(AC) AND Bot saves confirmed location to persistent storage",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory matches saved location",
+                    "(AC) THEN Bot uses saved location without asking for confirmation",
+                    "(AC) AND Bot proceeds directly to next action",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory is DIFFERENT from saved location",
+                    "(AC) THEN Bot presents new location to user for confirmation",
+                    "(AC) AND Bot asks if user wants to switch to new location",
+                    "(AC) AND Bot saves confirmed location if user approves change"
+                  ]
+                }
+              ]
+            },
             {
               "name": "Invoke Bot Tool",
               "sequential_order": 2,
