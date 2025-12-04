@@ -8,6 +8,10 @@ class RenderOutputAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'render_output')
     
+    def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute render_output action logic."""
+        return self.render()
+    
     def render(self) -> Dict[str, Any]:
         return {'status': 'rendered'}
     

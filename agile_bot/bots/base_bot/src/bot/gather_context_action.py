@@ -10,6 +10,11 @@ class GatherContextAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'gather_context')
     
+    def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute gather_context action logic."""
+        instructions = self.load_and_merge_instructions()
+        return {'instructions': instructions}
+    
     def load_and_merge_instructions(self) -> Dict[str, Any]:
         # Load base instructions - check for numbered prefix folders
         base_actions_dir = self.workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
@@ -70,6 +75,11 @@ class GatherContextAction(BaseAction):
         if behavior_instructions:
             merged['behavior_instructions'] = behavior_instructions.get('instructions', [])
         
+        # Inject guardrails (key_questions and evidence) from behavior folder
+        guardrails = self.inject_questions_and_evidence()
+        if guardrails and guardrails.get('guardrails'):
+            merged['guardrails'] = guardrails['guardrails']
+        
         return merged
     
     def inject_questions_and_evidence(self) -> Dict[str, Any]:
@@ -81,7 +91,24 @@ class GatherContextAction(BaseAction):
                 self.bot_name,
                 self.behavior
             )
-            guardrails_dir = behavior_folder / 'guardrails' / 'required_context'
+            
+            # Find guardrails folder (may have number prefix like 1_guardrails)
+            guardrails_folder = None
+            for folder in behavior_folder.glob('*guardrails'):
+                if folder.is_dir():
+                    guardrails_folder = folder
+                    break
+            
+            if not guardrails_folder:
+                return {'guardrails': {}}
+            
+            # Find required_context folder (may have number prefix like 1_required_context)
+            guardrails_dir = None
+            for folder in guardrails_folder.glob('*required_context'):
+                if folder.is_dir():
+                    guardrails_dir = folder
+                    break
+            
         except FileNotFoundError:
             guardrails_dir = None
         
@@ -90,15 +117,25 @@ class GatherContextAction(BaseAction):
         if not guardrails_dir:
             return instructions
         
-        # Load questions
-        questions_file = guardrails_dir / 'key_questions.json'
-        if questions_file.exists():
+        # Load questions (may have number prefix like 1_key_questions.json or just key_questions.json)
+        questions_file = None
+        for file in guardrails_dir.glob('*key_questions.json'):
+            if file.is_file():
+                questions_file = file
+                break
+        
+        if questions_file and questions_file.exists():
             questions_data = read_json_file(questions_file)
             instructions['guardrails']['key_questions'] = questions_data.get('questions', [])
         
-        # Load evidence
-        evidence_file = guardrails_dir / 'evidence.json'
-        if evidence_file.exists():
+        # Load evidence (may have number prefix like 1_evidence.json or just evidence.json)
+        evidence_file = None
+        for file in guardrails_dir.glob('*evidence.json'):
+            if file.is_file():
+                evidence_file = file
+                break
+        
+        if evidence_file and evidence_file.exists():
             evidence_data = read_json_file(evidence_file)
             instructions['guardrails']['evidence'] = evidence_data.get('evidence', [])
         

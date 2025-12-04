@@ -9,6 +9,11 @@ class ValidateRulesAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'validate_rules')
     
+    def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute validate_rules action logic."""
+        instructions = self.inject_behavior_specific_and_bot_rules()
+        return {'instructions': instructions}
+    
     def inject_common_bot_rules(self) -> Dict[str, Any]:
         # Try both potential paths for common rules
         rules_file = (

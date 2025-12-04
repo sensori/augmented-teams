@@ -117,6 +117,42 @@
         {
           "name": "Orders Behavior Action Steps",
           "collaborators": ["Agile Bot", "Bot Behavior"]
+        },
+        {
+          "name": "Determines Next Action From Completed Actions",
+          "collaborators": ["Completed Actions", "Action Configuration", "Transitions"]
+        },
+        {
+          "name": "Checks If Action Is Completed",
+          "collaborators": ["Completed Actions", "Workflow State"]
+        },
+        {
+          "name": "Saves Completed Action To Workflow State",
+          "collaborators": ["Workflow State", "Completed Actions", "File System"]
+        },
+        {
+          "name": "Transitions To Next Action In Behavior",
+          "collaborators": ["State Machine", "Action Configuration", "Transitions"]
+        },
+        {
+          "name": "Detects Final Action In Behavior",
+          "collaborators": ["Action Configuration", "State Machine"]
+        },
+        {
+          "name": "Transitions To Next Behavior When Final Action Complete",
+          "collaborators": ["Bot Config", "Behavior", "Workflow State"]
+        },
+        {
+          "name": "Initializes Next Behavior At First Action",
+          "collaborators": ["Behavior", "Action Configuration", "State Machine"]
+        },
+        {
+          "name": "Loads State From workflow_state.json",
+          "collaborators": ["Workflow State", "File System"]
+        },
+        {
+          "name": "Persists State To workflow_state.json",
+          "collaborators": ["Workflow State", "File System"]
         }
       ]
     },
@@ -267,19 +303,39 @@
     },
     {
       "name": "Bot Tool",
-      "examples": ["story_bot"],
+      "examples": ["story_bot", "story_bot_close_current_action"],
       "responsibilities": [
         {
           "name": "Runs Active Action On Active Behavior",
           "collaborators": ["Agile Bot", "Project", "Project Bot State", "Workflow State", "Bot Behavior", "Bot Action"]
         },
         {
-          "name": "Moves To Next Action If Done",
-          "collaborators": ["Agile Bot", "Project", "Workflow State", "Workflow"]
+          "name": "Closes Current Action Explicitly",
+          "collaborators": ["Workflow", "Workflow State", "Completed Actions"]
         },
         {
-          "name": "Moves To Next Behavior If Done",
-          "collaborators": ["Workflow", "Agile Bot", "Project", "Workflow State"]
+          "name": "Checks If Action Is In Completed Actions Before Closing",
+          "collaborators": ["Workflow", "Completed Actions", "Workflow State"]
+        },
+        {
+          "name": "Returns Error If Action Requires Confirmation",
+          "collaborators": ["Completed Actions", "AI Chat"]
+        },
+        {
+          "name": "Transitions To Next Action When Action Complete",
+          "collaborators": ["Workflow", "Action Configuration", "Workflow State"]
+        },
+        {
+          "name": "Transitions To Next Behavior When Final Action Complete",
+          "collaborators": ["Workflow", "Bot Config", "Behavior", "Workflow State"]
+        },
+        {
+          "name": "Initializes Next Behavior At First Action",
+          "collaborators": ["Workflow", "Behavior", "Action Configuration"]
+        },
+        {
+          "name": "Handles Idempotent Completion",
+          "collaborators": ["Completed Actions", "Workflow State"]
         }
       ]
     },

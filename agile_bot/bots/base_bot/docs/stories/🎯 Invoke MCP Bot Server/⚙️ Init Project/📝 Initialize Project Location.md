@@ -7,17 +7,26 @@
 **Actor:** Bot Behavior  
 **Story Type:** system
 
-## Story Description
+## Story Descriptio
 
 Bot initializes and confirms project location where workflow state will be persisted. System asks user for confirmation only when location is new or changed, avoiding repeated confirmations for same location.
 
 ## Acceptance Criteria
 
+
+
 - **(AC) WHEN** Bot behavior is invoked for the first time (no saved location exists)
-- **(AC) THEN** Bot detects current directory from context
-- **(AC) AND** Bot presents location to user for confirmation
-- **(AC) AND** Bot waits for user to confirm or provide different location
-- **(AC) AND** Bot saves confirmed location to persistent storage
+- **(AC) AND** No `project_area` parameter is provided
+- **(AC) THEN** Bot detects current directory from context, or as an explicit parameter
+- **(AC) AND** Bot presents detected location to user
+- **(AC) AND** Bot waits for user to confirm the proposed location
+
+When User confirms location
+- **(AC) then** Bot saves location
+
+When User provides `project_area` parameter with explicit location as response to confirmation
+- **(AC) THEN** Bot saves the provided location immediately to persistent storage
+- **(AC) AND** Bot proceeds to next action without asking for confirmation
 
 - **(AC) WHEN** Bot behavior is invoked
 - **(AC) AND** Saved location exists
@@ -34,18 +43,39 @@ Bot initializes and confirms project location where workflow state will be persi
 
 ## Scenarios
 
-### Scenario: First time initialization with no saved location
+### Scenario: First time initialization with no saved location (detects current directory)
 
 **Steps:**
 ```gherkin
 Given no project location has been saved
 And current directory is 'C:/dev/my-project'
-When Bot behavior is invoked
+When Bot behavior is invoked (no project_area parameter)
 Then Bot detects current directory as 'C:/dev/my-project'
+And Bot returns: requires_confirmation=True, proposed_location='C:/dev/my-project'
 And Bot presents message: "Project location will be: C:/dev/my-project. Confirm?"
 And Bot waits for user response
-When User confirms with "yes"
+
+When User confirms with confirm=True (no project_area parameter)
 Then Bot saves location 'C:/dev/my-project' to storage file
+And Bot returns: requires_confirmation=False, saved=True
+And Bot proceeds to gather_context action
+```
+
+### Scenario: First time initialization with project_area parameter hint
+
+**Steps:**
+```gherkin
+Given no project location has been saved
+And current directory is 'C:/dev/augmented-teams'
+When Bot behavior is invoked with project_area='C:/dev/my-project'
+Then Bot uses provided parameter as 'C:/dev/my-project'
+And Bot returns: requires_confirmation=True, proposed_location='C:/dev/my-project'
+And Bot presents message: "Project location will be: C:/dev/my-project. Confirm?"
+And Bot waits for user response
+
+When User confirms with confirm=True (no project_area parameter)
+Then Bot saves location 'C:/dev/my-project' to storage file
+And Bot returns: requires_confirmation=False, saved=True
 And Bot proceeds to gather_context action
 ```
 
@@ -78,16 +108,19 @@ Then Bot saves new location 'C:/dev/new-project' to storage file
 And Bot proceeds to gather_context action
 ```
 
-### Scenario: User provides different location during confirmation
+### Scenario: User provides different location as response to confirmation
 
 **Steps:**
 ```gherkin
 Given no project location has been saved
 And current directory is 'C:/dev/augmented-teams'
-When Bot behavior is invoked
-Then Bot presents message: "Project location will be: C:/dev/augmented-teams. Confirm?"
-When User responds with "no, use C:/projects/my-app"
-Then Bot saves location 'C:/projects/my-app' to storage file
+When Bot behavior is invoked (no project_area parameter)
+Then Bot returns: requires_confirmation=True, proposed_location='C:/dev/augmented-teams'
+And Bot presents message: "Project location will be: C:/dev/augmented-teams. Confirm?"
+
+When User responds with confirm=True AND project_area='C:/projects/my-app'
+Then Bot saves location 'C:/projects/my-app' to storage file (not the proposed one)
+And Bot returns: requires_confirmation=False, saved=True
 And Bot proceeds to gather_context action
 ```
 

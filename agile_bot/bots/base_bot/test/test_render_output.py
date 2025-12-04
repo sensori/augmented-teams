@@ -51,10 +51,9 @@ class TestTrackActivityForRenderOutputAction:
         )
 
     def test_track_multiple_render_output_invocations_across_behaviors(self, workspace_root):
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
-        log_dir = bot_dir / 'project_area'
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / 'activity_log.json'
+        # Activity log is in workspace_root/ (no project_area subdirectory)
+        workspace_root.mkdir(parents=True, exist_ok=True)
+        log_file = workspace_root / 'activity_log.json'
         from tinydb import TinyDB
         with TinyDB(log_file) as db:
             db.insert({'action_state': 'story_bot.shape.render_output', 'timestamp': '09:00'})

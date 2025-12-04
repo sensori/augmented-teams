@@ -9,6 +9,48 @@
 
 **CRITICAL RULE:** When user is trying to transform user needs into well-structured, testable stories using a progressive refinement workflow, ALWAYS check for and use MCP story_bot tools FIRST before falling back to manual file operations.
 
+When ever user mention stories, discovery, story, shaping, scenarios, spec by example, etc use the story-bot MCP tools!
+
+## Tool Selection Based on Context
+
+**Choose the RIGHT tool based on how much context you have. Don't guess - use a more general tool when you lack context.**
+
+### Most Specific: Call Behavior-Action Tool
+**When you have:** Both behavior AND action from context
+- Example context: "We're in shape behavior at gather_context action"
+- **Call:** `story_bot_shape_gather_context` (specific tool)
+- **Why:** You have full context to call the exact tool needed
+
+### Medium Specificity: Call Behavior Tool
+**When you have:** Behavior but NOT which action
+- Example context: "We're working on shape behavior" (but don't know if it's gather_context, decide_planning, etc.)
+- **Call:** `story_bot_shape_tool` (behavior tool - routes to current action internally)
+- **Why:** Let the tool route you to the correct action
+
+### Least Specific: Call Main Bot Tool
+**When you have:** NO context about behavior or action
+- Example context: User says "continue story work" but you don't know where we are in the workflow
+- **Call:** `story_bot_tool` (main bot tool - routes to current behavior AND action internally)
+- **Why:** Let the tool tell you the current state and route you correctly
+
+### CRITICAL: Don't Guess!
+- **DON'T** use trigger words alone to guess behavior/action
+- **DON'T** assume "exploration" just because user said "scenarios"
+- **DO** check conversation history, file context, workflow state for actual context
+- **DO** use more general tool when context is unclear
+- **DO** let the tool route you to the correct place
+
+**Example of WRONG approach:**
+- User: "continue story writing"
+- AI sees trigger word "story" → guesses "exploration" behavior → calls `story_bot_exploration_gather_context`
+- **Problem:** We were actually in "shape" behavior, not "exploration"
+
+**Example of CORRECT approach:**
+- User: "continue story writing"
+- AI doesn't know current behavior/action → calls `story_bot_tool`
+- Tool responds: "Current behavior: shape, current action: gather_context"
+- AI now calls `story_bot_shape_gather_context` with proper context
+
 ## Behaviors and Trigger Words
 
 ### Shape Behavior
@@ -103,23 +145,50 @@
 
 ## Workflow Pattern
 
-When you recognize a trigger word:
+When you recognize a trigger word or story work request:
 
 1. **Check if MCP tools are available** (ask mode vs agent mode)
 2. **If in ask mode:** Inform user to switch to agent mode for MCP tool access
-3. **If in agent mode:** Look for matching MCP tool and invoke it
+3. **If in agent mode:** 
+   - **Assess your context** (do you know behavior? action? neither?)
+   - **Select appropriate tool** (specific → medium → general, don't guess)
+   - **Invoke the tool**
 4. **If tool returns error:** Follow error handling above (do NOT workaround)
 5. **If no matching tool found:** Fall back to manual operations with explanation
 
 ## Example Usage
 
-**User says:** "shape.*capability"
+### Example 1: With Full Context
+
+**User says:** "continue with gather_context for shape"
+**AI has context:** behavior=shape, action=gather_context
 
 **AI should:**
-1. Recognize trigger word from behavior section above
-2. Check: Am I in agent mode?
-3. Check: Is `story_bot_shape_gather_context` available?
-4. If yes → Invoke the tool
-5. If no → Explain and ask how to proceed
+1. Check: Am I in agent mode? ✓
+2. Assess context: I know behavior AND action
+3. Call: `story_bot_shape_gather_context` (most specific tool)
+
+### Example 2: With Partial Context
+
+**User says:** "continue shape work"
+**AI has context:** behavior=shape (but not which action)
+
+**AI should:**
+1. Check: Am I in agent mode? ✓
+2. Assess context: I know behavior but NOT action
+3. Call: `story_bot_shape_tool` (medium specificity - will route to current action)
+
+### Example 3: Without Context
+
+**User says:** "continue story writing" or "use mcp tool"
+**AI has context:** None (don't know behavior or action)
+
+**AI should:**
+1. Check: Am I in agent mode? ✓
+2. Assess context: I DON'T know behavior or action
+3. Call: `story_bot_tool` (most general - will route to current behavior and action)
+4. Tool responds with current state
+5. Now proceed with proper context
 
 **DO NOT** immediately start reading files manually without checking for tools first.
+**DO NOT** guess behavior/action from trigger words alone without actual context.

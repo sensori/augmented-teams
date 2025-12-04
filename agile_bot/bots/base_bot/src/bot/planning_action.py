@@ -10,6 +10,11 @@ class PlanningAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'decide_planning_criteria')
     
+    def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute decide_planning_criteria action logic."""
+        instructions = self.inject_decision_criteria_and_assumptions()
+        return {'instructions': instructions}
+    
     def _find_action_folder(self, action_name: str) -> Path:
         base_actions_dir = self.workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
         

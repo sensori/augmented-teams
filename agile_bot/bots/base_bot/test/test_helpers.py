@@ -1,23 +1,72 @@
 import json
 from pathlib import Path
 
+
+# ============================================================================
+# PATH HELPERS - Centralized path calculations
+# ============================================================================
+
+def get_bot_dir(workspace: Path, bot_name: str) -> Path:
+    """Get bot directory path."""
+    return workspace / 'agile_bot' / 'bots' / bot_name
+
+def get_current_project_file(workspace: Path, bot_name: str) -> Path:
+    """Get current_project.json file path."""
+    return get_bot_dir(workspace, bot_name) / 'current_project.json'
+
+def get_activity_log_path(workspace: Path, project_location: Path = None) -> Path:
+    """Get activity_log.json path."""
+    if project_location:
+        return project_location / 'activity_log.json'
+    return workspace / 'activity_log.json'
+
+def get_workflow_state_path(workspace: Path, project_location: Path = None) -> Path:
+    """Get workflow_state.json path."""
+    if project_location:
+        return project_location / 'workflow_state.json'
+    return workspace / 'workflow_state.json'
+
+def get_bot_config_path(workspace: Path, bot_name: str) -> Path:
+    """Get bot config path."""
+    return get_bot_dir(workspace, bot_name) / 'config' / 'bot_config.json'
+
+def get_behavior_dir(workspace: Path, bot_name: str, behavior: str) -> Path:
+    """Get behavior directory path."""
+    return get_bot_dir(workspace, bot_name) / 'behaviors' / behavior
+
+def get_base_bot_dir(workspace: Path) -> Path:
+    """Get base_bot directory path."""
+    return workspace / 'agile_bot' / 'bots' / 'base_bot'
+
+def get_base_actions_dir(workspace: Path) -> Path:
+    """Get base_actions directory path."""
+    return get_base_bot_dir(workspace) / 'base_actions'
+
+def get_base_bot_rules_dir(workspace: Path) -> Path:
+    """Get base_bot rules directory path."""
+    return get_base_bot_dir(workspace) / 'rules'
+
 def create_bot_config(workspace: Path, bot_name: str, behaviors: list) -> Path:
-    config_path = workspace / 'agile_bot/bots' / bot_name / 'config/bot_config.json'
+    config_path = get_bot_config_path(workspace, bot_name)
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(json.dumps({'name': bot_name, 'behaviors': behaviors}), encoding='utf-8')
     return config_path
 
-def create_activity_log_file(workspace: Path, bot_name: str = 'story_bot') -> Path:
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    log_dir = bot_dir / 'project_area'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'activity_log.json'
+def create_activity_log_file(workspace: Path, bot_name: str = 'story_bot', project_location: Path = None) -> Path:
+    # Ensure current_project.json exists so activity tracking works
+    if project_location is None:
+        project_location = workspace
+    create_saved_location(workspace, bot_name, str(project_location))
+    
+    # Activity log goes in {current_project}/
+    log_file = get_activity_log_path(workspace, project_location)
+    log_file.parent.mkdir(parents=True, exist_ok=True)
     log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
     return log_file
 
-def create_workflow_state(workspace: Path, bot_name: str, current_behavior: str = None, current_action: str = None, completed_actions: list = None) -> Path:
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    state_file = bot_dir / 'project_area' / 'workflow_state.json'
+def create_workflow_state(workspace: Path, bot_name: str, current_behavior: str = None, current_action: str = None, completed_actions: list = None, project_location: Path = None) -> Path:
+    # Workflow state goes in {current_project}/project_area/
+    state_file = get_workflow_state_path(workspace, project_location)
     state_file.parent.mkdir(parents=True, exist_ok=True)
     
     state_data = {}
@@ -32,14 +81,13 @@ def create_workflow_state(workspace: Path, bot_name: str, current_behavior: str 
     return state_file
 
 def create_saved_location(workspace: Path, bot_name: str, location: str):
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    location_file = bot_dir / 'project_area' / 'project_location.json'
-    location_file.parent.mkdir(parents=True, exist_ok=True)
-    location_file.write_text(json.dumps({'project_location': location}), encoding='utf-8')
-    return location_file
+    current_project_file = get_current_project_file(workspace, bot_name)
+    current_project_file.parent.mkdir(parents=True, exist_ok=True)
+    current_project_file.write_text(json.dumps({'current_project': location}), encoding='utf-8')
+    return current_project_file
 
 def create_guardrails_files(workspace: Path, bot_name: str, behavior: str, questions: list, evidence: list) -> tuple:
-    guardrails_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / behavior / 'guardrails/required_context'
+    guardrails_dir = get_behavior_dir(workspace, bot_name, behavior) / 'guardrails' / 'required_context'
     guardrails_dir.mkdir(parents=True, exist_ok=True)
     
     questions_file = guardrails_dir / 'key_questions.json'
@@ -51,7 +99,7 @@ def create_guardrails_files(workspace: Path, bot_name: str, behavior: str, quest
     return questions_file, evidence_file
 
 def create_planning_guardrails(workspace: Path, bot_name: str, behavior: str, assumptions: list, criteria: dict) -> tuple:
-    guardrails_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / behavior / 'guardrails/planning'
+    guardrails_dir = get_behavior_dir(workspace, bot_name, behavior) / 'guardrails' / 'planning'
     guardrails_dir.mkdir(parents=True, exist_ok=True)
     
     assumptions_file = guardrails_dir / 'typical_assumptions.json'
@@ -65,7 +113,7 @@ def create_planning_guardrails(workspace: Path, bot_name: str, behavior: str, as
     return assumptions_file, criteria_file
 
 def create_knowledge_graph_template(workspace: Path, bot_name: str, behavior: str, template_name: str) -> Path:
-    kg_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / behavior / 'content/knowledge_graph'
+    kg_dir = get_behavior_dir(workspace, bot_name, behavior) / 'content' / 'knowledge_graph'
     kg_dir.mkdir(parents=True, exist_ok=True)
     
     template_file = kg_dir / f'{template_name}.json'
@@ -73,7 +121,7 @@ def create_knowledge_graph_template(workspace: Path, bot_name: str, behavior: st
     return template_file
 
 def create_validation_rules(workspace: Path, bot_name: str, behavior: str, rules: list) -> Path:
-    rules_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / behavior / '3_rules'
+    rules_dir = get_behavior_dir(workspace, bot_name, behavior) / '3_rules'
     rules_dir.mkdir(parents=True, exist_ok=True)
     
     rules_file = rules_dir / 'validation_rules.json'
@@ -81,7 +129,7 @@ def create_validation_rules(workspace: Path, bot_name: str, behavior: str, rules
     return rules_file
 
 def create_common_rules(workspace: Path, rules: list) -> Path:
-    rules_dir = workspace / 'agile_bot/bots/base_bot/rules'
+    rules_dir = get_base_bot_rules_dir(workspace)
     rules_dir.mkdir(parents=True, exist_ok=True)
     
     rules_file = rules_dir / 'common_rules.json'
@@ -89,7 +137,7 @@ def create_common_rules(workspace: Path, rules: list) -> Path:
     return rules_file
 
 def create_base_instructions(workspace: Path):
-    base_actions = workspace / 'agile_bot/bots/base_bot/base_actions'
+    base_actions = get_base_actions_dir(workspace)
     for idx, action in enumerate(['initialize_project', 'gather_context', 'decide_planning_criteria', 
                                     'build_knowledge', 'render_output', 'validate_rules'], start=1):
         action_dir = base_actions / f'{idx}_{action}'
@@ -98,7 +146,7 @@ def create_base_instructions(workspace: Path):
         instructions_file.write_text(json.dumps({'instructions': [f'{action} base instructions']}), encoding='utf-8')
 
 def create_base_action_instructions(workspace: Path, action: str) -> Path:
-    base_actions_dir = workspace / 'agile_bot/bots/base_bot/base_actions'
+    base_actions_dir = get_base_actions_dir(workspace)
     
     action_mapping = {
         'gather_context': '2_gather_context',
@@ -117,12 +165,12 @@ def create_base_action_instructions(workspace: Path, action: str) -> Path:
     return instructions_file
 
 def create_behavior_folder(workspace: Path, bot_name: str, folder_name: str) -> Path:
-    behavior_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / folder_name
+    behavior_dir = get_behavior_dir(workspace, bot_name, folder_name)
     behavior_dir.mkdir(parents=True, exist_ok=True)
     return behavior_dir
 
 def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior: str, action: str) -> Path:
-    instructions_dir = workspace / 'agile_bot/bots' / bot_name / 'behaviors' / behavior / action
+    instructions_dir = get_behavior_dir(workspace, bot_name, behavior) / action
     instructions_dir.mkdir(parents=True, exist_ok=True)
     
     instructions_file = instructions_dir / 'instructions.json'
@@ -132,14 +180,14 @@ def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior
     return instructions_file
 
 def create_trigger_words_file(workspace: Path, bot_name: str, behavior: str, action: str, patterns: list) -> Path:
-    trigger_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior / action
+    trigger_dir = get_behavior_dir(workspace, bot_name, behavior) / action
     trigger_dir.mkdir(parents=True, exist_ok=True)
     trigger_file = trigger_dir / 'trigger_words.json'
     trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
     return trigger_file
 
 def create_base_actions_structure(workspace: Path):
-    base_actions_dir = workspace / 'agile_bot/bots/base_bot/base_actions'
+    base_actions_dir = get_base_actions_dir(workspace)
     workflow_actions = [
         ('1_initialize_project', 'initialize_project'),
         ('2_gather_context', 'gather_context'),
@@ -166,9 +214,9 @@ def create_base_actions_structure(workspace: Path):
         'workflow_type': 'independent'
     }), encoding='utf-8')
 
-def read_activity_log(workspace: Path, bot_name: str = 'story_bot') -> list:
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    log_file = bot_dir / 'project_area' / 'activity_log.json'
+def read_activity_log(workspace: Path, bot_name: str = 'story_bot', project_location: Path = None) -> list:
+    # Activity log is in {current_project}/project_area/
+    log_file = get_activity_log_path(workspace, project_location)
     if not log_file.exists():
         return []
     
@@ -233,8 +281,13 @@ def verify_workflow_transition(workspace: Path, source_action: str, dest_action:
     workflow.transition_to_next()
     assert workflow.state == dest_action
 
-def verify_workflow_saves_completed_action(workspace: Path, action_name: str, bot_name: str = 'story_bot', behavior: str = 'exploration'):
+def verify_workflow_saves_completed_action(workspace: Path, action_name: str, bot_name: str = 'story_bot', behavior: str = 'exploration', project_location: Path = None):
     """Helper: Verify workflow saves completed action to state file."""
+    # Ensure current_project.json exists so workflow can save
+    if project_location is None:
+        project_location = workspace
+    create_saved_location(workspace, bot_name, str(project_location))
+    
     from agile_bot.bots.base_bot.src.state.workflow import Workflow
     workflow = Workflow(
         bot_name=bot_name,
@@ -245,8 +298,8 @@ def verify_workflow_saves_completed_action(workspace: Path, action_name: str, bo
     )
     workflow.save_completed_action(action_name)
     
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    state_file = bot_dir / 'project_area' / 'workflow_state.json'
+    # Workflow state is in {current_project}/workflow_state.json
+    state_file = get_workflow_state_path(workspace, project_location)
     state_data = json.loads(state_file.read_text(encoding='utf-8'))
     assert any(
         action_name in entry.get('action_state', '')

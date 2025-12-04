@@ -3,6 +3,9 @@ from typing import Dict, Any, List, Tuple
 import json
 from transitions import Machine
 from agile_bot.bots.base_bot.src.utils import read_json_file
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str], List[Dict]]:
@@ -34,8 +37,9 @@ def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str
                     config = json.loads(config_file.read_text(encoding='utf-8'))
                     if config.get('workflow'):  # Only workflow actions
                         actions.append(config)
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Skip malformed action config files
+                    logger.warning(f'Failed to load action config from {config_file}: {e}')
     
     # Sort by order
     actions.sort(key=lambda x: x.get('order', 999))
@@ -86,6 +90,47 @@ class Behavior:
             transitions=transitions
         )
     
+    @property
+    def dir(self) -> Path:
+        """Get behavior's bot directory path."""
+        return self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
+    
+    @property
+    def current_project_file(self) -> Path:
+        """Get current_project.json file path."""
+        return self.dir / 'current_project.json'
+    
+    @property
+    def current_project(self) -> Path:
+        """Get current project directory."""
+        if self.current_project_file.exists():
+            try:
+                project_data = json.loads(self.current_project_file.read_text(encoding='utf-8'))
+                return Path(project_data.get('current_project', ''))
+            except Exception:
+                pass
+        return self.workspace_root
+    
+    @property
+    def project_area(self) -> Path:
+        """Get project_area directory for current project."""
+        return self.current_project / 'project_area'
+    
+    @property
+    def workflow_state_file(self) -> Path:
+        """Get workflow_state.json path."""
+        return self.project_area / 'workflow_state.json'
+    
+    @property
+    def activity_log_file(self) -> Path:
+        """Get activity_log.json path."""
+        return self.project_area / 'activity_log.json'
+    
+    @property
+    def folder(self) -> Path:
+        """Get behavior's folder path in behaviors directory."""
+        return self.dir / 'behaviors' / self.name
+    
     @staticmethod
     def find_behavior_folder(workspace_root: Path, bot_name: str, behavior_name: str) -> Path:
         behaviors_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors'
@@ -106,6 +151,7 @@ class Behavior:
     
     @property
     def state(self):
+        """Get current state from workflow."""
         return self.workflow.current_state
     
     @property
@@ -114,6 +160,7 @@ class Behavior:
     
     def proceed(self):
         self.workflow.machine.proceed()
+    
     
     def initialize_project(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.initialize_project_action import InitializeProjectAction
@@ -130,15 +177,22 @@ class Behavior:
         # Track activity start
         action.track_activity_on_start()
         
-        # Initialize location
-        project_area = parameters.get('project_area')
-        data = action.initialize_location(project_area=project_area)
+        # Check if this is a confirmation response from user
+        if parameters.get('confirm') and parameters.get('project_area'):
+            # User is responding with their location choice (confirmation response)
+            data = action.confirm_location(project_location=parameters['project_area'])
+        else:
+            # Initial call - propose location and ask for confirmation
+            # (project_area here is just a hint, we still ask for confirmation)
+            project_area = parameters.get('project_area')
+            data = action.initialize_location(project_area=project_area)
         
         # Track activity completion
         action.track_activity_on_completion(outputs=data)
         
-        # Save completed action to workflow state
-        self.workflow.save_completed_action('initialize_project')
+        # Save completed action to workflow state only if confirmed
+        if not data.get('requires_confirmation'):
+            self.workflow.save_completed_action('initialize_project')
         
         return BotResult(
             status='completed',
@@ -150,39 +204,50 @@ class Behavior:
     def gather_context(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
         
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
+        
         action = GatherContextAction(
             bot_name=self.bot_name,
             behavior=self.name,
             workspace_root=self.workspace_root
         )
-        instructions = action.load_and_merge_instructions()
+        # Use template method that automatically tracks activity
+        data = action.execute(parameters)
         
         return BotResult(
             status='completed',
             behavior=self.name,
             action='gather_context',
-            data={'instructions': instructions}
+            data=data
         )
     
     def decide_planning_criteria(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.planning_action import PlanningAction
+        
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
         
         action = PlanningAction(
             bot_name=self.bot_name,
             behavior=self.name,
             workspace_root=self.workspace_root
         )
-        instructions = action.inject_decision_criteria_and_assumptions()
+        # Use template method that automatically tracks activity
+        data = action.execute(parameters)
         
         return BotResult(
             status='completed',
             behavior=self.name,
             action='decide_planning_criteria',
-            data={'instructions': instructions}
+            data=data
         )
     
     def build_knowledge(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.build_knowledge_action import BuildKnowledgeAction
+        
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
         
         action = BuildKnowledgeAction(
             bot_name=self.bot_name,
@@ -191,43 +256,65 @@ class Behavior:
         )
         
         try:
-            instructions = action.inject_knowledge_graph_template()
+            # Use template method that automatically tracks activity
+            data = action.execute(parameters)
         except FileNotFoundError:
             # Template not required for all behaviors
-            instructions = {}
+            data = {'instructions': {}}
         
         return BotResult(
             status='completed',
             behavior=self.name,
             action='build_knowledge',
-            data={'instructions': instructions}
+            data=data
         )
     
     def render_output(self, parameters: Dict[str, Any] = None) -> BotResult:
+        from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
+        
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
+        
+        action = RenderOutputAction(
+            bot_name=self.bot_name,
+            behavior=self.name,
+            workspace_root=self.workspace_root
+        )
+        # Use template method that automatically tracks activity
+        data = action.execute(parameters)
+        
         return BotResult(
             status='completed',
             behavior=self.name,
-            action='render_output'
+            action='render_output',
+            data=data
         )
     
     def validate_rules(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+        
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
         
         action = ValidateRulesAction(
             bot_name=self.bot_name,
             behavior=self.name,
             workspace_root=self.workspace_root
         )
-        instructions = action.inject_behavior_specific_and_bot_rules()
+        # Use template method that automatically tracks activity
+        data = action.execute(parameters)
         
         return BotResult(
             status='completed',
             behavior=self.name,
             action='validate_rules',
-            data={'instructions': instructions}
+            data=data
         )
     
     def correct_bot(self, parameters: Dict[str, Any] = None) -> BotResult:
+        # Save workflow state when action is invoked (sets current_behavior and current_action)
+        self.workflow.save_state()
+        
         return BotResult(
             status='completed',
             behavior=self.name,
@@ -242,8 +329,11 @@ class Behavior:
         action_method = getattr(self, current_action)
         result = action_method()
         
-        # Transition to next state and save
-        self.workflow.transition_to_next()
+        # Check if action marked itself as complete (saved to completed_actions)
+        # Actions call save_completed_action() when they're truly done
+        if self.workflow.is_action_completed(current_action):
+            # Action is complete - transition to next action
+            self.workflow.transition_to_next()
         
         return result
     

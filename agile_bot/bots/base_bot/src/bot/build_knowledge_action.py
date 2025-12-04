@@ -10,6 +10,15 @@ class BuildKnowledgeAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'build_knowledge')
     
+    def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute build_knowledge action logic."""
+        try:
+            instructions = self.inject_knowledge_graph_template()
+        except FileNotFoundError:
+            # Template not required for all behaviors
+            instructions = {}
+        return {'instructions': instructions}
+    
     def inject_knowledge_graph_template(self) -> Dict[str, Any]:
         # Find behavior folder (handles numbered prefixes)
         from agile_bot.bots.base_bot.src.bot.bot import Behavior

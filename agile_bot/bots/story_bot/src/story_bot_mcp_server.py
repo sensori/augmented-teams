@@ -9,7 +9,7 @@ import sys
 workspace_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(workspace_root))
 
-from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
 
 
 def main():

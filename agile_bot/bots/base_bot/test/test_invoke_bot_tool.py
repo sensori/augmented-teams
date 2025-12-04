@@ -324,3 +324,44 @@ class TestForwardToCurrentAction:
         
         # Then
         assert result.action == 'gather_context'
+    
+    def test_action_called_directly_saves_workflow_state(self, workspace_root):
+        """
+        SCENARIO: Action called directly saves workflow state
+        GIVEN: Bot is initialized with current_project set
+        AND: No workflow state exists yet
+        WHEN: Action is called directly (e.g., bot.shape.gather_context())
+        THEN: workflow_state.json is created with current_behavior and current_action
+        AND: This ensures state is saved whether action is called via forward or directly
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape'])
+        
+        # Create current_project.json
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+        project_dir = workspace_root / 'test_project'
+        project_dir.mkdir()
+        (bot_dir / 'current_project.json').write_text(json.dumps({'current_project': str(project_dir)}))
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
+        bot = Bot(
+            bot_name='story_bot',
+            workspace_root=workspace_root,
+            config_path=bot_config
+        )
+        
+        # Verify no workflow state exists yet
+        workflow_file = project_dir / 'workflow_state.json'
+        assert not workflow_file.exists(), "Workflow state should not exist yet"
+        
+        # Call gather_context DIRECTLY (not via forward_to_current_action)
+        result = bot.shape.gather_context()
+        
+        # Then
+        assert workflow_file.exists(), "Workflow state should be created"
+        state_data = json.loads(workflow_file.read_text())
+        assert state_data['current_behavior'] == 'story_bot.shape'
+        assert state_data['current_action'] == 'story_bot.shape.gather_context'
+        assert result.action == 'gather_context'

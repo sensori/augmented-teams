@@ -8,20 +8,12 @@ Tests for all stories in the 'Validate Knowledge & Content Against Rules' sub-ep
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.test.test_helpers import read_activity_log
+from agile_bot.bots.base_bot.test.test_helpers import read_activity_log, create_activity_log_file
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
-def create_activity_log_file(workspace: Path, bot_name: str = 'story_bot') -> Path:
-    """Helper: Create activity log file."""
-    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    log_dir = bot_dir / 'project_area'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'activity_log.json'
-    log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
-    return log_file
 
 def create_workflow_state(workspace: Path, current_action: str, completed_actions: list = None) -> Path:
     """Helper: Create workflow state file."""
@@ -129,11 +121,9 @@ class TestTrackActivityForValidateRulesAction:
         WHEN: both entries are present
         THEN: activity log distinguishes same action in different behaviors
         """
-        # Given: Activity log with multiple validate_rules entries
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
-        log_dir = bot_dir / 'project_area'
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / 'activity_log.json'
+        # Given: Activity log with multiple validate_rules entries (in workspace_root)
+        workspace_root.mkdir(parents=True, exist_ok=True)
+        log_file = workspace_root / 'activity_log.json'
         from tinydb import TinyDB
         with TinyDB(log_file) as db:
             db.insert({
@@ -162,11 +152,14 @@ class TestTrackActivityForValidateRulesAction:
         WHEN: validate_rules entry is appended
         THEN: New entry appears at end of log in chronological order
         """
-        # Given: Activity log with 10 entries
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
-        log_dir = bot_dir / 'project_area'
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / 'activity_log.json'
+        # Given: Activity log with 10 entries (in workspace_root) and current_project set
+        workspace_root.mkdir(parents=True, exist_ok=True)
+        
+        # Create current_project.json so activity tracking works
+        from agile_bot.bots.base_bot.test.test_helpers import create_saved_location
+        create_saved_location(workspace_root, 'story_bot', str(workspace_root))
+        
+        log_file = workspace_root / 'activity_log.json'
         from tinydb import TinyDB
         with TinyDB(log_file) as db:
             for i in range(10):

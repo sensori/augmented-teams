@@ -22,9 +22,17 @@ Specific Bot
     Provide Synchronizer 
     Provide Trigger Words   
 
-Behavior Workflow
-    Determine next Action:  Behavior, Action, State
-    Track state:  Behavior, Action, State
+Workflow
+    Orders Behavior Action Steps: Agile Bot, Bot Behavior
+    Determines Next Action From Completed Actions: Completed Actions, Action Configuration, Transitions
+    Checks If Action Is Completed: Completed Actions, Workflow State
+    Saves Completed Action To Workflow State: Workflow State, Completed Actions, File System
+    Transitions To Next Action In Behavior: State Machine, Action Configuration, Transitions
+    Detects Final Action In Behavior: Action Configuration, State Machine
+    Transitions To Next Behavior When Final Action Complete: Bot Config, Behavior, Workflow State
+    Initializes Next Behavior At First Action: Behavior, Action Configuration, State Machine
+    Loads State From workflow_state.json: Workflow State, File System
+    Persists State To workflow_state.json: Workflow State, File System
 
 Project
     Move project to working area: Working Directory
@@ -107,9 +115,15 @@ BaseMCPServer
     hasBehaviorActionsTools
     hasBotTool
 
-BotTool
-    Forward to behavior: Behavior, Specific Bot
-    Forward to current behavior and action: Behavior, Action, Specific Bot
+Bot Tool (examples: story_bot, story_bot_close_current_action)
+    Runs Active Action On Active Behavior: Agile Bot, Project, Project Bot State, Workflow State, Bot Behavior, Bot Action
+    Closes Current Action Explicitly: Workflow, Workflow State, Completed Actions
+    Checks If Action Is In Completed Actions Before Closing: Workflow, Completed Actions, Workflow State
+    Returns Error If Action Requires Confirmation: Completed Actions, AI Chat
+    Transitions To Next Action When Action Complete: Workflow, Action Configuration, Workflow State
+    Transitions To Next Behavior When Final Action Complete: Workflow, Bot Config, Behavior, Workflow State
+    Initializes Next Behavior At First Action: Workflow, Behavior, Action Configuration
+    Handles Idempotent Completion: Completed Actions, Workflow State
     
 
 BotBehaviorTool

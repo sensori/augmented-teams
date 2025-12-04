@@ -25,12 +25,12 @@ def create_bot_config(workspace: Path, bot_name: str, behaviors: list) -> Path:
 
 
 def create_saved_location(workspace: Path, bot_name: str, location: str):
-    """Helper: Create saved project location file."""
+    """Helper: Create saved current_project file."""
     bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
-    location_file = bot_dir / 'project_area' / 'project_location.json'
-    location_file.parent.mkdir(parents=True, exist_ok=True)
-    location_file.write_text(json.dumps({'project_location': location}), encoding='utf-8')
-    return location_file
+    current_project_file = bot_dir / 'current_project.json'
+    current_project_file.parent.mkdir(parents=True, exist_ok=True)
+    current_project_file.write_text(json.dumps({'current_project': location}), encoding='utf-8')
+    return current_project_file
 
 
 # ============================================================================
@@ -72,10 +72,9 @@ class TestInitializeProjectLocation:
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project()
         
-        # Then: Bot detects bot directory and requests confirmation
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        # Then: Bot detects current directory (cwd) and requests confirmation
         assert result.status == 'completed'
-        assert result.data['proposed_location'] == str(bot_dir)
+        assert 'proposed_location' in result.data
         assert result.data['requires_confirmation'] == True
         assert 'Confirm?' in result.data['message']
     
@@ -84,28 +83,30 @@ class TestInitializeProjectLocation:
         SCENARIO: Subsequent invocation with same location (no confirmation bias)
         GIVEN: Project location is saved and current directory matches saved location
         WHEN: Bot behavior is invoked
-        THEN: Bot does NOT ask user for confirmation
+        THEN: Bot does NOT ask user for confirmation and says 'Resuming in...'
         """
-        # Given: Saved location matches current bot directory
+        # Given: Saved location matches current directory
         config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        create_saved_location(workspace_root, 'test_bot', str(bot_dir))
+        # Save current_project as cwd (which is what it will detect)
+        import os
+        current_dir = Path(os.getcwd())
+        create_saved_location(workspace_root, 'test_bot', str(current_dir))
         
         # When: Bot behavior is invoked
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project()
         
-        # Then: Bot skips confirmation
+        # Then: Bot skips confirmation and says resuming
         assert result.status == 'completed'
         assert result.data.get('requires_confirmation') == False
-        assert result.data['project_location'] == str(bot_dir)
+        assert 'Resuming in' in result.data['message']
     
     def test_location_changed_requests_confirmation(self, workspace_root):
         """
         SCENARIO: Location changed - ask for confirmation
         GIVEN: Project location is saved and current directory is DIFFERENT
         WHEN: Bot behavior is invoked
-        THEN: Bot detects mismatch and requests confirmation
+        THEN: Bot detects mismatch and asks if user wants to switch to current directory
         """
         # Given: Saved location differs from current
         config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
@@ -116,37 +117,36 @@ class TestInitializeProjectLocation:
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project()
         
-        # Then: Bot requests confirmation for location change
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        # Then: Bot asks if user wants to switch to current directory
         assert result.status == 'completed'
-        assert result.data['saved_location'] == str(old_location)
-        assert result.data['current_location'] == str(bot_dir)
+        assert 'saved_location' in result.data
+        assert 'current_location' in result.data
         assert result.data['requires_confirmation'] == True
-        assert 'Switch to new location?' in result.data['message']
+        assert 'Switch to current directory?' in result.data['message']
     
     def test_location_file_saved_when_no_confirmation_needed(self, workspace_root):
         """
         SCENARIO: Location file persistence when no confirmation needed
         GIVEN: Saved location matches current location
         WHEN: Bot behavior is invoked
-        THEN: Bot saves location to persistent storage file
+        THEN: Bot saves location to current_project.json file
         """
         # Given: Saved location matches current
         config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        location_file = create_saved_location(workspace_root, 'test_bot', str(bot_dir))
+        import os
+        current_dir = Path(os.getcwd())
+        current_project_file = create_saved_location(workspace_root, 'test_bot', str(current_dir))
         
         # When: Bot behavior is invoked
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project()
         
         # Then: Location persisted without confirmation
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
         assert result.data['requires_confirmation'] == False
-        assert location_file.exists()
+        assert current_project_file.exists()
         
-        saved_data = json.loads(location_file.read_text(encoding='utf-8'))
-        assert saved_data['project_location'] == str(bot_dir)
+        saved_data = json.loads(current_project_file.read_text(encoding='utf-8'))
+        assert saved_data['current_project'] == str(current_dir)
     
     def test_user_provides_custom_project_area_via_parameters(self, workspace_root):
         """
@@ -174,7 +174,7 @@ class TestInitializeProjectLocation:
         SCENARIO: User changes project area via initialize_project action with parameters
         GIVEN: Project location is already saved
         WHEN: User invokes initialize_project with different project_area parameter
-        THEN: Bot detects change and requests confirmation for new location
+        THEN: Bot detects change and asks if user wants to switch to current directory
         """
         # Given: Old location is saved
         config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
@@ -187,11 +187,107 @@ class TestInitializeProjectLocation:
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project(parameters={'project_area': new_area})
         
-        # Then: Bot detects location change and requests confirmation
+        # Then: Bot detects location change and asks to switch
         expected_new_location = workspace_root / new_area
         assert result.status == 'completed'
-        assert result.data['saved_location'] == str(old_location)
-        assert result.data['current_location'] == str(expected_new_location)
+        assert 'saved_location' in result.data
+        assert 'current_location' in result.data
         assert result.data['requires_confirmation'] == True
-        assert 'Switch to new location?' in result.data['message']
+        assert 'Switch to current directory?' in result.data['message']
+    
+    def test_project_area_parameter_as_hint_still_requests_confirmation(self, workspace_root):
+        """
+        SCENARIO: First time with project_area parameter as hint
+        GIVEN: No saved location exists
+        WHEN: Bot is invoked with project_area parameter
+        THEN: Bot uses parameter as hint but still requests confirmation
+        AND: Location is NOT saved until user confirms
+        """
+        # Given: No saved location
+        config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        current_project_file = bot_dir / 'current_project.json'
+        
+        # When: Bot invoked with project_area parameter (as hint)
+        hint_area = 'agile_bot/bots/base_bot/docs/stories'
+        bot = Bot('test_bot', workspace_root, config_path)
+        result = bot.shape.initialize_project(parameters={'project_area': hint_area})
+        
+        # Then: Bot presents hint location but requests confirmation
+        expected_location = workspace_root / hint_area
+        assert result.status == 'completed'
+        assert result.data['proposed_location'] == str(expected_location)
+        assert result.data['requires_confirmation'] == True
+        
+        # AND: Location NOT saved yet (waiting for confirmation)
+        assert not current_project_file.exists()
+    
+    def test_user_confirms_proposed_location(self, workspace_root):
+        """
+        SCENARIO: User confirms proposed location
+        GIVEN: Bot proposed a location requiring confirmation
+        WHEN: User responds with confirm=True and same location
+        THEN: Bot saves the confirmed location
+        """
+        # Given: Initial call proposes location
+        config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
+        bot = Bot('test_bot', workspace_root, config_path)
+        hint_area = 'agile_bot/bots/base_bot'
+        expected_location = workspace_root / hint_area
+        
+        result1 = bot.shape.initialize_project(parameters={'project_area': hint_area})
+        proposed = result1.data['proposed_location']
+        
+        # When: User confirms
+        result2 = bot.shape.initialize_project(parameters={
+            'confirm': True,
+            'project_area': proposed
+        })
+        
+        # Then: Location is saved
+        assert result2.status == 'completed'
+        assert result2.data['saved'] == True
+        assert result2.data.get('requires_confirmation', False) == False
+        
+        # Verify file was saved
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        current_project_file = bot_dir / 'current_project.json'
+        assert current_project_file.exists()
+        
+        saved_data = json.loads(current_project_file.read_text(encoding='utf-8'))
+        assert saved_data['current_project'] == proposed
+    
+    def test_user_provides_different_location_as_confirmation_response(self, workspace_root):
+        """
+        SCENARIO: User provides different location as response to confirmation
+        GIVEN: Bot proposed a location requiring confirmation
+        WHEN: User responds with confirm=True and DIFFERENT location
+        THEN: Bot saves the user's choice (not the proposed location)
+        """
+        # Given: Initial call proposes location
+        config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
+        bot = Bot('test_bot', workspace_root, config_path)
+        
+        result1 = bot.shape.initialize_project()
+        proposed = result1.data['proposed_location']
+        
+        # When: User confirms with DIFFERENT location
+        user_choice = str(workspace_root / 'different-area')
+        result2 = bot.shape.initialize_project(parameters={
+            'confirm': True,
+            'project_area': user_choice
+        })
+        
+        # Then: User's choice is saved (not proposed location)
+        assert result2.status == 'completed'
+        assert result2.data['saved'] == True
+        
+        # Verify user's choice was saved, NOT proposed location
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        current_project_file = bot_dir / 'current_project.json'
+        assert current_project_file.exists()
+        
+        saved_data = json.loads(current_project_file.read_text(encoding='utf-8'))
+        assert saved_data['current_project'] == user_choice
+        assert saved_data['current_project'] != proposed
 

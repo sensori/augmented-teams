@@ -9,64 +9,68 @@ class InitializeProjectAction(BaseAction):
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
         super().__init__(bot_name, behavior, workspace_root, 'initialize_project')
     
+    @property
+    def dir(self) -> Path:
+        """Get action's bot directory path."""
+        return self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
+    
+    @property
+    def current_project_file(self) -> Path:
+        """Get current_project.json file path."""
+        return self.dir / 'current_project.json'
+    
     def initialize_location(self, project_area: str = None) -> Dict[str, Any]:
-        # Determine current location from project_area or default to bot directory
+        # Determine current directory (project being worked on)
         if project_area:
             if not Path(project_area).is_absolute():
-                current_location = self.workspace_root / project_area
+                current_dir = self.workspace_root / project_area
             else:
-                current_location = Path(project_area)
+                current_dir = Path(project_area)
         else:
-            # Default to bot directory (agile_bot/bots/{bot_name})
-            current_location = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
+            # No explicit parameter - use current working directory
+            current_dir = Path.cwd()
         
-        # Check for saved location at bot directory
-        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
-        location_file = bot_dir / 'project_area' / 'project_location.json'
-        saved_location = None
+        # Check for saved current_project in bot root
+        saved_project = None
         
-        if location_file.exists():
+        if self.current_project_file.exists():
             try:
-                location_data = json.loads(location_file.read_text(encoding='utf-8'))
-                saved_location = Path(location_data.get('project_location', ''))
+                project_data = json.loads(self.current_project_file.read_text(encoding='utf-8'))
+                saved_project = Path(project_data.get('current_project', ''))
             except Exception:
                 pass
         
-        # Determine if confirmation needed
-        requires_confirmation = False
+        # Determine action based on saved_project vs current_dir
         data = {}
         
-        if not saved_location:
-            # First time - need confirmation
-            requires_confirmation = True
+        if not saved_project:
+            # First time - need confirmation (even if project_area provided)
             data = {
-                'proposed_location': str(current_location),
+                'proposed_location': str(current_dir),
                 'requires_confirmation': True,
-                'message': f'Project location will be: {current_location}. Confirm?'
+                'message': f'Project location will be: {current_dir}. Confirm?'
             }
-        elif saved_location != current_location:
-            # Location changed - need confirmation
-            requires_confirmation = True
+        elif saved_project == current_dir:
+            # Same location - skip init, just resume
             data = {
-                'saved_location': str(saved_location),
-                'current_location': str(current_location),
-                'requires_confirmation': True,
-                'message': f'Saved location: {saved_location}. Current: {current_location}. Switch to new location?'
+                'project_location': str(current_dir),
+                'requires_confirmation': False,
+                'message': f'Resuming in {current_dir}'
             }
         else:
-            # Same location - skip confirmation
+            # Location changed - ask if user wants to switch
             data = {
-                'project_location': str(current_location),
-                'requires_confirmation': False
+                'saved_location': str(saved_project),
+                'current_location': str(current_dir),
+                'requires_confirmation': True,
+                'message': f'Current project: {saved_project}. Current directory: {current_dir}. Switch to current directory?'
             }
         
-        # Save location if confirmed (in real usage, this would be called after user confirms)
-        if not requires_confirmation:
-            bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
-            save_location_file = bot_dir / 'project_area' / 'project_location.json'
-            save_location_file.parent.mkdir(parents=True, exist_ok=True)
-            save_location_file.write_text(
-                json.dumps({'project_location': str(current_location)}),
+        # Save if no confirmation needed (resuming case)
+        if not data.get('requires_confirmation'):
+            self.current_project_file.parent.mkdir(parents=True, exist_ok=True)
+            self.current_project_file.write_text(
+                json.dumps({'current_project': str(current_dir)}),
                 encoding='utf-8'
             )
         
@@ -79,12 +83,10 @@ class InitializeProjectAction(BaseAction):
         else:
             location = Path(project_location)
         
-        # Save location to bot's project_area
-        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
-        location_file = bot_dir / 'project_area' / 'project_location.json'
-        location_file.parent.mkdir(parents=True, exist_ok=True)
-        location_file.write_text(
-            json.dumps({'project_location': str(location)}),
+        # Save to bot root as current_project.json
+        self.current_project_file.parent.mkdir(parents=True, exist_ok=True)
+        self.current_project_file.write_text(
+            json.dumps({'current_project': str(location)}),
             encoding='utf-8'
         )
         

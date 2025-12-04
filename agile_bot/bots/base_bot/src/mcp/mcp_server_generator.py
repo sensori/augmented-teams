@@ -103,6 +103,9 @@ class MCPServerGenerator:
         # Register bot tool (routes to current behavior and current action)
         self.register_bot_tool(mcp_server)
         
+        # Register close current action tool (marks action complete and transitions)
+        self.register_close_current_action_tool(mcp_server)
+        
         # Register behavior tools (routes to current action within behavior)
         for behavior in behaviors:
             self.register_behavior_tool(mcp_server, behavior)
@@ -158,6 +161,157 @@ class MCPServerGenerator:
             'name': tool_name,
             'type': 'bot_tool',
             'description': f'Routes to current behavior and action'
+        })
+    
+    def register_close_current_action_tool(self, mcp_server: FastMCP):
+        tool_name = f'{self.bot_name}_close_current_action'
+        
+        @mcp_server.tool(name=tool_name, description=f'Close current action tool for {self.bot_name} - marks current action complete and transitions to next')
+        async def close_current_action(parameters: dict = None):
+            """
+            Mark the current action as complete and transition to next action.
+            
+            Call this after:
+            1. Action tool returned instructions
+            2. AI followed the instructions
+            3. Human reviewed and confirmed completion
+            
+            Returns:
+                status: "completed"
+                completed_action: Name of action that was closed
+                next_action: Name of next action (or same if at end)
+                message: Human-readable status message
+            """
+            if parameters is None:
+                parameters = {}
+            
+            if self.bot is None:
+                return {"error": "Bot not initialized"}
+            
+            # Get first behavior to access workflow properties
+            # (all behaviors share same current_project configuration)
+            first_behavior = self.bot.behaviors[0] if self.bot.behaviors else None
+            if not first_behavior:
+                return {
+                    "error": "No behaviors configured",
+                    "message": "Bot has no behaviors configured."
+                }
+            
+            behavior_obj = getattr(self.bot, first_behavior)
+            
+            # Use workflow properties instead of manually constructing paths
+            if not behavior_obj.workflow.current_project_file.exists():
+                return {
+                    "error": "No project initialized",
+                    "message": "No current_project.json found. Initialize project first."
+                }
+            
+            # Workflow state file path from workflow object
+            state_file = behavior_obj.workflow.file
+            
+            if not state_file.exists():
+                return {
+                    "error": "No active workflow found",
+                    "message": f"No workflow_state.json exists at {state_file}. Start a workflow first."
+                }
+            
+            try:
+                import json
+                state_data = json.loads(state_file.read_text(encoding='utf-8'))
+                current_behavior_path = state_data.get('current_behavior', '')
+                current_action_path = state_data.get('current_action', '')
+                
+                if not current_behavior_path or not current_action_path:
+                    return {
+                        "error": "Cannot determine current action",
+                        "message": "workflow_state.json is missing current_behavior or current_action"
+                    }
+                
+                # Extract behavior and action names
+                # 'story_bot.shape' -> 'shape'
+                # 'story_bot.shape.gather_context' -> 'gather_context'
+                behavior_name = current_behavior_path.split('.')[-1]
+                action_name = current_action_path.split('.')[-1]
+                
+                # Get behavior object
+                behavior_obj = getattr(self.bot, behavior_name, None)
+                if behavior_obj is None:
+                    return {
+                        "error": f"Behavior {behavior_name} not found",
+                        "message": f"Available behaviors: {', '.join(self.bot.behaviors)}"
+                    }
+                
+                # Mark action as complete and transition
+                # (idempotent - safe to call multiple times)
+                behavior_obj.workflow.save_completed_action(action_name)
+                
+                # Action is complete - check if this is the final action in behavior
+                is_final_action = (action_name == behavior_obj.workflow.states[-1] if behavior_obj.workflow.states else False)
+                
+                # Transition to next action within behavior
+                previous_state = behavior_obj.workflow.current_state
+                behavior_obj.workflow.transition_to_next()
+                new_state = behavior_obj.workflow.current_state
+                
+                # Check if behavior is complete (stayed at same state = end of behavior)
+                behavior_complete = (previous_state == new_state and is_final_action)
+                
+                if behavior_complete:
+                    # Final action - check for next behavior
+                    current_behavior_index = self.bot.behaviors.index(behavior_name)
+                    if current_behavior_index + 1 < len(self.bot.behaviors):
+                        # Transition to next behavior
+                        next_behavior_name = self.bot.behaviors[current_behavior_index + 1]
+                        
+                        # Update workflow state to next behavior, first action
+                        next_behavior_obj = getattr(self.bot, next_behavior_name)
+                        first_action = next_behavior_obj.workflow.states[0] if next_behavior_obj.workflow.states else 'initialize_project'
+                        
+                        # Update state file with new behavior
+                        state_data['current_behavior'] = f'{self.bot_name}.{next_behavior_name}'
+                        state_data['current_action'] = f'{self.bot_name}.{next_behavior_name}.{first_action}'
+                        state_file.write_text(json.dumps(state_data), encoding='utf-8')
+                        
+                        message = f"Behavior '{behavior_name}' complete. Transitioned to behavior '{next_behavior_name}', action '{first_action}'."
+                        
+                        return {
+                            "status": "completed",
+                            "completed_action": action_name,
+                            "completed_behavior": behavior_name,
+                            "next_behavior": next_behavior_name,
+                            "next_action": first_action,
+                            "message": message
+                        }
+                    else:
+                        # No more behaviors - workflow complete
+                        message = f"Action '{action_name}' marked complete. All behaviors complete."
+                        return {
+                            "status": "completed",
+                            "completed_action": action_name,
+                            "completed_behavior": behavior_name,
+                            "message": message
+                        }
+                else:
+                    # Not final - normal transition within behavior
+                    message = f"Action '{action_name}' marked complete. Transitioned to '{new_state}'."
+                    
+                    return {
+                        "status": "completed",
+                        "completed_action": action_name,
+                        "next_action": new_state,
+                        "message": message
+                    }
+                
+            except Exception as e:
+                return {
+                    "error": "Failed to close current action",
+                    "message": str(e)
+                }
+        
+        self.registered_tools.append({
+            'name': tool_name,
+            'type': 'close_action_tool',
+            'description': f'Marks current action complete and transitions to next'
         })
     
     def register_behavior_tool(self, mcp_server: FastMCP, behavior: str):

@@ -102,10 +102,9 @@ class TestTrackActivityForGatherContextAction:
         WHEN: both entries are present
         THEN: activity log distinguishes same action in different behaviors using full path
         """
-        # Given: Activity log with multiple behavior entries
-        log_dir = workspace_root / 'project_area'
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / 'activity_log.json'
+        # Given: Activity log with multiple behavior entries (in workspace_root)
+        workspace_root.mkdir(parents=True, exist_ok=True)
+        log_file = workspace_root / 'activity_log.json'
         from tinydb import TinyDB
         with TinyDB(log_file) as db:
             db.insert({'action_state': 'story_bot.shape.gather_context', 'timestamp': '09:00'})
