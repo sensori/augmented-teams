@@ -1,0 +1,326 @@
+"""
+Invoke Bot Tool Tests
+
+Tests for 'Invoke Bot Tool' sub-epic (foundational + increment 3):
+
+Foundational Tests (Increment 1/2):
+- Bot Tool Invocation
+- Behavior Action Instructions
+
+Increment 3 Tests:
+- Forward To Current Behavior and Current Action
+- Forward To Current Action
+
+Uses transitions state machine for workflow state management.
+"""
+import pytest
+from pathlib import Path
+import json
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> Path:
+    """Helper: Create bot configuration file."""
+    config_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'config'
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / 'bot_config.json'
+    config_file.write_text(
+        json.dumps({'name': bot_name, 'behaviors': behaviors}),
+        encoding='utf-8'
+    )
+    return config_file
+
+def create_base_instructions(workspace: Path):
+    """Helper: Create base instructions for all actions."""
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules', 'correct_bot']
+    for action in actions:
+        action_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action
+        action_dir.mkdir(parents=True, exist_ok=True)
+        instructions_file = action_dir / 'instructions.json'
+        instructions_file.write_text(
+            json.dumps({'action': action, 'instructions': [f'Instruction for {action}']}),
+            encoding='utf-8'
+        )
+
+def create_workflow_state(workspace: Path, current_behavior: str, current_action: str) -> Path:
+    """Helper: Create workflow state file."""
+    state_dir = workspace / 'project_area'
+    state_dir.mkdir(parents=True, exist_ok=True)
+    state_file = state_dir / 'workflow_state.json'
+    state_file.write_text(json.dumps({
+        'current_behavior': current_behavior,
+        'current_action': current_action,
+        'completed_actions': [],
+        'timestamp': '2025-12-03T10:00:00Z'
+    }), encoding='utf-8')
+    return state_file
+
+# ============================================================================
+# FIXTURES
+# ============================================================================
+
+@pytest.fixture
+def workspace_root(tmp_path):
+    """Fixture: Temporary workspace directory."""
+    workspace = tmp_path / 'workspace'
+    workspace.mkdir()
+    return workspace
+
+@pytest.fixture
+def test_bot_config(workspace_root):
+    """Fixture: Test bot configuration."""
+    return create_bot_config_file(
+        workspace_root,
+        'test_bot',
+        ['shape', 'discovery', 'exploration', 'specification']
+    )
+
+def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior: str, action: str) -> Path:
+    """Helper: Create behavior action instructions file."""
+    instructions_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior / action
+    instructions_dir.mkdir(parents=True, exist_ok=True)
+    instructions_file = instructions_dir / 'instructions.json'
+    instructions_data = {
+        'action': action,
+        'behavior': behavior,
+        'instructions': [f'{action} instructions for {behavior}']
+    }
+    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+    return instructions_file
+
+def create_base_action_instructions(workspace: Path, action: str) -> Path:
+    """Helper: Create base action instructions file with numbered prefix."""
+    action_prefixes = {
+        'gather_context': '2_gather_context',
+        'decide_planning_criteria': '3_decide_planning_criteria',
+        'build_knowledge': '4_build_knowledge',
+        'render_output': '5_render_output',
+        'correct_bot': 'correct_bot',
+        'validate_rules': '7_validate_rules'
+    }
+    
+    action_folder = action_prefixes.get(action, action)
+    base_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action_folder
+    base_dir.mkdir(parents=True, exist_ok=True)
+    instructions_file = base_dir / 'instructions.json'
+    instructions_data = {
+        'actionName': action,
+        'instructions': [f'Base {action} instructions']
+    }
+    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+    return instructions_file
+
+class TestBotToolInvocation:
+    """Bot tool invocation behavior tests (Increment 1/2 foundational)."""
+
+    def test_tool_invokes_behavior_action_when_called(self, workspace_root, test_bot_config):
+        """
+        SCENARIO: AI Chat invokes test_bot_shape_gather_context tool
+        GIVEN: Bot has behavior 'shape' with action 'gather_context'
+        WHEN: AI Chat invokes tool with parameters
+        THEN: Tool routes to test_bot.Shape.GatherContext() method
+        """
+        # Given: Bot configuration and instructions exist
+        create_behavior_action_instructions(workspace_root, 'test_bot', 'shape', 'gather_context')
+        create_base_action_instructions(workspace_root, 'gather_context')
+        
+        # When: Call REAL Bot API
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(
+            bot_name='test_bot',
+            workspace_root=workspace_root,
+            config_path=test_bot_config
+        )
+        result = bot.invoke_tool(
+            tool_name='test_bot_shape_gather_context',
+            parameters={'behavior': 'shape', 'action': 'gather_context'}
+        )
+        
+        # Then: Tool executed and returned result
+        assert result.status == 'completed'
+        assert result.behavior == 'shape'
+        assert result.action == 'gather_context'
+
+    def test_tool_routes_to_correct_behavior_action_method(self, workspace_root, test_bot_config):
+        """
+        SCENARIO: Tool routes to correct behavior action method
+        GIVEN: Bot has multiple behaviors with build_knowledge action
+        WHEN: AI Chat invokes 'test_bot_exploration_build_knowledge'
+        THEN: Tool routes to test_bot.Exploration.BuildKnowledge() not other behaviors
+        """
+        # Given: Multiple behaviors exist
+        create_behavior_action_instructions(workspace_root, 'test_bot', 'shape', 'build_knowledge')
+        create_behavior_action_instructions(workspace_root, 'test_bot', 'discovery', 'build_knowledge')
+        create_behavior_action_instructions(workspace_root, 'test_bot', 'exploration', 'build_knowledge')
+        create_base_action_instructions(workspace_root, 'build_knowledge')
+        
+        # When: Call REAL Bot API for specific behavior
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(
+            bot_name='test_bot',
+            workspace_root=workspace_root,
+            config_path=test_bot_config
+        )
+        result = bot.invoke_tool(
+            tool_name='test_bot_exploration_build_knowledge',
+            parameters={'behavior': 'exploration', 'action': 'build_knowledge'}
+        )
+        
+        # Then: Routes to exploration behavior only
+        assert result.behavior == 'exploration'
+        assert result.action == 'build_knowledge'
+
+
+class TestBehaviorActionInstructions:
+    """Behavior action instruction loading and merging tests (Increment 1/2 foundational)."""
+
+    def test_action_loads_and_merges_instructions(self, workspace_root):
+        """
+        SCENARIO: Action loads and merges instructions for shape gather_context
+        GIVEN: Base and behavior-specific instructions exist
+        WHEN: Action method is invoked
+        THEN: Instructions are loaded from both locations and merged
+        """
+        # Given: Both instruction files exist
+        bot_name = 'test_bot'
+        behavior = 'shape'
+        action = 'gather_context'
+        
+        config_file = create_bot_config_file(workspace_root, bot_name, ['shape'])
+        behavior_instructions = create_behavior_action_instructions(workspace_root, bot_name, behavior, action)
+        base_instructions = create_base_action_instructions(workspace_root, action)
+        
+        # When: Call REAL GatherContextAction API
+        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
+        action_obj = GatherContextAction(
+            bot_name=bot_name,
+            behavior=behavior,
+            workspace_root=workspace_root
+        )
+        merged_instructions = action_obj.load_and_merge_instructions()
+        
+        # Then: Instructions merged from both sources
+        assert 'base_instructions' in merged_instructions
+        assert merged_instructions['action'] == action
+
+
+class TestForwardToCurrentBehaviorAndCurrentAction:
+    """Story: Forward To Current Behavior and Current Action - Tests bot tool forwarding to behavior and action."""
+
+    def test_bot_tool_forwards_to_current_behavior_and_current_action(self, workspace_root):
+        """
+        SCENARIO: Bot tool forwards to current behavior and current action
+        GIVEN: workflow state shows current_behavior='discovery', current_action='build_knowledge'
+        WHEN: Bot tool receives invocation
+        THEN: Bot tool forwards to correct behavior and action
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
+        result = bot.forward_to_current_behavior_and_current_action()
+        
+        # Then
+        assert result.behavior == 'discovery'
+        assert result.action == 'gather_context'
+
+    def test_bot_tool_defaults_to_first_behavior_and_first_action_when_state_missing(self, workspace_root):
+        """
+        SCENARIO: Bot tool defaults to first behavior and first action when state missing
+        GIVEN: workflow state does NOT exist
+        WHEN: Bot tool receives invocation
+        THEN: Bot tool defaults to first behavior and first action
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape', 'discovery'])
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
+        result = bot.forward_to_current_behavior_and_current_action()
+        
+        # Then
+        assert result.behavior == 'shape'
+        assert result.action == 'gather_context'
+
+
+class TestForwardToCurrentAction:
+    """Story: Forward To Current Action - Tests behavior tool forwarding to current action."""
+
+    def test_behavior_tool_forwards_to_current_action_within_behavior(self, workspace_root):
+        """
+        SCENARIO: Behavior tool forwards to current action within behavior
+        GIVEN: a behavior tool for 'discovery' behavior
+        AND: workflow state shows current_action='build_knowledge'
+        WHEN: Behavior tool receives invocation
+        THEN: Behavior tool forwards to build_knowledge action
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(
+            bot_name='story_bot',
+            workspace_root=workspace_root,
+            config_path=bot_config
+        )
+        result = bot.discovery.forward_to_current_action()
+        
+        # Then
+        assert result.action == 'gather_context'
+
+    def test_behavior_tool_sets_workflow_to_current_behavior_when_state_shows_different_behavior(self, workspace_root):
+        """
+        SCENARIO: Behavior tool sets workflow to current behavior when state shows different behavior
+        GIVEN: a behavior tool for 'exploration' behavior
+        AND: workflow state shows current_behavior='discovery'
+        WHEN: Behavior tool receives invocation
+        THEN: workflow state updated to current_behavior='exploration'
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery', 'exploration'])
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(
+            bot_name='story_bot',
+            workspace_root=workspace_root,
+            config_path=bot_config
+        )
+        result = bot.exploration.forward_to_current_action()
+        
+        # Then
+        assert result.behavior == 'exploration'
+
+    def test_behavior_tool_defaults_to_first_action_when_state_missing(self, workspace_root):
+        """
+        SCENARIO: Behavior tool defaults to first action when state missing
+        GIVEN: a behavior tool for 'shape' behavior
+        AND: workflow state does NOT exist
+        WHEN: Behavior tool receives invocation
+        THEN: Behavior tool defaults to first action
+        """
+        # Given
+        create_base_instructions(workspace_root)
+        bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape'])
+        
+        # When
+        from agile_bot.bots.base_bot.src.bot import Bot
+        bot = Bot(
+            bot_name='story_bot',
+            workspace_root=workspace_root,
+            config_path=bot_config
+        )
+        result = bot.shape.forward_to_current_action()
+        
+        # Then
+        assert result.action == 'gather_context'
