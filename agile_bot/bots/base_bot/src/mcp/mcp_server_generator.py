@@ -1,27 +1,13 @@
-"""
-MCP Server Generator
-
-Generates FastMCP server instances for bots with tools for each behavior-action pair.
-Also generates deployment artifacts: bot_config.json, server entry point, and mcp.json config.
-"""
 from pathlib import Path
 import json
 from fastmcp import FastMCP
-from typing import Dict
+from typing import Dict, Any
 from agile_bot.bots.base_bot.src.utils import read_json_file
 
 
 class MCPServerGenerator:
-    """Generates MCP server instance for a bot."""
     
     def __init__(self, workspace_root: Path, bot_location: str = None):
-        """Initialize MCP Server Generator.
-        
-        Args:
-            workspace_root: Root workspace directory
-            bot_location: Bot location path (e.g., 'agile_bot/bots/story_bot'). 
-                         If None, uses base_bot.
-        """
         self.workspace_root = Path(workspace_root)
         
         if bot_location is None:
@@ -43,11 +29,6 @@ class MCPServerGenerator:
         self.independent_actions = self._discover_independent_actions()
     
     def _discover_workflow_actions(self) -> list:
-        """Discover workflow actions by scanning base_actions folder for folders with number prefix.
-        
-        Returns:
-            List of action names (without number prefix) in workflow order
-        """
         base_actions_path = self.workspace_root / self.bot_location / 'base_actions'
         
         # Fallback to base_bot if bot doesn't have its own base_actions
@@ -69,11 +50,6 @@ class MCPServerGenerator:
         return [action for _, action in workflow_actions]
     
     def _discover_independent_actions(self) -> list:
-        """Discover independent actions by scanning base_actions folder for folders WITHOUT number prefix.
-        
-        Returns:
-            List of independent action names
-        """
         base_actions_path = self.workspace_root / self.bot_location / 'base_actions'
         
         # Fallback to base_bot if bot doesn't have its own base_actions
@@ -91,15 +67,6 @@ class MCPServerGenerator:
         return independent_actions
     
     def create_server_instance(self) -> FastMCP:
-        """Create FastMCP server instance from bot configuration.
-        
-        Returns:
-            FastMCP server instance with unique server name
-            
-        Raises:
-            FileNotFoundError: If bot config file not found
-            json.JSONDecodeError: If bot config has malformed JSON
-        """
         if not self.config_path.exists():
             raise FileNotFoundError(
                 f'Bot Config not found at {self.config_path}'
@@ -120,7 +87,7 @@ class MCPServerGenerator:
         mcp_server.bot_config = bot_config
         
         # Initialize bot instance
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         self.bot = Bot(
             bot_name=self.bot_name,
             workspace_root=self.workspace_root,
@@ -130,11 +97,6 @@ class MCPServerGenerator:
         return mcp_server
     
     def register_all_behavior_action_tools(self, mcp_server: FastMCP):
-        """Register tools for all behavior-action pairs, plus bot and behavior tools.
-        
-        Args:
-            mcp_server: FastMCP server instance
-        """
         bot_config = mcp_server.bot_config
         behaviors = bot_config.get('behaviors', [])
         
@@ -157,10 +119,6 @@ class MCPServerGenerator:
                 )
     
     def _normalize_name_for_tool(self, name: str) -> str:
-        """Normalize behavior/action name for tool naming.
-        
-        Strips number prefixes and abbreviates long names.
-        """
         # Strip number prefix (e.g., '1_shape' -> 'shape')
         if name and name[0].isdigit() and '_' in name:
             name = name.split('_', 1)[1]
@@ -177,12 +135,10 @@ class MCPServerGenerator:
         return name
     
     def register_bot_tool(self, mcp_server: FastMCP):
-        """Register bot tool that routes to current behavior and current action."""
         tool_name = f'{self.bot_name}_tool'
         
         @mcp_server.tool(name=tool_name, description=f'Bot tool for {self.bot_name} - routes to current behavior and action')
         async def bot_tool(parameters: dict = None):
-            """Bot tool forwards to current behavior and current action."""
             if parameters is None:
                 parameters = {}
             
@@ -205,13 +161,11 @@ class MCPServerGenerator:
         })
     
     def register_behavior_tool(self, mcp_server: FastMCP, behavior: str):
-        """Register behavior tool that routes to current action within behavior."""
         normalized_behavior = self._normalize_name_for_tool(behavior)
         tool_name = f'{self.bot_name}_{normalized_behavior}_tool'
         
         @mcp_server.tool(name=tool_name, description=f'{behavior} behavior tool for {self.bot_name} - routes to current action')
         async def behavior_tool(parameters: dict = None):
-            """Behavior tool forwards to current action within this behavior."""
             if parameters is None:
                 parameters = {}
             
@@ -244,13 +198,6 @@ class MCPServerGenerator:
         behavior: str,
         action: str
     ):
-        """Register a single behavior-action tool with FastMCP.
-        
-        Args:
-            mcp_server: FastMCP server instance
-            behavior: Behavior name
-            action: Action name
-        """
         # Normalize names to keep tool names under 60 chars
         normalized_behavior = self._normalize_name_for_tool(behavior)
         normalized_action = self._normalize_name_for_tool(action)
@@ -268,7 +215,6 @@ class MCPServerGenerator:
         
         @mcp_server.tool(name=tool_name, description=description)
         async def behavior_action_tool(parameters: dict = None):
-            """Tool that forwards to bot behavior action."""
             if parameters is None:
                 parameters = {}
             
@@ -306,20 +252,11 @@ class MCPServerGenerator:
         behavior: str,
         action: str = None
     ) -> list:
-        """Load trigger words from behavior folder.
-        
-        Args:
-            behavior: Behavior name
-            action: Action name (optional - if None, loads behavior-level trigger words)
-            
-        Returns:
-            List of trigger word patterns, empty list if file not found
-        """
         # Find behavior folder (handles numbered prefixes)
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
+        from agile_bot.bots.base_bot.src.bot.bot import Behavior
         
         try:
-            behavior_folder = find_behavior_folder(
+            behavior_folder = Behavior.find_behavior_folder(
                 self.workspace_root,
                 self.bot_name,
                 behavior
@@ -345,14 +282,6 @@ class MCPServerGenerator:
             return []
     
     def generate_bot_config_file(self, behaviors: list) -> Path:
-        """Generate bot_config.json file.
-        
-        Args:
-            behaviors: List of behavior names
-            
-        Returns:
-            Path to generated bot_config.json
-        """
         config_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'config'
         config_dir.mkdir(parents=True, exist_ok=True)
         
@@ -366,11 +295,6 @@ class MCPServerGenerator:
         return config_path
     
     def generate_server_entry_point(self) -> Path:
-        """Generate {bot_name}_mcp_server.py entry point file.
-        
-        Returns:
-            Path to generated server entry point
-        """
         src_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'src'
         src_dir.mkdir(parents=True, exist_ok=True)
         
@@ -391,7 +315,6 @@ from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
 
 
 def main():
-    """Main entry point for {self.bot_name} MCP server."""
     generator = MCPServerGenerator(
         workspace_root=workspace_root,
         bot_location='agile_bot/bots/{self.bot_name}'
@@ -411,11 +334,6 @@ if __name__ == '__main__':
         return server_file
     
     def generate_cursor_mcp_config(self) -> Dict:
-        """Generate mcp.json configuration for Cursor.
-        
-        Returns:
-            Dictionary with mcpServers configuration
-        """
         server_path = f'C:/dev/augmented-teams/agile_bot/bots/{self.bot_name}/src/{self.bot_name}_mcp_server.py'
         
         mcp_config = {
@@ -434,11 +352,6 @@ if __name__ == '__main__':
         return mcp_config
     
     def discover_behaviors_from_folders(self) -> list:
-        """Discover behaviors by scanning behaviors folder.
-        
-        Returns:
-            List of behavior folder names
-        """
         behaviors_dir = (
             self.workspace_root / 
             'agile_bot' / 'bots' / self.bot_name / 'behaviors'
@@ -455,19 +368,6 @@ if __name__ == '__main__':
         return sorted(behaviors)
     
     def generate_server(self, behaviors: list = None) -> Dict[str, Path]:
-        """Generate MCP server deployment artifacts for bot.
-        
-        Generates:
-        - bot_config.json
-        - {bot_name}_mcp_server.py entry point
-        - mcp.json configuration for Cursor
-        
-        Args:
-            behaviors: Optional list of behavior names. If None, discovers from folders.
-            
-        Returns:
-            Dictionary with paths to generated files and mcp config
-        """
         if behaviors is None:
             behaviors = self.discover_behaviors_from_folders()
         
@@ -482,28 +382,14 @@ if __name__ == '__main__':
         }
     
     def generate_awareness_files(self) -> Dict[str, Path]:
-        """Generate cursor awareness files for MCP tool recognition.
-        
-        Generates:
-        - .cursor/rules/mcp-tool-awareness.mdc - workspace rules with trigger patterns
-        - Memory via update_memory API - persistent tool awareness
-        
-        Returns:
-            Dictionary with paths to generated files
-        """
         # Generate workspace rules file
         rules_path = self._generate_workspace_rules_file()
         
-        # Generate memory for tool awareness
-        memory_id = self._generate_tool_awareness_memory()
-        
         return {
-            'rules_file': rules_path,
-            'memory_id': memory_id
+            'rules_file': rules_path
         }
     
     def _generate_workspace_rules_file(self) -> Path:
-        """Generate bot-specific .cursor/rules/mcp-<bot-name>-awareness.mdc file dynamically from bot config."""
         rules_dir = self.workspace_root / '.cursor' / 'rules'
         rules_dir.mkdir(parents=True, exist_ok=True)
         
@@ -632,34 +518,3 @@ When you recognize a trigger word:
         
         rules_file.write_text(rules_content, encoding='utf-8')
         return rules_file
-    
-    def _generate_tool_awareness_memory(self) -> str:
-        """Generate memory for MCP tool awareness using update_memory API."""
-        # Import update_memory function
-        try:
-            from agile_bot.bots.base_bot.src.utils import update_memory
-        except ImportError:
-            # Fallback if utils doesn't have update_memory
-            return None
-        
-        title = "Always Check MCP Tools First for Workflow Commands"
-        
-        knowledge = (
-            "When user mentions workflow operations with trigger words "
-            "(explore, shape, discover, arrange, validate, specify for stories; "
-            "analyze/map domain; validate/run BDD; sync/feature for code-agent), "
-            "ALWAYS check for available MCP tools FIRST before doing manual file operations. "
-            "Pattern: hear trigger word → check if in agent mode → check available MCP tools → "
-            "invoke matching tool OR inform user to switch mode. "
-            "Story bot tools match pattern story_bot_<behavior>_<action>. "
-            "If in ask mode when MCP tools needed, inform user that MCP tools only available in agent mode."
-        )
-        
-        result = update_memory(
-            action='create',
-            title=title,
-            knowledge_to_store=knowledge
-        )
-        
-        return result.get('id') if result else None
-

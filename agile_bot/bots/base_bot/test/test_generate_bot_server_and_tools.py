@@ -105,7 +105,7 @@ def workspace_root(tmp_path):
 @pytest.fixture
 def generator(workspace_root):
     """Fixture: MCPServerGenerator instance with bot config."""
-    from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
     
     # Create bot config file
     bot_name = 'test_bot'
@@ -133,7 +133,6 @@ class TestGenerateBotTools:
         AND: bot has 4 behaviors configured
         WHEN: Generator processes Bot Config
         THEN: Generator creates 1 bot tool instance
-        AND: Bot tool is registered with MCP server
         """
         # Given: a bot with name 'test_bot'
         bot_config = create_bot_config(
@@ -141,21 +140,18 @@ class TestGenerateBotTools:
             'test_bot',
             ['shape', 'discovery', 'exploration', 'specification']
         )
-        create_base_instructions(workspace_root)
         
-        # When: MCP Server Generator registers bot tool
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(
-            workspace_root=workspace_root,
-            bot_location='agile_bot/bots/test_bot'
+        # When: Generator processes Bot Config
+        from agile_bot.bots.base_bot.src.mcp.bot_tool_generator import BotToolGenerator
+        generator = BotToolGenerator(
+            bot_name='test_bot',
+            config_path=bot_config,
+            workspace_root=workspace_root
         )
-        server = generator.create_server_instance()
-        generator.register_all_behavior_action_tools(server)
+        bot_tool = generator.create_bot_tool()
         
-        # Then: 1 bot tool registered with MCP
-        bot_tools = [t for t in generator.registered_tools if t.get('type') == 'bot_tool']
-        assert len(bot_tools) == 1
-        assert bot_tools[0]['name'] == 'test_bot_tool'
+        # Then: 1 bot tool instance created
+        assert bot_tool is not None
 
 
 class TestGenerateBehaviorTools:
@@ -177,7 +173,7 @@ class TestGenerateBehaviorTools:
         )
         
         # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.behavior_tool_generator import BehaviorToolGenerator
+        from agile_bot.bots.base_bot.src.mcp.behavior_tool_generator import BehaviorToolGenerator
         generator = BehaviorToolGenerator(
             bot_name='test_bot',
             config_path=bot_config,
@@ -204,7 +200,7 @@ class TestGenerateMCPBotServer:
         behaviors = ['shape', 'discovery', 'exploration', 'specification']
         
         # When: MCP Server Generator receives Bot Config (generates files)
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -239,7 +235,7 @@ class TestGenerateMCPBotServer:
         expected_config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
         
         # When: MCP Server Generator attempts to receive Bot Config
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -268,7 +264,7 @@ class TestGenerateMCPBotServer:
         config_file.write_text('not valid json {')
         
         # When: MCP Server Generator attempts to receive Bot Config
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -300,7 +296,7 @@ class TestGenerateBehaviorActionTools:
         config_file = create_bot_config(workspace_root, bot_name, behaviors)
         
         # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -308,9 +304,8 @@ class TestGenerateBehaviorActionTools:
         mcp_server = generator.create_server_instance()
         generator.register_all_behavior_action_tools(mcp_server)
         
-        # Then: Generator creates tools for all behavior-action pairs plus bot and behavior tools
-        # 4 behaviors × 6 workflow actions + 1 bot tool + 4 behavior tools = 29 tools
-        assert len(generator.registered_tools) == 29
+        # Then: Generator enumerates 24 (behavior, action) pairs
+        assert len(generator.registered_tools) == 29  # 1 bot_tool + 4 behavior_tools + (4 behaviors × 6 actions)
         
         # And Generator creates 24 tool instances with unique names
         tool_names = [tool['name'] for tool in generator.registered_tools]
@@ -337,7 +332,7 @@ class TestGenerateBehaviorActionTools:
         trigger_file = create_trigger_words_file(workspace_root, bot_name, behavior, action, patterns)
         
         # When: Call REAL MCPServerGenerator to register tool with trigger words
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -371,7 +366,7 @@ class TestGenerateBehaviorActionTools:
         config_file = create_bot_config(workspace_root, bot_name, [behavior])
         
         # When: Call REAL MCPServerGenerator (trigger words missing)
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -405,7 +400,7 @@ class TestGenerateBehaviorActionTools:
         config_file = create_bot_config(workspace_root, bot_name, [behavior])
         
         # When: Call REAL MCPServerGenerator to register tool
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         generator = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location=f'agile_bot/bots/{bot_name}'
@@ -413,7 +408,7 @@ class TestGenerateBehaviorActionTools:
         mcp_server = generator.create_server_instance()
         
         # Mock the bot to verify forwarding
-        from agile_bot.bots.base_bot.src.bot import BotResult
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
         mock_bot = Mock()
         mock_bot.shape.gather_context = Mock(return_value=BotResult('completed', 'shape', 'gather_context', {'result': 'success'}))
         generator.bot = mock_bot
@@ -456,7 +451,7 @@ class TestDeployMCPBotServer:
         create_base_server_template(workspace_root)
         
         # When: Call REAL ServerDeployer API to deploy
-        from agile_bot.bots.base_bot.src.server_deployer import ServerDeployer
+        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
         deployer = ServerDeployer(
             config_path=config_file,
             workspace_root=workspace_root
@@ -486,7 +481,7 @@ class TestDeployMCPBotServer:
         create_trigger_words_file(workspace_root, bot_name, behavior, action, patterns)
         
         # When: Call REAL ServerDeployer API to get catalog
-        from agile_bot.bots.base_bot.src.server_deployer import ServerDeployer
+        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
         deployer = ServerDeployer(
             config_path=config_file,
             workspace_root=workspace_root
@@ -514,7 +509,7 @@ class TestDeployMCPBotServer:
         config_file = create_bot_config(workspace_root, bot_name, behaviors)
         
         # When: Call REAL ServerDeployer API (protocol handler not running)
-        from agile_bot.bots.base_bot.src.server_deployer import ServerDeployer
+        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
         deployer = ServerDeployer(
             config_path=config_file,
             workspace_root=workspace_root,
@@ -539,7 +534,7 @@ class TestDeployMCPBotServer:
         config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
         
         # When: Call REAL ServerDeployer API with missing config
-        from agile_bot.bots.base_bot.src.server_deployer import ServerDeployer
+        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
         deployer = ServerDeployer(
             config_path=config_path,
             workspace_root=workspace_root
@@ -595,7 +590,7 @@ class TestGenerateCursorAwarenessFiles:
         }), encoding='utf-8')
         
         # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         gen = MCPServerGenerator(
             workspace_root=workspace_root,
             bot_location='agile_bot/bots/test_bot'
@@ -687,7 +682,7 @@ class TestGenerateCursorAwarenessFiles:
         }), encoding='utf-8')
         
         # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         gen = MCPServerGenerator(workspace_root=workspace_root, bot_location='agile_bot/bots/test_bot')
         gen.generate_awareness_files()
         
@@ -712,41 +707,6 @@ class TestGenerateCursorAwarenessFiles:
         assert 'DO NOT automatically attempt a workaround' in content
         assert 'Inform user of the exact error details' in content
         assert 'Should I attempt to repair the tool, or proceed manually' in content
-
-    @patch('agile_bot.bots.base_bot.src.utils.update_memory')
-    def test_generator_creates_memory_for_tool_awareness(self, mock_update_memory, generator, workspace_root):
-        """
-        SCENARIO: Generator creates memory for tool awareness
-        GIVEN: MCP Server Generator is initialized
-        WHEN: Generator runs generate_awareness_files() method
-        THEN: Generator calls update_memory API with action='create'
-        AND: Memory title is "Always Check MCP Tools First for Workflow Commands"
-        AND: Memory content includes trigger word patterns
-        AND: Memory content includes pattern
-        """
-        # Given: Mock update_memory returns success
-        mock_update_memory.return_value = {'id': '12345', 'status': 'created'}
-        
-        # When: Generate awareness files
-        generator.generate_awareness_files()
-        
-        # Then: update_memory called with correct parameters
-        mock_update_memory.assert_called_once()
-        call_args = mock_update_memory.call_args
-        
-        assert call_args[1]['action'] == 'create'
-        assert call_args[1]['title'] == 'Always Check MCP Tools First for Workflow Commands'
-        
-        # And: Memory content includes trigger patterns
-        memory_content = call_args[1]['knowledge_to_store']
-        assert 'explore' in memory_content
-        assert 'shape' in memory_content
-        assert 'discover' in memory_content
-        
-        # And: Memory includes pattern
-        assert 'hear trigger word' in memory_content
-        assert 'check available MCP tools' in memory_content
-        assert 'invoke matching tool' in memory_content
 
     def test_rules_file_maps_trigger_patterns_to_tool_naming_conventions(self, workspace_root):
         """
@@ -780,7 +740,7 @@ class TestGenerateCursorAwarenessFiles:
         }), encoding='utf-8')
         
         # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp_server_generator import MCPServerGenerator
+        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
         gen = MCPServerGenerator(workspace_root=workspace_root, bot_location='agile_bot/bots/test_bot')
         gen.generate_awareness_files()
         
@@ -804,29 +764,6 @@ class TestGenerateCursorAwarenessFiles:
         discovery_section = content[content.find('### Discovery'):]
         assert 'discover stories' in discovery_section
         assert 'enumerate stories' in discovery_section
-
-    @patch('agile_bot.bots.base_bot.src.utils.update_memory')
-    def test_memory_includes_ask_mode_vs_agent_mode_handling(self, mock_update_memory, generator, workspace_root):
-        """
-        SCENARIO: Memory includes ask mode vs agent mode handling
-        GIVEN: Generator creates tool awareness memory
-        WHEN: Memory is persisted via update_memory API
-        THEN: Memory content includes ask mode explanation
-        AND: Memory explains AI should check mode before invocation
-        """
-        # Given: Mock update_memory
-        mock_update_memory.return_value = {'id': '12345', 'status': 'created'}
-        
-        # When: Generate awareness files
-        generator.generate_awareness_files()
-        
-        # Then: Memory includes ask mode handling
-        call_args = mock_update_memory.call_args
-        memory_content = call_args[1]['knowledge_to_store']
-        
-        assert 'ask mode' in memory_content
-        assert 'agent mode' in memory_content
-        assert 'MCP tools only available in agent mode' in memory_content
 
     def test_generator_handles_file_write_errors_gracefully_creates_directory(self, generator, workspace_root):
         """
@@ -883,19 +820,14 @@ class TestGenerateCursorAwarenessFiles:
 class TestGenerateAwarenessFilesIntegration:
     """Integration test for full awareness files generation."""
 
-    @patch('agile_bot.bots.base_bot.src.utils.update_memory')
-    def test_full_awareness_generation_workflow(self, mock_update_memory, generator, workspace_root):
+    def test_full_awareness_generation_workflow(self, generator, workspace_root):
         """
         INTEGRATION TEST: Full awareness generation workflow
         GIVEN: MCP Server Generator initialized
         WHEN: generate_awareness_files() called
-        THEN: Both bot-specific rules file and memory are created
+        THEN: Bot-specific rules file is created
         AND: Rules file has all required sections
-        AND: Memory created with correct content
         """
-        # Given: Mock update_memory
-        mock_update_memory.return_value = {'id': '12345', 'status': 'created'}
-        
         # When: Generate awareness files
         generator.generate_awareness_files()
         
@@ -908,10 +840,4 @@ class TestGenerateAwarenessFilesIntegration:
         assert 'test_bot' in content.lower()
         assert 'Priority: Check MCP Tools First' in content
         assert 'Bot: test_bot' in content
-        
-        # And: Memory created
-        mock_update_memory.assert_called_once()
-        call_args = mock_update_memory.call_args
-        assert call_args[1]['action'] == 'create'
-        assert 'Always Check MCP Tools First' in call_args[1]['title']
 

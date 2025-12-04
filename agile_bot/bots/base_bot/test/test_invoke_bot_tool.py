@@ -16,6 +16,7 @@ Uses transitions state machine for workflow state management.
 import pytest
 from pathlib import Path
 import json
+from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -127,7 +128,7 @@ class TestBotToolInvocation:
         create_base_action_instructions(workspace_root, 'gather_context')
         
         # When: Call REAL Bot API
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(
             bot_name='test_bot',
             workspace_root=workspace_root,
@@ -157,7 +158,7 @@ class TestBotToolInvocation:
         create_base_action_instructions(workspace_root, 'build_knowledge')
         
         # When: Call REAL Bot API for specific behavior
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(
             bot_name='test_bot',
             workspace_root=workspace_root,
@@ -193,7 +194,6 @@ class TestBehaviorActionInstructions:
         base_instructions = create_base_action_instructions(workspace_root, action)
         
         # When: Call REAL GatherContextAction API
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
         action_obj = GatherContextAction(
             bot_name=bot_name,
             behavior=behavior,
@@ -221,7 +221,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
@@ -241,7 +241,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape', 'discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
@@ -266,7 +266,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(
             bot_name='story_bot',
             workspace_root=workspace_root,
@@ -290,7 +290,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery', 'exploration'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(
             bot_name='story_bot',
             workspace_root=workspace_root,
@@ -314,7 +314,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(
             bot_name='story_bot',
             workspace_root=workspace_root,

@@ -1,23 +1,18 @@
-"""
-Activity Tracker
-
-Tracks action execution activity using TinyDB.
-"""
 from pathlib import Path
 from datetime import datetime
 from tinydb import TinyDB, Query
 
 
 class ActivityTracker:
-    """Tracks action execution activity."""
     
-    def __init__(self, workspace_root: Path):
+    def __init__(self, workspace_root: Path, bot_name: str):
         self.workspace_root = Path(workspace_root)
-        self.db_path = self.workspace_root / 'project_area' / 'activity_log.json'
+        self.bot_name = bot_name
+        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name
+        self.db_path = bot_dir / 'project_area' / 'activity_log.json'
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
     
     def track_start(self, bot_name: str, behavior: str, action: str):
-        """Track action start."""
         with TinyDB(self.db_path) as db:
             db.insert({
                 'action_state': f'{bot_name}.{behavior}.{action}',
@@ -26,7 +21,6 @@ class ActivityTracker:
             })
     
     def track_completion(self, bot_name: str, behavior: str, action: str, outputs: dict = None, duration: int = None):
-        """Track action completion."""
         with TinyDB(self.db_path) as db:
             entry = {
                 'action_state': f'{bot_name}.{behavior}.{action}',

@@ -1,20 +1,13 @@
-"""
-Router
-
-Routes workflow to next action based on workflow state.
-"""
 from pathlib import Path
 import json
 
 
 class Router:
-    """Routes to next action based on workflow state."""
     
     def __init__(self, workspace_root: Path):
         self.workspace_root = Path(workspace_root)
     
     def determine_next_action_from_state(self, state_file: Path) -> str:
-        """Determine next action from workflow state file."""
         if not state_file.exists():
             return 'gather_context'
         

@@ -1,32 +1,18 @@
-"""
-MCP Server Wrapper
-
-Wraps MCP server functionality with bot initialization and tool routing.
-"""
 from pathlib import Path
 import json
 from typing import Dict, Any
-from agile_bot.bots.base_bot.src.bot import Bot
+from agile_bot.bots.base_bot.src.bot.bot import Bot
 
 
 class MCPServer:
-    """MCP Server that manages bot instance and tool invocations."""
     
     def __init__(self, bot_name: str, workspace_root: Path, config_path: Path):
-        """Initialize MCP Server.
-        
-        Args:
-            bot_name: Name of the bot
-            workspace_root: Root workspace directory
-            config_path: Path to bot_config.json
-        """
         self.bot_name = bot_name
         self.workspace_root = Path(workspace_root)
         self.config_path = Path(config_path)
         self.bot = None
     
     def start(self):
-        """Start server and initialize bot instance."""
         self.bot = Bot(
             bot_name=self.bot_name,
             workspace_root=self.workspace_root,

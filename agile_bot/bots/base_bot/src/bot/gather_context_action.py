@@ -1,36 +1,16 @@
-"""
-Gather Context Action
-
-Handles gather_context action including:
-- Loading and merging instructions from base and behavior-specific locations
-- Injecting guardrails (questions and evidence)
-- Managing rendered content
-"""
 from pathlib import Path
 from typing import Dict, Any
 import json
-from agile_bot.bots.base_bot.src.utils import read_json_file, find_behavior_folder
-from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+from agile_bot.bots.base_bot.src.utils import read_json_file
+from agile_bot.bots.base_bot.src.bot.base_action import BaseAction
 
 
-class GatherContextAction:
-    """Gather Context action implementation."""
+class GatherContextAction(BaseAction):
     
     def __init__(self, bot_name: str, behavior: str, workspace_root: Path):
-        self.bot_name = bot_name
-        self.behavior = behavior
-        self.workspace_root = Path(workspace_root)
-        self.tracker = ActivityTracker(workspace_root)
+        super().__init__(bot_name, behavior, workspace_root, 'gather_context')
     
     def load_and_merge_instructions(self) -> Dict[str, Any]:
-        """Load and merge instructions from base and behavior-specific locations.
-        
-        Returns:
-            Merged instructions dictionary
-            
-        Raises:
-            FileNotFoundError: If base instructions not found
-        """
         # Load base instructions - check for numbered prefix folders
         base_actions_dir = self.workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
         
@@ -66,7 +46,8 @@ class GatherContextAction:
         # Load behavior-specific instructions (optional)
         behavior_path = None
         try:
-            behavior_folder = find_behavior_folder(
+            from agile_bot.bots.base_bot.src.bot.bot import Behavior
+            behavior_folder = Behavior.find_behavior_folder(
                 self.workspace_root,
                 self.bot_name,
                 self.behavior
@@ -92,17 +73,10 @@ class GatherContextAction:
         return merged
     
     def inject_questions_and_evidence(self) -> Dict[str, Any]:
-        """Inject guardrails (questions and evidence) into instructions.
-        
-        Returns:
-            Instructions with guardrails injected
-            
-        Raises:
-            json.JSONDecodeError: If guardrails JSON is malformed
-        """
         # Find behavior folder (handles numbered prefixes)
         try:
-            behavior_folder = find_behavior_folder(
+            from agile_bot.bots.base_bot.src.bot.bot import Behavior
+            behavior_folder = Behavior.find_behavior_folder(
                 self.workspace_root,
                 self.bot_name,
                 self.behavior
@@ -131,11 +105,6 @@ class GatherContextAction:
         return instructions
     
     def inject_gather_context_instructions(self) -> Dict[str, Any]:
-        """Inject instructions to load rendered content.
-        
-        Returns:
-            Instructions with rendered content paths
-        """
         rendered_dir = (
             self.workspace_root /
             'agile_bot' / 'bots' / self.bot_name / 'docs' / 'stories'
@@ -150,35 +119,5 @@ class GatherContextAction:
         return {
             'rendered_content_paths': rendered_paths
         }
-    
-    def track_activity_on_start(self):
-        """Track activity when action starts."""
-        self.tracker.track_start(self.bot_name, self.behavior, 'gather_context')
-    
-    def track_activity_on_completion(self, outputs: dict = None, duration: int = None):
-        """Track activity when action completes."""
-        self.tracker.track_completion(self.bot_name, self.behavior, 'gather_context', outputs, duration)
-    
-    def save_state_on_completion(self):
-        """Save workflow state on completion."""
-        state_file = self.workspace_root / 'project_area' / 'workflow_state.json'
-        state_file.parent.mkdir(parents=True, exist_ok=True)
-        state = json.loads(state_file.read_text(encoding='utf-8')) if state_file.exists() else {}
-        
-        if 'completed_actions' not in state:
-            state['completed_actions'] = []
-        
-        state['completed_actions'].append({
-            'action_state': f'{self.bot_name}.{self.behavior}.gather_context',
-            'timestamp': '2025-12-04T10:00:00Z'
-        })
-        
-        state_file.write_text(json.dumps(state), encoding='utf-8')
-    
-    def finalize_and_transition(self):
-        """Finalize action and return next action."""
-        class TransitionResult:
-            next_action = 'decide_planning_criteria'
-        return TransitionResult()
 
 

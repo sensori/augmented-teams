@@ -8,31 +8,14 @@ Tests for all stories in the 'Build Knowledge' sub-epic:
 import pytest
 from pathlib import Path
 import json
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def create_activity_log_file(workspace: Path) -> Path:
-    """Helper: Create activity log file."""
-    log_dir = workspace / 'project_area'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'activity_log.json'
-    log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
-    return log_file
-
-def create_workflow_state(workspace: Path, current_action: str, completed_actions: list = None) -> Path:
-    """Helper: Create workflow state file."""
-    state_dir = workspace / 'project_area'
-    state_dir.mkdir(parents=True, exist_ok=True)
-    state_file = state_dir / 'workflow_state.json'
-    state_file.write_text(json.dumps({
-        'current_behavior': 'story_bot.exploration',
-        'current_action': current_action,
-        'completed_actions': completed_actions or [],
-        'timestamp': '2025-12-03T10:00:00Z'
-    }), encoding='utf-8')
-    return state_file
+from agile_bot.bots.base_bot.src.bot.build_knowledge_action import BuildKnowledgeAction
+from agile_bot.bots.base_bot.test.test_helpers import (
+    verify_action_tracks_start,
+    verify_action_tracks_completion,
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action,
+    create_knowledge_graph_template
+)
 
 # ============================================================================
 # FIXTURES
@@ -53,62 +36,16 @@ class TestTrackActivityForBuildKnowledgeAction:
     """Story: Track Activity for Build Knowledge Action - Tests activity tracking for build_knowledge."""
 
     def test_track_activity_when_build_knowledge_action_starts(self, workspace_root):
-        """
-        SCENARIO: Track activity when build_knowledge action starts
-        GIVEN: action is 'build_knowledge'
-        WHEN: action starts execution
-        THEN: Activity logger creates entry with action_state
-        """
-        # Given: Activity log initialized
-        log_file = create_activity_log_file(workspace_root)
-        
-        # When: Action starts
-        from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
-        action = BuildKnowledgeAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.track_activity_on_start()
-        
-        # Then: Activity logged
-        from tinydb import TinyDB
-        with TinyDB(log_file) as db:
-            log_data = db.all()
-            assert any(
-                e['action_state'] == 'story_bot.exploration.build_knowledge'
-                for e in log_data
-            )
+        verify_action_tracks_start(workspace_root, BuildKnowledgeAction, 'build_knowledge')
 
     def test_track_activity_when_build_knowledge_action_completes(self, workspace_root):
-        """
-        SCENARIO: Track activity when build_knowledge action completes
-        GIVEN: build_knowledge action started
-        WHEN: action finishes execution
-        THEN: Activity logger creates completion entry with outputs and duration
-        """
-        # Given: Activity log
-        log_file = create_activity_log_file(workspace_root)
-        
-        # When: Action completes
-        from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
-        action = BuildKnowledgeAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.track_activity_on_completion(
+        verify_action_tracks_completion(
+            workspace_root,
+            BuildKnowledgeAction,
+            'build_knowledge',
             outputs={'knowledge_items_count': 12, 'file_path': 'knowledge.json'},
             duration=420
         )
-        
-        # Then: Completion logged with metrics
-        from tinydb import TinyDB
-        with TinyDB(log_file) as db:
-            log_data = db.all()
-            completion_entry = next((e for e in log_data if 'outputs' in e), None)
-            assert completion_entry is not None
-            assert completion_entry['duration'] == 420
 
 
 # ============================================================================
@@ -119,50 +56,44 @@ class TestProceedToRenderOutput:
     """Story: Proceed To Render Output - Tests transition to render_output action."""
 
     def test_seamless_transition_from_build_knowledge_to_render_output(self, workspace_root):
-        """
-        SCENARIO: Seamless transition from build_knowledge to render_output
-        GIVEN: build_knowledge action is complete
-        WHEN: action finalizes
-        THEN: Workflow proceeds to render_output
-        """
-        # Given: Workflow state
-        create_workflow_state(workspace_root, 'story_bot.discovery.build_knowledge')
-        
-        # When: Action transitions
-        from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
-        action = BuildKnowledgeAction(
-            bot_name='story_bot',
-            behavior='discovery',
-            workspace_root=workspace_root
-        )
-        result = action.finalize_and_transition()
-        
-        # Then: Next action is render_output
-        assert result.next_action == 'render_output'
+        verify_workflow_transition(workspace_root, 'build_knowledge', 'render_output')
 
     def test_workflow_state_captures_build_knowledge_completion(self, workspace_root):
-        """
-        SCENARIO: Workflow state captures build_knowledge completion
-        GIVEN: build_knowledge action completes
-        WHEN: Action saves workflow state
-        THEN: completed_actions includes build_knowledge entry
-        """
-        # Given: Workflow state
-        state_file = create_workflow_state(workspace_root, 'story_bot.exploration.build_knowledge')
+        verify_workflow_saves_completed_action(workspace_root, 'build_knowledge')
+
+
+# ============================================================================
+# STORY: Inject Knowledge Graph Template for Build Knowledge
+# ============================================================================
+
+class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
+    """Story: Inject Knowledge Graph Template for Build Knowledge - Tests template injection."""
+
+    def test_action_injects_knowledge_graph_template(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'exploration'
+        template_name = 'story-graph-explored-outline.json'
         
-        # When: Save completion
-        from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
-        action = BuildKnowledgeAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.save_state_on_completion()
+        template_file = create_knowledge_graph_template(workspace_root, bot_name, behavior, template_name)
         
-        # Then: Completion captured
-        state_data = json.loads(state_file.read_text(encoding='utf-8'))
-        assert any(
-            'build_knowledge' in entry.get('action_state', '')
-            for entry in state_data.get('completed_actions', [])
-        )
+        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        instructions = action_obj.inject_knowledge_graph_template()
+        
+        assert 'knowledge_graph_template' in instructions
+        assert template_name in instructions['knowledge_graph_template']
+        assert Path(instructions['knowledge_graph_template']).exists()
+
+    def test_action_raises_error_when_template_missing(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'exploration'
+        
+        behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior
+        behavior_dir.mkdir(parents=True, exist_ok=True)
+        
+        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        
+        with pytest.raises(FileNotFoundError) as exc_info:
+            action_obj.inject_knowledge_graph_template()
+        
+        assert 'Knowledge graph template not found' in str(exc_info.value) or 'template' in str(exc_info.value).lower()
 

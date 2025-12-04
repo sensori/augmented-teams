@@ -6,6 +6,7 @@ Tests for utility functions in base_bot/src/utils.py
 import pytest
 from pathlib import Path
 import json
+from agile_bot.bots.base_bot.src.bot.bot import Behavior
 
 
 # ============================================================================
@@ -53,9 +54,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, folder_name)
         
         # When: Find folder using behavior name (without number)
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, behavior_name)
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, behavior_name)
         
         # Then: Returns numbered folder
         assert found_folder == behavior_folder
@@ -73,9 +73,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, '1_shape')
         
         # When: Find folder using behavior name
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, 'shape')
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, 'shape')
         
         # Then: Returns numbered folder
         assert found_folder == behavior_folder
@@ -93,9 +92,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, '5_exploration')
         
         # When
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, 'exploration')
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, 'exploration')
         
         # Then
         assert found_folder == behavior_folder
@@ -113,10 +111,9 @@ class TestFindBehaviorFolder:
         behavior_name = 'nonexistent'
         
         # When/Then: Raises FileNotFoundError
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
         with pytest.raises(FileNotFoundError, match='Behavior folder not found'):
-            find_behavior_folder(workspace_root, bot_name, behavior_name)
+            Behavior.find_behavior_folder(workspace_root, bot_name, behavior_name)
 
     def test_handles_prioritization_folder_with_prefix(self, workspace_root):
         """
@@ -130,9 +127,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, '2_prioritization')
         
         # When
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, 'prioritization')
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, 'prioritization')
         
         # Then
         assert found_folder == behavior_folder
@@ -150,9 +146,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, '6_scenarios')
         
         # When
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, 'scenarios')
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, 'scenarios')
         
         # Then
         assert found_folder == behavior_folder
@@ -170,9 +165,8 @@ class TestFindBehaviorFolder:
         behavior_folder = create_behavior_folder(workspace_root, bot_name, '7_examples')
         
         # When
-        from agile_bot.bots.base_bot.src.utils import find_behavior_folder
         
-        found_folder = find_behavior_folder(workspace_root, bot_name, 'examples')
+        found_folder = Behavior.find_behavior_folder(workspace_root, bot_name, 'examples')
         
         # Then
         assert found_folder == behavior_folder

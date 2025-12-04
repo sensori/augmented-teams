@@ -8,32 +8,14 @@ Tests for all stories in the 'Decide Planning Criteria' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.test.test_helpers import read_activity_log
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def create_activity_log_file(workspace: Path) -> Path:
-    """Helper: Create activity log file."""
-    log_dir = workspace / 'project_area'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'activity_log.json'
-    log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
-    return log_file
-
-def create_workflow_state(workspace: Path, current_action: str, completed_actions: list = None) -> Path:
-    """Helper: Create workflow state file."""
-    state_dir = workspace / 'project_area'
-    state_dir.mkdir(parents=True, exist_ok=True)
-    state_file = state_dir / 'workflow_state.json'
-    state_file.write_text(json.dumps({
-        'current_behavior': 'story_bot.exploration',
-        'current_action': current_action,
-        'completed_actions': completed_actions or [],
-        'timestamp': '2025-12-03T10:00:00Z'
-    }), encoding='utf-8')
-    return state_file
+from agile_bot.bots.base_bot.src.bot.planning_action import PlanningAction
+from agile_bot.bots.base_bot.test.test_helpers import (
+    verify_action_tracks_start,
+    verify_action_tracks_completion,
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action,
+    create_planning_guardrails
+)
 
 # ============================================================================
 # FIXTURES
@@ -54,58 +36,16 @@ class TestTrackActivityForPlanningAction:
     """Story: Track Activity for Planning Action - Tests activity tracking for decide_planning_criteria."""
 
     def test_track_activity_when_planning_action_starts(self, workspace_root):
-        """
-        SCENARIO: Track activity when planning action starts
-        GIVEN: action is 'decide_planning_criteria'
-        WHEN: action starts execution
-        THEN: Activity logger creates entry with action_state
-        """
-        # Given: Activity log initialized
-        log_file = create_activity_log_file(workspace_root)
-        
-        # When: Action starts
-        from agile_bot.bots.base_bot.src.actions.planning_action import PlanningAction
-        action = PlanningAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.track_activity_on_start()
-        
-        # Then: Activity logged
-        log_data = read_activity_log(log_file)
-        assert any(
-            e['action_state'] == 'story_bot.exploration.decide_planning_criteria'
-            for e in log_data
-        )
+        verify_action_tracks_start(workspace_root, PlanningAction, 'decide_planning_criteria')
 
     def test_track_activity_when_planning_action_completes(self, workspace_root):
-        """
-        SCENARIO: Track activity when planning action completes
-        GIVEN: planning action started
-        WHEN: action finishes execution
-        THEN: Activity logger creates completion entry with outputs
-        """
-        # Given: Activity log
-        log_file = create_activity_log_file(workspace_root)
-        
-        # When: Action completes
-        from agile_bot.bots.base_bot.src.actions.planning_action import PlanningAction
-        action = PlanningAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.track_activity_on_completion(
+        verify_action_tracks_completion(
+            workspace_root, 
+            PlanningAction, 
+            'decide_planning_criteria',
             outputs={'criteria_count': 3, 'assumptions_count': 2},
             duration=240
         )
-        
-        # Then: Completion logged
-        log_data = read_activity_log(log_file)
-        completion_entry = next((e for e in log_data if 'outputs' in e), None)
-        assert completion_entry is not None
-        assert completion_entry['outputs']['criteria_count'] == 3
 
 
 # ============================================================================
@@ -116,50 +56,42 @@ class TestProceedToBuildKnowledge:
     """Story: Proceed To Build Knowledge - Tests transition to build_knowledge action."""
 
     def test_seamless_transition_from_planning_to_build_knowledge(self, workspace_root):
-        """
-        SCENARIO: Seamless transition from planning to build_knowledge
-        GIVEN: decide_planning_criteria action is complete
-        WHEN: action finalizes
-        THEN: Workflow proceeds to build_knowledge
-        """
-        # Given: Workflow state
-        create_workflow_state(workspace_root, 'story_bot.exploration.decide_planning_criteria')
-        
-        # When: Action transitions
-        from agile_bot.bots.base_bot.src.actions.planning_action import PlanningAction
-        action = PlanningAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        result = action.finalize_and_transition()
-        
-        # Then: Next action is build_knowledge
-        assert result.next_action == 'build_knowledge'
+        verify_workflow_transition(workspace_root, 'decide_planning_criteria', 'build_knowledge')
 
     def test_workflow_state_captures_planning_completion(self, workspace_root):
-        """
-        SCENARIO: Workflow state captures planning completion
-        GIVEN: planning action completes
-        WHEN: Action saves workflow state
-        THEN: completed_actions includes planning entry
-        """
-        # Given: Workflow state
-        state_file = create_workflow_state(workspace_root, 'story_bot.discovery.decide_planning_criteria')
+        verify_workflow_saves_completed_action(workspace_root, 'decide_planning_criteria', behavior='discovery')
+
+
+# ============================================================================
+# STORY: Inject Planning Criteria Into Instructions
+# ============================================================================
+
+class TestInjectPlanningCriteriaIntoInstructions:
+    """Story: Inject Planning Criteria Into Instructions - Tests planning criteria injection."""
+
+    def test_action_injects_decision_criteria_and_assumptions(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'exploration'
+        assumptions = ['Stories follow user story format', 'Acceptance criteria are testable']
+        criteria = {'scope': ['Component', 'System', 'Solution']}
         
-        # When: Save completion
-        from agile_bot.bots.base_bot.src.actions.planning_action import PlanningAction
-        action = PlanningAction(
-            bot_name='story_bot',
-            behavior='discovery',
-            workspace_root=workspace_root
-        )
-        action.save_state_on_completion()
+        create_planning_guardrails(workspace_root, bot_name, behavior, assumptions, criteria)
         
-        # Then: Completion captured
-        state_data = json.loads(state_file.read_text(encoding='utf-8'))
-        assert any(
-            'decide_planning_criteria' in entry.get('action_state', '')
-            for entry in state_data.get('completed_actions', [])
-        )
+        action_obj = PlanningAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        instructions = action_obj.inject_decision_criteria_and_assumptions()
+        
+        assert 'decision_criteria' in instructions
+        assert 'assumptions' in instructions
+        assert instructions['assumptions'] == assumptions
+        assert instructions['decision_criteria']['scope'] == criteria['scope']
+
+    def test_action_uses_base_planning_when_guardrails_missing(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'exploration'
+        
+        action_obj = PlanningAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        instructions = action_obj.inject_decision_criteria_and_assumptions()
+        
+        assert 'decision_criteria' not in instructions or instructions['decision_criteria'] == {}
+        assert 'assumptions' not in instructions or instructions['assumptions'] == []
 

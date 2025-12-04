@@ -1,8 +1,3 @@
-"""
-Server Deployer
-
-Deploys FastMCP bot servers and publishes tool catalogs.
-"""
 from pathlib import Path
 import json
 from typing import Optional
@@ -11,7 +6,6 @@ from dataclasses import dataclass
 
 @dataclass
 class DeploymentResult:
-    """Result of server deployment."""
     status: str
     server_name: str
     tool_count: int
@@ -21,7 +15,6 @@ class DeploymentResult:
 
 @dataclass
 class ToolEntry:
-    """Tool catalog entry."""
     name: str
     trigger_patterns: list
     behavior: str
@@ -30,23 +23,18 @@ class ToolEntry:
 
 
 class ToolCatalog:
-    """Tool catalog for published tools."""
     
     def __init__(self):
-        """Initialize tool catalog."""
         self.tools = {}
     
     def add_tool(self, tool_entry: ToolEntry):
-        """Add tool to catalog."""
         self.tools[tool_entry.name] = tool_entry
     
     def get_tool(self, name: str) -> ToolEntry:
-        """Get tool from catalog by name."""
         return self.tools.get(name)
 
 
 class ServerDeployer:
-    """Deploys MCP bot server and publishes tool catalog."""
     
     def __init__(
         self,
@@ -54,13 +42,6 @@ class ServerDeployer:
         workspace_root: Path,
         protocol_handler_url: Optional[str] = None
     ):
-        """Initialize Server Deployer.
-        
-        Args:
-            config_path: Path to bot configuration file (parent folder of config is bot_name)
-            workspace_root: Root workspace directory
-            protocol_handler_url: Optional URL to MCP protocol handler
-        """
         self.config_path = Path(config_path)
         self.workspace_root = Path(workspace_root)
         
@@ -71,14 +52,6 @@ class ServerDeployer:
         self.catalog = ToolCatalog()
     
     def deploy_server(self) -> DeploymentResult:
-        """Deploy MCP bot server.
-        
-        Returns:
-            DeploymentResult with status and metadata
-            
-        Raises:
-            ConnectionError: If protocol handler not accessible
-        """
         if not self.config_path.exists():
             return DeploymentResult(
                 status='failed',
@@ -111,11 +84,6 @@ class ServerDeployer:
         )
     
     def get_tool_catalog(self) -> ToolCatalog:
-        """Get tool catalog with metadata.
-        
-        Returns:
-            ToolCatalog with all registered tools
-        """
         if not self.config_path.exists():
             return self.catalog
         
@@ -150,7 +118,6 @@ class ServerDeployer:
         return self.catalog
     
     def _load_trigger_words(self, behavior: str, action: str) -> list:
-        """Load trigger words from behavior folder."""
         trigger_path = (
             self.workspace_root /
             'agile_bot' / 'bots' / self.bot_name /

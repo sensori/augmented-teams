@@ -9,34 +9,17 @@ import pytest
 from pathlib import Path
 import json
 from prefect.testing.utilities import prefect_test_harness
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def create_activity_log_file(workspace: Path) -> Path:
-    """Helper: Create activity log file."""
-    log_dir = workspace / 'project_area'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'activity_log.json'
-    log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
-    return log_file
-
-def create_workflow_state(workspace: Path, current_action: str, completed_actions: list = None) -> Path:
-    """Helper: Create workflow state file."""
-    state_dir = workspace / 'project_area'
-    state_dir.mkdir(parents=True, exist_ok=True)
-    state_file = state_dir / 'workflow_state.json'
-    state_file.write_text(json.dumps({
-        'current_behavior': 'story_bot.discovery',
-        'current_action': current_action,
-        'completed_actions': completed_actions or [],
-        'timestamp': '2025-12-03T10:00:00Z'
-    }), encoding='utf-8')
-    return state_file
+from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
+from agile_bot.bots.base_bot.test.test_helpers import (
+    create_activity_log_file,
+    create_workflow_state,
+    read_activity_log,
+    create_guardrails_files,
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action
+)
 
 def verify_activity_logged(log_file: Path, action_state: str):
-    """Helper: Verify activity was logged."""
     from tinydb import TinyDB
     with TinyDB(log_file) as db:
         entries = db.all()
@@ -71,7 +54,7 @@ class TestTrackActivityForGatherContextAction:
         log_file = create_activity_log_file(workspace_root)
         
         # When: Action starts and logs activity
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
+        from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
         action = GatherContextAction(
             bot_name='story_bot',
             behavior='discovery',
@@ -93,7 +76,7 @@ class TestTrackActivityForGatherContextAction:
         log_file = create_activity_log_file(workspace_root)
         
         # When: Action completes
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
+        from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
         action = GatherContextAction(
             bot_name='story_bot',
             behavior='discovery',
@@ -150,49 +133,19 @@ class TestProceedToDecidePlanning:
         """
         SCENARIO: Seamless transition from gather_context to decide_planning_criteria
         GIVEN: gather_context action is complete
-        WHEN: gather_context action finalizes
-        THEN: Action saves state and injects next action instructions
+        WHEN: workflow transitions
+        THEN: Workflow proceeds to decide_planning_criteria
         """
-        # Given: Action config and workflow state
-        create_workflow_state(workspace_root, 'story_bot.discovery.gather_context')
-        
-        # When: Action transitions
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='discovery',
-            workspace_root=workspace_root
-        )
-        result = action.finalize_and_transition()
-        
-        # Then: Transition instructions provided
-        assert 'decide_planning_criteria' in result.next_action
+        verify_workflow_transition(workspace_root, 'gather_context', 'decide_planning_criteria')
 
     def test_workflow_state_captures_gather_context_completion(self, workspace_root):
         """
         SCENARIO: Workflow state captures gather_context completion
         GIVEN: gather_context action completes
-        WHEN: Action saves workflow state
+        WHEN: Workflow saves completed action
         THEN: workflow state updated with timestamp and completed_actions
         """
-        # Given: Workflow state exists
-        state_file = create_workflow_state(workspace_root, 'story_bot.exploration.gather_context')
-        
-        # When: Action saves completion
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='exploration',
-            workspace_root=workspace_root
-        )
-        action.save_state_on_completion()
-        
-        # Then: Completion captured
-        state_data = json.loads(state_file.read_text(encoding='utf-8'))
-        assert any(
-            'gather_context' in entry.get('action_state', '')
-            for entry in state_data.get('completed_actions', [])
-        )
+        verify_workflow_saves_completed_action(workspace_root, 'gather_context')
 
     def test_workflow_resumes_at_decide_planning_criteria_after_interruption(self, workspace_root):
         """
@@ -212,10 +165,59 @@ class TestProceedToDecidePlanning:
         )
         
         # When: Router determines next action
-        from agile_bot.bots.base_bot.src.router import Router
+        from agile_bot.bots.base_bot.src.state.router import Router
         router = Router(workspace_root=workspace_root)
         next_action = router.determine_next_action_from_state(state_file)
         
         # Then: Next action is decide_planning_criteria
         assert next_action == 'decide_planning_criteria'
+
+
+# ============================================================================
+# STORY: Inject Guardrails as Part of Clarify Requirements
+# ============================================================================
+
+class TestInjectGuardrailsAsPartOfClarifyRequirements:
+    """Story: Inject Guardrails as Part of Clarify Requirements - Tests guardrail injection."""
+
+    def test_action_injects_questions_and_evidence(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'shape'
+        questions = ['What is the scope?', 'Who are the users?']
+        evidence = ['Requirements doc', 'User interviews']
+        
+        create_guardrails_files(workspace_root, bot_name, behavior, questions, evidence)
+        
+        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        instructions = action_obj.inject_questions_and_evidence()
+        
+        assert 'key_questions' in instructions['guardrails']
+        assert instructions['guardrails']['key_questions'] == questions
+        assert 'evidence' in instructions['guardrails']
+        assert instructions['guardrails']['evidence'] == evidence
+
+    def test_action_uses_base_instructions_when_guardrails_missing(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'shape'
+        
+        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        instructions = action_obj.inject_questions_and_evidence()
+        
+        assert 'guardrails' not in instructions or instructions['guardrails'] == {}
+
+    def test_action_handles_malformed_guardrails_json(self, workspace_root):
+        bot_name = 'test_bot'
+        behavior = 'shape'
+        guardrails_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior / 'guardrails' / 'required_context'
+        guardrails_dir.mkdir(parents=True, exist_ok=True)
+        
+        questions_file = guardrails_dir / 'key_questions.json'
+        questions_file.write_text('invalid json {')
+        
+        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, workspace_root=workspace_root)
+        
+        with pytest.raises(json.JSONDecodeError) as exc_info:
+            action_obj.inject_questions_and_evidence()
+        
+        assert 'key_questions.json' in str(exc_info.value) or 'Expecting' in str(exc_info.value)
 

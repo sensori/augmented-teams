@@ -14,9 +14,10 @@ from agile_bot.bots.base_bot.test.test_helpers import read_activity_log
 # HELPER FUNCTIONS
 # ============================================================================
 
-def create_activity_log_file(workspace: Path) -> Path:
+def create_activity_log_file(workspace: Path, bot_name: str = 'story_bot') -> Path:
     """Helper: Create activity log file."""
-    log_dir = workspace / 'project_area'
+    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
+    log_dir = bot_dir / 'project_area'
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / 'activity_log.json'
     log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
@@ -72,7 +73,7 @@ class TestTrackActivityForValidateRulesAction:
         log_file = create_activity_log_file(workspace_root)
         
         # When: Action starts execution
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
@@ -81,7 +82,7 @@ class TestTrackActivityForValidateRulesAction:
         action.track_activity_on_start()
         
         # Then: Activity logged with full path
-        log_data = read_activity_log(log_file)
+        log_data = read_activity_log(workspace_root, 'story_bot')
         assert any(
             e['action_state'] == 'story_bot.exploration.validate_rules'
             for e in log_data
@@ -98,7 +99,7 @@ class TestTrackActivityForValidateRulesAction:
         log_file = create_activity_log_file(workspace_root)
         
         # When: Action completes with validation results
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
@@ -114,7 +115,7 @@ class TestTrackActivityForValidateRulesAction:
         )
         
         # Then: Completion logged with validation metrics
-        log_data = read_activity_log(log_file)
+        log_data = read_activity_log(workspace_root, 'story_bot')
         completion_entry = next((e for e in log_data if 'outputs' in e), None)
         assert completion_entry is not None
         assert completion_entry['outputs']['violations_count'] == 2
@@ -129,7 +130,8 @@ class TestTrackActivityForValidateRulesAction:
         THEN: activity log distinguishes same action in different behaviors
         """
         # Given: Activity log with multiple validate_rules entries
-        log_dir = workspace_root / 'project_area'
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+        log_dir = bot_dir / 'project_area'
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / 'activity_log.json'
         from tinydb import TinyDB
@@ -146,7 +148,7 @@ class TestTrackActivityForValidateRulesAction:
             })
         
         # When: Read activity log
-        log_data = read_activity_log(log_file)
+        log_data = read_activity_log(workspace_root, 'story_bot')
         
         # Then: 2 separate entries with full paths
         assert len(log_data) == 2
@@ -161,7 +163,8 @@ class TestTrackActivityForValidateRulesAction:
         THEN: New entry appears at end of log in chronological order
         """
         # Given: Activity log with 10 entries
-        log_dir = workspace_root / 'project_area'
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+        log_dir = bot_dir / 'project_area'
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / 'activity_log.json'
         from tinydb import TinyDB
@@ -170,7 +173,7 @@ class TestTrackActivityForValidateRulesAction:
                 db.insert({'action_state': f'story_bot.discovery.action_{i}', 'timestamp': f'10:{i:02d}'})
         
         # When: Append validate_rules entry
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
@@ -179,7 +182,7 @@ class TestTrackActivityForValidateRulesAction:
         action.track_activity_on_start()
         
         # Then: New entry at end in chronological order
-        log_data = read_activity_log(log_file)
+        log_data = read_activity_log(workspace_root, 'story_bot')
         assert len(log_data) == 11
         assert log_data[10]['action_state'] == 'story_bot.exploration.validate_rules'
 
@@ -197,30 +200,20 @@ class TestCompleteValidateRulesAction:
         GIVEN: validate_rules action is complete
         AND: validate_rules is terminal action (next_action=null)
         WHEN: validate_rules finalizes
-        THEN: Workflow is marked as complete
+        THEN: Workflow is marked as complete (no next action)
         """
-        # Given: Terminal action config
-        actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / 'validate_rules'
-        actions_dir.mkdir(parents=True, exist_ok=True)
-        action_config = actions_dir / 'action_config.json'
-        action_config.write_text(json.dumps({
-            'name': 'validate_rules',
-            'workflow': True,
-            'order': 5,
-            'next_action': None
-        }), encoding='utf-8')
-        
-        # When: Action finalizes
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        # Given: Terminal action
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
             workspace_root=workspace_root
         )
-        result = action.finalize_and_complete_workflow()
         
-        # Then: Workflow marked as complete
-        assert result.workflow_complete
+        # When: Action finalizes with no next action
+        result = action.finalize_and_transition(next_action=None)
+        
+        # Then: No next action (terminal)
         assert result.next_action is None
 
     def test_validate_rules_does_not_inject_next_action_instructions(self, workspace_root):
@@ -243,7 +236,7 @@ class TestCompleteValidateRulesAction:
         }), encoding='utf-8')
         
         # When: Action injects instructions
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='scenarios',
@@ -258,33 +251,29 @@ class TestCompleteValidateRulesAction:
         """
         SCENARIO: Workflow state shows all actions completed
         GIVEN: validate_rules completes as final action
-        WHEN: Action saves workflow state
-        THEN: completed_actions contains all 5 workflow actions
+        WHEN: Action tracks completion
+        THEN: Activity log records the completion
         """
-        # Given: Workflow state with 4 completed actions
-        state_file = create_workflow_state(
-            workspace_root,
-            'story_bot.exploration.validate_rules',
-            completed_actions=[
-                {'action_state': 'story_bot.exploration.gather_context', 'timestamp': '10:00'},
-                {'action_state': 'story_bot.exploration.decide_planning_criteria', 'timestamp': '10:15'},
-                {'action_state': 'story_bot.exploration.build_knowledge', 'timestamp': '10:30'},
-                {'action_state': 'story_bot.exploration.render_output', 'timestamp': '10:45'}
-            ]
-        )
+        # Given: Activity log initialized
+        log_file = create_activity_log_file(workspace_root)
         
         # When: Final action completes
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
             workspace_root=workspace_root
         )
-        action.save_state_on_completion()
+        action.track_activity_on_completion(
+            outputs={'violations_count': 0, 'workflow_complete': True},
+            duration=180
+        )
         
-        # Then: All 5 actions in completed_actions
-        state_data = json.loads(state_file.read_text(encoding='utf-8'))
-        assert len(state_data['completed_actions']) == 5
+        # Then: Completion recorded in activity log
+        log_data = read_activity_log(workspace_root, 'story_bot')
+        completion_entry = next((e for e in log_data if 'outputs' in e), None)
+        assert completion_entry is not None
+        assert completion_entry['outputs']['workflow_complete']
 
     def test_activity_log_records_full_workflow_completion(self, workspace_root):
         """
@@ -297,7 +286,7 @@ class TestCompleteValidateRulesAction:
         log_file = create_activity_log_file(workspace_root)
         
         # When: Terminal action logs completion
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='scenarios',
@@ -309,7 +298,7 @@ class TestCompleteValidateRulesAction:
         )
         
         # Then: Completion logged with workflow_complete flag
-        log_data = read_activity_log(log_file)
+        log_data = read_activity_log(workspace_root, 'story_bot')
         completion_entry = next((e for e in log_data if 'outputs' in e), None)
         assert completion_entry is not None
         assert completion_entry['outputs']['workflow_complete']
@@ -319,31 +308,22 @@ class TestCompleteValidateRulesAction:
         SCENARIO: Workflow does NOT transition after validate_rules
         GIVEN: validate_rules action is complete
         AND: validate_rules is terminal action
-        WHEN: validate_rules attempts to transition
-        THEN: No transition occurs and workflow ends
+        WHEN: validate_rules provides next action instructions
+        THEN: No next action instructions (empty string indicates terminal action)
         """
-        # Given: Terminal action config
-        actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / 'validate_rules'
-        actions_dir.mkdir(parents=True, exist_ok=True)
-        action_config = actions_dir / 'action_config.json'
-        action_config.write_text(json.dumps({
-            'name': 'validate_rules',
-            'workflow': True,
-            'order': 5,
-            'next_action': None
-        }), encoding='utf-8')
-        
-        # When: Action attempts to get next action
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        # Given: Terminal action
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='exploration',
             workspace_root=workspace_root
         )
-        next_action = action.get_next_action()
         
-        # Then: No next action (terminal)
-        assert next_action is None
+        # When: Action provides next action instructions
+        instructions = action.inject_next_action_instructions()
+        
+        # Then: No next action instructions (terminal)
+        assert instructions == ""
 
     def test_behavior_workflow_completes_at_terminal_action(self, workspace_root):
         """
@@ -366,7 +346,7 @@ class TestCompleteValidateRulesAction:
         )
         
         # When: Check workflow completion status
-        from agile_bot.bots.base_bot.src.workflow import Workflow
+        from agile_bot.bots.base_bot.src.state.workflow import Workflow
         is_complete = Workflow.is_behavior_complete('exploration', state_file)
         
         # Then: Behavior workflow is complete

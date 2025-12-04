@@ -1,12 +1,3 @@
-"""
-Base Bot Class
-
-Provides core bot functionality including:
-- Loading bot configuration
-- Managing behaviors
-- Routing tool invocations to behavior actions
-- Workflow state management using transitions state machine
-"""
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 import json
@@ -15,15 +6,7 @@ from agile_bot.bots.base_bot.src.utils import read_json_file
 
 
 def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str], List[Dict]]:
-    """
-    Load workflow states and transitions from action_config.json files.
-    
-    Reads all action configurations from base_actions/, sorts by order,
-    and builds state list and transition list.
-    
-    Returns:
-        Tuple of (states_list, transitions_list)
-    """
+
     base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
     
     # Fallback if path doesn't exist (for tests with temp workspaces)
@@ -74,7 +57,6 @@ def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str
 
 
 class BotResult:
-    """Result from bot tool invocation."""
     
     def __init__(self, status: str, behavior: str, action: str, data: Dict[str, Any] = None):
         self.status = status
@@ -85,7 +67,6 @@ class BotResult:
 
 
 class Behavior:
-    """Behavior container for action execution."""
     
     def __init__(self, name: str, bot_name: str, workspace_root: Path):
         self.name = name
@@ -96,7 +77,7 @@ class Behavior:
         states, transitions = load_workflow_states_and_transitions(self.workspace_root)
         
         # Initialize workflow (contains state machine)
-        from agile_bot.bots.base_bot.src.workflow import Workflow
+        from agile_bot.bots.base_bot.src.state.workflow import Workflow
         self.workflow = Workflow(
             bot_name=bot_name,
             behavior=name,
@@ -105,23 +86,37 @@ class Behavior:
             transitions=transitions
         )
     
+    @staticmethod
+    def find_behavior_folder(workspace_root: Path, bot_name: str, behavior_name: str) -> Path:
+        behaviors_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors'
+        
+        # Try to find folder with or without number prefix
+        for folder in behaviors_dir.glob(f'*{behavior_name}'):
+            if folder.is_dir():
+                return folder
+        
+        # Fall back to exact name
+        behavior_folder = behaviors_dir / behavior_name
+        if behavior_folder.exists():
+            return behavior_folder
+        
+        raise FileNotFoundError(
+            f'Behavior folder not found for {behavior_name} in {behaviors_dir}'
+        )
+    
     @property
     def state(self):
-        """Delegate to workflow current state."""
         return self.workflow.current_state
     
     @property
     def workflow_states(self):
-        """Delegate to workflow states list."""
         return self.workflow.workflow_states
     
     def proceed(self):
-        """Delegate to workflow transition."""
         self.workflow.machine.proceed()
     
     def initialize_project(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute initialize project action with activity tracking and workflow state."""
-        from agile_bot.bots.base_bot.src.actions.initialize_project_action import InitializeProjectAction
+        from agile_bot.bots.base_bot.src.bot.initialize_project_action import InitializeProjectAction
         
         if parameters is None:
             parameters = {}
@@ -142,8 +137,8 @@ class Behavior:
         # Track activity completion
         action.track_activity_on_completion(outputs=data)
         
-        # Save workflow state
-        action.save_state_on_completion()
+        # Save completed action to workflow state
+        self.workflow.save_completed_action('initialize_project')
         
         return BotResult(
             status='completed',
@@ -153,8 +148,7 @@ class Behavior:
         )
     
     def gather_context(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute gather context action as Prefect task."""
-        from agile_bot.bots.base_bot.src.actions.gather_context_action import GatherContextAction
+        from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
         
         action = GatherContextAction(
             bot_name=self.bot_name,
@@ -171,8 +165,7 @@ class Behavior:
         )
     
     def decide_planning_criteria(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute decide planning criteria action as Prefect task."""
-        from agile_bot.bots.base_bot.src.actions.planning_action import PlanningAction
+        from agile_bot.bots.base_bot.src.bot.planning_action import PlanningAction
         
         action = PlanningAction(
             bot_name=self.bot_name,
@@ -189,8 +182,7 @@ class Behavior:
         )
     
     def build_knowledge(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute build knowledge action as Prefect task."""
-        from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
+        from agile_bot.bots.base_bot.src.bot.build_knowledge_action import BuildKnowledgeAction
         
         action = BuildKnowledgeAction(
             bot_name=self.bot_name,
@@ -212,7 +204,6 @@ class Behavior:
         )
     
     def render_output(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute render output action as Prefect task."""
         return BotResult(
             status='completed',
             behavior=self.name,
@@ -220,8 +211,7 @@ class Behavior:
         )
     
     def validate_rules(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute validate rules action as Prefect task."""
-        from agile_bot.bots.base_bot.src.actions.validate_rules_action import ValidateRulesAction
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         
         action = ValidateRulesAction(
             bot_name=self.bot_name,
@@ -238,7 +228,6 @@ class Behavior:
         )
     
     def correct_bot(self, parameters: Dict[str, Any] = None) -> BotResult:
-        """Execute correct bot action."""
         return BotResult(
             status='completed',
             behavior=self.name,
@@ -246,7 +235,6 @@ class Behavior:
         )
     
     def forward_to_current_action(self) -> BotResult:
-        """Forward to current action using workflow state machine."""
         # Workflow knows current state (action)
         current_action = self.workflow.current_state
         
@@ -261,17 +249,6 @@ class Behavior:
     
     def execute(self, action_class, action_name: str, 
                 execute_fn, parameters: Dict[str, Any] = None) -> BotResult:
-        """Template method: wraps action execution with activity tracking.
-        
-        Args:
-            action_class: Action class to instantiate
-            action_name: Name of the action
-            execute_fn: Function to execute on action instance
-            parameters: Optional parameters for execution
-            
-        Returns:
-            BotResult with execution details
-        """
         action = action_class(
             bot_name=self.bot_name,
             behavior=self.name,
@@ -287,8 +264,8 @@ class Behavior:
         # Track completion
         action.track_activity_on_completion(outputs=result if isinstance(result, dict) else {})
         
-        # Save workflow state
-        action.save_state_on_completion()
+        # Save completed action to workflow state
+        self.workflow.save_completed_action(action_name)
         
         return BotResult(
             status='completed',
@@ -299,17 +276,10 @@ class Behavior:
 
 
 class Bot:
-    """Base Bot class that manages behaviors and routes actions."""
     
     def __init__(self, bot_name: str, workspace_root: Path, config_path: Path):
-        """Initialize Bot.
-        
-        Args:
-            bot_name: Name of the bot
-            workspace_root: Root workspace directory
-            config_path: Path to bot_config.json
-        """
         self.name = bot_name
+        self.bot_name = bot_name  # Add bot_name attribute for consistency
         self.workspace_root = Path(workspace_root)
         self.config_path = Path(config_path)
         
@@ -331,19 +301,6 @@ class Bot:
             setattr(self, behavior_name, behavior_obj)
     
     def invoke_tool(self, tool_name: str, parameters: Dict[str, Any]) -> BotResult:
-        """Invoke a tool by routing to the correct behavior action.
-        
-        Args:
-            tool_name: Name of the tool (e.g., 'test_bot_shape_gather_context')
-            parameters: Parameters including 'behavior' and 'action'
-            
-        Returns:
-            BotResult with execution details
-            
-        Raises:
-            AttributeError: If behavior not found
-            FileNotFoundError: If action not found in base actions
-        """
         behavior = parameters.get('behavior')
         action = parameters.get('action')
         
@@ -366,17 +323,9 @@ class Bot:
         return action_method(parameters)
     
     def forward_to_current_behavior_and_current_action(self) -> BotResult:
-        """
-        Forward to current behavior and current action.
-        
-        Reads workflow state from file to determine current behavior.
-        Defaults to first behavior in config if no state exists.
-        
-        Returns:
-            BotResult from executed action
-        """
-        # Read workflow state
-        state_file = self.workspace_root / 'project_area' / 'workflow_state.json'
+        # Read workflow state from bot directory
+        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.name
+        state_file = bot_dir / 'project_area' / 'workflow_state.json'
         
         current_behavior = None
         if state_file.exists():
