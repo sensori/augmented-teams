@@ -1,0 +1,570 @@
+{
+  "_explanation": {
+    "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
+    "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "domain_placement": "domain_concepts: 'local' if relevant to single sub_epic, 'global' if relevant to multiple sub_epics. Place at most specific level (local preferred), but elevate to parent if used by multiple children."
+  },
+  "epics": [
+    {
+      "name": "Group Minions into Mobs",
+      "sequential_order": 1,
+      "estimated_stories": 10,
+      "domain_concepts": [
+        {
+          "name": "Mob",
+          "responsibilities": [
+            {
+              "name": "Group minions together for unified control",
+              "collaborators": ["Minion", "Foundry VTT Token System"]
+            },
+            {
+              "name": "Maintain mob membership",
+              "collaborators": ["Minion"]
+            },
+            {
+              "name": "Execute coordinated actions for all members",
+              "collaborators": ["Strategy", "Target Selection"]
+            }
+          ]
+        },
+        {
+          "name": "Minion",
+          "responsibilities": [
+            {
+              "name": "Represent individual token/actor that can be grouped",
+              "collaborators": ["Foundry VTT Token System", "Foundry VTT Actor System"]
+            },
+            {
+              "name": "Belong to a mob",
+              "collaborators": ["Mob"]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "Create and Edit Mobs",
+          "sequential_order": 1,
+          "estimated_stories": 5,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Select multiple minion tokens on canvas when preparing for combat",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Create mob with selected tokens and assign random leader",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Display mob grouping in combat tracker showing all members",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Edit mob membership by adding or removing minion tokens",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Delete mob and return minions to individual control",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Spawn Mobs from Actors",
+          "sequential_order": 2,
+          "estimated_stories": 5,
+          "domain_concepts": [
+            {
+              "name": "Mob Template",
+              "responsibilities": [
+                {
+                  "name": "Define mob configuration for spawning",
+                  "collaborators": ["Actor", "Strategy"]
+                },
+                {
+                  "name": "Store actor references and spawn parameters",
+                  "collaborators": ["Foundry VTT Actor System"]
+                }
+              ]
+            }
+          ],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Select actor templates when creating mob from library",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Spawn mob from selected actor templates on canvas",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Create reusable mob template from selected actors and configuration",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save mob template to library for future use",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Load saved mob template and spawn mob on canvas",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Select and Configure Mob Strategies",
+      "sequential_order": 2,
+      "estimated_stories": 8,
+      "domain_concepts": [
+        {
+          "name": "Strategy",
+          "responsibilities": [
+            {
+              "name": "Define target selection rules",
+              "collaborators": ["Target Selection"]
+            },
+            {
+              "name": "Determine attack behavior",
+              "collaborators": ["Attack Execution"]
+            },
+            {
+              "name": "Configure mob behavior patterns",
+              "collaborators": ["Mob"]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "Select Strategy Type",
+          "sequential_order": 1,
+          "estimated_stories": 5,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Select attack most powerful target strategy when mob needs to eliminate strongest threat",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Select attack weakest target strategy when mob needs quick eliminations",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Select defend leader strategy when mob leader is under threat",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Select attack most damaged target strategy when mob needs to finish off wounded enemies",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Select attack common target strategy when mob needs coordinated focus fire",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Configure Strategy Settings",
+          "sequential_order": 2,
+          "estimated_stories": 3,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Open mob configuration panel when clicking on mob leader token or combat tracker entry",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Display current strategy and available options in configuration panel",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save strategy configuration and apply to mob for future actions",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Choose Targets for Mob Actions",
+      "sequential_order": 3,
+      "estimated_stories": 6,
+      "domain_concepts": [
+        {
+          "name": "Target Selection",
+          "responsibilities": [
+            {
+              "name": "Determine target based on strategy",
+              "collaborators": ["Strategy", "Foundry VTT Combat System"]
+            },
+            {
+              "name": "Evaluate available targets",
+              "collaborators": ["Foundry VTT Combat Tracker"]
+            },
+            {
+              "name": "Apply strategy rules to select target",
+              "collaborators": ["Strategy"]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "Apply Strategy-Based Target Selection",
+          "sequential_order": 1,
+          "estimated_stories": 4,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "System queries combat tracker for available enemy targets when mob's turn begins",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["System"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System calculates power levels for each available target based on combat stats",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["System"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System applies selected strategy rules to determine optimal target",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": ["System"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Display selected target in combat tracker with visual indicator",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Manual Target Override",
+          "sequential_order": 2,
+          "estimated_stories": 2,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Override strategy-selected target when manual control is needed",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Manually select target token for mob action from available enemies",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Execute Mob Actions",
+      "sequential_order": 4,
+      "estimated_stories": 10,
+      "domain_concepts": [
+        {
+          "name": "Attack Execution",
+          "responsibilities": [
+            {
+              "name": "Execute attack for all mob members",
+              "collaborators": ["Mob", "Foundry VTT Combat System"]
+            },
+            {
+              "name": "Handle different attack types",
+              "collaborators": ["Ranged Attack", "Melee Attack", "Area Attack"]
+            },
+            {
+              "name": "Coordinate movement and attack",
+              "collaborators": ["Movement", "Foundry VTT Canvas System"]
+            }
+          ]
+        },
+        {
+          "name": "Ranged Attack",
+          "responsibilities": [
+            {
+              "name": "Execute attack at range",
+              "collaborators": ["Attack Execution", "Foundry VTT Combat System"]
+            }
+          ]
+        },
+        {
+          "name": "Melee Attack",
+          "responsibilities": [
+            {
+              "name": "Execute close combat attack",
+              "collaborators": ["Attack Execution", "Movement", "Foundry VTT Combat System"]
+            },
+            {
+              "name": "Require movement to target if out of range",
+              "collaborators": ["Movement", "Foundry VTT Canvas System"]
+            }
+          ]
+        },
+        {
+          "name": "Area Attack",
+          "responsibilities": [
+            {
+              "name": "Execute attack affecting multiple targets",
+              "collaborators": ["Attack Execution", "Foundry VTT Combat System"]
+            }
+          ]
+        },
+        {
+          "name": "Movement",
+          "responsibilities": [
+            {
+              "name": "Move token to target location",
+              "collaborators": ["Foundry VTT Canvas System", "Foundry VTT Token System"]
+            },
+            {
+              "name": "Calculate movement path",
+              "collaborators": ["Foundry VTT Canvas System"]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "Execute Unified Mob Action",
+          "sequential_order": 1,
+          "estimated_stories": 3,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Click on any mob member token when ready to execute mob action",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System forwards selected action to all mob members simultaneously",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["System"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System executes same action for all mob members with selected target",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": ["System"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Execute Attack Types",
+          "sequential_order": 2,
+          "estimated_stories": 5,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Execute ranged attack for all mob members against selected target",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Execute melee attack with automatic movement when target is out of range",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Execute area attack affecting multiple targets within range",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Attack fleeing targets when enemies attempt to retreat",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Move mob members to target location when melee attack requires positioning",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Display Action Results",
+          "sequential_order": 3,
+          "estimated_stories": 2,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Display formatted attack results in chat showing hits, misses, and damage for all mob members",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Update combat tracker with damage dealt and status changes for all participants",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ]
+}

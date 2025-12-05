@@ -1,5 +1,6 @@
 {
-  "description": "Domain Concepts Are Nouns, Behaviors Are Verbs",
+  "description": "When shaping the domain, domain concepts are nouns, behaviors are verbs",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

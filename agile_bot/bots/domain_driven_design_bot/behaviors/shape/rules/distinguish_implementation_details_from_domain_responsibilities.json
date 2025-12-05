@@ -1,5 +1,6 @@
 {
-  "description": "Distinguish implementation details from domain responsibilities",
+  "description": "When shaping the domain, distinguish implementation details from domain responsibilities",
+  "context": "when shaping the domain",
   "do": {
     "examples": [
       {

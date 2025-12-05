@@ -1,5 +1,6 @@
 {
-  "description": "Organize by Domain First, System Support Second",
+  "description": "When shaping the domain, organize by domain first, system support second",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

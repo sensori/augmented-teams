@@ -79,17 +79,14 @@ class Workflow:
             logger.debug(f'Transition failed (expected at workflow end): {e}')
     
     def load_state(self):
-        # Workflow state is in {current_project}/project_area/workflow_state.json
         if self.file.exists():
             try:
                 state_data = json.loads(self.file.read_text(encoding='utf-8'))
                 current_behavior = state_data.get('current_behavior', '')
                 completed_actions = state_data.get('completed_actions', [])
                 
-                # Check if this is the current behavior
                 if current_behavior == f'{self.bot_name}.{self.behavior}':
-                    # Determine next action from completed_actions (source of truth)
-                    # NOT from current_action (which may be stale/corrupted)
+                    # Determine from completed_actions (source of truth), NOT current_action (may be stale)
                     next_action = self._determine_next_action_from_completed(completed_actions)
                     
                     if next_action and next_action in self.states:
@@ -97,7 +94,7 @@ class Workflow:
             except Exception as e:
                 logger.warning(f'Failed to load workflow state from {self.file}: {e}', exc_info=True)
         else:
-            # No workflow state file - reset to first action
+            # No file - reset to first action
             first_action = self.states[0] if self.states else None
             if first_action:
                 self.machine.set_state(first_action)
@@ -156,15 +153,11 @@ class Workflow:
         return last_completed
     
     def save_state(self):
-        # Don't write if current_project not set
         if not self.current_project_file.exists():
-            # Silently skip - project not initialized yet
             return
         
-        # Workflow state is in {project_location}/workflow_state.json
         self.project_location.mkdir(parents=True, exist_ok=True)
         
-        # Load existing state to preserve completed_actions
         existing_state = {}
         if self.file.exists():
             try:
@@ -172,7 +165,6 @@ class Workflow:
             except Exception as e:
                 logger.warning(f'Failed to load existing workflow state from {self.file}, starting fresh: {e}')
         
-        # Update current state
         existing_state.update({
             'current_behavior': f'{self.bot_name}.{self.behavior}',
             'current_action': f'{self.bot_name}.{self.behavior}.{self.current_state}',

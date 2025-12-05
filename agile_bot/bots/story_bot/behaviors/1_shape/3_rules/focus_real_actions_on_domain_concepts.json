@@ -1,5 +1,6 @@
 {
-  "description": "Stories must describe REAL ACTIONS that users or other actors (even system or technical actors) can perform, not capabilities or structural descriptions. Organize by lifecycle flow (Load, Read, Edit, Render, Synchronize, Search, Save). CRITICAL: Actor names must NOT appear in Epic/Sub-Epic/Story names - names are Verb-Noun only.",
+  "description": "When shaping stories, stories must describe REAL ACTIONS that users or other actors (even system or technical actors) can perform, not capabilities or structural descriptions. Organize by lifecycle flow (Load, Read, Edit, Render, Synchronize, Search, Save). CRITICAL: Actor names must NOT appear in Epic/Sub-Epic/Story names - names are Verb-Noun only.",
+  "context": "when shaping stories",
   "examples": [
     {
       "do": {

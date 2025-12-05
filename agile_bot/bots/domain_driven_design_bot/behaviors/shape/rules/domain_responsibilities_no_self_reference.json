@@ -1,5 +1,6 @@
 {
-  "description": "Domain Structure Responsibilities Must Not Reference Themselves",
+  "description": "When shaping the domain, domain structure responsibilities must not reference themselves",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

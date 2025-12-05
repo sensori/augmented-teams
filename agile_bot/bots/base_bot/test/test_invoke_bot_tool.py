@@ -157,6 +157,14 @@ class TestBotToolInvocation:
         create_behavior_action_instructions(workspace_root, 'test_bot', 'exploration', 'build_knowledge')
         create_base_action_instructions(workspace_root, 'build_knowledge')
         
+        # Create base actions structure with action_config.json (needed for workflow)
+        from conftest import create_base_actions_structure
+        create_base_actions_structure(workspace_root)
+        
+        # Create current_project and workflow state so action can execute
+        create_bot_config_file(workspace_root, 'test_bot', ['shape', 'discovery', 'exploration'])
+        create_workflow_state(workspace_root, 'test_bot.exploration', 'test_bot.exploration.build_knowledge')
+        
         # When: Call REAL Bot API for specific behavior
         from agile_bot.bots.base_bot.src.bot.bot import Bot
         bot = Bot(

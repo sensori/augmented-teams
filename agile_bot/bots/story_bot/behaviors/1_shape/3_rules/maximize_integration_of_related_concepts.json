@@ -1,5 +1,6 @@
 {
-  "description": "Maximize Integration of Related Concepts",
+  "description": "When shaping stories, maximize integration of related concepts",
+  "context": "when shaping stories",
   "examples": [
     {
       "do": {

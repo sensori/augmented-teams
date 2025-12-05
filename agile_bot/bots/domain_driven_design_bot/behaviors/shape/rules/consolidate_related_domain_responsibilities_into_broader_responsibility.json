@@ -1,5 +1,6 @@
 {
-  "description": "Consolidate related domain responsibilities into broader responsibility",
+  "description": "When shaping the domain, consolidate related domain responsibilities into broader responsibility",
+  "context": "when shaping the domain",
   "do": {
     "examples": [
       {

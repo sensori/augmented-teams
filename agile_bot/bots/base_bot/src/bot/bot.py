@@ -162,28 +162,23 @@ class Behavior:
         self.workflow.machine.proceed()
     
     def execute_action(self, action_name: str, action_class, parameters: Dict[str, Any] = None) -> BotResult:
-        # 1. Set state machine to this action (handles direct calls from behavior-action tools)
         if self.workflow.current_state != action_name:
             self.workflow.machine.set_state(action_name)
         
-        # 2. Save workflow state (sets current_behavior and current_action)
         self.workflow.save_state()
         
-        # 3. Instantiate action with standard parameters
         action = action_class(
             bot_name=self.bot_name,
             behavior=self.name,
             workspace_root=self.workspace_root
         )
         
-        # 4. Execute action and get data
         try:
             data = action.execute(parameters)
         except FileNotFoundError:
             # Some actions (build_knowledge) may not have templates for all behaviors
             data = {'instructions': {}}
         
-        # 5. Wrap in BotResult (generic for all actions)
         return BotResult(
             status='completed',
             behavior=self.name,
@@ -263,20 +258,13 @@ class Behavior:
         return self.execute_action('correct_bot', CorrectBotAction, parameters)
     
     def forward_to_current_action(self) -> BotResult:
-        # Reload workflow state from file (in case file changed or was deleted)
         self.workflow.load_state()
         
-        # Workflow knows current state (action)
         current_action = self.workflow.current_state
-        
-        # Execute that action
         action_method = getattr(self, current_action)
         result = action_method()
         
-        # Check if action marked itself as complete (saved to completed_actions)
-        # Actions call save_completed_action() when they're truly done
         if self.workflow.is_action_completed(current_action):
-            # Action is complete - transition to next action
             self.workflow.transition_to_next()
         
         return result

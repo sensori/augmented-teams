@@ -1,0 +1,13 @@
+{
+  "description": "Bounded context identification strategy",
+  "question": "How are we identifying and defining bounded contexts?",
+  "outcome": "Determines how domain boundaries are established",
+  "options": [
+    "By business capability - group by what the business does",
+    "By organizational structure - align with teams or departments",
+    "By data ownership - group by who owns the data",
+    "By integration patterns - group by how systems interact",
+    "By domain complexity - separate complex from simple domains"
+  ]
+}
+

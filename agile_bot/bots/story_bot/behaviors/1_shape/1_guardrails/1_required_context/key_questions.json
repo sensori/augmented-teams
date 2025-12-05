@@ -8,7 +8,14 @@
     "What problems, inefficiencies, or workarounds is this request trying to eliminate?",
     "Where are users currently struggling, getting stuck, or experiencing delays in the process we're aiming to improve?",
     "What other systems, data sources, or tools does this capability need to interact with in order to deliver value?",
-    "What are the key behaviors or integration points that define how these systems support or depend on one another?"
+    "What are the key behaviors or integration points that define how these systems support or depend on one another?",
+    "What is the business domain we are modeling?",
+    "What are the core business concepts and their relationships?",
+    "What are the distinct sub-domains or business capabilities?",
+    "What are the boundaries between different parts of the domain?",
+    "What domain events occur in this business domain?",
+    "What are the key business rules and constraints?",
+    "What domain language do business experts use to describe this domain?"
   ]
 }
 

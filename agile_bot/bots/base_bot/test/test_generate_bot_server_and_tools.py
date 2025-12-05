@@ -305,7 +305,7 @@ class TestGenerateBehaviorActionTools:
         generator.register_all_behavior_action_tools(mcp_server)
         
         # Then: Generator enumerates 24 (behavior, action) pairs
-        assert len(generator.registered_tools) == 29  # 1 bot_tool + 4 behavior_tools + (4 behaviors × 6 actions)
+        assert len(generator.registered_tools) == 31  # 1 bot_tool + 1 close_action + 1 restart + 4 behavior_tools + (4 behaviors × 6 actions)
         
         # And Generator creates 24 tool instances with unique names
         tool_names = [tool['name'] for tool in generator.registered_tools]

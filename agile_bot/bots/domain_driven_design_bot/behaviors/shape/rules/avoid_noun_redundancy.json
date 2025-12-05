@@ -1,5 +1,6 @@
 {
-  "description": "Avoid Noun Redundancy in Domain and Concept Names",
+  "description": "When shaping the domain, avoid noun redundancy in domain and concept names",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

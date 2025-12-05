@@ -2,7 +2,10 @@
   "recommended_human_activity": [
     "Review the AI-generated story map to verify the overarching flow accurately describes the overall user journey and system behavior",
     "Verify that epics, features, and stories follow action and goal-oriented language as intended",
-    "Review the AI's approach to drill-downs to confirm they bring clarity to areas of uncertainty, complexity, and opportunity rather than over-documenting simple areas"
+    "Review the AI's approach to drill-downs to confirm they bring clarity to areas of uncertainty, complexity, and opportunity rather than over-documenting simple areas",
+    "Review the AI-generated bounded contexts to verify they align with business capabilities",
+    "Validate that domain concepts use language from domain experts",
+    "Review the AI's approach to identifying bounded contexts to confirm they reflect business reality"
   ]
 }
 

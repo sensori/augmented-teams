@@ -1,5 +1,6 @@
 {
-  "description": "Order by User Mental Model, Not Code Structure",
+  "description": "When shaping the domain, order by user mental model, not code structure",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

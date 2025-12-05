@@ -1,5 +1,6 @@
 {
-  "description": "Domain Structure Collaborators Are Ordered By Likely Call Chain",
+  "description": "When shaping the domain, collaborators are ordered by likely call chain",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

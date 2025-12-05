@@ -1,5 +1,6 @@
 {
-  "description": "CRITICAL: Stories must show user/system journey flow, not just list operations. Stories must include context (when/why actions happen) and connect logically. Order by user journey, not technical sequential_order.",
+  "description": "When shaping stories, CRITICAL: Stories must show user/system journey flow, not just list operations. Stories must include context (when/why actions happen) and connect logically. Order by user journey, not technical sequential_order.",
+  "context": "when shaping stories",
   "examples": [
     {
       "do": {

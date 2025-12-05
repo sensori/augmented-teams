@@ -1,5 +1,6 @@
 {
-  "description": "Organization: Domain Concepts Over File Structure",
+  "description": "When shaping the domain, organize by domain concepts over file structure",
+  "context": "when shaping the domain",
   "examples": [
     {
       "do": {

@@ -1,5 +1,6 @@
 {
-  "description": "Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
+  "description": "When shaping stories, use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
+  "context": "when shaping stories",
   "examples": [
     {
       "do": {

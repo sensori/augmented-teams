@@ -3149,6 +3149,7 @@
               "sub_epics": [],
               "stories": [
                 {
+                  "test class"
                   "name": "Generate Bot Tools",
                   "sequential_order": 4,
                   "connector": "or",
@@ -3167,7 +3168,8 @@
                   "scenarios": [
                     {
                       "name": "Generator creates ONE bot tool with workflow state awareness",
-                      "steps": "Given base_actions/ contains folders: gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules\nAnd Bot Config defines behaviors: shape, discovery, exploration, scenarios\nAnd Action configs specify workflow sequence and transitions\nWhen Generator creates bot tool\nThen Generator creates ONE bot tool (not separate tools per behavior/action)\nAnd Bot tool can read workflow_state to determine current behavior/action\nAnd Bot tool routes to correct behavior/action based on workflow state\nAnd Bot tool uses action configuration to understand workflow transitions"
+                      "steps": "Given base_actions/ contains folders: gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules\nAnd Bot Config defines behaviors: shape, discovery, exploration, scenarios\nAnd Action configs specify workflow sequence and transitions\nWhen Generator creates bot tool\nThen Generator creates ONE bot tool (not separate tools per behavior/action)\nAnd Bot tool can read workflow_state to determine current behavior/action\nAnd Bot tool routes to correct behavior/action based on workflow state\nAnd Bot tool uses action configuration to understand workflow transitions",
+                      "test method"
                     },
                     {
                       "name": "Bot tool routes to workflow actions based on state",
