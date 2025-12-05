@@ -2,6 +2,7 @@
   "_explanation": {
     "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
     "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "domain_placement": "domain_concepts: 'local' if relevant to single sub_epic, 'global' if relevant to multiple sub_epics. Place at most specific level (local preferred), but elevate to parent if used by multiple children.",
     "scenarios": "Each story contains scenarios (happy_path, edge_case, error_case) with background and steps in Gherkin format."
   },
   "epics": [
@@ -9,11 +10,33 @@
       "name": "",
       "sequential_order": 1,
       "estimated_stories": null,
+      "domain_concepts": [
+        {
+          "name": "",
+          "responsibilities": [
+            {
+              "name": "",
+              "collaborators": []
+            }
+          ]
+        }
+      ],
       "sub_epics": [
         {
           "name": "",
           "sequential_order": 1,
           "estimated_stories": null,
+          "domain_concepts": [
+            {
+              "name": "",
+              "responsibilities": [
+                {
+                  "name": "",
+                  "collaborators": []
+                }
+              ]
+            }
+          ],
           "sub_epics": [],
           "story_groups": [
             {

@@ -88,6 +88,30 @@
                     "AND Server publishes tool catalog to AI Chat",
                     "AND Each tool entry includes name, description, trigger patterns, parameters"
                   ]
+                },
+                {
+                  "name": "Restart MCP Server To Load Code Changes",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "system",
+                  "test_file": "test_restart_mcp_server.py",
+                  "acceptance_criteria": [
+                    "WHEN Bot code changes are detected",
+                    "THEN MCP Server clears Python bytecode cache (__pycache__)",
+                    "AND MCP Server restarts to load new code",
+                    "AND Server restarts gracefully without losing state",
+                    "AND Server re-registers with MCP Protocol Handler after restart"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Clear Python bytecode cache",
+                      "steps": "Given __pycache__ directories exist with .pyc files\nWhen clear_python_cache is called\nThen All __pycache__ directories are removed\nAnd All .pyc files are deleted\nAnd Cache is cleared before server restart",
+                      "test_method": "test_clear_python_bytecode_cache"
+                    }
+                  ]
                 }
               ]
             }
@@ -102,6 +126,7 @@
         {
           "name": "Init Project",
           "sequential_order": 1.0,
+          "test_file": "test_init_project.py",
           "story_groups": [
             {
               "type": "and",
@@ -204,15 +229,68 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Move to Project",
+                  "name": "Guards Prevent Writes Without Project",
                   "sequential_order": 4,
+                  "connector": "or",
+                  "users": [
+                    "Bot"
+                  ],
+                  "story_type": "system",
+                  "test_file": "test_guards_prevent_writes_without_project.py",
+                  "test_class": "TestActivityTrackerGuard",
+                  "acceptance_criteria": [
+                    "WHEN Activity tracker attempts to log activity",
+                    "AND current_project.json does NOT exist",
+                    "THEN Activity tracker does NOT write to activity log",
+                    "AND Activity tracking fails gracefully without error",
+                    "WHEN Workflow attempts to save state",
+                    "AND current_project.json does NOT exist",
+                    "THEN Workflow does NOT save workflow_state.json",
+                    "AND Workflow state save fails gracefully without error"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Activity not tracked when current_project missing",
+                      "steps": "Given current_project.json does NOT exist\nWhen Action attempts to track activity\nThen Activity tracker detects missing current_project\nAnd Activity tracker does NOT write to activity log\nAnd Action continues execution (non-blocking)",
+                      "test_method": "test_activity_not_tracked_when_current_project_missing"
+                    },
+                    {
+                      "name": "Activity tracked when current_project exists",
+                      "steps": "Given current_project.json exists with valid project_area\nWhen Action attempts to track activity\nThen Activity tracker writes to project_area/activity_log.json\nAnd Activity entry is successfully logged",
+                      "test_method": "test_activity_tracked_when_current_project_exists"
+                    },
+                    {
+                      "name": "Initialize project action not tracked without current_project",
+                      "steps": "Given current_project.json does NOT exist\nWhen initialize_project action executes\nThen Activity tracker does NOT log initialize_project activity\nAnd initialize_project can still execute (it creates current_project)",
+                      "test_method": "test_initialize_project_action_not_tracked_without_current_project"
+                    },
+                    {
+                      "name": "Workflow state not saved when current_project missing",
+                      "steps": "Given current_project.json does NOT exist\nWhen Action attempts to save workflow state\nThen Workflow guard detects missing current_project\nAnd Workflow does NOT write workflow_state.json\nAnd Action continues execution (non-blocking)",
+                      "test_method": "test_workflow_state_not_saved_when_current_project_missing"
+                    },
+                    {
+                      "name": "Workflow state saved when current_project exists",
+                      "steps": "Given current_project.json exists\nWhen Action attempts to save workflow state\nThen Workflow writes to project_area/workflow_state.json\nAnd Workflow state is successfully persisted",
+                      "test_method": "test_workflow_state_saved_when_current_project_exists"
+                    },
+                    {
+                      "name": "Completed actions not saved when current_project missing",
+                      "steps": "Given current_project.json does NOT exist\nWhen Action attempts to save completed_actions\nThen Workflow guard prevents write\nAnd completed_actions are NOT persisted\nAnd Action continues execution",
+                      "test_method": "test_completed_actions_not_saved_when_current_project_missing"
+                    }
+                  ]
+                },
+                {
+                  "name": "Move to Project",
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
                   "name": "Stores Activity for Initialize Project Action",
-                  "sequential_order": 5,
+                  "sequential_order": 6,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
@@ -287,6 +365,7 @@
         {
           "name": "Invoke Bot Tool",
           "sequential_order": 2.0,
+          "test_file": "test_invoke_bot_tool.py",
           "story_groups": [
             {
               "type": "and",
@@ -437,6 +516,7 @@
         {
           "name": "Gather Context",
           "sequential_order": 1.0,
+          "test_file": "test_gather_context.py",
           "sub_epics": [
             {
               "name": "Review Context For Answers And Evidence",
@@ -657,6 +737,7 @@
         {
           "name": "Decide Planning Criteria Action",
           "sequential_order": 2.0,
+          "test_file": "test_decide_planning_criteria.py",
           "sub_epics": [
             {
               "name": "Provide Decision Criteria and Assumptions",
@@ -971,6 +1052,7 @@
         {
           "name": "Build Knowledge Action",
           "sequential_order": 3.0,
+          "test_file": "test_build_knowledge.py",
           "sub_epics": [
             {
               "name": "Build Knowledge Graph",
@@ -1314,6 +1396,7 @@
         {
           "name": "Render Output",
           "sequential_order": 4.0,
+          "test_file": "test_render_output.py",
           "sub_epics": [
             {
               "name": "Generate Rendered Outputs",
@@ -1520,6 +1603,7 @@
         {
           "name": "Validate Knowledge & Content Against Rules",
           "sequential_order": 5.0,
+          "test_file": "test_validate_knowledge_and_content_against_rules.py",
           "story_groups": [
             {
               "type": "and",
@@ -3147,10 +3231,11 @@
               "name": "Generate Bot Server And Tools",
               "sequential_order": 1,
               "sub_epics": [],
+              "test_file": "test_generate_bot_server_and_tools.py",
               "stories": [
                 {
-                  "test class"
                   "name": "Generate Bot Tools",
+                  "test_class": "TestGenerateBotTools",
                   "sequential_order": 4,
                   "connector": "or",
                   "users": [
@@ -3169,11 +3254,12 @@
                     {
                       "name": "Generator creates ONE bot tool with workflow state awareness",
                       "steps": "Given base_actions/ contains folders: gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules\nAnd Bot Config defines behaviors: shape, discovery, exploration, scenarios\nAnd Action configs specify workflow sequence and transitions\nWhen Generator creates bot tool\nThen Generator creates ONE bot tool (not separate tools per behavior/action)\nAnd Bot tool can read workflow_state to determine current behavior/action\nAnd Bot tool routes to correct behavior/action based on workflow state\nAnd Bot tool uses action configuration to understand workflow transitions",
-                      "test method"
+                      "test_method": "test_generator_creates_bot_tool_for_test_bot"
                     },
                     {
                       "name": "Bot tool routes to workflow actions based on state",
-                      "steps": "Given bot tool is created\nAnd workflow state shows: current_action='story_bot.discovery.build_knowledge'\nAnd build_knowledge action configuration specifies workflow=true, next_action='render_output'\nWhen bot tool is invoked\nThen Bot tool reads workflow state\nAnd Bot tool extracts current behavior and action\nAnd Bot tool routes to discovery.build_knowledge\nAnd Bot tool executes build_knowledge with workflow awareness (auto-transition to render_output)"
+                      "steps": "Given bot tool is created\nAnd workflow state shows: current_action='story_bot.discovery.build_knowledge'\nAnd build_knowledge action configuration specifies workflow=true, next_action='render_output'\nWhen bot tool is invoked\nThen Bot tool reads workflow state\nAnd Bot tool extracts current behavior and action\nAnd Bot tool routes to discovery.build_knowledge\nAnd Bot tool executes build_knowledge with workflow awareness (auto-transition to render_output)",
+                      "test_method": ""
                     },
                     {
                       "name": "Bot tool routes to independent actions via parameter",
@@ -3195,6 +3281,7 @@
                 },
                 {
                   "name": "Generate Behavior Tools",
+                  "test_class": "TestGenerateBehaviorTools",
                   "sequential_order": 5,
                   "connector": "or",
                   "users": [
@@ -3212,7 +3299,8 @@
                   "scenarios": [
                     {
                       "name": "Generator creates behavior tools for all defined behaviors",
-                      "steps": "Given Bot Config defines behaviors: ['shape', 'discovery', 'exploration', 'scenarios']\nAnd base_actions/ contains: gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules\nWhen Generator enumerates behaviors from Bot Config\nThen Generator creates 4 behavior tools (ONE tool per behavior)\nAnd Each behavior tool can route to all 5 actions\nAnd Tools are named: shape_bot, discovery_bot, exploration_bot, scenarios_bot\nAnd Each tool routes between actions based on parameters or workflow state"
+                      "steps": "Given Bot Config defines behaviors: ['shape', 'discovery', 'exploration', 'scenarios']\nAnd base_actions/ contains: gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules\nWhen Generator enumerates behaviors from Bot Config\nThen Generator creates 4 behavior tools (ONE tool per behavior)\nAnd Each behavior tool can route to all 5 actions\nAnd Tools are named: shape_bot, discovery_bot, exploration_bot, scenarios_bot\nAnd Each tool routes between actions based on parameters or workflow state",
+                      "test_method": "test_generator_creates_behavior_tools_for_test_bot_with_4_behaviors"
                     },
                     {
                       "name": "Generator applies workflow transitions to workflow actions",
@@ -3491,6 +3579,147 @@
                       "steps": "Given gather_context action started at timestamp='2025-12-03T10:00:00Z'\nWhen gather_context action completes at timestamp='2025-12-03T10:05:30Z'\nThen Behavior calculates duration: 330 seconds (5.5 minutes)\nAnd Behavior updates completed_actions with: {action_state: 'story_bot.shape.gather_context', timestamp: '2025-12-03T10:05:30Z', duration: 330}\nAnd Duration provides performance metrics for workflow analysis"
                     }
                   ]
+                },
+                {
+                  "name": "Workflow Determines Next Action From Completed Actions",
+                  "sequential_order": 9,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "test_file": "test_workflow_action_sequence.py",
+                  "acceptance_criteria": [
+                    "WHEN Workflow loads state from workflow_state.json",
+                    "THEN Workflow uses completed_actions as source of truth (not current_action)",
+                    "AND Workflow ignores stale current_action field if it doesn't match completed_actions",
+                    "AND Workflow determines next uncompleted action from action sequence",
+                    "AND Workflow starts at first action when no completed_actions exist",
+                    "AND Workflow handles missing workflow_state.json file gracefully"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Workflow determines next action from completed_actions (ignores stale current_action)",
+                      "steps": "Given workflow_state.json shows: completed_actions=[initialize_project], current_action='build_knowledge' (stale)\nWhen Workflow loads state\nThen Workflow ignores stale current_action='build_knowledge'\nAnd Workflow uses completed_actions to determine next action\nAnd Workflow sets current_state='gather_context' (next after initialize_project)\nAnd Workflow does NOT use stale current_action field",
+                      "test_method": "test_workflow_determines_next_action_from_completed_actions"
+                    },
+                    {
+                      "name": "Workflow starts at first action when no completed_actions",
+                      "steps": "Given workflow_state.json has empty completed_actions=[]\nWhen Workflow loads state\nThen Workflow determines current_state is first action in sequence\nAnd Workflow sets current_state='initialize_project'",
+                      "test_method": "test_workflow_starts_at_first_action_when_no_completed_actions"
+                    },
+                    {
+                      "name": "Workflow determines action after multiple completed actions",
+                      "steps": "Given completed_actions=[initialize_project, gather_context]\nWhen Workflow loads state\nThen Workflow determines next uncompleted action\nAnd Workflow sets current_state='decide_planning_criteria'",
+                      "test_method": "test_workflow_determines_action_after_multiple_completed_actions"
+                    },
+                    {
+                      "name": "Workflow starts at first action when workflow_state.json missing",
+                      "steps": "Given workflow_state.json file does NOT exist\nAnd current_project.json exists\nWhen Workflow is created\nThen Workflow creates new workflow state\nAnd Workflow sets current_state to first action\nAnd Workflow initializes empty completed_actions list",
+                      "test_method": "test_workflow_starts_at_first_action_when_no_workflow_state_file_exists"
+                    }
+                  ]
+                },
+                {
+                  "name": "Close Current Action",
+                  "sequential_order": 10,
+                  "connector": "or",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_file": "test_close_current_action.py",
+                  "acceptance_criteria": [
+                    "WHEN User explicitly closes current action",
+                    "THEN Action is marked complete and saved to completed_actions",
+                    "AND Workflow transitions to next action in sequence",
+                    "AND Closing final action keeps workflow at final action (no next action)",
+                    "AND Closing action that requires confirmation but wasn't confirmed shows error",
+                    "AND Closing already-completed action is idempotent (no error)"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Close current action and transition to next",
+                      "steps": "Given workflow is at action 'gather_context'\nAnd action has NOT been marked complete\nWhen User closes current action\nThen Action 'gather_context' is saved to completed_actions\nAnd Workflow transitions to 'decide_planning_criteria' (next action)",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions"
+                    },
+                    {
+                      "name": "Close action when already at final action",
+                      "steps": "Given workflow is at final action 'validate_rules'\nWhen User closes current action\nThen Action 'validate_rules' is saved to completed_actions\nAnd Workflow stays at 'validate_rules' (no next action available)",
+                      "test_method": "test_close_action_at_final_action_stays_at_final"
+                    },
+                    {
+                      "name": "Close final action and transition to next behavior",
+                      "steps": "Given workflow is at final action 'validate_rules' of behavior 'shape'\nWhen User closes current action\nThen Action 'validate_rules' is saved to completed_actions\nAnd Workflow stays at 'validate_rules' (end of behavior)\nAnd Behavior transition to next behavior happens at Bot level",
+                      "test_method": "test_close_final_action_transitions_to_next_behavior"
+                    },
+                    {
+                      "name": "Error when closing action that requires confirmation",
+                      "steps": "Given workflow is at 'initialize_project'\nAnd action has NOT been saved to completed_actions (requires confirmation)\nWhen User attempts to close action\nThen is_action_completed returns False\nAnd User cannot close action until confirmation provided",
+                      "test_method": "test_error_when_closing_action_that_requires_confirmation"
+                    },
+                    {
+                      "name": "Close action that's already completed (idempotent)",
+                      "steps": "Given action 'gather_context' is already marked complete\nWhen User closes action again\nThen Action remains marked complete\nAnd No error occurs\nAnd Operation is idempotent",
+                      "test_method": "test_close_handles_action_already_completed_gracefully"
+                    }
+                  ]
+                },
+                {
+                  "name": "Activity Logged To Project Area Not Bot Area",
+                  "sequential_order": 11,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "system",
+                  "test_file": "test_activity_tracking_for_project_area.py",
+                  "test_class": "TestActivityTrackingLocation",
+                  "acceptance_criteria": [
+                    "WHEN Action tracks activity",
+                    "THEN Activity log is written to {project_area}/activity_log.json",
+                    "AND Activity log is NOT written to bot directory",
+                    "AND Activity log location is determined by current_project.json",
+                    "AND Activity entries include correct action_state with full path"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Activity logged to project_area not bot area",
+                      "steps": "Given current_project.json specifies project_area='agile_bot/bots/base_bot/docs/stories'\nAnd action 'gather_context' executes\nWhen Activity logger creates entry\nThen Activity log file is at: project_area/activity_log.json\nAnd Activity log is NOT at: agile_bot/bots/story_bot/activity_log.json\nAnd Activity log location matches project_area from current_project.json",
+                      "test_method": "test_activity_logged_to_project_area_not_bot_area"
+                    },
+                    {
+                      "name": "Activity log contains correct entry",
+                      "steps": "Given action 'gather_context' executes in behavior 'discovery'\nWhen Activity logger creates entry\nThen Activity log entry includes:\n  - action_state='story_bot.discovery.gather_context'\n  - timestamp\n  - Full path includes bot_name.behavior.action",
+                      "test_method": "test_activity_log_contains_correct_entry"
+                    }
+                  ]
+                },
+                {
+                  "name": "Proceed With Workflow",
+                  "sequential_order": 12,
+                  "connector": "or",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_file": "test_complete_workflow_integration.py",
+                  "acceptance_criteria": [
+                    "WHEN Complete workflow executes end-to-end",
+                    "THEN All workflow fixes work together correctly",
+                    "AND Workflow determines action from completed_actions",
+                    "AND Guardrails load with number prefixes",
+                    "AND Actions save state when called directly",
+                    "AND Close tool marks complete and transitions",
+                    "AND Jumping to different behavior-action updates state correctly"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Complete end-to-end workflow test",
+                      "steps": "Given workflow starts at initialize_project\nWhen User confirms location\nThen initialize_project saves to completed_actions\nAnd Workflow forwards to gather_context\nWhen User closes gather_context\nThen Workflow transitions to decide_planning_criteria\nWhen User jumps to discovery.gather_context (out of order)\nThen State correctly shows discovery.gather_context\nAnd All completed actions tracked across behaviors",
+                      "test_method": "test_complete_workflow_end_to_end"
+                    }
+                  ]
                 }
               ]
             }
@@ -3513,6 +3742,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestTrackActivityForGatherContextAction",
                   "acceptance_criteria": [
                     "WHEN GatherContextAction executes",
                     "THEN Action creates activity entry with timestamp, action name, behavior name",
@@ -3521,15 +3751,18 @@
                   "scenarios": [
                     {
                       "name": "Track activity when gather_context action starts",
-                      "steps": "Given behavior is 'discovery'\nAnd action is 'gather_context'\nWhen gather_context action starts execution\nThen Activity logger creates entry with:\n  - timestamp=[start timestamp]\n  - action_state='story_bot.discovery.gather_context'\n  - inputs={source_files_count: 2, context_type: \"exploration\"}\nAnd Entry is appended to activity log at project_area/\nAnd Activity log records action initiation"
+                      "steps": "Given behavior is 'discovery'\nAnd action is 'gather_context'\nWhen gather_context action starts execution\nThen Activity logger creates entry with:\n  - timestamp=[start timestamp]\n  - action_state='story_bot.discovery.gather_context'\n  - inputs={source_files_count: 2, context_type: \"exploration\"}\nAnd Entry is appended to activity log at project_area/\nAnd Activity log records action initiation",
+                      "test_method": "test_track_activity_when_gather_context_action_starts"
                     },
                     {
                       "name": "Track activity when gather_context action completes",
-                      "steps": "Given gather_context action started at timestamp='2025-12-03T10:00:00Z'\nAnd activity log has entry for gather_context  \nWhen gather_context action finishes execution at timestamp='2025-12-03T10:05:30Z'\nThen Activity logger creates completion entry with:\n  - action_state='story_bot.discovery.gather_context'\n  - outputs={questions_count: 5, evidence_count: 3, file_path: \"clarifications.json\"}\n  - duration=330 (seconds: 5.5 minutes)\nAnd Entry is appended to activity log\nAnd Activity log shows complete execution record with metrics and file path"
+                      "steps": "Given gather_context action started at timestamp='2025-12-03T10:00:00Z'\nAnd activity log has entry for gather_context  \nWhen gather_context action finishes execution at timestamp='2025-12-03T10:05:30Z'\nThen Activity logger creates completion entry with:\n  - action_state='story_bot.discovery.gather_context'\n  - outputs={questions_count: 5, evidence_count: 3, file_path: \"clarifications.json\"}\n  - duration=330 (seconds: 5.5 minutes)\nAnd Entry is appended to activity log\nAnd Activity log shows complete execution record with metrics and file path",
+                      "test_method": "test_track_activity_when_gather_context_action_completes"
                     },
                     {
                       "name": "Track multiple gather_context invocations across behaviors",
-                      "steps": "Given activity log contains entry for story_bot.shape.gather_context completed at 09:00\nAnd activity log contains entry for story_bot.discovery.gather_context completed at 10:00\nWhen both entries are present in activity log\nThen activity log contains 2 separate entries:\n  - Entry 1: action_state='story_bot.shape.gather_context', timestamp='2025-12-03T09:00:00Z'\n  - Entry 2: action_state='story_bot.discovery.gather_context', timestamp='2025-12-03T10:00:00Z'\nAnd Each entry has its own inputs (metrics/paths), outputs (metrics/paths), and duration\nAnd Activity log distinguishes same action in different behaviors using full path"
+                      "steps": "Given activity log contains entry for story_bot.shape.gather_context completed at 09:00\nAnd activity log contains entry for story_bot.discovery.gather_context completed at 10:00\nWhen both entries are present in activity log\nThen activity log contains 2 separate entries:\n  - Entry 1: action_state='story_bot.shape.gather_context', timestamp='2025-12-03T09:00:00Z'\n  - Entry 2: action_state='story_bot.discovery.gather_context', timestamp='2025-12-03T10:00:00Z'\nAnd Each entry has its own inputs (metrics/paths), outputs (metrics/paths), and duration\nAnd Activity log distinguishes same action in different behaviors using full path",
+                      "test_method": "test_track_multiple_gather_context_invocations_across_behaviors"
                     },
                     {
                       "name": "Track activity with user-provided context inputs",
@@ -3557,6 +3790,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestProceedToDecidePlanning",
                   "acceptance_criteria": [
                     "WHEN GatherContextAction completes execution",
                     "AND Human says action is done",
@@ -3567,7 +3801,8 @@
                   "scenarios": [
                     {
                       "name": "Seamless transition from gather_context to decide_planning_criteria",
-                      "steps": "Given behavior is 'discovery'\nAnd gather_context action is complete\nAnd Human confirms \"done\" or \"proceed\"\nWhen gather_context action finalizes\nThen Action saves Workflow State with:\n  - current_behavior='story_bot.discovery'\n  - current_action='story_bot.discovery.gather_context'\n  - timestamp=[completion time]\nAnd Action loads gather_context/action configuration\nAnd Action reads next_action='decide_planning_criteria'\nAnd Action injects AI instructions: \"When done, proceed to decide_planning_criteria\"\nAnd AI invokes decide_planning_criteria tool\nAnd Workflow transitions seamlessly to next action"
+                      "steps": "Given behavior is 'discovery'\nAnd gather_context action is complete\nAnd Human confirms \"done\" or \"proceed\"\nWhen gather_context action finalizes\nThen Action saves Workflow State with:\n  - current_behavior='story_bot.discovery'\n  - current_action='story_bot.discovery.gather_context'\n  - timestamp=[completion time]\nAnd Action loads gather_context/action configuration\nAnd Action reads next_action='decide_planning_criteria'\nAnd Action injects AI instructions: \"When done, proceed to decide_planning_criteria\"\nAnd AI invokes decide_planning_criteria tool\nAnd Workflow transitions seamlessly to next action",
+                      "test_method": "test_seamless_transition_from_gather_context_to_decide_planning_criteria"
                     },
                     {
                       "name": "User must confirm before transition",
@@ -3575,7 +3810,8 @@
                     },
                     {
                       "name": "Workflow state captures gather_context completion",
-                      "steps": "Given gather_context action completes at timestamp='2025-12-03T10:05:30Z'\nAnd Human confirms \"done\"\nWhen Action saves workflow state\nThen workflow state is updated with:\n  - current_action='story_bot.exploration.gather_context'\n  - timestamp='2025-12-03T10:05:30Z'\nAnd completed_actions list includes: {action_state: 'story_bot.exploration.gather_context', timestamp: '2025-12-03T10:05:30Z'}\nAnd State persists to project_area/workflow state\nAnd If workflow is interrupted after this point, gather_context is marked as completed"
+                      "steps": "Given gather_context action completes at timestamp='2025-12-03T10:05:30Z'\nAnd Human confirms \"done\"\nWhen Action saves workflow state\nThen workflow state is updated with:\n  - current_action='story_bot.exploration.gather_context'\n  - timestamp='2025-12-03T10:05:30Z'\nAnd completed_actions list includes: {action_state: 'story_bot.exploration.gather_context', timestamp: '2025-12-03T10:05:30Z'}\nAnd State persists to project_area/workflow state\nAnd If workflow is interrupted after this point, gather_context is marked as completed",
+                      "test_method": "test_workflow_state_captures_gather_context_completion"
                     },
                     {
                       "name": "Next action instructions injected into AI context",
@@ -3587,7 +3823,8 @@
                     },
                     {
                       "name": "Workflow resumes at decide_planning_criteria after interruption",
-                      "steps": "Given workflow state shows: current_action='story_bot.discovery.gather_context'\nAnd completed_actions contains gather_context entry\nAnd decide_planning_criteria has not yet started\nAnd chat session was interrupted\nWhen user reopens chat and invokes bot tool\nThen Router loads workflow state\nAnd Router sees gather_context is completed\nAnd Router determines next action is decide_planning_criteria\nAnd Router forwards to decide_planning_criteria action\nAnd Workflow resumes at correct next step despite interruption"
+                      "steps": "Given workflow state shows: current_action='story_bot.discovery.gather_context'\nAnd completed_actions contains gather_context entry\nAnd decide_planning_criteria has not yet started\nAnd chat session was interrupted\nWhen user reopens chat and invokes bot tool\nThen Router loads workflow state\nAnd Router sees gather_context is completed\nAnd Router determines next action is decide_planning_criteria\nAnd Router forwards to decide_planning_criteria action\nAnd Workflow resumes at correct next step despite interruption",
+                      "test_method": "test_workflow_resumes_at_decide_planning_criteria_after_interruption"
                     },
                     {
                       "name": "Activity log records transition",
@@ -3610,6 +3847,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestTrackActivityForPlanningAction",
                   "acceptance_criteria": [
                     "WHEN PlanningAction executes",
                     "THEN Action creates activity entry with timestamp, action name, behavior name",
@@ -3654,6 +3892,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestProceedToBuildKnowledge",
                   "acceptance_criteria": [
                     "WHEN PlanningAction completes execution",
                     "WHEN Human says action is done",
@@ -3711,6 +3950,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestTrackActivityForBuildKnowledgeAction",
                   "acceptance_criteria": [
                     "WHEN BuildKnowledgeAction executes",
                     "THEN Action creates activity entry with timestamp, action name, behavior name",
@@ -3755,6 +3995,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestProceedToRenderOutput",
                   "acceptance_criteria": [
                     "WHEN BuildKnowledgeAction completes execution",
                     "THEN BuildKnowledgeAction saves Workflow State (per \"Saves Behavior State\" story)",
@@ -3807,6 +4048,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestTrackActivityForRenderOutputAction",
                   "acceptance_criteria": [
                     "WHEN RenderOutputAction executes",
                     "THEN Action creates activity entry with timestamp, action name, behavior name",
@@ -3851,6 +4093,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestProceedToValidateRules",
                   "acceptance_criteria": [
                     "WHEN RenderOutputAction completes execution",
                     "WHEN Human says action is done",
@@ -3909,6 +4152,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestTrackActivityForValidateRulesAction",
                   "acceptance_criteria": [
                     "WHEN ValidateRulesAction executes",
                     "THEN Action creates activity entry with timestamp, action name, behavior name, violations count",
@@ -3957,6 +4201,7 @@
                     "Behavior"
                   ],
                   "story_type": "user",
+                  "test_class": "TestCompleteValidateRulesAction",
                   "acceptance_criteria": [
                     "WHEN ValidateRulesAction completes execution",
                     "THEN Action presents validation results to user",

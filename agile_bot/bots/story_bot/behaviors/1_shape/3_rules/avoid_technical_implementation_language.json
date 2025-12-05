@@ -1,0 +1,48 @@
+{
+  "description": "When shaping stories, avoid technical implementation language in user-facing story elements",
+  "context": "when shaping stories",
+  "do": {
+    "examples": [
+      {
+        "description": "Use business language in user-facing elements",
+        "content": [
+          "Customer places order, User views profile, Admin approves request"
+        ]
+      },
+      {
+        "description": "Focus on what user experiences, not how it's implemented",
+        "content": [
+          "Story describes user experience, not technical implementation"
+        ]
+      }
+    ]
+  },
+  "dont": {
+    "examples": [
+      {
+        "description": "Don't use development task language",
+        "content": [
+          "implement, create, refactor, optimize, fix, build, set up"
+        ]
+      },
+      {
+        "description": "Don't use technical implementation details",
+        "content": [
+          "query database, call API, update table"
+        ]
+      },
+      {
+        "description": "Don't focus on delivery or development tasks",
+        "content": [
+          "Implement order system, Create database schema, Set up API endpoints"
+        ]
+      },
+      {
+        "description": "Don't focus on system internals",
+        "content": [
+          "Optimize query performance, Refactor authentication code, Update configuration"
+        ]
+      }
+    ]
+  }
+}
