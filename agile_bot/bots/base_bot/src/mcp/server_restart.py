@@ -185,3 +185,4 @@ def restart_mcp_server(workspace_root: Path, bot_name: str, bot_location: str) -
         return result
 
 
+

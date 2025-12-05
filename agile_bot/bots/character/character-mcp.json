@@ -3,9 +3,9 @@
     "mutants-and-masterminds-character-helper": {
       "command": "python",
       "args": [
-        "behaviors/character/code/character_mcp_server.py"
+        "agile_bot/bots/character/code/character_mcp_server.py"
       ],
-      "cwd": "behaviors/character/code",
+      "cwd": "agile_bot/bots/character/code",
       "env": {},
       "description": "Mutants and Masterminds Character Helper - Exposes character agent methods as MCP tools",
       "tools": {
