@@ -3,21 +3,17 @@
     {
       "name": "Manage Mobs",
       "sequential_order": 1,
-      "estimated_stories": null,
+      "estimated_stories": 8,
       "domain_concepts": [
         {
           "name": "Mob",
           "responsibilities": [
             {
-              "name": "Groups minions together",
-              "collaborators": ["Minion"]
+              "name": "Group minions together for coordinated actions",
+              "collaborators": ["Minion", "Token"]
             },
             {
-              "name": "Executes actions for all members",
-              "collaborators": ["Minion", "Strategy"]
-            },
-            {
-              "name": "Manages mob configuration",
+              "name": "Maintain collection of minions that act together",
               "collaborators": ["Minion"]
             }
           ]
@@ -26,74 +22,80 @@
           "name": "Minion",
           "responsibilities": [
             {
-              "name": "Represents individual game entity",
-              "collaborators": []
+              "name": "Represent individual game entity that can be controlled",
+              "collaborators": ["Actor", "Token"]
             },
             {
-              "name": "Belongs to mob",
+              "name": "Be grouped into mobs for coordinated actions",
               "collaborators": ["Mob"]
-            },
+            }
+          ]
+        },
+        {
+          "name": "Actor",
+          "responsibilities": [
             {
-              "name": "Executes actions when mob acts",
-              "collaborators": ["Mob", "Strategy"]
+              "name": "Represent game character/creature in Foundry system",
+              "collaborators": ["Token"]
+            }
+          ]
+        },
+        {
+          "name": "Token",
+          "responsibilities": [
+            {
+              "name": "Provide visual representation of actor on virtual tabletop",
+              "collaborators": ["Actor", "Minion"]
             }
           ]
         }
       ],
       "sub_epics": [
         {
-          "name": "Create Mob",
+          "name": "Create Mobs",
           "sequential_order": 1,
-          "estimated_stories": null,
-          "domain_concepts": [
-            {
-              "name": "MobTemplate",
-              "responsibilities": [
-                {
-                  "name": "Defines mob configuration",
-                  "collaborators": []
-                },
-                {
-                  "name": "Spawns mobs from templates",
-                  "collaborators": ["Mob", "Minion"]
-                }
-              ]
-            }
-          ],
+          "estimated_stories": 3,
+          "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
             {
-              "type": "or",
+              "type": "and",
               "connector": null,
+              "sequential_order": 1,
               "stories": [
                 {
-                  "name": "Group minions into existing mob",
+                  "name": "Create mob from selected minion tokens",
                   "sequential_order": 1,
-                  "connector": "and",
-                  "users": [],
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Create mob from selected minions",
+                  "name": "Group minions into mob",
                   "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "connector": "and",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "or",
+              "connector": "or",
+              "sequential_order": 2,
+              "stories": [
+                {
+                  "name": "Spawn mob from multiple actors",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Spawn mob from actor templates",
-                  "sequential_order": 3,
+                  "name": "Spawn mob from mob template",
+                  "sequential_order": 2,
                   "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Spawn mob from mob templates",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [],
+                  "users": ["Game Master"],
                   "story_type": "user"
                 }
               ]
@@ -101,43 +103,29 @@
           ]
         },
         {
-          "name": "Manage Mob MInions",
+          "name": "Edit Mobs",
           "sequential_order": 2,
-          "estimated_stories": null,
+          "estimated_stories": 2,
+          "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
             {
-              "type": "or",
+              "type": "and",
               "connector": null,
+              "sequential_order": 1,
               "stories": [
                 {
-                  "name": "Edit mob configuration",
+                  "name": "Add minion to existing mob",
                   "sequential_order": 1,
-                  "connector": "and",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Remove minions from mob",
+                  "name": "Remove minion from mob",
                   "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Add Minion To Mob",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Clone Minions In Mob",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [],
+                  "connector": "and",
+                  "users": ["Game Master"],
                   "story_type": "user"
                 }
               ]
@@ -148,24 +136,20 @@
       "stories": []
     },
     {
-      "name": "Execute Actions",
+      "name": "Apply Strategies to Mobs",
       "sequential_order": 2,
-      "estimated_stories": null,
+      "estimated_stories": 5,
       "domain_concepts": [
         {
           "name": "Strategy",
           "responsibilities": [
             {
-              "name": "Determines target selection behavior",
+              "name": "Define behavioral rules for target selection and actions",
+              "collaborators": ["Target Selection", "Mob"]
+            },
+            {
+              "name": "Determine how mob selects targets and performs actions",
               "collaborators": ["Target Selection"]
-            },
-            {
-              "name": "Defines attack patterns",
-              "collaborators": ["Actions"]
-            },
-            {
-              "name": "Controls mob behavior",
-              "collaborators": ["Mob"]
             }
           ]
         },
@@ -173,222 +157,131 @@
           "name": "Target Selection",
           "responsibilities": [
             {
-              "name": "Chooses targets based on strategy",
+              "name": "Choose which entities to attack based on strategy rules",
               "collaborators": ["Strategy"]
             },
             {
-              "name": "Identifies most powerful target",
-              "collaborators": []
-            },
-            {
-              "name": "Identifies weakest target",
-              "collaborators": []
-            },
-            {
-              "name": "Identifies most damaged target",
-              "collaborators": []
-            },
-            {
-              "name": "Identifies fleeing targets",
-              "collaborators": []
-            }
-          ]
-        },
-        {
-          "name": "Actions",
-          "responsibilities": [
-            {
-              "name": "Executes combat actions",
-              "collaborators": ["Mob", "Strategy"]
-            },
-            {
-              "name": "Performs attacks",
-              "collaborators": ["Target Selection"]
-            },
-            {
-              "name": "Handles movement",
-              "collaborators": ["Range"]
+              "name": "Evaluate available targets based on strategy criteria",
+              "collaborators": ["Strategy"]
             }
           ]
         }
       ],
       "sub_epics": [
         {
-          "name": "Scan Surroundings",
+          "name": "Select Strategy",
           "sequential_order": 1,
-          "estimated_stories": null,
-          "domain_concepts": [
+          "estimated_stories": 1,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
             {
-              "name": "Target",
-              "responsibilities": [
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
                 {
-                  "name": "Represents potential attack target",
-                  "collaborators": []
-                },
-                {
-                  "name": "Has power level",
-                  "collaborators": []
-                },
-                {
-                  "name": "Has threat level",
-                  "collaborators": []
+                  "name": "Apply strategy to mob",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
+                  "story_type": "user"
                 }
               ]
             }
-          ],
+          ]
+        },
+        {
+          "name": "Select Target Selection Strategies",
+          "sequential_order": 2,
+          "estimated_stories": 4,
+          "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
             {
               "type": "or",
               "connector": null,
+              "sequential_order": 1,
               "stories": [
                 {
-                  "name": "Scan Targets",
-                  "sequential_order": 1,
-                  "connector": "and",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Scan Power Level",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Assess Threat",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Assess Opportunity",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
                   "name": "Determine target based on aggression rules",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Understand Walls and Cover",
-                  "sequential_order": 6,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Limit Based On senses",
-                  "sequential_order": 7,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
                   "name": "Determine target based on power effects",
-                  "sequential_order": 8,
+                  "sequential_order": 2,
                   "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Select  Strategy",
-          "sequential_order": 2,
-          "estimated_stories": null,
-          "sub_epics": [],
-          "story_groups": [
-            {
-              "type": "or",
-              "connector": null,
-              "stories": [
-                {
-                  "name": "Execute action on any mob member to trigger all members",
-                  "sequential_order": 1,
-                  "connector": "and",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Choose fleeing targets",
-                  "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "name": "Attack most powerful target",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Attack weakest target",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
                   "name": "Defend leader",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Attack Who did most damage",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Attack targets In Area",
                   "sequential_order": 5,
                   "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Attack  Biggest Threat",
+                  "name": "Attack most damaged target",
                   "sequential_order": 6,
                   "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "users": ["Game Master"],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Execute Mob Actions",
+      "sequential_order": 3,
+      "estimated_stories": 6,
+      "domain_concepts": [],
+      "sub_epics": [
+        {
+          "name": "Coordinate Attacks",
+          "sequential_order": 1,
+          "estimated_stories": 3,
+          "domain_concepts": [],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Execute coordinated attack for all minions in mob",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Attack  Based On Aggresion",
-                  "sequential_order": 7,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "name": "Perform area attack with mob",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": ["Game Master"],
                   "story_type": "user"
                 }
               ]
@@ -396,155 +289,29 @@
           ]
         },
         {
-          "name": "Move Mob",
-          "sequential_order": 3,
-          "estimated_stories": null,
-          "domain_concepts": [
-            {
-              "name": "Movement",
-              "responsibilities": [
-                {
-                  "name": "Moves minions to target",
-                  "collaborators": ["Mob", "Range"]
-                },
-                {
-                  "name": "Handles pathfinding around obstacles",
-                  "collaborators": []
-                },
-                {
-                  "name": "Maximizes distance in range",
-                  "collaborators": ["Range"]
-                }
-              ]
-            },
-            {
-              "name": "Range",
-              "responsibilities": [
-                {
-                  "name": "Determines if movement is needed",
-                  "collaborators": ["Movement"]
-                },
-                {
-                  "name": "Calculates distance to target",
-                  "collaborators": []
-                },
-                {
-                  "name": "Checks if target is in range",
-                  "collaborators": []
-                }
-              ]
-            }
-          ],
+          "name": "Handle Movement and Range",
+          "sequential_order": 2,
+          "estimated_stories": 2,
+          "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
             {
-              "type": "or",
+              "type": "and",
               "connector": null,
+              "sequential_order": 1,
               "stories": [
                 {
-                  "name": "Move minions to target when out of range",
+                  "name": "Move minions to target area based on range",
                   "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
+                  "connector": null,
+                  "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
-                  "name": "Move minions to target around walls / cover",
+                  "name": "Attack fleeing target",
                   "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Surround Attacker",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Maximize Distance In Range",
-                  "sequential_order": 4,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Take Advantage Of Wallls /Cover",
-                  "sequential_order": 5,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Attack",
-          "sequential_order": 4,
-          "estimated_stories": null,
-          "domain_concepts": [
-            {
-              "name": "Attack",
-              "responsibilities": [
-                {
-                  "name": "Executes melee attacks",
-                  "collaborators": ["Mob", "Target Selection"]
-                },
-                {
-                  "name": "Executes ranged attacks",
-                  "collaborators": ["Mob", "Target Selection", "Range"]
-                },
-                {
-                  "name": "Executes area attacks",
-                  "collaborators": ["Mob", "Target Selection"]
-                }
-              ]
-            },
-            {
-              "name": "AreaAttack",
-              "responsibilities": [
-                {
-                  "name": "Affects multiple targets",
-                  "collaborators": ["Attack", "Target Selection"]
-                },
-                {
-                  "name": "Uses area templates",
-                  "collaborators": []
-                }
-              ]
-            }
-          ],
-          "sub_epics": [],
-          "story_groups": [
-            {
-              "type": "or",
-              "connector": null,
-              "stories": [
-                {
-                  "name": "Execute melee attack",
-                  "sequential_order": 1,
-                  "connector": "or",
-                  "users": [
-                    "Game Master"
-                  ],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Execute ranged attack",
-                  "sequential_order": 2,
-                  "connector": "opt",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Execute area attack",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [],
+                  "connector": "and",
+                  "users": ["Game Master"],
                   "story_type": "user"
                 }
               ]

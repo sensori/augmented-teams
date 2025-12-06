@@ -1,5 +1,6 @@
 {
   "name": "render_domain_model_description",
+  "type": "template",
   "path": "docs/stories",
   "input": "story-graph.json",
   "template": "templates/domain-model-description-template.md",

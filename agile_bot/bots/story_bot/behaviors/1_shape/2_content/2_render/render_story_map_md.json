@@ -1,7 +1,10 @@
 {
   "name": "render_story_map",
-  "renderer": "render_story_map_txt.py",
+  "type": "builder",
+  "builder": "render_story_map_txt.py",
   "path": "docs/stories",
+  "input": "story-graph.json",
   "template": "templates/story-map.md",
-  "output": "story-map.txt"
+  "output": "story-map.txt",
+  "instructions": "Render story-graph.json to story-map.txt format using the render_story_map_txt.py builder script. The builder reads story-graph.json and generates a formatted text file with epics, sub-epics, and stories."
 }

@@ -87,17 +87,16 @@ This test can be run in two modes:
 
 ## Phase 0: Cleanup and Preparation
 
-### Step 0.1: Delete All Generated Files (Keep Only input.txt and Instructions)
+### Step 0.1: Delete All Generated Files (Keep Only input.txt)
 
-**Action:** Delete all files and directories EXCEPT `input.txt` and `SHAPING_WORKFLOW_INSTRUCTIONS.md`:
+**Action:** Delete all files and directories EXCEPT `input.txt`:
 - Delete: `docs/` directory (and all contents)
 - Delete: `workflow_state.json`
 - Delete: `activity_log.json`
 - Keep: `input.txt` (this is the source material)
-- Keep: `SHAPING_WORKFLOW_INSTRUCTIONS.md` (this instruction file - needed to run the test!)
 
 **Validation:** 
-- Verify only `input.txt` and `SHAPING_WORKFLOW_INSTRUCTIONS.md` remain in `demo/mob_minion/`
+- Verify only `input.txt` remains in `demo/mob_minion/`
 - Verify `docs/` directory does not exist
 
 **PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 1.1
@@ -249,52 +248,39 @@ This test can be run in two modes:
 
 **PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 4.3
 
-### Step 4.3: Automatic Forward to Render Output
+### Step 4.3: Continue to Next Action
+
+**Command:** `/story_bot-continue`
 
 **Expected Behavior:**
-- `build_knowledge` action automatically forwards to `render_output` action (no manual command needed)
-- This is by design: "AUTOMATIC PROGRESSION: After completing build_knowledge and storing the structured content, automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step."
-- When render_output instructions are received, **IMMEDIATELY execute the rendering** - do not pause after transition
+- Workflow should transition to `render_output` action
+- Instructions should be returned for rendering outputs
 
 **Validation:**
 - `workflow_state.json` should show: `current_action: "story_bot.shape.render_output"`
 - `completed_actions` should include `build_knowledge`
-- Render output instructions should be received with all render configs
 
-**CRITICAL:** When render_output action is reached (either automatically forwarded or manually), proceed directly to Step 5.2 execution - do NOT pause after transition.
+**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 5.1
 
 ---
 
 ## Phase 5: Render Output
 
-### Step 5.1: Review Render Output Instructions (Automatic - No Separate Step)
+### Step 5.1: Review Render Output Instructions
 
-**Note:** When `build_knowledge` automatically forwards to `render_output`, the instructions are automatically loaded. Review them as part of Step 5.2 execution.
+**Action:** Review the instructions returned from render_output action
 
 **Expected Content:**
 - Instructions should list render configurations (domain model description, diagram, story map, etc.)
 - Instructions should specify input files (story-graph.json) and output templates
-- Instructions should specify which configs use builders, synchronizers, or templates
 
-### Step 5.2: Execute Render Output (Execute Immediately When Action Reached)
+### Step 5.2: Execute Render Output
 
-**Action:** As the AI, when render_output action is reached (either by automatic forward from build_knowledge or manually), IMMEDIATELY execute all rendering steps:
-
-1. **Execute Builders (Python Scripts):**
-   - For each config with `"builder"` or `"renderer"` field, execute the Python script
-   - Example: `python agile_bot/bots/story_bot/behaviors/1_shape/2_content/2_render/render_story_map_txt.py demo/mob_minion/docs/stories/story-graph.json demo/mob_minion/docs/stories/story-map.txt`
-
-2. **Execute Synchronizers:**
-   - For each config with `"synchronizer"` field, execute the synchronizer command
-   - Example: `python -m story_io synchronize render-outline --input demo/mob_minion/docs/stories/story-graph.json --output demo/mob_minion/docs/stories/story-map-outline.drawio`
-
-3. **Render Templates:**
-   - For each config with only `"template"` field (no builder/synchronizer), render template directly
-   - Load story-graph.json and clarification.json
-   - Render domain model description using template
-   - Render domain model diagram using template
-
-**CRITICAL:** Do NOT pause after receiving render_output instructions - execute all rendering steps immediately, then pause for validation.
+**Action:** As the AI, follow the instructions to:
+- Load story-graph.json
+- Render domain model description using template
+- Render domain model diagram using template
+- Render story map files (markdown, text, drawio)
 
 **Validation:**
 - `demo/mob_minion/docs/stories/mob-minion-domain-model-description.md` should be created
@@ -402,6 +388,17 @@ This test can be run in two modes:
 - `completed_actions` should include all actions: initialize_project, gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules
 - No next action should be available (terminal action)
 
+---
+
+### Step 6.3: Verify Workflow Completion
+
+**Action:** Check that validate_rules is the terminal action
+
+**Validation:**
+- `workflow_state.json` should show: `current_action: "story_bot.shape.validate_rules"`
+- `completed_actions` should include all actions: initialize_project, gather_context, decide_planning_criteria, build_knowledge, render_output, validate_rules
+- No next action should be available (terminal action)
+
 **PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 7.1
 
 ---
@@ -454,11 +451,6 @@ This test can be run in two modes:
 - Should list violations found (if any)
 - Should reference clarification.json and planning.json
 - Should provide specific corrections
-
-**CRITICAL: PHASE 7 IS THE END OF THE WORKFLOW**
-- **After Phase 7 is complete, the shaping workflow is DONE**
-- **If user says "continue" after Phase 7, respond with "Done" - do NOT proceed to Phase 8 or any other steps**
-- **Done means done - the workflow ends here**
 
 ---
 
@@ -559,24 +551,6 @@ Final state of `workflow_state.json`:
 - **Check file contents** - don't just check files exist, verify they have correct content
 - **Report issues** - if any step fails, document what failed and why
 - **Use commands exactly as specified** - `/story_bot-shape`, `/story_bot-continue`, etc.
-
-**CRITICAL: WHEN WORKFLOW IS DONE, SAY "DONE"**
-- **When Phase 7 (Final Validation) is complete, the workflow is DONE**
-- **If user says "continue" after workflow is complete, respond with "Done" - do NOT look for additional steps or phases**
-- **Do NOT try to find "next steps" or "Phase 8" or additional validation when the workflow is complete**
-- **Done means done - stop and report completion, do not continue**
-- **The shaping workflow ends at Phase 7 - validate_rules is the terminal action**
-
-**CRITICAL: NO WORKAROUNDS OR FIXES**
-- **DO NOT create temporary scripts, wrappers, or workarounds** when commands fail**
-- **DO NOT fix system bugs** - this is a test of existing functionality, not a development session
-- **If a command fails:**
-  1. Report the exact error message
-  2. Report what command was attempted
-  3. Report what the expected behavior was
-  4. **STOP and wait for user direction**
-- **The goal is to test the system as-is** - creating workarounds defeats the purpose of the test
-- **If something doesn't work, that's valuable test information** - document it and stop
 
 ### Mode-Specific Behavior
 

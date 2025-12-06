@@ -1,1 +1,0 @@
-{'story': {'output': 'Story documents created with scenarios for all 6 Increment 1 stories', 'stories_created': ['Create Mob from Selected Tokens', 'Display Mob Grouping in Combat Tracker', 'Execute Mob Attack with Strategy', 'Display Attack Results in Chat', 'Apply Attack Common Target Strategy', 'Display Selected Common Target']}}

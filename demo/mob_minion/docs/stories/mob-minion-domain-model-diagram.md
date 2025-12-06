@@ -4,7 +4,7 @@
 **Location**: `demo/mob_minion/mob-minion-domain-model-diagram.md`
 
 ## Solution Purpose
-Virtual tabletop game management - specifically minion/mob combat management within Foundry VTT.
+Mob Minion is a feature extension for the Foundry Virtual Tabletop system that enables Game Masters to efficiently manage groups of minions (mobs) during combat encounters. The system allows GMs to group minion tokens together so they can be controlled with single actions rather than requiring individual clicks on every minion token. Once grouped into mobs, strategies can be applied to determine how the mob selects targets and performs coordinated actions.
 
 ---
 
@@ -13,112 +13,40 @@ Virtual tabletop game management - specifically minion/mob combat management wit
 ```mermaid
 classDiagram
     class Mob {
-        +Groups minions together()
-        +Executes actions for all members()
-        +Manages mob configuration()
+        +Group minions together for coordinated actions()
+        +Maintain collection of minions that act together()
     }
     
     class Minion {
-        +Represents individual game entity()
-        +Belongs to mob()
-        +Executes actions when mob acts()
+        +Represent individual game entity that can be controlled()
+        +Be grouped into mobs for coordinated actions()
     }
     
-    class MobTemplate {
-        +Defines mob configuration()
-        +Spawns mobs from templates()
+    class Actor {
+        +Represent game character/creature in Foundry system()
+    }
+    
+    class Token {
+        +Provide visual representation of actor on virtual tabletop()
     }
     
     class Strategy {
-        +Determines target selection behavior()
-        +Defines attack patterns()
-        +Controls mob behavior()
+        +Define behavioral rules for target selection and actions()
+        +Determine how mob selects targets and performs actions()
     }
     
     class TargetSelection {
-        +Chooses targets based on strategy()
-        +Identifies most powerful target()
-        +Identifies weakest target()
-        +Identifies most damaged target()
-        +Identifies fleeing targets()
-    }
-    
-    class Actions {
-        +Executes combat actions()
-        +Performs attacks()
-        +Handles movement()
-    }
-    
-    class Target {
-        +Represents potential attack target()
-        +Has power level()
-        +Has threat level()
-    }
-    
-    class Movement {
-        +Moves minions to target()
-        +Handles pathfinding around obstacles()
-        +Maximizes distance in range()
-    }
-    
-    class Range {
-        +Determines if movement is needed()
-        +Calculates distance to target()
-        +Checks if target is in range()
-    }
-    
-    class Attack {
-        +Executes melee attacks()
-        +Executes ranged attacks()
-        +Executes area attacks()
-    }
-    
-    class AreaAttack {
-        +Affects multiple targets()
-        +Uses area templates()
+        +Choose which entities to attack based on strategy rules()
+        +Evaluate available targets based on strategy criteria()
     }
     
     %% Associations
     Mob --> Minion : contains
     Mob --> Strategy : uses
-    Mob --> Actions : executes
-    MobTemplate --> Mob : spawns
-    MobTemplate --> Minion : spawns
     Strategy --> TargetSelection : determines
-    Strategy --> Actions : defines
-    Strategy --> Mob : controls
-    TargetSelection --> Strategy : based on
-    Actions --> Mob : executes for
-    Actions --> Strategy : coordinates with
-    Actions --> TargetSelection : performs
-    Actions --> Range : handles
-    Target --> TargetSelection : identified by
-    Movement --> Mob : moves
-    Movement --> Range : coordinates with
-    Range --> Movement : determines need for
-    Attack --> Mob : executes for
-    Attack --> TargetSelection : uses
-    Attack --> Range : checks
-    AreaAttack --> Attack : extends
-    AreaAttack --> TargetSelection : affects
-```
-
-**Example:**
-```mermaid
-classDiagram
-    class Payment {
-        +Validates card number()
-        +Authorizes transaction()
-        +Processes payment()
-    }
-    
-    class Order {
-        +Creates order()
-        +Calculates total()
-        +Updates status()
-    }
-    
-    Order --> Payment : processes
+    Minion --> Actor : based on
+    Minion --> Token : represented by
+    Token --> Actor : represents
 ```
 
 **Diagram Notes:**
@@ -132,7 +60,9 @@ classDiagram
 
 ## Source Material
 
-**Source**: story-graph.json domain_concepts extracted from epics and sub_epics
-**Generated**: 2024-12-19
-**Context**: Domain concepts identified during story shaping phase for mob minion management system
-
+**Primary Source**: `demo/mob_minion/docs/stories/story-graph.json`
+**Sections Referenced**: 
+- Epic 1 "Manage Mobs" - domain_concepts section (Mob, Minion, Actor, Token)
+- Epic 2 "Apply Strategies to Mobs" - domain_concepts section (Strategy, Target Selection)
+**Date Generated**: 2025-12-06
+**Context Note**: Domain concepts extracted from story-graph.json epics and sub-epics. All domain concepts represent core business entities in the virtual tabletop combat management domain.

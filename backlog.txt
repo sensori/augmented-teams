@@ -84,6 +84,9 @@ all render documents should have hyperlinks to other render documentsas appropri
 
 standsalone synch command 
 
+
+
+make instructions a lot for the actual bot that's running where you are getting into instruction below again which is the reason I started this in the first place is to avoid this kind of thing
  
 
 

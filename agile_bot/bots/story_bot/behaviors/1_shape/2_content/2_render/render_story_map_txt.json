@@ -1,6 +1,9 @@
 {
-  "name": "render_story_map",
+  "name": "render_story_map_txt",
+  "type": "template",
   "path": "docs/stories",
-  "template": "story-map.txt",
-  "output": "story-map.txt"
+  "input": "story-graph.json",
+  "template": "templates/story-map.txt",
+  "output": "story-map.txt",
+  "instructions": "Render story-graph.json to story-map.txt format using the story-map.txt template file. This is a direct template rendering (no builder script)."
 }

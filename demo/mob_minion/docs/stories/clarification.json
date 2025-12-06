@@ -1,66 +1,43 @@
 {
   "shape": {
     "key_questions": {
-      "user_types": {
-        "question": "Who are the distinct types of users (e.g., operational users, power users, compliance consumers, content creators, producers)?",
-        "answer": "Game Masters (GMs) / Dungeon Masters (DMs) using Foundry VTT. They control multiple minion tokens and need efficient group management."
-      },
-      "user_goals": {
-        "question": "What are the key goals, behaviors, or decisions each group is trying to accomplish using this capability?",
-        "answer": "Goal: Control multiple minions as a single 'mob' unit instead of individually. Behavior: Click one minion token to make all minions in the mob perform the same action. Decision: Select strategies for mob behavior (attack most powerful, attack weakest, defend leader, attack most damaged)."
-      },
-      "primary_users": {
-        "question": "Who are the primary users or stakeholder groups impacted?",
-        "answer": "Game Masters running combat encounters in Foundry VTT who manage multiple minion tokens."
-      },
-      "first_action": {
-        "question": "What is the first thing users will try to do with this new capability or system?",
-        "answer": "Group existing minion tokens into a mob, then select a strategy and execute actions for the entire mob."
-      },
-      "problems_solved": {
-        "question": "What problems, inefficiencies, or workarounds is this request trying to eliminate?",
-        "answer": "Eliminates the need to click on every individual minion token to perform actions. Currently, GMs must click each minion separately, which is time-consuming during combat."
-      },
-      "struggle_points": {
-        "question": "Where are users currently struggling, getting stuck, or experiencing delays in the process we're aiming to improve?",
-        "answer": "During combat encounters when managing multiple minions, requiring repetitive clicking on each token individually."
-      },
-      "system_integrations": {
-        "question": "What other systems, data sources, or tools does this capability need to interact with in order to deliver value?",
-        "answer": "Foundry VTT system - specifically: Actor system (for minion tokens), Token system (for visual representation), Combat system (for turn management), Range/movement mechanics, Attack/action systems, Template system (for mob templates)."
-      },
-      "integration_behaviors": {
-        "question": "What are the key behaviors or integration points that define how these systems support or depend on one another?",
-        "answer": "Mobs depend on Foundry's Actor/Token system for minion representation. Strategy system determines target selection and action execution. Range/movement mechanics determine if minions need to move before attacking. Combat system coordinates mob actions within turn structure."
-      },
-      "business_domain": {
-        "question": "What is the business domain we are modeling?",
-        "answer": "Virtual tabletop game management - specifically minion/mob combat management within Foundry VTT."
-      },
-      "core_concepts": {
-        "question": "What are the core business concepts and their relationships?",
-        "answer": "Minion: Individual game entity/token. Mob: Collection of minions that act together. Strategy: Behavioral rules for mob actions (target selection, attack patterns). Actions: Combat actions (attack, move, area attack, etc.). Target Selection: Methods for choosing targets (most powerful, weakest, most damaged, fleeing, etc.). Relationships: Mobs contain multiple Minions. Mobs have a Strategy. Strategies determine Target Selection and Actions."
-      },
-      "sub_domains": {
-        "question": "What are the distinct sub-domains or business capabilities?",
-        "answer": "1. Mob Management (create, edit, group minions), 2. Strategy Selection (choose and apply strategies), 3. Target Selection (identify targets based on strategy), 4. Action Execution (perform attacks, movement, area attacks), 5. Integration with Foundry VTT (actor/token/combat systems)."
-      },
-      "domain_boundaries": {
-        "question": "What are the boundaries between different parts of the domain?",
-        "answer": "Mob Management is separate from Foundry's core systems but integrates with them. Strategy logic is independent but uses Foundry's combat/targeting data. Action execution bridges mob commands and Foundry's action system."
-      },
-      "domain_events": {
-        "question": "What domain events occur in this business domain?",
-        "answer": "Mob created, Minions grouped into mob, Strategy selected, Target chosen (based on strategy), Mob action executed, Mob spawned from template, Mob edited/modified."
-      },
-      "business_rules": {
-        "question": "What are the key business rules and constraints?",
-        "answer": "Mobs are collections of minions that act together. One click on any mob member triggers actions for all members. Strategies determine target selection and behavior. Range mechanics may require movement before attacking. Must work within Foundry VTT's existing systems. Area attacks affect multiple targets. Different attack methods available (melee, ranged, area)."
-      },
-      "domain_language": {
-        "question": "What domain language do business experts use to describe this domain?",
-        "answer": "Mob (collection of minions), Minion (individual token/actor), Strategy (behavioral rules), Target selection (choosing who to attack), Spawn (create from template), Group (associate minions with mob), Area attack (attack affecting multiple targets), Range (distance mechanics), Token (visual representation in Foundry)."
-      }
+      "Who are the distinct types of users (e.g., operational users, power users, compliance consumers, content creators, producers)?": "Game Masters (GMs) who run role-playing game sessions using the Foundry Virtual Tabletop system. These are the primary users who need to manage multiple minion tokens during combat encounters.",
+      "What are the key goals, behaviors, or decisions each group is trying to accomplish using this capability?": "GMs want to efficiently manage groups of minions (mobs) during combat without having to individually click on every minion token. They want to: (1) Group minions into mobs that act together, (2) Apply strategies to mobs (attack most powerful target, attack weakest target, defend leader, attack most damaged), (3) Control mobs with single actions rather than individual minion actions.",
+      "Who are the primary users or stakeholder groups impacted?": "Game Masters using Foundry Virtual Tabletop system for running role-playing game sessions, particularly those managing combat encounters with multiple minion tokens.",
+      "What is the first thing users will try to do with this new capability or system?": "Create a mob by grouping existing minion tokens together, then apply a strategy to that mob so all minions in the mob perform coordinated actions.",
+      "What problems, inefficiencies, or workarounds is this request trying to eliminate?": "The current problem is that GMs must click on every individual minion token to make them perform actions during combat. This is time-consuming and tedious when managing many minions. The workaround being eliminated is manual, repetitive clicking on each minion token individually.",
+      "Where are users currently struggling, getting stuck, or experiencing delays in the process we're aiming to improve?": "Users struggle during combat encounters when they have multiple minion tokens on the virtual tabletop. They get stuck having to manually select and command each minion individually, causing delays in gameplay flow and making combat management cumbersome.",
+      "What other systems, data sources, or tools does this capability need to interact with in order to deliver value?": "The capability must integrate with Foundry Virtual Tabletop system. It needs to interact with: (1) Actor system (for minion tokens and mob templates), (2) Token system (for selecting and grouping tokens), (3) Combat system (for executing attacks and movements), (4) Range/movement system (for determining valid targets and movement requirements), (5) Area attack system (for area-based attacks).",
+      "What are the key behaviors or integration points that define how these systems support or depend on one another?": "Key integration points: (1) Mob creation depends on Actor system to identify minion actors, (2) Token selection depends on Foundry's token system to group tokens into mobs, (3) Strategy execution depends on Combat system to determine valid targets and execute attacks, (4) Target selection strategies (attack most powerful, weakest, most damaged) depend on Combat system to evaluate target states, (5) Movement and range calculations depend on Foundry's spatial/range system, (6) Area attacks depend on Foundry's area effect system.",
+      "What is the business domain we are modeling?": "Virtual Tabletop Game Management - specifically combat encounter management for role-playing games, focusing on minion and mob coordination within the Foundry Virtual Tabletop system.",
+      "What are the core business concepts and their relationships?": "Core concepts: (1) Minion - individual game entity/token that can be controlled, (2) Mob - collection of minions that act together as a coordinated group, (3) Strategy - behavioral rules that determine how a mob selects targets and performs actions (e.g., attack most powerful target, attack weakest target, defend leader, attack most damaged), (4) Target Selection - process of choosing which entities to attack based on strategy rules, (5) Actor - Foundry system entity representing a game character/creature, (6) Token - visual representation of an actor on the virtual tabletop. Relationships: Mobs contain multiple Minions, Mobs have Strategies, Strategies determine Target Selection behavior, Minions are Actors represented as Tokens.",
+      "What are the distinct sub-domains or business capabilities?": "Sub-domains: (1) Mob Management - creating, editing, grouping, and managing mobs, (2) Strategy Management - defining and applying strategies to mobs, (3) Target Selection - determining targets based on strategy rules (most powerful, weakest, most damaged, defend leader), (4) Combat Execution - performing coordinated actions (attacks, movements, area attacks) for all minions in a mob, (5) Integration with Foundry - working within Foundry's actor, token, combat, and range systems.",
+      "What are the boundaries between different parts of the domain?": "Boundaries: (1) Mob Management is separate from individual minion control (mobs act as groups, not individuals), (2) Strategy rules are separate from combat execution (strategies determine what to do, combat system executes how to do it), (3) Target selection logic is separate from actual attack execution, (4) Mob functionality is separate from Foundry's core systems but depends on them, (5) Mob templates (for spawning) are separate from runtime mob instances.",
+      "What domain events occur in this business domain?": "Domain events: (1) Mob Created - when minions are grouped into a mob, (2) Mob Strategy Applied - when a strategy is assigned to a mob, (3) Target Selected - when a mob's strategy determines which target to attack, (4) Mob Action Executed - when all minions in a mob perform coordinated actions, (5) Mob Spawned - when a mob is created from a template or multiple actors, (6) Mob Edited - when mob composition or properties are modified, (7) Minion Added to Mob - when a minion is grouped into an existing mob, (8) Minion Removed from Mob - when a minion is ungrouped from a mob.",
+      "What are the key business rules and constraints?": "Business rules: (1) A mob must contain at least one minion, (2) All minions in a mob perform the same action when the mob acts, (3) Strategies determine target selection but must work within Foundry's combat and range rules, (4) Target selection strategies must evaluate available targets based on strategy criteria (power level, health, damage status, leader status), (5) Movement and range constraints from Foundry system must be respected, (6) Area attacks must follow Foundry's area effect rules, (7) Mob actions must be executed through Foundry's combat system, (8) Mob templates can be used to spawn mobs with predefined configurations.",
+      "What domain language do business experts use to describe this domain?": "Domain language: Mob (collection of minions acting together), Minion (individual game entity/token), Strategy (behavioral rules for target selection and actions), Target Selection (choosing which entities to attack), Spawn (create mob from template or actors), Group/Ungroup (add/remove minions from mobs), Attack Most Powerful/Weakest/Most Damaged (specific target selection strategies), Defend Leader (protective strategy), Area Attack (attack affecting multiple targets in an area), Range (distance constraints for attacks and movement), Token (visual representation on tabletop), Actor (game entity in Foundry system)."
+    },
+    "evidence": {
+      "Business model canvas": "Not provided - this is a feature extension to existing Foundry VTT system",
+      "Journey maps or other design thinking artifacts": "High-level story map mentioned in input: editing mobs, creating mobs, grouping minions, spawning mobs, choosing targets, different ways of attacking",
+      "Technical specifications": "Must work within Foundry Virtual Tabletop system, integrate with actor/token/combat/range systems",
+      "Product charters": "Not explicitly provided",
+      "Business cases": "Efficiency improvement - reduce manual clicking on individual minion tokens during combat",
+      "Business models": "Not provided",
+      "Impact maps": "Not provided",
+      "R&D maps": "Not provided",
+      "User research": "Input describes user pain point: having to click on every token of every minion",
+      "User journey maps": "Not explicitly provided, but input describes workflow: group minions → apply strategy → execute coordinated actions",
+      "Similar systems": "Foundry VTT system (existing system this extends)",
+      "User interviews": "Input text appears to be from user describing their needs",
+      "Business process documentation": "Combat encounter management process in role-playing games",
+      "Domain expert interviews": "Input appears to be from domain expert (GM describing their needs)",
+      "Existing system documentation": "Foundry VTT system documentation (referenced but not provided)",
+      "Business glossaries or dictionaries": "Domain language provided in input: mob, minion, strategy, target selection, etc.",
+      "Financial statements": "Not applicable",
+      "Industry literature": "Role-playing game combat management practices",
+      "Event storming outputs": "Not provided",
+      "Domain models from similar systems": "Foundry VTT actor/token/combat system models"
     }
   }
 }
