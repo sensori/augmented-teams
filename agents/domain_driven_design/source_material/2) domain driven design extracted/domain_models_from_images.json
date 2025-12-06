@@ -1,0 +1,812 @@
+{
+  "source_folder": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted",
+  "total_slides": 47,
+  "domain_model_slides": 47,
+  "slide_analyses": [
+    {
+      "slide_number": 1,
+      "text": [
+        "Agile Internal Training Day 2"
+      ],
+      "images": [
+        "slide_001_image_1.png"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_001_image_1.png"
+        }
+      ]
+    },
+    {
+      "slide_number": 2,
+      "text": [
+        "Domain Modeling With Class Responsibility Cards and Domain Driven Design"
+      ],
+      "images": [
+        "slide_002_image_1.jpg",
+        "slide_002_image_1.png"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_002_image_1.jpg"
+        },
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_002_image_1.png"
+        }
+      ]
+    },
+    {
+      "slide_number": 3,
+      "text": [
+        "The number one reason for failure of software projects is a failure of people to communicate",
+        "Language wall between clients and developers)",
+        "Domain Models are a Ubiquitous Language,",
+        "tight collaboration from both business and delivery teams",
+        "drawn in the language of the business",
+        "constrained by technology, using technical structure",
+        "One model for the code, the diagrams, and the language people use!",
+        "Business terms, concepts, etc, used by solution",
+        "Business Logic layer of solution",
+        "Business logic layer of solution",
+        "Business aspects of all layers of the solution (UI, DB, etc)",
+        "Business terms not part of the scope of the solution",
+        "Business terms part of the of the solution, that are not explicit in the solution"
+      ],
+      "images": [
+        "slide_003_image_1.wmf"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_003_image_1.wmf"
+        }
+      ]
+    },
+    {
+      "slide_number": 4,
+      "text": [
+        "The number one reason for failure of software projects is a failure of peopleto communicate",
+        "One layer of the solution is built using the language of the model",
+        "For cut dev this is the business logic layer",
+        "For package, the interfaces and testing layer are good candidates",
+        "Use one set of terms across the solution and problem space",
+        "Language permeates stories, test cases, database, service methods, etc",
+        "One model for the code, the diagrams, and the language people use!"
+      ],
+      "images": [
+        "slide_004_image_1.wmf"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_004_image_1.wmf"
+        }
+      ]
+    },
+    {
+      "slide_number": 5,
+      "text": [
+        "Two Agile Methods Key to Building A Domain Model",
+        "Domain Driven Design",
+        "An agile methodology for evolving a software system that closely aligns  to business requirements",
+        "A Practice to Maintain a Domain Model",
+        "A selective abstraction of knowledge from business domain experts",
+        "Responsible for representing business concepts, information about business situations, business state, and business rules",
+        "Evolves to represent the constraints of the technical solution as it becomes more well understood",
+        "A common, ubiquitous language to express business terms using a vocabulary that both technical and business can use",
+        "Class responsibility Card Modelling",
+        "An Agile Modelling technique to visually represent whole or part of an application or problem domain",
+        "Quickly explore, shape, and discard domain concepts",
+        "We will be using CRC to practice Domain Driven Design"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 6,
+      "text": [
+        "Domain Modelling with CRC"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 7,
+      "text": [
+        "Starting Simple: Using A Domain model to elaborate on our story map"
+      ],
+      "images": [
+        "slide_007_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_007_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 8,
+      "text": [
+        "Starting Simple: Using A Domain model to elaborate on our story map",
+        "Payments Customer",
+        "Sign Up For Payments Products",
+        "Make A Payment",
+        "Reverse A Payment",
+        "Payments Admin",
+        "Review Customer Payment",
+        "Maintain Customer"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 9,
+      "text": [
+        "Starting Simple: Using A Domain model to elaborate on our story map",
+        "Payments Customer",
+        "Sign Up For Payments Products",
+        "Make A Payment",
+        "Reverse A Payment",
+        "Payments Admin",
+        "Review Customer Payment",
+        "Maintain Customer",
+        "What do  we mean by a payments customer?",
+        "User? Company? Department?  Representative?",
+        "How Do we ID one?",
+        "What Information is required to make a payment?",
+        "What needs to be tracked",
+        "What States can a Payment have?"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 10,
+      "text": [
+        "Payments Customer",
+        "Sign Up For Payments Products",
+        "Make A Payment",
+        "Reverse A Payment",
+        "Payments Admin",
+        "Review Customer Payment",
+        "Maintain Customer",
+        "Account",
+        "Belongs to a Customer | Customer",
+        "Has An Account Type | <DDA, Saving, Checking, etc)",
+        "Product PMT Agreement",
+        "Agreed To By A Customer | Customer",
+        "To Use Products",
+        "Is Owned | Payment Product",
+        "Owner",
+        "Customer",
+        "Identified By Direct Deposit Account | Account",
+        "Agrees to Use Payment Product | Payment Product Agreement",
+        "Answers to these questions can be captured in a Domain Model, using CRC notation"
+      ],
+      "images": [
+        "slide_010_image_1.jpg",
+        "slide_010_image_1.png"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_010_image_1.jpg"
+        },
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_010_image_1.png"
+        }
+      ]
+    },
+    {
+      "slide_number": 11,
+      "text": [
+        "Answers to these questions can be captured in a Domain Model, using CRC notation"
+      ],
+      "images": [
+        "slide_011_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_011_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 12,
+      "text": [
+        "Answers to these questions can be captured in a Domain Model, using CRC notation"
+      ],
+      "images": [
+        "slide_012_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_012_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 13,
+      "text": [
+        "A good Domain Model dramatically increases the pace of story discovery and exploration, domain concepts are captured in one place as understanding increases"
+      ],
+      "images": [
+        "slide_013_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_013_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 14,
+      "text": [
+        "Language is as (or more) important the diagram. Practice walking the model, describing each piece, this builds the common vocabulary being used by the team"
+      ],
+      "images": [
+        "slide_014_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_014_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 15,
+      "text": [
+        "Language is as (or more) important the diagram. Practice walking the model, describing each piece, this builds the common vocabulary being used by the team"
+      ],
+      "images": [
+        "slide_015_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_015_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 18,
+      "text": [
+        "CRC components 101"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 19,
+      "text": [
+        "Each discrete part of the domain is captured as a Class"
+      ],
+      "images": [
+        "slide_019_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_019_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 20,
+      "text": [
+        "Responsibilities are added to classes, and define the behaviour and data of that class"
+      ],
+      "images": [
+        "slide_020_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_020_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 21,
+      "text": [
+        "Collaborators define the other classed that participate to fulfill a specific responsibility"
+      ],
+      "images": [
+        "slide_021_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_021_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 22,
+      "text": [
+        "Object oriented notation can be used to further define the relationships between various classes"
+      ],
+      "images": [
+        "slide_022_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_022_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 23,
+      "text": [
+        "Putting it together, a precise and concise way to describe how business logic works, in a format that can be easily translated to the actual solution"
+      ],
+      "images": [
+        "slide_023_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_023_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 24,
+      "text": [
+        "Putting it together, a precise and concise way to describe how business logic works, in a format that can be easily translated to the actual solution"
+      ],
+      "images": [
+        "slide_024_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_024_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 25,
+      "text": [
+        "Domain Modelling throughout the agile lifecycle"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 26,
+      "text": [
+        "Start by modelling functional behaviour (story map, acceptance criteria, spec by example, etc)",
+        "Ask domain related questions",
+        "What do you mean by X?",
+        "Explain the difference between an X and a Y",
+        "Describe all the different types of XWhat happens When X does Y?",
+        "What the F&@@!& is an X again?",
+        "Rephrase the answer in the domain model format (ah ha! So an X is for/does/behaves like….)",
+        "Update your model to capture the insight",
+        "Update your stories as necessary",
+        "Pause every so often and walk the model",
+        "Flesh out your domain model in parallel with story exploration"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 27,
+      "text": [],
+      "images": [
+        "slide_027_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_027_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 28,
+      "text": [
+        "Walk through your story map and build out an initial domain model",
+        "Don’t worry about being complete or precise, focus on major concepts and responsibilities",
+        "Exercise: Outline your Domain Model"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 29,
+      "text": [],
+      "images": [
+        "slide_029_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_029_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 30,
+      "text": [],
+      "images": [
+        "slide_030_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_030_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 31,
+      "text": [
+        "Refine your story map to a greater level",
+        "Add details around some key functions and stories, try to tack each major domain area in part",
+        "Refine the domain model to answer domain questions across each story",
+        "Exercise: Flesh out your Domain Model"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 32,
+      "text": [
+        "Validate the domain model by walking through individual stories, tracing the connections and collaborators in the map to see if there is a missing concept"
+      ],
+      "images": [
+        "slide_032_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_032_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 33,
+      "text": [
+        "Can the class take a crack at walking the domain model using this story? Does it reveal any missing pieces in the model?"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 34,
+      "text": [
+        "Take a set of stories and walk the model to validate the model is complete",
+        "Take note of missing sections and update your model as necessary",
+        "Refine the domain model to answer domain questions across each story",
+        "Present the model to the class",
+        "Exercise: Validate your domain model through walkthroughs"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 35,
+      "text": [
+        "Apply For a Payment Product Agreement",
+        "Story Acceptance Criteria",
+        "The Customer must provide a valid DDA Account that the Customer owns",
+        "The Customer may apply for one or more Payment Products, each application results in a separate Payment Product Agreement",
+        "Each Ap",
+        "The Customer must specify an Owner, providing the necessary Contact Details",
+        "Idea",
+        "Discovery",
+        "Delivery",
+        "Customer",
+        "Identified By Direct Deposit Account | Account",
+        "Agrees to Use Payment Product | Payment Product Agreement",
+        "Product PMT Agreement",
+        "Agreed To By A Customer | Customer",
+        "To Use Products",
+        "Is Owned | Payment Product",
+        "Owner",
+        "Owner",
+        "Contacted Using | Contact Details",
+        "Has A Role",
+        "Owns Agreements | Payment Role = Owner",
+        "Product PMT Agreement",
+        "Acceptance criteria are easier to do with a domain model in place",
+        "Acceptance criteria also provide excellent input into your domain model!",
+        "Account",
+        "Belongs to a Customer | Customer",
+        "Has An Account Type | <DDA, Saving, Checking, etc)"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 36,
+      "text": [
+        "Idea",
+        "Discovery",
+        "Delivery",
+        "Detailed Domain Modelling and Spec by Example can be done in parallel",
+        "Acceptance criteria are also an excellent time to build and refine your domain model!",
+        "Apply For a Payment Product Agreement",
+        "Story Scenario",
+        "Given the following Payments Products exist",
+        "And the following Customer exist",
+        "With a valid DDA Account",
+        "When the Customer applies for a Payment Product Agreement",
+        "using his DDA Account",
+        "with an Owner",
+        "that has the following Contact Details",
+        "Then the Payment Product Agreement will be submitted to…"
+      ],
+      "images": [
+        "slide_036_image_1.png"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_036_image_1.png"
+        }
+      ]
+    },
+    {
+      "slide_number": 37,
+      "text": [
+        "Take an individual story and define it in terms of Acceptance Criteria and / or Specification Scenarios",
+        "Write each AC / Scenario step in a way that explicitly calls out the concepts in your domain model",
+        "Elaborate / refine the domain model as you go",
+        "Validate the domain model by walking through the story",
+        "Exercise: Detail the Domain Model"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 39,
+      "text": [
+        "Avoid many to many relationship create a card to represent the relationship",
+        "Avoid dependency magnets break up classes with to many responsibilities into discrete domain concepts",
+        "Evolve “generic” responsibilities  into domain specific ones",
+        "Use Abstractions Push behavior found in multiple places into a common class; use inheritance to “inject” the common behavior into these subject areas",
+        "Meta Layer consider moving the configurable part into a separate set of classes, known as a “meta layer”",
+        "Walk the Model whenever getting “lost in the model ground the conversation by walking the model through a scenario",
+        "Connect to architecture “Annotate and inject” common functionality through inheritance, and collect common behavior into a set of requirements that influence the choice of technology, patterns and/or APIs",
+        "Establish boundaries Where multiple teams / systems connect and overlap, call out mapping and integration mechanism; try to express dependencies in terms of specific domain concepts",
+        "There are a lot of traps to avoid when writing a domain models, follow these best practices:",
+        "As a Class which of these do we want to explore?"
+      ],
+      "images": [],
+      "image_analyses": []
+    },
+    {
+      "slide_number": 40,
+      "text": [
+        "When you have a many to many relationship, that is a STRONG signal that you need to create a card to represent the relationship"
+      ],
+      "images": [
+        "slide_040_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_040_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 41,
+      "text": [
+        "Avoid dependency magnets; break up classes that have too many responsibilities into discrete domain concepts that match the business language used to describe different concepts being represented by the class"
+      ],
+      "images": [
+        "slide_041_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_041_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 42,
+      "text": [
+        "Evolve “generic” responsibilities and collaborations into responsibilities that are domain driven, and express the business language involved"
+      ],
+      "images": [
+        "slide_042_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_042_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 43,
+      "text": [
+        "Consider pushing behavior found in multiple places into a common class that describes the key domain concept common across domain subject areas; use inheritance to “inject” the common behavior into these subject areas"
+      ],
+      "images": [
+        "slide_043_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_043_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 44,
+      "text": [
+        "When parts of your system are “configurable” consider moving the configurable part into a separate set of classes, known as a “meta layer”"
+      ],
+      "images": [
+        "slide_044_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_044_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 45,
+      "text": [
+        "Always ground the conversation by walking the model through a scenario, repeat the scenario walk-through whenever getting “lost in the model"
+      ],
+      "images": [
+        "slide_045_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_045_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 46,
+      "text": [
+        "When walking a CRC model in support of a user story or scenario, start with the class that represents a persona, person or role. Make sure that the responsibilities of this “boundary” class aligns to a user story on the story map"
+      ],
+      "images": [
+        "slide_046_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_046_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 47,
+      "text": [
+        "Annotate the model with questions, and require clarifications, then make sure to update the model based on the answers"
+      ],
+      "images": [
+        "slide_047_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_047_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 48,
+      "text": [
+        "Connect the model to architecture by “injecting” common functionality through inheritance, collect common behavior into a set of requirements that influence the choice of technology, patterns and/or APIs"
+      ],
+      "images": [
+        "slide_048_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_048_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 49,
+      "text": [
+        "Establish boundaries of meaning across different teams and systems; calling out mapping and integration mechanism",
+        "Identify key domain constructs/objects that are relevant to both the business and the system to play",
+        "Draw boundaries around constructs according to when the context changes ( different system, different team)",
+        "Establish relationships and dependencies across different contexts",
+        "For each relationship/dependency identify what integration pattern makes the most sense",
+        "Establishing integration approach/policy between context owners for each dependency found"
+      ],
+      "images": [
+        "slide_049_image_1.jpg"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_049_image_1.jpg"
+        }
+      ]
+    },
+    {
+      "slide_number": 50,
+      "text": [
+        "Use a deliberate strategy to ensure that models stay consistent within and across different team and system boundaries",
+        "Keep elements in a model boundary consistent",
+        "Models will fragment when worked on by multiple parties in parallel",
+        "Continuous Integration of both concepts and implementation is required to stay in synch",
+        "High level of rigour; only required within an individual bounded countext",
+        "Synchronize across boundaries according to the nature of the dependency",
+        "Establishing clear boundaries for each context in play",
+        "Identifying relationships across the different context based on dependencies",
+        "Define an integration strategy to govern how different team will resolve and synchronize each cross context dependency"
+      ],
+      "images": [
+        "slide_050_group_image_1.png"
+      ],
+      "image_analyses": [
+        {
+          "success": false,
+          "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-cu5an***************************************Gemp. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}}",
+          "image_path": "C:\\dev\\augmented-teams\\agents\\domain_driven_design\\source_material\\2) domain driven design extracted\\images\\slide_050_group_image_1.png"
+        }
+      ]
+    }
+  ],
+  "domain_graph": {
+    "solution": {
+      "name": "",
+      "purpose": ""
+    },
+    "bounded_contexts": []
+  }
+}

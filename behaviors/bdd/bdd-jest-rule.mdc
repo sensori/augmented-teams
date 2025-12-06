@@ -1,0 +1,630 @@
+---
+description: BDD testing practices for Jest/JavaScript
+globs: ["**/*test*.js", "**/*test*.ts", "**/*test*.jsx", "**/*test*.tsx", "**/*spec*.js", "**/*spec*.ts", "**/*spec*.jsx", "**/*spec*.tsx"]
+alwaysApply: false
+---
+**When** practicing BDD testing with Jest/JavaScript,
+**then** follow these Jest-specific patterns.
+
+This rule extends `bdd-rule.mdc` — all base BDD principles apply throughout.
+
+**Executing Commands:**
+* `/bdd-validate` — Validate BDD test files against these principles
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
+
+## Conventions
+
+Naming conventions, file locations, and structural conventions for Jest/JavaScript BDD tests (what the rules apply to, not the rule files themselves).
+
+* Test file naming: Use `*test*.js`, `*test*.ts`, `*test*.jsx`, `*test*.tsx`, `*spec*.js`, `*spec*.ts`, `*spec*.jsx`, or `*spec*.tsx` patterns
+* Test file location: Place test files alongside source code or in dedicated test directories following JavaScript/TypeScript/Jest conventions
+* Framework syntax: Use Jest framework syntax: `describe()`, `it()`, `beforeEach()`, `expect()`
+* Code examples: Use JavaScript/TypeScript syntax with Jest-specific patterns
+
+## 1. Business Readable Language
+
+Write `describe`/`it` so that inner/outer sentences create natural sentence. Use nouns for `describe` (concepts, states). Start each `it()` with "should …". Nest from broad → specific; each child adds context. Use plain behavioral language. Prefer domain terms over technical jargon.
+
+**[DO]:**
+* Use `describe()` for top-level concepts and nested contexts
+* Use `it()` for individual behaviors
+* Create natural sentences when reading describe → it
+* Use nouns for describe blocks (concepts, states)
+* Start each it() with "should" to describe expected behavior
+
+```javascript
+describe('a ranged damage power', () => {
+  describe('that has targeted and resulted in a successful attack', () => {
+    it('should apply damage based on degrees of failure', () => {
+      expect(result.injuries).toBe(2);
+    });
+  });
+});
+```
+
+**[DON'T]:**
+* Use verbs for describe blocks
+* Omit "should" from it() blocks
+* Use technical jargon or class names
+* Flatten hierarchy unnecessarily
+* Use implementation-focused language
+
+```javascript
+describe('when Attack.targetToken()', () => {});
+describe('retrieved attack', () => {});
+it('sets isSubmitting flag', () => {});
+```
+
+## 2. Comprehensive and Brief
+
+Test observable behavior, not hidden internals. Cover state, validation, rules, and interactions. Cover normal, edge, and failure paths. Keep tests short, expressive, readable. Keep tests independent, deterministic, and fast.
+
+**[DO]:**
+* Test observable outcomes and state changes
+* Use `expect()` assertions for clear expectations
+* Set up test data in `beforeEach()` blocks
+* Write focused tests for each distinct behavior
+* Keep test bodies concise and readable
+
+```javascript
+describe('a damage power', () => {
+  beforeEach(() => {
+    mockTarget = { dodge: 15, injury: 0 };
+  });
+  
+  it('should be a ranged attack', () => {
+    expect(attack.isRanged).toBe(true);
+  });
+  
+  it('should calculate DC from targets dodge', () => {
+    expect(attack.execute(mockTarget).DC).toBe(20);
+  });
+});
+```
+
+**[DON'T]:**
+* Test internal methods or private attributes
+* Assert on mock internals or framework internals
+* Write overly broad tests
+* Create tests that depend on execution order
+* Access implementation details
+
+```javascript
+it('calls _validateCredentials()', () => {
+  expect(form._internal_flag).toBe(true);
+  expect(form._validateCredentials).toHaveBeenCalled();
+});
+```
+
+## 3. Balance Context Sharing with Localization
+
+Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Move shared Arrange code to `beforeEach()` in parent context.
+
+**[DO]:**
+* Move shared setup to `beforeEach()` in parent describe blocks
+* Use factory functions for creating test data
+* Extract complex setup logic into reusable helpers
+* Nest contexts to avoid repetition
+* Balance shared context with test-specific setup
+
+```javascript
+const createPower = (o = {}) => ({ name: 'Test', rank: 10, ...o });
+
+describe('a Power', () => {
+  beforeEach(() => {
+    power = createPower();
+  });
+});
+```
+
+**[DON'T]:**
+* Duplicate setup code across sibling tests
+* Repeat parent context setup unnecessarily
+* Create overly complex setup in individual tests
+* Mix shared and test-specific setup without clear separation
+* Leave duplicate Arrange code in sibling tests
+
+```javascript
+describe('with an attached macro', () => {
+  it('should return animation with type "attached"', () => {
+    const mockMacro = { name: 'Custom', execute: jest.fn() };
+    const mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    const powerItem = new PowerItem(mockItem);
+  });
+  
+  it('should provide macro name as animation name', () => {
+    const mockMacro = { name: 'Custom', execute: jest.fn() };
+    const mockItem = createMockItem({ getFlag: jest.fn().mockReturnValue('id') });
+    const powerItem = new PowerItem(mockItem);  // Duplicate setup
+  });
+});
+```
+
+## 4. Cover All Layers of the System
+
+Include separate front end, business logic, integration, and data access tests. Isolate across architecture boundaries with mocks and stubs.
+
+**[DO]:**
+* Write separate test files for each architectural layer
+* Use `jest.mock()` to isolate layers
+* Test business logic independently of data access
+* Create integration tests for cross-layer behavior
+* Use appropriate mocking strategies for each layer
+
+**[DON'T]:**
+* Mix concerns from different layers in the same test
+* Test dependencies instead of the code under test
+* Create tests that require multiple layers to be running
+* Over-mock to the point where tests don't verify real behavior
+* Skip testing important layers
+
+## 5. Unit Tests the Front-End
+
+Mock services, business logic, and routing. Stub user events and verify resulting state or view. Test user-visible behavior, not internal component state or methods.
+
+**[DO]:**
+* Mock backend services and business logic
+* Test user-visible outcomes and interactions
+* Verify component rendering and user interactions
+* Focus on what users see and experience
+* Use mocks to isolate front-end from backend
+
+```javascript
+describe('an attack power display', () => {
+  beforeEach(() => {
+    mockService = jest.fn();
+    context = prepareContext(actor);
+  });
+  
+  it('should include attack bonus in context', () => {
+    expect(context.attackPowers[0].bonus).toBe(8);
+  });
+});
+```
+
+**[DON'T]:**
+* Test internal component state or methods
+* Assert on HTML rendering details or CSS
+* Make real HTTP requests in unit tests
+* Access component internals directly (e.g., `.state`, `.props`, `.instance()`)
+* Test framework internals or implementation details
+
+```javascript
+it('renders bonus', () => {
+  expect(html).toContain('value="8"');
+  expect(html).toContain('color: blue');
+  await fetch('http://api.com');
+});
+it('calls _onMount()', () => {
+  expect(component._onMount).toHaveBeenCalled();
+});
+```
+
+## 6. Signature Phase Requirements
+
+When creating test signatures (Phase 1: Build Test Signatures), generate test structure with empty bodies:
+
+**[DO]:**
+* Use proper Jest syntax: `describe()`, `it()`, nested `describe()` blocks
+* Keep test bodies empty (no statements)
+* Mark each test with `// BDD: SIGNATURE` comment at start of body
+* Preserve ALL nesting levels from scaffold hierarchy
+* Convert plain English scaffold to proper code syntax
+* Update test file directly (e.g., `zorbling.test.js`)
+* Target ~18 describe blocks per signature iteration
+
+```javascript
+// From scaffold (plain English):
+// Zorbling Management
+//   Creating Zorblings
+//     should create zorbling with valid data
+//     should reject zorbling with invalid data
+
+// To signature (code structure):
+describe("Zorbling Management", () => {
+  describe("Creating Zorblings", () => {
+    it("should create zorbling with valid data", () => {
+      // BDD: SIGNATURE
+    });
+    
+    it("should reject zorbling with invalid data", () => {
+      // BDD: SIGNATURE
+    });
+  });
+});
+```
+
+**[DON'T]:**
+* Add mocks, stubs, or helpers in signature phase
+* Include implementation code or assertions
+* Flatten hierarchy from scaffold
+* Skip signature markers
+* Change nesting structure from scaffold
+
+```javascript
+// Missing signature marker
+it("should create zorbling", () => {
+});
+
+// Has implementation code (wrong for signature phase)
+it("should create zorbling", () => {
+  const zorbling = new Zorbling();
+  expect(zorbling).not.toBeNull();
+});
+```
+
+## 7. Test Implementation Phase Examples
+
+When implementing tests from signatures (Phase 2: Write Tests), follow base rule § 8 principles with Jest-specific syntax:
+
+**[DO]:**
+* Use Arrange-Act-Assert structure with JavaScript syntax
+* Mock using `jest.mock()` for modules or `jest.fn()` for functions - external boundaries only
+* Extract setup to helper functions or `beforeEach()`
+* Call production code directly - let tests fail naturally if code doesn't exist
+* Replace `// BDD: SIGNATURE` markers with full implementation
+
+```javascript
+// From signature:
+it("should create user with valid email", () => {
+  // BDD: SIGNATURE
+});
+
+// To full test implementation:
+it("should create user with valid email", () => {
+  // Arrange
+  const email = "test@example.com";
+  const userData = { email, name: "Test User" };
+  
+  // Act
+  const user = createUser(userData);
+  
+  // Assert
+  expect(user.email).toBe(email);
+  expect(user.isActive).toBe(true);
+});
+```
+
+**[DON'T]:**
+* Comment out production code calls
+* Mock internal business logic
+* Duplicate setup across sibling tests
+
+```javascript
+// DON'T: Commented out code
+it("should create user", () => {
+  // const email = "test@example.com";
+  // const user = createUser({ email });
+});
+
+// DON'T: Mocking internal business logic
+it("should validate user", () => {
+  const mockUser = jest.fn();  // Don't mock the thing you're testing
+  expect(mockUser.isValid()).toBe(true);
+});
+```
+
+## 8. Code Implementation Phase Examples
+
+When implementing production code from tests (Phase 3: Write Code), follow base rule § 9 principles with JavaScript-specific syntax:
+
+**[DO]:**
+* Implement minimal JavaScript code to make tests pass
+* Use simple objects before creating classes
+* Follow JavaScript conventions (ES6+)
+* Return what tests expect, nothing more
+* Let tests drive when you need classes or complexity
+
+```javascript
+// Test expects:
+it("should create user with valid email", () => {
+  const user = createUser({ email: "test@example.com", name: "Test" });
+  expect(user.email).toBe("test@example.com");
+  expect(user.isActive).toBe(true);
+});
+
+// Minimal implementation (start with object):
+function createUser(userData) {
+  const { email, name, role = "user" } = userData;
+  
+  if (!email || !email.includes("@")) {
+    throw new Error("Invalid email format");
+  }
+  
+  return {
+    email,
+    name,
+    role,
+    isActive: true
+  };
+}
+```
+
+**[DON'T]:**
+* Add features not tested
+* Create complex class structures prematurely
+* Add configuration or options not tested
+
+```javascript
+// DON'T: Over-engineered with untested features
+class User {
+  constructor(email, name, role = "user", permissions = [], preferences = {}) {
+    this.email = email;
+    this.name = name;
+    this.role = role;
+    this.permissions = permissions;  // Not tested
+    this.preferences = preferences;  // Not tested
+    this.createdAt = new Date();     // Not tested
+  }
+  
+  validatePermissions() {  // Not tested
+    // ...
+  }
+  
+  updatePreferences(prefs) {  // Not tested
+    // ...
+  }
+}
+```
+
+## 11. Object-Oriented API Design and Test Writing Principles
+
+**When** designing object-oriented APIs and writing tests for them,
+**then** follow these principles to ensure APIs are intuitive, maintainable, and follow the "ask, don't tell" pattern.
+
+These principles apply to both API design and test writing, ensuring tests verify observable behavior through well-designed object interfaces.
+
+### 11.1 Automatic Initialization and Configuration
+
+Objects should initialize themselves completely when constructed. Configuration loading and setup should happen automatically, not require explicit method calls.
+
+**[DO]:**
+```javascript
+// DO: Configuration loaded automatically
+const agent = new Agent("test");
+// Agent is now fully configured and ready to use
+expect(agent.promptTemplates).not.toBeNull();
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Requiring explicit configuration loading
+const agent = new Agent("test");
+agent.loadConfiguration();  // DON'T: Should happen automatically
+```
+
+### 11.2 "Ask, Don't Tell" Principle
+
+Objects should manage their own internal state and orchestrate operations. Methods should use internal state rather than requiring external state to be passed as parameters.
+
+**[DO]:**
+```javascript
+// DO: Agent manages internal state
+const agent = new Agent("test");
+agent.start("shape");  // Sets internal stage
+agent.assumptions = { assumption1: "value1" };  // Sets internal state
+agent.decisionCriteria = { criteria1: "option1" };  // Sets internal state
+const result = agent.build();  // Uses internal state, no parameters needed
+const instructions = agent.instructions;  // Returns instructions based on internal state
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Passing state as parameters
+const agent = new Agent("test");
+agent.build("shape", {...assumptions}, {...criteria});  // DON'T: State should be internal
+agent.assemblesInstructions("shape", {...assumptions});  // DON'T: Should use internal state
+```
+
+### 11.3 Properties Over Methods When Appropriate
+
+Use properties for accessing state or computed values that don't perform significant operations. Use methods for actions that change state or perform operations.
+
+**[DO]:**
+```javascript
+// DO: Properties for state/computed values
+const agent = new Agent("test");
+const templates = agent.promptTemplates;  // Property - simple access
+const instructions = agent.instructions;  // Property - computed from internal state
+const tools = agent.toolsAndInstructions;  // Property - structured data access
+
+// DO: Methods for actions
+agent.start("shape");  // Method - changes state
+agent.build();  // Method - performs operation
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Methods for simple property access
+agent.providesToolsAndInstructions();  // DON'T: Should be property
+agent.getPromptTemplates();  // DON'T: Should be property
+agent.retrievesInstructions();  // DON'T: Should be property
+```
+
+### 11.4 Simple, Direct Verb Names
+
+Use simple, direct verb names for methods. Avoid verbose or overly descriptive method names that add unnecessary complexity.
+
+**[DO]:**
+```javascript
+// DO: Simple, direct verbs
+agent.build();  // Clear and direct
+agent.contents.save();  // Simple verb
+agent.contents.validate();  // Direct action
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Verbose method names
+agent.executesBuilderMethod();  // DON'T: Should be build()
+agent.savesContentData();  // DON'T: Should be save()
+agent.validatesContentAgainstSchema();  // DON'T: Should be validate()
+```
+
+### 11.5 Domain Model-Driven API Organization
+
+Properties and methods should be placed on the object that is closest to them in the domain model, not on parent objects. Follow the domain model hierarchy to determine where operations belong in the API design.
+
+**[DO]:**
+```javascript
+// DO: API operations on the closest domain object (per domain model)
+agent.contents.structured = { features: [], stories: [] };  // Structured data belongs to contents
+agent.contents.save();  // Save operation belongs to contents object
+agent.contents.validate();  // Validation belongs to contents object
+agent.contents.rendered["story_map"].output;  // Rendered content belongs to contents
+agent.contents.rendered["story_map"].template;  // Template belongs to rendered content
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: API operations on parent when they belong to child (per domain model)
+agent.savesContentData();  // DON'T: Save belongs to contents, not agent
+agent.partialContent;  // DON'T: Content data belongs to contents object
+agent.completeContent;  // DON'T: Content data belongs to contents object
+agent.project.outputData["structured"];  // DON'T: Content belongs to contents, not project
+```
+
+**Note:** This principle is about API design - where to place operations in the object hierarchy. Section 2 (Fluency, Hierarchy, and Storytelling) in the base rule covers test file organization - how to structure describe/it blocks. Both follow the domain model but apply to different aspects: API design vs. test structure.
+
+### 11.6 Use Public API, Not Internal Objects
+
+Tests should access functionality through the main object's public API, not by directly accessing internal implementation objects. The main object should provide a complete public interface that abstracts internal structure.
+
+**[DO]:**
+```javascript
+// DO: Use main object's public API
+const agent = new Agent("test");
+agent.start("shape");
+expect(agent.contents.structured).not.toBeNull();  // Through agent API
+expect(agent.activityLog).not.toBeNull();  // Through agent API
+expect(agent.traceabilityLinks).not.toBeNull();  // Through agent API
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Direct access to internal objects
+agent.project.outputData["structured"];  // DON'T: Should be agent.contents.structured
+agent.project.activityLog;  // DON'T: Should be agent.activityLog
+agent.project.traceabilityLinks;  // DON'T: Should be agent.traceabilityLinks
+```
+
+**Exception:** A small number of tests may directly access internal objects for verification of internal operations, but these should be clearly marked as internal testing scenarios.
+
+### 11.7 Test Observable Behavior, Not Implementation Details
+
+**Note:** This principle is related to Section 2 (Comprehensive and Brief) which states "Test observable behavior, not hidden internals." This section adds specific examples for object-oriented API testing.
+
+Tests should verify observable behavior and outcomes through assertions, not internal implementation details like type checks, private state, or internal method calls.
+
+**[DO]:**
+```javascript
+// DO: Assert on observable behavior
+const agent = new Agent("test");
+expect(agent.promptTemplates.contextValidation.contextSufficient.template).toBe(expectedTemplate);
+expect(agent.contents.structured).toContain("features");
+expect(agent.project.storyArea).not.toBeNull();  // Observable property
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Assert on implementation details
+expect(agent.project instanceof Project).toBe(true);  // DON'T: Type check, not behavior
+expect(agent._internalFlag).toBe(true);  // DON'T: Private state
+expect(mockMethod).toHaveBeenCalled();  // DON'T: Internal call (unless testing side effects)
+```
+
+**Note:** This principle focuses on what you assert on, while principle 11.6 focuses on how you access the object under test. See Section 2 for the general principle.
+
+### 11.8 Explicit Assertions Over Conditional Guards
+
+Tests should use explicit assertions to verify preconditions and outcomes. Don't use conditional guards that silently skip assertions.
+
+**[DO]:**
+```javascript
+// DO: Explicit assertions
+expect(agent.behaviors.length).toBeGreaterThan(0);  // Explicit assertion
+expect(agent.contents.structured).not.toBeNull();  // Explicit assertion
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Conditional guards
+if (agent.behaviors.length > 0) {  // DON'T: Should assert instead
+  expect(agent.behaviors[0]).not.toBeNull();
+}
+// Missing else - test silently passes if condition false
+```
+
+### 11.9 Test Actual Values, Not Just Types
+
+Tests should verify actual values from configuration or expected data, not just check that values exist or are of a certain type.
+
+**[DO]:**
+```javascript
+// DO: Test actual values
+const expectedDo = [
+  "Use verb-noun format for all story elements",
+  "Use verb-noun language in scenario sentences"
+];
+expect(agent.rules.examples.do).toEqual(expectedDo);  // Actual values
+expect(agent.workflow.stages).toEqual(["shape", "prioritization", "discovery"]);  // Actual values
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Only type/existence checks
+expect(agent.rules.examples.do).not.toBeNull();  // DON'T: Should check actual values
+expect(Array.isArray(agent.workflow.stages)).toBe(true);  // DON'T: Should check actual values
+```
+
+### 11.10 Remove Redundant Tests
+
+Don't create tests that only verify that setting a property returns that same property. Only test properties when there's actual processing or transformation involved.
+
+**[DO]:**
+```javascript
+// DO: Test properties with processing
+agent.start("shape");
+expect(agent.currentStage).toBe("shape");  // Processing: sets stage, updates workflow
+expect(agent.instructions).not.toBeNull();  // Processing: assembles from internal state
+```
+
+**[DON'T]:**
+```javascript
+// DON'T: Redundant property tests
+agent.someProperty = "value";
+expect(agent.someProperty).toBe("value");  // DON'T: No processing, just getter
+```
+
+## 10. Use ASCII-Only Characters in Test Code
+
+**[DO]:**
+Use plain ASCII text that works on all systems:
+```javascript
+console.log("PASS: Test passed");
+console.log("SUCCESS: All assertions correct");
+console.log("Next step:");
+expect(result).toContain("correct the error");
+```
+
+**[DON'T]:**
+Unicode characters crash on Windows console:
+```javascript
+console.log("✓ Test passed");
+console.log("✅ All assertions correct");
+console.log("→ Next step");
+expect(result).toContain("→");
+```
+
+**Error:** Unicode encoding errors prevent tests from running on Windows and many CI/CD systems.
+
+## Commands
+
+Commands that implement or use this rule:
+
+* `/bdd-validate` — Validate BDD test files against these principles
+* `/bdd-workflow` — Execute BDD workflow phases (Domain Scaffold, Signatures, Write Tests, Write Code)
+* `/bdd-scaffold` — Generate domain scaffolding (plain English hierarchy) from domain maps
+* `/bdd-signature` — Generate test signatures (code structure) from scaffolds
+* `/bdd-test` — Implement test code from signatures
+* `/bdd-code` — Implement production code to make tests pass

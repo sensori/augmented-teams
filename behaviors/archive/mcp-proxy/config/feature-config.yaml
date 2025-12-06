@@ -1,0 +1,50 @@
+feature:
+  name: mcp-proxy
+  version: "1.0.0"
+  description: "HTTP API proxy for MCP server operations"
+
+build:
+  requirements:
+    - "fastapi>=0.104.0"
+    - "uvicorn>=0.24.0"
+    - "pydantic>=2.4.0"
+    - "requests>=2.31.0"
+    - "pyyaml>=6.0"
+
+service:
+  port: 8000
+  host: "0.0.0.0"
+  url: "http://localhost:8000"
+  timeout: 30
+
+environment:
+  development:
+    url: "http://localhost:8000"
+    log_level: "DEBUG"
+  production:
+    url: "https://mcp-proxy.icyrock-e61cf3e7.westus2.azurecontainerapps.io"
+    log_level: "INFO"
+
+secrets:
+  github_token: "${GITHUB_TOKEN}"
+  api_key: "${API_KEY}"
+
+azure:
+  resource_group: "AugmentedTeams"
+  container_registry: "augmentedteams-hfdzfjhghshucaf6.azurecr.io"
+  registry_username: "augmentedteams"
+  # registry_password should be set via environment variable ACR_PASSWORD
+  namespace: "mcp-proxy"
+  replicas: 1
+  memory_request: "0.5Gi"
+  memory_limit: "0.5Gi"
+  cpu_request: "0.25"
+  cpu_limit: "0.25"
+
+health_check:
+  interval: 30
+  timeout: 10
+  start_period: 5
+  retries: 3
+  path: "/"
+

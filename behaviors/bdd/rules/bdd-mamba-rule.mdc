@@ -1,0 +1,547 @@
+---
+description: BDD testing practices for Mamba/Python
+globs: ["**/*_test.py", "**/test_*.py", "**/*_spec.py", "**/spec_*.py", "**/*_test.pyi", "**/test_*.pyi", "**/*_spec.pyi", "**/spec_*.pyi"]
+alwaysApply: false
+---
+
+**When** writing Mamba tests,
+**then** apply BDD practices with Mamba/Python-specific patterns.
+
+This rule extends `bdd-rule.mdc` with Mamba-specific examples.
+
+For comprehensive examples and edge cases, see `bdd-mamba-reference.md`.
+
+**Executing Commands:**
+* `\bdd-validate` — Validate Mamba test files against BDD principles (uses this rule for Mamba-specific patterns)
+* `\bdd-workflow` — Guide through Red-Green-Refactor cycle for Mamba tests
+
+---
+
+## 1. Business Readable Language
+Write `describe`/`it` so that inner/outer sentences create natural sentence. Use nouns for `describe` (concepts, states). Start each `it()` with "should …". Nest from broad → specific; each child adds context. Use plain behavioral language. Prefer domain terms over technical jargon. Connect base business concept to more specific concepts using linking words: "that is/that has" "that has been"
+
+**✅ DO:**
+```python
+with description('a ranged damage power'):  // DO: Use nouns for describe, connect with "a/an", use domain terms
+    with context('that has targeted and resulted in a successful attack'):  // DO: Connect with "that has", nest broad→specific
+        with it('should apply damage based on degrees of failure'):  // DO: Start with "should", use plain behavioral language
+            expect(result.injuries).to(equal(2))
+```
+
+**❌ DON'T:**
+```python
+with description('when attacking Target'):  // DON'T: Use action verbs, use class names without article
+with description('Power.execute()'):  // DON'T: Use technical/method names instead of business concepts
+with context('retrieved attack'):  // DON'T: Break natural connection (should be "that is retrieved"), repeat parent context
+with it('sets is_submitting flag'):  // DON'T: Include technical jargon (flags/IDs), omit "should"
+```
+
+---
+
+## 2. Comprehensive and Brief
+
+Test observable behavior, not hidden internals. Cover state, validation, rules, and interactions. Cover normal, edge, and failure paths. Keep tests short, expressive, readable. Keep tests independent, deterministic, and fast.
+
+**✅ DO:**
+```python
+with description('a damage power'):
+    with before.each:
+        self.mock_target = {'dodge': 15, 'injury': 0}  // DO: Isolate with stubs, keep independent
+    
+    with it('should be a ranged attack'):  // DO: Test observable state, keep short & expressive
+        expect(attack.is_ranged).to(equal(True))
+    
+    with it('should calculate DC from targets dodge'):  // DO: Cover calculations/business rules/interactions
+        expect(attack.execute(self.mock_target).DC).to(equal(20))
+    
+    with context('whose roll exceeds the DC'):  // DO: Cover normal paths, keep fast
+        with it('should indicate a hit'):
+            expect(result.hit).to(be_true)
+        
+    with context('whose roll does not exceed the DC'):  // DO: Cover failure paths
+        with it('should indicate a miss'):
+            expect(result.hit).to(be_false)
+```
+
+**❌ DON'T:**
+```python
+with it('calls _validate()'):  // DON'T: Assert internal calls, test hidden internals, omit "should"
+    expect(form._flag).to(be_true)  // DON'T: Test private state
+    expect(form._validate).to(have_been_called)
+with it('handles attack'):  // DON'T: Skip validations (no assertions!), write long tests
+    # 50 lines...
+    time.sleep(2)  // DON'T: Use arbitrary sleeps, depend on external state, let suites grow slow
+    expect(db.records).to(have_len(5))
+```
+
+---
+
+## 3. Balance Context Sharing with Localization
+
+Nest parent context, don't repeat it. Provide expected data via helper factories/builders. Extract complex logic into helpers. Reuse helpers/factories where possible. Centralize setup/teardown logic and helpers when sharing. But keep setup/helper code as close to your test code as you can. Initialize helper instances for every test; reset between runs. Clear state after each run. 
+
+**MAMBA LIMITATION:** Mamba does NOT support moving `before.each` to parent `describe` blocks. When the same mock/setup appears in multiple sibling `describe` blocks, extract it to a shared helper function instead of trying to move `before.each` to parent (which will break tests).
+
+**VALIDATION CHECKLIST (AI must check ALL):**
+1. ~~**Sibling with describe() blocks:** Do they have identical before_each? → Move to parent~~ **NOTE: Mamba does NOT support moving before.each to parent describe blocks - this check is DISABLED for Mamba**
+2. ✓ **Sibling it() blocks (3+):** Do they have identical Arrange code? → **For Mamba: Extract to helper function, do NOT move to parent before_each** (Mamba limitation)
+3. ✓ **Mock objects:** Same mock created in multiple places? → Extract to helper function (do NOT move to parent before_each for Mamba)
+4. ✓ **Monkey patches:** Repeated patches across tests? → Extract to helper function (do NOT move to parent before_each for Mamba)
+5. ✓ **Helper factories:** Defined multiple times? → Define once at appropriate scope
+6. ✓ **Test data builders:** Duplicated? → Create shared factory function
+
+**✅ DO:**
+```python
+def create_power(o=None):  // DO: Use helper factories, extract complex logic
+    return Power({**{'name': 'Test', 'rank': 10}, **(o or {})})
+
+with description('a Power'):
+    with before.each:  // DO: Place setup at parent scope when shared
+        self.factory = MockFactory()
+        self.factory.reset()  // DO: Clear state/reset between runs
+        self.power = create_power()  // DO: Reuse helpers, keep code close to tests
+    
+    with context('that is a ranged power'):  // DO: Nest parent context, don't repeat it
+        with before.each:
+            self.power = create_power({'range': 'ranged'})  // DO: Add ONLY test-specific
+```
+
+**✅ DO (Pattern B Fix - Shared Arrange via Helper Function for Mamba):**
+```python
+def setup_macro_mocks(context_self):
+    """Helper to set up common mocks for macro tests"""
+    context_self.mock_macro = {'name': 'Custom', 'execute': Mock()}
+    context_self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+    context_self.power_item = PowerItem(context_self.mock_item)
+    return context_self.mock_macro, context_self.mock_item, context_self.power_item
+
+with description('with an attached macro'):
+    with it('should return animation with type attached'):
+        # Arrange - use helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.type).to(equal('attached'))
+    
+    with it('should provide macro name as animation name'):
+        # Arrange - reuse helper function
+        setup_macro_mocks(self)
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.name).to(equal('Custom'))
+```
+
+**✅ DO (Alternative - Shared Arrange in before_each when in SAME context):**
+```python
+with description('with an attached macro'):
+    with before.each:  // DO: Move shared Arrange to before.each (works within same context)
+        self.mock_macro = {'name': 'Custom', 'execute': Mock()}
+        self.mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        self.power_item = PowerItem(self.mock_item)
+    
+    with it('should return animation with type attached'):
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.type).to(equal('attached'))
+    
+    with it('should provide macro name as animation name'):
+        # Act
+        animation = self.power_item.animation
+        # Assert
+        expect(animation.name).to(equal('Custom'))
+```
+
+**⚠️ MAMBA LIMITATION - Pattern A:**
+```python
+with description('Power'):
+    with context('created from actor'):
+        with before.each:  // NOTE: Mamba doesn't support moving before.each to parent describe blocks
+            self.actor = {'id': '123'}  // Acceptable: Use helper functions instead of parent before.each
+    with context('that is ranged'):
+        with before.each:  // NOTE: For Mamba, extract common setup to helper functions rather than parent
+            self.actor = create_actor({'id': '123'})  // DO: Use helper factory to avoid duplication
+```
+
+**❌ DON'T (Pattern B - Duplicate Arrange in sibling it() blocks):**
+```python
+with description('with an attached macro'):
+    with it('should return animation with type attached'):
+        # Arrange
+        mock_macro = {'name': 'Custom', 'execute': Mock()}
+        mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        power_item = PowerItem(mock_item)
+        # Act & Assert...
+    
+    with it('should provide macro name'):
+        # Arrange - DON'T: Same setup as above!
+        mock_macro = {'name': 'Custom', 'execute': Mock()}
+        mock_item = create_mock_item({'get_flag': Mock(return_value='id')})
+        power_item = PowerItem(mock_item)
+        # Act & Assert...
+    
+    # FIX: When 3+ sibling it() share identical Arrange → extract to helper function (Mamba limitation: cannot move to parent before.each)
+```
+
+---
+
+## 4. Cover All Layers of the System
+
+Include separate front end, business logic, integration, and data access tests. Isolate across architecture boundaries with mocks and stubs. Keep tests for a story/feature together across architectural layers. Stub/mock external deps between each layer. Organize tests so they tell a story, front, middle or integration, back. Keep unit tests fast and isolated. Focus tests on the code under test, not its dependencies. Apply a behavioral lens at every layer.
+
+**✅ DO:**
+```python
+with description('an Attack Power'):  // DO: Organize to tell story (front/middle/back), keep feature tests together
+    with context('whose actor data is being displayed on a character sheet'):  // DO: Front-end - Include separate tests
+        with it('should include attack bonus in context'):  // DO: Keep fast & isolated
+            expect(context['attack_powers'][0]['bonus']).to(equal(8))  // DO: Focus on code under test
+        with it('should render attack bonus in HTML'):
+            expect(html).to(contain('value="8"'))
+    
+    with context('that is a damage power'):  // DO: Domain - Apply behavioral lens at every layer
+        with it('should calculate damage from rank'):
+            expect(calculate_damage(5)).to(equal(10))
+    
+    with context('that has been saved to the repository'):  // DO: Data access - Isolate with mocks, stub external deps
+        with before.each:
+            self.mock_db = Mock(); self.repo.save_attack(attack)
+        with context('that is retrieved at a later time'):
+            with it('should return the saved attack with all properties'):
+                expect(self.repo.get_attack(attack.id).bonus).to(equal(attack.bonus))
+```
+
+**❌ DON'T:**
+```python
+with description('damage'):  // DON'T: Stop at happy path, test 3rd party libs
+    with it('works'):
+        expect(requests.get(url)).to(be_ok)
+with it('passes if repo ready'):  // DON'T: Rely on dependent code, mix test types
+    render_page(); expect(db.has_record()).to(be_true)
+```
+
+---
+
+## 5. Unit Tests the Front-End
+
+Mock services, business logic, and routing. Stub user events and verify resulting state or view. Validate conditional render paths (loading, empty, err). Test sheet/page functions/methods that are substantive in nature. Assert emitted events or callbacks. Reset DOM and mocks each test.
+
+**✅ DO:**
+```python
+with description('an attack power display'):
+    with before.each:
+        self.mock_service = Mock()  // DO: Mock services/business logic/routing, reset DOM & mocks
+        self.context = prepare_context(self.actor)  // DO: Stub user events, assert emitted events/callbacks
+    
+    with it('should include attack bonus in context'):  // DO: Test BOTH data structure
+        expect(self.context['attack_powers'][0]['bonus']).to(equal(8))
+    
+    with it('should render attack bonus in HTML'):  // DO: AND rendered output
+        expect(render_template(self.context)).to(contain('value="8"'))
+    
+    with context('that is loading'):  // DO: Validate conditional render paths (loading/empty/error)
+        with it('should show spinner'):
+            expect(html).to(contain('loading-spinner'))
+```
+
+**❌ DON'T:**
+```python
+with it('renders bonus'):  // DON'T: Test only HTML not data, hit live APIs, test styling
+    expect(html).to(contain('value="8"'))
+    expect(html).to(contain('color: blue'))
+    requests.get('http://api.com')
+with it('calls _on_mount()'):  // DON'T: Depend on lifecycle/internals, re-render full app trees
+    expect(component._on_mount).to(have_been_called)
+```
+
+---
+
+## Common Mamba Patterns
+
+**Mocking with unittest.mock:**
+```python
+from unittest.mock import Mock, patch
+
+with before.each:
+    self.api = Mock()
+    self.api.post.return_value = {'id': '123', 'email': 'test@example.com'}
+    self.service = UserService(self.api)
+
+with it('should create user with email'):
+    user = self.service.create_user('test@example.com')
+    expect(user['email']).to(equal('test@example.com'))
+    # Verify API called (as side-effect check, not main assertion)
+    self.api.post.assert_called_once()
+```
+
+**Async tests:**
+```python
+with _it('should fetch data asynchronously'):
+    async def spec():
+        data = await fetch_data()
+        expect(data).not_to(be_none)
+```
+
+**Context managers:**
+```python
+with it('should process file contents'):
+    with open('test.txt', 'w') as f:
+        f.write('test data')
+    
+    result = processor.process('test.txt')
+    expect(result).to(contain('test data'))
+```
+
+**Patching:**
+```python
+with _it('should send email via SMTP'):
+    with patch('smtplib.SMTP') as mock_smtp:
+        service = EmailService()
+        service.send('test@example.com', 'Hello')
+        
+        expect(mock_smtp.return_value.send_message).to(have_been_called)
+```
+
+**Expect matchers:**
+```python
+expect(value).to(equal(expected))
+expect(value).to(be_true)
+expect(value).to(be_false)
+expect(value).to(be_none)
+expect(collection).to(contain(item))
+expect(collection).to(have_len(3))
+expect(func).to(raise_error(ValueError))
+expect(mock).to(have_been_called)
+expect(mock).to(have_been_called_with(args))
+```
+
+---
+
+## 11. Object-Oriented API Design and Test Writing Principles
+
+**When** designing object-oriented APIs and writing tests for them,
+**then** follow these principles to ensure APIs are intuitive, maintainable, and follow the "ask, don't tell" pattern.
+
+These principles apply to both API design and test writing, ensuring tests verify observable behavior through well-designed object interfaces.
+
+### 11.1 Automatic Initialization and Configuration
+
+Objects should initialize themselves completely when constructed. Configuration loading and setup should happen automatically, not require explicit method calls.
+
+**✅ DO:**
+```python
+# DO: Configuration loaded automatically
+agent = Agent("test")
+# Agent is now fully configured and ready to use
+expect(agent.prompt_templates).not_to(be_none)
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Requiring explicit configuration loading
+agent = Agent("test")
+agent.loadConfiguration()  # DON'T: Should happen automatically
+```
+
+### 11.2 "Ask, Don't Tell" Principle
+
+Objects should manage their own internal state and orchestrate operations. Methods should use internal state rather than requiring external state to be passed as parameters.
+
+**✅ DO:**
+```python
+# DO: Agent manages internal state
+agent = Agent("test")
+agent.start("shape")  # Sets internal stage
+agent.assumptions = {"assumption1": "value1"}  # Sets internal state
+agent.decision_criteria = {"criteria1": "option1"}  # Sets internal state
+result = agent.build()  # Uses internal state, no parameters needed
+instructions = agent.instructions  # Returns instructions based on internal state
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Passing state as parameters
+agent = Agent("test")
+agent.build(behavior="shape", assumptions={...}, criteria={...})  # DON'T: State should be internal
+agent.assemblesInstructions(behavior="shape", assumptions={...})  # DON'T: Should use internal state
+```
+
+### 11.3 Properties Over Methods When Appropriate
+
+Use properties for accessing state or computed values that don't perform significant operations. Use methods for actions that change state or perform operations.
+
+**✅ DO:**
+```python
+# DO: Properties for state/computed values
+agent = Agent("test")
+templates = agent.prompt_templates  # Property - simple access
+instructions = agent.instructions  # Property - computed from internal state
+tools = agent.tools_and_instructions  # Property - structured data access
+
+# DO: Methods for actions
+agent.start("shape")  # Method - changes state
+agent.build()  # Method - performs operation
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Methods for simple property access
+agent.providesToolsAndInstructions()  # DON'T: Should be property
+agent.getPromptTemplates()  # DON'T: Should be property
+agent.retrievesInstructions()  # DON'T: Should be property
+```
+
+### 11.4 Simple, Direct Verb Names
+
+Use simple, direct verb names for methods. Avoid verbose or overly descriptive method names that add unnecessary complexity.
+
+**✅ DO:**
+```python
+# DO: Simple, direct verbs
+agent.build()  # Clear and direct
+agent.contents.save()  # Simple verb
+agent.contents.validate()  # Direct action
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Verbose method names
+agent.executesBuilderMethod()  # DON'T: Should be build()
+agent.savesContentData()  # DON'T: Should be save()
+agent.validatesContentAgainstSchema()  # DON'T: Should be validate()
+```
+
+### 11.5 Domain Model-Driven API Organization
+
+Properties and methods should be placed on the object that is closest to them in the domain model, not on parent objects. Follow the domain model hierarchy to determine where operations belong in the API design.
+
+**✅ DO:**
+```python
+# DO: API operations on the closest domain object (per domain model)
+agent.contents.structured = {"features": [], "stories": []}  # Structured data belongs to contents
+agent.contents.save()  # Save operation belongs to contents object
+agent.contents.validate()  # Validation belongs to contents object
+agent.contents.rendered["story_map"].output  # Rendered content belongs to contents
+agent.contents.rendered["story_map"].template  # Template belongs to rendered content
+```
+
+**❌ DON'T:**
+```python
+# DON'T: API operations on parent when they belong to child (per domain model)
+agent.savesContentData()  # DON'T: Save belongs to contents, not agent
+agent.partial_content  # DON'T: Content data belongs to contents object
+agent.complete_content  # DON'T: Content data belongs to contents object
+agent.project.output_data["structured"]  # DON'T: Content belongs to contents, not project
+```
+
+**Note:** This principle is about API design - where to place operations in the object hierarchy. Section 2 (Fluency, Hierarchy, and Storytelling) covers test file organization - how to structure describe/context/it blocks. Both follow the domain model but apply to different aspects: API design vs. test structure.
+
+### 11.6 Use Public API, Not Internal Objects
+
+Tests should access functionality through the main object's public API, not by directly accessing internal implementation objects. The main object should provide a complete public interface that abstracts internal structure.
+
+**✅ DO:**
+```python
+# DO: Use main object's public API
+agent = Agent("test")
+agent.start("shape")
+expect(agent.contents.structured).not_to(be_none)  # Through agent API
+expect(agent.activity_log).not_to(be_none)  # Through agent API
+expect(agent.traceability_links).not_to(be_none)  # Through agent API
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Direct access to internal objects
+agent.project.output_data["structured"]  # DON'T: Should be agent.contents.structured
+agent.project.activity_log  # DON'T: Should be agent.activity_log
+agent.project.traceability_links  # DON'T: Should be agent.traceability_links
+```
+
+**Exception:** A small number of tests may directly access internal objects for verification of internal operations, but these should be clearly marked as internal testing scenarios.
+
+### 11.7 Test Observable Behavior, Not Implementation Details
+
+**Note:** This principle is related to Section 2 (Comprehensive and Brief) which states "Test observable behavior, not hidden internals." This section adds specific examples for object-oriented API testing.
+
+Tests should verify observable behavior and outcomes through assertions, not internal implementation details like type checks, private state, or internal method calls.
+
+**✅ DO:**
+```python
+# DO: Assert on observable behavior
+agent = Agent("test")
+expect(agent.prompt_templates.context_validation.context_sufficient.template).to(equal(expected_template))
+expect(agent.contents.structured).to(contain("features"))
+expect(agent.project.story_area).not_to(be_none)  # Observable property
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Assert on implementation details
+expect(isinstance(agent.project, Project)).to(be_true)  # DON'T: Type check, not behavior
+expect(agent._internal_flag).to(be_true)  # DON'T: Private state
+expect(mock_method).to(have_been_called)  # DON'T: Internal call (unless testing side effects)
+```
+
+**Note:** This principle focuses on what you assert on, while principle 11.6 focuses on how you access the object under test. See Section 2 for the general principle.
+
+### 11.8 Explicit Assertions Over Conditional Guards
+
+Tests should use explicit assertions to verify preconditions and outcomes. Don't use conditional guards that silently skip assertions.
+
+**✅ DO:**
+```python
+# DO: Explicit assertions
+expect(len(agent.behaviors)).to(be_above(0))  # Explicit assertion
+expect(agent.contents.structured).not_to(be_none)  # Explicit assertion
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Conditional guards
+if len(agent.behaviors) > 0:  # DON'T: Should assert instead
+    expect(agent.behaviors[0]).not_to(be_none)
+# Missing else - test silently passes if condition false
+```
+
+### 11.9 Test Actual Values, Not Just Types
+
+Tests should verify actual values from configuration or expected data, not just check that values exist or are of a certain type.
+
+**✅ DO:**
+```python
+# DO: Test actual values
+expected_do = [
+    "Use verb-noun format for all story elements",
+    "Use verb-noun language in scenario sentences"
+]
+expect(agent.rules.examples.do).to(equal(expected_do))  # Actual values
+expect(agent.workflow.stages).to(equal(["shape", "prioritization", "discovery"]))  # Actual values
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Only type/existence checks
+expect(agent.rules.examples.do).not_to(be_none)  # DON'T: Should check actual values
+expect(isinstance(agent.workflow.stages, list)).to(be_true)  # DON'T: Should check actual values
+```
+
+### 11.10 Remove Redundant Tests
+
+Don't create tests that only verify that setting a property returns that same property. Only test properties when there's actual processing or transformation involved.
+
+**✅ DO:**
+```python
+# DO: Test properties with processing
+agent.start("shape")
+expect(agent.current_stage).to(equal("shape"))  # Processing: sets stage, updates workflow
+expect(agent.instructions).not_to(be_none)  # Processing: assembles from internal state
+```
+
+**❌ DON'T:**
+```python
+# DON'T: Redundant property tests
+agent.some_property = "value"
+expect(agent.some_property).to(equal("value"))  # DON'T: No processing, just getter
+```

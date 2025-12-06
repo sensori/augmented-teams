@@ -1,0 +1,101 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Behavior Consistency Check",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-consistency-cmd.py"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Behavior Watch Mode",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-consistency-cmd.py",
+                "watch"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Behavior Sync",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-sync-cmd.py"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Behavior Sync on Startup",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-sync-cmd.py"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Behavior Sync Watch Mode",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-sync-cmd.py",
+                "watch"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Behavior Index",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-index-cmd.py"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Behavior Index on Startup",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "command-runners/behavior-index-cmd.py"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
+}

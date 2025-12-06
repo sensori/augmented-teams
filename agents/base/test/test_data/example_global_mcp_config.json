@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "other-server": {
+      "command": "node",
+      "args": [
+        "other-server.js"
+      ]
+    },
+    "agent-test_agent": {
+      "command": "python",
+      "args": [
+        "agents/base/src/agent_mcp_server.py",
+        "test_agent"
+      ],
+      "cwd": "C:\\dev\\augmented-teams",
+      "env": {
+        "AGENT_NAME": "test_agent",
+        "PYTHONPATH": "C:\\dev\\augmented-teams"
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

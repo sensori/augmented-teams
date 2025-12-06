@@ -1,0 +1,127 @@
+```mermaid
+flowchart TB
+    subgraph BC["Service Oriented Bounded Context"]
+        direction TB
+        
+        subgraph AG1["An Aggregate"]
+            direction TB
+            
+            %% Events at top
+            E1["An Aggregate Root Created Event<br/>eventId, timestamp, aggregateRootData"]
+            E2["An Aggregate Root Updated Event<br/>eventId, timestamp, changes"]
+            
+            %% Aggregate Root
+            AR["An Aggregate Root<br/>aggregateRootId<br/>perform aggregate operation<br/>manage sub entities<br/>use value object"]
+            
+            %% Sub Entity
+            SOA["A Sub Object Of The Aggregate<br/>subObjectId<br/>perform sub operation<br/>get aggregate root"]
+            
+            %% Value Objects
+            VO["A Value Object<br/>valueProperty<br/>validateValue<br/>combineWith"]
+            SOVO["A Sub Object Of The Value Object<br/>subValueProperty<br/>calculate sub value"]
+            AVO["Another Value Object<br/>anotherValueProperty<br/>transformValue"]
+            
+            %% Commands
+            C1["Create An Aggregate Root Command<br/>commandId, aggregateRootData"]
+            C2["Update An Aggregate Root Command<br/>commandId, aggregateRootId, updateData"]
+            
+            %% Service
+            SVC["A Service<br/>perform cross aggregate operation<br/>calculate complex value<br/>validate business rule"]
+            
+            %% Repository
+            REPO["A Repository<br/>findById<br/>findByCriteria<br/>save<br/>delete"]
+            SC["A Search Criteria"]
+        end
+        
+        subgraph AG2["Another Aggregate"]
+            direction TB
+            AAR["Another Aggregate Root<br/>anotherAggregateRootId<br/>perform another operation<br/>referenceAn Aggregate Root"]
+        end
+        
+        %% Integration Points
+        BC2["Another Bounded Context<br/>customer_supplier"]
+        BC3["Yet Another Bounded Context<br/>open_host"]
+    end
+    
+    %% Database
+    DB[("Database<br/>Patients")]
+    
+    %% Relationships within An Aggregate
+    AR -->|owns| SOA
+    AR -->|uses| VO
+    SOA -->|references| AR
+    SOA -->|uses| SOVO
+    VO -->|contains| SOVO
+    VO -.->|associates| AVO
+    
+    %% Event relationships
+    AR -.->|raises| E1
+    AR -.->|raises| E2
+    E1 -->|references| AR
+    E2 -->|references| AR
+    E2 -->|references| VO
+    
+    %% Command relationships
+    C1 -->|contains| VO
+    C2 -->|targets| AR
+    C2 -->|contains| VO
+    
+    %% Service relationships
+    SVC -->|operates on| AR
+    SVC -->|operates on| AAR
+    SVC -->|uses| VO
+    SVC -->|uses| AVO
+    SVC -->|uses| REPO
+    
+    %% Repository relationships
+    REPO -->|persists/retrieves| AR
+    REPO -->|uses| SC
+    
+    %% Cross-aggregate relationships
+    AR -.->|references| AAR
+    AAR -.->|references| AR
+    
+    %% Persistence relationships (dotted lines to database)
+    AR -.->|persisted to| DB
+    SOA -.->|persisted to| DB
+    VO -.->|persisted to| DB
+    SOVO -.->|persisted to| DB
+    AVO -.->|persisted to| DB
+    
+    %% Integration points
+    BC -.->|customer_supplier| BC2
+    BC -.->|open_host| BC3
+    
+    %% Styling
+    classDef entity fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef valueObject fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef event fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef command fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef service fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef repository fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef database fill:#e0e0e0,stroke:#424242,stroke-width:3px
+    classDef boundedContext fill:#ffffff,stroke:#000000,stroke-width:3px,stroke-dasharray: 5 5
+    classDef aggregate fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray: 3 3
+    
+    class AR,SOA,AAR entity
+    class VO,SOVO,AVO,SC valueObject
+    class E1,E2 event
+    class C1,C2 command
+    class SVC service
+    class REPO repository
+    class DB database
+    class BC boundedContext
+    class AG1,AG2 aggregate
+```
+
+
+
+
+
+
+
+
+
+
+
+

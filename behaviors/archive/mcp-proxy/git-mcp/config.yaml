@@ -1,0 +1,32 @@
+# GitHub MCP Server Configuration
+# This describes how to integrate the GitHub MCP server into the mcp-proxy container
+
+build:
+  # Multi-stage build - copy from GitHub MCP server image
+  from_image: ghcr.io/github/github-mcp-server
+  copy_from:
+    - src: /server/github-mcp-server
+      dst: /usr/local/bin/github-mcp-server
+
+install:
+  packages:
+    - supervisor
+
+run:
+  - mkdir -p /etc/supervisor/conf.d
+  - "echo '[supervisord]' > /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'nodaemon=true' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo '[program:mcp-server]' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'command=/usr/local/bin/github-mcp-server stdio' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'environment=GITHUB_PERSONAL_ACCESS_TOKEN=\"%(ENV_GITHUB_PERSONAL_ACCESS_TOKEN)s\"' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'stdout_logfile=/dev/stdout' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'stderr_logfile=/dev/stderr' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo '[program:mcp-proxy]' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'command=uvicorn service:app --host 0.0.0.0 --port 8000' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'stdout_logfile=/dev/stdout' >> /etc/supervisor/conf.d/mcp.conf"
+  - "echo 'stderr_logfile=/dev/stderr' >> /etc/supervisor/conf.d/mcp.conf"
+
+cmd:
+  - supervisord
+  - "-c"
+  - /etc/supervisor/supervisord.conf

@@ -1,7 +1,0 @@
-{
-  "name": "render_story_exploration",
-  "path": "docs/stories",
-  "template": "story-exploration.md",
-  "output": "{increment_name_slug}-exploration.md"
-}
-

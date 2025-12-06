@@ -1,0 +1,1850 @@
+{
+  "verbose_mode": false,
+  "rules": {
+    "description": "Agent-level rules that apply to all behaviors (shape, prioritization, arrange, discovery, exploration, specification_scenarios, specification_examples, specification_tests)",
+    "examples": {
+      "do": [
+        "Use verb-noun format for all story elements (epic names, feature names, story titles)",
+        "CRITICAL: Story names MUST follow Actor-Verb-Noun format: Use concise Verb-Noun format for story name (e.g., 'Move To Mob Leaders Turn', 'Determines Target from Strategy', 'Initiate Mob Attack'), and include italicized description showing component interactions (e.g., '*Combat Tracker moves to any mob member's turn, auto moves to mob leader's turn*'). The story name should be concise and action-oriented, while the description shows the component-to-component interactions.",
+        "Use verb-noun language in scenario sentences",
+        "Maintain verb-noun consistency from epic to feature to story to scenario",
+        "Focus stories on user interactions and observable system behavior",
+        "Ensure stories follow INVEST principles (Independent, Negotiable, Valuable, Estimable, Small, Testable)",
+        "Use business domain language that stakeholders understand",
+        "Write stories that can be developed and tested in a matter of days"
+      ],
+      "dont": [
+        "Mix verb-noun with other formats",
+        "Use technical implementation language in user-facing story elements",
+        "Focus on delivery or development tasks required to build a system",
+        "Focus on system internals (technical stories)",
+        "Use development task language: implement, create, refactor, optimize, fix, build, set up",
+        "Use technical implementation details: query database, call API, update table"
+      ]
+    },
+    "diagnostic": "story_agent_validate_verb_noun_consistency"
+  },
+  "behaviors": {
+    "shape": {
+      "order": 1,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the shape behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers\n6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool with:\n   - `key_questions_answered`: dict mapping question keys to answer strings\n   - `evidence_provided`: dict mapping evidence types to evidence content\n   - Example: key_questions_answered={'user_types': 'Game Masters', 'first_action': 'Group tokens into mobs'}\n7. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user\n   - You have successfully stored the clarification data using `agent_store_clarification()`\n\n**CRITICAL REMINDER:** The presentation of questions and answers in the chat window is MANDATORY and CANNOT BE SKIPPED. This allows the user to see what was asked, how it was answered, and provide corrections. For shape behavior specifically, incomplete clarification will lead to poor story maps. Stop and get complete answers.",
+          "key_questions": [
+            "Who are the distinct types of users (e.g., operational users, power users, compliance consumers, content creators, producers)?",
+            "What are the key goals, behaviors, or decisions each group is trying to accomplish using this capability?",
+            "Who are the primary users or stakeholder groups impacted?",
+            "What is the first thing users will try to do with this new capability or system?",
+            "What problems, inefficiencies, or workarounds is this request trying to eliminate?",
+            "Where are users currently struggling, getting stuck, or experiencing delays in the process we're aiming to improve?",
+            "What other systems, data sources, or tools does this capability need to interact with in order to deliver value?",
+            "What are the key behaviors or integration points that define how these systems support or depend on one another?"
+          ],
+          "evidence": [
+            "Business model canvas",
+            "Journey maps or other design thinking artifacts",
+            "Technical specifications",
+            "Product charters",
+            "Business cases",
+            "Business models",
+            "Impact maps",
+            "R&D maps",
+            "User research",
+            "User journey maps",
+            "Similar systems",
+            "User interviews"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Story drill down",
+              "question": "What areas of the story map do you want to explore more deeply as a part of shaping?",
+              "outcome": "Determines which epics/stories get detailed breakdown",
+              "options": [
+                "Dig deep on business complexity",
+                "Dig deep on system interactions",
+                "Dig deep on architectural pieces",
+                "Dig deep on user workflows",
+                "High and wide across all epics",
+                "Focus on highest value areas",
+                "Dig deep on behavioral complexity",
+                "Dig deep on data and reporting needs",
+                "Dig deep on change management or training impact",
+                "Dig deep on system-of-record versus system-of-engagement boundaries"
+              ]
+            },
+            {
+              "description": "Flow scope and granularity",
+              "question": "How wide are we going with the flow and what level of scope are we documenting?",
+              "outcome": "Determines the breadth user-system interactions we're mapping",
+              "options": [
+                "End-to-end user-system behavior – One user interaction followed by one system response",
+                "Journey level – Complete user journey across multiple touchpoints, systems, and interactions. Captures full experience flow.",
+                "Intra-system level – Focus on interactions within a single system, Useful for Solutions with significant backend or service flows.",
+                "Business process plus user-system behavior – Combine business process steps with detailed user-system interaction points.",
+                "Integration boundary level – Focus on system-to-system integration points and data flow across boundaries.",
+                "Domain boundary level – Map flows by business domain boundaries, showing how domains interact.",
+                "Capability level – High-level flow showing major capabilities and how they connect, without detailed interactions."
+              ]
+            },
+            {
+              "description": "Depth of shaping",
+              "question": "How deep should we drill down in each shaping phase for the drill-down areas?",
+              "outcome": "Determines the level of detail for each phase in drill-down areas",
+              "options": [
+                "Estimates --> story_count only",
+                "Decompose ->Discover all stories listed",
+                "Structure --> Explore Domain AC only",
+                "Behavioral--> Explore Business and Domain AC",
+                "Happy Path -> Specify happy path scenariosonly",
+                "Extensive -> Specify all scenarios",
+                "Testable -> Specify minimal examples",
+                "Complete -> Specify all examples"
+              ],
+              "note": "Select one or more options. For drill-down areas, specify depth for: discovery (all stories listed vs story_count), exploration (all AC vs domain AC only), scenarios (all scenarios vs happy path only), spec examples (all examples vs minimal examples)."
+            },
+            {
+              "description": "Drill-down limits",
+              "question": "What are the approximate limits for drill-down coverage (to prevent over-detailing)?",
+              "outcome": "Sets boundaries on how many stories/features to drill down on",
+              "options": [
+                "Approximate story limit: 3-5 stories",
+                "Approximate story limit: 5-10 stories",
+                "Approximate story limit: 10-15 stories",
+                "Approximate story limit: 15-20 stories",
+                "Approximate story limit: No limit",
+                "Approximate feature limit: 2-3 features",
+                "Approximate feature limit: 3-5 features",
+                "Approximate feature limit: 5-7 features",
+                "Approximate feature limit: 7-10 features",
+                "Approximate feature limit: No limit"
+              ],
+              "note": "Select approximate limits to prevent over-detailing. Can select both story and feature limits, or specify 'No limit' for either."
+            }
+          ],
+          "typical_assumptions": [
+            "Focus on user flow over internal systems",
+            "Cover the end-to-end scenario",
+            "Prioritize customer-facing features",
+            "Assume stories should be independently testable",
+            "Assume each story delivers user value",
+            "Assume technical infrastructure stories are implicit",
+            "Drill down where architectural uncertainty is high – unknown integration patterns, new technology, or unclear system boundaries require deeper exploration",
+            "Drill down where business complexity is significant – complex business rules, regulatory requirements, or domain logic that needs clarification",
+            "Drill down where uniqueness creates risk – novel approaches, first-of-kind features, or untested patterns benefit from detailed shaping",
+            "Drill down where integration complexity exists – multiple systems, data dependencies, or coordination challenges need detailed mapping",
+            "Drill down where user behavior is highly variable – diverse user needs, multiple personas, or inconsistent workflows require deeper understanding",
+            "Skip deep drill-down where patterns are well-established – standard CRUD operations, familiar workflows, or proven integration patterns can stay high-level"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated story map to verify the overarching flow accurately describes the overall user journey and system behavior",
+            "Verify that epics, features, and stories follow action and goal-oriented language as intended",
+            "Review the AI's approach to drill-downs to confirm they bring clarity to areas of uncertainty, complexity, and opportunity rather than over-documenting simple areas"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Shared structured content schema across all story behaviors",
+          "instructions": "Build the structured story map content. READ the story_graph.json schema file to understand the required structure - this schema file defines the exact format you must follow. CRITICAL: In build_structure phase, you MUST: (1) Build the complete story graph JSON data following the schema, (2) Write the JSON data directly to structured.json using the write tool at the exact location: {project_area}/docs/stories/structured.json (replace {project_area} with the actual project area path), (3) After writing, validate that the file exists and is valid JSON using the read_file tool to confirm it was saved correctly. DO NOT render any documentation, DO NOT create markdown files, DO NOT perform any transformation work. All documentation rendering and transformation happens in the render_output phase. Your only task here is to build the structured JSON content, write it directly to structured.json using the write tool, and validate the file exists. MANDATORY: You MUST review ALL planning decisions and assumptions provided above. These planning decisions contain critical constraints and strategies that MUST guide your story generation. For example, if planning decisions specify 'focus on drilling down 1-2 stories that cross all components, then extrapolate the rest', you MUST follow this strategy: enumerate only 1-2 stories that demonstrate component interactions, and use 'story_count' notation (e.g., '~5 stories') for all other features. DO NOT enumerate all stories unless planning decisions explicitly require it. Planning decisions override default patterns - you MUST apply them directly to your story generation. ADDITIONAL QUESTIONS REQUIREMENT: Load clarification.json and check for 'additional_questions_answered' section. Use these detailed workflow questions and answers to inform story creation, especially for features that involve Foundry system interactions (canvas, tokens, actors, combat tracker, UI panels). The additional_questions_answered contain detailed workflow information that should be reflected in story behavioral acceptance criteria and story purposes. MANDATORY STORY NAMING FORMAT - CRITICAL: ALL stories MUST follow Actor-Verb-Noun format. This is NOT optional. Every story MUST have: (1) Story name field: Concise Verb-Noun format (e.g., 'Create Mob from Selected Tokens', 'Display Mob Grouping in Combat Tracker', 'Execute Mob Attack with Strategy', 'Apply Attack Common Target Strategy'). The name should be action-oriented and concise. (2) Description field: Component interaction description in plain text showing component-to-component interactions (e.g., 'GM selects multiple minion tokens on canvas and Mob manager creates mob with selected tokens and assigns random leader'). The description field is MANDATORY and MUST show how components interact. DO NOT create stories without both name and description fields. DO NOT use long narrative story names - use concise Verb-Noun format for names, put component interactions in description field. MANDATORY USER IDENTIFICATION AND AGGREGATION - CRITICAL: You MUST identify and aggregate users/actors at the appropriate hierarchical level. Load clarification.json and extract user types from 'key_questions_answered' (especially 'Who are the distinct types of users?'). For each epic, feature, and story, identify which user types are involved. AGGREGATION RULES: (1) If ALL stories in a feature have the SAME user(s), put the users array at the FEATURE level and leave story users arrays empty. (2) If ALL features in an epic have the SAME user(s), put the users array at the EPIC level and leave feature/story users arrays empty. (3) If stories within a feature have DIFFERENT users, put users at the STORY level for each story. (4) If features within an epic have DIFFERENT users, put users at the FEATURE level for each feature. (5) Always aggregate users upward when they are consistent - this reduces duplication and makes the diagram cleaner. The users field is an array of strings (e.g., ['Collector', 'Trader'] or ['Content Creator']). Users will be displayed in the diagram above the first story/feature/epic where they appear."
+        },
+        "outputs": [
+          {
+            "name": "story_map",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_story_map_to_markdown",
+            "template": "templates/story-map-decomposition-template.md",
+            "instructions": "Transform the structured story map into a markdown document using the story-map-decomposition-template.md template file. The template file contains the complete formatting rules and structure. Follow the template exactly, filling in the structured content data. CRITICAL: Story map MUST use '## Story Map Structure' as single section header with ALL epics in body (NOT individual ## headers per epic). CRITICAL HIERARCHY FORMATTING: The epic_hierarchy section MUST use tree structure characters (│, ├─, └─) to show visual hierarchy. Epic format: 🎯 **Epic Name** (X features, ~Y stories)  . Feature format: ├─ ⚙️ **Feature Name** (~Z stories)  for items with siblings, └─ ⚙️ **Feature Name** (~Z stories)  for last item. Story format: ├─ 📝 Story: Story Name  followed by italicized description on next line: │  *description text*  . All lines MUST end with TWO SPACES for proper line breaks. STORY FORMAT: Each story MUST be displayed as: ├─ 📝 Story: [Verb-Noun Name]  followed by │  *[Component interaction description]*  on the next line. The story name should be concise (Verb-Noun format), and the description should show component-to-component interactions in italics. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/story-map.md (replace {project_area} with the actual project area path). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "drawio.story_shape",
+            "path": "docs/stories/map",
+            "builder": "story_agent_build_drawio_story_shape",
+            "template": "templates/story-map-template.drawio",
+            "instructions": "Generate Draw.io story map diagram from structured story graph JSON. The diagram positions stories based on sequential_order (horizontal) and vertical_order (vertical for optional stories). Mandatory stories (optional: false) are positioned horizontally left-to-right. Optional stories (optional: true) are positioned vertically below their sequential position. Features are sized to span all their stories. Epics are sized to span all their features."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to shaping/scoping/initial planning behavior",
+        "patterns": [
+          "shape.*capability",
+          "scoping",
+          "initial.*planning",
+          "starting.*with.*requirements",
+          "begin.*capability.*shape",
+          "explore.*problem.*space",
+          "what.*are.*we.*solving",
+          "frame.*initiative",
+          "frame.*solution",
+          "kick.*off.*project",
+          "initiate.*request",
+          "describe.*need",
+          "start.*intake",
+          "capture.*ask",
+          "early.*shaping",
+          "solution.*intent",
+          "business.*intent",
+          "initial.*goal",
+          "who.*needs.*what",
+          "start.*mapping.*conversation",
+          "map.*user.*types",
+          "identify.*system.*touchpoints",
+          "start.*exploring.*flow",
+          "problem.*framing",
+          "story.*shape",
+          "build.*new",
+          "start.*new.*project",
+          "new.*project",
+          "begin.*new",
+          "create.*new",
+          "start.*on.*new",
+          "want.*to.*build.*new",
+          "want.*to.*start.*new",
+          "want.*to.*start.*on.*new",
+          "i.*want.*to.*build",
+          "i.*want.*to.*start",
+          "new.*initiative",
+          "new.*application",
+          "new.*solution",
+          "new.*system",
+          "new.*platform",
+          "new.*service",
+          "new.*product",
+          "new.*capability",
+          "new.*tool",
+          "new.*software",
+          "new.*technology",
+          "new.*tech.*stack",
+          "new.*architecture",
+          "new.*infrastructure",
+          "new.*integration",
+          "new.*api",
+          "new.*microservice",
+          "new.*component",
+          "new.*module",
+          "new.*framework",
+          "new.*library",
+          "new.*ecosystem",
+          "new.*transformation",
+          "new.*modernization",
+          "new.*digital",
+          "new.*automation",
+          "new.*enterprise",
+          "new.*program",
+          "launch.*new",
+          "develop.*new",
+          "design.*new",
+          "implement.*new",
+          "roll.*out.*new",
+          "deploy.*new",
+          "release.*new",
+          "introduce.*new",
+          "establish.*new",
+          "set.*up.*new",
+          "commence.*new",
+          "embark.*on.*new",
+          "undertake.*new"
+        ],
+        "priority": 8
+      },
+      "rules": [
+        {
+          "description": "Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.",
+          "examples": [
+            {
+              "do": {
+                "description": "Include both user and system activities in story descriptions",
+                "content": "User submits order, System validates payment"
+              },
+              "dont": {
+                "description": "Avoid task-oriented language that describes implementation",
+                "content": "Implement order submission, Create payment validation"
+              }
+            },
+            {
+              "do": {
+                "description": "Show user actions and corresponding system responses",
+                "content": "Customer views products, System displays inventory"
+              },
+              "dont": {
+                "description": "Don't use task language for building or setting up",
+                "content": "Build product listing page, Set up inventory display"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create stories that represent complete flows within the effort range",
+                "content": "Customer places order (complete flow, 3-5 days)"
+              },
+              "dont": {
+                "description": "Avoid stories that are too large and span multiple weeks",
+                "content": "Order management system (too large, 20+ days)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Balance fine-grained stories with testable and valuable independent units. Stories must deliver value and be independently testable.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create stories that are complete interactions with value",
+                "content": "Customer places order (complete interaction, testable, valuable)"
+              },
+              "dont": {
+                "description": "Avoid stories that are too small and have no value alone",
+                "content": "Add order button (too fine-grained, no value alone)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.",
+          "examples": [
+            {
+              "do": {
+                "description": "Maintain hierarchy within the 7±2 cognitive limit range",
+                "content": "Epic with 6 features, each feature with 5-7 stories"
+              },
+              "dont": {
+                "description": "Split when hierarchy exceeds the maximum threshold",
+                "content": "Epic with 12 features (split into 2 epics), feature with 15 stories (split into 2 features)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
+          "examples": [
+            {
+              "do": {
+                "description": "Use action verbs to describe what happens",
+                "content": "User submits order, System validates payment"
+              },
+              "dont": {
+                "description": "Avoid capability nouns that describe functions rather than behaviors",
+                "content": "Order Management, Payment Processing (capability nouns)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Ensure business experts can understand the language of stories. Use business domain language, not technical implementation details.",
+          "examples": [
+            {
+              "do": {
+                "description": "Use business language that stakeholders understand",
+                "content": "Customer places order with payment details"
+              },
+              "dont": {
+                "description": "Avoid technical API and implementation details",
+                "content": "POST /api/orders with JSON payload containing payment object"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Create lightweight but precise documentation during shaping. Focus on structure and scope, not detailed specifications.",
+          "examples": [
+            {
+              "do": {
+                "description": "Document the hierarchy and structure during shaping",
+                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order"
+              },
+              "dont": {
+                "description": "Avoid detailed technical specifications during shaping phase",
+                "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Detailed API specs, database schema, UI mockups"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_story_shape"
+        },
+        {
+          "description": "Identify marketable increments with business priorities and relative sizing. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers).",
+          "examples": [
+            {
+              "do": {
+                "description": "Define increments with business value and priorities as vertical slices",
+                "content": "Marketable increment: Basic Order Flow (NOW priority, Small relative size) - includes PARTIAL features from MULTIPLE epics delivering complete end-to-end flow"
+              },
+              "dont": {
+                "description": "Avoid technical increments without business value or horizontal layers",
+                "content": "Increment: API endpoints (no priority, no sizing) OR Complete Epic A then Epic B (horizontal layers)"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_market_increments"
+        }
+      ]
+    },
+    "prioritization": {
+      "order": 2,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the prioritization behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user",
+          "key_questions": [
+            "Which areas of the story map carry the most business or delivery risk?",
+            "Which areas are expected to deliver the most value if delivered early?",
+            "Which areas are the most complex or hardest to implement, relative to their value?",
+            "Do you want thin slices to be as end-to-end as possible?",
+            "Are there any components, capabilities, or services that need to be reused across multiple stories or features?",
+            "Are there any project or program constraints that impact delivery order?",
+            "Are there users or groups that must go first to enable others to follow?"
+          ],
+          "evidence": [
+            "Story map from Shape stage (epics, features, and initial story breakdown)",
+            "Business cases or initiative briefs",
+            "Project charters and delivery timelines",
+            "Capability or architectural dependency maps",
+            "User rollout or onboarding strategies",
+            "Risk registers or readiness checklists",
+            "Value modeling or impact estimation docs"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision-making criteria to the user and ask for their input. Confirm which options apply and guide them to select based on their intended value delivery and learning goals.",
+          "decision_making_criteria": [
+            {
+              "question": "What approach are you taking to group the work into thin slices or increments of value, and how are you ensuring they are as small as possible while still being valuable and/or generating learning or reducing risk?",
+              "outcome": "Determines how work is grouped and prioritized for incremental delivery",
+              "options": [
+                "Delivering End-to-End Journey — supports integrated validation across systems and users",
+                "Validating Impact - Feasibility — reduces uncertainty and derisks critical components early",
+                "Maximizing Earned Value — delivers early impact and builds stakeholder confidence",
+                "Increasing Reuse/Dependency— prevents downstream rework and enables reuse",
+                "Quick Win — implements lowest-complexity paths first",
+                "Validating Impact — validates whether users care, intend to use, or will act on the solution before investing in full delivery (e.g., Wizard of Oz, landing pages, stubs, or mafia offers)"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Thin slices should provide either value, learning, or risk reduction",
+            "Slices do not need to include all functionality to be useful",
+            "Not every increment must be user-visible if it validates key assumptions",
+            "Some slices may be architectural if they unlock multiple features"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated slice strategies to verify they are visually coherent and align with the intended approach",
+            "Validate that each AI-proposed slice serves a clear learning, value, or risk-reduction goal",
+            "Review the AI's sequencing logic to verify it optimizes both insight and momentum rather than following a simplistic order",
+            "Validate the scope of stories to verify they are appropriate for the slice"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Prioritization refines increments from the structured story map content, organizing them with business priorities and relative sizing",
+          "instructions": "Update the structured story map content to refine increments. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers). Assign business priorities (NOW/NEXT/LATER) and relative sizing to increments."
+        },
+        "outputs": [
+          {
+            "name": "increments",
+            "path": "docs/stories/increments",
+            "transformer": "story_agent_transform_increments_to_markdown",
+            "template": "templates/story-map-increments-template.md",
+            "instructions": "Transform the increments from the structured content into a markdown document using the story-map-increments-template.md template file. Follow the template structure exactly. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers). Include business priorities (NOW/NEXT/LATER) and relative sizing. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/increments/increments.md (replace {project_area} with the actual project area path). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "increments_backlog",
+            "path": "docs/stories/increments",
+            "transformer": "story_agent_transform_increments_to_markdown",
+            "template": "templates/story-map-increments-backlog-template.md",
+            "instructions": "Transform the increments from the structured content into a flat backlog markdown document using the story-map-increments-backlog-template.md template file. Show only increment names and flat lists of stories (no hierarchy, no epics/features). Each increment should show: increment name with priority, then flat list of story names with 📝 prefix. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/increments/{product_name}-story-map-increments-backlog.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to prioritization/thin slicing behavior",
+        "patterns": [
+          "prioritiz.*stories",
+          "rank.*epics",
+          "value.*based.*order",
+          "decide.*what.*first",
+          "slice.*for.*delivery",
+          "group.*stories.*by.*value",
+          "group.*stories.*by.*risk",
+          "group.*stories.*by.*assumption",
+          "define.*thin.*slice",
+          "organize.*story.*map",
+          "plan.*mvp.*delivery",
+          "choose.*mvp",
+          "decide.*initial.*release",
+          "pick.*first.*slice",
+          "stack.*stories.*by.*impact",
+          "delivery.*sequence",
+          "delivery.*order",
+          "assumption.*driven.*planning",
+          "cost.*of.*delay",
+          "delivery.*strategy",
+          "validate.*risk.*first",
+          "learn.*fast.*slice",
+          "test.*value.*proposition",
+          "explore.*release.*path",
+          "prioritization"
+        ],
+        "priority": 9
+      },
+      "rules": [
+        {
+          "description": "Folder structure must exactly match story map hierarchy. Epic/feature folders created inside docs/stories/map/ directory.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create folders matching story map structure",
+                "content": "docs/stories/map/dYZ_ Epic Name/⚙️ Feature Name/"
+              },
+              "dont": {
+                "description": "Don't create folders at wrong level or with wrong names",
+                "content": "docs/stories/🎯 Epic Name/ (wrong level) OR docs/stories/map/Epic Name/ (missing emoji)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "NEVER delete files or folders. Archive obsolete items to map/z_archive/[timestamp]/ instead.",
+          "examples": [
+            {
+              "do": {
+                "description": "Move obsolete folders to archive",
+                "content": "Move old folder to map/z_archive/20250121-143022/old-folder/"
+              },
+              "dont": {
+                "description": "Never delete files or folders",
+                "content": "Delete obsolete folder (WRONG - should archive)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "arrange": {
+      "order": 3,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "For the arrange behavior, ensure you have the structured story graph content from prioritization phase. The story graph must exist before creating folder structure."
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Arrange creates folder structure from the structured story graph content, organizing epic/feature folders and optionally story stub files",
+          "instructions": "Read the structured story graph JSON. Create epic and feature folders matching the hierarchy. Optionally create story stub files from templates. Archive obsolete folders to map/z_archive/[timestamp]/ (NEVER delete)."
+        },
+        "builder": "agents.story_bot.src.story_agent.story_agent_build_folder_structure",
+        "outputs": []
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to arrange/folder structure behavior",
+        "patterns": [
+          "arrange.*folder",
+          "create.*folder.*structure",
+          "story.*arrange",
+          "build.*folder.*structure",
+          "arrange"
+        ],
+        "priority": 9
+      },
+      "rules": [
+        {
+          "description": "Folder structure must exactly match story graph hierarchy. Epic/feature folders created inside docs/stories/map/ directory from structured JSON.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create folders matching story graph structure",
+                "content": "Read structured.json → Create docs/stories/map/🎯 Epic Name/⚙️ Feature Name/ folders"
+              },
+              "dont": {
+                "description": "Don't create folders at wrong level or with wrong names",
+                "content": "docs/stories/🎯 Epic Name/ (wrong level) OR docs/stories/map/Epic Name/ (missing emoji)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "NEVER delete files or folders. Archive obsolete items to map/z_archive/[timestamp]/ instead.",
+          "examples": [
+            {
+              "do": {
+                "description": "Move obsolete folders to archive",
+                "content": "Move old folder to map/z_archive/20250121-143022/old-folder/"
+              },
+              "dont": {
+                "description": "Never delete files or folders",
+                "content": "Delete obsolete folder (WRONG - should archive)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Create folders and files from structured Story Graph JSON, not from markdown parsing. Builder reads JSON structure directly.",
+          "examples": [
+            {
+              "do": {
+                "description": "Read from structured JSON",
+                "content": "Builder reads structured.json → Iterates epics[] → Creates folders for each epic and its features"
+              },
+              "dont": {
+                "description": "Don't parse markdown for folder creation",
+                "content": "Parse story-map.md markdown file to extract hierarchy (WRONG - use structured JSON)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    },
+    "discovery": {
+      "order": 4,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the discovery behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user",
+          "key_questions": [
+            "What is the full scope of the next increment or release?",
+            "What are the major workflows or process segments it touches?",
+            "What systems, teams, or roles are involved across this flow?",
+            "What story groupings or capabilities define this increment?",
+            "What order or sequence do these stories need to follow?",
+            "Where are the major transitions or integration points in the flow?",
+            "Are any stories or features dependent on others being completed first?"
+          ],
+          "evidence": [
+            "Story map from Shape stage (overarching epics, features, and stories)",
+            "Increments document from Prioritization stage (defined slices with priorities and sizing)",
+            "User experience and customer journey maps",
+            "Workflow diagrams or journey maps",
+            "Program increment plans or release outlines",
+            "Architecture or integration diagrams",
+            "Dependency trackers or milestone maps"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision-making criteria to the user and ask them to confirm how stories will be grouped, aligned, and validated as a complete flow.",
+          "decision_making_criteria": [
+            {
+              "description": "Story scope definition",
+              "question": "What's your preferred approach for defining the full set of stories in the increment and ensuring their order and alignment reflect end-to-end flow?",
+              "outcome": "Determines story inventory structure and sequencing logic",
+              "options": [
+                "Hierarchical — Go from left to right through every step of system and user interactions, including each alternate option. Start with top-level steps and drill down completely before moving to the next step.",
+                "Skinny then Elaborate — Create the smallest spine you can (minimal viable flow) and then go back and add different alternates and options. Build the core path first, then expand.",
+                "User and System Only — Focus exclusively on user-system interaction points. Skip internal system processing and back-office details.",
+                "System /back office — Deep dive into system internals and back-office components. Include detailed component interactions, data flows, and system-to-system communication.",
+                "Template — Create a few templated flows as patterns, then Use deltas for the rest of the flow.",
+                "Changes only — Only define areas where the system requires development/config work. Skip out-of-the-box functionality, and pre-existing capabilities."
+              ]
+            },
+            {
+              "question": "What level of granularity do you want to define stories at for this increment?",
+              "outcome": "Determines how detailed stories should be before moving to exploration",
+              "options": [
+                "User/system level interactions — gives clarity for design, testing, and responsibility",
+                "Coarse-grained business process — for solutions that require a lot of business process change",
+                "System inner behavior and inner workings — needed when elaboration of new complex architecture across unknown libraries and components is useful to elaborate",
+                "Fine-grained bespoke work — detailed fine-grained units of work when there's a lot of custom/bespoke development required",
+                "Higher-level out-of-the-box — higher level view when working with out-of-the-box solutions, configurations, or pre-existing capabilities"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Default granularity is one Meaningful user/system interaction per story",
+            "Story granularity may vary based on technical or functional complexity",
+            "Coarse-grained stories are acceptable where functionality is easily enabled",
+            "Fine-grained slicing is required where architectural or integration uncertainty is high"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated story sequence to verify it accurately reflects the full flow across roles and systems",
+            "Validate that the AI has correctly identified boundaries, transitions, and integration points",
+            "Verify the AI's inventory matches a coherent, realistic flow and review its approach to story identification",
+            "Review the AI's granularity decisions to confirm the slice granularity is appropriate before moving into exploration"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Discovery refines the structured story map content, adding detailed stories for increment(s) in focus",
+          "instructions": "**CRITICAL DISCOVERY PROCESS - STORY REFINEMENT AND EXPANSION:**\n\n**MANDATORY: Discovery Phase Scope - What Discovery DOES and DOES NOT Include:**\n- ✅ Discovery DOES: Update the existing story map markdown (mob-rule-story-map.md) with enumerated stories for increment(s) in focus\n- ✅ Discovery DOES: Update the existing increments markdown (mob-rule-story-map-increments.md) with enumerated stories for increment(s) in focus\n- ✅ Discovery DOES: Update structured.json with enumerated stories (no ~X stories notation for focus increment)\n- ✅ Discovery DOES: List all stories for increment(s) in focus with names and descriptions showing component interactions\n- ✅ Discovery DOES: Break down stories into component-interaction stories based on planning decisions\n- ✅ Discovery DOES: Enumerate all stories explicitly (no ~X stories notation)\n- ✅ Discovery DOES: Identify and aggregate users/actors for each story, feature, and epic\n- ❌ Discovery DOES NOT: Create separate discovery documents (discovery/increment-X-discovery.md files)\n- ❌ Discovery DOES NOT: Include acceptance criteria (AC belongs in Exploration phase, NOT Discovery)\n- ❌ Discovery DOES NOT: Write When/Then statements (those belong in Exploration phase)\n- ❌ Discovery DOES NOT: Create detailed test scenarios (those belong in Exploration phase)\n\n**CRITICAL: Discovery updates EXISTING documents (story map and increments), NOT creates new discovery documents. If you are in Discovery phase, you MUST update the story map markdown and increments markdown with enumerated stories. Do NOT create separate discovery/increment-X-discovery.md files.**\n\n1. **Load Planning Decisions:** ALWAYS load planning.json and check for \"discovery\" section with decisions_made and assumptions_made. These decisions and assumptions MUST guide all discovery work.\n\n2. **Review Existing Story Map:** Load and review the current structured.json and story map markdown to understand existing stories for increment(s) in focus.\n\n3. **Apply Planning Decisions to Story Granularity:** Based on planning.json discovery.decisions_made (especially story_scope_approach and story_granularity), you MUST:\n   - Review each existing story with the planning decisions' comprehensiveness and granularity requirements\n   - Identify component-level interactions that should be separate stories based on the planning decisions\n   - Break down existing stories into more granular component-interaction stories\n   - Add new stories for component interactions that aren't explicitly covered\n   - Reference planning.json discovery.assumptions_made to understand granularity expectations\n\n4. **Example Story Breakdown:** A story like \"Group tokens from canvas into mob\" should be broken down into multiple stories showing component interactions:\n   - \"Group tokens from canvas into mob\" (user action story)\n   - \"Mob manager creates mob with all selected tokens\" (system/back office story)\n   - \"System assigns leader randomly\" (system/back office story)\n   - Additional component-interaction stories as needed\n\n5. **Story Expansion Criteria:** Add new stories when:\n   - Component interactions aren't explicitly covered (per planning.json discovery.decisions_made.story_scope_approach)\n   - System/back office operations need separate stories from user actions (per planning decisions)\n   - Data flows or system-to-system communication need explicit stories\n   - The planning decisions reveal gaps in story coverage\n\n6. **MANDATORY USER IDENTIFICATION AND AGGREGATION:** For each story you create or refine, identify which user types are involved. Load clarification.json to get user types from 'key_questions_answered'. AGGREGATION RULES: (1) If ALL stories in a feature have the SAME user(s), put the users array at the FEATURE level and leave story users arrays empty. (2) If ALL features in an epic have the SAME user(s), put the users array at the EPIC level and leave feature/story users arrays empty. (3) If stories within a feature have DIFFERENT users, put users at the STORY level for each story. (4) If features within an epic have DIFFERENT users, put users at the FEATURE level for each feature. (5) Always aggregate users upward when they are consistent - this reduces duplication and makes the diagram cleaner. The users field is an array of strings (e.g., ['Collector', 'Trader'] or ['Content Creator']).\n\n7. **Update Structured Content:** Update structured.json with enumerated stories for increment(s) in focus (no ~X stories notation). For other increments: use story counts (~X stories). Include users arrays at the appropriate hierarchical level based on aggregation rules.\n\n8. **Update Story Map Markdown:** Update mob-rule-story-map.md to enumerate ALL stories explicitly for increment(s) in focus, including newly identified/expanded stories. Stories should follow Actor-Verb-Noun format with italicized descriptions showing component interactions.\n\n9. **Update Increments Markdown:** Update mob-rule-story-map-increments.md to enumerate ALL stories explicitly for increment(s) in focus, including newly identified/expanded stories.\n\n10. **Reference Planning Decisions:** When expanding stories, explicitly reference planning.json discovery.decisions_made and discovery.assumptions_made to ensure consistency.\n\n11. **Add Discovery Refinements:** Document the story expansion/refinement process in the source material section of the story map, explaining what stories were added, broken down, or refined and why, referencing the planning decisions used."
+        },
+        "outputs": [
+          {
+            "name": "story_map",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_story_map_to_markdown",
+            "template": "templates/story-map-decomposition-template.md",
+            "instructions": "Update the EXISTING story map markdown (mob-rule-story-map.md) with discovery refinements. Include all stories for increment(s) in focus, including any newly identified/expanded stories from the discovery process. Enumerate all stories explicitly (no ~X stories notation) for increment(s) in focus. Update source material section with Discovery Refinements subsection that documents:\n- What stories were added, broken down, or refined\n- Why stories were expanded (component interactions, system/back office approach, etc.)\n- How the new granularity approach changed the story inventory\n\nCRITICAL: This updates the EXISTING story map document, NOT creates a new discovery document. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/map/{product_name}-story-map.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "increments",
+            "path": "docs/stories/increments",
+            "transformer": "story_agent_transform_increments_to_markdown",
+            "template": "templates/story-map-increments-template.md",
+            "instructions": "Update the EXISTING increments markdown (mob-rule-story-map-increments.md) with discovery refinements. For increment(s) in focus, enumerate ALL stories explicitly with names and descriptions (no ~X stories notation). Include italicized component interaction descriptions for each story. Stories should follow Actor-Verb-Noun format.\n\nCRITICAL: This updates the EXISTING increments document, NOT creates a new discovery document. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/increments/{product_name}-story-map-increments.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "increments_backlog",
+            "path": "docs/stories/increments",
+            "transformer": "story_agent_transform_increments_to_markdown",
+            "template": "templates/story-map-increments-backlog-template.md",
+            "instructions": "Transform the increments from the structured content into a flat backlog markdown document using the story-map-increments-backlog-template.md template file. Show only increment names and flat lists of stories (no hierarchy, no epics/features). For increment(s) in focus, enumerate ALL stories explicitly with story names (no ~X stories notation). Each increment should show: increment name with priority, then flat list of story names with 📝 prefix. CRITICAL: After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/increments/{product_name}-story-map-increments-backlog.md (replace {project_area} with the actual project area path and {product_name} with the actual product name from structured.json). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "drawio.story_shape",
+            "path": "docs/stories/map",
+            "builder": "story_agent_build_drawio_story_shape",
+            "template": "templates/story-map-template.drawio",
+            "instructions": "Generate Draw.io story map diagram from structured story graph JSON. The diagram positions stories based on sequential_order (horizontal) and vertical_order (vertical for optional stories). Mandatory stories (optional: false) are positioned horizontally left-to-right. Optional stories (optional: true) are positioned vertically below their sequential position. Features are sized to span all their stories. Epics are sized to span all their features. CRITICAL: The builder will automatically execute during render_output action and generate the diagram at {project_area}/docs/stories/map/story-map.drawio. The diagram will reflect all enumerated stories from discovery phase."
+          }
+        ]
+      },
+      
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to discovery/increment inventory behavior",
+        "patterns": [
+          "map.*next.*increment",
+          "discover.*all.*stories",
+          "explore.*end.*to.*end.*flow",
+          "get.*inventory.*of.*stories",
+          "list.*stories.*for.*increment",
+          "define.*increment.*scope",
+          "what.*are.*we.*building.*next",
+          "capture.*all.*stories.*next.*release",
+          "model.*next.*increment.*flow",
+          "visualize.*increment.*scope",
+          "build.*full.*story.*inventory",
+          "walk.*through.*increment.*flow",
+          "define.*story.*sequence",
+          "lay.*out.*increment.*plan",
+          "draft.*full.*map.*of.*increment",
+          "capture.*increment.*workflow",
+          "discovery",
+          "refine.*increment",
+          "story.*discovery"
+        ],
+        "priority": 10
+      },
+      "rules": [
+          {
+            "description": "Enumerate ALL stories for increment(s) in focus explicitly (no ~X stories notation). Use story counts (~X stories) for other increments. CRITICAL: When applying new approach (especially System /back office), you MUST review existing stories and expand/break them down into component-interaction stories. The number of stories WILL change based on the new granularity approach.",
+            "examples": [
+              {
+                "do": {
+                  "description": "List all stories explicitly for focus increment, including newly expanded stories",
+                  "content": "Increment 1 (FOCUS): Story 1, Story 2, Story 3... (all listed, including component-interaction stories). Increment 2: ~15 stories (count only). Example expansion: 'Group tokens from canvas into mob' becomes: 'Group tokens from canvas into mob' (user action), 'Mob manager creates mob with selected tokens' (system), 'System assigns leader randomly' (system)"
+                },
+                "dont": {
+                  "description": "Don't use ~X notation for focus increment or keep original stories without expansion",
+                  "content": "Increment 1 (FOCUS): ~8 stories (WRONG - should list all) OR keeping original 'Group tokens from canvas into mob' without breaking down into component stories (WRONG - should expand based on approach)"
+                }
+              }
+            ]
+          },
+        {
+          "description": "Apply exhaustive logic decomposition. Enumerate ALL permutations (prerequisite types, validation rules, calculation paths).",
+          "examples": [
+            {
+              "do": {
+                "description": "List all validation paths and calculation branches",
+                "content": "User enters ability rank - and system validates (STR, STA, AGL, DEX) - and system calculates modifier - and system saves"
+              },
+              "dont": {
+                "description": "Don't skip permutations or paths",
+                "content": "User enters ability - and system saves (missing validation and calculation)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Present consolidation review BEFORE finalizing. Identify similar stories, ask domain expert questions, wait for user confirmation.",
+          "examples": [
+            {
+              "do": {
+                "description": "Present consolidation questions and wait for answers",
+                "content": "CONSOLIDATION REVIEW: These stories use same logic? [List stories] → User answers → Apply decisions"
+              },
+              "dont": {
+                "description": "Don't automatically consolidate without user confirmation",
+                "content": "Auto-consolidate similar stories (WRONG - must ask user first)"
+              }
+            }
+          ]
+        },
+          {
+            "description": "Ensure increments remain VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers).",
+            "examples": [
+              {
+                "do": {
+                  "description": "Increment includes partial features from multiple epics",
+                  "content": "Increment 1: Partial Feature A (Epic 1) + Partial Feature B (Epic 2) = Complete end-to-end flow"
+                },
+                "dont": {
+                  "description": "Don't create horizontal layer increments",
+                  "content": "Increment 1: Complete Epic A, Increment 2: Complete Epic B (horizontal layers)"
+                }
+              }
+            ]
+          },
+          {
+            "description": "CRITICAL: Review and expand stories based on new approach granularity. When planning decisions specify 'System /back office' approach or detailed component interactions, you MUST break down existing stories into component-interaction stories. The story count WILL increase. Example: 'Group tokens from canvas into mob' expands to: user action story + mob manager creates mob story + system assigns leader story.",
+            "examples": [
+              {
+                "do": {
+                  "description": "Break down stories into component interactions when System /back office approach is selected",
+                  "content": "Original: 'Group tokens from canvas into mob'. Expanded: 'Group tokens from canvas into mob' (user action), 'Mob manager creates mob with all selected tokens' (system/back office), 'System assigns leader randomly' (system/back office). Story count increased from 1 to 3."
+                },
+                "dont": {
+                  "description": "Don't keep original stories without expansion when new approach requires component-level detail",
+                  "content": "Keeping 'Group tokens from canvas into mob' as single story when System /back office approach requires component interactions (WRONG - should expand)"
+                }
+              }
+            ]
+          }
+      ]
+    },
+    "exploration": {
+      "order": 5,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the exploration behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user",
+          "key_questions": [
+            "Which increment are we exploring?",
+            "What is the overarching outcome or user goal that unites this increment?",
+            "What is the first thing the user will try to do in this flow?",
+            "What system reactions are expected for each user input?",
+            "Are we capturing both behavioral (user-system) and domain (concept-relationship) criteria?",
+            "Where do we 'pass the ball' between the user and system in this flow?",
+            "What are the likely unknowns, edge cases, or domain complexities?",
+            "Are there domain rules or constraints that govern this behavior?",
+            "Do we need to split or merge stories based on how many acceptance criteria arise?",
+            "Is this increment too large? Should it be broken into smaller increments?",
+            "What is the right amount of acceptance criteria for each story?",
+            "How will we walk through the first acceptance criteria to confirm clarity and alignment?",
+            "What parts of this increment are likely to involve integration or coordination across systems?",
+            "Where might technical uncertainty or architectural complexity push us toward more granular stories or smaller increments?"
+          ],
+          "evidence": [
+            "Story map from Shape stage (overarching epics, features, and stories)",
+            "Discovery refinements from Discovery stage (enumerated stories for increment in focus)",
+            "User interaction diagrams",
+            "Low fidelity UX flows",
+            "User Journeys or Workflow Diagrams",
+            "Domain Models or Business Rules Documentation",
+            "Behavior Maps or Interaction Scenarios",
+            "Assumptions and Known Risks Logged from Earlier Phases"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision-making criteria to the user and ask them to confirm their preferences. Confirm where they want to emphasize precision, coverage, or simplification in story exploration.",
+          "decision_making_criteria": [
+            {
+              "description": "Acceptance criteria granularity",
+              "question": "What level of granularity are we aiming for when exploring stories?",
+              "outcome": "Determines how detailed each story's acceptance criteria and scope will be",
+              "options": [
+                "User-System Behavioral – Focus on each point of interaction (user input, system response). Ideal when precision in behavior is key.",
+                "Business Rule – Explicit business rules being called out as acceptance criteria. Focus on domain rules and business logic that govern behavior.",
+                "Inner System – Focus on technical interaction points, system-to-system communication, and internal system behavior",
+                "Technical Planning Level – Technical activity-style acceptance criteria (e.g., 'this must be built', 'that must be built').  Sometimes useful for planning and coordination."
+              ]
+            },
+            {
+              "description": "Acceptance criteria count",
+              "question": "How do we know when a story has the right number of acceptance criteria?",
+              "outcome": "Guides when to split or merge stories",
+              "options": [
+                "Stop when criteria capture a full back-and-forth (user-system-user). Ensures atomic and testable slices.",
+                "Stop when each user goal or intent is covered. Emphasizes outcome-focused criteria.",
+                "Ensure each criteria can be validated independently. Supports automated testability.",
+                "Keep criteria grouped by domain rule or concept. Useful for business-heavy stories.",
+                "Constrained to a certain reasonable number of acceptance criteria EG under 9"
+              ]
+            },
+            {
+              "description": "Acceptance criteria consolidation",
+              "question": "When should we reuse or split acceptance criteria based on the same/Similar logic/formula?",
+              "outcome": "Determines AC consolidation candidates",
+              "options": [
+                "Same logic, different data → Consolidate",
+                "Different formulas → Keep separate",
+                "Different validation rules → Keep separate"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Each story should include both behavioral and domain acceptance criteria",
+            "Acceptance criteria define the end-to-end flow, not just isolated rules",
+            "Behavioral criteria follow a 'When trigger, Then response' format",
+            "Domain criteria describe structured responsibilities or rules around business concepts",
+            "Exploration will result in story reshaping: merging, splitting, or re-scoping is expected",
+            "ACs with same logic but different data should be consolidated",
+            "ACs with different formulas should remain separate",
+            "Domain AC belongs at increment level (aggregated from features), Behavioral AC at story level",
+            "Story documentation (scenarios) belongs in specification_scenarios phase, NOT exploration phase"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated behavioral flow to verify it reflects realistic user-system interactions",
+            "Cross-check the AI's acceptance criteria against domain rules to verify accuracy and completeness",
+            "Validate that the AI has captured complete 'user–system–user' loops and review its approach to identifying interaction boundaries",
+            "Review the AI's first acceptance criteria as a model to verify its approach to story scoping is appropriate",
+            "Review the AI's story structure to identify opportunities for merging or splitting that the AI may have missed",
+            "Verify the AI has addressed vagueness and missing steps in its generated acceptance criteria",
+            "Confirm the AI-generated content aligns with user intent and goals, and review its approach to capturing user needs",
+            "Review the AI's handling of edge cases and exception flows to verify completeness"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Exploration adds acceptance criteria to the structured story map content at the increment level. Story documentation (scenarios) belongs in the specification_scenarios phase, NOT exploration phase.",
+          "instructions": "**CRITICAL EXPLORATION PROCESS:**\n\n1. **Load Planning Decisions:** ALWAYS load planning.json and check for \"exploration\" section with decisions_made and assumptions_made. Also check \"discovery\" section for decisions that affect exploration. These decisions and assumptions MUST guide all exploration work.\n\n2. **Update Structured Content:** Update the structured story map content with Domain AC (increment level, aggregated from all features in the increment) and Behavioral AC (story level for all stories in the increment).\n\n3. **Domain AC Scope:** Use increment-scoped domain perspective for Domain AC (define concepts, behaviors, and rules relevant to THIS increment).\n\n4. **Component Interactions:** If planning.json discovery.decisions_made.story_scope_approach specifies component interactions, ensure Behavioral AC includes steps for component interactions (e.g., \"Mob component updates combat tracker\", \"Combat tracker displays mob membership\").\n\n5. **Reference Planning Decisions:** When writing AC, explicitly reference planning.json exploration.decisions_made and exploration.assumptions_made, as well as discovery.decisions_made and discovery.assumptions_made to ensure consistency.\n\n6. **Increment Size:** If increment is too large, consider breaking into smaller increments.\n\n7. **CRITICAL:** Do NOT add scenarios - scenarios belong in specification phase only."
+        },
+        "outputs": [
+          {
+            "name": "increment",
+            "path": "docs/stories/increments",
+            "transformer": "story_agent_transform_increment_to_markdown",
+            "template": "templates/increment-exploration-template.md",
+            "instructions": "**CRITICAL EXPLORATION PROCESS:**\n\n1. **Load Planning Decisions:** ALWAYS load planning.json and check for \"exploration\" section with decisions_made and assumptions_made. Also check \"discovery\" section for decisions that affect exploration. These decisions and assumptions MUST guide all exploration work.\n\n2. **Create Increment Exploration Document:** Create increment exploration document with Domain AC (Core Concepts + Domain Behaviors + Domain Rules aggregated from all features in increment) and Acceptance Criteria for all stories in the increment.\n\n3. **Acceptance Criteria Format:** ALL AC written in increment exploration document. Use When/Then format. Ensure AC reflects planning decisions - if planning.json discovery.decisions_made.story_scope_approach specifies System /back office, AC should include component interaction steps.\n\n4. **Reference Planning Decisions:** When writing AC, explicitly reference planning.json exploration.decisions_made and exploration.assumptions_made, as well as discovery.decisions_made and discovery.assumptions_made to ensure consistency.\n\n5. **Do NOT Add Scenarios:** Scenarios belong in specification phase only.\n\n6. **Increment Size:** If increment is too large, consider breaking into smaller increments.\n\n**CRITICAL:** After transforming the content, you MUST write the rendered markdown directly to the file using the write tool at the exact location: {project_area}/docs/stories/increments/{increment_name_slug}-exploration.md (replace {project_area} with the actual project area path and {increment_name_slug} with the slugified increment name). After writing, validate that the file exists using the read_file tool to confirm it was saved correctly."
+          },
+          {
+            "name": "drawio.story_exploration",
+            "path": "docs/stories/map",
+            "builder": "story_agent_build_drawio_story_exploration",
+            "template": "templates/story-map-template exploration.drawio",
+            "instructions": "Generate Draw.io story map exploration diagram from structured story graph JSON with acceptance criteria displayed below each story. The diagram positions stories based on sequential_order (horizontal) and vertical_order (vertical for optional stories). Acceptance criteria boxes are displayed below each story with When/Then format. CRITICAL: The builder will automatically execute during render_output action and generate the diagram at {project_area}/docs/stories/map/story-map-exploration.drawio. The diagram will reflect all enumerated stories and their acceptance criteria from exploration phase."
+          }
+        ],
+        "pre_actions": [
+          {
+            "action": "arrange",
+            "description": "Always automatically run Arrange behavior before Exploration to ensure folder structure is up-to-date.",
+            "auto_trigger": true,
+            "instructions": "Before starting Exploration, automatically run Arrange to create/update the folder structure from the latest story graph. This ensures that any subsequent actions in Exploration (e.g., creating story files) have the correct directory structure."
+          }
+        ]
+      },
+      
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to exploration/acceptance criteria behavior",
+          "patterns": [
+            "explore.*increment",
+            "explore.*increment.*flow",
+            "define.*acceptance.*criteria",
+            "walk.*through.*user.*steps",
+            "discover.*story.*details",
+            "model.*user.*behavior",
+            "what.*does.*user.*do",
+            "understand.*increment.*usage",
+          "map.*happy.*path",
+          "capture.*steps.*to.*complete",
+          "refine.*acceptance.*logic",
+          "describe.*usage.*scenario",
+          "define.*done.*for.*feature",
+          "explore.*workflow.*steps",
+          "user.*journey.*through.*feature",
+          "define.*success.*criteria",
+          "collaborate.*on.*acceptance",
+          "write.*acceptance.*examples",
+          "map.*real.*world.*usage",
+          "exploration",
+          "explore",
+          "story.*explore",
+          "acceptance.*criteria"
+        ],
+        "priority": 11
+      },
+      "rules": [
+        {
+          "description": "Domain AC belongs at increment level using increment-scoped domain perspective. Aggregate domain concepts, behaviors, and rules from all features in the increment. Define only facets THIS increment operates on, not entire domain model.",
+          "examples": [
+            {
+              "do": {
+                "description": "Increment-scoped domain concepts",
+                "content": "Increment: Basic Character Creation → Domain AC aggregates concepts from Establish Identity feature (name, concept, descriptor) and Save Character feature (persistence states). Defines Character through increment's combined lens."
+              },
+              "dont": {
+                "description": "Don't copy entire domain model",
+                "content": "Increment: Basic Character Creation → Domain AC includes ALL Character properties from entire system (wrong - only increment-relevant)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Behavioral AC belongs at story level, written in increment exploration document (NOT story documents). Use When/Then format (NO Given clauses - save for scenarios).",
+          "examples": [
+            {
+              "do": {
+                "description": "AC in increment exploration document with When/Then format",
+                "content": "Increment exploration document: Story 1 - Acceptance Criteria: When user enters name, then system saves to character sheet"
+              },
+              "dont": {
+                "description": "Don't put AC in story documents or use Given clauses",
+                "content": "Story document: Acceptance Criteria: Given user is logged in, When... (WRONG - AC in story doc, has Given)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Enumerate ALL acceptance criteria permutations. Apply exhaustive logic decomposition at AC level.",
+          "examples": [
+            {
+              "do": {
+                "description": "List all validation paths and calculation branches",
+                "content": "When user enters STR rank, then system validates (1-20 range) - When user enters invalid rank, then system shows error - When user enters valid rank, then system calculates modifier"
+              },
+              "dont": {
+                "description": "Don't skip AC permutations",
+                "content": "When user enters rank, then system saves (missing validation and calculation ACs)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Present AC consolidation review BEFORE finalizing. Identify similar ACs, ask domain expert questions, wait for user confirmation.",
+          "examples": [
+            {
+              "do": {
+                "description": "Present AC consolidation questions and wait for answers",
+                "content": "CONSOLIDATION REVIEW: These ACs use same logic? [List ACs] → User answers → Apply decisions"
+              },
+              "dont": {
+                "description": "Don't automatically consolidate ACs without user confirmation",
+                "content": "Auto-consolidate similar ACs (WRONG - must ask user first)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "CRITICAL SCOPE: Scenarios work on STORY documents (📝 *.md files), NOT feature documents. NEVER creates feature specification documents.",
+          "examples": [
+            {
+              "do": {
+                "description": "Add scenarios to story documents",
+                "content": "docs/stories/map/Epic/Feature/📝 Story Name.md - Scenarios section added"
+              },
+              "dont": {
+                "description": "Don't create feature specification documents",
+                "content": "docs/stories/map/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story docs)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Given statements must use state-oriented language (not action-oriented). Given describes STATE, not actions.",
+          "examples": [
+            {
+              "do": {
+                "description": "Given uses state language",
+                "content": "Given user is logged in (state) - Given character sheet exists (state)"
+              },
+              "dont": {
+                "description": "Given doesn't use action language",
+                "content": "Given user logs in (action - WRONG) - Given system creates character (action - WRONG)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use Background for repeated Given steps across 3+ scenarios. Background contains only Given/And steps (no When/Then).",
+          "examples": [
+            {
+              "do": {
+                "description": "Background for shared context",
+                "content": "Background: Given user is logged in And character sheet exists (used by 5 scenarios)"
+              },
+              "dont": {
+                "description": "Don't use Background for unique Given steps or include When/Then",
+                "content": "Background: Given user logs in (action - WRONG) OR Background: When user clicks button (When/Then - WRONG)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use Scenario Outline with Examples when story warrants concrete data: formulas need validation, domain has named entities, parameter variations exist.",
+          "examples": [
+            {
+              "do": {
+                "description": "Scenario Outline for formulas or domain entities",
+                "content": "Scenario Outline: Calculate ability modifier - Examples table with Rank 10→0, Rank 12→+1, Rank 14→+2"
+              },
+              "dont": {
+                "description": "Don't use Scenario Outline for simple behaviors",
+                "content": "Scenario Outline: User clicks button (too simple - use regular scenario)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Scenarios must cover happy path, edge cases, and error cases based on acceptance criteria.",
+          "examples": [
+            {
+              "do": {
+                "description": "Complete scenario coverage",
+                "content": "Happy path: User enters valid data → System saves. Edge case: User enters boundary value → System validates. Error case: User enters invalid data → System shows error."
+              },
+              "dont": {
+                "description": "Don't skip scenario types",
+                "content": "Only happy path scenarios (missing edge cases and error cases)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "specification_scenarios": {
+      "order": 6,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For specification scenarios behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window.\n2. Wait for the user to answer each question.\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user.\n   - **Answers Provided:** Show the exact answers the user provided for each question.\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail.\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail.\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification.\n5. DO NOT proceed until:\n   - All questions have complete, unambiguous answers confirmed by the user.",
+          "key_questions": [
+            "What system and user actions initiate this story's flow?",
+            "What is the intended system response after each user action?",
+            "What preconditions or data states are required before this story can begin?",
+            "What are the success criteria for the story (from a domain and user perspective)?",
+            "What are the expected alternate flows, error paths, and edge cases?",
+            "Are there any mandatory sequencing constraints within or across stories?",
+            "What domain rules, calculations, or business policies does this story validate?",
+            "Is the story testable independently (including setup and teardown conditions)?",
+            "What external systems or services does this story need to interact with?",
+            "What requests, responses, or contracts are involved in those system interactions?",
+            "Are there system integration points that require validation or simulation?",
+            "How do we handle failures, timeouts, or retries for those system calls?"
+          ],
+          "evidence": [
+            "Acceptance criteria from Exploration stage (Domain AC at feature level, Behavioral AC at story level)",
+            "Low fidelity UX flows",
+            "Domain models or ubiquitous language",
+            "Cross-functional walkthrough outputs",
+            "Integration contracts or API mocks",
+            "Behavior diagrams (state, sequence)"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "question": "What approach are we using to define the right level of detail and coverage for this story's scenarios?",
+              "outcome": "Determines whether the scenarios are granular, domain-focused, or integration-heavy",
+              "options": [
+                "User-System Behavioral Flow — ensures full traceability from trigger to response",
+                "Domain Rules-Centric — validates business correctness through rule clarity",
+                "System-Centric — defines system-to-system interactions with clear request/response templates",
+                "Minimal Path Plus Alternates — covers happy path plus targeted exceptions only",
+                "Full Spec Coverage — includes all realistic variations and negative cases",
+                "Very Trustable Story — maximizes testability by scoping tight atomic flows with few steps and precise acceptance criteria",
+                "Exhaustive Behavior Split — repeats each unique behavior even when similar, discourages reuse to maximize coverage visibility"
+              ]
+            },
+            {
+              "description": "Scenario structure",
+              "question": "Should scenarios use Background for repeated Given steps?",
+              "outcome": "Determines Background section creation",
+              "options": [
+                "Yes - 3+ scenarios share Given steps",
+                "No - Given steps are unique per scenario"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "One story is specified at a time",
+            "Acceptance criteria must be testable, unambiguous, and executable",
+            "Gherkin syntax or structured language (Given/When/Then) is preferred",
+            "Scenarios are written in plain English without variables or test data",
+            "Specification drives both design and test — not written after implementation",
+            "Scenarios must cover both behavior and domain policy",
+            "Cross-functional review is required before considering the story ready for development"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated scenarios to verify they accurately reflect step-by-step user-system interactions",
+            "Validate that the AI has correctly identified domain rules and data constraints in real-world terms",
+            "Review the AI's approach to scope definition to verify it covers appropriate flows and edge cases",
+            "Review the AI's acceptance criteria with dev and test teams to verify feasibility, clarity, and testability"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Specification scenarios adds plain English scenarios with Background sections to both structured.json and story documents. NO variables, NO Examples tables, NO Scenario Outlines at this stage.",
+          "instructions": "**CRITICAL: Specification Scenarios MUST update structured.json with scenario data:**\n\n1. **Update structured.json:** Add scenarios array to each story in the epic/feature structure (NOT in increments) with:\n   - Scenario name (plain English, descriptive)\n   - Background (if 3+ scenarios share Given steps): object with steps array containing only Given/And statements\n   - Steps: array of Given/When/Then/And step strings in plain English (NO variables, NO placeholders)\n\n2. **Update story markdown documents:** Also update story documents (📝 *.md files) with the same scenario data formatted as Gherkin syntax.\n\n**CRITICAL RESTRICTIONS:**\n- NO Scenario Outlines at this stage\n- NO Examples tables at this stage\n- NO variables or placeholders (e.g., no \"<variable>\", no \"<test_data>\")\n- Use plain English descriptions only\n- Scenarios go in stories within epics/features structure, NOT in increments\n- Increments only reference stories by name (strings), not full story objects\n- Story specifications (scenarios) belong in epic/feature stories only\n\n**Scenario Structure in structured.json:**\n- Each scenario has: name (string), steps (array of strings)\n- If Background exists: background object with steps array (Given/And only, no When/Then)\n- Background steps are Given/And statements only (no When/Then)\n- Regular scenario steps are Given/When/Then/And statements in plain English\n- NO Examples arrays at this stage\n\n**MANDATORY:** All scenario data (backgrounds, steps) MUST be stored in structured.json for each story in the epic/feature structure. Increments only contain story names (strings), not full story objects with specifications."
+        },
+        "outputs": [
+          {
+            "name": "story",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_story_to_markdown",
+            "template": "templates/story-doc-scenarios-template.md",
+            "instructions": "Update story document with Scenarios section using story-doc-scenarios-template.md. Use Background for repeated Given steps (3+ scenarios share common setup). Write scenarios in plain English - NO variables, NO Examples tables, NO Scenario Outlines at this stage. Reference good examples: agents/story_bot/docs/stories/map/🎯 Start Story Development Session/⚙️ Initialize Story Agent Workflow/📝 Initialize Behavior and Workflow.md for proper Background usage. CRITICAL: Background contains ONLY common setup (true for ALL scenarios). Scenario-specific setup goes in scenario Steps as Given steps."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to specification scenarios writing behavior",
+        "patterns": [
+          "specify.*story.*scenarios",
+          "write.*scenarios",
+          "define.*test.*scenario",
+          "write.*story.*details",
+          "get.*to.*exact.*flow",
+          "describe.*step.*by.*step",
+          "elaborate.*story.*flow",
+          "model.*edge.*cases",
+          "walk.*through.*test.*case",
+          "spec.*acceptance.*scenario",
+          "detail.*story.*logic",
+          "story.*level.*specification",
+          "define.*preconditions",
+          "create.*test.*scenarios",
+          "scenario.*based.*design",
+          "specification.*scenarios",
+          "story.*scenarios"
+        ],
+        "priority": 12
+      },
+      "rules": [
+        {
+          "description": "CRITICAL SCOPE: Scenarios work on STORY documents (📝 *.md files), NOT feature documents. NEVER creates feature specification documents.",
+          "examples": [
+            {
+              "do": {
+                "description": "Add scenarios to story documents",
+                "content": "docs/stories/map/Epic/Feature/📝 Story Name.md - Scenarios section added"
+              },
+              "dont": {
+                "description": "Don't create feature specification documents",
+                "content": "docs/stories/map/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story docs)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Given statements must use state-oriented language (not action-oriented). Given describes STATE, not actions.",
+          "examples": [
+            {
+              "do": {
+                "description": "Given uses state language",
+                "content": "Given user is logged in (state) - Given character sheet exists (state)"
+              },
+              "dont": {
+                "description": "Given doesn't use action language",
+                "content": "Given user logs in (action - WRONG) - Given system creates character (action - WRONG)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use Background section at story level for common setup steps shared across 3+ scenarios. Background contains only Given/And steps (no When/Then). Scenario-specific setup goes in scenario Steps as Given steps, not in Background.",
+          "examples": [
+            {
+              "do": {
+                "description": "Background for shared context, scenario-specific Given in Steps",
+                "content": "## Background\n\n**Common setup steps shared across all scenarios:**\n\n```gherkin\nGiven Agent is initialized with agent_name='story_bot'\nAnd Project is finished initializing\n```\n\n## Scenarios\n\n### Scenario: Agent loads configurations\n\n**Steps:**\n```gherkin\nGiven test project area is set up at test_data/projects/valid-project\nAnd valid base agent.json exists at test_data/agents/base/agent.json\nWhen Project is finished initializing\n```"
+              },
+              "dont": {
+                "description": "Don't put scenario-specific setup in Background or repeat Background in each scenario",
+                "content": "## Background\n\n```gherkin\nGiven test project area is set up at test_data/projects/valid-project\n```\n\n### Scenario: Agent loads configurations\n\n**Background:**\n```gherkin\nGiven test project area is set up at test_data/projects/valid-project\nAnd Project is finished initializing\n```\n(WRONG - Background repeated in scenario, scenario-specific setup in Background)"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_background_usage"
+        },
+        {
+          "description": "Write scenarios in plain English. NO variables, NO placeholders, NO Scenario Outlines, NO Examples tables at this stage.",
+          "examples": [
+            {
+              "do": {
+                "description": "Plain English scenarios",
+                "content": "Given user has attached documents to chat window\nAnd user has typed request message 'start shaping'\nWhen AI Chat processes request\nThen AI Chat identifies story shaping keywords"
+              },
+              "dont": {
+                "description": "Don't use variables or placeholders",
+                "content": "Given user has typed request message \"<request_message>\" (WRONG - has variable)\nScenario Outline: AI Chat detects keywords (WRONG - Outline at this stage)\nExamples: | request_message | (WRONG - Examples at this stage)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Scenarios must cover happy path, edge cases, and error cases based on acceptance criteria.",
+          "examples": [
+            {
+              "do": {
+                "description": "Complete scenario coverage",
+                "content": "Happy path: User enters valid data → System saves. Edge case: User enters boundary value → System validates. Error case: User enters invalid data → System shows error."
+              },
+              "dont": {
+                "description": "Don't skip scenario types",
+                "content": "Only happy path scenarios (missing edge cases and error cases)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "specification_examples": {
+      "order": 7,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For specification examples behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window.\n2. Wait for the user to answer each question.\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user.\n   - **Answers Provided:** Show the exact answers the user provided for each question.\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail.\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail.\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification.\n5. DO NOT proceed until:\n   - All questions have complete, unambiguous answers confirmed by the user.",
+          "key_questions": [
+            "What data variations (e.g., boundary conditions, common examples) are required for test coverage?",
+            "What are the input values needed to test each scenario?",
+            "What are the expected output values for each input?",
+            "Are there formulas or calculations that need multiple data points to validate?",
+            "Are there domain entities with named values that should be tested?",
+            "What are the boundary conditions (min, max, edge cases) for each data point?",
+            "Who is responsible for writing or validating these examples (e.g., BA, Dev, QC)?",
+            "Do scenarios need to be converted to Scenario Outlines with Examples tables?"
+          ],
+          "evidence": [
+            "Scenarios from Specification Scenarios stage (plain English Given/When/Then structure with Background)",
+            "Acceptance criteria from Exploration stage",
+            "Domain models or ubiquitous language",
+            "Test fixtures or automation setup",
+            "Cross-functional walkthrough outputs"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Scenario Outline",
+              "question": "Should scenarios be converted to Scenario Outline with Examples?",
+              "outcome": "Determines Scenario Outline creation",
+              "options": [
+                "Yes - formulas/calculations need multiple data points OR domain has named entities from source OR parameter variations exist",
+                "No - behavior is simple/obvious and doesn't need data variations"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Examples tables must include ALL variables used in scenario steps",
+            "Examples tables must have exact values for both input AND output variables",
+            "Every variable in scenario steps must have a corresponding column in Examples table",
+            "Examples tables must have actual test data, not placeholders",
+            "Output/expected result variables must be included in Examples tables",
+            "Examples drive both design and test — not written after implementation"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated Examples tables to verify they contain all variables from scenario steps",
+            "Validate that Examples tables include both input AND output values with exact test data",
+            "Review the AI's approach to identify which scenarios need Scenario Outlines",
+            "Review the AI-generated Examples to verify they can be incorporated directly into automated test frameworks"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Specification examples adds variables, Scenario Outlines, and Examples arrays with test data to scenarios in structured.json. structured.json is the SINGLE SOURCE OF TRUTH - Examples MUST be added to structured.json FIRST.",
+          "instructions": "**CRITICAL: structured.json is the SINGLE SOURCE OF TRUTH. Examples MUST be added to structured.json FIRST before generating any markdown or feature files.**\n\n**MANDATORY WORKFLOW - DO NOT SKIP:**\n\n1. **Load structured.json:** Read the current structured.json file to get existing scenarios from specification_scenarios stage.\n\n2. **Identify scenarios needing Examples:** For each story in structured.json, review scenarios and determine which need Scenario Outlines based on:\n   - Formulas/calculations requiring multiple data points\n   - Domain entities with named values\n   - Parameter variations that need testing\n   - Any scenario with variables in steps (e.g., \"<variable_name>\")\n\n3. **Update structured.json with Examples:**\n   - For scenarios that need Examples, add \"examples\" array to the scenario object in structured.json\n   - Each example is an object with keys matching ALL variables (both input AND output)\n   - Examples array must have at least 2 example objects\n   - Each example object must have exact test data values (no placeholders, no empty values)\n   - Example structure:\n     ```json\n     {\n       \"name\": \"Scenario Outline: Agent loads configurations\",\n       \"steps\": [\"Given test project area is set up at \\\"<test_project_area>\\\"\", ...],\n       \"examples\": [\n         {\"test_project_area\": \"test_data/projects/valid-project\", \"expected_base_templates\": \"context_clarification,planning\", ...},\n         {\"test_project_area\": \"test_data/projects/another-project\", \"expected_base_templates\": \"context_clarification,planning\", ...}\n       ]\n     }\n     ```\n\n4. **Update scenario names in structured.json:** If scenario has variables or examples, ensure name includes \"Scenario Outline:\" prefix in structured.json\n\n5. **Update steps in structured.json:** Replace plain English values with variables (e.g., \"<variable_name>\") in the steps array in structured.json\n\n**CRITICAL REQUIREMENTS:**\n- structured.json MUST be updated FIRST - it is the single source of truth\n- EVERY variable used in scenario steps MUST have a corresponding key in each example object\n- Examples array MUST include BOTH input variables AND output/expected result variables\n- Examples array MUST have exact test data values (no placeholders like \"(same as base)\", no empty cells)\n- If scenario has variables, it MUST have Examples array in structured.json\n- Examples arrays must be complete - missing variables or missing data is a defect\n- All Examples data MUST be stored in structured.json - markdown and feature files are generated FROM structured.json\n\n**MANDATORY:** Update structured.json FIRST. Then markdown and feature files will be generated from structured.json automatically."
+        },
+        "outputs": [
+          {
+            "name": "story",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_story_to_markdown",
+            "template": "templates/story-doc-examples-template.md",
+            "instructions": "Update story document with Scenario Outlines and Examples tables using story-doc-examples-template.md. Convert appropriate scenarios to Scenario Outlines. Add Examples tables with ALL variables (input AND output) and exact test data values. CRITICAL: Every variable in Steps MUST have a column in Examples. Examples MUST include both input AND output variables with exact test data. Reference good examples: agents/story_bot/docs/stories/map/🎯 Start Story Development Session/⚙️ Initialize Story Agent Workflow/📝 Initialize Behavior and Workflow.md for proper Examples table format."
+          },
+          {
+            "name": "feature_file",
+            "path": "docs/stories/map",
+            "builder": "story_agent_build_feature_file",
+            "instructions": "Generate .feature file from structured.json (single source of truth). This is the final output that creates executable Gherkin test files. The builder reads from structured.json and generates .feature files with Background, Scenarios, and Examples tables. CRITICAL: This runs AFTER structured.json is updated with Examples arrays. The builder reads Examples from structured.json, not from markdown files."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to specification examples/test data behavior",
+        "patterns": [
+          "specify.*story.*examples",
+          "add.*test.*data",
+          "define.*test.*data",
+          "write.*examples.*for.*story",
+          "create.*examples.*table",
+          "add.*variables.*to.*scenarios",
+          "convert.*to.*scenario.*outline",
+          "add.*examples.*to.*scenarios",
+          "define.*story.*inputs",
+          "define.*expected.*outcome",
+          "capture.*data.*needs",
+          "specification.*examples",
+          "story.*examples",
+          "test.*data.*for.*story"
+        ],
+        "priority": 13
+      },
+      "rules": [
+        {
+          "description": "Use Scenario Outline with Examples when story warrants concrete data: formulas need validation, domain has named entities, parameter variations exist.",
+          "examples": [
+            {
+              "do": {
+                "description": "Scenario Outline for formulas or domain entities",
+                "content": "Scenario Outline: Calculate ability modifier - Examples table with Rank 10→0, Rank 12→+1, Rank 14→+2"
+              },
+              "dont": {
+                "description": "Don't use Scenario Outline for simple behaviors without data variations",
+                "content": "Scenario Outline: User clicks button (too simple - use regular scenario)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "CRITICAL: Every variable used in scenario steps MUST have a corresponding column in the Examples table. Missing variables in Examples table is a defect.",
+          "examples": [
+            {
+              "do": {
+                "description": "All variables in Examples table",
+                "content": "Steps: Given user types request message \"<request_message>\" And MCP Server is unavailable due to \"<unavailability_reason>\" Then user receives error \"<expected_error_message>\"\n\nExamples:\n| request_message | unavailability_reason | expected_error_message |\n|----------------|----------------------|----------------------|\n| build story map | server_not_running | \"MCP Server is not available. Please check server status.\" |"
+              },
+              "dont": {
+                "description": "Missing variables in Examples table",
+                "content": "Steps: Given user types \"<request_message>\" Then system processes\nExamples: | request_message |\n(WRONG - missing expected_error_message or other output variables)"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_examples_completeness"
+        },
+        {
+          "description": "CRITICAL: Examples tables MUST include BOTH input variables AND output/expected result variables. Examples tables must have exact test data values for all variables, especially outcome/expected result variables.",
+          "examples": [
+            {
+              "do": {
+                "description": "Examples with input and output variables",
+                "content": "Examples:\n| test_project_area | error_condition | expected_error_message |\n|-------------------|-----------------|----------------------|\n| test_data/projects/valid-project | file_not_found | \"Error: Could not load base agent configuration from test_data/agents/base-missing/agent.json: File not found\" |"
+              },
+              "dont": {
+                "description": "Missing output variables or missing data values",
+                "content": "Examples:\n| test_project_area | error_condition |\n|-------------------|-----------------|\n| test_data/projects/valid-project | file_not_found |\n(WRONG - missing expected_error_message column, missing data in rows)"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_examples_outputs"
+        },
+        {
+          "description": "Examples tables must have exact test data values. NO placeholders, NO empty cells, NO \"(same as base)\" or similar vague values. Every cell must have a concrete test value.",
+          "examples": [
+            {
+              "do": {
+                "description": "Exact test data values",
+                "content": "Examples:\n| request_message | detected_keywords | selected_tool |\n|----------------|-------------------|--------------|\n| start shaping | shaping | agent_get_instructions |\n| plan new project | planning,new project | agent_get_instructions |"
+              },
+              "dont": {
+                "description": "Placeholders or vague values",
+                "content": "Examples:\n| request_message | detected_keywords |\n|----------------|-------------------|\n| <message> | <keywords> |\n(WRONG - placeholders instead of actual values) OR | (same as base) | (WRONG - vague value)"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_examples_data"
+        },
+        {
+          "description": "When creating variables, use descriptive names that match the data being tested. Variable names should be clear and indicate what they represent.",
+          "examples": [
+            {
+              "do": {
+                "description": "Descriptive variable names",
+                "content": "Given test project area is set up at \"<test_project_area>\"\nAnd base agent.json has error condition \"<error_condition>\"\nThen error \"<expected_error_message>\" is presented"
+              },
+              "dont": {
+                "description": "Vague or unclear variable names",
+                "content": "Given area is \"<area>\"\nAnd file has \"<condition>\"\nThen \"<message>\" is shown\n(WRONG - variable names too vague)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Examples tables must have at least 2 rows of test data to demonstrate variations. Single row Examples tables should be regular scenarios instead.",
+          "examples": [
+            {
+              "do": {
+                "description": "Multiple rows of test data",
+                "content": "Examples:\n| request_message | detected_keywords |\n|----------------|-------------------|\n| start shaping | shaping |\n| plan new project | planning,new project |\n| build story map | story map |"
+              },
+              "dont": {
+                "description": "Single row Examples table",
+                "content": "Examples:\n| request_message |\n|----------------|\n| start shaping |\n(WRONG - only one row, should be regular scenario)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "specification_tests": {
+      "order": 8,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For specification tests behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window.\n2. Wait for the user to answer each question.\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user.\n   - **Answers Provided:** Show the exact answers the user provided for each question.\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail.\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail.\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification.\n5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers.\n6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool with:\n   - `key_questions_answered`: dict mapping question keys to answer strings\n   - `evidence_provided`: dict mapping evidence types to evidence content\n7. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user\n   - You have successfully stored the clarification data using `agent_store_clarification()`\n\n**CRITICAL REMINDER:** The presentation of questions and answers in the chat window is MANDATORY and CANNOT BE SKIPPED.",
+          "key_questions": [
+            "What test framework should be used (pytest-bdd, pytest, etc.)?",
+            "Should tests use real implementations or mocks (e2e vs unit tests)?",
+            "What fixtures or helpers are needed for test setup?",
+            "Are there any specific test data requirements beyond what's in Examples tables?",
+            "What is the expected test file structure and location?",
+            "Are there any existing test patterns or conventions to follow?"
+          ],
+          "evidence": [
+            "Feature files (.feature) from specification_examples stage",
+            "Examples tables with test data",
+            "Structured.json with scenarios and examples",
+            "Existing test code or test patterns",
+            "Test framework documentation"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Test scope level",
+              "question": "What scope level should acceptance tests cover?",
+              "outcome": "Determines test implementation approach",
+              "options": [
+                "Component/Service level - test individual components/services in isolation (minimum)",
+                "System level - test full system with external systems mocked out",
+                "Whole solution - test entire solution including external systems"
+              ]
+            },
+            {
+              "description": "Mocking strategy",
+              "question": "Should tests use mocks or real implementations?",
+              "outcome": "Determines whether to mock external dependencies",
+              "options": [
+                "Real implementations - use actual code with temporary test data (default)",
+                "Mock framwork and tools - file I/O, databases, network, on top of external APIs (for system level)",
+
+                "Mock external dependencies - mock external APIs, integrations, external systems",
+                "No mocking - use real implementations for everything (for whole solution)"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Tests must match feature files exactly - no new steps, no modified step text",
+            "Step definitions must use exact text from feature files",
+            "Assertions must verify what the steps say they verify",
+            "Tests should use real implementations by default",
+            "Only mock when explicitly asked for e2e tests or for uncontrollable external dependencies",
+            "All test code must use ASCII-only characters (no Unicode)",
+            "Tests should call production code directly - let tests fail naturally if code doesn't exist"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated test code to verify step definitions match feature files exactly",
+            "Validate that assertions verify what the steps say they verify",
+            "Review the AI's approach to fixtures and helpers",
+            "Verify the AI has correctly implemented Arrange-Act-Assert structure",
+            "Review the AI's mocking strategy to ensure it matches requirements",
+            "Validate that test code follows pytest-bdd conventions correctly"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Specification tests generates pytest-bdd test code from feature files. Tests must match feature files exactly - all step definitions and assertions must match verbatim.",
+          "instructions": "**CRITICAL: Match Feature Files Exactly**\n\n**MANDATORY WORKFLOW - DO NOT SKIP:**\n\n1. **Load Feature Files:** Read .feature files from docs/stories/map/ directory. These are the SINGLE SOURCE OF TRUTH for all step definitions.\n\n2. **Generate Test Code:** Create pytest-bdd test code in src/stories_acceptance_tests.py with:\n   - Step definitions that match feature file steps EXACTLY (including quotes, capitalization, punctuation)\n   - Assertions that verify what the steps say they verify\n   - Fixtures for shared setup (defined in test file)\n   - Helper classes for test data factories\n   - Class-based organization (AgentSteps, ProjectSteps, WorkflowSteps, etc.)\n\n3. **Follow Rules:** Reference specification-tests-rule.mdc for:\n   - Arrange-Act-Assert structure\n   - Proper mocking (only when asked for e2e tests)\n   - Fixture organization\n   - Helper extraction\n   - ASCII-only characters\n   - Test observable behavior, not implementation details\n\n4. **Match Examples Tables:** Use exact variable names from Examples tables in feature files.\n\n5. **No New Steps:** We are NOT creating new steps - we are implementing existing steps from feature files.\n\n6. **File Structure:**\n   - Single test file: src/stories_acceptance_tests.py\n   - Contains all step definitions, fixtures, and helpers\n   - Class-based organization for maintainability\n   - Feature files remain in docs/stories/map/"
+        },
+        "outputs": [
+          {
+            "name": "test_file",
+            "path": "src",
+            "instructions": "Generate pytest-bdd test code directly in src/stories_acceptance_tests.py. The AI should write the complete test file with:\n- Match feature files exactly - all step definitions use exact text from .feature files\n- Use class-based organization (AgentSteps, ProjectSteps, WorkflowSteps, AgentFactory, ProjectFactory, etc.)\n- Include fixtures defined in the test file (not in separate conftest.py)\n- Follow Arrange-Act-Assert structure\n- Use real implementations by default (only mock when asked for e2e tests)\n- Include all step definitions for all scenarios in feature files\n- Use exact variable names from Examples tables\n- Use ASCII-only characters throughout\n- Call production code directly - let tests fail naturally if code doesn't exist\n\nReference specification-tests-rule.mdc for detailed guidance on test code structure and patterns.\n\n**CRITICAL:** The AI must write the complete test code file directly - do not use a builder function."
+          }
+        ],
+        "builder": "agents.story_bot.src.story_agent.story_agent_annotate_feature_files",
+        "builder_description": "After test code is generated, automatically annotate feature files with navigation links to step definitions. This builder reads .feature files and adds annotation comments (🔗 → path:line:function) linking each step to its corresponding step definition function in the test file."
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to specification tests/test code generation behavior",
+        "patterns": [
+          "generate.*test.*code",
+          "create.*test.*file",
+          "write.*pytest.*tests",
+          "implement.*step.*definitions",
+          "generate.*acceptance.*tests",
+          "create.*bdd.*tests",
+          "write.*test.*code",
+          "generate.*test.*implementation",
+          "create.*test.*cases",
+          "implement.*feature.*tests",
+          "specification.*tests",
+          "test.*code.*generation",
+          "bdd.*test.*code"
+        ],
+        "priority": 14
+      },
+      "rules": [
+        {
+          "description": "CRITICAL: All step definitions and assertions must match exactly what's in the feature files. We are NOT creating new steps - we are implementing existing steps from specification behaviors. Copy step text exactly from feature files (including quotes, capitalization, punctuation). Use exact variable names from Examples tables.",
+          "examples": [
+            {
+              "do": {
+                "description": "Step definition matches feature file exactly",
+                "content": "Feature file: Given Agent is initialized with agent_name='story_bot'\n\nStep definition:\n@given(\"Agent is initialized with agent_name='story_bot'\")\ndef given_agent_initialized(context, agent_name='story_bot'):\n    context.agent = Agent(agent_name=agent_name)"
+              },
+              "dont": {
+                "description": "Step definition doesn't match feature file",
+                "content": "Feature file: Given Agent is initialized with agent_name='story_bot'\n\nStep definition:\n@given(\"Agent is initialized\")  # WRONG - missing parameter\nOR\n@given(\"agent is initialized with agent_name='story_bot'\")  # WRONG - wrong capitalization\nOR\n@given(\"Agent is initialized with agent_name=story_bot\")  # WRONG - missing quotes"
+              }
+            },
+            {
+              "do": {
+                "description": "Assertions verify what steps say",
+                "content": "Feature file: Then Agent sets up base agent configuration path at agents/base/agent.json\n\nStep definition:\n@then(\"Agent sets up base agent configuration path at agents/base/agent.json\")\ndef then_agent_sets_base_config_path(context):\n    expected_path = context.workspace_root / \"agents\" / \"base\" / \"agent.json\"\n    assert context.agent._agent_config_path == expected_path"
+              },
+              "dont": {
+                "description": "Assertions for things not in steps",
+                "content": "Feature file: Then Agent sets up base agent configuration path\n\nStep definition:\n@then(\"Agent sets up base agent configuration path\")\ndef then_agent_sets_path(context):\n    assert context.agent._internal_flag == True  # WRONG - not mentioned in step"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_step_definitions_match_feature_files"
+        },
+        {
+          "description": "Use Arrange-Act-Assert structure in step definitions. Each step should have clear Arrange (setup), Act (call production code), and Assert (verify) sections where appropriate.",
+          "examples": [
+            {
+              "do": {
+                "description": "Arrange-Act-Assert structure",
+                "content": "@given(\"Agent is initialized with agent_name='story_bot'\")\ndef given_agent_initialized(context, agent_name):\n    # Arrange: Set up test data\n    context.agent_name = agent_name\n    context.workspace_root = Path(\"/test/workspace\")\n    \n    # Act: Call production code\n    context.agent = Agent(agent_name=agent_name, workspace_root=context.workspace_root)\n    \n    # Assert: Verify initial state\n    assert context.agent.agent_name == agent_name"
+              },
+              "dont": {
+                "description": "Missing structure or mocking what we test",
+                "content": "@given(\"Agent is initialized\")\ndef given_agent(context):\n    # Missing arrange/act/assert structure\n    context.agent = Mock()  # WRONG - mocking what we should test"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use real implementations by default. Only mock when explicitly asked to assume e2e tests or for uncontrollable external dependencies (file I/O, network, APIs). Create real files in temporary test workspace instead of mocking file operations.",
+          "examples": [
+            {
+              "do": {
+                "description": "Real implementation with temporary test data",
+                "content": "@given(\"agents/base/agent.json exists and is valid\")\ndef given_base_config_exists(context, workspace_root):\n    # Create real file in test workspace\n    config_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"\n    config_path.parent.mkdir(parents=True, exist_ok=True)\n    config_path.write_text('{\"name\": \"base\"}')"
+              },
+              "dont": {
+                "description": "Mocking when real implementation is possible",
+                "content": "@given(\"agents/base/agent.json exists and is valid\")\ndef given_base_config_exists(context):\n    # DON'T: Mock when real implementation is possible\n    with patch('pathlib.Path.exists', return_value=True):\n        pass"
+              }
+            },
+            {
+              "do": {
+                "description": "Mock only external boundaries when asked for e2e",
+                "content": "# Only when explicitly asked for e2e tests:\n@given(\"agents/base/agent.json exists and is valid\")\ndef given_base_config_exists(context):\n    # Mock file I/O (external boundary) - only when e2e tests specified\n    with patch('pathlib.Path.exists', return_value=True):\n        with patch('pathlib.Path.read_text', return_value='{\"valid\": \"json\"}'):\n            context.base_config_path = Path(\"agents/base/agent.json\")"
+              },
+              "dont": {
+                "description": "Mock internal business logic",
+                "content": "@given(\"Agent is initialized\")\ndef given_agent(context):\n    # DON'T: Mock the class we're testing\n    context.agent = Mock(spec=Agent)  # WRONG"
+              }
+            }
+          ]
+        },
+        {
+          "description": "All test code must use ASCII-only characters. No Unicode symbols, emojis, or special characters in test code, assertions, print statements, or output messages. Use plain ASCII alternatives like [PASS], [ERROR], [FAIL].",
+          "examples": [
+            {
+              "do": {
+                "description": "ASCII-only characters",
+                "content": "print(\"[PASS] Agent initialized successfully\")\nprint(\"[ERROR] Configuration file not found\")\nassert result.status == \"success\"\nassert result.message == \"Agent initialized\""
+              },
+              "dont": {
+                "description": "Unicode characters",
+                "content": "print(\"✓ Agent initialized\")  # WRONG - Unicode checkmark\nprint(\"✅ Configuration loaded\")  # WRONG - Emoji\nprint(\"→ Next step\")  # WRONG - Unicode arrow\nassert result.status == \"✓\"  # WRONG - Unicode in assertions"
+              }
+            }
+          ],
+          "diagnostic": "story_agent_validate_ascii_only"
+        },
+        {
+          "description": "Test observable behavior, not implementation details. Assertions must verify what the steps say they verify - test outcomes and state changes that are visible externally, not internal methods or private attributes.",
+          "examples": [
+            {
+              "do": {
+                "description": "Test observable outcome",
+                "content": "@then(\"Agent sets up base agent configuration path at agents/base/agent.json\")\ndef then_agent_sets_base_config_path(context):\n    expected_path = context.workspace_root / \"agents\" / \"base\" / \"agent.json\"\n    assert context.agent._agent_config_path == expected_path\n    assert context.agent._agent_config_path.exists()"
+              },
+              "dont": {
+                "description": "Test implementation details",
+                "content": "@then(\"Agent sets up base agent configuration path\")\ndef then_agent_sets_path(context):\n    # DON'T: Test internal implementation\n    assert context.agent._setup_config_path.called  # WRONG\n    assert context.agent._internal_flag == True  # WRONG\n    assert context.agent._validate.called  # WRONG"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use class-based organization in single test file. Organize step definitions into classes (AgentSteps, ProjectSteps, WorkflowSteps) and helpers into factory classes (AgentFactory, ProjectFactory). All code in src/stories_acceptance_tests.py.",
+          "examples": [
+            {
+              "do": {
+                "description": "Class-based organization",
+                "content": "class AgentSteps:\n    @given(\"Agent is initialized with agent_name='story_bot'\")\n    def given_agent_initialized(self, context, agent_name):\n        context.agent = AgentFactory.create_agent(agent_name=agent_name, workspace_root=context.workspace_root)\n\nclass AgentFactory:\n    @staticmethod\n    def create_agent(agent_name='story_bot', workspace_root=None):\n        return Agent(agent_name=agent_name, workspace_root=workspace_root)"
+              },
+              "dont": {
+                "description": "Flat organization or multiple files",
+                "content": "# DON'T: All steps at module level without organization\n# DON'T: Separate files for steps, helpers, fixtures\n# DON'T: conftest.py for fixtures (use test file instead)"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Define fixtures in the test file, not in separate conftest.py. Use pytest fixtures for shared setup. Truly reusable fixtures (file operations, location helpers) belong in agents/base/src/conftest.py.",
+          "examples": [
+            {
+              "do": {
+                "description": "Fixtures in test file",
+                "content": "# In src/stories_acceptance_tests.py\nimport pytest\n\n@pytest.fixture\ndef workspace_root(tmp_path):\n    workspace = tmp_path / \"workspace\"\n    workspace.mkdir()\n    return workspace\n\n@pytest.fixture\ndef base_config_path(workspace_root):\n    config_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"\n    config_path.parent.mkdir(parents=True, exist_ok=True)\n    config_path.write_text('{\"name\": \"base\"}')\n    return config_path"
+              },
+              "dont": {
+                "description": "Separate conftest.py for agent-specific fixtures",
+                "content": "# DON'T: Create src/conftest.py for agent-specific fixtures\n# Use test file instead, or agents/base/src/conftest.py for reusable ones"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Call production code directly - let tests fail naturally if code doesn't exist. Don't comment out production code calls or mock internal business logic. Tests should call real code and fail with clear error messages if code is missing.",
+          "examples": [
+            {
+              "do": {
+                "description": "Call production code directly",
+                "content": "@when(\"Agent initializes\")\ndef when_agent_initializes(context):\n    # Call production code directly\n    context.agent.initialize()\n    # If initialize() doesn't exist, test fails with AttributeError"
+              },
+              "dont": {
+                "description": "Comment out or mock production code",
+                "content": "@when(\"Agent initializes\")\ndef when_agent_initializes(context):\n    # DON'T: Comment out production code\n    # context.agent.initialize()  # WRONG\n    # DON'T: Fake the state\n    context.agent._initialized = True  # WRONG"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use exact variable names from Examples tables in feature files. When steps reference variables like \"<variable_name>\", use the exact same variable name in step definitions and parameter names.",
+          "examples": [
+            {
+              "do": {
+                "description": "Exact variable names from Examples",
+                "content": "Feature file:\nGiven test project area is set up at \"<test_project_area>\"\nExamples:\n| test_project_area |\n|-------------------|\n| test_data/projects/valid-project |\n\nStep definition:\n@given(parsers.parse(\"test project area is set up at '{test_project_area}'\"))\ndef given_test_project_area(context, test_project_area):\n    context.project_area = Path(test_project_area)"
+              },
+              "dont": {
+                "description": "Different variable names",
+                "content": "Feature file: <test_project_area>\nStep definition: def given_test_project_area(context, project_area):  # WRONG - different name"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Use descriptive step definition function names that match step text. Function names should clearly indicate what step they implement.",
+          "examples": [
+            {
+              "do": {
+                "description": "Descriptive function names",
+                "content": "@given(\"Agent is initialized with agent_name='story_bot'\")\ndef given_agent_initialized_with_name(context, agent_name):\n    pass\n\n@when(\"MCP Server requests Agent instance from AgentStateManager\")\ndef when_mcp_requests_agent_from_manager(context):\n    pass"
+              },
+              "dont": {
+                "description": "Non-descriptive or abbreviated names",
+                "content": "@given(\"Agent is initialized\")\ndef step1(context):  # WRONG - non-descriptive\ndef agent_init(context):  # WRONG - abbreviated"
+              }
+            }
+          ]
+        }
+      ],
+      "rule_file": "specification-tests-rule.mdc"
+    }
+  },
+  "trigger_words": {
+    "description": "Agent-level trigger words - general terms that indicate when to use the stories agent",
+    "patterns": [
+      "story.*mapping",
+      "story.*writing",
+      "stories",
+      "requirements",
+      "user.*stories",
+      "epic.*feature.*story",
+      "story.*map",
+      "backlog.*grooming",
+      "product.*backlog",
+      "agile.*stories",
+      "user.*requirements",
+      "build.*new",
+      "start.*new.*project",
+      "new.*project",
+      "begin.*new",
+      "create.*new",
+      "start.*on.*new",
+      "want.*to.*build.*new",
+      "want.*to.*start.*new",
+      "want.*to.*start.*on.*new",
+      "i.*want.*to.*build",
+      "i.*want.*to.*start",
+      "new.*initiative",
+      "new.*application",
+      "new.*solution",
+      "new.*system",
+      "new.*platform",
+      "new.*service",
+      "new.*product",
+      "new.*capability",
+      "new.*tool",
+      "new.*software",
+      "new.*technology",
+      "new.*tech.*stack",
+      "new.*architecture",
+      "new.*infrastructure",
+      "new.*integration",
+      "new.*api",
+      "new.*microservice",
+      "new.*component",
+      "new.*module",
+      "new.*framework",
+      "new.*library",
+      "new.*ecosystem",
+      "new.*transformation",
+      "new.*modernization",
+      "new.*digital",
+      "new.*automation",
+      "new.*enterprise",
+      "new.*program",
+      "launch.*new",
+      "develop.*new",
+      "design.*new",
+      "implement.*new",
+      "roll.*out.*new",
+      "deploy.*new",
+      "release.*new",
+      "introduce.*new",
+      "establish.*new",
+      "set.*up.*new",
+      "commence.*new",
+      "embark.*on.*new",
+      "undertake.*new"
+    ],
+    "priority": 5
+  },
+  "mcp": {
+    "server_name": "agent-story_bot",
+    "command": "python",
+    "args": [
+      "agents/base/src/agent_mcp_server.py",
+      "story_bot"
+    ],
+    "cwd": "C:\\dev\\augmented-teams",
+    "env": {
+      "AGENT_NAME": "story_bot",
+      "PYTHONPATH": "C:\\dev\\augmented-teams"
+    }
+  }
+}

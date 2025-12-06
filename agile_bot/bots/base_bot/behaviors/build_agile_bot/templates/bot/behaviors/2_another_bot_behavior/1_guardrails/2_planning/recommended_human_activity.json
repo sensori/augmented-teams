@@ -1,7 +1,0 @@
-{
-  "recommended_human_activity": [
-    "{activity_1 - what should human review or verify}",
-    "{activity_2 - what should human validate or confirm}",
-    "{activity_3 - what human judgment or expertise is needed}"
-  ]
-}

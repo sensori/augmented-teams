@@ -1,0 +1,390 @@
+{
+  "rules": {
+    "description": "Agent-level rules that apply to all behaviors (shape, discovery, exploration, specification)",
+    "examples": {
+      "do": [
+        "Use verb-noun format for all story elements (epic names, feature names, story titles)",
+        "Use verb-noun language in scenario sentences",
+        "Maintain verb-noun consistency from epic to feature to story to scenario"
+      ],
+      "dont": [
+        "Mix verb-noun with other formats",
+        "Use technical implementation language in user-facing story elements"
+      ]
+    },
+    "diagnostic": "story_agent_validate_verb_noun_consistency"
+  },
+  "behaviors": {
+    "shape": {
+      "order": 1,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions":  "CRITICAL: For the shape behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers\n6. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user\n\n**Required Key Questions:**\n- What is the product or feature area?\n- What are the primary user goals?\n- What constraints exist?\n\n**Required Evidence:**\n- Product documentation\n- User research\n- Existing stories\n\n**CRITICAL REMINDER:** The presentation of questions and answers in the chat window is MANDATORY and CANNOT BE SKIPPED. This allows the user to see what was asked, how it was answered, and provide corrections. For shape behavior specifically, incomplete clarification will lead to poor story maps. Stop and get complete answers.",
+          "key_questions": [
+            "What is the product or feature area?",
+            "What are the primary user goals?",
+            "What constraints exist?"
+          ],
+          "evidence": [
+            "Product documentation",
+            "User research",
+            "Existing stories"
+          ]
+        },
+        "planning":{
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point."
+          ,
+          "decision_making_criteria": [
+            {
+              "question": "What areas of the story map do you want to explore more deeply as a part of shaping?",
+              "outcome": "Determines which epics/stories get detailed breakdown",
+              "options": [
+                "Dig deep on business complexity",
+                "Dig deep on system interactions",
+                "Dig deep on architectural pieces",
+                "Dig deep on user workflows",
+                "High and wide across all epics",
+                "Focus on highest value areas"
+              ]
+            },
+            {
+              "question": "How should stories be prioritized for discovery?",
+              "outcome": "Determines story order and focus",
+              "options": [
+                "Smallest testable increment validating architecture",
+                "Smallest piece of value testing value proposition",
+                "Largest market share first",
+                "Friendliest customers",
+                "Geography-based",
+                "Customer type-based",
+                "Product-based"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Focus on user flow over internal systems",
+            "Cover the end-to-end scenario",
+            "Prioritize customer-facing features",
+            "Assume stories should be independently testable",
+            "Assume each story delivers user value",
+            "Assume technical infrastructure stories are implicit"
+          ],
+          "recommended_human_activity": [
+            "Review epic breakdown",
+            "Confirm story granularity"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Shared structured content schema across all story behaviors",
+          "instructions": "Build the structured story map content using the story_graph.json schema file. The schema file defines the exact structure you must follow. Load and use the schema file to ensure your output matches the required format exactly."
+        },
+        "builder": "story_agent_build_story_map",
+        "outputs": [
+          {
+            "name": "story_map",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_story_map_to_markdown",
+            "template": "templates/story-map-template.md",
+            "instructions": "Transform the structured story map into a markdown document using the story-map-template.md template file. The template file contains the complete formatting rules and structure. Follow the template exactly, filling in the structured content data."
+          },
+          {
+            "name": "epic",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_epic_to_markdown",
+            "template": "templates/epic-template.md",
+            "instructions": "Transform each epic from the structured content into a markdown document using the epic-template.md template file. Follow the template structure exactly."
+          },
+          {
+            "name": "feature",
+            "path": "docs/stories/map",
+            "transformer": "story_agent_transform_feature_to_markdown",
+            "template": "templates/feature-template.md",
+            "instructions": "Transform each feature from the structured content into a markdown document using the feature-template.md template file. Follow the template structure exactly."
+          }
+        ]
+      },
+      "actions": {
+        "description": "Only include actions that override default base agent methods. Default actions (context-validation, planning, generate, validate, correct) use base agent methods unless overridden here.",
+        "correct": {
+          "trigger_words": {
+            "patterns": [
+              "shape.*correction",
+              "fix.*story.*map",
+              "update.*epic"
+            ],
+            "priority": 15
+          }
+        }
+      },
+      "trigger_words": {
+        "correct": {
+          "patterns": [
+            "shape.*fix",
+            "story.*correction"
+          ],
+          "priority": 12
+        },
+        "validate": {
+          "patterns": [
+            "check.*story",
+            "validate.*epic"
+          ],
+          "priority": 7
+        }
+      },
+      "rules": [
+      {
+        "description": "Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.",
+        "examples": [
+          {
+            "do": {
+              "description": "Include both user and system activities in story descriptions",
+              "content": "User submits order, System validates payment"
+            },
+            "dont": {
+              "description": "Avoid task-oriented language that describes implementation",
+              "content": "Implement order submission, Create payment validation"
+            }
+          },
+          {
+            "do": {
+              "description": "Show user actions and corresponding system responses",
+              "content": "Customer views products, System displays inventory"
+            },
+            "dont": {
+              "description": "Don't use task language for building or setting up",
+              "content": "Build product listing page, Set up inventory display"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.",
+        "examples": [
+          {
+            "do": {
+              "description": "Create stories that represent complete flows within the effort range",
+              "content": "Customer places order (complete flow, 3-5 days)"
+            },
+            "dont": {
+              "description": "Avoid stories that are too large and span multiple weeks",
+              "content": "Order management system (too large, 20+ days)"
+            }
+          },
+          {
+            "do": {
+              "description": "Focus on specific behaviors that can be completed in a few days",
+              "content": "System validates payment (focused behavior, 2-4 days)"
+            },
+            "dont": {
+              "description": "Don't create stories that require building entire infrastructure",
+              "content": "Payment processing infrastructure (too large, 15+ days)"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Balance fine-grained stories with testable and valuable independent units. Stories must deliver value and be independently testable.",
+        "examples": [
+          {
+            "do": {
+              "description": "Create stories that are complete interactions with value",
+              "content": "Customer places order (complete interaction, testable, valuable)"
+            },
+            "dont": {
+              "description": "Avoid stories that are too small and have no value alone",
+              "content": "Add order button (too fine-grained, no value alone)"
+            }
+          },
+          {
+            "do": {
+              "description": "Ensure stories represent complete behaviors that can be tested",
+              "content": "System sends confirmation email (complete behavior, testable)"
+            },
+            "dont": {
+              "description": "Don't break down into components that aren't independently valuable",
+              "content": "Create email template (too fine-grained, not independently valuable)"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.",
+        "examples": [
+          {
+            "do": {
+              "description": "Maintain hierarchy within the 7±2 cognitive limit range",
+              "content": "Epic with 6 features, each feature with 5-7 stories"
+            },
+            "dont": {
+              "description": "Split when hierarchy exceeds the maximum threshold",
+              "content": "Epic with 12 features (split into 2 epics), feature with 15 stories (split into 2 features)"
+            }
+          },
+          {
+            "do": {
+              "description": "Keep features with appropriate number of stories",
+              "content": "Feature with 4 stories (within acceptable range)"
+            },
+            "dont": {
+              "description": "Merge when hierarchy is too small",
+              "content": "Feature with 1 story (merge with related feature)"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
+        "examples": [
+          {
+            "do": {
+              "description": "Use action verbs to describe what happens",
+              "content": "User submits order, System validates payment"
+            },
+            "dont": {
+              "description": "Avoid capability nouns that describe functions rather than behaviors",
+              "content": "Order Management, Payment Processing (capability nouns)"
+            }
+          },
+          {
+            "do": {
+              "description": "Describe active behaviors with verbs",
+              "content": "Customer views products, System displays inventory"
+            },
+            "dont": {
+              "description": "Don't use functional language that describes capabilities",
+              "content": "Product Viewing, Inventory Display (functional language)"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Ensure business experts can understand the language of stories. Use business domain language, not technical implementation details.",
+        "examples": [
+          {
+            "do": {
+              "description": "Use business language that stakeholders understand",
+              "content": "Customer places order with payment details"
+            },
+            "dont": {
+              "description": "Avoid technical API and implementation details",
+              "content": "POST /api/orders with JSON payload containing payment object"
+            }
+          },
+          {
+            "do": {
+              "description": "Describe system behavior in business terms",
+              "content": "System validates customer payment information"
+            },
+            "dont": {
+              "description": "Don't include technical implementation specifics",
+              "content": "Invoke payment gateway API with encrypted credentials"
+            }
+          }
+        ]
+      },
+      {
+        "description": "Create lightweight but precise documentation during shaping. Focus on structure and scope, not detailed specifications.",
+        "examples": [
+          {
+            "do": {
+              "description": "Document the hierarchy and structure during shaping",
+              "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order"
+            },
+            "dont": {
+              "description": "Avoid detailed technical specifications during shaping phase",
+              "content": "Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Detailed API specs, database schema, UI mockups"
+            }
+          },
+          {
+            "do": {
+              "description": "Focus on high-level structure and boundaries",
+              "content": "Story map with hierarchy, key activities, and scope boundaries"
+            },
+            "dont": {
+              "description": "Don't include detailed specifications that belong in later phases",
+              "content": "Complete technical specifications, acceptance criteria, and implementation details"
+            }
+          }
+        ],
+        "diagnostic": "story_agent_validate_story_shape"
+      },
+      {
+        "description": "Identify marketable increments with business priorities and relative sizing.",
+        "examples": [
+          {
+            "do": {
+              "description": "Define increments with business value and priorities",
+              "content": "Marketable increment: Basic Order Flow (NOW priority, Small relative size)"
+            },
+            "dont": {
+              "description": "Avoid technical increments without business value",
+              "content": "Increment: API endpoints (no priority, no sizing)"
+            }
+          }
+        ],
+        "diagnostic": "story_agent_validate_market_increments"
+      }
+    ]
+    },
+    "prioritization": {
+      "order": 2,
+      "guardrails": {
+        "base_instructions": {
+          
+        }
+      }
+    },
+    "discovery": {
+      "order": 3,
+      "guardrails": {
+        "base_instructions": {
+          
+        }
+      }
+    },
+    "exploration": {
+      "order": 4,
+      "guardrails": {
+        "base_instructions": {
+          
+        }
+      }
+    }
+  },
+  "trigger_words": {
+    "correct": {
+      "patterns": [
+        "test.*correction",
+        "fix.*test.*agent",
+        "update.*test.*config"
+      ],
+      "priority": 11
+    },
+    "validate": {
+      "patterns": [
+        "check.*test",
+        "validate.*test.*agent"
+      ],
+      "priority": 6
+    }
+  },
+  "mcp": {
+    "server_name": "agent-test_agent",
+    "command": "python",
+    "args": [
+      "agents/base/src/agent_mcp_server.py",
+      "test_agent"
+    ],
+    "cwd": "C:\\dev\\augmented-teams",
+    "env": {
+      "AGENT_NAME": "test_agent",
+      "PYTHONPATH": "C:\\dev\\augmented-teams"
+    }
+  }
+}
+

@@ -1,0 +1,98 @@
+FUNCTIONAL PURPOSE
+Migrate from markdown-first command architecture to JSON-first agent architecture. Enable structured JSON configuration as source of truth while maintaining human-readable markdown documentation. Provide common agent infrastructure (Base Agent) and specific agent implementations (Story Agent, etc.) with workflow orchestration, guidance application, rule validation, and content generation.
+
+Agent
+	Purpose: Common infrastructure all agents inherit
+	orchestrates Workflow
+		Purpose: Behavior-based execution engine with actions
+		Workflow derives behavior names from behaviors dictionary sorted by order property
+		Behavior Data: behavior name, state (approved, next, skip, start), order
+		current_behavior: Property that returns Behavior from behaviors dictionary based on workflow.current_behavior_name
+		current_action: Property that returns Action from current behavior's actions
+		workflow.start(behavior_name): Begin at specific behavior
+		workflow.next_behavior(): Advance to next behavior
+		workflow.approve_current(): Mark current behavior complete
+		workflow.skip_current(): Skip current behavior
+		workflow.move_to_action(action_name): Move to specific action within current behavior
+		workflow.start_next_behavior(): Determine which behavior should be initiated
+	applies Guidance
+		Purpose: Context validation and human interaction
+		Context Data: key questions, evidence, assumptions, decision criteria, user feedback
+		clarifies Context
+			Purpose: Validate context completeness
+			clarification_instructions: Property that delegates to current_behavior.guardrails.requirements_clarification_instructions
+			GuardRails Data: required context (key questions, evidence), decision making criteria (questions, outcomes, options), typical assumptions, base_instructions
+			GuardRails.requirements_clarification_instructions: Property that returns dict with content_data and instructions string
+			store_clarification(): Store key questions answered and evidence provided to Project.clarification
+		plans Approach
+			Purpose: Present assumptions and decision criteria for user review
+			planning_instructions: Property that delegates to current_behavior.guardrails.get_planning_instructions
+			Planning Data: assumptions, decision criteria, high-level assessment
+			GuardRails.get_planning_instructions: Property that returns dict with content_data and instructions string
+			store_decisions_and_assumptions(): Store decisions made and assumptions made to Project.planning
+	validates with Rule
+		Purpose: Validation and correction
+		Validation Data: examples (do/don't patterns), violations, corrections, diagnostic results, validation reports
+		scansForViolationsWithCode(): Code-based validation scanning
+		executesDiagnosticMethods(): Behavior-specific code diagnostics
+		assemblesValidationPrompt(): Create prompt for AI to evaluate content against rules
+		incorporatesValidatedFixes(): Apply AI-generated fixes to Content Data
+		corrects Rules and Examples
+			Purpose: Update rules, examples, and prompts based on corrections made
+			Correction Data: original Content Data, corrections made, current rules, instructions, examples
+			assemblesCorrectionPrompt(): Create prompt for AI to evaluate and generate corrected rules/instructions/prompts
+			updatesRulesExamplesAndPrompts(): Save corrected rules, examples, prompts to Config Data or Behavior Data
+	generates Content
+		Purpose: Content creation pipeline
+		Content Data: JSON structures, templates, schemas, markdown, structured content schema, rendered documents
+		instructions: Property that delegates to workflow.current_action.instructions
+		Content.build_instructions: Property that includes agent-level rules, behavior-level rules, structured_content instructions
+		Content.transform_instructions: Property that includes instructions from each output's instructions field
+		Content.build(): Create initial structure (code-based)
+		Content.validate(): Validate Content Data structure (code-based)
+		Content.save(): Save Content Data including structured JSON and rendered documents
+		Content.store(): Automatically calls Project.store_output() and creates traceability links
+		tools_and_instructions: Property that provides MCP tool names and usage instructions
+		providesToolsAndInstructions(): Register tools with AI Chat for structure building
+		assemblesTransformationInstructions(): Create instructions for AI Chat to transform structure to documents using output templates
+		transformsContentToDocuments(): Transform structured JSON to rendered markdown/other formats using templates and transformers
+		generatesMarkdownFromJSON(): Generate markdown documentation from JSON configuration (command files, rule documentation)
+		ensuresMarkdownSyncWithJSON(): Ensure markdown docs are always in sync with structured JSON source of truth
+		store_content(): Store structured and/or rendered content via Content.structured or Content.rendered setters
+	loads Configuration
+		Purpose: JSON configuration files
+		Config Data: prompt templates, workflow definitions, rules, behaviors, content configs, examples
+		Base Agent Config: Common prompt templates (context_validation, planning, generate, validate, correct)
+		Agent Config: Agent-specific configuration (workflow stages, agent-level rules, behaviors with guidelines/rules/actions/content)
+
+Story Agent
+	Purpose: Story-specific agent extending Base Agent
+	extends Agent
+	configures Workflow Stages
+		Purpose: Ordered behaviors for story work
+		Stage Order Data: shape → prioritization → discovery → exploration → specification
+	configures Behavior
+		Purpose: Specific story behavior configuration
+		Behavior Data: MCP config, guidelines, rules, actions, content configs
+		MCP Config: Merged with deployable MCP server config
+		GuardRails Data: required context (key questions, evidence), decision making criteria (questions, outcomes, options), typical assumptions, recommended human activity
+		Rule Data: examples (do/don't), diagnostic method references
+		Action Data: prompt templates, method overrides
+		Content Data: structured content schema reference, builder method, transformer methods, output templates
+			reads Schema: Validates structured content against schema
+			writes Schema: Defines structured content schema
+	executesDiagnosticMethods(): Story-specific code diagnostics for validation
+
+Project
+	Purpose: Track agent activity and outputs per domain area
+	organizes Domain Area
+		Purpose: Organize work by domain
+		tracks Activity
+			Purpose: Execution log
+			Activity Data: status, behavior name, inputs, reasoning (context provided, decisions made, human intervention)
+			Activity stored in project_area/docs/activity/activity.json
+		stores Output
+			Purpose: Generated artifacts
+			Output Data: structured JSON, rendered markdown/other formats
+			Structured JSON stored in project_area/docs/content/structured.json
+			Rendered documents stored in project_area/docs/content/{output_name}.md (one file per output)

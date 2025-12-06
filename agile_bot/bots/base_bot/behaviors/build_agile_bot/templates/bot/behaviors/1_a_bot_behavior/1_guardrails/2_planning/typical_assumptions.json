@@ -1,8 +1,0 @@
-{
-  "typical_assumptions": [
-    "{assumption_1 - describe what the bot assumes by default}",
-    "{assumption_2 - describe standard approach or focus area}",
-    "{assumption_3 - describe expected behavior or priority}",
-    "{assumption_4 - describe implicit understanding}"
-  ]
-}

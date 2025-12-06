@@ -1,0 +1,27 @@
+describe a command that has a rule
+  that is corrected with context
+      it should have access to chat context
+      it should have access to content with error
+      it should have access to rule principles
+    when correction is requested
+      it should instruct AI prompt to correct the error based on context
+      it should insert all exsitingexamples from rule in instructions
+      it should insert all principles from rule in instructions
+      it should tell AI to examine context for changes to principle
+      it should tell AI to examine context for changes to examples
+      it should tell AI to propose new principle if needed
+      it should tell AI to propose new example if needed
+      it should set corrected flag to true
+  that generates correction instructions for AI
+      it should include instruction to analyze error pattern in context
+      it should include instruction to create new principle capturing pattern
+      it should include next available principle number
+      it should include instruction to use principle_template
+      it should include instruction to analyze why principle was unclear
+      it should include instruction to improve principle content
+      it should include instruction to preserve principle structure
+      it should include instruction to run DO example against content to see if would prevent error
+      it should include instruction to test example against all other principles
+      it should include instruction to auto fix if example violates other principles
+      it should include instructions to consider code heirusutic for new example if it makse sense
+      it should incllude instructions to create code-heuristics accoridng to code-agent-rules rules and code heristics section

@@ -1,0 +1,46 @@
+{
+  "behavior_name": "sheet",
+  "description": "Character sheet queries - read-only queries from XML or Foundry character sheets",
+  "usage_documentation": {
+    "purpose": "Queries character sheet data from XML file. Does NOT write to episode files - read-only queries.",
+    "categories": {
+      "powers": "Query power data from character sheet",
+      "abilities": "Query ability ranks (STR, DEX, CON, INT, WIS, CHA)",
+      "skills": "Query skill ranks",
+      "defenses": "Query defense values (Dodge, Parry, Toughness, Fortitude, Will)",
+      "attacks": "Query attack powers and abilities"
+    },
+    "list_command": {
+      "description": "Returns a formatted list of all items in the specified category",
+      "categories": ["powers", "skills", "abilities", "advantages", "equipment", "complications", "defenses"],
+      "returns": "Numbered, formatted list of all items in the category"
+    },
+    "read_only": {
+      "description": "Character sheet queries are read-only - they do NOT write to episode files",
+      "note": "Query results are returned to the user but not automatically written to episodes"
+    }
+  },
+  "mcp_tool": {
+    "name": "character_sheet_load",
+    "description": "Load character sheet from XML or Foundry and query data by category",
+    "parameters": {
+      "character_name": {
+        "type": "string",
+        "required": true,
+        "description": "Character name (e.g., 'Roach-Boy', 'Atom')"
+      },
+      "category": {
+        "type": "string",
+        "required": true,
+        "enum": ["powers", "abilities", "skills", "defenses", "attacks"],
+        "description": "Category to query"
+      },
+      "name_or_index": {
+        "type": ["string", "integer"],
+        "required": false,
+        "description": "Optional: specific power/skill name or index to query"
+      }
+    }
+  }
+}
+

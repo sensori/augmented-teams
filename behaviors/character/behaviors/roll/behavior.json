@@ -1,0 +1,49 @@
+{
+  "behavior_name": "roll",
+  "description": "Game mechanics rolls using character statistics",
+  "usage_documentation": {
+    "purpose": "Performs game mechanics rolls (abilities, skills, attacks) using character statistics. Returns mechanical results only (no narration) and writes roll results to episode file.",
+    "roll_types": {
+      "ability": "Roll an ability check (STR, DEX, CON, etc.)",
+      "skill": "Roll a skill check",
+      "attack": "Roll an attack using a power",
+      "defense": "Roll a defense check"
+    },
+    "roll_execution": {
+      "description": "Rolls are executed using character statistics from the character sheet",
+      "returns_mechanical_results": "Returns mechanical results only (no narration)",
+      "optional_episode_write": "Roll results can optionally be written to episode file if episode_id parameter is provided"
+    },
+    "roll_result": {
+      "success": "Whether roll succeeded (from roll mechanics)",
+      "degrees": "Degrees of success/failure (from roll mechanics)",
+      "total": "Total roll result (from roll mechanics)",
+      "rolls": "Individual dice rolls (from roll mechanics)",
+      "roll_type": "Type of roll (ability/skill/attack/defense)",
+      "roll_target": "What was rolled (ability name, skill name, attack name)",
+      "difficulty": "Optional target number (DC)"
+    }
+  },
+  "mcp_tool": {
+    "name": "character_roll_execute",
+    "description": "Execute game mechanics roll (abilities, skills, attacks) using character statistics",
+    "parameters": {
+      "character_name": {
+        "type": "string",
+        "required": true,
+        "description": "Character name"
+      },
+      "roll_command": {
+        "type": "string",
+        "required": true,
+        "description": "Roll command in natural language (e.g., 'roll STR check', 'roll Blast power attack')"
+      },
+      "episode_id": {
+        "type": "string",
+        "required": false,
+        "description": "Optional episode ID to write roll results to"
+      }
+    }
+  }
+}
+

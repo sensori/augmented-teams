@@ -1,0 +1,15 @@
+[2025-11-17 22:52:19] [CHARACTER-MCP] Log file initialized: c:\dev\augmented-teams\behaviors\character\code\logs\mcp_server_20251117_225219.log
+[2025-11-17 22:52:19] [CHARACTER-MCP] Starting MCP server initialization...
+[2025-11-17 22:52:19] [CHARACTER-MCP] Python executable: C:\Users\thoma\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe
+[2025-11-17 22:52:19] [CHARACTER-MCP] Python version: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+[2025-11-17 22:52:19] [CHARACTER-MCP] Workspace root: c:\dev\augmented-teams
+[2025-11-17 22:52:19] [CHARACTER-MCP] Current file: c:\dev\augmented-teams\behaviors\character\code\mcp_server.py
+[2025-11-17 22:52:19] [CHARACTER-MCP] Current directory (before change): c:\dev\augmented-teams
+[2025-11-17 22:52:19] [CHARACTER-MCP] Changed working directory to: c:\dev\augmented-teams
+[2025-11-17 22:52:19] [CHARACTER-MCP] Python path updated: ['c:\\dev\\augmented-teams\\behaviors\\character\\code', 'c:\\dev\\augmented-teams', 'c:\\dev\\augmented-teams\\behaviors\\character\\code']
+[2025-11-17 22:52:19] [CHARACTER-MCP] Importing MCP SDK...
+[2025-11-17 22:52:19] [CHARACTER-MCP] MCP SDK imported successfully
+[2025-11-17 22:52:19] [CHARACTER-MCP] Importing character agent modules...
+[2025-11-17 22:52:19] [CHARACTER-MCP] Character agent modules imported successfully
+[2025-11-17 22:52:19] [CHARACTER-MCP] Creating FastMCP instance...
+[2025-11-17 22:52:19] [CHARACTER-MCP] FastMCP instance created successfully

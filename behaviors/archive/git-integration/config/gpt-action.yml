@@ -1,0 +1,433 @@
+openapi: 3.1.0
+info:
+  title: Git Integration Service (GPT Action)
+  version: 1.0.1
+  description: >
+    API for Git operations used by Augmented Team GPT — includes committing text, checking
+    repository status, and pushing to remote. Focused on pure Git operations without document processing.
+servers:
+  - url: http://localhost:8001
+    description: Git Integration Service (Local Development)
+  - url: https://ubiquitous-fiesta-4xrwxq44wh57q6-8001.app.github.dev
+    description: Git Integration Service (Codespace HTTPS endpoint)
+security:
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "GitHub Personal Access Token for authentication"
+  schemas:
+    CommitRequest:
+      type: object
+      required:
+        - content
+        - file_path
+      properties:
+        content:
+          type: string
+          description: The text content to write
+        file_path:
+          type: string
+          description: Path to save the file (relative to repo root)
+        commit_message:
+          type: string
+          description: Optional commit message
+    CommitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        commit_hash:
+          type: string
+        file_path:
+          type: string
+    DeleteFileRequest:
+      type: object
+      required:
+        - file_path
+      properties:
+        file_path:
+          type: string
+          description: Path to the file to delete
+        commit_message:
+          type: string
+          description: Optional commit message
+    SearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Search query
+        file_pattern:
+          type: string
+          description: File pattern to search in
+paths:
+  /:
+    get:
+      operationId: health_check
+      summary: Health Check
+      description: Check if the Git Integration Service is running
+      responses:
+        "200":
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  repo:
+                    type: string
+                  github_auth:
+                    type: boolean
+
+  /auth/github:
+    get:
+      operationId: github_auth_status
+      summary: GitHub Authentication Status
+      description: Check GitHub authentication status
+      responses:
+        "200":
+          description: GitHub auth status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  github_auth:
+                    type: boolean
+
+  /auth/client:
+    get:
+      operationId: client_auth_status
+      summary: Client Authentication Status
+      description: Check client authentication configuration
+      responses:
+        "200":
+          description: Client auth status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_required:
+                    type: boolean
+
+  /auth/verify:
+    get:
+      operationId: verify_auth
+      summary: Verify Authentication
+      description: Verify client authentication
+      responses:
+        "200":
+          description: Authentication verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+
+  /status:
+    get:
+      operationId: get_status
+      summary: Get Repository Status
+      description: Returns current repository status and pending changes
+      responses:
+        "200":
+          description: Repository status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repo_path:
+                    type: string
+                  branch:
+                    type: string
+                  has_changes:
+                    type: boolean
+                  changes:
+                    type: array
+                    items:
+                      type: string
+                  error:
+                    type: string
+
+  /commit/text:
+    post:
+      operationId: commit_text
+      summary: Commit text content to a file
+      description: Write text content to a file and commit it to the repository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommitRequest'
+      responses:
+        "200":
+          description: Text committed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitResponse'
+
+  /push:
+    post:
+      operationId: push_changes
+      summary: Push committed changes
+      description: Push changes to the remote repository
+      responses:
+        "200":
+          description: Changes pushed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  output:
+                    type: string
+
+  /tree:
+    get:
+      operationId: get_tree
+      summary: Get Repository Tree
+      description: Get repository tree structure
+      parameters:
+        - name: path
+          in: query
+          schema:
+            type: string
+            default: "."
+          description: Path to get tree for
+      responses:
+        "200":
+          description: Repository tree
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tree:
+                    type: array
+                    items:
+                      type: object
+
+  /folder/{folder_path}:
+    get:
+      operationId: get_folder
+      summary: Get Folder Content
+      description: Get content of a specific folder
+      parameters:
+        - name: folder_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the folder
+      responses:
+        "200":
+          description: Folder content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: string
+
+  /search/content:
+    post:
+      operationId: search_content
+      summary: Search Repository Content
+      description: Search repository content using git grep
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+
+  /search/files:
+    get:
+      operationId: search_files
+      summary: Search Files by Name
+      description: Search for files by name pattern
+      parameters:
+        - name: pattern
+          in: query
+          required: true
+          schema:
+            type: string
+          description: File name pattern to search for
+      responses:
+        "200":
+          description: File search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: string
+
+  /file/{file_path}:
+    get:
+      operationId: get_file
+      summary: Get File Content
+      description: Get content of a specific file
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the file
+      responses:
+        "200":
+          description: File content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                  file_path:
+                    type: string
+
+  /sync:
+    post:
+      operationId: sync_repository
+      summary: Sync Repository
+      description: Sync repository (pull latest changes)
+      responses:
+        "200":
+          description: Repository synced successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /delete/{file_path}:
+    delete:
+      operationId: delete_file
+      summary: Delete a file (DELETE method)
+      description: Delete a file from the repository using DELETE method
+      parameters:
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the file to delete
+        - name: commit_message
+          in: query
+          schema:
+            type: string
+          description: Optional commit message
+      responses:
+        "200":
+          description: File deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  file_path:
+                    type: string
+        "404":
+          description: File not found
+        "500":
+          description: Error deleting file
+
+  /deleteFile:
+    post:
+      operationId: delete_file_post
+      summary: Delete a file (POST method)
+      description: Delete a file from the repository using POST method for GPT Actions compatibility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteFileRequest'
+      responses:
+        "200":
+          description: File deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  file_path:
+                    type: string
+        "404":
+          description: File not found
+        "500":
+          description: Error deleting file
+
+  /workflows/copy:
+    post:
+      operationId: copy_workflows
+      summary: Copy Workflow Files
+      description: Copy workflow files to .github/workflows/
+      responses:
+        "200":
+          description: Workflow files copied successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  copied_files:
+                    type: array
+                    items:
+                      type: string

@@ -1,0 +1,12 @@
+{
+  "key_questions_answered": {
+    "test": "answer",
+    "What is the product?": "Test product",
+    "Who are the users?": "Game Masters"
+  },
+  "evidence_provided": {
+    "test": "evidence",
+    "Product documentation": "Test docs",
+    "User research": "GM interviews"
+  }
+}

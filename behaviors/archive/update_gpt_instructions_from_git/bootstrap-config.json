@@ -1,0 +1,70 @@
+{
+  "name": "Augmented Teams GPT Builder",
+  "description": "Auto-refresh configuration for GPT Builder to pull latest instructions from Git repository",
+  "version": "1.0.0",
+  "auto_refresh": {
+    "enabled": true,
+    "source": "git",
+    "repository": "augmented-teams",
+    "branch": "main",
+    "instruction_paths": [
+      "instructions/",
+      "config/"
+    ],
+    "refresh_triggers": [
+      "startup",
+      "manual",
+      "github_action"
+    ]
+  },
+  "instruction_files": {
+    "primary": "instructions/OPERATING_MODEL.md",
+    "style_guide": "instructions/STYLE_GUIDE.md",
+    "tools": "instructions/TOOLS.md",
+    "examples": "instructions/EXAMPLES.md",
+    "purpose": "instructions/PURPOSE.md"
+  },
+  "git_integration": {
+    "read_only": true,
+    "write_back": false,
+    "auto_commit": false,
+    "source_of_truth": "git_repository"
+  },
+  "runtime_behavior": {
+    "pull_mode": true,
+    "cache_instructions": true,
+    "version_control": "git_tracked",
+    "audit_trail": "git_commits"
+  },
+  "security": {
+    "immutable_by_default": true,
+    "explicit_authorship": true,
+    "human_approval_required": true,
+    "no_silent_edits": true
+  },
+  "workflow": {
+    "startup": [
+      "check_bootstrap_config",
+      "pull_latest_instructions",
+      "load_runtime_model",
+      "cache_for_session"
+    ],
+    "runtime": [
+      "follow_live_instructions",
+      "no_write_back_unless_explicit",
+      "maintain_git_as_source_of_truth"
+    ],
+    "explicit_write": [
+      "human_command_required",
+      "create_new_commit",
+      "tag_with_metadata",
+      "version_in_git_history"
+    ]
+  },
+  "metadata": {
+    "created": "2025-01-27",
+    "architecture": "unidirectional_instruction_flow",
+    "principle": "instructions_flow_downstream_not_upstream",
+    "design_philosophy": "git_as_single_source_of_truth"
+  }
+}

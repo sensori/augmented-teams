@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+	<public>
+		<program name="Hero Lab" url="https://www.wolflair.com">
+			<programinfo>Hero Lab and the Hero Lab logo are Registered Trademarks of LWD Technology, Inc. Free download at https://www.wolflair.com
+Mutants &amp; Masterminds, Third Edition is ©2010-2017 Green Ronin Publishing, LLC. All rights reserved.</programinfo>
+			<version version="8.9h" primary="8" secondary="9" tertiary="h" build="959"/>
+		</program>
+		<localization language="eng" units="imperial"/>
+		<character active="yes" characterindex="1" nature="normal" role="pc" relationship="ally" type="Hero" name="Atomic" playername="">
+			<powerpoints text="156 PP" value="156"/>
+			<powerlevel text="PL 10" value="10"/>
+			<size name="Medium"/>
+			<resources startingpp="150" totalpp="150" startingpl="10" currentpl="10" wealth="8">
+				<resource name="Abilities" spent="60"/>
+				<resource name="Powers" spent="70"/>
+				<resource name="Advantages" spent="5"/>
+				<resource name="Skills" spent="19"/>
+				<resource name="Defenses" spent="2"/>
+			</resources>
+			<personal gender="Male" age="45" hair="brown" eyes="blue">
+				<description>Steve Reeves once captivated the hearts of America as a charismatic movie star in the 1950s, famed for his portrayal of the real life superhero Atom in popular black-and-white serials. His films painted him as a larger-than-life hero, fighting villains and saving the day in grand, cinematic style. However, away from the silver screen, Steve's life was far more complex and troubled.
+
+During the height of the Red Scare, Steve's personal associations with known socialists and communists brought him under intense scrutiny. Betraying his principles in a moment of fear, he publicly denounced several of his friends to save his career. This act of betrayal, however, only led to his social and professional downfall, marking him as both a communist sympathizer and a traitor to his peers. Disgraced and increasingly isolated, Steve's life spiraled downwards, ending tragically in a mysterious and controversial death that was rumored to be either murder or suicide.
+
+Decades later, long after his death, fifth-dimensional alien beings—unable to comprehend the nuances of three-dimensional life and death—intercepted reruns of his films. Mistaking these for actual historical records, they decided to resurrect Atom, beleiving steve to be the real hero. Using advanced technology, they encased Steve's essence in a reality-warping cocoon, designed to reconstruct him based on their interpretation of the broadcasts.
+
+When Steve awoke, he found himself not only alive but transformed. He now physically embodies the black-and-white aesthetic of his old films, with his appearance shifting more towards monochrome under stress or during heroic actions. Additionally, Steve's memories are a confusing blend of his real life and the scripted adventures of Atomic, causing him frequent identity crises.
+
+Powers and Abilities: As the resurrected Atomic, Steve possesses abilities akin to those of his on-screen character, albeit less potent and somewhat distorted by the aliens' misinterpretation. He exhibits strength, durability, and a form of energy manipulation that mimics the special effects of 1950s cinema.</description>
+				<charheight text="5' 8&quot;" value="68"/>
+				<charweight text="175 lb." value="175"/>
+			</personal>
+			<languages>
+				<language name="Native Language" useradded="no"/>
+			</languages>
+			<attributes>
+				<attribute name="Strength" text="8" base="8" modified="8">
+					<cost text="16 PP" value="16"/>
+				</attribute>
+				<attribute name="Stamina" text="8" base="8" modified="8">
+					<cost text="16 PP" value="16"/>
+				</attribute>
+				<attribute name="Agility" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Dexterity" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Fighting" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Intellect" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Awareness" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Presence" text="4" base="4" modified="4">
+					<cost text="8 PP" value="8"/>
+				</attribute>
+			</attributes>
+			<defenses>
+				<defense name="Dodge" abbr="Dodge" text="2" base="2" modified="2" impervious="0">
+					<cost text="0 PP" value="0"/>
+				</defense>
+				<defense name="Parry" abbr="Parry" text="2" base="2" modified="2" impervious="0">
+					<cost text="0 PP" value="0"/>
+				</defense>
+				<defense name="Fortitude" abbr="Fort" text="8" base="8" modified="8" impervious="0">
+					<cost text="0 PP" value="0"/>
+				</defense>
+				<defense name="Toughness" abbr="Tou" text="12" base="12" modified="12" impervious="0">
+					<cost text="0 PP" value="0"/>
+				</defense>
+				<defense name="Will" abbr="Will" text="4" base="4" modified="4" impervious="0">
+					<cost text="2 PP" value="2"/>
+				</defense>
+			</defenses>
+			<initiative total="+2"/>
+			<skills>
+				<skill name="Acrobatics" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Use Acrobatics to flip, dive, roll, tumble, and perform other acrobatic maneuvers, as well as keeping your balance under difficult circumstances.
+
+Balancing: You can keep your balance and move along a precarious surface at your ground speed minus 1 rank with a successful Acrobatics check against the surface's DC. A degree of failure indicates you spend your move action just maintaining your balance and do not actually move, while two or more degrees of failure means you lose your balance and fall. You are vulnerable while balancing. If you accept a +5 increase to the Acrobatics DC, you are not vulnerable.
+
+Maneuvering: You can make Acrobatics checks for various acrobatic stunts or maneuvers, from back flips to jumping over an opponent (to get behind them), flipping up onto a ledge, tumbling through obstacles, and so forth. The GM sets the DC. Success means you accomplish the maneuver.
+
+Standing: You can make a DC 20 Acrobatics check to go from prone to standing as a free action rather than a move action. A failed check means you remain prone.
+
+Tumbling: You can make an Acrobatics check (DC 5) to lessen damage from a fall, reducing the damage by 1 per degree. A fall reduced to rank 0 damage does no damage and you quickly roll to your feet as a free action. Otherwise, you are prone at the end of a fall.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Athletics" attrbonus="8" value="+11" base="3">
+					<description>Use Athletics for physical feats like climbing, jumping, riding animal mounts, and swimming.
+
+Climbing: With a successful Athletics check, you can climb along a slope, wall, or other steep incline at your ground speed rank minus 2 as a move action. A perfectly smooth, flat, vertical surface can't be climbed without the Wall-crawling effect of Movement (see the Powers chapter).
+
+Jumping: The result of an Athletics check is the distance (in feet) you can clear in a running long-jump. If you make a standing jump, divide the distance in half. If you make a vertical jump (straight up) divide the distance by 5, and if you make a standing vertical jump, divide it by 10. Your Athletics bonus + 10 is the base distance you can jump under routine circumstances.
+
+Running: You can make a DC 15 Athletics check as a free action to run faster: success increases your ground speed rank by +1 for one round.
+
+Swimming: A successful DC 10 Athletics check allows you to swim your ground speed rank minus 2 as a move action. If the check fails, you make no progress through the water during the action. With more than one degree of failure, you go under. If underwater, you must hold your breath to avoid drowning.</description>
+					<cost text="1.5 PP" value="1.5"/>
+				</skill>
+				<skill name="Close Combat: Unarmed" attrbonus="2" value="+4" base="2">
+					<description>You're trained with a particular type of close attack, giving you a bonus to your attack checks with it equal to your skill rank (see Attack Check in The Basics and in the Action &amp; Adventure chapter). Each close attack is a separate Close Combat skill with its own rank, and encompasses a single weapon or power, although an array may be considered one power, at the Gamemaster's discretion (see Arrays in the Powers chapter for more information).</description>
+					<cost text="1 PP" value="1"/>
+				</skill>
+				<skill name="Deception" attrbonus="4" value="+12" base="8">
+					<description>Deception is the skill of getting others to believe what you want them to believe. It covers things like acting, bluffing, fast-talk, trickery, and subterfuge. Deception takes as long as it takes to spin-out your story.
+
+Bluffing: Make a Deception check to tell a believable lie or get someone do go along with you. A bluff is usually opposed by the target's Deception or Insight check. Favorable and unfavorable circumstances weigh heavily on the outcome.
+
+Disguise: You can use makeup, costumes, and other props to change your appearance. Your Deception check result determines the effectiveness of the disguise, opposed by others' Perception check results. The GM makes the Deception check secretly, so you are not sure exactly how well your disguise holds up under scrutiny.
+
+Feinting: You can use Deception as a standard action to mislead an opponent in combat. Make a Deception check as a standard action. If your Deception check succeeds, the target is vulnerable against your next attack, until the end of your next round (see Vulnerable in the Conditions section of The Basics chapter).
+
+Innuendo: You can use Deception to send covert messages using wordplay and double-meanings while apparently talking about other things. The DC for a basic message is 10. Complex messages or messages trying to communicate new information have DCs of 15 or 20, respectively. The recipient of the message must make an Insight check against the same DC to understand it.
+
+Tricking: You can use Deception to mislead an opponent into taking a potentially unwise action, such as trying to hit you while standing in front of an electrical junction box or at the edge of a precipice. If your Deception check opposed by Deception or Insight succeeds, your opponent is heedless of the potential danger and may hit the junction box or lose his balance and fall, if his attack against you fails.</description>
+					<cost text="4 PP" value="4"/>
+				</skill>
+				<skill name="Expertise: ????" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Expertise is a broad skill encompassing knowledge and training in a variety of specialized fields, particularly professional disciplines and scholarship. Each is considered a separate skill and training in each is acquired separately, so a former police officer turned district attorney might have Expertise: Police Officer and Expertise: Law, each with their own ranks, for example.
+
+Sample Expertise domains: Art, Business, Carpentry, Cooking, Criminal, Current Events, Dance, History, Journalism, Law, Law Enforcement, Medicine, Military, Music, Magic, Philosophy, Politics, Popular Culture, Psychiatry, Science, Sociology, Streetwise, Theology.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Insight" attrbonus="2" value="+5" base="3">
+					<description>You can tell someone's true intentions and feelings by paying attention to things like body language, inflection, and your own intuition.
+
+Detect Illusion: The GM makes a secret Insight check to determine if your hero senses the true nature of an illusion (DC 10 + Illusion rank). Success means you pick up on a flaw in the illusion, sensing it is not real. See the Illusion effect in the Powers chapter for details.
+
+Detect Influence: You can make an Insight check to notice someone acting under outside influence. The DC is 10 + the rank of the effect or skill affecting the subject. If you succeed, you notice the subject is not acting entirely of his or her own will. Three or more degrees give you a general idea of what is influencing them (and perhaps even whom, depending on the situation and the Gamemaster's  judgment).
+
+Evaluate: With an Insight check, opposed by Deception, you can tell if someone is trustworthy and honorable (or not) upon meeting them. You can also make an Insight check (DC 20) to evaluate a social situation, getting a feel for the overall mood and prevailing attitudes. Two or more degrees of failure on either check mean you misinterpret the signs, so the GM may make these checks for you in secret.
+
+Innuendo: You can use Insight to pick up on hidden messages sent via the Deception skill (see the Deception skill description).
+
+Resist Influence: Make an Insight check when called to do so to resist or overcome the effects of certain interaction skills, such as Deception or Intimidation. If the result of your check exceeds your opponent's, you are unaffected by their attempt to influence you.</description>
+					<cost text="1.5 PP" value="1.5"/>
+				</skill>
+				<skill name="Intimidation" attrbonus="4" value="+8" base="4">
+					<description>You know how to use threats (both real and implied) to get others to do what you want.
+
+Coercing: Make an Intimidation check, opposed by the target's Insight or Will defense (whichever has the highest bonus). If your check succeeds, you may treat the target as friendly, but only for actions taken in your presence. That is, the target retains his normal attitude, but will talk, advise, offer limited help, or advocate on your behalf while intimidated. The target cooperates, but won't necessarily obey your every whim or do anything that would directly endanger him.
+
+Demoralizing: You can use Intimidation in combat as a standard action to undermine an opponent's confidence. Make an Intimidation check as a standard action. If it succeeds, your target is impaired (a -2 circumstance penalty on checks) until the end of your next round. With four or more degrees of success, the target is disabled (a -5 penalty) until the end of your next round.
+
+Intimidating Minions: You can intimidate a whole group of minions - who can all see and hear you - with a single check. If the group has you at a disadvantage, you suffer the usual circumstance penalty on your check. Compare your check result against a single resistance check made by the GM for the entire group. Your Intimidation check must have the same effect on every member of the group.</description>
+					<cost text="2 PP" value="2"/>
+				</skill>
+				<skill name="Investigation" attrbonus="2" value="+6" base="4" trainedonly="yes">
+					<description>You know how to search for and study clues, gather information through interviews and surveillance, and analyze evidence to help solve crimes. The GM may make Investigation checks for you in secret, so you do not know exactly what you have found, or if you may have missed something.
+
+Search: You can search an area for clues, hidden items, traps, and other details. Perception allows you to immediately notice things, while an Investigation check allows you to pick up on details with some effort.
+
+Gather Evidence: To collect a piece of evidence for analysis, make an Investigation check (DC 15). If the check succeeds, the evidence can be analyzed (see the following). If the check fails, an analysis can be done, but with a -5 penalty for highly unfavorable circumstances. With more than one degree of failure, the evidence is ruined and no analysis can be done. On the other hand, two or more degrees of success provide a +2 circumstance bonus to later analysis.
+
+Analyze Evidence: You can make an Investigation check to apply forensic knowledge to evidence. This function of Investigation does not give you clues where none exist. It simply allows you to extract useful information from evidence and clues you have found.
+
+Gather Information: You know how to make contacts, collect gossip and rumors, question informants, and otherwise get information from people.
+
+Surveillance: You can set up surveillance of a particular area, watching from a stationary location. The DC of the subject's Stealth check to evade your notice is equal to the result of your Investigation check. For actively following a subject, see Tailing in the Stealth skill description.</description>
+					<cost text="2 PP" value="2"/>
+				</skill>
+				<skill name="Perception" attrbonus="2" value="+6" base="4">
+					<description>Use this skill to notice and pick up on things. Discerning details - such as clearly hearing conversation or reading fine text - requires at least three degrees of success on the Perception check.
+
+Hearing: Make a check against a DC based on how loud the noise is or against an opposed Stealth check. Normal conversation is DC 0, a soft noise DC 10. Listening through a door is +5 DC, +15 for a solid wall. While you're asleep, hearing something well enough to wake up is +10 DC.
+
+Seeing: Make a check against a DC based on how visible the object is or against an opposed Stealth check. Something in plain sight is DC 0, while something subtle or easily overlooked may be DC 5, 10 or more. Visual perception is also used to detect someone in disguise (see the Deception skill) or to notice a concealed object (see the Sleight of Hand skill).
+
+Other Senses: You can make Perception checks involving other sense types as well (see the Powers chapter for more on sense types). Noticing something obvious to a sense is DC 0. Less obvious things are DC 10 or so, hidden things DC 20 or more, and discerning details requires at least three degrees of success, as usual.</description>
+					<cost text="2 PP" value="2"/>
+				</skill>
+				<skill name="Persuasion" attrbonus="4" value="+10" base="6">
+					<description>You're skilled in dealing with people, from etiquette and social graces to a way with words and public speaking, all of which helps to get your point across, make a good impression, negotiate, and generally win people over to your way of seeing things. In negotiations, all participants roll Persuasion checks to see who gains the advantage. Opposed checks also resolve cases where two advocates plead opposing cases before a third party. Non-player characters each have an initial attitude towards you or your cause. The GM chooses the character's initial attitude based on circumstances. Most of the time, people are favorable or indifferent toward heroes, but a specific circumstance or complication may call for a different attitude.</description>
+					<cost text="3 PP" value="3"/>
+				</skill>
+				<skill name="Sleight of Hand" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>You can perform dexterous feats of legerdemain such as palming small objects, picking pockets, slipping out of restraints, and so forth. Stage magicians use Sleight of Hand legitimately as a performance skill, but it is most commonly known for its criminal applications.
+
+Concealing: You can use Sleight of Hand to conceal a small item on your person, making your check result the DC of an Investigation or Perception check to find it.
+
+Contorting: Make a DC 30 Sleight of Hand check to fit through a tight space wide enough for your head but too narrow for the width of your shoulders, or to reach through an opening wide enough for your hand, but too narrow for your arm.
+
+Escaping: Make a Sleight of Hand check to slip out of various restraints. This takes at least a minute per check.
+
+Legerdemain: Minor feats of Sleight of Hand, such as making a coin or playing card 'vanish', have a DC of 10 unless an observer is focused on noticing what you are doing. When you perform this skill under observation, your check is opposed by the observer's Perception check to see if they notice the trick.
+
+Stealing: To covertly take something from another person make a Sleight of Hand check (DC 20). Your target makes a Perception check and notices the attempt if his check result beats yours, whether you succeed in taking the object or not. You can also make a Sleight of Hand check to plant a small object on someone, slip  something into their pocket, drop something into their drink, place a tiny radio tracer on them, and so forth.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Stealth" attrbonus="2" value="+5" base="3">
+					<description>You're skilled in going unnoticed. While using Stealth, you can move at your speed rank minus 1 with no penalty. Faster than that, up to your full speed, you take a -5 circumstance penalty to your Stealth checks.
+
+Hiding: If you have cover or concealment, make a Stealth check, opposed by an observer's Perception check, to hide and go unnoticed.
+
+Tailing: You can use Stealth to tail someone at your normal speed. This assumes you have some cover or concealment (crowds of people, shadows, fog, etc.). If the subject is worried about being followed, he can make a Perception check (opposed by your Stealth check) every time he changes course (goes around a street corner, exits a building, and so on). If he is unsuspecting, he only gets one Perception check for the scene.</description>
+					<cost text="1.5 PP" value="1.5"/>
+				</skill>
+				<skill name="Technology" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Technology covers operating, building, repairing, and generally working with technological devices and equipment. Without the proper tools or equipment, you take a -5 penalty to Technology checks for highly unfavorable circumstances.
+
+Operating: Most routine operations of technological equipment don't require a skill check and can be done untrained. Using an unfamiliar device does require a check, with the DC determined by how foreign or unusual the device is, from simple (DC 10) to highly advanced (DC 25 or more).
+
+Building: The difficulty and time required to make an item depends on its complexity, as shown on the Building Items table. If your Technology check succeeds, you have made the item after the necessary time.
+
+Repairing: You can also use Technology to repair damaged items, with a -5 to the DC to build the item and -2 to the time rank required. So you can perform repairs on a complex item in eight hours (time rank 12) with a DC of 20.
+
+Jury-rigging: You can also attempt jury-rigged, or temporary, repairs. Doing this reduces the repair DC by an additional 5 (for a total of -10 to the DC to build the item), and allows you to make the Technology check as a standard action. However, a jury-rigged repair can only fix a single problem, and the repair only lasts until the end of the scene.
+
+Demolitions: Careful placement of an explosive against a fixed structure can maximize damage by exploiting vulnerabilities in the structure. This requires at least a minute and a DC 10 Technology check. The GM makes the check, so you don't know exactly how well you have done until the explosive goes off.
+
+Inventing: If you have the Inventor advantage (see the Advantages chapter), you can use Technology to create inventions, temporary devices. See Inventing, page 145, for details.
+
+Security: You can use Technology to disarm or sabotage various security devices, including locks, traps, and sensors. This takes at least a minute, possibly longer, at the GM's discretion. The GM makes your Technology check secretly, so you don't necessarily know right away if you have succeeded.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Treatment" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>You're trained in treating injuries and ailments.
+
+Diagnosis: You can diagnose injuries and ailments with an eye toward further treatment. This takes at least a minute. At the GM's discretion, a successful diagnosis provides a +2 bonus for favorable circumstances on further Treatment checks.
+
+Provide Care: Providing care means treating an injured patient for a day or more. If successful, the patient further reduces the recovery time by 1 rank (see Recovery in the Action &amp; Adventure chapter). You can provide care for up to your Treatment rank in patients at one time.
+
+Revive: You can remove the dazed or stunned conditions from a subject (see Conditions in the Action &amp; Adventure chapter). The check to revive is a standard action. A successful check removes the condition.
+
+Stabilize: As a standard action, a successful Treatment check stabilizes a dying character.
+
+Treat Disease and Poison: You can treat a character afflicted with a disease or poison. Each time the character makes a resistance check against the ailment, you make a Treatment check. One degree of success provides the patient with a +2 circumstance bonus to the resistance check, three or more degrees of success provides a +5 circumstance bonus.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Vehicles" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Use this skill to operate vehicles, from ground vehicles like cars to boats, planes, or even spaceships! See Vehicles in the Gadgets &amp; Gear chapter for details.
+
+Routine tasks, such as ordinary operation of known vehicles, don't require a check and may even be done untrained for some vehicles, particularly common ones like cars. Make a check only when operating the vehicle in a stressful or dramatic situation like being chased or attacked, or trying to reach a destination in a limited amount of time.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+			</skills>
+			<advantages>
+				<advantage name="Accurate Attack" categorytext="Combat">
+					<description>When you make an accurate attack (see Maneuvers) you can take a penalty of up to -5 on the effect modifier of the attack and add the same number (up to +5) to your attack bonus.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Eidetic Memory" categorytext="General">
+					<description>You have perfect recall of everything you've experienced. You have a +5 circumstance bonus on checks to remember things, including resistance checks against effects that alter or erase memories. You can also make Expertise skill checks to answer questions and provide information as if you were trained, meaning you can answer questions involving difficult or obscure knowledge even without ranks in the skill, due to the sheer amount of trivia you have picked up.</description>
+					<advantagecategory>General</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Interpose" categorytext="General">
+					<description>Once per round, when an ally within range of your normal movement is hit by an attack, you can choose to place yourself between the attacker and your ally as a reaction, making you the target of the attack instead. The attack hits you rather than your ally, and you suffer the effects normally. You cannot use this advantage against area effects or perception range attacks, only those requiring an attack check.</description>
+					<advantagecategory>General</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Power Attack" categorytext="Combat">
+					<description>When you make a power attack (see Maneuvers) you can take a penalty of up to -5 on your attack bonus and add the same number (up to +5) to the effect bonus of your attack.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Ultimate Effort: Atomic Punch" categorytext="Fortune">
+					<description>You can spend a hero point on a particular check and treat the roll as a 20 (meaning you don't need to roll the die at all, just apply a result of 20 to your modifier). This is not a natural 20, but is treated as a roll of 20 in all other respects. You choose the particular check the advantage applies to when you acquire it and the GM must approve it. You can take Ultimate Effort multiple times; each time, it applies to a different check. This advantage may not be used after you've rolled the die to determine if you succeed. (Examples include Ultimate Aim, Ultimate Resistance, or Ultimate Skill.)</description>
+					<advantagecategory>Fortune</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+			</advantages>
+			<powers>
+				<power name="Atomic Flight: Flight 5" info="Speed: 60 miles/hour, 900 feet/round" ranks="5" range="" displaylevel="0" summary="Speed: 60 miles/hour, 900 feet/round" active="yes">
+					<cost text="10 PP" value="10"/>
+					<description>You can fly through the air, including hovering in place. You have a flight speed rank equal to your effect rank.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Atomic Life Support: Immunity 10" info="" ranks="10" range="" displaylevel="0" summary="Life Support" active="yes">
+					<cost text="10 PP" value="10"/>
+					<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+					<descriptors/>
+					<elements/>
+					<options>
+						<option name="Life Support">
+							<description>You are immune to disease, poison, all environmental conditions, suffocation, starvation and thirst.</description>
+						</option>
+					</options>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Atomic Might" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="24 PP" value="24"/>
+					<description>An array is a set of powers, of which only one can be used at a time.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Atomic Eye Blasts: Damage 18" info="" ranks="18" range="450/900/1800 ft." displaylevel="1" summary="DC 33; Alternate Resistance: Fortitude, Increased Range: ranged; Distracting, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Alternate Resistance: Fortitude" info="Fortitude">
+									<description>An effect with this modifier has a different resistance than usual. The resistance check difficulty class remains the same, only the resistance differs. If the change is to a generally lower (and therefore more advantageous) resistance, this extra increases cost per rank by +1. If, in the GM's opinion, there is no real increase in effectiveness, just a chance to the resistance, it has a net modifier of +0.
+
+Note: To set this extra's modifier to +0, set its ranks to 0.</description>
+								</extra>
+								<extra name="Increased Range" info="ranged">
+									<description>Effects have a standard range: personal, close, ranged, or perception. See Range at the start of this chapter for details. This modifier increases an effect's range. Increasing the range of an effect from personal to close requires either the Affects Others or Attack extras (see their descriptions). Making a close effect into a perception ranged effect requires two applications of this extra, for +2 cost per rank.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Distracting" info="">
+									<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Atomic Senses: Senses 19" info="" ranks="19" range="" displaylevel="1" summary="Counters All Concealment: Choose Sense Type, Darkvision, Detect: Radiation 2: ranged, Extended: Sight 2: x100, Extended: Hearing 2: x100, Microscopic Vision 1: dust-size, Penetrates Concealment: Sight, Radio">
+							<cost text="1 PP" value="1"/>
+							<description>One or more of your senses are improved, or you have additional sensory abilities beyond the normal five senses.</description>
+							<descriptors/>
+							<elements/>
+							<options>
+								<option name="Counters All Concealment: Choose Sense Type" selection="Choose Sense Type">
+									<description>A sense type with this trait ignores the Concealment effect of a particular descriptor; you sense the subject of the effect normally, as if the Concealment wasn't even there. So if you have vision that Counters Invisibility, for example, then invisible beings are visible to you. For 5 ranks, the sense type ignores all Concealment effects, regardless of descriptor. Concealed subjects seem slightly 'off' to you, enough to know they are concealed to others. This trait does not affect concealment provided by opaque objects, for that, see Penetrates Concealment.</description>
+								</option>
+								<option name="Darkvision">
+									<description>You can see in complete darkness as if it were normal daylight; darkness provides no concealment to your vision. This is essentially the same as Counters Concealment (Darkness).</description>
+								</option>
+								<option name="Detect: Radiation" selection="Radiation" ranks="2" info="ranged">
+									<description>You can sense a particular item or effect by touch with a Perception check. Detect has no range and only indicates the presence or absence of something (being neither acute nor accurate). Choose what sense type your Detect falls under (often mental). For 2 ranks you can detect things at range (with the normal -1 per 10 feet modifier to your Perception check).</description>
+								</option>
+								<option name="Extended: Hearing" selection="Hearing" ranks="2" info="x100">
+									<description>You have a sense that operates at greater than normal range. Your range with the sense - the distance used to determine penalties to your Perception check - is increased by a factor of 10. Each additional time you apply this option, your range increases by an additional factor of 10, so 1 rank means you have a -1 to Perception checks per 100 feet, 2 ranks makes it -1 per 1,000 feet, and so on. An extended sense may be limited by conditions like the horizon and physical barriers between you and the subject, unless it also Penetrates Concealment.</description>
+								</option>
+								<option name="Extended: Sight" selection="Sight" ranks="2" info="x100">
+									<description>You have a sense that operates at greater than normal range. Your range with the sense - the distance used to determine penalties to your Perception check - is increased by a factor of 10. Each additional time you apply this option, your range increases by an additional factor of 10, so 1 rank means you have a -1 to Perception checks per 100 feet, 2 ranks makes it -1 per 1,000 feet, and so on. An extended sense may be limited by conditions like the horizon and physical barriers between you and the subject, unless it also Penetrates Concealment.</description>
+								</option>
+								<option name="Microscopic Vision" ranks="1" info="dust-size">
+									<description>You can view extremely small things. You can make Perception checks to see tiny things nearby. Cost is 1 rank for dust-sized objects, 2 ranks for cellular-sized, 3 ranks for DNA and complex molecules, 4 ranks for atomic-sized. The GM may require an Expertise skill check to understand and interpret what you see.</description>
+								</option>
+								<option name="Penetrates Concealment: Sight" selection="Sight">
+									<description>A sense with this trait is unaffected by concealment from obstacles (rather than Concealment effects). So vision that Penetrates Concealment sees right through opaque objects, for example, and hearing that Penetrates Concealment is unaffected by sound-proofing or intervening materials, and so forth.</description>
+								</option>
+								<option name="Radio">
+									<description>You can 'hear' radio frequencies including AM, FM, television, cellular, police bands, and so forth. This allows you to pick up on Radio Communication (see the Communication effect). This is the base sense of the radio sense type. It's ranged, radius, and acute by default.</description>
+								</option>
+							</options>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Atomic Speed" info="" ranks="1" range="" displaylevel="1" summary="Advantages: Improved Initiative 4">
+							<cost text="19 PP" value="19"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages>
+								<chainedadvantage name="Improved Initiative 4"/>
+							</chainedadvantages>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Flight: Flight 5" info="Speed: 60 miles/hour, 900 feet/round" ranks="5" range="" displaylevel="2" summary="Speed: 60 miles/hour, 900 feet/round">
+									<cost text="10 PP" value="10"/>
+									<description>You can fly through the air, including hovering in place. You have a flight speed rank equal to your effect rank.</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Quickness: Quickness 5" info="Perform routine tasks in -5 time ranks" ranks="5" range="" displaylevel="2" summary="Perform routine tasks in -5 time ranks">
+									<cost text="5 PP" value="5"/>
+									<description>You can perform routine tasks - anything that can be done as a routine check (see Routine Checks in The Basics chapter) - fast, perhaps very fast. Subtract your effect rank from the normal time rank to perform a task to determine how long it takes you. So, for example, if you have Quickness 7, a routine task normally taking an hour (time rank 9) takes you (9 - 7 = time rank 2) 30 seconds. Non-routine checks are not affected by Quickness, nor is movement speed.
+
+If you can perform a task in less than a second (time rank -2), the GM may choose to treat that task as a free action for you (although the GM can still limit the number of free actions you can accomplish in a turn as usual).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Atomic Strength: Enhanced Strength 8" info="+8 STR" ranks="8" range="" displaylevel="1" summary="+8 STR; Affects Insubstantial 2: full rank, Secondary Effect; Distracting">
+							<cost text="1 PP" value="1"/>
+							<description>You can temporarily improve one of your existing traits, chosen when you take this effect. While this effect is active, you increase the affected trait by its rank. So, for example, Enhanced Strength 5 increases your Strength by +5 while it is active. Your enhanced trait is still subject to power level limits, so your unenhanced rank must be below the limit by at least the amount of the enhancement to accommodate it.</description>
+							<descriptors/>
+							<elements>
+								<element name="Ability: Strength" info="Strength"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Affects Insubstantial" ranks="2" info="full rank">
+									<description>An effect with this extra works on insubstantial targets, in addition to having its normal effect on corporeal targets. Rank 1 allows the effect to work at half its normal rank against insubstantial targets (rounded down); rank 2 allows the effect to function at its full rank against them.</description>
+								</extra>
+								<extra name="Secondary Effect" info="">
+									<description>An instant duration effect with this modifier affects the target once immediately (when the effect is used) and then once again on the following round, at the end of the attacker's turn. The target gets the normal resistance check against the secondary effect.
+
+Secondary Effects don't stack, so if you attack a target with your Secondary Effect on the round after a successful hit, it doesn't affect the target twice; it simply delays the second effect for another round. You can attack the target with a different effect, however.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Distracting" info="">
+									<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Speed Blitz" info="" ranks="1" range="" displaylevel="1" summary="Advantages: Improved Initiative, Move-by Action, Takedown 2">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages>
+								<chainedadvantage name="Improved Initiative"/>
+								<chainedadvantage name="Move-by Action"/>
+								<chainedadvantage name="Takedown 2"/>
+							</chainedadvantages>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Strength Effect" info="" ranks="8" range="" displaylevel="2" summary="Accurate 5: +10, Affects Insubstantial 2: full rank, Multiattack">
+									<cost text="15 PP" value="15"/>
+									<description>This power allows you to add Damage feats, extras and drawbacks to your strength bonus. You can add Damage extras to it to make them apply to your unarmed attack and other powers that use your strength bonus.
+
+You can also add alternate powers based on the power points paid for your Strength attribute.</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Accurate" ranks="5" info="+10">
+											<description>An effect with this extra is especially accurate; you get +2 per Accurate rank to attack checks made with it. The power level limits maximum attack bonus with any given effect.</description>
+										</extra>
+										<extra name="Affects Insubstantial" ranks="2" info="full rank">
+											<description>An effect with this extra works on insubstantial targets, in addition to having its normal effect on corporeal targets. Rank 1 allows the effect to work at half its normal rank against insubstantial targets (rounded down); rank 2 allows the effect to function at its full rank against them.</description>
+										</extra>
+										<extra name="Multiattack" info="">
+											<description>A Multiattack effect allows you to hit multiple targets, or a single target multiple times, in the same standard action. Multiattack can apply to any effect requiring an attack check. There are three ways in which a Multiattack effect can be used: single target, mulitple targets, or as a covering attack.</description>
+										</extra>
+									</extras>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Ultimate Strength" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Enhanced Strength Effects: Enhanced Trait 30" info="" ranks="30" range="" displaylevel="2" summary="Traits: Strength +12 (+20), Advantages: All-out Attack, Holding Back, Improved Critical 4; Secondary Effect; Distracting, Unreliable (5 uses)">
+									<cost text="15 PP" value="15"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Strength" bonus="+12"/>
+									</traitmods>
+									<chainedadvantages>
+										<chainedadvantage name="All-out Attack"/>
+										<chainedadvantage name="Holding Back"/>
+										<chainedadvantage name="Improved Critical 4: Ultimate Strength"/>
+									</chainedadvantages>
+									<extras>
+										<extra name="Secondary Effect" info="">
+											<description>An instant duration effect with this modifier affects the target once immediately (when the effect is used) and then once again on the following round, at the end of the attacker's turn. The target gets the normal resistance check against the secondary effect.
+
+Secondary Effects don't stack, so if you attack a target with your Secondary Effect on the round after a successful hit, it doesn't affect the target twice; it simply delays the second effect for another round. You can attack the target with a different effect, however.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Distracting" info="">
+											<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+										</flaw>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Enhanced Trait: Enhanced Trait 8" info="" ranks="8" range="" displaylevel="2" summary="Traits: Toughness +2 (+14), Dodge -2 (+0), Parry -2 (+0), Fortitude +0 (+8), Will +6 (+10), Intimidation +6 (+14), Advantages: Daze (Intimidation); Distracting, Unreliable (5 uses)">
+									<cost text="3 PP" value="3"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Toughness" bonus="+2"/>
+										<traitmod name="Dodge" bonus="-2"/>
+										<traitmod name="Parry" bonus="-2"/>
+										<traitmod name="Fortitude" bonus="+0"/>
+										<traitmod name="Will" bonus="+6"/>
+										<traitmod name="Intimidation" bonus="+6"/>
+									</traitmods>
+									<chainedadvantages>
+										<chainedadvantage name="Daze (Intimidation)"/>
+									</chainedadvantages>
+									<extras/>
+									<flaws>
+										<flaw name="Distracting" info="">
+											<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+										</flaw>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+					</otherpowers>
+				</power>
+				<power name="Focused Defense" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="11 PP" value="11"/>
+					<description>An array is a set of powers, of which only one can be used at a time.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Indominatible" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Enhanced Trait: Enhanced Trait -8" info="" ranks="-8" range="" displaylevel="2" summary="Traits: Toughness -8 (+4)">
+									<cost text="-8 PP" value="-8"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Toughness" bonus="-8"/>
+									</traitmods>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Immunity: Immunity 30" info="" ranks="30" range="" displaylevel="2" summary="Will Effects; Sustained; Unreliable (5 uses)">
+									<cost text="15 PP" value="15"/>
+									<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Will Effects">
+											<description>You're immune to all effects resisted by Will.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Sustained" info="">
+											<description>Applied to a permanent duration effect, this modifier makes it sustained duration, requiring a free action to use (rather than none, like other permanent effects). The benefit is the sustained effect can be improved using extra effort, including using it to perform power stunts. The drawback is the effect requires a free action each turn to maintain it, and being unable to do so means the effect shuts off.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Inexaustible" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Enhanced Trait: Enhanced Trait -8" info="" ranks="-8" range="" displaylevel="2" summary="Traits: Fortitude -8 (+0)">
+									<cost text="-8 PP" value="-8"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Fortitude" bonus="-8"/>
+									</traitmods>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Immunity: Immunity 30" info="" ranks="30" range="" displaylevel="2" summary="Fortitude Effects; Sustained; Unreliable (5 uses)">
+									<cost text="15 PP" value="15"/>
+									<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Fortitude Effects">
+											<description>You're immune to all effects resisted by Fortitude.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Sustained" info="">
+											<description>Applied to a permanent duration effect, this modifier makes it sustained duration, requiring a free action to use (rather than none, like other permanent effects). The benefit is the sustained effect can be improved using extra effort, including using it to perform power stunts. The drawback is the effect requires a free action each turn to maintain it, and being unable to do so means the effect shuts off.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Innate Toughness: Enhanced Trait 8" info="" ranks="8" range="" displaylevel="1" summary="Traits: Toughness +8 (+20)">
+							<cost text="8 PP" value="8"/>
+							<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods>
+								<traitmod name="Toughness" bonus="+8"/>
+							</traitmods>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Invulnerable" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Enhanced Trait: Enhanced Trait -8" info="" ranks="-8" range="" displaylevel="2" summary="Traits: Toughness -8 (+4)">
+									<cost text="-8 PP" value="-8"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Toughness" bonus="-8"/>
+									</traitmods>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Immunity: Immunity 30" info="" ranks="30" range="" displaylevel="2" summary="Custom: Toughness Effects 30; Sustained; Unreliable (5 uses)">
+									<cost text="15 PP" value="15"/>
+									<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Custom: Toughness Effects" selection="Toughness Effects" ranks="30">
+											<description>Choose a custom immunity here.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Sustained" info="">
+											<description>Applied to a permanent duration effect, this modifier makes it sustained duration, requiring a free action to use (rather than none, like other permanent effects). The benefit is the sustained effect can be improved using extra effort, including using it to perform power stunts. The drawback is the effect requires a free action each turn to maintain it, and being unable to do so means the effect shuts off.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+					</otherpowers>
+				</power>
+				<power name="Movie Reality Alteration: Feature 1" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="1 PP" value="1"/>
+					<description>You have one or more minor features, effects granting you an occasionally useful ability, one per rank. This effect is essentially a version of the Benefit advantage, but a power rather than a virtue of skill, talent, or social background. For example, diplomatic immunity or wealth are Benefits; fur, the ability to mimic sounds, or a hidden compartment in your hollow leg are Features.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Protection: Protection 4" info="+4 Toughness" ranks="4" range="" displaylevel="0" summary="+4 Toughness" active="yes">
+					<cost text="4 PP" value="4"/>
+					<description>Protection shields you against damage, giving you +1 to your Toughness defense per rank. So Protection 4 gives you +4 Toughness.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Super Sense Diagnostic: Mind Reading 10" info="" ranks="10" range="" displaylevel="0" summary="DC 20; Affects Objects, Reaction 3: reaction; Distracting, Increased Action: free, Limited 2: Only abilitities and weaknesses that can be scanned, Unreliable (5 uses)" active="yes">
+					<cost text="10 PP" value="10"/>
+					<description>You can read another character's mind. To use Mind Reading, make an opposed effect check against the result of the target's Will check. The degree of success determines the degree of contact.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras>
+						<extra name="Affects Objects" info="">
+							<description>This modifier allows effects normally resisted by Fortitude to work on non-living objects (those with no Stamina). Generally, this extra applies to effects like Heal or Weaken, allowing them to work on objects in the same way as they do living creatures. If the effect Affects Only Objects, working on objects but not on living creatures, it has a net modifier of +0.</description>
+						</extra>
+						<extra name="Reaction" ranks="3" info="reaction">
+							<description>Each effect has a default action required to use it: standard, free, or none (for permanent effects). This modifier changes an effect's required action from a standard or free to a reaction, occurring automatically when a specific triggering event occurs. This is similar to the Triggered modifier (later in this section) but reaction effects do not need to be 'set', originate from their user, and can function repeatedly, so long as their triggering requirement is met.
+
+Specify a triggering circumstance that activates the effect, such as someone touching or attacking the user, activating a particular effect or power in the user's presence, and so forth. The GM is the final arbiter as to whether or not a triggering circumstance is suitable for a particular effect in the context of the series. Caution should be used to keep this option from being abused.
+
+The Reaction modifier applies +1 cost per rank to effects with a default action of free, +3 cost per rank to effects with a default standard action.</description>
+						</extra>
+					</extras>
+					<flaws>
+						<flaw name="Distracting" info="">
+							<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+						</flaw>
+						<flaw name="Increased Action" info="free">
+							<description>Using an effect requires one of the following types of actions: standard, move, free, or reaction. Each increase in the required action from that effect's base action type (free to move, for example) is a -1 cost per rank modifier.</description>
+						</flaw>
+						<flaw name="Limited: Only abilitities and weaknesses that can be scanned" ranks="2" info="Only abilitities and weaknesses that can be scanned">
+							<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+						</flaw>
+						<flaw name="Unreliable (5 uses)" info="">
+							<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+						</flaw>
+					</flaws>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+			</powers>
+			<attacks>
+				<attack name="Atomic Eye Blasts: Damage 18" attack="+2" dc="33" crit="20" special="" descriptor="">
+					<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+				</attack>
+				<attack name="Grab" attack="+6" dc="18" crit="20" special="" descriptor="Bludgeon">
+					<description>You can make a Grab attack to restrain or bind your opponent.</description>
+				</attack>
+				<attack name="Super Sense Diagnostic: Mind Reading 10" attack="+2" dc="20" crit="20" special="" descriptor="">
+					<description>You can read another character's mind. To use Mind Reading, make an opposed effect check against the result of the target's Will check. The degree of success determines the degree of contact.</description>
+				</attack>
+				<attack name="Throw" attack="+2" dc="23" crit="20" special="" descriptor="Bludgeon">
+					<description>Your basic thrown attack.</description>
+				</attack>
+				<attack name="Unarmed" attack="+4" dc="23" crit="20" special="" descriptor="Bludgeon">
+					<description>Your basic unarmed attack.</description>
+				</attack>
+			</attacks>
+			<gear>
+				<item name="Dropped to Ground (empty)" quantity="1">
+					<cost text="" value="0"/>
+					<description>Any equipment dropped to the ground is held in this container.
+You can move an item from one container to another by clicking the "Gear" button beside its info button.</description>
+				</item>
+				<item name="Grab" quantity="1">
+					<cost text="" value="0"/>
+					<description>You can make a Grab attack to restrain or bind your opponent.</description>
+				</item>
+				<item name="Throw" quantity="1">
+					<cost text="" value="0"/>
+					<description>Your basic thrown attack.</description>
+				</item>
+				<item name="Unarmed" quantity="1">
+					<cost text="" value="0"/>
+					<description>Your basic unarmed attack.</description>
+				</item>
+			</gear>
+			<complications>
+				<complication name="Cinematic Limitations">
+					<description>Personality: Steve's personality fluctuates dramatically. At times, he is Atom: bold, confident, and righteous, emulating the quintessential American superhero. At other times, he reverts to his real persona—sombre, depressed, and full of remorse for his past actions. This duality torments him, as he struggles with the guilt of his past cowardice contrasted against the heroism expected of his alter ego.</description>
+				</complication>
+				<complication name="Dissonance Between Persona and Reality">
+					<description> Steve, in his role as Atom, is heavily influenced by the cinematic techniques and limitations of the 1950s movies in which he starred. For instance, he avoids being seen taking off or landing, as these were expensive and technically challenging scenes to film in his era. This avoidance can be problematic during superhero activities where quick or dramatic entries and exits are crucial. This complication can hinder his effectiveness in various situations, such as needing to make a quick escape or engage swiftly in a fight.</description>
+				</complication>
+				<complication name="Fame">
+					<description>: Steve Reeves, as Atom, experiences a unique blend of fame and confusion in the public eye. Some people recognize him as Atomic, the superhero from the black-and-white films, truly believing in his heroic persona. Others recognize him as Steve Reeves, the famous 1950s actor, known for his roles and controversial past. This duality leads to a complex social dynamic where interactions can vary wildly depending on the person's perception. This recognition not only affects his personal interactions but also impacts his superhero activities, as people might expect him to act in accordance with the cinematic version of Atomic or be skeptical of his abilities and intentions due to his past as an actor. This complication adds layers to his identity crisis, as he must navigate both adoration and scrutiny, often simultaneously, complicating his attempts to integrate into society and fulfill his role as a superhero.</description>
+				</complication>
+				<complication name="Fictional Enemies and Allies">
+					<description>All the enemies and allies from Atom's films are regarded by Steve as his enemeies wether they are real or not. His movie percpetions of these villains can be very naive compared to rality. He is driven to seek out and bring to justice any villain he battled on screen, and he views all side characters, like dependants or love interests, as real and his responsibility. This includes an obsessive quest to find his movie love interest, the lady reporter, who does not exist in reality. This can lead to misguided adventures and the potential for conflict with actual allies who may try to correct his misunderstandings.</description>
+				</complication>
+				<complication name="Naiveté and Overconfidence">
+					<description>tomic's personality is a caricature of a 1950s American superhero, which often gets him into trouble. He might expect to resolve conflicts with a single punch, as was typical in his films, or use simplistic methods like tying up villains with rope and walking away, assuming the problem is solved. His overconfidence and outdated approaches to problem-solving can lead to failures and potentially endanger himself and others as he underestimates modern threats or overestimates his own capabilities.</description>
+				</complication>
+			</complications>
+			<journals>
+				<journal name="Title" gamedate="0" realdate="20240425" pp="0" pl="0" wealth="0">
+					<description/>
+				</journal>
+			</journals>
+			<images/>
+			<validation>
+				<report>Too many PP spent (156, max 150)</report>
+				<validmessage>Error: Too many PP spent (156, max 150)</validmessage>
+			</validation>
+			<settings summary="Sourcebooks -&gt; Cosmic Handbook: Cosmic Handbook; Sourcebooks -&gt; Hero High: Hero High; Sourcebooks -&gt; Supernatural Handbook: Supernatural Handbook Equipment &amp; Complications; Sourcebooks -&gt; Gamemaster's Guide: Gamemaster's Guide Equipment"/>
+			<minions/>
+		</character>
+	</public>
+</document>

@@ -1,0 +1,51 @@
+# Git Integration Configuration
+# Single source of truth for all configuration values
+
+feature:
+  name: "git-integration"
+  version: "1.0.0"
+  description: "Git Integration Service for Augmented Teams"
+
+build:
+  requirements:
+    - "fastapi>=0.104.0"
+    - "uvicorn>=0.24.0"
+    - "pydantic>=2.4.0"
+    - "requests>=2.31.0"
+    - "pyyaml>=6.0"
+    - "python-dotenv>=1.0.0"
+    - "pygithub>=1.59.0"
+
+service:
+  port: 8000
+  host: "0.0.0.0"
+  timeout: 30
+
+environment:
+  development:
+    url: "http://localhost:8000"
+    log_level: "DEBUG"
+  production:
+    url: "https://git-integration.azurecontainerapps.io"
+    log_level: "INFO"
+
+azure:
+  resource_group: "augmented-team-rg"
+  container_registry: "augmentedteams-hfdzfjhghshucaf6.azurecr.io"
+  namespace: "augmented-teams"
+  replicas: 1
+  memory_request: "256Mi"
+  memory_limit: "512Mi"
+  cpu_request: "100m"
+  cpu_limit: "250m"
+
+secrets:
+  github_token: "${GITHUB_TOKEN}"
+  api_key: "${API_KEY}"
+
+health_check:
+  interval: 30
+  timeout: 10
+  start_period: 5
+  retries: 3
+  path: "/"

@@ -1,0 +1,20 @@
+{
+  "stories": [],
+  "increments": [
+    {
+      "name": "Basic Order Flow",
+      "priority": "NOW",
+      "stories": [
+        "Customer places order",
+        "System validates payment"
+      ],
+      "relative_size": "Small"
+    }
+  ],
+  "epics": [],
+  "solution": {
+    "name": "E-Commerce Platform",
+    "purpose": "Enable customers to browse, purchase, and manage orders online"
+  },
+  "features": []
+}

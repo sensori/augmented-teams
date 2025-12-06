@@ -1,7 +1,0 @@
-{
-  "name": "render_story_map",
-  "renderer": "render_story_map_txt.py",
-  "path": "docs/stories",
-  "template": "templates/story-map.md",
-  "output": "story-map.txt"
-}

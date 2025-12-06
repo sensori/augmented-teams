@@ -1,0 +1,401 @@
+---
+description: Rules regarding what is a valid code-agent-behavior, including the valid content, structure and relationships between all artifacts that make up a code agent behavior (features, rules, commands, and runners)
+globs:
+  - "**/*-rule.mdc"
+  - "**/*-cmd.md"
+  - "**/*-runner.py"
+  - "**/behavior.json"
+  - "**/feature-outline.md"
+---
+**When** creating or updating a Code Agent feature, rule, command, or runner
+**then** follow the defined structure, standards, and naming conventions to ensure consistency, discoverability, and maintainability.
+
+## Overview: Components and Relationships
+
+**Rules** (`.mdc` files) define principles and guidelines for when and how behaviors should be applied. They follow a hierarchical structure: base rules define general principles, specializing rules extend base rules for specific aspects, and specialized rules extend specializing rules for framework/language-specific implementations. **Naming:** Main feature rule: `<feature-name>-rule.mdc`; Command-specific: `<rule-name>-rule.mdc`; Specialized: `<rule-type>-<framework>-rule.mdc`. **Relationships:** Rules list commands in `**Executing Commands:**` section; commands reference rules via `**[Rule]:**` section; each feature has a main rule file.
+
+**Commands** (`.md` files) define executable steps that implement a rule. They follow a standard 4-action workflow: Generate → User Feedback → Validate → User Feedback. Each command has a main command file and delegate command files (generate, validate, optionally plan). **Naming:** Main command: `<feature-name>-<command-name>-cmd.md`; Delegate: `<feature-name>-<command-name>-<action>-cmd.md`. **Relationships:** Commands reference rules via `**[Rule]:**` section; commands belong to a feature and are organized in command subdirectory; each command has corresponding classes in runner file.
+
+**Runners** (`.py` files) implement the Python logic for commands. They use the `common_command_runner` framework with inner command classes (business logic) and outer wrapper classes (CLI integration and additional functionality). **Naming:** Feature runner: `<feature-name>_runner.py`; Command class: `<CommandName>Command`; Wrapper class: `CodeAugmented<CommandName>Command` or other wrapper type. **Relationships:** Each command has corresponding classes in runner file; runner file belongs to feature and implements all commands for that feature; CLI handlers map command names to wrapper class's `handle_cli()` method.
+
+**Features** are collections of related behaviors organized in a single directory. Each feature contains rules, commands, and a runner implementation. Files are organized by command (domain-oriented), not by file type. **Naming:** Feature directory: `behaviors/<feature-name>/` (kebab-case); Runner file: `<feature-name>_runner.py`; Main rule: `<feature-name>-rule.mdc`. **Relationships:** Features contain rules, commands, and runners; each feature has a main rule file; commands belong to a feature.
+
+**Executing Commands:**
+* `/code-agent-feature` — Create a new feature
+* `/code-agent-feature-generate` — Generate feature files
+* `/code-agent-feature-validate` — Validate feature structure
+* `/code-agent-rule` — Create a new rule
+* `/code-agent-rule-generate` — Generate rule files
+* `/code-agent-rule-validate` — Validate rule structure
+* `/code-agent-command` — Create a new command
+* `/code-agent-command-generate` — Generate command files
+* `/code-agent-command-validate` — Validate command structure
+* `/code-agent-command-plan` — Generate implementation plan
+* `/code-agent-sync` — Synchronize all commands and rules from behaviors folders with deployed=true to cursor deployed areas
+* `/code-agent-sync-generate` — Generate sync operation
+* `/code-agent-sync-validate` — Validate sync operation
+
+## 1. Rules
+
+A **Rule** (`.mdc` file) defines principles and guidelines for when and how behaviors should be applied. Rules follow a hierarchical structure: base rules define general principles, specializing rules extend base rules for specific aspects, and specialized rules extend specializing rules for framework/language-specific implementations. Rules reference the commands that execute them and are referenced by those commands.
+
+**File Locations:**
+* Main feature rule: `behaviors/<feature-name>/<feature-name>-rule.mdc`
+* Command-specific rules: `behaviors/<feature-name>/<command-name>/<rule-name>-rule.mdc`
+* Shared sub-rules: `behaviors/<feature-name>/feature/<rule-name>-rule.mdc`
+
+**Naming Conventions:**
+* Main feature rule: `<feature-name>-rule.mdc` (e.g., `code-agent-rule.mdc`)
+* Command-specific rules: `<rule-name>-rule.mdc` (in command directory)
+* Shared sub-rules: `<rule-name>-rule.mdc` (in `feature/` directory)
+* Specialized rules: `<rule-type>-<framework>-rule.mdc` (e.g., `bdd-jest-rule.mdc`)
+
+**[DO]:**
+* Include frontmatter with `description`, `globs`, `alwaysApply`
+* Start with `**When** <context>, **then** <behavior>.` statement
+* Include `**Executing Commands:**` section listing commands that use this rule
+* Include `## Conventions` section (before principles) with naming conventions, file locations, and structural conventions
+* Include numbered principles (## 1. Principle Name) with **[DO]:** and **[DON'T]:** bullet points
+* Include `## Templates` section (after principles) if the rule uses or references specific templates
+* Include `## Commands` section (at end) listing all commands that implement or use this rule
+* **Base rules**: Use bullet points only, NO code examples (framework-agnostic guidance)
+* **Specialized rules**: Include framework-specific code examples in code blocks
+* Reference parent rules for specializing/specialized rules
+* Use appropriate template based on rule type
+
+**[DON'T]:**
+* Reference commands that don't exist
+* Create rules without frontmatter
+* Create rules without principles section
+* Duplicate principles from parent rules
+* Use inconsistent naming patterns
+
+**Templates:**
+* `base_rule_template.mdc` - For base rules
+* `specializing_rule_template.mdc` - For specializing rules
+* `specialized_rule_template.mdc` - For specialized rules
+* `principle_template.mdc` - For individual principles
+
+**Rule Types:**
+There are three types of rules that form a hierarchy:
+
+* **Base Rules** - Define general principles applicable across contexts. Use template: `base_rule_template.mdc`. Name: `<feature-name>-rule.mdc` or `<rule-name>-rule.mdc`. Example: `code-agent-rule.mdc`. **Important**: Base rules should contain bullet points only, NO code examples (code examples are framework-specific and belong in specialized rules).
+
+* **Specializing Rules** - Extend base rules for specific aspects or workflows. Use template: `specializing_rule_template.mdc`. Must reference parent rule: `This rule extends and references `<parent-rule-name>.mdc` — all <parent-rule> principles apply throughout.` Name: `<aspect-name>-rule.mdc` (e.g., `workflow-rule.mdc`). Never duplicate principles from parent rule.
+
+* **Specialized Rules** - Extend specializing rules for framework/language-specific implementations. Use template: `specialized_rule_template.mdc`. Must reference both parent specializing rule and base rule. Include framework/language-specific globs in frontmatter. Name: `<rule-type>-<framework>-rule.mdc` (e.g., `bdd-jest-rule.mdc`). Never duplicate principles from parent rules.
+
+**Rule Structure:**
+Rules follow a standard structure:
+1. Frontmatter (YAML): `description`, `globs`, `alwaysApply`
+2. When/then statement: Context and behavior description
+3. Rule overview: Explanation of the rule
+4. **Executing Commands:** Quick reference to commands (at top)
+5. **Conventions:** Naming conventions, file locations, structural conventions (before principles)
+6. **Principles:** Numbered principles (## 1. Principle Name) with DO/DON'T examples
+7. **Templates:** Templates used for generating files (after principles, if applicable)
+8. **Commands:** Detailed list of commands that implement or use this rule (at end)
+
+**Validation:**
+* Frontmatter has required fields: `description`, `globs`, `alwaysApply`
+* Has `**When**` and `**then**` statement
+* Has `**Executing Commands:**` section
+* Has `## Conventions` section (before principles)
+* Has principles section with DO/DON'T examples
+* Has `## Commands` section (at end)
+* Rule instances can load examples
+* Parent rule references are valid (for specializing/specialized rules)
+
+**Relationships:**
+* **Rule ↔ Command:** Rules list commands in `** Commands:**` section; commands reference rules via `**[Rule]:**` section
+* **Rule ↔ Feature:** Each feature has a main rule file that defines principles for all commands in the feature
+* Keep relationships bidirectional - update both sides when adding new commands
+
+**Commands:**
+Commands that affect rules:
+
+* `/code-agent-rule` — Create a new rule
+* `/code-agent-rule-generate` — Generate rule files
+* `/code-agent-rule-validate` — Validate rule structure
+
+## 2. Commands
+
+A **Command** (`.md` file) defines executable steps that implement a rule. Commands follow a standard 4-action workflow: Generate → User Feedback → Validate → User Feedback. Each command has a main command file and delegate command files (generate, validate, and optionally plan) that delegate to specific actions.
+
+**Naming Conventions:**
+* Main command: `<feature-name>-<command-name>-cmd.md` (e.g., `code-agent-feature-cmd.md`)
+* Delegate commands: `<feature-name>-<command-name>-<action>-cmd.md` (e.g., `code-agent-feature-generate-cmd.md`)
+* Follow pattern: `code-agent-{feature}-{action}-cmd.md`
+
+**File Locations:**
+* All command files go in the command's directory (domain-oriented):
+  - Main command: `behaviors/<feature-name>/<command-name>/<command-name>-cmd.md`
+  - Delegate commands: `behaviors/<feature-name>/<command-name>/<command-name>-<action>-cmd.md`
+  - Command templates: `behaviors/<feature-name>/<command-name>/<template-name>.md`
+  - Command helpers: `behaviors/<feature-name>/<command-name>/<helper-file>.py` (if needed)
+* Common templates: `behaviors/<feature-name>/feature/<template-name>.md`
+
+**[DO]:**
+* Include YAML frontmatter with execution metadata (see **Execution Metadata** section below)
+* Include header: `### Command: `/<command-name>``
+* Include sections: `**[Purpose]:**`, `**[Rule]:**`, `**Execution:**`, `**Runner:**`, `**Action 1: GENERATE**`, `**Action 2: GENERATE FEEDBACK**`, `**Action 3: VALIDATE**`, `**Action 4: VALIDATE FEEDBACK**`, `**ACTION 5: CORRECT**`
+* Reference valid rule file via `**[Rule]:**` section
+* Reference valid runner path via `**Runner:**` section
+* Include `**Execution:**` section describing Python import, CLI, and MCP tool options
+* Specify performer in each step: **User**, **AI Agent**, **Runner**, or **Code**
+* Create delegate commands for generate and validate actions
+* Use template: `command_template.md` for main command files
+* **When creating command runners with prompts (generate_instructions, validate_instructions, etc.) that rely on templates: Reference the template file path, do NOT repeat the template structure in the prompt**
+
+**[DON'T]:**
+* Create commands without rule reference
+* Create commands without runner reference
+* Create delegate commands with complex logic (they should only delegate)
+* Duplicate main command logic in delegate commands
+* Skip required sections
+* Use inconsistent naming patterns
+* **Repeat template structure in prompts - always reference the template file instead of duplicating its content**
+
+**Execution Metadata:**
+All command files MUST include YAML frontmatter with execution metadata to enable automatic command execution by AI agents. This metadata allows AI agents to execute commands efficiently without manual CLI parsing.
+
+**Required Execution Metadata Structure:**
+```yaml
+---
+execution:
+  registry_key: [command-name]
+  python_import: [module.path.ClassName]
+  cli_runner: [runner-path]
+  mcp_tool: [mcp-tool-name]  # Optional
+  actions:
+    generate:
+      cli: [generate-action]
+      method: generate
+      params:
+        - name: [param1]
+          optional: true/false
+          type: str/bool/list
+          flag: [--flag-name]  # Optional
+    validate:
+      cli: [validate-action]
+      method: validate
+    correct:
+      cli: [correct-action]
+      method: correct
+  working_directory: workspace_root
+---
+```
+
+**Execution Metadata Fields:**
+* `registry_key`: Unique identifier for command (typically `feature-name-command-name`)
+* `python_import`: Full Python import path to command class (e.g., `behaviors.code_agent.code_agent_runner.SyncIndexCommand`)
+* `cli_runner`: Path to runner file relative to workspace root (e.g., `behaviors/code-agent/code_agent_runner.py`)
+* `mcp_tool`: Optional MCP tool name for external access
+* `actions`: Map of action names to execution details (generate, validate, correct)
+* `working_directory`: Where to execute command (typically `workspace_root`)
+
+**Execution Methods (in priority order):**
+1. **Python Import** (Preferred): Direct import and method call - fastest, type-safe
+2. **CLI** (Fallback): Subprocess execution via runner file
+3. **MCP Tool** (External): For external tool access
+
+
+**Templates:**
+* `command_template.md` - For main command files (includes execution metadata structure)
+* `command_plan_template.md` - For command implementation plans
+
+**Delegate Commands:**
+* `<command-name>-generate-cmd.md` - Always present, delegates to generate action
+* `<command-name>-validate-cmd.md` - Always present, delegates to validate action
+* `<command-name>-correct-cmd.md` - Always present, delegates to correct action
+* `<command-name>-plan-cmd.md` - Sometimes present, delegates to plan action (optional)
+* Commands can be extended with custom delegate commands for bespoke needs
+
+**Workflow Commands:**
+For features with multi-phase workflows, there are two types of commands:
+
+1. **Phase-Specific Commands** - Execute a specific workflow phase/state:
+   * Main command: `/<feature-name>-<phase-name>` (e.g., `/bdd-scaffold`)
+   * Generate delegate: `/<feature-name>-<phase-name>-generate`
+   * Validate delegate: `/<feature-name>-<phase-name>-validate`
+   * Correct delegate: `/<feature-name>-<phase-name>-correct`
+   * Contains full business logic for the phase
+   * Files: `<phase-name>-cmd.md`, `<phase-name>-generate-cmd.md`, `<phase-name>-validate-cmd.md`, `<phase-name>-correct-cmd.md`
+
+2. **Workflow Orchestrator Commands** - Lightweight dispatcher that delegates to phase-specific commands:
+   * Main command: `/<feature-name>-workflow` (e.g., `/bdd-workflow`)
+   * Generate delegate: `/<feature-name>-workflow-generate`
+   * Validate delegate: `/<feature-name>-workflow-validate`
+   * **CRITICAL**: Workflow orchestrator commands should be VERY LIGHTWEIGHT and VERY SMALL - they simply delegate to the right phase-specific command to do its job. They do NOT contain complex logic or duplicate phase command functionality.
+   * Files: `workflow/workflow-cmd.md`, `workflow/workflow-generate-cmd.md`, `workflow/workflow-validate-cmd.md`
+   * Architecture pattern: Workflow orchestrator = lightweight dispatcher that delegates to phase commands. Phase commands = full implementation with business logic.
+
+**Command Steps Structure:**
+Each step must specify the performer:
+* **User** - User actions (e.g., "1. **User** invokes command via `/command-name`")
+* **AI Agent** - AI analysis and decisions (e.g., "2. **AI Agent** determines parameters from user input")
+* **Runner** - Python function calls (e.g., "3. **Runner** (`CommandClass.generate()`) generates files")
+* **Code** - Deterministic code operations (e.g., "4. **Code** (`FileSyncer.sync()`) synchronizes files")
+
+**Validation:**
+* Command file has YAML frontmatter with execution metadata
+* Execution metadata includes required fields (registry_key, python_import, cli_runner, actions)
+* Command file has required structure (Purpose, Rule, Execution, Runner, Steps)
+* Command references valid rule file
+* Command references valid runner path
+* Python import path is valid and importable
+* CLI runner path exists relative to workspace root
+* Delegate commands delegate correctly
+* Command directory exists
+* All required files exist
+
+**Relationships:**
+* **Command ↔ Rule:** Commands reference rules via `**[Rule]:**` section; rules list commands via `**Commands:**` section
+* **Command ↔ Feature:** Commands belong to a feature and are organized in command subdirectory of feature directory
+* **Command ↔ Runner:** Each command has corresponding command classes in runner file (inner command class and outer wrapper class)
+* Keep relationships bidirectional - update both sides when adding new commands
+
+**Commands:**
+Commands that affect commands:
+
+* `/code-agent-command` — Create a new command
+* `/code-agent-command-generate` — Generate command files
+* `/code-agent-command-validate` — Validate command structure
+* `/code-agent-command-plan` — Generate implementation plan
+
+## 3. Runners
+
+A **Runner** (`.py` file) implements the Python logic for commands. Runners use the `common_command_runner` framework and follow consistent patterns with inner command classes (containing business logic) and outer wrapper classes (providing CLI integration and additional functionality). Runners expose commands via CLI entry point and must register every command to be executable.
+
+**Naming Conventions:**
+* Feature runner: `<feature-name>_runner.py`
+* Test file: `<feature-name>_runner_test.py`
+* Command class: `<CommandName>Command` (PascalCase)
+* Wrapper class: `CodeAugmented<CommandName>Command` or other wrapper type
+* Config class: `<CommandName>Config`
+
+**File Locations:**
+* Runner file: `behaviors/<feature-name>/<feature-name>_runner.py`
+* Test file: `behaviors/<feature-name>/<feature-name>_runner_test.py`
+
+**Command Wrapper Types:**
+Commands use wrapper/decorator patterns that can be chained together:
+* **CodeAugmentedCommand** - AI-powered validation with heuristics from rule files
+* **IncrementalCommand** - Incremental run functionality with sample sizes and run history
+* **WorkflowPhaseCommand** - Workflow phase management for multi-phase workflows
+* **SpecializingRuleCommand** - Specializing rule support with framework detection
+
+**[DO]:**
+* Every command must have an equivalent outer command class for execution
+* Choose wrapper type based on required functionality (workflow phases, specializing rules, incremental runs, or AI validation)
+* Create both inner command class and outer wrapper class
+* Inner command class extends `Command` or feature-specific base (e.g., `CodeAgentCommand`)
+* Outer wrapper class extends wrapper type and wraps inner command instance
+* Outer wrapper class implements `handle_cli()` class method for CLI integration
+* Register command in CLI entry point (`main()` function)
+* Use parameter objects (dataclasses) instead of many parameters
+* Decompose large methods into smaller private methods
+* Use guard clauses to reduce nesting
+* Maximize reuse of base classes and wrappers
+* Import from `common_command_runner`: `Content`, `BaseRule`, `Command`, `CodeAugmentedCommand`, `IncrementalCommand`, `WorkflowPhaseCommand`, `SpecializingRuleCommand`
+* **When creating prompts (generate_instructions, validate_instructions, etc.) that rely on templates: Reference the template file path, do NOT repeat the template structure in the prompt**
+
+**[DON'T]:**
+* Create commands without outer wrapper classes
+* Skip CLI registration for new commands
+* Reimplement wrapper functionality
+* Use many parameters instead of parameter objects
+* Create deeply nested code without guard clauses
+* Duplicate logic that exists in base classes or wrappers
+* Mix command logic with CLI handling
+* Create monolithic command classes
+* **Repeat template structure in prompts - always reference the template file instead of duplicating its content**
+
+**Command Class Pattern:**
+* **Inner Command Class:** Extends `Command` or feature-specific base, implements `generate()` and `validate()` methods, uses templates, delegates to helper classes, contains core business logic
+* **Outer Wrapper Class:** Extends wrapper type, wraps inner command instance, provides `handle_cli()` method, adds wrapper functionality, can be chained with other wrappers
+
+**CLI Integration:**
+* Include `main()` function as CLI entry point
+* Register every command in command handler dictionary
+* Map command names to outer wrapper's `handle_cli()` method
+* Support exact matches and prefix matches (more specific first)
+* Parse arguments consistently (positional arguments and flags)
+* Use helper functions for argument parsing
+* Print usage information for unknown commands
+
+**CLI Handler Pattern:**
+```python
+@classmethod
+def handle_cli(cls, action: str, args: list[str]) -> None:
+    """Handle CLI invocation for commands"""
+    # Parse arguments
+    feature_name = args[0] if len(args) > 0 else None
+    # ... parse other arguments
+    
+    command = cls(feature_name, ...)
+    
+    if action == "execute":
+        command.execute()
+    elif action == "generate":
+        command.generate()
+    elif action == "validate":
+        command.validate()
+```
+
+**Validation:**
+* Imports from `common_command_runner` are correct
+* Command classes extend correct base classes
+* CLI handlers are registered correctly
+* Parameter objects are used instead of many parameters
+* Methods are decomposed appropriately
+* Guard clauses are used to reduce nesting
+
+**Relationships:**
+* **Runner ↔ Command:** Each command has corresponding command classes in runner file; inner command class implements generation/validation logic; outer wrapper class provides CLI integration and adds functionality based on wrapper type
+* **Runner ↔ Feature:** Runner file belongs to feature and implements all commands for that feature
+* CLI handlers map command names to wrapper class's `handle_cli()` method
+
+## 4. Features
+
+A **Code Agent Feature** is a collection of related behaviors organized in a single directory. Each feature contains rules, commands, and a runner implementation. Files are organized by command (domain-oriented), not by file type.
+
+**Naming Conventions:**
+* Feature directory: `behaviors/<feature-name>/` (kebab-case, descriptive)
+* Runner file: `<feature-name>_runner.py`
+* Main rule file: `<feature-name>-rule.mdc`
+
+**File Organization:**
+* Organize files by command (domain-oriented), not by file type:
+  - `<command-name>/` - All files for a specific command (command files, templates, helpers, etc.)
+  - `docs/` - Documentation and domain scaffolds shared across the feature
+* Each command directory contains everything needed for that command
+
+**[DO]:**
+* Create feature directory at `behaviors/<feature-name>/`
+* Include `behavior.json` with required fields: `deployed`, `feature`, `description`
+* Include `feature-outline.md` with `[feature-purpose]` section
+* Include runner file with proper imports from `common_command_runner` and CLI entry point
+
+**[DON'T]:**
+* Create features without `behavior.json`
+* Create features without `feature-outline.md`
+* Create runner files without proper imports from `common_command_runner`
+* Organize by file type (e.g., `rule/`, `command/` directories) - organize by command/domain instead
+* Put command-specific files in shared directories - keep them with their command
+* Mix files from different features in the same directory
+* Use inconsistent naming patterns
+
+**Validation:**
+* `behavior.json` has required fields: `deployed`, `feature`, `description`
+* `feature-outline.md` has `[feature-purpose]` section
+* Runner file has proper structure and imports
+* All required files exist
+
+**Relationships:**
+* **Feature ↔ Rule:** Each feature has a main rule file that defines principles for all commands in the feature
+* **Feature ↔ Command:** Commands belong to a feature and are organized in command subdirectory of feature directory
+* **Feature ↔ Runner:** Runner file belongs to feature and implements all commands for that feature
+
+## Executing Commands
+* /code-agent-stories — Generate and validate stories

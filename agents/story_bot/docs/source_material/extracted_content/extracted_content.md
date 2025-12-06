@@ -1,0 +1,6885 @@
+# Story Writing Training
+
+**Slide by Slide Extraction from PowerPoint Presentation**
+
+---
+
+## Slide 1
+
+Story Writing @ OLG Digital
+
+A comprehensive guide
+
+---
+
+---
+
+## Slide 2
+
+Outcomes
+
+This course is intended to prepare you to develop software effectively in conjunction with your digital engineering lab-mates
+
+We will be covering all aspects of how to efficiently analyze and capture new ideas, break them down into bite-sized pieces, and refine them into stories that can be consumed by your development team
+
+Confidential
+
+Course Overview
+
+Agenda
+
+Introduction to User Stories
+
+Story Flow For Delivery Teams
+
+Idea Shaping
+
+Idea Shaping in a Nutshell
+
+Introduction To Story Mapping
+
+Identifying Marketable Increments Of Value
+
+Discovery Your Next Market Increment
+
+Discovery in a Nutshell
+
+Refining Marketable Increments of Value on Your Story Map
+
+Story Mapping Practices to Encourage & Avoid
+
+Planning, Scheduling, & Forecasting
+
+Story Exploration
+
+Story Exploration in a Nutshell
+
+Writing Story Acceptance Criteria
+
+Refining Your Story Map During Story Exploration
+
+Defining System Level Stories
+
+Story Specification
+
+Story Testing
+
+Structure
+
+Each module will consist of a lecture component, followed by a homework assignment
+
+Lean on the coach assigned to your lab if you need help with completing the homework
+
+---
+
+---
+
+## Slide 3
+
+Introduction to User Stories
+
+What Are Stories and Why Do We Use Them?
+
+---
+
+---
+
+## Slide 4
+
+As a result, industrial era organizations were built around the concepts of standardization, division, and control.
+
+The results were the creation of wealth and employment at a hitherto unprecedented scale
+
+At the turn of the last century, organizations were designed to get as many of the same type of goods to as much of the population as possible for the lowest possible cost.
+
+Any customer can have a car painted any color that he wants, so long as it is black.
+
+---
+
+*[Image(s) for Slide 4]*
+
+![Diagram/Image from Slide 4](images/slide_004_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 4](images/slide_004_image_1.jpg)
+
+---
+
+## Slide 5
+
+Markets are both more crowded and move faster than ever before
+
+---
+
+*[Image(s) for Slide 5]*
+
+![Diagram/Image from Slide 5](images/slide_005_image_1.jpg)
+
+![Diagram/Image from Slide 5](images/slide_005_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 5](images/slide_005_image_1.jpg)
+
+
+![Diagram/Image from Slide 5](images/slide_005_image_1.png)
+
+---
+
+## Slide 6
+
+Commodity limited product selection to an undifferentiated mass of consumers
+
+Cost focus, the lowest price point
+
+Stable and low rate of change, similar products have been built many times before
+
+Long lead times are acceptable
+
+The focus of the last century was centralized planning driving down cost, consistency and repeatability
+
+You can have any car you want as long as it’s black!
+
+Today focus is speed, growth, innovation, and maximizing feedback in the face of increasing uncertainty
+
+Success requires a First Mover or even True Innovator mindset
+
+Order of Magnitude increase in change of products, plans, solutions etc.
+
+Customer Learning is key
+
+Focus is on Speed and Learning, cost is a secondary consideration
+
+Today’s markets require a different approach to introducing products to our users
+
+---
+
+*[Image(s) for Slide 6]*
+
+![Diagram/Image from Slide 6](images/slide_006_group_image_1.png)
+
+![Diagram/Image from Slide 6](images/slide_006_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 6](images/slide_006_group_image_1.png)
+
+
+![Diagram/Image from Slide 6](images/slide_006_image_1.png)
+
+---
+
+## Slide 7
+
+We need create value by working in smaller increments of scope that can be continuously delivered and validated
+
+Big Project
+
+Big projects and big releases are hard!
+
+Lots of variability and unknowns!
+
+Lots of dependencies!
+
+Skyscraper 2 years
+
+I need Shelter!
+
+Cave – 5 Days
+
+Increment 1
+
+Increment 3
+
+Tent - 2 weeks
+
+House – 6 months
+
+Increment 4
+
+Skyscraper – 3 years
+
+Efficiency takes a back seat to delivering smaller features to the market sooner!
+
+Increment 2
+
+Agile is all about breaking big projects into smaller units of work that can deliver business value
+
+---
+
+*[Image(s) for Slide 7]*
+
+![Diagram/Image from Slide 7](images/slide_007_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 7](images/slide_007_image_1.png)
+
+---
+
+## Slide 8
+
+Stories are a semi formal narrative structure that help us describe solution functionality as small increments Of value
+
+Good user stories are
+
+a unit of scope
+
+a unit of value/ behavior
+
+a unit of planning
+
+a unit of testing
+
+a unit of story telling
+
+Stories are an artifact that are owned and worked on by the entire team
+
+---
+
+*[Image(s) for Slide 8]*
+
+![Diagram/Image from Slide 8](images/slide_008_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 8](images/slide_008_image_1.jpg)
+
+---
+
+## Slide 9
+
+Above all, Stories are action oriented, and they describe interactions between users and systems
+
+Telling a good Story involves discussing how we want the system to behave in response to a user interaction
+
+Manage User Accounts (User Goal)
+
+Register New User Account ( User Activity)
+
+Enter Contact Details (User Task)
+
+It is hard to tell a good story by focusing on the delivery or development tasks required to build a system or on system internals
+
+Build Registration Database
+
+Research User Preferences
+
+Design Contact Details Entry Form
+
+Tip: Focus Stories on User Interactions and how the system behaves as observed by the users, document tasks and system internals using other artifacts
+
+---
+
+*[Image(s) for Slide 9]*
+
+![Diagram/Image from Slide 9](images/slide_009_image_1.jpg)
+
+![Diagram/Image from Slide 9](images/slide_009_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 9](images/slide_009_image_1.jpg)
+
+
+![Diagram/Image from Slide 9](images/slide_009_image_1.png)
+
+---
+
+## Slide 10
+
+Story Flow For Delivery Teams
+
+---
+
+---
+
+## Slide 11
+
+Tip: Avoid writing stories below sea level, i.e., a discrete user action and corresponding, observable system response
+
+Stories are an approach that allow teams to focus on multiple levels of detail based on where they are in the discovery and delivery flow of work
+
+Epics Business capabilities, end-to-end business processes, or end-to-end customer outcomes
+
+Features  Concrete, smallish grouping of of business value that is natural to define, develop, and test at the same time
+
+User Stories Captures a small increment of system behavior that a user can see
+
+System Stories Captures a small increment of system behavior that crosses a system
+
+Tasks Captures team work required to develop or test one or more stories, but
+
+does not describe any system behavior
+
+Stop Here!
+
+---
+
+*[Image(s) for Slide 11]*
+
+![Diagram/Image from Slide 11](images/slide_011_image_1.jpg)
+
+![Diagram/Image from Slide 11](images/slide_011_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 11](images/slide_011_image_1.jpg)
+
+
+![Diagram/Image from Slide 11](images/slide_011_image_1.png)
+
+---
+
+## Slide 12
+
+Market Increment
+
+Story
+
+Feature
+
+Epic
+
+Business capabilities, end-to-end business processes
+
+Major objectives, and/or end-to-end customer outcomes
+
+Contains 4 – 7 Features
+
+Eg: Purchase Lottery Ticket
+
+An integrated unit of scope that is easy to define, develop, and test together
+
+Can be completed by a team within 1-2 sprints
+
+Between 4 - 7 Stories
+
+Eg: Purchase With Existing Card
+
+A granular increment of testable and product verifiable work
+
+Completed by a couple of team members in less than a week
+
+5 – 9 Acceptance criteria or 3 – 5 testable scenarios
+
+Eg: Display Players Existing Cards on Web
+
+An increment of work that is deployed to real users in production
+
+Teams should complete within 6 – 12 weeks
+
+Eg: Purchase Lottery Ticket via Direct Pay with an Existing Card on Web
+
+Tip: Size an increment of value so that it contains no more than 7-9 items of the next level of detail  (e.g. an Epic contains no more than 7-9 features)
+
+When using stories, we break behavior down until we get to the story level and then group them according to a set of minimal viable increments
+
+---
+
+---
+
+## Slide 13
+
+We are often handed an entire problem statement, a large boulder
+
+We then progressively break that up into Epics and Features, our individual rocks
+
+And then further define, deliver and test individual stories, our pebbles
+
+We then aggregate those stories back into features, and increments and test and release them in a bundle
+
+We call this approach the scatter-aggregate pattern
+
+You do the work required to decompose something into a collection finer grained unit
+
+You then work on each increment until you are ready to reassemble your work
+
+Getting to the right level of detail can be thought of us progressively breaking up the boulders in our solution scope
+
+---
+
+*[Image(s) for Slide 13]*
+
+![Diagram/Image from Slide 13](images/slide_013_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 13](images/slide_013_image_1.jpg)
+
+---
+
+## Slide 14
+
+Tip: Design your story flow so work can move along the process in the smallest possible batches, this will increase feedback and give the team more opportunity reduce defects and introduce improvements to how they are working
+
+Story Map Outline
+
+Write Acceptance Criteria
+
+Story Specification Scenario
+
+Story Specification Test case
+
+Initiative /Idea
+
+(Minimum Viable) Increment
+
+Story
+
+Feature
+
+Initiatives / Ideas are shaped into one or more Increments (PO/BA)
+
+Rough order of magnitude estimate story count for each Increment  by Bede Tech Team
+
+Lead by OLG PO in close collaboration with Bede Product Manger
+
+Approved by BY OLG PM
+
+Story Map out a list of Features and Stories for  Increment (PO/BA)
+
+Refine stories based on technical / platform concerns (tech Team)
+
+Schedule and prioritize Features based on team(s) estimated throughput (Tech Team + PO/BA)
+
+Write Acceptance Criteria for all stories in a feature (BAs)
+
+Split / group/ reorder stories in a feature as required (BAs + Tech)
+
+Confirm ready for Dev (Tech)
+
+Group Acceptance Criterial into Scenarios (BAs)
+
+Refine scenario language and add backgrounds and givens
+
+Define alternative  and edge scenarios
+
+Do enough Story Mapping to prioritize and size the Increments inside an Initiative
+
+Complete the Story Map for an Increment identifying the Features and Stories
+
+Write Acceptance Criteria for all Stories in a Feature
+
+Incrementally analyze, build and test individual stories
+
+Test that all stories in a feature work together in an integrated way
+
+Test then release the next increment to production
+
+Story Flow implements the scatter – aggregate pattern using a consistent set of agile practices and artifacts
+
+---
+
+*[Image(s) for Slide 14]*
+
+![Diagram/Image from Slide 14](images/slide_014_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 14](images/slide_014_image_1.png)
+
+---
+
+## Slide 15
+
+Story Specification
+
+Story Validation
+
+Discovery
+
+Grooming
+
+Feature Testing
+
+Shaping
+
+Increment
+
+Test & Release
+
+Weeks
+
+Months
+
+Story Develop
+
+Do enough Story Mapping to prioritize and size the Increments inside an Initiative
+
+Complete the Story Map for an Increment identifying the Features and Stories
+
+Write Acceptance Criteria for all Stories in a Feature
+
+Incrementally analyze, build and test individual stories
+
+Test that all stories in a feature work together in an integrated way
+
+Test then release the next increment to production
+
+Given some condition
+
+And another condition
+
+When something happens
+
+And something else happens
+
+Then expected result
+
+And another expected result
+
+Story Acceptance Criteria
+
+Story Specification Scenario
+
+Story Specification Test case
+
+Story Mapping
+
+Story Flow can also be thought of as enabling a feedback loop at 2 different cadences
+
+---
+
+*[Image(s) for Slide 15]*
+
+![Diagram/Image from Slide 15](images/slide_015_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 15](images/slide_015_image_1.png)
+
+---
+
+## Slide 16
+
+Initiatives / Ideas are shaped into one or more Increments (PO/BA)
+
+Rough order of magnitude estimate story count for each Increment  (Dev)
+
+Story Map out a list of Features and Stories for  Increment (PO/BA)
+
+Refine stories based on technical / platform concerns (tech Team)
+
+Schedule and prioritize Features based on team(s) estimated throughput (Tech Team + PO/BA)
+
+Here is what a flow of stories can look like on Kanbanize
+
+Story Map out a list of Features and Stories for  Increment (PO/BA)
+
+Refine stories based on technical / platform concerns (Dev)
+
+Schedule and prioritize Features based on team(s) estimated throughput (Dev + PO/BA)
+
+---
+
+*[Image(s) for Slide 16]*
+
+![Diagram/Image from Slide 16](images/slide_016_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 16](images/slide_016_image_1.png)
+
+---
+
+## Slide 17
+
+Initiatives / Ideas are shaped into one or more Increments (PO/BA)
+
+Rough order of magnitude estimate story count for each Increment  (Dev)
+
+Story Map out a list of Features and Stories for  Increment (PO/BA)
+
+Refine stories based on technical / platform concerns (Dev)
+
+Schedule and prioritize Features based on team(s) estimated throughput (Dev + PO/BA)
+
+Group Acceptance Criteria into Scenarios (BAs)
+
+Refine scenario language and add backgrounds and givens (BAs)
+
+Define alternative  and edge scenarios (QC)
+
+Incorporate Examples (QC)
+
+Here is what a flow of stories can look like on Kanbanize
+
+Confirm Acceptance Test pass
+
+(QC/BA)
+
+Run automation suite)
+
+Raise and Fix Defects (QC/BA/Dev)
+
+Write Acceptance Test In Code (QC / Dev)
+
+Write first failing unit test (Dev)
+
+Write code until test passes (Dev)
+
+Refactor
+
+Repeat until Acceptance Test passes (Dev)
+
+---
+
+*[Image(s) for Slide 17]*
+
+![Diagram/Image from Slide 17](images/slide_017_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 17](images/slide_017_image_1.png)
+
+---
+
+## Slide 18
+
+Here is what a flow of stories can look like on Kanbanize
+
+Confirm Acceptance Test pass
+
+(QC/BA)
+
+Run automation suite)
+
+Raise and Fix Defects (QC/BA/Dev)
+
+Write Acceptance Test In Code (QC / Dev)
+
+Write first failing unit test (Dev)
+
+Write code until test passes (Dev)
+
+Refactor
+
+Repeat until Acceptance Test passes (Dev)
+
+Test Feature works across all Stories (QC/BA)
+
+Initiatives / Ideas are shaped into one or more Increments (PO/BA)
+
+Rough order of magnitude estimate story count for each Increment  (Dev)
+
+Story Map out a list of Features and Stories for  Increment (PO/BA)
+
+Refine stories based on technical / platform concerns (Dev)
+
+Schedule and prioritize Features based on team(s) estimated throughput (Dev + PO/BA)
+
+Group Acceptance Criteria into Scenarios (BAs)
+
+Refine scenario language and add backgrounds and givens (BAs)
+
+Define alternative  and edge scenarios (QC)
+
+Incorporate Examples (QC)
+
+---
+
+*[Image(s) for Slide 18]*
+
+![Diagram/Image from Slide 18](images/slide_018_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 18](images/slide_018_image_1.png)
+
+---
+
+## Slide 19
+
+Traditional delivery methods are based on the idea that distinct artifacts are create by people with discrete job titles
+
+Project Managers work on project plans, product managers work on product strategies,  analysts work on requirements, developers write code and testers create and run test cases
+
+This kind of approach doesn’t scale in the face of rapid market change and the need to deliver and learn in frequent small iterations
+
+When teams work with the stories it is important that they learn to accept the idea that many people in the team will work on the same story
+
+The product owner may identify it, the analyst may specify it, the tester may add additional edge cases and color it with examples, and the developer may code it. Or the team will evolve to an entirely different arrangement
+
+In a nutshell Story Delivery is a team sport
+
+Unlike traditional approaches story development is conducted by the entire team
+
+---
+
+*[Image(s) for Slide 19]*
+
+![Diagram/Image from Slide 19](images/slide_019_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 19](images/slide_019_image_1.jpg)
+
+---
+
+## Slide 20
+
+The work of a Business Analyst writing stories will frequently overlap with the work that the rest of the team
+
+Product Owner
+
+Set and communicate product vision and strategy
+
+Position product through  market and industry knowledge / research
+
+Monitor KPIs, against market trends and market response
+
+Track progress towards OKRs and communicate roadmap with key stakeholders
+
+Employ customer-problem and usability driven design
+
+Facilitates collaborative solution discovery  workshops
+
+Define value and prioritize backlog
+
+Validate feature work as intended and provide feedback to the team
+
+validate assumptions and business value using test and learn
+
+Scrum Master
+
+Exploratory and regression testing
+
+Coaches others and brings a “testing mindset” to the team
+
+Facilitates root cause analysis of defects and ensures that they acts as a catalyst for continuous improvement
+
+Ensuring delivery is prioritized according to testable thin slices
+
+Extends stories to include real world data, edge case scenarios, non func. reqs, etc.
+
+Performs acceptance testing
+
+Visualizes defects and works with team to  resolve them
+
+Facilitates the design of the system of work including workflow, policies, work types, services, cadences and events
+
+Facilitates identification and resolution of impediments, bottlenecks, assumptions, and risks
+
+Facilitates a continually improving system of work using a lightweight but empirical approach
+
+Facilitates lab events (e.g. planning, standups, demos, retros, etc.)
+
+Facilitates visually managing the flow of stories
+
+Uses flow metrics to communicate progress
+
+Facilitates long-term planning using techniques such as relative sizing and throughput accounting
+
+Define and Decomposes Solution Scope into small increments that can be independently built and tested
+
+Works closely with development to ensure a flow of stories are specified, engineered and validated
+
+Collaborates with team to define and detail out stories
+
+Tester
+
+Front End Developer
+
+Writes good quality software that meets the needs of stake-holders
+
+Unit tests work to ensure minimal defects
+
+Conducts peer reviews of code
+
+Participates in merging, integrating, versioning, promoting, code through environments and version control
+
+Active in analysis / design working sessions
+
+Collaborates to define acceptance criteria
+
+Estimates Delivery Work
+
+Participates in testing and defect fixing
+
+Assists with triaging and problem solving necessary to restore service to production and with follow on root cause / fix efforts
+
+Tip: Consider who else on the team will collaborate throughout the story writing process, the BA can’t do it alone!
+
+Analyst
+
+---
+
+---
+
+## Slide 21
+
+Idea Shaping
+
+How can working with stories help us plan better?
+
+---
+
+---
+
+## Slide 22
+
+Idea Shaping In A Nutshell
+
+---
+
+---
+
+## Slide 23
+
+Goal: Co-create and socialize the key building blocks of an initiative (Customers, Problems, Features, Value, Cost, Effort) with all stake holders and participating people
+
+Key Activities
+
+Build a shared understanding of the goals, problems, and customer impacts
+
+Evaluate Solution options
+
+Estimate likely value drivers and cost drivers
+
+Identify and explore critical assumptions
+
+Story Writing Related Activities
+
+Do just enough story mapping to …
+
+Move from an abstract idea to concrete initiative
+
+Understand the overarching scope of an initiative
+
+Identify an initial list of increments that can be delivered to end users
+
+Collaborate with engineering to provide an initial size estimate for each increment
+
+Other Helpful Agile Artifacts
+
+Opportunity Canvas
+
+Uncertainty Kanban
+
+Impact Map
+
+Cost of Delay Estimation
+
+Tip: In idea shaping you are working on an entire initiative; it is critical to avoid going to the lowest level of detail. Go wide and go shallow
+
+The goal of Idea Shaping is to do just enough analysis to determine the over-arching parameters of an upcoming initiative
+
+---
+
+*[Image(s) for Slide 23]*
+
+![Diagram/Image from Slide 23](images/slide_023_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 23](images/slide_023_image_1.jpg)
+
+---
+
+## Slide 24
+
+Ideas are introduced by working with Product Managers, as well as other OLG stakeholders, Lab priority etc
+
+Product Managers, Product Owners, and the Lab Team Members agree on which labs can initiate shaping for an idea
+
+Labs pull in an initiative when they have capacity and do just enough story mapping to identify a set of increments that can be released to production
+
+Increments are added to the Kanban board and the lab collaborates with technology to size each increment
+
+The Initiative ticket and related Increment tickets are moved to shaping done
+
+Moving an Idea / Initiative through a Delivery Kanban
+
+---
+
+*[Image(s) for Slide 24]*
+
+![Diagram/Image from Slide 24](images/slide_024_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 24](images/slide_024_image_1.png)
+
+---
+
+## Slide 25
+
+Introducing Story Mapping
+
+---
+
+---
+
+## Slide 26
+
+Teams can use Story Mapping to systematically decompose an initiative into smaller units of recognizable business value, known as stories. While the practice is highly collaborative, it also lends just enough structure to focus the conversation and accelerate understanding
+
+Story Mapping is a highly collaborative practice that allow teams to iteratively identify and define the scope and priority of future state system behavior
+
+Manage Shopping Cart
+
+Shopping Cart
+
+Purchase with Existing Card
+
+Submit Payment Order
+
+Fulfill Payment Order
+
+Accept Subscription Terms & Conditions
+
+Prompt Player to Login
+
+Select Direct Pay
+
+Enter Player Login Details
+
+Increment 1: Purchase Lottery Ticket via Direct Pay with an Existing Card
+
+Increment 2: Purchase Lottery Ticket via Direct Pay with a New Card
+
+Increment 3: Purchase Subscription Lottery Ticket via Direct Pay with an Existing Card
+
+Time
+
+Priority / Optionally
+
+Epic
+
+Feature
+
+Story
+
+Persona
+
+Story Mapping is…
+
+A lightweight and semi-formal approach to defining the intended behavior of a product
+
+A story telling vehicle;  stories are arranged in a two-dimensional map resulting in a sequential narrative from left to right and a prioritization from top to bottom
+
+A highly visible, highly sharable representation of end-to-end product scope
+
+An accessible place where conversations are had to set and share context
+
+A practice that intrinsically supports iterative delivery and product decomposition
+
+Add Lottery Ticket to Shopping Cart
+
+Display Payment Options
+
+Login Player
+
+Return to Direct Pay or MyBalance Payment Option
+
+Display Payment Options for Existing Card(s)
+
+Submit Payment
+
+Display Payment Options For Existing Cards on App
+
+System Generates an Order ID
+
+Send Card Details to PaySafe
+
+PaySafe Process Payment
+
+PaySafe Returns Successful Payment
+
+Authenticate Credentials
+
+Unauthenticated Player
+
+Select My Balance (within Wallet)
+
+Create Player Account
+
+Retrieve Payment Options From Platform
+
+---
+
+---
+
+## Slide 27
+
+Manage Orders
+
+Manage Fulfillment
+
+Epic
+
+Manage Provisioning
+
+Manage Activation and Billing
+
+Feature
+
+Story
+
+Enter Order
+
+Process Order
+
+Process Fulfillment Order
+
+Submit to Fulfillment Vendor
+
+Track Shipping Progress
+
+Time
+
+Customer
+
+Persona
+
+Sales Rep
+
+Fulfillment Vendor
+
+Fulfillment Clerk
+
+Optional
+
+Sequential
+
+Network Operator
+
+Billing Clerk
+
+Major categories of users that gain value from using the system
+
+Major objectives that with tangible business outcomes and real business value.
+
+Tangible, sequential events that describe what the user needs to do in order to get value
+
+Small, concrete units of business value that are also the smallest increment of delivery, typically taking several business days to deliver
+
+We prioritize stories by ordering them vertically on the map
+
+The persona and story layer are the good / bits; the stuff in between is for context, the number of levels and labels will vary
+
+Story Mapping is the practice of mapping user goals to business objectives and user actions down to tangible system behaviors
+
+---
+
+---
+
+## Slide 28
+
+Epic 1
+
+Epic 2
+
+Feature 1
+
+Story
+
+Feature 2
+
+Feature 3
+
+Feature 4
+
+Feature 5
+
+Why Are We doing This?
+
+Customers and User Problems
+
+Solutions and Features
+
+Value Drivers
+
+What are we doing?
+
+Users Outcomes, Goals, Activities
+
+Increments and Priority
+
+System Behavior
+
+Shaping is often done in tandem with other agile practices, choose what you want to use in order accelerate shaping of ideas
+
+---
+
+*[Image(s) for Slide 28]*
+
+![Diagram/Image from Slide 28](images/slide_028_group_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 28](images/slide_028_group_image_1.png)
+
+---
+
+## Slide 29
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531806338225&cot=14
+
+Confluence Hierarchy: https://federation.atlassian.net/wiki/spaces/OS/pages/184877216/Central+Document+Repository
+
+Don’t start your story map from scratch! The Story Repository can help you get started
+
+---
+
+*[Image(s) for Slide 29]*
+
+![Diagram/Image from Slide 29](images/slide_029_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 29](images/slide_029_image_1.png)
+
+---
+
+## Slide 30
+
+Exercise: Take a moderately complex initiative, and start to lay it out using a story map
+
+Think hierarchically from your users to major business goals, user events, all the way to small & observable system behaviors
+
+Start top-down or bottom up, whatever is easier to start
+
+Move left-to-right or up-and-down; wherever your discussion takes you
+
+Go beyond your external users and consider administrators, support people, operational users, power users, etc…
+
+Think about all the required functionality, customer onboarding, product setup, onboarding
+
+Epic
+
+Feature
+
+Story
+
+Persona
+
+Optional
+
+Sequential
+
+Don’t forget to move your Initiative ticket to Shaping In Progress on your Kanban Board….
+
+---
+
+---
+
+## Slide 31
+
+Like exploring a new body of land, we often start by understanding the boundaries of the thing we want to better understand
+
+At any point we may uncover an entry point or other interesting detail
+
+Exploration requires us to continually decide whether we continue to map the surrounding edges or to go inland and get a deeper understanding of internal terrain
+
+In both cases mapping requires us to both document what we have discovered as well as extrapolate those findings to guess at the more complete picture
+
+The metaphor of exploration and discovery is a powerful one, and is essential to successfully mapping out the relationship between user needs and potential solution features
+
+When teams participate in Story Mapping, they are exploring the unknown terrain of future outcomes and corresponding system behavior
+
+---
+
+*[Image(s) for Slide 31]*
+
+![Diagram/Image from Slide 31](images/slide_031_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 31](images/slide_031_image_1.jpg)
+
+---
+
+## Slide 32
+
+Tip: Complete only as much of the story map as you need to uncover uncertainty, validate assumptions and share understanding
+
+Conduct a cursory scan to evaluate breadth and approach. Continue to rely on past experience to inform complexity
+
+Epic
+
+Feature
+
+Stories
+
+Guess the story complexity based on experience from similar work.
+
+Deciding when to dive deeper, continue mapping at the current level, or to extrapolate and move on is as much art as it is science
+
+---
+
+---
+
+## Slide 33
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764532901466040&cot=14
+
+Example Story Map with Exploration and Extrapolate Annotations – Direct Pay
+
+---
+
+*[Image(s) for Slide 33]*
+
+![Diagram/Image from Slide 33](images/slide_033_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 33](images/slide_033_image_1.jpg)
+
+---
+
+## Slide 34
+
+Go through your Story Map
+
+Identify areas where you can extrapolate
+
+Do this at all levels of the story map, epic, feature, or story
+
+Identify areas where more exploration is required, that will serve as a reminder for us later in the course to start here!
+
+annotate the map with assumptions and questions
+
+Add the estimated Story Count to your initiative on your Kanban
+
+Exercise: Identify areas where you need further exploration and then extrapolate the stories required to estimate the total volume of stories
+
+---
+
+---
+
+## Slide 35
+
+Identifying Marketable Increments of Value
+
+---
+
+---
+
+## Slide 36
+
+My brilliant idea will make us millions
+
+We need to build the best performance car the world has seen using the latest (maybe even experimental) technology
+
+---
+
+---
+
+## Slide 37
+
+What does your customer want?
+
+I just need to get from point A to B as fast as possible
+
+I want to drive around town in my nice car and show off
+
+I need to drive around town and make many stops along the way
+
+---
+
+---
+
+## Slide 38
+
+A Minimum Viable Product is a mechanism to help you understand what customers actually need
+
+Start with a minimum viable product
+
+Get user, customer and market feedback
+
+Deliver 80% of the value sooner
+
+Continue to iterate based on feedback and learning
+
+An MVP includes just enough valuable functionality to be released into the market
+
+We want to get the product into the customers’ hands as soon as possible, measure their response and use that data to inform the choice of what we work on next
+
+By taking this approach, we can become customer feedback driven and deliver value to customers frequently
+
+An MVP allows you to test an idea by releasing a set of features (early in your product and/or service’s lifecycle) to targeted users and customers, in order to collect the relevant data, and to learn from it.
+
+---
+
+*[Image(s) for Slide 38]*
+
+![Diagram/Image from Slide 38](images/slide_038_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 38](images/slide_038_image_1.jpg)
+
+---
+
+## Slide 39
+
+Delivering Minimum Viable Products Implies We Are Ready to Adopt Rapid Market Learning
+
+Minimal Viable Product
+
+Smallest increment that can enable us to learn whether we have a viable product for a highly uncertain market
+
+Primarily defined as an increment of learning
+
+Includes a formal hypothesis and how we are going to test that hypothesis
+
+We test the market reaction of every increment we deploy and are ready to pivot to a new direction if required
+
+If we are not ready to adopt rapid market learning, we may want to avoid MVP terminology
+
+(Minimal Viable) Market Increment
+
+A small increment of value that we (hopefully) introduce to the market and learn from
+
+Primarily defined as an increment of scope
+
+Less formal hypothesis, market testing, and expectations of pivoting based on market reaction
+
+Critical to getting feedback from stake-holders and sponsors on whether we have built a solution that meets their expectations, known or otherwise
+
+Delivering in small increment is a good first step towards higher quality delivery and accelerated market learning
+
+During this course we will use the terminology of increments, and how to deliver them more frequently to our users
+
+---
+
+*[Image(s) for Slide 39]*
+
+![Diagram/Image from Slide 39](images/slide_039_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 39](images/slide_039_image_1.png)
+
+---
+
+## Slide 40
+
+Internal Employee Trial 1
+
+100 employees
+
+Activate inside WAN
+
+Manual processes
+
+No support tooling
+
+Internal Employee Trial 2
+
+All employees in Major City
+
+Partial automation of provisioning
+
+Activate over 3G network
+
+Support through DB views
+
+Full Customer Rollout
+
+High and order entry UI
+
+3 million customers
+
+Fully automated
+
+Robust support tooling
+
+Business Value:
+
+N/A
+
+Business Risk:
+
+Demonstrate capability to build a viable solution
+
+Technical Risk:
+
+Provisioning and activation of unproven network elements
+
+Build eager adopter community to promote product
+
+Prove base product and partner integration before expanding into paying customers
+
+Scaling the solution to meet higher volumes and supporting the users
+
+Increase revenue stream through new service
+
+Validate pricing and optimize operating costs
+
+Scaling operations and support to meet production usage volumes
+
+Market Increment 1
+
+Market Increment 2
+
+Market Increment 3
+
+A Market Increment should be defined with the goal of realizing business benefits and/or validating key risks and assumptions
+
+---
+
+---
+
+## Slide 41
+
+The following factors should be considered when prioritizing work into Markets Increments:
+
+The business value of the Increment
+
+The effort of developing the Increment
+
+The amount of learning that will be gained
+
+The amount of risk & uncertainty removed
+
+The order of dependencies across your Increments
+
+Defining Increments tends be a process that is started by Product Owner and Analysts but requires significant co-creation from technology and operations before it can be finished!
+
+Prioritizing Market Increments needs to account for a combination of value, complexity, and risk
+
+---
+
+*[Image(s) for Slide 41]*
+
+![Diagram/Image from Slide 41](images/slide_041_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 41](images/slide_041_image_1.png)
+
+---
+
+## Slide 42
+
+Subjective Quality:
+
+Does the MVP’s complexity depend on meeting non-functional requirements (performance, amount of visual polish, ease of use)?
+
+E.g. New card product for 50 early adopters
+
+When delivering larger solution, use splitting patterns to reduce the complexity and size of your Market Increments
+
+---
+
+---
+
+## Slide 43
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531896784002&cot=14
+
+Story Map with Increments Tagged on the Side – Example Direct Pay
+
+---
+
+*[Image(s) for Slide 43]*
+
+![Diagram/Image from Slide 43](images/slide_043_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 43](images/slide_043_image_1.jpg)
+
+---
+
+## Slide 44
+
+Think of how you can bring the solution to market in smaller units
+
+Prioritize according to a combination of business value, risk, effort, and uncertainty
+
+Leverage the Splitting Patterns if stuck on how to split work into smaller increments
+
+Make sure to define the purpose of each market increment, the value, and any risks you will validate, and learning achieved
+
+Don’t forget to create increment tickets and link them to your Initiative ticket.
+
+Confidential
+
+Exercise: Define A Set Of Increments for the Scope of the Solution Defined On Your Story Map
+
+---
+
+---
+
+## Slide 45
+
+What would Kanbanize look like?
+
+https://olg3d.kanbanize.com/ctrl_board/89/locatecard/31315
+
+Kanbanize Example After Shaping Increment 1 – Direct Pay
+
+---
+
+*[Image(s) for Slide 45]*
+
+![Diagram/Image from Slide 45](images/slide_045_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 45](images/slide_045_image_1.png)
+
+---
+
+## Slide 46
+
+Reduce Collisions with other labs by looking in the Global Story Repository
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531807770936&cot=14
+
+---
+
+*[Image(s) for Slide 46]*
+
+![Diagram/Image from Slide 46](images/slide_046_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 46](images/slide_046_image_1.png)
+
+---
+
+## Slide 47
+
+Discovering Your Next Market Increment
+
+---
+
+---
+
+## Slide 48
+
+Discovery In A Nutshell
+
+---
+
+---
+
+## Slide 49
+
+Goal: Align on the solution and scope of functionality in a way that fosters fine-grained and incremental learning and delivery of the next end to end slice of value
+
+Key Activities
+
+Key functionality & solution agreed to sufficient to make any hard to reverse decisions (platform, hardware, vendors etc)
+
+Define a plan expressed as throughput, lead-time, and batch size across the delivery lifecycle required to deliver
+
+Agree on the likely team composition and size required to deliver
+
+Story Writing Related Activities
+
+Scope, prioritize and schedule your next market increment of an initiative
+
+Complete the Story Map for an increment identifying all required epics, features, and stories
+
+Refine / split stories based on technical / platform concerns
+
+Features are schedule and prioritize based on team(s) estimated throughput
+
+Other Helpful Agile Artifacts
+
+Agile Backlog
+
+Cumulative Flow Diagram
+
+Domain Driven Design
+
+UX (Lo – Fi)
+
+Tip: In discovery you are working across a single increment, while you want to be complete from a story mapping perspective avoid detailing out each individual story
+
+Goal:
+
+The goal of Discovery is to map the scope and work required to deliver on the next increment of value
+
+---
+
+*[Image(s) for Slide 49]*
+
+![Diagram/Image from Slide 49](images/slide_049_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 49](images/slide_049_image_1.jpg)
+
+---
+
+## Slide 50
+
+Moving an Idea / Initiative through a Delivery Kanban
+
+A Lab pulls in the next increment of value into discovery and completes the story map for that increment
+
+As all the stories are identified for a feature, feature cards are created as children of the increment card and moved to discovery done.
+
+Product, Analysts and Tech collaborate to ensure all features have accurate story counts
+
+Once all features for an increment are complete the increment ticket is moved to done in priority order
+
+---
+
+*[Image(s) for Slide 50]*
+
+![Diagram/Image from Slide 50](images/slide_050_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 50](images/slide_050_image_1.png)
+
+---
+
+## Slide 51
+
+Refining Marketable Increments of Value On Your Story Map
+
+---
+
+---
+
+## Slide 52
+
+Avoid building all of one function and then building all of the next function and the function that, instead incrementally build an end to end product after every iteration
+
+This does not mean that you will have a strictly complete product at the end of every increment rather you have some that  can achieve your user’s needs and goals
+
+To do this you start by defining the spine of your solution, a simple, rough, even manual in solution in places, anything than can even remotely be considered optional is jettisoned
+
+Rather than reports, you expose a database table, bare bones UI over fancy screens, validation is left out
+
+If you ran out of money next week, what would you deliver next?
+
+If all you had was time to deliver your spine, what would you deliver to support your business outcome?
+
+When developing a product iteratively, start from the spine and then work your way outward
+
+---
+
+*[Image(s) for Slide 52]*
+
+![Diagram/Image from Slide 52](images/slide_052_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 52](images/slide_052_image_1.jpg)
+
+---
+
+## Slide 53
+
+Lay out stories vertically  to represent choices users can make
+
+Think about which option is mandatory in the sense that the solution wouldn’t work without that story
+
+Lay out stories horizontally to indicate a linear sequence of activity
+
+As we complete the Story Map for an Increment, we can start becoming more formal in laying out sequential vs optional functionality
+
+Manage Orders
+
+Manage Fulfillment
+
+Enter Order
+
+Enter Order Info
+
+Submit Order
+
+Process Order
+
+Save Order Info
+
+Receive Order
+
+Submit Fulfillment Order
+
+Process Fulfillment Order
+
+Receive Fulfillment Order
+
+Submit to Fulfillment Vendor
+
+Save Fulfillment Order
+
+Transform to Vendor Fulfillment
+
+Submit Fulfillment to Vendor
+
+Receive Shipping Notification
+
+Track Shipping Progress
+
+Submit Provision Request
+
+Process Shipping Exceptions
+
+Process Order Exceptions
+
+Process Fulfillment Order Exception
+
+View Order
+
+Increment 1
+
+Optional
+
+Fix Fulfillment Order
+
+Fix Shipment Order
+
+Sequential
+
+Increment 2
+
+Increment N
+
+---
+
+---
+
+## Slide 54
+
+Reshuffle stories and stack them vertically according to priority order
+
+Stories that are required to create your first increment are placed at the top of the stack, this is known as the spine
+
+Stories that may be delivered later (and sometimes never) are placed lower, and lower down the stack
+
+Be critical about what is in your spine, and drop anything that is absolutely not essential
+
+Manage Orders
+
+Manage Fulfillment
+
+Enter Order
+
+Enter Order Info
+
+Submit Order
+
+Process Order
+
+Update Order Info
+
+Save Order Info
+
+Add Accessory
+
+Add Optional Mobile Features
+
+Receive Order
+
+Notify Customer
+
+Submit Fulfillment Order
+
+Process Fulfillment Order
+
+Receive Fulfillment Order
+
+Submit to Fulfillment Vendor
+
+Save Fulfillment Order
+
+Transform to Vendor Fulfillment
+
+Submit Fulfillment to Vendor
+
+Receive Shipping Notification
+
+Track Shipping Progress
+
+Submit Order with Accessory
+
+Submit Order with Features
+
+Submit Fulfillment to Network Managmt
+
+Submit Provision Request
+
+Process Shipping Exceptions
+
+Resend Fulfillment to Vendor
+
+Process Order Exceptions
+
+Process Fulfillment Order Exception
+
+View Order
+
+Shuffle
+
+Priority
+
+Time
+
+The Spine
+
+Exercise: Reorder the stories in your story map according to priority and identify the stories that make up your spine
+
+Story Maps are a visual medium that makes it easy to collaboratively sort your stories into order of delivery priority and identify the spine of your solution
+
+---
+
+---
+
+## Slide 55
+
+By dividing the entire Story Map into planned increments. We can visually tell a narrative for a particular increment.
+
+We can also tell the story of how we want to order delivery to market.
+
+Teams often build the story map iteratively, focusing on laying out stories for the next one or two increments at a time
+
+As priority becomes clearer, you can revisit your market increments, placing the exact stories you want into your first and subsequent increment
+
+---
+
+---
+
+## Slide 56
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531874045593&cot=14
+
+Story Map Direct Pay with increments
+
+---
+
+*[Image(s) for Slide 56]*
+
+![Diagram/Image from Slide 56](images/slide_056_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 56](images/slide_056_image_1.jpg)
+
+---
+
+## Slide 57
+
+Subjective Quality:
+
+Does the MVP’s complexity depend on meeting non-functional requirements (performance, amount of visual polish, ease of use)?
+
+Eg. New card product for 50 early adopters
+
+Remember to use splitting patterns to refine the size of your Market Increments
+
+---
+
+---
+
+## Slide 58
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531897203997&cot=14
+
+Story Map of Direct Pay Example with Splitting Patterns
+
+---
+
+*[Image(s) for Slide 58]*
+
+![Diagram/Image from Slide 58](images/slide_058_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 58](images/slide_058_image_1.jpg)
+
+---
+
+## Slide 59
+
+Layout your story vertically and horizontally to reflect priority and sequentially
+
+Shuffle stories in your next increment and identify the spine of your solution
+
+Continue to shuffle stories to refine the scope of subsequent Increments, stopping after you have defined the next one or two increments
+
+Consider again how to use splitting patterns to refine the size of your MVPs
+
+Exercise: Refine your Story Map based on scope and priority of your Market Increments
+
+---
+
+*[Image(s) for Slide 59]*
+
+![Diagram/Image from Slide 59](images/slide_059_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 59](images/slide_059_image_1.jpg)
+
+---
+
+## Slide 60
+
+Writing things down may be a required part of a knowledge worker’s job
+
+But writing things down is far from sufficient
+
+Written information is most effective when we add just enough structure to enable a focused conversation
+
+Stories are semi structured artifacts that serve as a place holder to have an effective conversation
+
+The exact amount of written detail behind a story will vary from team to team
+
+Above all story must enable a semi structured narrative
+
+Communication and collaboration is best accomplished when we use supporting artifacts to maximize the effectiveness of a personal, face to face dialogue
+
+---
+
+*[Image(s) for Slide 60]*
+
+![Diagram/Image from Slide 60](images/slide_060_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 60](images/slide_060_image_1.jpg)
+
+---
+
+## Slide 61
+
+Exercise : Practice story telling using your story map to help you share your narrative of future user and system behavior
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764531808236168&cot=14
+
+Story Mapping is primarily a vehicle that helps you tell a story about how would want users to engage with your system in the future
+
+---
+
+*[Image(s) for Slide 61]*
+
+![Diagram/Image from Slide 61](images/slide_061_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 61](images/slide_061_image_1.png)
+
+---
+
+## Slide 62
+
+Exploring areas outside of the team's knowledge is par for the course of most agile teams
+
+Teams will often work outside of their expertise
+
+When working with uncertainty it is critical that teams make note of their assumptions and take action to validate those assumptions as quickly as they can
+
+As we explore our future solution, we will often encounter areas of unknowns and uncertainty that fall outside our domain of knowledge
+
+---
+
+*[Image(s) for Slide 62]*
+
+![Diagram/Image from Slide 62](images/slide_062_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 62](images/slide_062_image_1.jpg)
+
+---
+
+## Slide 63
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764533995948959&cot=14
+
+In a large enterprise we can often get answers by engaging with others outside of our team
+
+Operations, call center, senior leaders, technology, are all areas that can provide their expertise and weigh in in the feasibility of our solution in both asked for and often in areas we didn’t event  to ask
+
+Your story map is a good place to identify the need for those conversations as well as document the answers by updating he story map in real time
+
+Story Map of Direct Pay with Unknowns
+
+Exercise: Annotate your story map with which areas contain uncertainty or unknowns as and how you want reduce that uncertainty
+
+---
+
+*[Image(s) for Slide 63]*
+
+![Diagram/Image from Slide 63](images/slide_063_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 63](images/slide_063_image_1.png)
+
+---
+
+## Slide 64
+
+https://olg3d.kanbanize.com/ctrl_board/89/locatecard/31315
+
+Kanban Snapshot After Discovery – Increment 1 Of Direct Pay
+
+---
+
+*[Image(s) for Slide 64]*
+
+![Diagram/Image from Slide 64](images/slide_064_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 64](images/slide_064_image_1.png)
+
+---
+
+## Slide 65
+
+Some Story Mapping Practices to Encourage and Avoid
+
+---
+
+---
+
+## Slide 66
+
+Avoid
+
+Describing stories as a set of development or testing activities to be complete
+
+Using the story map as a work breakdown structure
+
+Encourage
+
+Describing stories in terms of behavior the system will exhibit once a story has been promoted to production
+
+Use the story map to describe testable increments of functionality
+
+Benefits
+
+Agile teams measure progress in terms of testable functionality, which enables better feedback
+
+System Behavior conveys much more meaning that dev tasks
+
+Behavior aligns stakeholders, technology and others outside the team
+
+Epic
+
+Feature
+
+Story
+
+Send Wire
+
+Define order schema
+
+Manage  Wire
+
+Enter Beneficiary
+
+Process Wire
+
+Validate Wire Format
+
+Enter Beneficiary Details
+
+Enter Bank Details
+
+Submit  Processed Wire
+
+Notify Customer
+
+Retrieve Bank Details
+
+Retrieve  Bene from List
+
+Check Fraud Wire
+
+Use Story Maps to Outline User and System Behavior *NOT* Tasks
+
+---
+
+---
+
+## Slide 67
+
+Enter Beneficiary Details
+
+Enter Bank Details
+
+Validate Wire Format
+
+Submit  Processed Wire
+
+Retrieve Bank Details
+
+Retrieve  Bene from List
+
+Send Wire
+
+Manage  Wire
+
+Enter Beneficiary
+
+Process Wire
+
+Check Fraud Wire
+
+View Notification
+
+Notify Customer
+
+Send to Fraud
+
+Real time validation of bank details
+
+Transform to submission client
+
+Epic
+
+Feature
+
+Story
+
+Avoid
+
+Focusing only on User interactions
+
+Black boxing system to system logic
+
+Encourage
+
+Define System activities, outlining the behavior required to allow information to flow across systems
+
+Treat systems as personas, and be explicit on required back office behavior
+
+Color code stories by system
+
+Benefits
+
+Focus Mapping on where complexity is in many IT projects, ie system to system behavior
+
+Early understanding of integration points, supports placing work onto other teams backlogs
+
+Focus Story Maps on User *AND* System Activities
+
+---
+
+---
+
+## Slide 68
+
+Epic
+
+Feature
+
+Story
+
+Large story, can we break it up?
+
+Send Wire
+
+Enter Beneficiary
+
+Enter Beneficiary Details
+
+Enter Bank Details
+
+Retrieve Data Details
+
+15 D
+
+Avoid
+
+Arbitrarily decomposing stories to a functional level, regardless of size
+
+Building the map in absence of the people who can estimate the work
+
+Encourage
+
+Asking how “big  or small are the stories in the map?” promoted to production
+
+Breaking / Grouping stories so that most fall into a 3 – 12 day effort range
+
+Benefits
+
+Enable frequent feedback by decomposing the work into smaller items
+
+Enable high quality feedback by grouping work into meaningful chunks
+
+Stories Need to Balance Being Fine-Grained As Well As Testable/Valuable
+
+---
+
+---
+
+## Slide 69
+
+Avoid
+
+Generic function, verbs, nouns
+
+Overly technical, IT concepts, unless core to domain being discussed
+
+Encourage
+
+Focusing the language on the business domain
+
+Validating that a business expert can understand the language of most of the stories
+
+Benefits
+
+A common artifact that serves a wide variety of stakeholders
+
+Lightweight but precise documentation over a tome of illegible content
+
+Pop Bene Core Form
+
+Pop Bank #
+
+Format
+
+Submit
+
+Pull Bank #
+
+Send Wire
+
+Manage  Wire
+
+Enter Beneficiary
+
+Process Wire
+
+Notify
+
+Get Beneficiaries
+
+API call to Fraud
+
+Enter Beneficiary Details
+
+Enter Bank Details
+
+Validate Wire Format
+
+Notify Customer
+
+Submit  Processed Wire
+
+Retrieve Bank Details
+
+Retrieve  Bene from KYC List
+
+Check Fraud Wire
+
+Epic
+
+Feature
+
+Story
+
+Ground the Map in Business Language That is Specific and Precise
+
+---
+
+---
+
+## Slide 70
+
+Avoid
+
+Static functional concepts
+
+Encourage
+
+Verb /Noun language
+
+Language that emphasize performing an operation on an explicit thing
+
+Benefits
+
+The map is easy to walk through, i.e. it tells a story
+
+Gaps in flow make it easier to spot where the solution may be incomplete
+
+Order Beneficiary Details
+
+Order  Bank Details
+
+Order Wire Format
+
+Wire Submission
+
+Bank Details
+
+Send Wire
+
+Manage  Wire
+
+Enter Beneficiary
+
+Process Wire
+
+Order Notification
+
+Order List
+
+Order Fraud Check
+
+Fraud Check Wire
+
+Epic
+
+Feature
+
+Story
+
+Favor Active Behavioral Language Over Functional / Capability Breakup
+
+---
+
+---
+
+## Slide 71
+
+Use Story Maps to Outline User and System Behavior *NOT* Tasks
+
+Focus Story Maps on User *AND* System Activities
+
+Stories Need to Balance Being Fine-Grained As Well As Testable/Valuable
+
+Ground the Map in Business Language That is Specific and Precise
+
+Favor Active Behavioral Language Over Functional / Capability Breakup
+
+Confidential
+
+Exercise: Go through your story map and refactor your stories to incorporate best practices
+
+---
+
+---
+
+## Slide 72
+
+Planning, Scheduling and Forecasting
+
+---
+
+---
+
+## Slide 73
+
+Stories are integral part of an agile team’s ability to plan, schedule and report on progress
+
+At the beginning of every sprint teams estimate stories by assigning them a point value (1,2,3,5,8,etc) representing the complexity in a story
+
+This complexity is relative to other stories in the team’s backlog
+
+Estimating continues until a maximum amount of work that can accomplish in a sprint is reached
+
+Tracking is accomplished by recording how many points worth of work was done inside a sprint, known as velocity to better plan in the future
+
+---
+
+---
+
+## Slide 74
+
+Confidential
+
+The Velocity and pointing approach to planning work is a good way to get teams to start collaborating in a way that increases a shared understanding of the work
+
+Practices like sprint planning and story points are whole team activities
+
+They are designed as activities that are done by the everyone on the team
+
+These practices ensure that the team engage in a way that helps them challenge each other’s assumption
+
+These practices encourage  team members to challenge each other’s understanding of the work that they need to
+
+---
+
+*[Image(s) for Slide 74]*
+
+![Diagram/Image from Slide 74](images/slide_074_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 74](images/slide_074_image_1.jpg)
+
+---
+
+## Slide 75
+
+Confidential
+
+Most Agile Teams eventually hit a wall when it comes to planning their work using a sprint and story based approach
+
+Extensive data collected in the field shows that pointing based estimations and tracking of  velocity is notoriously inaccurate and predictability rarely increases over time
+
+In practice it is really hard to predict how much work is initiated and complete inside a small increment of time (eg a sprint)
+
+The result is teams often end up padding their estimates to increase accuracy, or sacrifice accuracy to attain higher velocity
+
+This practice is also deliberately team, development,  and sprint focused which ignores the bigger picture
+
+The biggest source of delay and churn are often outside the team, happen outside the sprint, and are not directly due to the development team
+
+---
+
+*[Image(s) for Slide 75]*
+
+![Diagram/Image from Slide 75](images/slide_075_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 75](images/slide_075_image_1.jpg)
+
+---
+
+## Slide 76
+
+Confidential
+
+Like Sands in an Hourglass So Goes The Stories In Our Teams Lives
+
+In reality we can take what works with point + sprint planning, adjust to provide both a simpler and more holistic view
+
+Small stories let us switch from estimating the details, which is both expensive, inaccurate and myopic, to simply counting them
+
+We estimate the story count during shaping, and then plan progress by predicting how often stories across our flow of delivery
+
+This works because, as long as most stories are small, we can treat all stories as being effectively the same size for planning and tracking  purpose, using the Law Of Large Numbers
+
+---
+
+*[Image(s) for Slide 76]*
+
+![Diagram/Image from Slide 76](images/slide_076_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 76](images/slide_076_image_1.jpg)
+
+---
+
+## Slide 77
+
+Confidential
+
+Planning Is Made Simple By Calculating Throughput and Volume
+
+A good metaphor for this kind of planning is asking how much time it would take to completely fill a bucket of water?
+
+To calculate we an answer we simply need to understand how large the bucket of water is, and the rate the water being poured into the bucket, or the throughput
+
+Estimating and planning is done by estimating the story volume of upcoming initiatives and their increments; then predicting what the throughput of the team is going to be and tracking what the throughput of the team has been over time
+
+---
+
+*[Image(s) for Slide 77]*
+
+![Diagram/Image from Slide 77](images/slide_077_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 77](images/slide_077_image_1.jpg)
+
+---
+
+## Slide 78
+
+The Agile practice Of Relative Sizing is best conducted where size actually matters, Upstream and for larger buckets of Scope
+
+Remember as part of Idea Shaping we want to do just enough story mapping to extrapolate how many epics, feature, and stories make up an increment
+
+100 Stories
+
+10 Stories
+
+New Initiative
+
+Already Delivered Initiative
+
+At any point the work can be assessed by comparing and contrasting it to work previously completed.
+
+As long work is similar from a platform and team perspective, than it is relatively easy to relatively size the new initiative against previously completed one
+
+During Idea Shaping and Discovery we are continually identifying and refining our Marketable Increments
+
+In either of these stages we can relate size our increments in the initiatives against each other as well as previously delivered increments of value that are similar in platform and team skills
+
+Relative sizing at the initiative and increment level gives us an accelerated and surprisingly accurate estimate of size
+
+25 Stories
+
+5  Stories
+
+Increment In New Initiative
+
+Increment Already Delivered
+
+---
+
+---
+
+## Slide 79
+
+Apply relative sizing by stack ranking the following in order of size
+
+Doberman
+
+Chihuahua
+
+German Shepherd
+
+Bulldog
+
+Great Dane
+
+Golden Retriever
+
+Poodle
+
+Newfoundland
+
+Austrian Guildenbaur
+
+Exercise: Conduct a Relative Sizing Exercise on a topic we are well versed in…
+
+---
+
+*[Image(s) for Slide 79]*
+
+![Diagram/Image from Slide 79](images/slide_079_group_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 79](images/slide_079_group_image_1.png)
+
+---
+
+## Slide 80
+
+Exercise Answer:
+
+It turns out that relatively estimating known things is pretty easy to do
+
+What about unknown item?
+
+How would we estimate the size of the Austrian Guildenbaur?
+
+---
+
+---
+
+## Slide 81
+
+Exercise: Conduct a Relative Sizing Exercise on your Initiative and / or The Increments inside them
+
+200 Stories
+
+50  Stories
+
+Take an Initiative and relatively size it against previously delivered initiatives (For Bede work you may need 3 estimates: App, Web and Platform)
+
+We did a bit of story mapping…
+
+Lets relatively size each  increment in the initiative to each other…
+
+Take your Increments inside an initiative and relatively size them, (Again for Bede work you may need 3 estimates: App, Web and Platform)
+
+We identified Market Increment…
+
+Let's relatively size the initiative to previous initiatives
+
+As well as relatively size them to previously delivered increments…
+
+25 Stories
+
+---
+
+---
+
+## Slide 82
+
+Weekly Queue (3 Stories
+
+It’s a story!
+
+No Idea
+
+Team throughput 6 stories a month
+
+Explore
+
+To Big
+
+It’s too big split it up!
+
+No Idea send it back for more analysis
+
+Delivery
+
+The reality is the biggest value of pointing is ensuring that the team only accepts stories that can be completed quickly, and that stories are small
+
+Use sprint planning and story grooming (to be covered in later in training) as an opportunity to simply reject stories that are too ambiguous, or split work into smaller stories before accepting them
+
+By only sizing enough work based on actual throughput they keep enough work to keep the team supplied as well creating predictable performance numbers
+
+This approach scales across the entire delivery flow as we can see the volume of planned or actual work across all states in our kanban
+
+Stories throughput is a simple and easy way for agile team’s ability to plan, schedule and report on progress
+
+---
+
+*[Image(s) for Slide 82]*
+
+![Diagram/Image from Slide 82](images/slide_082_image_1.jpg)
+
+![Diagram/Image from Slide 82](images/slide_082_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 82](images/slide_082_image_1.jpg)
+
+
+![Diagram/Image from Slide 82](images/slide_082_image_1.png)
+
+---
+
+## Slide 83
+
+Exercise: Let’s conduct a planning experiment…
+
+Assuming the delivery throughput is 10 stories a month, and the upstream flow can keep up with our dev teams…
+
+Approximately when will feature 1 finish development?
+
+Approximately when will Feature 2 start development? How long will it take to develop? How about 3?
+
+Approximately when will Initiative 1 fully complete development? What about Initiative 2?
+
+---
+
+*[Image(s) for Slide 83]*
+
+![Diagram/Image from Slide 83](images/slide_083_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 83](images/slide_083_image_1.png)
+
+---
+
+## Slide 84
+
+As soon as an Initiative / Increment is relatively sized we can place on one or more team’s backlogs based on priority order
+
+As the delivery start date gets closer, work will also pass through the lab’s upstream flow and be continually broken up and story counts will be refined
+
+Schedules are Estimated by placing work into Sprint Queues that are filled until an estimated Story capacity is reached
+
+Inspect and Adapt is used to continually adjust backlogs based on Team Throughput
+
+Stories
+
+An Upstream Flow can be thought of as an Agile Backlog; where development teams can iteratively plan upcoming work
+
+This Week
+
+(Options)
+
+(Discovery)
+
+(Story Definition)
+
+(Shaping)
+
+---
+
+*[Image(s) for Slide 84]*
+
+![Diagram/Image from Slide 84](images/slide_084_image_1.jpg)
+
+![Diagram/Image from Slide 84](images/slide_084_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 84](images/slide_084_image_1.jpg)
+
+
+![Diagram/Image from Slide 84](images/slide_084_image_1.png)
+
+---
+
+## Slide 85
+
+Exercise: Place relatively sized work onto one or more team's backlog
+
+Finish relatively sizing your Initiative, Increments, or Features in your story map in terms of effort and complexity; guide the conversation by stack ranking them against other new items and/or previously delivered ones. Once relatively sized, we can infer a story count for each Initiative, Increment, or Feature.
+
+Plot initiatives, increments, and/or Features according to when you think the team would be able to start delivery on them (Hint: think about the team's delivery throughput).
+
+Bonus: Try write out a prediction of how stories will flow across our system of work. Think about the cadences we can use to help us plot movement of stories (e.g. planning, story testing, integration testing) to ensure we inject sufficient feedback into the system.
+
+---
+
+*[Image(s) for Slide 85]*
+
+![Diagram/Image from Slide 85](images/slide_085_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 85](images/slide_085_image_1.png)
+
+---
+
+## Slide 86
+
+Story Exploration
+
+---
+
+---
+
+## Slide 87
+
+Story Or Not A Story!(Let’s play a little game)
+
+---
+
+---
+
+## Slide 88
+
+Stories are the core artifact we use to describe how we want our system to behave in response to User activity
+
+Recapping on Stories; Stories are
+
+a unit of scope and value
+
+worked on by the entire team
+
+Statements of user and system behavior
+
+written so they can be tested
+
+delivered in features and increments
+
+a place holder for conversations and collaboration
+
+can be developed and tested in a matter of days
+
+“I N V E S T”
+
+Describing Stories Through Acceptance Criteria
+
+Acceptance Criteria describe the conditions that the story must meet to be accepted as complete by the Product Owner (who represents the user)
+
+They are a way to share a clear boundary to the scope of a story, and help to describe to a team the conditions under which a story can be considered done
+
+Are written in a behavior form or a more domain-oriented form
+
+Acceptance Criteria
+
+When the daily transaction cycle is complete then the system retrieves the all transactions for the last days Interac
+
+When the system successfully retrieves the daily transactions from Interact then the system retrieves internal transactions from the internal transaction logs and the systems compares the two transaction records
+
+When discrepancies are found then the system creates a report that contain entries for each discrepancy and alerts User ABC
+
+Each discrepancy entry includes both transactions, as well as the discrepancy descriptor, a …
+
+Reconcile Interact and Internal Payment Transaction File and Generate Discrepancy Report
+
+As a BCAU operator, and an Interac Operator
+
+I want to reconcile the Interac reconciliation file with the payment center transaction record and provide a list of discrepancies
+
+So I can fix any discrepancies that arise
+
+Example
+
+---
+
+---
+
+## Slide 89
+
+COMPARISON #1
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+Best Practices for Writing a User Story (as a.. i want.. so that.. uggghh so dumb)
+
+---
+
+---
+
+## Slide 90
+
+COMPARISON #1 – And the winner is…..
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+Story B uses ambiguous language such as easily, as well as some acceptance criteria in the story itself. Story A offers a little more detail with a more structured, achievable outcome.
+
+Best Practices for Writing a User Story (as a.. i want.. so that.. uggghh so dumb)
+
+---
+
+---
+
+## Slide 91
+
+Several guiding principles have been established for gauging the quality of a User Story – the INVEST principles
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+COMPARISON #2
+
+---
+
+---
+
+## Slide 92
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+Story A is not valuable on its own to the end user, and a common way stories are split to achieve Small
+
+COMPARISON #2 – And the winner is…..
+
+---
+
+---
+
+## Slide 93
+
+COMPARISON #3
+
+Several guiding principles have been established for gauging the quality of a User Story – the INVEST principles
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+---
+
+---
+
+## Slide 94
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+Story A is over-solutioned, where Story B offers enough specifics for the team to creatively develop a solution around it.
+
+COMPARISON #3 – And the winner is…..
+
+---
+
+---
+
+## Slide 95
+
+Several guiding principles have been established for gauging the quality of a User Story – the INVEST principles
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+COMPARISON #4
+
+---
+
+---
+
+## Slide 96
+
+Negotiable
+
+Testable
+
+Valuable
+
+Estimate
+
+Small
+
+Independent
+
+Story B is vague and is more Epic than Story, while Story A is focused and sharp in a single area
+
+COMPARISON #4 – And the winner is…..
+
+---
+
+---
+
+## Slide 97
+
+This format came around in the early days of agile
+
+In the absence of higher-level context, this format is useful to provide a reason for a system behavior to exist
+
+The format can give the team insight into the mind of the end user, to hopefully help make better design decisions with the end user goal in mind
+
+It also makes sure that each card represents a small change in the system's behavior
+
+A short discussion on the Agile Story Format
+
+Be wary of using the typical preconceived agile story template without understanding its purpose
+
+TIP: If you find yourself writing a "story" that doesn't represent a small increment of system behavior in response to an end user action STOP and consider if the work is actually a story
+
+HOWEVER
+
+This format is frequently mis-used and attempted to be applied to work that does not require any of the above outcomes to be successful
+
+With story maps in place, many teams find the typical template to be redundant and use a simple title to convey meaning
+
+The main focus of the story should be the acceptance criteria, the story summary is only there to provide context!
+
+Many agile teams use the:
+
+As A              <User>
+
+I Want To     <Perform Action>
+
+So That        <I Receive Value>
+
+---
+
+*[Image(s) for Slide 97]*
+
+![Diagram/Image from Slide 97](images/slide_097_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 97](images/slide_097_image_1.png)
+
+---
+
+## Slide 98
+
+Story Exploration In A Nutshell
+
+---
+
+---
+
+## Slide 99
+
+Goal: Perform enough definition and design so that a small cross functional team collectively understands the what, the how, and the who of delivery for the next sprint (or maybe two)
+
+Key Activities
+
+The understanding of stories & their solution have been refined for a feature or thin slice
+
+A subset of the team have taken ownership of delivering the work, estimated it, and committed to start in the next couple of days
+
+Supporting design and definition activities are completed necessary to laying out how the stories will be delivered (e.g. UX, Domain Design, etc)
+
+Story Writing Related Activities
+
+Share a common understanding of the next feature/slide starting delivery
+
+Define Acceptance Criteria for every story inside the next feature / slice to start
+
+Refine / Merge/ Split stories as necessary to ensure they are expressed at a small / similar level of details
+
+Remaining Key risks/ unknowns/ assumptions have been explored for upcoming to be delivered Stories
+
+Other Helpful Agile Artifacts
+
+Planning Game
+
+Architecture Modeling
+
+Spec By Example
+
+Domain Driven Design
+
+Tip: In Exploration you are going relatively deep on a smallest part of the solution that you believe a team can deliver on quickly together, but keep the focus of story writing on completeness from a user / system behavior
+
+The goal of Story Exploration is to gain a deep share understanding of the outcomes and work required for the team to execute delivery activities together for a short period of time
+
+---
+
+*[Image(s) for Slide 99]*
+
+![Diagram/Image from Slide 99](images/slide_099_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 99](images/slide_099_image_1.jpg)
+
+---
+
+## Slide 100
+
+Moving an Idea / Initiative through a Delivery Kanban
+
+A Single feature is pulled into Exploration based on the Lab / dev team capacity
+
+BAs collaborate closely with Product, Designers, and Tech to define and refine acceptance criteria for each story in the feature, including identifying and exploring assumptions and unknowns
+
+Once done the feature is moved to Explore Done in The Kanban, and all stories in the feature are added to the Kanban as children of the feature; these stories are now considered ready for the team to start working on
+
+---
+
+*[Image(s) for Slide 100]*
+
+![Diagram/Image from Slide 100](images/slide_100_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 100](images/slide_100_image_1.png)
+
+---
+
+## Slide 101
+
+Any athletes that run relay races will tell you it's not just about having the fastest runners; winning teams also focus on how well they pass the baton
+
+Most work we find ourselves in is far more like a relay race than an individual sprint. We are constantly in demand from some other part of the organization, only to pass it to someone else
+
+In relay races the receiving runner is already at full speed by the time they get the baton, the sender also ensures that the receiver doesn’t need to look behind him; the transition is seamless
+
+In a relay race you optimize for success when you watch the baton; you don’t optimize for the individual performance of the runners, and it’s the same for our work as well!
+
+Knowledge work succeeds by watching the baton, not the runner
+
+---
+
+*[Image(s) for Slide 101]*
+
+![Diagram/Image from Slide 101](images/slide_101_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 101](images/slide_101_image_1.png)
+
+---
+
+## Slide 102
+
+Story Specification Scenario
+
+Story Specification Test case
+
+Story
+
+Feature
+
+We pull Features, 1 -2 at a time
+
+Test then release the next increment to production
+
+Discovered
+
+Feature Testing
+
+Story Delivery
+
+(Spec, Dev, Test)
+
+Story Exploration
+
+We spec, develop and test stories independently
+
+We collectively define and design all of the stories in a feature
+
+We validate features as soon as they are ready, and catch most of our defects early
+
+Waiting To Release
+
+We queue features until the increment is done
+
+Tip: Size and resize features until each features represents a tightly integrated collection of stories that can be delivered in several weeks by a single team
+
+We will increase in agility if we can frequently define, deliver, and test small incremental features on a frequent basis (a matter of weeks)
+
+---
+
+*[Image(s) for Slide 102]*
+
+![Diagram/Image from Slide 102](images/slide_102_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 102](images/slide_102_image_1.png)
+
+---
+
+## Slide 103
+
+Many teams make the mistake of trying to figure out the detail of a particular story one at a time
+
+But Stories do not exist in isolation, individual Stories are small segments of a larger, interlocking narrative
+
+It is often easier to explore stories together,  grouping them in a way that allows us to discuss and deliver a more integrated set of functionality than a single story
+
+While doing this we want to keep these groupings small, so we can incrementally deliver our work and maximize feedback
+
+Focus Exploration on telling a more detailed narrative that spans a small grouping of stories
+
+---
+
+*[Image(s) for Slide 103]*
+
+![Diagram/Image from Slide 103](images/slide_103_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 103](images/slide_103_image_1.jpg)
+
+---
+
+## Slide 104
+
+Session Overview
+
+Sessions are often facilitated by Product Owner or Analysts, and actively attended by relevant SMEs, and the Development / Delivery people likely to build the feature
+
+It is recommended to pick a highly visual collaboration tool. Like physical post-its if possible or Miro if remote so that everyone can participate
+
+Try to keep sessions under an hour to keep minds sharp
+
+Remember not every section of the story map must be explored all at once, incorporate into your process after story mapping and execute on a pull basis
+
+Pitfalls to Watch Out For
+
+Analysis Paralysis - Unknowns that require input from those not present should not derail the session. Rather, capture the assumptions and validate with SMEs afterward. It’s OK to have unknowns, the point of the exercise is to surface them, judge whether they are showstoppers, and balance acceptance criteria across stories
+
+Siloed Sessions - Performing exploration sessions without key members of the team will inevitably cause churn. Missing technical team representation will make it challenging to load balance stories. Missing SMEs will make it challenging to answer questions that have major impact on story composition
+
+Micro Stories - Militantly breaking down stories to the point of 1 acceptance criterion per story.  Breaking down work into task lists. Too much fragmentation can make it difficult to have the pieces fit together. Try to find a balance between small and valuable
+
+Running a Story Exploration Session
+
+---
+
+---
+
+## Slide 105
+
+Writing Story Acceptance Criteria
+
+---
+
+---
+
+## Slide 106
+
+Two approaches to group stories together for exploration are commonly used by agile teams, choose the approach based on level of uncertainty and level of collaboration on your teams
+
+---
+
+---
+
+## Slide 107
+
+Key Activities
+
+Define a group of Stories are easy to describe, deliver, and test together.
+
+Brainstorm data, behavior, UI, rules, etc including unknowns & assumptions
+
+Define behavioral acceptance criteria for your group of stories
+
+Increase your understanding by defining domain-oriented acceptance criteria
+
+Split / Merge Stories in order to ensure all stories are similarly small
+
+(Note: these steps can be done in any order, and steps are often revisited)
+
+Define Products
+
+Define Product
+
+Configure Plans for Products
+
+Agree to Product Plan
+
+Conducts Chargeable Activity
+
+Calculate
+
+Bill
+
+Use  Product and Charge
+
+Let’s walk through exploration all the Stories inside a Feature…
+
+---
+
+---
+
+## Slide 108
+
+The outcome of good story exploration session is a semi structured narrative that focuses on user and system behavior; it can be had for some teams to start there
+
+Just as often we will want to jot down any information, we can get that we think would be relevant to the story or feature at hand
+
+We are in effect mind mapping all the permutations of data, business rules, user actions, system constraints, etc that are useful to the discussion at hand.
+
+Often we will need to just make sense of all the possible details and permutations associated with a particular grouping of stories
+
+---
+
+*[Image(s) for Slide 108]*
+
+![Diagram/Image from Slide 108](images/slide_108_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 108](images/slide_108_image_1.jpg)
+
+---
+
+## Slide 109
+
+Modify homepage so customers can view charging related alerts
+
+Chargeable Threshold Alert -> Activities, Period, Amount, alert code
+
+Chargeable Activity ->
+
+Customer, activity type, charge, product code
+
+Customer:
+
+First name, MIddle initial, Last name,
+
+Product Agreement can only be made for more active products
+
+Activity exceeding a threshold goes to a alert queue for customers to review
+
+Agreement: created on product sign up
+
+Other key points to cover in exploration session can include
+
+UI / free drawing
+
+Integration
+
+Data elements
+
+Business rules
+
+Testing Scenarios
+
+Examples
+
+The Story Map is an excellent place to start assembling all information related to set of stories in rough form
+
+Agree to Product Plan
+
+Conducts Chargeable Activity
+
+Calculate
+
+Bill
+
+Use  Product and Charge
+
+Agreement: date, product, customer, etc
+
+Chargeable activity: tracked for an activated product
+
+What happens when we de-activate a product
+
+How many Alerts do we show, when do we stop showing them?
+
+How do we get exception from the queue over to the product web site?
+
+---
+
+---
+
+## Slide 110
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764533998832277&cot=14
+
+Example: Direct Pay Story Exploration - Low Fi
+
+---
+
+*[Image(s) for Slide 110]*
+
+![Diagram/Image from Slide 110](images/slide_110_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 110](images/slide_110_image_1.png)
+
+---
+
+## Slide 111
+
+Exercise: Brainstorm Acceptance Criteria (or the details that will contribute to your acceptance criteria)
+
+Jot down all the information we can get that we think would be relevant to the story or feature at hand
+
+Mind map all the permutations of data, business rules, user actions, system constraints, etc that can be used form acceptance criteria
+
+Note down any assumptions, unknowns or uncertainty and next steps to resolve them
+
+---
+
+---
+
+## Slide 112
+
+Specify outcomes that result from either user action or  system triggers.
+
+Describe flow of events, actions and reactions, processes, and tasks
+
+Behavioral acceptance criteria can often  follow the form of  When <trigger> then <reaction>
+
+When a call center rep selects a waiting call request on the call center dashboard
+
+Then the call center system will activate the call and connect it to the rep’s work station
+
+As we progress we can start refining our Narrative to cover both behavioral and domain oriented acceptance criteria
+
+Behavioral acceptance criteria
+
+Domain acceptance criteria
+
+will describe a concept according to their structure and composition,
+
+Describe responsibilities, information, relationship with other subjects, along with rules, or constraints pertaining to a particular concept or subject
+
+Can use the form <A Concept> <some interaction or relationship> <another Concept>
+
+A waiting call request include the originating phone number, the wait time of the call, the IVR problem code, and grouped according to business region the caller is calling from
+
+---
+
+*[Image(s) for Slide 112]*
+
+![Diagram/Image from Slide 112](images/slide_112_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 112](images/slide_112_image_1.png)
+
+---
+
+## Slide 113
+
+When writing Stories structure your narrative in a way that you are constantly shifting across the actors in your story
+
+Think of each criteria as an opportunity to pass the ball from one actor to the next
+
+Often you will start with a user action, then the system will respond in kind, to again be followed by another user action,
+
+You may also be passing the ball between two or more systems that need to integrate with each other
+
+Behavioral Acceptance Criteria describe the interaction between the human and system actors that are part of your story
+
+Tip: If you are writing more than a couple of acceptance criteria for a single actor, consider revising stories to show more interplay between users and the various systems at play
+
+---
+
+*[Image(s) for Slide 113]*
+
+![Diagram/Image from Slide 113](images/slide_113_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 113](images/slide_113_image_1.jpg)
+
+---
+
+## Slide 114
+
+Behavioral acceptance criteria in the form ofWhen <trigger> then <outcome>facilitates our concept of passing the ball across actors.
+
+Sometimes the ball is passed within a single when -> then
+
+Sometimes the ball is passed when we move from one AC to the next
+
+In either case focus on alternating when you pass or  when you run with the ball
+
+A good way to define behavioral acceptance criteria is to add them under each Story in the story map
+
+Acceptance Criteria
+
+Agree to Product Plan
+
+Use  Product and Charge
+
+Conducts Chargeable Activity
+
+Calculate
+
+Bill
+
+Pass!
+
+---
+
+*[Image(s) for Slide 114]*
+
+![Diagram/Image from Slide 114](images/slide_114_group_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 114](images/slide_114_group_image_1.png)
+
+---
+
+## Slide 115
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764534187884811&cot=14
+
+Example Direct Pay Story Grooming - Well Done
+
+---
+
+*[Image(s) for Slide 115]*
+
+![Diagram/Image from Slide 115](images/slide_115_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 115](images/slide_115_image_1.png)
+
+---
+
+## Slide 116
+
+Refine your informal acceptance criteria into the more formal When… Then.. Format
+
+Try to describe how the system will respond to User actions
+
+Also include system to system behaviors where it makes sense
+
+Remember to pass the ball from one actor to the next frequently
+
+Exercise: Define Behavioral Acceptance Criteria For a Single Feature
+
+---
+
+---
+
+## Slide 117
+
+Stories often get cluttered with information that applies to more than one story, epic, feature, etc
+
+Teams end up re-iterating the same concepts over and over
+
+When concepts cross teams this repetition gets worse and worse…
+
+The understanding of concepts often change over time, sometime because we learn, sometimes because we forget
+
+Different stories can end up contradicting each other, and be inconsistent in the way ideas are expressed
+
+This gets worse as we scale, especially when more than one team is working in the same domain
+
+When everything is described in behavioral acceptance criteria we can suffer from repetition and inconsistency
+
+---
+
+*[Image(s) for Slide 117]*
+
+![Diagram/Image from Slide 117](images/slide_117_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 117](images/slide_117_image_1.jpg)
+
+---
+
+## Slide 118
+
+Domain oriented acceptance criteria are good first step towards establishing a common body of knowledge known as a Ubiquitous Language
+
+The Model
+
+The Conversation
+
+And Yes, The Code
+
+How do we want to treat Cars differently from vehicles in general?
+
+For cars we are concerned with passengers and fuel…
+
+Hey I think I can understand what these guys are talking about…
+
+Historically, technology and the business have spoken entirely different languages, interfering with collaboration, blocking understanding, and impeding progress
+
+---
+
+*[Image(s) for Slide 118]*
+
+![Diagram/Image from Slide 118](images/slide_118_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 118](images/slide_118_image_1.png)
+
+---
+
+## Slide 119
+
+Domain acceptance criteria describe a concept in terms of its responsibilities, information, relationship with other subjects
+
+This helps us to increase our shared understanding of complex domains
+
+Thinking structurally, write sentences down using the form <A Concept> <some interaction or relationship> <another Concept(s)>
+
+In a way we are passing the ball a bit differently this time, after every behavioral acceptance criteria we can consider injecting more domain-oriented ones
+
+Domain oriented acceptance criteria elaborate and further explain our behavioral ones
+
+Agree to Product Plan
+
+Use  Product and Charge
+
+When a Customer signs up to use a Product
+
+Then the System creates a Product Agreement
+
+When a Product Agreement is created
+
+Then the system activates the Product  for that Customer
+
+When the Product is activated for the Customer
+
+Then associated Chargeable Activity for that Customer will flagged to be tracked
+
+Conducts Chargeable Activity
+
+When a Customer conducts Chargeable Activity
+
+Then the System will track that Chargeable Activity
+
+When Chargeable Activity exceeds a Chargeable Threshold ….
+
+Then the System will create an Alert and send it to the Customer’s Alert Queue
+
+When a Customer goes to their Product Home Page
+
+Then the system shows an Alerts Summary of all Customer Alerts not yet viewed
+
+Calculate
+
+Bill
+
+The volume of  Chargeable Activity for the  Pricing Item is collected for the Type Of  Chargeable Activity being priced  by the Price item
+
+When a Billing Period is completed
+
+Then the System will generate a Customer Bill for all relevant Chargeable Activity
+
+When a Customer requests a  Customer Bill from their Product Home page
+
+Then the system will render the Customer Bill according to their Bill Preferences
+
+A good way to define behavioral acceptance criteria is to add them under each Story in the story map
+
+---
+
+*[Image(s) for Slide 119]*
+
+![Diagram/Image from Slide 119](images/slide_119_group_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 119](images/slide_119_group_image_1.png)
+
+---
+
+## Slide 120
+
+https://miro.com/app/board/uXjVOgBcQPc=/?moveToWidget=3458764535675399871&cot=14
+
+Example Direct Pay Story Grooming - Well Done
+
+---
+
+*[Image(s) for Slide 120]*
+
+![Diagram/Image from Slide 120](images/slide_120_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 120](images/slide_120_image_1.png)
+
+---
+
+## Slide 121
+
+Go through your behavioral acceptance and identify the major concepts or subjects under discussion
+
+For each concept identified try to describe major responsibilities, information, constraints or relationships with other concept
+
+In general, write out  statements in the very loose form of A < Concept> <some interaction or relationship> <another sub or related Concept(s)>
+
+Think about what concepts will span multiple stories, features, increments etc and move them to a separate place, perhaps linking them to your behavioral AC
+
+Exercise: Define Domain Acceptance Criteria For a Single Feature
+
+---
+
+---
+
+## Slide 122
+
+Refining Your Story Map during Story Exploration
+
+---
+
+---
+
+## Slide 123
+
+In order to move forward with pace in the face of uncertainty, we are always moving forward with an imperfect and incomplete understanding of what we want to accomplish
+
+This means we will constantly be uncovering information that invalidates, at least in part, our previous understanding of what we want to accomplish
+
+Moving forward with out of date artifacts is an example of a small leak that reduces agility, and can eventually sink the ship
+
+Working effectively with agility means  we are constantly going back and revising our original plans, scope, solution, etc.
+
+Team navigate this reality by keeping their artifacts light weight enough so they can modify them as new ideas emerge
+
+Deeper analysis almost always requires that we refactor our initial, higher level perspectives
+
+Tip: Use previous artifacts as a starting point for more details discussion, not a fixed constraint, and be ready to modify high level pictures based on what you have uncovered in lower level ones
+
+---
+
+*[Image(s) for Slide 123]*
+
+![Diagram/Image from Slide 123](images/slide_123_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 123](images/slide_123_image_1.jpg)
+
+---
+
+## Slide 124
+
+Story Exploration is an excellent example of where we often see opportunity to revisit;  Team often refine Stories in their story map to better reflect our increased understanding
+
+Initial Story Map
+
+Story Map with Initial Acceptance Criteria
+
+Story Map Normalize
+
+Stories are split where necessary to ensure they can be developed and tested by a single team in a couple of days
+
+Large enough that they capture a cohesive set of user and system behavior that can be tested by the business
+
+We may add and/or defer some stories to a later increment
+
+Some Stories end up being large, even massive
+
+Some stories only have 1-2 criteria, and appear tiny
+
+We may have orphaned acceptance criteria, we missed a story or two on our initial story map
+
+Our original picture of all the stories we think we need after performing discovery on an Increment
+
+---
+
+---
+
+## Slide 125
+
+Go through the stories in your feature and ask what changes do you need to make in the story map?
+
+Where can stories be split and merged?
+
+Where do we need to add new stories or change the flow of the stories?
+
+Where do we want to defer stories to later increments and/or identify new stories that we can deliver later?
+
+Exercise: Refine Your Story Map based on Story Exploration Done So Far
+
+---
+
+---
+
+## Slide 126
+
+Vertical Story Splitting
+
+---
+
+---
+
+## Slide 127
+
+Top signs that you should split a story:
+
+When a story is too big to complete within a reasonable timeframe (2 weeks is common rule of thumb)
+
+When a story is too complex or complicated, causing a lot of questions from developers
+
+When you want to get quick feedback from your stakeholders
+
+When a story has a lot of dependencies (team and external)
+
+Story splitting allow teams to ensure we can inject feedback into our delivery and development activities
+
+Why bother splitting? I have all the information I need!
+
+Small stories allow the team to fail early, and fail fast
+
+Smaller stories enable the team to learn quickly (both technically and user experience)
+
+Smaller stories pass more quickly through the workflow
+
+Smaller stories have more certainty and clarity
+
+Smaller stories make the team faster!
+
+Story Splitting Pitfalls to watch out for:
+
+Splitting stories horizontally first before trying to split the scope can lead to isolation of other layers and thus increase dependencies and hinder overall pace of development
+
+Splitting stories until they become tasks and to the point that product owner does not have see any value in the “stories” at this level, and we end up with stories that are not testable by anyone other than a developer, and therefore cannot be accepted or demoed
+
+---
+
+---
+
+## Slide 128
+
+Teams can leverage a number of story splitting patterns to keep stories small
+
+Story Splitting Patterns
+
+There are many approaches to splitting stories. We will explore a couple aiming to maintain INVEST principles via Vertical Slicing
+
+Workflow Steps What steps does a user perform and
+
+can I separate or simplify the steps to deliver now vs later?
+
+Business Rules What business rules apply to this story and what can I simplify or separate business rules right now vs later?
+
+Send a cross currency wire to another entity
+
+Send a cross currency wire of < $50K using daily updated daily table
+
+Send a cross currency wire of >=$50K using a live FX rate
+
+First Story
+
+Happy/Unhappy Path What does the happy / unhappy flow look like, can unhappy flows be simplified, separated or are they even necessary now vs later?
+
+log in with correct credentials
+
+Block users with 3 failed login attempts in a row
+
+Request a new password
+
+Log into Bizbank
+
+Splitting on Operations What operations are involved and which of these can we separate out and consider for now vs later?
+
+Manage recurring payments
+
+Add a new recurring payment
+
+update the amount and date of an existing recurring expense
+
+Delete a recurring payment
+
+---
+
+*[Image(s) for Slide 128]*
+
+![Diagram/Image from Slide 128](images/slide_128_group_image_1.png)
+
+![Diagram/Image from Slide 128](images/slide_128_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 128](images/slide_128_group_image_1.png)
+
+
+![Diagram/Image from Slide 128](images/slide_128_image_1.png)
+
+---
+
+## Slide 129
+
+1.  Workflow Steps?
+
+What steps does a user perform? 
+Can I separate/simplify steps (right now)?
+
+
+
+i.e. steps in an e-transfer, such as selecting payee, source account, confirmation receipt, etc. | 2.  Business Rules?
+
+What business rules apply to this story? 
+Can I simplify or separate business rules (right now)?
+
+
+
+i.e. failures during web order process and possible recovery options | 3.  Happy/Unhappy Flow?
+
+What does the happy / unhappy flow look like? 
+Can unhappy flows be simplified, separated or even necessary? (right now)
+
+i.e. successful login with successful known credentials. | 4.  Operations?
+
+What operations does their story perform? (create, read, update, delete)?
+Are all operations required? (right now)
+
+
+i.e. Splitting on CRUD (create, read, update, delete)
+
+5. Datatypes and Parameters?
+
+What datatypes are supported?
+Can I separate data types? 
+
+
+
+
+i.e. different search options / different kinds of reports (tables, graphs. Etc) | 6. Input Option?
+
+Which platforms are supported?
+Are all platforms required (right now)?
+Are some platforms harder that others?
+
+
+
+i.e. mobile, tablet, browser, etc | 7.  Test Case/Acceptance Crit.
+
+What tests are used to verify the story?
+What are the acceptance criteria?
+Can I simplify/separate the story’s acceptance Criteria (right now)?
+
+
+i.e. steps in an order proves, like selecting a payment option, delivery method, etc. | 8.  Roles?
+
+What roles are involved in this story? 
+Can I separate the roles and/or are all of them necessary (right now)?
+
+
+
+i.e. steps in an order proves, like selecting a payment option, delivery method, etc.
+
+Vertical Story Splitting Patterns Cheat Sheet
+
+---
+
+---
+
+## Slide 130
+
+How Do I Know Where To Stop?
+
+Getting this under 2 weeks is a good rule of thumb, this allows you to deploy and test more frequently
+
+2. How will we test this?
+
+Someone who is not an engineer must be able to test the story’s behaviour (tools such as Postman, Rest Assured may be required)
+
+In other words, try to avoid “stories” that manipulate data and variables solely in memory
+
+How long will the story take to develop?
+
+---
+
+*[Image(s) for Slide 130]*
+
+![Diagram/Image from Slide 130](images/slide_130_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 130](images/slide_130_image_1.png)
+
+---
+
+## Slide 131
+
+Look at your Stories, which of these still feel too large?
+
+When in doubt, look at number of acceptance criteria! If the list is long, really consider breaking that story up
+
+Examine these stories and see if one or more splitting patterns apply
+
+Alternatively, look at your acceptance criteria. Are there distinct groups within them? If so, use those boundary lines to create your new story breakdown
+
+Remap stories and re-allocate acceptance criteria as necessary
+
+Validate: Have we gone too far? Is this still testable from an end-user perspective?
+
+Exercise: Revisit your stories being explored and apply vertical splitting patterns at necessary
+
+---
+
+---
+
+## Slide 132
+
+Horizontal Story Splitting (Defining System Level Stories)
+
+---
+
+---
+
+## Slide 133
+
+Sometime we are heavily challenged to come up with a small increment of team work that is a recognizable increment of user and system behavior
+
+Perhaps the there is a large amount of back-office system to system related processes
+
+Perhaps different portions of the user observable behavior is being developed by separate teams and you have little influence on this team structure (eg back office and front end teams)
+
+Perhaps you have broken your architecture into discrete micro-services that are owned by discrete team and want to separate stories for each separate service
+
+While good story writing keeps us focused on user to system interactions, sometimes we need to deeper
+
+Tip: When the context asks for it, consider going below sea level and define stories and story acceptance criteria for interactions across system / technical components
+
+---
+
+*[Image(s) for Slide 133]*
+
+![Diagram/Image from Slide 133](images/slide_133_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 133](images/slide_133_image_1.jpg)
+
+---
+
+## Slide 134
+
+Captures system behavior that a user can see
+
+Have observable value to the user
+
+Are clearly testable; we will learn something after we deliver it
+
+Can get really large in terms of time and effort, especially for new team and/or legacy technology
+
+Going below Sea Levels can dilute the value and purpose of stories; at a minimum make sure you are always using stories to describe behavior
+
+Not a story!!!!
+
+Avoid if at all possible!!!!
+
+---
+
+*[Image(s) for Slide 134]*
+
+![Diagram/Image from Slide 134](images/slide_134_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 134](images/slide_134_image_1.jpg)
+
+---
+
+## Slide 135
+
+Example: Store An Image
+
+Let’s take an example of a seemingly simple story; at least from a user perspective
+
+---
+
+---
+
+## Slide 136
+
+User Story: Successfully Store an Image Scan
+
+Story Summary
+
+As a Staff user
+
+I want to store a the scan of an image in the cloud
+
+So that it can be accessed from any location
+
+Acceptance Criteria
+
+Successful transmission shows confirmation message “Image Scan Successful”
+
+Scanned image is present in database
+
+User Story: Unsuccessfully Store a Image Image
+
+I want to be notified if my image is not saved
+
+So that I know to save it to the local database
+
+User Stories Only Consider User-Visible Impact
+
+---
+
+*[Image(s) for Slide 136]*
+
+![Diagram/Image from Slide 136](images/slide_136_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 136](images/slide_136_image_1.png)
+
+---
+
+## Slide 137
+
+Break downthe black box
+
+System Stories Have The Same Boundaries As Systems or Components
+
+---
+
+*[Image(s) for Slide 137]*
+
+![Diagram/Image from Slide 137](images/slide_137_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 137](images/slide_137_image_1.png)
+
+---
+
+## Slide 138
+
+ID | Hash | Fname | Lname
+
+Int (16 chars) | Int (32 chars) | String (20 chars) | String (40 chars)
+
+Break downthe black boxes
+
+Technical Stories Define Behaviour Internal To Systems/Components
+
+---
+
+*[Image(s) for Slide 138]*
+
+![Diagram/Image from Slide 138](images/slide_138_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 138](images/slide_138_image_1.png)
+
+---
+
+## Slide 139
+
+Look at your Stories, which stories require more than a single team to deliver on?
+
+Which Stories are still too big from an implementation perspective?
+
+Split these stories into system stories, and if absolutely necessary technical stories
+
+Rewrite acceptance criteria to reflect the perspective of the system and/or technical component (hint technical team members will be required)
+
+Exercise: Revisit your stories and add system and/or technical stories if (and only if) required
+
+---
+
+---
+
+## Slide 140
+
+Splitting User Stories Presentation: http://www.slideshare.net/arsenalist/splitting-userstories
+
+Breaking Down Larger Stories: http://agileinaflash.blogspot.co.uk/2009/02/breaking-down-larger-stories.html
+
+User Story Hamburger technique:https://gojko.net/2012/01/23/splitting-user-stories-the-hamburger-method/
+
+Features to User Stories:http://idiacomputing.com/pub/UserStories.pdf
+
+Patterns for splitting user stories: http://agileforall.com/patterns-for-splitting-user-stories/
+
+Twenty Ways to Split Stories http://xp123.com/articles/twenty-ways-to-split-stories/
+
+50 Quick Ideas to Improve Your User Storieshttps://www.amazon.ca/Fifty-Quick-Ideas-Improve-Stories-ebook/dp/B00OGT2U7M
+
+There are many more techniques and resources
+
+---
+
+---
+
+## Slide 141
+
+Most common types of non-functional acceptance criteria for front-end development:
+
+Performance (How fast should the page/function respond to the user?)
+
+Security (Is there anything we shouldn’t allow for security purposes?)
+
+Usability is also common, however usually manifests itself in the UI design instead of the Acceptance Criteria (eg. How many clicks does it take to do the task? How many seconds?)
+
+Writing a Non-Functional Acceptance Criteria
+
+Best Practices for Writing a User Story (as a.. i want.. so that.. uggghh so dumb)
+
+---
+
+*[Image(s) for Slide 141]*
+
+![Diagram/Image from Slide 141](images/slide_141_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 141](images/slide_141_image_1.png)
+
+---
+
+## Slide 142
+
+Writing User Stories is one of the core competencies of an Agile Team; but remember:
+
+There are principles to gauge story quality but there are few rules to follow when writing stories
+
+Writing good stories is really hard! Expect the first stories you write to be poor and for quality to improve with practice
+
+Teams will usually struggle at the beginning to break stories small enough that they can be completed in a short amount of time (ie < 2 wks)
+
+It is important to bound the story without predetermining the solution
+
+Writing stories is part art, part science
+
+It takes practice to get good at writing stories
+
+It takes even more practice to get stories right-sized
+
+Business constraints need to be balanced against the technical solution
+
+Here are a few takeaways on User Stories:
+
+---
+
+---
+
+## Slide 143
+
+https://federation.atlassian.net/l/cp/toYuDNyB
+
+Now that you have a solid handle on stories and what goes inside them, you can create the Story and Acceptance Criteria in Confluence (and in your work management tool!)
+
+---
+
+*[Image(s) for Slide 143]*
+
+![Diagram/Image from Slide 143](images/slide_143_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 143](images/slide_143_image_1.png)
+
+---
+
+## Slide 144
+
+Kanbanize Snapshot – Post Story Exploration
+
+---
+
+*[Image(s) for Slide 144]*
+
+![Diagram/Image from Slide 144](images/slide_144_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 144](images/slide_144_image_1.png)
+
+---
+
+## Slide 145
+
+Story Specification
+
+---
+
+---
+
+## Slide 146
+
+Goals and Activities Of Story Specification
+
+---
+
+*[Image(s) for Slide 146]*
+
+![Diagram/Image from Slide 146](images/slide_146_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 146](images/slide_146_image_1.png)
+
+---
+
+## Slide 147
+
+A Brief Note On Specifying One Story at a Times vs current approach of a feature at a time
+
+---
+
+---
+
+## Slide 148
+
+Moving an Feature through Story Specification
+
+---
+
+---
+
+## Slide 149
+
+Spec By Example – In a Nutshell
+
+Spec by Example is A way to express complex system behaviour  (in stories) in a simple, structured way
+
+Spec By Example extends the acceptance criteria teams define by defining scenarios as well as adding real world examples to those scenarios
+
+Spec by Example works because Humans often struggle to interpret complex concepts in the same way;
+
+But humans are very good at deriving concepts by observing them in action
+
+Spec By Example helps Increases team understanding, leading to faster delivery and fewer bugs
+
+The practices helps teams spot requirement holes and edge cases before starting to code
+
+Spec by Example has excellent integration with ATDD/BDD tools, so that examples can be plugged directly into automated tests, so that teams can rely on business rule documentation that automated, and always up to date
+
+---
+
+*[Image(s) for Slide 149]*
+
+![Diagram/Image from Slide 149](images/slide_149_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 149](images/slide_149_image_1.jpg)
+
+---
+
+## Slide 150
+
+Spec by Example
+
+Story Exploration
+
+How Specs fit into Story Development
+
+Story Spec with Examples
+
+Story Specification Scenarios
+
+Story Card
+
+Story Acceptance Criteria
+
+All of the stories in a feature or thin slice are described using semi formal acceptance criteria
+
+Unknowns are explored, solution feasibility, UX (lo-fi minimum) are designed, story sizes are confirmed, etc
+
+Behavior Driven Development
+
+Test Fixture
+
+Code
+
+One story is specified at a time
+
+Acceptance Criteria are converted to multi-step scenarios by adding pre-conditions, alternate and exceptional flows, ordering steps, etc
+
+Scenarios are extended with examples; we add data sets to that contribute to one or more test cases; forming a test suite
+
+Developers or QC write a test fixture, using a BDD tool (eg Cucumber)
+
+Developers write code until the test pass
+
+BA/QC perform a final verification and a quick manual test
+
+---
+
+---
+
+## Slide 151
+
+Specification Scenarios stated simply
+
+---
+
+---
+
+## Slide 152
+
+Specification With Examples
+
+---
+
+---
+
+## Slide 153
+
+Specification Scenarios – the complete example
+
+---
+
+---
+
+## Slide 154
+
+An Example Specification – ACME University
+
+Story: Purchase Textbook
+
+Given a student is logged in to the system
+
+And a particular textbook exists
+
+And that textbook is not out of stock
+
+When
+
+The student selects that textbook for purchase
+
+And the student specifies shipping information( shipping method, billing address, shipping address )
+
+And the student confirms his purchase
+
+Then the system send the payment information to the 3rd party
+
+And the system send the Order Details to the bookstore application
+
+And a message is display to the student that the book was successfully purchased and is on its way
+
+---
+
+---
+
+## Slide 155
+
+Spec By Example For an Entire Feature
+
+Feature: Filter Active Call Center Cases
+
+Background:
+
+---
+
+*[Image(s) for Slide 155]*
+
+![Diagram/Image from Slide 155](images/slide_155_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 155](images/slide_155_image_1.png)
+
+---
+
+## Slide 156
+
+Walkthrough of the Specification By Example Template
+
+---
+
+*[Image(s) for Slide 156]*
+
+![Diagram/Image from Slide 156](images/slide_156_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 156](images/slide_156_image_1.png)
+
+---
+
+## Slide 157
+
+Walkthrough of the Specification By Example Template
+
+---
+
+*[Image(s) for Slide 157]*
+
+![Diagram/Image from Slide 157](images/slide_157_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 157](images/slide_157_image_1.png)
+
+---
+
+## Slide 158
+
+Given that customer 012 has a chequing account with overdraft protection at the bank
+
+And the account has a balance of $100
+
+When customer 012 withdraws $50 from their account
+
+And in a separate transaction customer 012 withdraws $60 from their account
+
+Then after the first transaction the account has a balance of
+
+And the first transaction is
+
+And after the second transaction the account has a balance of              and is
+
+And the second transaction is
+
+The practice of writing out examples  is meant to drive automation testing
+
+Before execution
+
+After execution
+
+Execute
+
+Then after the first transaction the account has a balance of $50
+
+And the first transaction is successful
+
+And after the second transaction the account has a balance of -$10 and is in overdraft
+
+And the second transaction is successful
+
+successful
+
+Business user can click execute to run the test
+
+rejected
+
+$50
+
+not in overdraft
+
+The system is tested against the requirements
+
+If the test passes then the requirements go green
+
+If the test fails then the requirements go red.
+
+Requirements can be written in the form of a “story” using the language of the business
+
+Other formats can be supported (i.e. use case, process, etc.)
+
+Be Precise and make the specification testable
+
+Focus on business functionality, not design
+
+Avoid UI details
+
+Avoid covering every possible combination (emphasis scenarios based on risk)
+
+Supplement with Exploratory & User Experience Testing to increase  test coverage
+
+Include non-functional scenarios (e.g. performance, load, usability, etc.) as specification by example
+
+Tips for Writing Specification By Examples
+
+---
+
+---
+
+## Slide 159
+
+The 10 Deadly Sins of Spec By Example
+
+No examples
+
+Incorrect Trigger
+
+Repetition
+
+Using UI elements (not contents) in Given, treating as steps
+
+Irrelevant Givens
+
+Unreadable formatting
+
+Exposing inner workings of the system
+
+Imprecise Language
+
+Doing Specs after Engineering
+
+Overspeccing
+
+---
+
+---
+
+## Slide 160
+
+Sin #1&2: No Examples, Incorrect Trigger
+
+Use licence # to verify AB residence
+
+Given I have the following client record
+
+And the following licence record
+
+When I do a client search for “John Jones”
+
+Then I should get the following result
+
+Given I have searched for a client by first and last name
+
+When a record is found
+
+Then use licence number to verify location of residence
+
+And display province of driver’s licence
+
+Client ID | FName | LName | Licence #
+
+178654 | John | Jones | 35612
+
+Try to avoid simply transposing a standard acceptance criterion into Given When Then, instead show the conditions that cause the behaviour
+
+Licence # | Prov
+
+35612 | AB
+
+Province
+
+---
+
+---
+
+## Slide 161
+
+Sin #3: Repetition
+
+No payload field may be empty
+
+Given I have the following scanned cheque image payloads
+
+When I import the payloads
+
+Then I should get the following results
+
+1. CHECK CHEQUE ID
+
+GIVEN Cheque Image payload has been received by Hermes
+
+WHEN Cheque ID# is NOT populated in the payload
+
+THEN Log payload as a failure
+
+2. CHECK BRANCH ID
+
+WHEN Cheque ID does NOT end with the branch ID
+
+3. CHECK METHOD
+
+WHEN Method is NOT "scan" OR "rescan"
+
+4. CHECK LANGUAGE
+
+WHEN Language is NOT "en" OR "fr"
+
+5. CHECK INTAKE TIMESTAMP
+
+WHEN Intake timestamp does not exist
+
+6. CHECK PROVINCE
+
+WHEN Province is not present
+
+Cheque ID | Method | Language | Timestamp | Province
+
+<blank> | Scan | EN | 11:12:00-03/14/2020 | ON
+
+4269-10 | <blank> | EN | 11:12:00-03/14/2020 | ON
+
+4269-10 | Scan | <blank> | 11:12:00-03/14/2020 | ON
+
+4269-10 | Scan | EN | <blank> | ON
+
+4269-10 | Scan | EN | 11:12:00-03/14/2020 | <blank>
+
+4269-10 | Scan | EN | 11:12:00-03/14/2020 | ON
+
+Result
+
+Fail
+
+Pass
+
+Branch ID must be embedded in Cheque ID
+
+Method must be scan or re-scan
+
+Language must be en or fr
+
+---
+
+---
+
+## Slide 162
+
+Sin #4: Treating Givens Like A Traditional Manual Test Case
+
+Recurring bill payments expire after period end
+
+Given I log in as a user with correct permissions
+
+And I click on the home screen
+
+And click on the Bill Payment button
+
+And in the payee filter field enter “CRA”
+
+And check the Active Only option
+
+And my recurring payment with the CRA has an end date in the future
+
+When I click the filter button
+
+Then I see CRA listed in my results
+
+Focus your Givens on setting up data, not the UI actions
+
+Given the following recurring bill pay record exists
+
+When I submit the following queries
+
+Then I should get the following results
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021
+
+Date | Acct ID | Payee ID | Active Only?
+
+03/13/2020 | 156332 | 46722 | Y
+
+03/14/2020 | 156332 | 46722 | Y
+
+01/01/2021 | 156332 | 46722 | Y
+
+01/02/2021 | 156332 | 46722 | Y
+
+Txn ID
+
+<null>
+
+777888
+
+---
+
+---
+
+## Slide 163
+
+Sin #5: Irrelevant Givens
+
+Only data that is illustrative or affects the outcome should be included
+
+Recurring bill payments expire after period end
+
+Given the following recurring bill pay record exists
+
+And the following payee record exists
+
+When I submit the following queries
+
+Then I should get the following results
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End | Amt | Payment Offset
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021 | $20 | 30 days
+
+Payee ID | Common Name | Address | Currency
+
+46722 | CRA Installment | 1050 Notre Dame Avenue Sudbury ON | CAD
+
+Date | Acct ID | Payee ID | Active Only?
+
+03/13/2020 | 156332 | 46722 | Y
+
+03/14/2020 | 156332 | 46722 | Y
+
+01/01/2021 | 156332 | 46722 | Y
+
+01/02/2021 | 156332 | 46722 | Y
+
+Txn ID
+
+<null>
+
+777888
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021
+
+---
+
+---
+
+## Slide 164
+
+Sin #6a: Unreadable Wall of Text
+
+The bottleneck of software development is not writing requirements or code, it is understanding
+
+Recurring bill payments expire after period end
+
+Given that I have account ID 156332 and a recurring bill pay with transaction ID 777888 with the CRA and the recurring bill pay’s period start is March 14th 2020 and end date is January 1st 2021, When I query the system for active recurring bill pays for account ID 156332 on March 17th 2020, Then I should get CRA back as a result
+
+Given the following recurring bill pay record exists
+
+When I submit the following queries
+
+Then I should get the following results
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021
+
+Date | Acct ID | Payee ID | Active Only?
+
+03/13/2020 | 156332 | 46722 | Y
+
+03/14/2020 | 156332 | 46722 | Y
+
+01/01/2021 | 156332 | 46722 | Y
+
+01/02/2021 | 156332 | 46722 | Y
+
+Txn ID
+
+<null>
+
+777888
+
+---
+
+---
+
+## Slide 165
+
+Sin #6a: Unreadable Wall of Text
+
+The bottleneck of software development is not writing requirements or code, it is understanding
+
+Recurring bill payments expire after period end
+
+Given that I have account ID 156332 and a recurring bill pay with transaction ID 777888 with the CRA and the recurring bill pay’s period start is March 14th 2020 and end date is January 1st 2021, When I query the system for active recurring bill pays for account ID 156332 on March 17th 2020, Then I should get CRA back as a result
+
+GIVEN an account ID 156332
+
+AND a recurring payment with transaction ID 777888 that is associated with the above account
+
+AND the period start is March 14th 2020
+
+AND the period end is January 1st 2021
+
+WHEN I query the system for account ID 156332 on March 17th 2020
+
+THEN I should get 777888 back as a result
+
+-----------------------------------------------------------------------
+
+WHEN I query the system for account ID 156332 on January 1st 2021
+
+WHEN I query the system for account ID 156332 on January 2nd 2021
+
+THEN I should get no results back
+
+WHEN I query the system for account ID 156332 on March 13th 2020
+
+Well structured text is also OK
+
+(though might need additional When Then pairs)
+
+---
+
+---
+
+## Slide 166
+
+Sin #6b: Using Tables For Given-When-Then Structure
+
+Using tables for your Given-When-Then discourages shared setups, resulting in lots of copy/pasting and difficulty in running efficient tests
+
+Recurring bill payments expire after period end
+
+Given | When | Then
+
+I have a recurring bill pay:
+Txn: 777888
+Acct: 156332
+Payee: 46722
+Period Start: 03/14/2020
+Period End: 01/01/2021 | I search for active recurring bill payments on 03/13/2020 | I should not get any results
+
+I have a recurring bill pay:
+Txn: 777888
+Acct: 156332
+Payee: 46722
+Period Start: 03/14/2020
+Period End: 01/01/2021 | I search for active recurring bill payments on 03/14/2020 | I should see transaction 777888
+
+I have a recurring bill pay:
+Txn: 777888
+Acct: 156332
+Payee: 46722
+Period Start: 03/14/2020
+Period End: 01/01/2021 | I search for active recurring bill payments on 01/01/2021 | I should see transaction 777888
+
+I have a recurring bill pay:
+Txn: 777888
+Acct: 156332
+Payee: 46722
+Period Start: 03/14/2020
+Period End: 01/01/2021 | I search for active recurring bill payments on 01/02/2021 | I should not get any results
+
+Given the following recurring bill pay record exists
+
+When I submit the following queries
+
+Then I should get the following results
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021
+
+Date | Acct ID | Payee ID | Active Only?
+
+03/13/2020 | 156332 | 46722 | Y
+
+03/14/2020 | 156332 | 46722 | Y
+
+01/01/2021 | 156332 | 46722 | Y
+
+01/02/2021 | 156332 | 46722 | Y
+
+Txn ID
+
+<null>
+
+777888
+
+---
+
+---
+
+## Slide 167
+
+Sin #7: Exposing Inner Workings
+
+Your Spec should represent how you will test, not how you will implement
+
+Use licence # to verify AB residence
+
+Given I have the following client record
+
+And the following licence record
+
+When I do a client search for “John Jones”
+
+Then I should get the following result
+
+Client ID | FName | LName | Licence #
+
+178654 | John | Jones | 35612
+
+Licence # | Prov
+
+35612 | AB
+
+Province
+
+Then extract first name from FName field
+
+And extract last name from LName field
+
+And look up names in Client table in SAP to retrieve Licence #
+
+And go to Licence API
+
+And submit request with retrieved licence #
+
+And display result “AB”
+
+---
+
+---
+
+## Slide 168
+
+Sin #8: Imprecise Language
+
+Try to avoid using words that mean the same thing, agree on one term as a team
+
+Recurring bill payments expire after period end
+
+GIVEN a client with ID 156332
+
+AND first name Sam
+
+AND last name Jones
+
+AND a recurring bill payment with ID 777888
+
+AND payee is 00231 (CRA Installment)
+
+AND the recurring bill pay’s period start is March 14th 2020
+
+AND the recurring bill pay’s period end is January 1st 2021
+
+WHEN I query the system for customer ID 156332 on March 17th 2020
+
+THEN I should get beneficiary CRA back as a result
+
+WHEN I query the system for client ID 156332 on March 17th 2020
+
+THEN I should get payee CRA back as a result
+
+---
+
+---
+
+## Slide 169
+
+Sin #9: Starting Specs After Engineering Is Complete
+
+Most of the benefit of specification by example is in preventing bugs from occurring through clear communication
+
+The 2nd most benefit is using them to form your automated tests
+
+Neither of these things can happen if you start writing them after engineering!
+
+---
+
+---
+
+## Slide 170
+
+Sin #10: Over Speccing
+
+GIVEN I have signed in successfully
+
+WHEN I navigate to the Bill Payment screen
+
+THEN I see the header bar with working links to all other payment rails
+
+AND the payee table is shown at an offset of 24px from the sidebar…
+
+Specification by Example is a powerful tool for communicating complex logic. However, it does not have to be the only tool in your bag! Use it judiciously.
+
+WHEN I enter aquickbrownfoxjumpsoverthelazydog in the Client Name field
+
+THEN show an error and stop text entry after character 30
+
+Look and feel matches mockup
+
+Hyperlinking to content saves a lot of time, and a picture is worth a thousand words
+
+Client Name field will not accept more than 30 characters (show error matching with other payment rails)
+
+Low return on investment when speccing criteria that has no conditional logic
+
+---
+
+---
+
+## Slide 171
+
+Sin #10: Over Speccing
+
+Typically the most interesting cases are around the trigger points (and where the vast majority of bugs creep in)
+
+Pick only the examples that matter, not every single possibility!
+
+Recurring bill payments expire after period end
+
+Given the following recurring bill pay record exists
+
+When I submit the following queries
+
+Then I should get the following results
+
+Txn ID | Acct ID | Payee ID | Period Start | Period End
+
+777888 | 156332 | 46722 | 03/14/2020 | 01/01/2021
+
+Date | Acct ID | Payee ID | Active Only?
+
+03/13/2020 | 156332 | 46722 | Y
+
+03/14/2020 | 156332 | 46722 | Y
+
+01/01/2021 | 156332 | 46722 | Y
+
+01/02/2021 | 156332 | 46722 | Y
+
+Txn ID
+
+<null>
+
+777888
+
+04/01/2020 | 156332 | 46722 | Y
+
+06/01/2020 | 156332 | 46722 | Y
+
+08/01/2020 | 156332 | 46722 | Y
+
+10/01/2020 | 156332 | 46722 | Y
+
+---
+
+---
+
+## Slide 172
+
+Appendix
+
+---
+
+---
+
+## Slide 173
+
+A good starter practice is to make your actions areas of uncertainty explicit on your story map
+
+Manage Orders
+
+Manage Fulfillment
+
+Enter Order
+
+Enter Order Info
+
+Submit Order
+
+Process Order
+
+Update Order Info
+
+Save Order Info
+
+Add Accessory
+
+Add Optional Mobile Features
+
+Receive Order
+
+Notify Customer
+
+Submit Fulfillment Order
+
+Process Fulfillment Order
+
+Receive Fulfillment Order
+
+Submit to Fulfillment Vendor
+
+Save Fulfillment Order
+
+Transform to Vendor Fulfillment
+
+Submit Fulfillment to Vendor
+
+Receive Shipping Notification
+
+Track Shipping Progress
+
+Submit Order with Accessory
+
+Submit Order with Features
+
+Submit Fulfillment to Network Managmt
+
+Submit Provision Request
+
+Process Shipping Exceptions
+
+Resend Fulfillment to Vendor
+
+Process Order Exceptions
+
+Process Fulfillment Order Exception
+
+View Order
+
+Time
+
+Exercise: Annotate your story map with which areas contain uncertainty or unknowns as and how you want reduce that uncertainty
+
+Confirm with R & D If client would prefer autosave instead?
+
+Meet with Fulfillment System Lead  to understand IF Fulfillment has an API we can use
+
+Engage with operations leads  to understand shipping and provisioning process better
+
+In a large enterprise we can often get answers by engaging with others outside of our team
+
+Operations, call center, senior leaders, technology, are all areas that can provide their expertise and weigh in in the feasibility of our solution in both asked for and often in areas we didn’t event  to ask
+
+Your story map is a good place to identify the need for those conversations as well as document the answers by updating he story map in real time
+
+---
+
+---
+
+## Slide 174
+
+Story Mapping is primarily a vehicle that helps you tell a story about how would want users to engage with your system in the future
+
+Manage Orders
+
+Manage Fulfillment
+
+Enter Order
+
+Enter Order Info
+
+Submit Order
+
+Process Order
+
+Update Order Info
+
+View Order
+
+Add Optional Mobile Features
+
+Receive Order
+
+Notify Customer
+
+Submit Fulfillment Order
+
+Process Fulfillment Order
+
+Receive Fulfillment Order
+
+Submit to Fulfillment Vendor
+
+Save Fulfillment Order
+
+Transform to Vendor Fulfillment
+
+Submit Fulfillment to Vendor
+
+Receive Shipping Notification
+
+Track Shipping Progress
+
+Submit Order with Features
+
+Submit Fulfillment to Network Managmt
+
+Submit Provision Request
+
+Process Shipping Exceptions
+
+Resend Fulfillment to Vendor
+
+Process Order Exceptions
+
+Process Fulfillment Order Exception
+
+Save Order Info
+
+Time
+
+Optionally
+
+Epic
+
+Feature
+
+Story
+
+Customer
+
+Persona
+
+Sales Rep
+
+Fulfillment Vendor
+
+Fulfillment Clerk
+
+High level narrative
+
+Customers can directly purchase a lottery ticket online using new or existing cards without funding their wallet.
+
+Drill Down Narrative
+
+After a Player adds a lottery ticket in their shopping cart they can initiate payment by selecting between Direct Pay and MyBalance. Direct Pay leverages new or existing cards on their profile. By selecting a card using direct pay the player and transaction are verified and fulfilled via PaySafe (Third Party Vendor).
+
+Optional Narrative
+
+A Player does…
+
+And then a Player does…
+
+Or they do
+
+And the system may do….
+
+The Player has an option to…
+
+A user does… and the system does… and then a user does…
+
+Tip: As you are mapping out your stories spend time practicing telling the story of what you want the system to do
+
+Exercise : Practice story telling using your story map to help you share your narrative of future user and system behavior
+
+---
+
+---
+
+## Slide 175
+
+Interacts With Card
+
+Performs Actions Within 30 Days
+
+Activate Card
+
+Performs Actions After 30 Days
+
+Spends Out Of Store
+
+Stopped Spending
+
+Executes Based On Triggers
+
+Triggers for Active Cards
+
+Apply Customer Details
+
+Build Offer
+
+Time
+
+Customer
+
+HB Execution
+
+Spends In Store
+
+Spends Sufficiently
+
+Spends Minimally
+
+Doesn’t Activate Card
+
+Triggers for Non-Active Cards
+
+Apply Offer Details
+
+Send Offer Via Mail
+
+Sends an Offer
+
+Select Offer Based On Rules
+
+Triggers for Minimal Spenders
+
+Triggers for Non-Spenders
+
+Triggers for OOS Spenders
+
+Triggers for IS Spenders
+
+Send Offer
+
+Redeem Offer
+
+Redeem In Person, In Store
+
+Redeem In Person, Out Of Store
+
+Redeem Online
+
+Receive In Store Benefit
+
+Receive Out Of Store Benefit
+
+Receive Benefit
+
+Receive Discount
+
+Receive Gift
+
+Receive Points
+
+MVP N: Active customers who spend minimally, physical mail delivery, in-person redemption for in-store discount
+
+MVP N+2: Active customers who spend sufficiently, email and/or mail delivery, in-person and/or online redemption, in-store discount and/or points
+
+MVP Future
+
+Send Offer Via Email
+
+MVP N+1: Active customers who spend minimally, email delivery, in-person or online redemption, in-store discount or points
+
+It can be helpful to annotate your Story Map to clearly identify the thin slicing patterns used..
+
+Users
+
+Environment
+
+Interfaces
+
+---
+
+---
+
+## Slide 176
+
+A good analogy is playing a game of Tetris
+
+The rate that work arrives is inconsistent and can fluctuate dramatically
+
+While shapes sometimes repeat, the level of variation in shape, size and color defy up front planning
+
+Opportunities emerge to get a better score in real time
+
+Agile planning is a just in time activity where we allocate differently shaped demand to fit into a relatively fixed set of capacity
+
+---
+
+*[Image(s) for Slide 176]*
+
+![Diagram/Image from Slide 176](images/slide_176_image_1.jpg)
+
+---
+
+
+![Diagram/Image from Slide 176](images/slide_176_image_1.jpg)
+
+---
+
+## Slide 177
+
+Backlogs are a powerful visual mechanism to provide a place for Labs and Bede Dev teams collaboratively adjust prioritize and allocate capacity
+
+Epic9
+
+Feature
+
+Feature 24
+
+Feature 26
+
+Feature 21
+
+Feature  16
+
+Feature 8
+
+Oppt 6
+
+US1
+
+US2
+
+US3
+
+US9
+
+US10
+
+US5
+
+US6
+
+US7
+
+US8
+
+US4
+
+Oppt 5
+
+Feature  23
+
+Done
+
+Doing
+
+Sprint 1
+
+Sprint
+
+Sprint 4
+
+Sprint 3
+
+Sprint 2
+
+Soon
+
+Later
+
+Sprints
+
+On the Rader
+
+Teams
+
+Feature 12
+
+Feature 13
+
+Feature  13
+
+Now
+
+Team 1
+
+Oppt 3
+
+Feature  27
+
+Feature 19
+
+Opportunity 4
+
+Oppt 7
+
+Oppt
+
+Oppt 11
+
+20 Stories
+
+10 Stories
+
+60 Stories
+
+30 Stories
+
+(45)
+
+(100)
+
+Team 2
+
+Team 3
+
+Team 4
+
+Team 5
+
+With a backlog we can Shuffle work to the appropriate location on the system based on risk, priority, capability, or dependencies.
+
+Work is placed on one more team’s backlogs until a team’s capacity to deliver stories for a particular period of time has been met
+
+As we get closer to delivery start, shape, size, and allocation of work can be adjusted – like playing a game of tetris!
+
+---
+
+*[Image(s) for Slide 177]*
+
+![Diagram/Image from Slide 177](images/slide_177_group_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 177](images/slide_177_group_image_1.png)
+
+---
+
+## Slide 178
+
+Dev Backlogs can be adjusted in real time as labs progress work through their story flow
+
+As an Initiative is being shaped, we can have a discussion with dev / tech about when and where we can place it on the backlog, respecting teams existing estimates of their throughput
+
+During Discover we can update backlogs to reflect the increments, and features identify and define
+
+We want both Labs and Dev Teams to pay attention to make sure labs aren’t flowing work so fast that they create a large backlog of detailed and highly defined work; we also want to watch for Dev teams never running out of work
+
+---
+
+*[Image(s) for Slide 178]*
+
+![Diagram/Image from Slide 178](images/slide_178_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 178](images/slide_178_image_1.png)
+
+---
+
+## Slide 179
+
+Exercise: Place relatively sized work onto one or more team's backlog
+
+Finish relatively sizing your Initiative, Increments, or Features in your story map in terms of effort and complexity; guide the conversation by stack ranking them against other new items and/or previously delivered ones. Once relatively sized, we can infer a story count for each Initiative, Increment, or Feature
+
+Place initiatives, increments, and/or Features into one or more teams backlogs according to priority, risk mitigation, learning and /or value. Try to line up demand and position work so that it lines up across teams so that multiple teams can works simultaneously to deliver on an integrated set of functionality
+
+New
+
+Bonus: Try write out a prediction of how stories will flow across our system of work. Think about the cadences we can use to help us plot movement of stories (eg planning, story testing, integration testing) to ensure we inject sufficient feedback into the system,
+
+---
+
+*[Image(s) for Slide 179]*
+
+![Diagram/Image from Slide 179](images/slide_179_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 179](images/slide_179_image_1.png)
+
+---
+
+## Slide 180
+
+The Agile practice Of Relative Sizing is best conducted where size actually matters, Upstream and for larger buckets of Scope
+
+Remember as part of Idea Shaping we want to do just enough story mapping to extrapolate how many epics, feature, and stories make up an increment
+
+100 Stories
+
+10 Stories
+
+New Initiative
+
+Already Delivered Initiative
+
+At any point the work can be assessed by comparing and contrasting it to work previously completed.
+
+As long work is similar from a platform and team perspective, than it is relatively easy to relatively size the new initiative against previously completed one
+
+Incr. 1
+
+Incr. 2
+
+Incr. 3
+
+Incr. 4
+
+During Idea Shaping and Discovery we are continually identifying and refining our Marketable Increments
+
+In either of these stages we can relate size our increments in the initiatives against each other as well as previously delivered increments of value that are similar in platform and team skills
+
+Relative sizing at the initiative and increment level gives us an accelerated and surprisingly accurate estimate of size
+
+25 Stories
+
+5  Stories
+
+Increment In New Initiative
+
+Increment Already Delivered
+
+---
+
+*[Image(s) for Slide 180]*
+
+![Diagram/Image from Slide 180](images/slide_180_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 180](images/slide_180_image_1.png)
+
+---
+
+## Slide 181
+
+Exercise: Conduct a Relative Sizing Exercise on your Initiative and / or The Increments inside them
+
+200 Stories
+
+50  Stories
+
+Take an Initiative and relatively size it against previously delivered initiatives (For Bede work you may need 3 estimates: App, Web and Platform)
+
+We did a bit of story mapping…
+
+Lets relatively size each  increment in the initiative to each other…
+
+Take your Increments inside an initiative and relatively size them, (Again for Bede work you may need 3 estimates: App, Web and Platform)
+
+Incr. 1
+
+Incr. 2
+
+Incr. 3
+
+Incr. 4
+
+We identified Market Increment…
+
+Lets relatively size the initiative to previous initiatives
+
+As well as relatively size them to previously delivered increments…
+
+25 Stories
+
+---
+
+*[Image(s) for Slide 181]*
+
+![Diagram/Image from Slide 181](images/slide_181_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 181](images/slide_181_image_1.png)
+
+---
+
+## Slide 182
+
+What Are The Challenges With Traditional Testing Models?
+
+Communication is hard, especially so across departments
+
+Generally not co-located, use low-effectiveness communication methods
+
+Separate management
+
+Separate goals/incentives
+
+Separate tracking systems
+
+People doing testing and people doing development have an adversarial relationship
+
+Results in both groups creating lots and lots of paper in order to CYA
+
+Further reduces incentive to communicate
+
+Testing is the last stop on the train
+
+Inherently an elastic activity
+
+First thing to be compressed
+
+Pay for the sins and decisions of those that came before
+
+Deploying in big batches make it difficult to find and diagnose bugs
+
+This results in bugs that are sent back to developers with little clue on root cause
+
+Also results in high regression defect count, more code means more likely to go wrong
+
+People doing testing have limited domain expertise
+
+Reliance on matching requirements documents instead of matching intent
+
+Results in high false-positive rate
+
+---
+
+---
+
+## Slide 183
+
+The Principles of Agile Testing
+
+Communication is hard, especially so across departments
+
+People doing testing and people doing development have an adversarial relationship
+
+Testing is the last stop on the train
+
+Deploying in big batches make it difficult to find and diagnose bugs
+
+People doing testing have limited domain expertise
+
+Take a whole team approach to testing
+
+Test First, Test Often
+
+Innovate on your process
+
+Keep it simple!
+
+Challenge
+
+Test Principle
+
+---
+
+---
+
+## Slide 184
+
+BA and QA start to evolve toward a single entity: Product Analyst (PA)
+
+Write functional requirements in the form of testable acceptance criteria and scenarios
+
+Execute tests for stories and acceptance criteria
+
+Write functional requirements in the form of stories and acceptance criteria
+
+Generate and document test cases
+
+Execute test cases
+
+Document results
+
+Acquire business domain knowledge
+
+Acquire testing skills
+
+---
+
+---
+
+## Slide 185
+
+The Agile Test Quadrants Classify The Different Types Of Tests
+
+Inspired by: Agile Testing by Lisa Crispin & Janet Gregory
+
+Support Development
+
+Critique the Product
+
+Unit Test
+
+Component Test
+
+Acceptance Test
+
+Exploratory Test
+
+Usability Test
+
+User Acceptance Test
+
+Performance/Load Test
+
+Security Test
+
+-ility Test
+
+Business Facing
+
+Technology Facing
+
+End To End Test
+
+Contract Test
+
+Test single business rule/logic works correctly
+
+Test all business rules/logic work together correctly to produce correct end result
+
+Test single class or method behaves as expected
+
+Test group of classes interact and produce expected result
+
+Test that stub and real external production system work identically
+
+Test E2E workflows with real user
+
+Unscripted testing/white-hat hacking to find bugs
+
+Test UI & navigation as different user personas
+
+Test that app/component response times are within acceptable bounds at various levels of load
+
+Test that application/component is resilient to security threats
+
+---
+
+---
+
+## Slide 186
+
+Sample Process - Testing activities throughout the workflow
+
+Discovery
+
+Story Refinement
+
+Engineering
+
+Story Testing
+
+Feat./TS Testing
+
+Define Test Strategy for Epic/Feature/Thin Slice (via Mindmap)
+
+Write Acceptance Criteria in Jira Epic
+
+Include NFR’s in Acceptance Criteria
+
+Testable Acceptance Criteria defined for each user story, entered as a part of the story in Jira
+
+Acceptance Criteria refined into Specifications by adding Givens and Example conditions
+
+Edge / Negative Specifications Added
+
+All Specifications entered into story in Jira alongside the Acceptance Criteria
+
+Run each specification
+
+For passed spec, no action required
+
+For failed spec, options available:
+
+Discuss failed spec with developer, fix and re-test immediately (best)
+
+Add defect sticky to physical board, discuss with developer and product owner, fix immediately or place in Kanban backlog
+
+Raise defect in Jira, discuss with developer and product owner, fix immediately or place in Jira backlog
+
+Optional: Short exploratory test session on story
+
+Define and run Feature level Specifications
+
+Same defect management process as Story Testing
+
+Run exploratory testing on Feature
+
+Run exploratory testing to Regression Test other impacted areas of HealthWATCH
+
+Q3 Tests
+
+Exploratory, Usability: created, run
+
+Acceptance Test
+
+End To End Test
+
+Refined into Specifications, run
+
+Refined into Specifications
+
+E2E Test
+
+Written in the form of Acceptance Criteria
+
+Q1 Tests
+
+Unit, Component, Contract: created
+
+---
+
+---
+
+## Slide 187
+
+Story Maps Are Also Test Maps
+
+Login
+
+RX Intake
+
+Validate Renewal
+
+Notify Prescriber
+
+Dispense New/Existing Prescription
+
+Renew Prescription
+
+Pharmacy Staff
+
+RX Claims Process
+
+RX Dispense
+
+Story
+
+Tested during Story Testing
+
+Feature
+
+Tested during Feature/Thin Slice Testing
+
+MVP
+
+Tested during UAT/Regression
+
+---
+
+*[Image(s) for Slide 187]*
+
+![Diagram/Image from Slide 187](images/slide_187_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 187](images/slide_187_image_1.png)
+
+---
+
+## Slide 188
+
+Story Maps Are Also Test Maps
+
+Login
+
+RX Intake
+
+Validate Renewal
+
+Notify Prescriber
+
+Dispense New/Existing Prescription
+
+Renew Prescription
+
+Pharmacy Staff
+
+RX Claims Process
+
+RX Dispense
+
+Story
+
+Tested during Story Testing
+
+Thin Slice
+
+Tested during Feature/Thin Slice Testing
+
+MVP
+
+Tested during UAT/Regression
+
+Good Thin Slices:
+
+Cross all application layers
+
+Business observable behaviour
+
+Integration tested within 2-4 weeks
+
+---
+
+*[Image(s) for Slide 188]*
+
+![Diagram/Image from Slide 188](images/slide_188_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 188](images/slide_188_image_1.png)
+
+---
+
+## Slide 189
+
+Example: NS Audit Web Reports
+
+TS1
+
+TS4
+
+TS5
+
+TS6
+
+TS2
+
+TS3
+
+---
+
+*[Image(s) for Slide 189]*
+
+![Diagram/Image from Slide 189](images/slide_189_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 189](images/slide_189_image_1.png)
+
+---
+
+## Slide 190
+
+What Is An Epic?
+
+Classic definition: A large user action that needs to be broken down into smaller, more digestible User Stories
+
+Challenge:
+
+Epic is a special reserved card type in some popular work management systems (eg Jira)
+
+We already have a decomposition framework from Story Mapping (Persona-Goal-Activity)
+
+New definition: An epic in your work management system represents any grouping of User Stories. This can be
+
+Recommendation: Start with Epics representing a Thin Slice
+
+---
+
+---
+
+## Slide 191
+
+Creating A Test Approach With A Mindmap
+
+Agreeing on and documenting a test approach need not be a lengthy and wordy process!
+
+Mindmaps are a great way to quickly show what and how we will verify
+
+Doesn’t have to be digital! Hand drawn on a whiteboard + photos is enough
+
+Stop when it makes sense to (don’t have to always go down to AC level)
+
+Different thin slices will have different approaches!
+
+Thin Slice 1
+
+Story 1
+
+Story 2
+
+Story 3
+
+Story 4
+
+AC 1
+
+AC 2
+
+AC 3
+
+Manual Test
+
+Automated Test
+
+Manual + Exploratory
+
+---
+
+---
+
+## Slide 192
+
+Creating A Test Approach With A Mindmap
+
+User Activity Report
+
+Authentication & Navigation
+
+Generate Report
+
+Add Comments
+
+Audit Report Logging & Capture
+
+Successful report generation with audit logging
+
+Fail to generate report
+
+Manual Test
+
+Automated Test
+
+Exploratory
+
+---
+
+---
+
+## Slide 193
+
+Testing During Story Refinement
+
+Overview of Story Acceptance criteria
+
+focus on idea that each AC can be tested
+
+some teams stop documenting here, and talk through the rest
+
+Testing UI > we dont need test case for location of wigets!
+
+Just because you don’t write a test case doesn’t mean you don’t test it
+
+show an example in confluence plus sticky notes
+
+---
+
+---
+
+## Slide 194
+
+Expanding The Mindmap
+
+User Activity Report
+
+Authentication & Navigation
+
+Generate Report
+
+Add Comments
+
+Audit Report Logging & Capture
+
+Successful report generation
+
+Fail to generate report
+
+Field layout, look and feel, tab order, character limits
+
+Configurable based on province
+
+Navigable via arrow keys
+
+Manual Test
+
+Automated Test
+
+Exploratory
+
+Navigable with mouse
+
+Only Pharmacists with Admin can access
+
+Reset page via button or refresh
+
+View output in web browser
+
+Download (Excel)
+
+Download (PDF)
+
+Sorting & handling blanks
+
+Excel report formatting
+
+PDF report formatting
+
+---
+
+---
+
+## Slide 195
+
+Mindmapping software can also help with making clean diagrams
+
+Pictured: Mindjet Mindmanager
+
+Open source alternative: FreeMind
+
+---
+
+*[Image(s) for Slide 195]*
+
+![Diagram/Image from Slide 195](images/slide_195_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 195](images/slide_195_image_1.png)
+
+---
+
+## Slide 196
+
+Alternatively, you can do your mindmap with sticky notes
+
+---
+
+*[Image(s) for Slide 196]*
+
+![Diagram/Image from Slide 196](images/slide_196_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 196](images/slide_196_image_1.png)
+
+---
+
+## Slide 197
+
+Side Bar 1: Defect management
+
+Agile definition of a defect
+
+Defect triaging
+
+Defect Density
+
+Root Cause analys
+
+show examples
+
+---
+
+---
+
+## Slide 198
+
+Thin Slice Testing
+
+what are thin slices for? validate risk, what’s the test then? list the risks highlite the ones we testers focus on
+
+Test a thin slice as soon as its done!
+
+show an example in confluence
+
+---
+
+---
+
+## Slide 199
+
+Side Bar 2: Exploratory Testing
+
+test mindmaps
+
+etc
+
+show an example in confluence
+
+---
+
+---
+
+## Slide 200
+
+MVP & Regression Testing
+
+---
+
+---
+
+## Slide 201
+
+Story Testing
+
+---
+
+---
+
+## Slide 202
+
+Principle of Agile Testing: Innovate On Your Process
+
+Test process and everything in it (documentation, reports etc) is owned by the team just like the dev process and story writing process.
+
+Experiment and innovate, and share innovations with others.
+
+Discuss testing process during retrospectives, identify opportunities for improvement and conduct experiments around testing process.
+
+---
+
+---
+
+## Slide 203
+
+Principle of Agile Testing: Set Yourself Up For Automation
+
+Doing functional testing manually is a stepping stone toward doing automated functional testing
+
+We can learn some practices now that will make the transition to automation much smoother
+
+---
+
+---
+
+## Slide 204
+
+Write (Failing) Story Specification
+
+Days
+
+Execute (Passing) Story Specification
+
+Check In and Test All Stories In Feature
+
+hours
+
+Advanced teams maximize feedback by delivering stories using a Test Driven approach
+
+---
+
+---
+
+## Slide 205
+
+Spec by Example
+
+Story Grooming
+
+The Composition of a Story
+
+Story Spec with Examples
+
+Story Specification Scenarios
+
+Story Card
+
+Story Acceptance Criteria
+
+Test Driven Development
+
+Story Mapping
+
+Stories
+
+Feature
+
+Epic
+
+MVP
+
+Automated Acceptance Tests
+
+Automated Unit Tests
+
+Code!
+
+---
+
+---
+
+## Slide 206
+
+Story: Trading Status Alert
+
+As a Trader
+
+I want to be alerted when stocks are traded a specific threshold
+
+So that I can take the right action
+
+Scenario:  Trader is not alerted below threshold
+
+Given a stock of symbol STK1
+
+And a threshold of 10.0
+
+When the stock is traded at 5.0
+
+Then the alert status should be OFF
+
+Scenario:  Trader is alerted above threshold
+
+When the stock is traded at 11.0
+
+Then the alert status should be ON
+
+Execute (Passing) Story Specification
+
+Each Story is defined by creating a Scenario Specification
+
+---
+
+---
+
+## Slide 207
+
+Story: Trading Status Alert
+
+As a Trader
+
+I want to be alerted when stocks are traded a specific threshold
+
+So that I can take the right action
+
+Scenario:  Trader is not alerted below threshold
+
+Given a stock of symbol STK1
+
+And a threshold of 10.0
+
+When the stock is traded at 5.0
+
+Then the alert status should be OFF
+
+Scenario:  Trader is alerted above threshold
+
+When the stock is traded at 11.0
+
+Then the alert status should be ON
+
+Execute (Passing) Story Specification
+
+public class TraderSteps {
+
+private Stock stock;
+
+@Given("a stock of symbol $symbol and a threshold of $threshold")
+
+public void aStock(String symbol, double threshold) {
+
+stock = new Stock(symbol, threshold);
+
+@When("the stock is traded at $price")
+
+public void theStockIsTradedAt(double price) {
+
+stock.tradeAt(price);
+
+@Then("the alert status should be $status")
+
+public void theAlertStatusShouldBe(String status) {
+
+ensureThat(stock.getStatus().name(), equalTo(status));
+
+http://jbehave.org/
+
+When Scenario Specifications are created in code, often before a single line of story code is written they become Automated Acceptance Tests
+
+---
+
+---
+
+## Slide 208
+
+Spec by Example
+
+Story Grooming
+
+The Composition of a Story
+
+Story Spec with Examples
+
+Story Specification Scenarios
+
+Story Card
+
+Story Acceptance Criteria
+
+Test Driven Development
+
+Story Mapping
+
+Stories
+
+Feature
+
+Epic
+
+MVP
+
+Automated Acceptance Tests
+
+Automated Unit Tests
+
+Code!
+
+---
+
+---
+
+## Slide 209
+
+Specification: Describe Stock Threshold
+
+Context: When a stock is traded below alert threshold
+
+Stock alert status should be OFF
+
+an alert message is not sent to the message trader queue
+
+Context: When stock is traded above alert threshold stock
+
+Alert status should be ON
+
+An alert is sent to trader message queue
+
+Individual classes required to realize a story are defined according to Software Specs that drive a suite Unit Tests
+
+---
+
+---
+
+## Slide 210
+
+Testable Criteria Evolve Over A Story’s Lifecycle
+
+Feature Discovery
+
+Story Analysis
+
+Story Engineering
+
+Story Testing
+
+Feature Test
+
+Release Testing
+
+Testing Mind Map
+
+Acceptance Criteria
+
+Testable Scenarios
+
+Add Examples
+
+An X should have a Y
+
+When X happens, Y is the outcome
+
+Eg. Trades over $100 are routed to Broadridge
+
+Given a $110 equity trade
+
+When the trade is processed
+
+Then the trade is routed to Broadridge
+
+Given an equity trade at time 11:00:46
+
+And value of $110
+
+And stock symbol is GOOG
+
+And trade ID of 1002
+
+When the trade is processed by iTrade
+
+Then Broadridge system shows trade 1002 as processed
+
+---
+
+---
+
+## Slide 211
+
+The Story Holds All Information Relevant To Delivery
+
+Epic
+
+Feature
+
+Story
+
+Acceptance Criteria
+
+Specifications
+
+Examples
+
+Test Results
+
+---
+
+---
+
+## Slide 212
+
+Mind Mapping Helps Visualize The Test Approach & Strategy
+
+Feature 1
+
+Story 1
+
+Story 2
+
+Story 3
+
+Story 7
+
+Story 6
+
+Story 5
+
+Story 4
+
+Manual Test
+
+Automated Test
+
+Worrisome Acceptance Criteria
+
+Exploratory Test
+
+Acceptance Criteria 1
+
+Acceptance Criteria 2
+
+---
+
+---
+
+## Slide 213
+
+The Roles Of Team Members Shift Dramatically
+
+Testing Specialist
+
+Things They Do
+
+Infect testing mindset in the team
+
+Brings a risk mindset
+
+Coaches on practices
+
+Exploratory Testing
+
+TDD
+
+ATDD
+
+Things They Do Not Do
+
+All the testing
+
+Spend significant time writing manual test scripts
+
+Explicit test planning
+
+Onerous documentation of test results
+
+Functional Analyst
+
+Write and verify correctness of the system at a business/functional level
+
+Test stories
+
+Engineer
+
+Write and verify correctness of the system at a technical level
+
+Test methods and classes
+
+Build test automation
+
+Business Correctness
+
+Technical Correctness
+
+System Correctness
+
+---
+
+---
+
+## Slide 214
+
+Agile Delivery Leans Heavily On Tools
+
+Functions | Sample Tools
+
+Specifications & Acceptance Testing
+
+Unit Testing
+
+Web/UI Testing
+
+Continuous Integration/Deployment
+
+Story Flow
+
+---
+
+*[Image(s) for Slide 214]*
+
+![Diagram/Image from Slide 214](images/slide_214_image_1.jpg)
+
+![Diagram/Image from Slide 214](images/slide_214_image_1.png)
+
+---
+
+
+![Diagram/Image from Slide 214](images/slide_214_image_1.jpg)
+
+
+![Diagram/Image from Slide 214](images/slide_214_image_1.png)
+
+---
+
+## Slide 215
+
+Traceability Still Exists, Just Uses Different Tools
+
+All relevant information is a part of the story
+
+Acceptance Criteria
+
+Specifications
+
+Examples
+
+Test Results
+
+Signoff
+
+CI runners run suite of unit test cases from xUnit, xBehave, etc. and generates report
+
+Defect Management
+
+Test Traceability
+
+Vast majority of defects are fixed in place, at the point of development
+
+Regular root cause analysis performed in order to harden the system
+
+All defects are managed through the backlog and prioritized alongside all other stories
+
+Significant defect root cause analysis
+
+---
+
+---
+
+## Slide 216
+
+Feature Testing
+
+---
+

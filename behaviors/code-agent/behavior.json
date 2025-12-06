@@ -1,0 +1,5 @@
+{
+  "deployed": true,
+  "feature": "code-agent",
+  "description": "Behavior structure, validation, sync, and indexing system"
+}

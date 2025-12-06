@@ -1,0 +1,687 @@
+---
+description: Rules for generating pytest-bdd test code from Gherkin feature files
+---
+
+**When** generating pytest-bdd test code from Gherkin feature files,
+**then** follow these principles adapted from BDD best practices.
+
+## 0. Match Feature Files Exactly
+
+**CRITICAL:** All step definitions and assertions must match exactly what's in the feature files. We are NOT creating new steps - we are implementing the steps that were already defined in the specification behaviors (scenarios and examples).
+
+**[DO]:**
+- Copy step text exactly from feature files (including quotes, capitalization, punctuation)
+- Implement assertions that verify exactly what the step says it verifies
+- Use the exact variable names from Examples tables
+- Match Background steps exactly as written
+
+```python
+# Feature file has:
+# Given Agent is initialized with agent_name='stories'
+
+# Step definition matches exactly:
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, agent_name='stories'):
+    # Implementation matches what the step says
+    context.agent = Agent(agent_name=agent_name)
+```
+
+**[DON'T]:**
+- Create new steps not in the feature files
+- Modify step text (e.g., "Agent is initialized" when feature says "Agent is initialized with agent_name='stories'")
+- Add assertions for things not mentioned in the steps
+- Use different variable names than those in Examples tables
+
+```python
+# DON'T: Feature says "Agent is initialized with agent_name='stories'"
+# but step definition says:
+@given("Agent is initialized")  # WRONG - missing parameter
+def given_agent(context):
+    pass
+
+# DON'T: Feature doesn't mention checking internal flags
+@then("Agent sets up base agent configuration path")
+def then_agent_sets_path(context):
+    assert context.agent._internal_flag == True  # WRONG - not in feature file
+```
+
+**Source of Truth:** The feature files (`.feature` files in `docs/stories/map/`) are the single source of truth for all step definitions and assertions.
+
+## 1. Step Definition Structure
+
+### 1.1 Arrange-Act-Assert in Step Definitions
+
+Each step definition should follow Arrange-Act-Assert structure where appropriate:
+
+**[DO]:**
+```python
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, agent_name):
+    # Arrange: Set up test data
+    context.agent_name = agent_name
+    context.workspace_root = Path("/test/workspace")
+    
+    # Act: Call production code
+    context.agent = Agent(agent_name=agent_name, workspace_root=context.workspace_root)
+    
+    # Assert: Verify initial state (if applicable)
+    assert context.agent.agent_name == agent_name
+```
+
+**[DON'T]:**
+```python
+@given("Agent is initialized")
+def given_agent(context):
+    # Missing arrange/act/assert structure
+    context.agent = Mock()  # Mocking what we should test
+```
+
+### 1.2 Step Definition Organization
+
+Organize step definitions by domain area or feature:
+
+**[DO]:**
+- `tests/steps/agent_steps.py` - Agent-related steps
+- `tests/steps/project_steps.py` - Project-related steps
+- `tests/steps/workflow_steps.py` - Workflow-related steps
+- Fixtures defined in test file (or in `agents/base/src/conftest.py` for reusable fixtures)
+
+**[DON'T]:**
+- All steps in one giant file
+- Steps mixed with test logic
+- Duplicate step definitions across files
+
+## 2. Don't Mock Unless I Asked
+
+**Default: No Mocking** - By default, tests should use real implementations. Only mock when explicitly asked to assume end-to-end (e2e) tests or when testing requires external dependencies that cannot be controlled.
+
+Mock only external dependencies, not internal business logic:
+
+**[DO] - When e2e tests are specified:**
+```python
+from unittest.mock import Mock, patch, MagicMock
+
+@given("agents/base/agent.json exists and is valid")
+def given_base_config_exists(context):
+    # Mock file I/O (external boundary) - only when e2e tests specified
+    with patch('pathlib.Path.exists', return_value=True):
+        with patch('pathlib.Path.read_text', return_value='{"valid": "json"}'):
+            context.base_config_path = Path("agents/base/agent.json")
+```
+
+**[DO] - Default approach (no mocking):**
+```python
+@given("agents/base/agent.json exists and is valid")
+def given_base_config_exists(context, workspace_root):
+    # Create real file in test workspace
+    config_path = workspace_root / "agents" / "base" / "agent.json"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"name": "base", "behaviors": []}')
+    context.base_config_path = config_path
+```
+
+**[DON'T]:**
+```python
+@given("Agent is initialized")
+def given_agent(context):
+    # DON'T: Mock the class we're testing
+    context.agent = Mock(spec=Agent)
+    context.agent.agent_name = 'stories'
+```
+
+**Guideline:** Prefer real implementations using temporary directories and test fixtures. Only use mocks when:
+1. Explicitly asked to assume e2e tests
+2. External dependencies cannot be controlled (network calls, third-party APIs)
+3. Test setup would be prohibitively complex without mocking
+
+## 3. Fixture Organization
+
+### 3.1 Fixtures in Test File
+
+Since we have a single test file, define fixtures directly in the test file. Truly reusable fixtures (like getting current location, file operations) belong in the base agent, not in individual agent test files.
+
+Define fixtures in the test file:
+
+**[DO]:**
+```python
+# src/stories_acceptance_tests.py
+import pytest
+from pathlib import Path
+
+# Fixtures defined in test file
+@pytest.fixture
+def workspace_root(tmp_path):
+    """Create temporary workspace for tests"""
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    return workspace
+
+@pytest.fixture
+def base_config_path(workspace_root):
+    """Create base agent.json in workspace"""
+    config_path = workspace_root / "agents" / "base" / "agent.json"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"name": "base"}')
+    return config_path
+
+@pytest.fixture
+def agent_config_path(workspace_root):
+    """Create stories agent.json in workspace"""
+    config_path = workspace_root / "agents" / "stories" / "agent.json"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"name": "stories"}')
+    return config_path
+```
+
+**Note:** For truly reusable fixtures (file operations, location helpers, etc.), these would be defined in `agents/base/src/conftest.py` and available to all agents.
+
+### 3.2 Context Sharing via pytest-bdd context
+
+Use pytest-bdd's context fixture for scenario state. Fixtures are defined in the same test file:
+
+**[DO]:**
+```python
+from pytest_bdd import given, when, then, parsers
+import pytest
+
+# Fixtures defined above in same file
+@pytest.fixture
+def workspace_root(tmp_path):
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    return workspace
+
+# Step definitions use fixtures from same file
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, workspace_root, agent_name='stories'):
+    # Use fixtures for setup, context for scenario state
+    context.agent = Agent(agent_name=agent_name, workspace_root=workspace_root)
+    context.agent_name = agent_name
+```
+
+## 4. Helper Functions and Factories
+
+Extract test data creation to helper factories:
+
+**[DO]:**
+```python
+# tests/helpers/agent_factory.py
+def create_agent(agent_name='stories', workspace_root=None, **overrides):
+    """Factory for creating Agent instances in tests"""
+    if workspace_root is None:
+        workspace_root = Path("/test/workspace")
+    
+    defaults = {
+        'agent_name': agent_name,
+        'workspace_root': workspace_root,
+    }
+    defaults.update(overrides)
+    
+    return Agent(**defaults)
+
+def create_base_config(workspace_root, content=None):
+    """Factory for creating base agent.json"""
+    if content is None:
+        content = '{"name": "base", "behaviors": []}'
+    
+    config_path = workspace_root / "agents" / "base" / "agent.json"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(content)
+    return config_path
+```
+
+Use factories in step definitions:
+
+```python
+from tests.helpers.agent_factory import create_agent, create_base_config
+
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, workspace_root, agent_name='stories'):
+    create_base_config(workspace_root)
+    context.agent = create_agent(agent_name=agent_name, workspace_root=workspace_root)
+```
+
+## 5. Test Observable Behavior
+
+Test what the system does, not how it does it:
+
+**[DO]:**
+```python
+@then("Agent sets up base agent configuration path at agents/base/agent.json")
+def then_agent_sets_base_config_path(context):
+    # Test observable outcome
+    assert context.agent._agent_config_path == context.workspace_root / "agents" / "base" / "agent.json"
+    assert context.agent._agent_config_path.exists()
+```
+
+**[DON'T]:**
+```python
+@then("Agent sets up base agent configuration path")
+def then_agent_sets_path(context):
+    # DON'T: Test internal implementation details
+    assert context.agent._setup_config_path.called
+    assert context.agent._internal_flag == True
+```
+
+## 6. Handling Examples Tables
+
+Convert Scenario Outline Examples to parameterized step definitions:
+
+**[DO]:**
+```python
+from pytest_bdd import scenario, given, when, then, parsers
+
+@scenario("initialize_agent.feature", "Agent initialization with invalid agent_name")
+@given(parsers.parse("MCP Server has received tool call with invalid agent_name '{agent_name}'"))
+def given_invalid_agent_name(context, agent_name):
+    context.agent_name = agent_name
+    context.expected_error = f"Invalid agent name: {agent_name}"
+
+@when("MCP Server requests Agent instance with invalid agent_name")
+def when_request_invalid_agent(context):
+    with pytest.raises(ValueError, match=context.expected_error):
+        context.agent = Agent(agent_name=context.agent_name)
+```
+
+For Examples tables, use pytest-bdd's parametrize:
+
+```python
+from pytest_bdd import scenario, parsers
+
+@scenario(
+    "initialize_agent.feature",
+    "Agent initialization with invalid agent_name",
+    example_converters={'agent_name': str, 'expected_error': str}
+)
+def test_invalid_agent_name(context, agent_name, expected_error):
+    # Test body - pytest-bdd handles parameterization
+    pass
+```
+
+## 7. Error Handling and Edge Cases
+
+Test error conditions explicitly:
+
+**[DO]:**
+```python
+@then("Agent handles missing agent config error gracefully")
+def then_handles_missing_config_error(context):
+    # Test observable error handling
+    assert context.error is not None
+    assert "agent.json" in str(context.error).lower()
+    assert context.agent is None  # Agent not created on error
+```
+
+## 8. ASCII-Only Characters
+
+Use plain ASCII in all test code:
+
+**[DO]:**
+```python
+print("[PASS] Agent initialized successfully")
+print("[ERROR] Configuration file not found")
+assert result.status == "success"
+```
+
+**[DON'T]:**
+```python
+print("✓ Agent initialized")  # Unicode checkmark
+print("✅ Configuration loaded")  # Emoji
+assert result.status == "✓"  # Unicode in assertions
+```
+
+## 9. Test File Organization
+
+Organize test code in a single file with class-based structure:
+
+**[DO]:**
+```
+agents/stories/
+├── docs/stories/map/              # Feature files location (already exist)
+│   └── 🎯 Start Story Development Session/  # Epic folder
+│       ├── ⚙️ Initialize Story Agent Workflow/  # Feature folder
+│       │   ├── 📝 Initialize Agent.feature
+│       │   ├── 📝 Initialize Project.feature
+│       │   └── 📝 Initialize Behavior and Workflow.feature
+│       ├── ⚙️ Build Folder Structure from Story Graph/  # Feature folder
+│       │   └── 📝 [story files].feature
+│       └── [other feature folders]/  # Additional feature folders
+└── src/
+    └── stories_acceptance_tests.py  # Single test file with class structure
+                                      # Contains all step definitions, fixtures, and helpers
+```
+
+**File structure within `stories_acceptance_tests.py`:**
+
+```python
+# src/stories_acceptance_tests.py
+
+# 1. Imports
+from pytest_bdd import given, when, then, parsers, scenario
+from pathlib import Path
+import pytest
+
+# 2. Helper/Factory Classes
+class AgentFactory:
+    """Factory for creating Agent instances in tests"""
+    @staticmethod
+    def create_agent(agent_name='stories', workspace_root=None, **overrides):
+        # Factory implementation
+        pass
+
+class ProjectFactory:
+    """Factory for creating Project instances in tests"""
+    @staticmethod
+    def create_project(workspace_root, **overrides):
+        # Factory implementation
+        pass
+
+# 3. Step Definition Classes
+class AgentSteps:
+    """Agent-related step definitions"""
+    
+    @given("Agent is initialized with agent_name='stories'")
+    def given_agent_initialized(self, context, agent_name):
+        # Step implementation
+        pass
+
+class ProjectSteps:
+    """Project-related step definitions"""
+    
+    @given("Project is finished initializing")
+    def given_project_initialized(self, context):
+        # Step implementation
+        pass
+
+class WorkflowSteps:
+    """Workflow-related step definitions"""
+    
+    @when("Agent starts workflow for new project")
+    def when_agent_starts_workflow(self, context):
+        # Step implementation
+        pass
+
+# 4. Instantiate step classes (pytest-bdd requires module-level functions)
+agent_steps = AgentSteps()
+project_steps = ProjectSteps()
+workflow_steps = WorkflowSteps()
+
+# 5. Register step definitions as module-level functions
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, agent_name):
+    return agent_steps.given_agent_initialized(context, agent_name)
+
+@given("Project is finished initializing")
+def given_project_initialized(context):
+    return project_steps.given_project_initialized(context)
+
+# ... more step registrations
+
+# 6. Scenario mappings
+@scenario("features/initialize_story_agent_workflow/initialize_agent.feature", 
+          "MCP Server requests new Agent instance")
+def test_mcp_requests_agent():
+    pass
+```
+
+**Naming convention:** `<agent>_acceptance_tests.py` (e.g., `stories_acceptance_tests.py`, `base_acceptance_tests.py`)
+
+## 10. Background Steps
+
+Handle Background steps via fixtures or step definitions:
+
+**[DO]:**
+```python
+# In test file - Background applies to all scenarios
+@pytest.fixture(scope="feature")
+def background_setup(context, workspace_root):
+    """Setup for Background steps"""
+    # Common setup for all scenarios in feature
+    context.workspace_root = workspace_root
+    context.agent_name = 'stories'
+    yield
+    # Cleanup if needed
+```
+
+Or use step definitions that run before each scenario:
+
+```python
+@given("MCP Server is initialized and running")
+def given_mcp_server_running(context):
+    context.mcp_server = Mock()
+    context.mcp_server.is_running = True
+```
+
+## 11. Test Data Management
+
+Use temporary directories and clean up after tests:
+
+**[DO]:**
+```python
+import pytest
+from pathlib import Path
+import shutil
+
+@pytest.fixture
+def test_project_area(tmp_path):
+    """Create temporary project area, cleaned up after test"""
+    project_area = tmp_path / "test_project"
+    project_area.mkdir()
+    yield project_area
+    # Cleanup handled by tmp_path fixture
+```
+
+## 12. Integration with pytest-bdd
+
+Follow pytest-bdd conventions:
+
+**[DO]:**
+```python
+from pytest_bdd import given, when, then, parsers, scenario
+
+# Use parsers for parameterized steps
+@given(parsers.parse("Agent is initialized with agent_name='{name}'"))
+def given_agent_with_name(context, name):
+    context.agent = Agent(agent_name=name)
+
+# Use scenario decorator for explicit feature/scenario mapping
+@scenario("initialize_agent.feature", "MCP Server requests new Agent instance")
+def test_mcp_requests_agent():
+    pass
+```
+
+## 13. Comprehensive Coverage
+
+Cover normal, edge, and failure paths:
+
+**[DO]:**
+- Happy path scenarios
+- Error conditions (missing files, invalid data, etc.)
+- Edge cases (empty data, boundary values)
+- Integration points (component interactions)
+
+## 14. Natural Test Failures
+
+Call production code directly - let tests fail naturally if code doesn't exist:
+
+**[DO]:**
+```python
+@when("Agent initializes")
+def when_agent_initializes(context):
+    # Call production code directly
+    context.agent.initialize()
+    # If initialize() doesn't exist, test fails with AttributeError
+```
+
+**[DON'T]:**
+```python
+@when("Agent initializes")
+def when_agent_initializes(context):
+    # DON'T: Comment out or mock production code
+    # context.agent.initialize()  # Commented out
+    context.agent._initialized = True  # Fake the state
+```
+
+## 15. Step Definition Naming
+
+Use descriptive function names that match step text:
+
+**[DO]:**
+```python
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized_with_name(context, agent_name):
+    pass
+
+@when("MCP Server requests Agent instance from AgentStateManager")
+def when_mcp_requests_agent_from_manager(context):
+    pass
+
+@then("AgentStateManager returns the Agent instance")
+def then_manager_returns_agent(context):
+    pass
+```
+
+**[DON'T]:**
+```python
+@given("Agent is initialized")
+def step1(context):  # Non-descriptive
+    pass
+
+@given("Agent is initialized")
+def agent_init(context):  # Abbreviated
+    pass
+```
+
+## 16. Handling Complex Step Parameters
+
+When steps have multiple parameters or complex data, use parsers or extract to helpers:
+
+**[DO]:**
+```python
+from pytest_bdd import parsers
+
+@given(parsers.parse("test project area is set up at '{project_area}'"))
+def given_test_project_area(context, project_area):
+    context.project_area = Path(project_area)
+    context.project_area.mkdir(parents=True, exist_ok=True)
+
+@given(parsers.parse("base agent.json has error condition '{error_condition}'"))
+def given_base_config_error(context, error_condition):
+    # Map error condition to actual test data
+    error_configs = {
+        'missing': None,  # File doesn't exist
+        'invalid_json': '{"invalid": json}',  # Malformed JSON
+        'missing_required_field': '{"name": "base"}',  # Missing required field
+    }
+    context.error_condition = error_condition
+    context.error_config = error_configs.get(error_condition)
+```
+
+## 17. Assertion Clarity
+
+Write clear, descriptive assertions that explain what is being verified:
+
+**[DO]:**
+```python
+@then("Agent sets up base agent configuration path at agents/base/agent.json")
+def then_agent_sets_base_config_path(context):
+    expected_path = context.workspace_root / "agents" / "base" / "agent.json"
+    assert context.agent._agent_config_path == expected_path, \
+        f"Expected config path {expected_path}, got {context.agent._agent_config_path}"
+    assert context.agent._agent_config_path.exists(), \
+        f"Config file should exist at {context.agent._agent_config_path}"
+```
+
+**[DON'T]:**
+```python
+@then("Agent sets up base agent configuration path")
+def then_agent_sets_path(context):
+    assert context.agent._agent_config_path  # Vague assertion
+    assert True  # Meaningless assertion
+```
+
+## 18. Test Independence
+
+Each test should be independent and not rely on execution order:
+
+**[DO]:**
+```python
+@given("AgentStateManager cache is empty")
+def given_empty_cache(context):
+    # Reset cache for this test
+    if hasattr(context, 'agent_state_manager'):
+        context.agent_state_manager.clear_cache()
+    else:
+        context.agent_state_manager = AgentStateManager()
+        context.agent_state_manager.clear_cache()
+```
+
+**[DON'T]:**
+```python
+@given("AgentStateManager cache is empty")
+def given_empty_cache(context):
+    # DON'T: Assume previous test cleaned up
+    # DON'T: Rely on test execution order
+    pass  # Assumes cache is already empty
+```
+
+## 19. Step Reusability
+
+Create reusable step definitions that can be shared across features:
+
+**[DO]:**
+```python
+# tests/steps/common_steps.py
+@given("workspace is set up")
+def given_workspace(context, workspace_root):
+    context.workspace_root = workspace_root
+    context.workspace_root.mkdir(parents=True, exist_ok=True)
+
+# Can be used in multiple features
+```
+
+## 20. Documentation and Comments
+
+Document complex step definitions and helper functions:
+
+**[DO]:**
+```python
+@given("Agent is initialized with agent_name='stories'")
+def given_agent_initialized(context, workspace_root, agent_name='stories'):
+    """
+    Initialize Agent instance for testing.
+    
+    Sets up:
+    - Agent with specified name
+    - Workspace root directory
+    - Base configuration path
+    
+    Stores in context:
+    - context.agent: Agent instance
+    - context.agent_name: Agent name used
+    - context.workspace_root: Workspace path
+    """
+    create_base_config(workspace_root)
+    context.agent = create_agent(agent_name=agent_name, workspace_root=workspace_root)
+    context.agent_name = agent_name
+    context.workspace_root = workspace_root
+```
+
+## Summary
+
+Key principles adapted from BDD rules:
+0. **Match feature files exactly** - All steps and assertions must match feature files verbatim (CRITICAL)
+1. **Arrange-Act-Assert** structure in step definitions
+2. **Don't mock unless asked** - Use real implementations by default, only mock for e2e tests
+3. **Extract helpers** for test data creation and common setup
+4. **Test observable behavior**, not implementation details
+5. **Use fixtures** for shared setup (defined in test file or base agent)
+6. **ASCII-only** characters in all test code
+7. **Natural test failures** - call production code directly
+8. **Comprehensive coverage** - normal, edge, and failure paths
+9. **Proper organization** - single test file with class-based structure
+10. **pytest-bdd conventions** - use decorators, parsers, scenario mapping correctly
+11. **Test independence** - each test stands alone
+12. **Clear assertions** - descriptive error messages
+13. **Reusable steps** - share common steps across features
+14. **Documentation** - explain complex setup and helpers

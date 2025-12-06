@@ -1,0 +1,185 @@
+{
+  "verbose_mode": false,
+  "behaviors": {
+    "code": {
+      "order": 1,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the code behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers\n6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool with:\n   - `key_questions_answered`: dict mapping question keys to answer strings\n   - `evidence_provided`: dict mapping evidence types to evidence content\n   - Example: key_questions_answered={'target_file': 'path/to/file.py', 'language': 'python', 'main_functions': ['calculate_total', 'process_order']}\n7. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user\n   - You have successfully stored the clarification data using `agent_store_clarification()`\n\n**CRITICAL REMINDER:** The presentation of questions and answers in the chat window is MANDATORY and CANNOT BE SKIPPED. This allows the user to see what was asked, how it was answered, and provide corrections. For analyze behavior specifically, incomplete clarification will lead to poor code design. Stop and get complete answers.\n\n**CONTEXT AWARENESS:** If code already exists at the target location, analyze it to infer answers where possible. If no code exists, ask all questions to understand requirements for generating clean code.",
+          "key_questions": [
+            "What programming language specialization should be used? (python, javascript, or both)",
+            "What is the target file or module name and location?",
+            "What are the main functions, features, or capabilities that need to be implemented?",
+            "What are the major domain objects, entities, or data structures involved?",
+            "What programming paradigm should be used: functional programming, object-oriented programming, or a hybrid approach?",
+            "How should the code be organized into layers or modules? (e.g., domain layer, service layer, presentation layer, data access layer)",
+            "What are the key responsibilities and behaviors of each major component?",
+            "What dependencies exist between components, modules, or external systems?",
+            "Are there any existing code patterns, architectural styles, or design patterns to follow?",
+            "What inputs are available from previous phases? (Check for: story documents, domain maps, BDD test files, existing code structure)",
+            "What are the integration points with existing code or external systems?",
+            "What error handling and validation requirements exist?",
+            "What are the performance, scalability, or resource constraints?",
+            "Are there any language-specific idioms, patterns, or conventions that must be respected?"
+          ],
+          "evidence": [
+            "User stories or story documents (from story writing phase)",
+            "Domain maps or domain model documents (from DDD documentation)",
+            "BDD test files or test specifications (from BDD or TDD tests)",
+            "Existing source code files",
+            "API specifications or interface definitions",
+            "Architecture diagrams, design documents / diagrams, or Archiecture templates ",
+            "Code style guides or conventions",
+            "Project documentation",
+            "Previous code reviews or feedback",
+            "Team coding standards",
+            "Language-specific style guides (PEP 8, Airbnb JS, etc.)"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Architecture and layering",
+              "question": "How should the code be organized into layers or architectural components?",
+              "outcome": "Determines code structure, separation of concerns, and module organization",
+              "options": [
+                "Layered architecture - Domain, Service, Presentation, Data layers",
+                "Hexagonal/Ports and Adapters - Core domain with adapters for external concerns",
+                "Clean Architecture - Entities, Use Cases, Interface Adapters, Frameworks",
+                "Domain-Driven Design - Services, Aggregates, Context Boundaries, Entities, Value objects, Repositories, Factories, Events, Rules, UI",
+                "Simple module structure - Functions and classes organized by feature",
+                "MVC/MVP/MVVM - Model-View separation patterns",
+                "Microservices structure - Independent services with clear boundaries",
+                "Monolithic structure - Single module with clear internal organization",
+                "Business Logic Only- pure business logic classes focused on modeling both properties and behavior"
+              ]
+            },
+            {
+              "description": "Dependency management",
+              "question": "How should dependencies be managed and injected?",
+              "outcome": "Determines how components depend on each other and external systems",
+              "options": [
+                "Constructor injection - All dependencies passed through constructors",
+                "Dependency injection container - Use DI framework for dependency management",
+                "Factory pattern - Use factories to create dependencies",
+                "Service locator - Central registry for dependencies",
+                "Minimal dependencies - Keep dependencies explicit and minimal",
+                "Interface-based - Depend on interfaces/abstractions, not concrete types"
+              ]
+            },
+            {
+              "description": "Error handling strategy",
+              "question": "What error handling and exception strategy should be used?",
+              "outcome": "Determines how errors are handled and propagated",
+              "options": [
+                "Exception-based - Use exceptions for error conditions",
+                "Result/Either types - Return success/failure results explicitly",
+                "Error codes - Return error codes with results",
+                "Fail-fast - Throw exceptions immediately on errors",
+                "Graceful degradation - Handle errors gracefully with fallbacks",
+                "Language-specific patterns - Use language idioms (Python exceptions, JS promises, etc.)"
+              ]
+            },
+            {
+              "description": "Programming paradigm",
+              "question": "What programming paradigm should be used?",
+              "outcome": "Determines whether code follows functional, object-oriented, or hybrid patterns",
+              "options": [
+                "Functional programming - Pure functions, immutability, higher-order functions, no side effects",
+                "Object-oriented programming - Classes, objects, inheritance, polymorphism, encapsulation",
+                "Hybrid approach - Combine functional and OOP patterns as appropriate",
+                "Procedural - Functions organized by feature, minimal object orientation",
+                "Data-oriented - Focus on data structures and transformations",
+                "Language-idiomatic - Follow the primary paradigm of the chosen language"
+              ]
+            },
+            {
+              "description": "Properties vs methods",
+              "question": "When should properties be used versus methods?",
+              "outcome": "Determines how to expose object state and behavior",
+              "options": [
+                "Properties for all cases - Use properties for both data access and computed values",
+                "Properties only for data - Use properties for simple data access, methods for behavior/computation",
+                "Methods preferred - Use methods for most access, properties only for simple field access",
+                "Computed properties - Use properties for computed values that are cheap and have no side effects",
+                "Language conventions - Follow language-specific conventions (Python @property, C# properties, etc.)",
+                "No properties - Use methods exclusively, no property accessors"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Focus on maintainability and readability over performance optimizations",
+            "Single Responsibility Principle - Each function/class does one thing well",
+            "Dependency Injection - Dependencies passed through constructors, not created internally",
+            "Immutability preferred - Minimize mutable state where possible",
+            "Explicit over implicit - Make dependencies and behavior explicit",
+            "Testability - Code should be easy to test in isolation",
+            "Respect language-specific idioms and patterns",
+            "Consider code context when generating or validating",
+            "Provide actionable suggestions for violations or improvements",
+            "Balance between strict adherence and practical constraints",
+            "When generating code, incorporate requirements from stories, domain maps, and BDD tests",
+            "When validating code, infer structure and intent from existing code",
+            "Properties vs methods decision determines how object state and behavior are exposed",
+            "Programming paradigm decision (functional/OOP/hybrid) guides overall code structure and patterns"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated violations report to verify accuracy",
+            "Confirm that violations are correctly identified and severity levels are appropriate",
+            "Validate that suggestions are actionable and appropriate for the codebase",
+            "Review the code quality score and recommendations"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "violations_report.json",
+          "schema_path": "agents/clean_code/violations_report.json",
+          "path": "docs",
+          "description": "Structured code design document (for generation) or violations report (for validation) with code analysis results",
+          "instructions": "Build the structured code design using the violations_report.json schema file located at agents/clean_code/violations_report.json. The schema file defines the exact structure you must follow. Load and use the schema file to ensure your output matches the required format exactly. CRITICAL: In build_structure phase, create the structured JSON file (violations_report.json) with the clean code design or analysis. Your task here is to build the structured JSON content that will be validated in the next phase.\n\n**MANDATORY STEPS:**\n1. MANDATORY: Load the schema template from agents/clean_code/violations_report.json to understand the exact structure required\n2. MANDATORY: Check if code already exists at the target location:\n   - If code exists: Load and analyze it to understand current structure, then identify violations and improvements\n   - If no code exists: Generate clean code design based on requirements\n\n3. MANDATORY: Load and review inputs from previous phases (as specified in planning decisions):\n   - User stories (from docs/stories/ directory) - Extract functional requirements\n   - Domain maps (from docs/domain/ directory) - Extract domain objects and relationships\n   - BDD test files (from test/ directory) - Extract expected behavior and interfaces\n   - Existing code structure - Understand current implementation\n\n4. MANDATORY: Review ALL planning decisions and assumptions. These decisions contain critical architectural and design constraints:\n   - Architecture/layering decisions determine code structure\n   - Dependency management decisions determine how dependencies are injected\n   - Error handling strategy determines exception/error patterns\n   - Programming paradigm decision (functional/OOP/hybrid) guides overall code structure and patterns\n   - Properties vs methods decision determines how object state and behavior are exposed\n   - Integration decisions determine which previous phase inputs to use\n\n5. Generate clean code structure following:\n   - Single Responsibility Principle for each function/class\n   - Dependency Injection patterns (dependencies in constructors)\n   - Proper layering and separation of concerns\n   - Programming paradigm patterns (functional, OOP, or hybrid as decided)\n   - Properties vs methods usage as decided\n   - Language-specific idioms and patterns\n   - Requirements from stories, domain maps, and BDD tests\n\n6. If analyzing existing code:\n   - Extract code structure (functions, classes, line counts, nesting depth, etc.)\n   - Run heuristics (static analysis) to identify obvious violations\n   - Perform deep semantic analysis to identify architectural and design violations\n   - Each violation MUST include:\n     * Location: Exact line number(s) and function/class name\n     * Severity: critical (must fix), important (should fix), suggested (consider fixing)\n     * Principle violated: Which clean code principle (e.g., \"1.2 Small and Focused\", \"1.3 Control Flow\")\n     * Specific issue description: What's wrong with the code\n     * Code snippet: Show the problematic code with line numbers (3-5 lines of context)\n     * Recommendation: Concrete example showing how to fix it with before/after code snippets including line numbers\n     * Benefits: Why this change improves code quality\n   - Format violations with code examples:\n     ```\n     **Line 482-490** (critical) - Deep Nesting (7 levels)\n     **Function:** `_deploy_to_global()`\n     **Principle:** 1.3 Control Flow - Simple Control Flow\n     \n     **Current Code:**\n     ```python\n     480|    if condition1:\n     481|        if condition2:\n     482|            if condition3:\n     ```\n     \n     **Issue:** [Description of what's wrong]\n     \n     **Recommendation:** [Before/after code with line numbers]\n     \n     **Benefits:** [Why this improves code]\n     ```\n\n7. Create structured design document following the violations_report.json schema:\n   - Proposed functions/classes and their responsibilities (or existing ones with violations)\n   - Domain objects and their relationships\n   - Layer organization and module structure\n   - Dependency relationships\n   - Error handling approach\n   - Integration points\n   - Violations (if analyzing existing code) - MUST include:\n     * Line numbers (start_line, end_line)\n     * Code snippets (current_code with line numbers)\n     * Recommended code (recommended_code with line numbers)\n     * Function/class name\n     * Severity, principle, issue, recommendation, benefits\n   - Summary with violation counts by severity\n   - Heuristics results\n   - AI analysis and recommendations with code examples\n\n8. **CRITICAL - Code Snippets:** For each violation in the structured JSON, include:\n   - `current_code`: The problematic code snippet with line numbers (format: \"482|    code here\")\n   - `recommended_code`: The improved code snippet with line numbers\n   - `line_numbers`: Array of line numbers where violation occurs\n   - `context_lines`: 3-5 lines before and after the violation for context\n\nPlanning decisions override default patterns - you MUST apply them directly to your code design."
+        },
+        "outputs": [
+          {
+            "name": "violations_report",
+            "path": "docs",
+            "template": "templates/violations-report-template.md",
+            "instructions": "Transform the structured violations_report.json into a markdown document using the violations-report-template.md template file. The template file contains the complete formatting rules and structure. Follow the template exactly, filling in the structured content data from the violations_report.json file. CRITICAL: In render_output phase, AUTOMATICALLY generate the markdown report - do NOT wait for user confirmation. Load the violations_report.json structured content and transform it into markdown using the template. Replace all template placeholders (e.g., {file}, {language}, {violations_list}, etc.) with actual data from the structured JSON.\n\n**MANDATORY FORMATTING REQUIREMENTS:**\n1. Format violations with code snippets showing line numbers:\n   - Include 3-5 lines of context around each violation\n   - Show line numbers in format: `482|    code here`\n   - Mark the violation line with `>>>` prefix: `>>> 482|    problematic code`\n   - Include function/class name where violation occurs\n\n2. For each violation, include:\n   - **Line numbers** (e.g., \"Line 482-490\")\n   - **Severity** (critical/important/suggested)\n   - **Function/Class name** where violation occurs\n   - **Principle violated** (e.g., \"1.2 Small and Focused\")\n   - **Current Code** snippet with line numbers\n   - **Issue** description explaining what's wrong\n   - **Recommendation** with before/after code examples showing line numbers\n   - **Benefits** explaining why the change improves code quality\n\n3. Group violations by severity (Critical, Important, Suggested) as shown in template\n\n4. Include example refactorings in the Recommendations section with:\n   - Current problematic code with line numbers\n   - Recommended improved code with line numbers\n   - Step-by-step refactoring approach\n   - Benefits of the change\n\n5. Ensure all code blocks use proper syntax highlighting (```python, ```javascript, etc.)\n\n6. Format all sections according to the template structure - do not skip any sections.\n\n**AUTOMATIC GENERATION:** After completing render_output phase, automatically save the generated markdown report to the output path specified in the template configuration. Do not wait for user confirmation - generate and save immediately."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to clean code analysis behavior",
+        "patterns": [
+          "analyze.*code.*quality",
+          "check.*clean.*code",
+          "review.*code.*violations",
+          "validate.*code.*quality",
+          "code.*review",
+          "clean.*code.*analysis",
+          "identify.*violations",
+          "code.*quality.*check",
+          "review.*for.*violations",
+          "analyze.*code"
+        ],
+        "priority": 10
+      },
+      "rules": []
+    }
+  },
+  "mcp": {
+    "server_name": "agent-{agent_name}",
+    "command": "python",
+    "args": [
+      "agents/base/src/agent_mcp_server.py",
+      "{agent_name}"
+    ],
+    "cwd": "{workspace_root}",
+    "env": {
+      "AGENT_NAME": "{agent_name}",
+      "PYTHONPATH": "{workspace_root}"
+    }
+  }
+}
+

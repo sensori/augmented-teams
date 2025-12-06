@@ -1,0 +1,22 @@
+---
+description: {framework}-specific {rule_type} patterns
+globs: ["{framework_specific_globs}"]
+alwaysApply: {always_apply}
+---
+**When** practicing {rule_type} with {framework}/{language},
+**then** follow these {framework}-specific patterns.
+
+This rule extends `{parent_specializing_rule}.mdc` and references `{base_rule}.mdc`.
+
+**Executing Commands:**
+{executing_commands}
+
+## Conventions
+
+{conventions_section}
+
+{principles_section}
+
+{templates_section}
+
+{commands_section}

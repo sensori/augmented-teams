@@ -1,7 +1,0 @@
-{
-  "name": "render_story_map",
-  "path": "docs/stories",
-  "template": "story-map.md",
-  "output": "story-map.md"
-}
-

@@ -1,0 +1,294 @@
+describe Agent
+
+  describe Agent that is orchestrating workflow
+    describe Agent that has been requested to start workflow
+      it should have loaded Configuration before starting workflow
+      it should provide context clarification instructions with guardrails and requirements after starting workflow
+    describe Agent that is managing workflow behaviors
+      it should be able to start workflow at specified behavior
+      it should be able to move to next behavior
+      it should be able to approve current behavior
+      it should be able to skip current behavior
+    describe Agent that is managing workflow actions
+      it should be able to move to specific action within current behavior via workflow.move_to_action(action_name)
+      it should provide current_action property that returns current Action
+      it should provide instructions from current_action.instructions
+      describe Agent that is validating workflow action advancement
+        it should check if current action can advance using can_advance() method
+        it should validate that clarification action has key_questions_answered and evidence_provided before advancing
+        it should validate that planning action has decisions_made and assumptions_made before advancing
+        it should validate that build_structure action has structured content before advancing
+        it should prevent advancing from mandatory actions when action is not complete
+        it should raise ValueError when trying to skip mandatory action without completion
+        it should raise ValueError when trying to advance from incomplete action
+        it should allow advancing when action is complete and not mandatory
+        describe Agent that is enforcing mandatory action sequence
+          it should define clarification and planning as mandatory actions
+          it should prevent skipping clarification action without explicit override
+          it should prevent skipping planning action without explicit override
+          it should allow skipping non-mandatory actions when complete
+        describe Agent that is supporting explicit override mechanism
+          it should accept force parameter in next_action() to skip validation
+          it should allow skipping mandatory actions when force=True is provided
+          it should allow skipping to specific action when override is used
+          it should provide clear error message when override is needed but not provided
+          it should log when override is used for audit trail
+    describe Agent that is evaluating workflow behaviors
+      it should determine which behavior should be initiated based on context
+
+  describe Agent that is loading Configuration
+    describe Agent that is loading Configuration
+      it should load Configuration and provide access to prompt templates, workflow, rules, and behaviors
+      it should provide workflow stages that match configuration
+      it should provide agent-level rules that match configuration
+    describe Agent that has loaded behaviors
+      describe Behavior that has been loaded
+        it should have guardrails
+        it should have rules
+        it should have actions sub-object
+        it should have content sub-object
+        describe Behavior that has guardrails
+          describe Guardrails that has required context
+            it should load key questions that match configuration
+            it should load evidence requirements that match configuration
+          describe Guardrails that has decision making criteria
+            it should load first decision criteria with question, result, and choices
+            it should load second decision criteria with question, result, and choices
+          it should load typical assumptions that match configuration
+          it should load recommended human activities that match configuration
+        describe Behavior that has rules
+          it should load description that matches configuration
+          describe Rules that has examples
+            it should load positive examples that match configuration
+            it should load negative examples that match configuration
+          it should load validation method name that matches configuration
+        describe Behavior that has actions
+          it should load description that matches configuration
+        describe Behavior that has content
+          describe Content that has structured content
+            it should load content structure definition that matches configuration
+            it should load description that matches configuration
+          it should load content builder name that matches configuration
+          describe Content that has outputs
+            it should load first output with name, converter, and format that match configuration
+            it should load second output with name, converter, and format that match configuration
+            it should load third output with name, converter, and format that match configuration
+
+  describe Agent that is generating Content
+    describe Agent that is providing tools and instructions to AI Chat
+      it should provide MCP tool names and usage instructions for structure building
+      it should reference MCP tools that are already registered via MCP server configuration
+      it should provide tools_and_instructions property with MCP tool names and usage instructions
+    describe Agent that is building structured content
+      describe Agent that has received request to proceed to generation
+        it should access current_behavior property to get Behavior for current workflow stage
+        it should access instructions property which delegates to workflow.current_action.instructions
+        it should return instructions from current action to AI Chat
+      describe Content that is generating build instructions
+        it should include agent-level rules in build_instructions
+        it should include behavior-level rules in build_instructions
+        it should include structured_content instructions in build_instructions
+      describe Agent that is executing builder method
+        it should call Content.build() to create initial structure
+        it should access build_instructions property which includes agent-level rules, behavior-level rules, and structured_content instructions
+        it should allow AI Chat to use instructions to finalize building the structure
+        it should capture complete Content Data from AI Chat after structure building
+      describe Agent that is validating Content Data against schema
+        it should call Content.validate() to validate Content Data structure
+        it should perform code-based schema validation
+        it should read structured_content.schema from Content Config
+        it should provide validation errors to AI Chat if validation fails
+        it should proceed to transformation phase if validation passes
+    describe Agent that is transforming Content to Documents
+      describe Agent that is providing transformation instructions
+        it should access transform_instructions property which includes instructions from each output's instructions field
+        it should provide transformation instructions to AI Chat with set of documents to be built
+        it should provide transformation instructions with templates to be used
+        it should provide transformation instructions with important parameters
+      describe Agent that is transforming structured content to rendered documents
+        it should transform structured JSON to rendered markdown using templates
+        it should transform structured JSON to other formats using templates
+        it should use output.transformer for each output in Content.outputs
+        it should use output.template for each output in Content.outputs
+        it should use output.instructions for each output in Content.outputs
+        it should generate rendered document for each output in Content.outputs
+      describe Agent that is generating markdown from JSON configuration
+        it should generate markdown documentation from JSON configuration when specified in output instructions
+        it should generate command files from JSON configuration
+        it should generate rule documentation from JSON configuration
+        it should ensure markdown docs are always in sync with structured JSON source of truth
+    describe Agent that is managing Content Data
+      describe Agent that is storing structured content
+        it should call Agent.store_content with structured parameter containing content_data
+        it should delegate to current_behavior.content.structured setter which stores data
+        it should call Content.store automatically when structured setter is used
+        it should store via Project.store_output and create traceability link
+        it should save structured JSON to project_area/docs/content/structured.json
+      describe Agent that is storing rendered content
+        it should call Agent.store_content with rendered parameter containing rendered_docs
+        it should delegate to current_behavior.content.rendered setter which stores data
+        it should call Content.store automatically when rendered setter is used
+        it should store via Project.store_output and create traceability link
+        it should save rendered documents to project_area/docs/content/{output_name}.md files
+        it should save one file per output
+
+  describe Agent
+    that is been sent a request to validate content
+      and is creating validation instructions
+          it should include structured content in prompt content_data
+          it should assemble the validation prompt from all validations
+          it should assemble validation prompt with each agent and behavior rule
+          it should assemble validation prompt with examples for each rule
+          it should include instruction in validation prompt for AI to evaluate Content against rules and generate report
+          and the Rules have diagnostics
+            it should execute Rule diagnostics on Content
+            it should log diagnostics that were executed
+            that has agent-level diagnostic methods
+              it should execute agent-level diagnostic method on Content
+              it should log diagnostics that were executed
+            that has rule-level diagnostic methods
+              it should execute behavior-level diagnostic methods on Content
+              it should log diagnostics exectuted
+            whose diagnotics have returns Violations
+              it should collect violations for each diagnostic Validation
+              it should include the rule in each violation
+              it should include violation message in each violation
+              it should include location information of content in each violation
+            that are being fed into validation instructions
+              it should include structured content in prompt content_data
+              it should assemble the validation prompt from all validations
+              it should assemble validation prompt with each rule
+              it should assemble validation prompt with examples for each rule
+              it should include violations in the validation prompt
+              it should include instructions in validation prompt to pay close attention to violations
+            that is validating structured content
+              it should include structured content in prompt content_data
+              that has been sent to the Agent for storage
+                it should save updates to the structured content
+            that is validating rendered output
+              it should include rendered output in prompt content_data
+              that has been sent to the Agent for storage
+                it should save updates to the rendered output
+    that has received a request to make a correction
+      and is creating correction instructions
+        it should include instructions to analyze the current chat history for all generation and validation feedback
+        it should include all data provided as part of validation instruction including rules, examples, and violations
+        it should include agent, behavior, and action level prompts
+        it should include instructions to generate updated prompts, rules and/or examples based on the all correction inputs
+    that has been sent corrections to store
+      that are new rules
+        it should add new rules to agent-level rules in Config Data when storing agent-level corrections
+        it should add new rules to behavior-specific rules in Behavior Data when storing behavior-level corrections
+        it should save updates to agent config file
+      that are new examples on existing rules
+        it should add new examples to existing agent-level rules in Config Data when storing agent-level corrections
+        it should add new examples to existing behavior-specific rules in Behavior Data when storing behavior-level corrections
+        it should save updates to agent config file
+      that are updated rules 
+        it should update existing rules in Config Data when storing agent-level corrections
+        it should update existing rules in Behavior Data when storing behavior-level corrections
+        it should save updates to agent config file
+      that are updated examples on existing rules
+        it should update examples on existing agent-level rules in Config Data when storing agent-level corrections
+        it should update examples on existing behavior-specific rules in Behavior Data when storing behavior-level corrections
+        it should save updates to agent config file
+      that are updates to prompts
+        it should update agent-level prompts in Config Data when storing agent-level corrections
+        it should update behavior-level prompts in Behavior Data when storing behavior-level corrections
+        it should update action-level prompts in Behavior Data when storing behavior-level corrections
+        it should save updates to agent config file
+       
+  that is orchestrating Project tracking and storage
+    it should provide access to Project for tracking activity and storing output
+    it should automatically track activity when starting workflow behavior
+    it should automatically track activity when building content
+    it should automatically store structured output when saving content data after build
+    it should automatically store rendered output when saving content data after transform
+    it should automatically link activity to output for traceability
+    describe Direct Project API access (for internal testing)
+      it should allow direct access to project output data for internal operations
+      it should allow direct access to project activity log for internal operations
+
+  describe Agent that is exposing MCP wrapper
+    that is loading MCP configuration
+      it should load mcp config section from agent configuration
+      it should substitute agent name placeholder in MCP config
+      it should provide access to MCP config with server name, command, arguments, working directory, and environment variables
+      that has trigger words
+        it should load trigger words from base agent configuration
+        it should collect trigger words for action from all config levels
+        it should merge trigger words from base and agent levels
+        it should include behavior-level trigger words when behavior is current
+        it should include action-level trigger words when action is available
+        it should return empty list when no trigger words found for action
+        that is enhancing MCP tool descriptions with trigger words
+          it should build tool description with trigger words embedded
+          it should include trigger phrases for each action in description
+          it should format trigger phrases as readable list in description
+          it should enhance agent_move_to_action tool description with triggers
+    that is deploying MCP configuration
+      that is deploying to workspace location
+        it should create workspace MCP directory if it does not exist
+        it should generate standalone MCP config file with server name and command
+        it should write MCP config to workspace MCP directory with agent name
+      that is deploying to global location
+        it should determine OS-level global MCP config path based on platform
+        it should create global configuration directory if it does not exist
+        it should merge agent MCP config with existing global configuration
+        it should preserve existing MCP servers when merging
+        it should write merged config to global configuration location
+    that is exposing state and navigation tools
+      it should provide state tool that returns current behavior and action
+      it should provide list behaviors tool that lists all behaviors and their actions
+      it should provide move to behavior tool that navigates to specific behavior
+      it should provide move to action tool that navigates to specific action
+      it should provide next action tool that moves to next action
+      it should provide next action tool that validates action completion before advancing
+      it should provide next action tool that prevents skipping mandatory actions without override
+      it should provide next action tool with override_mandatory parameter to allow explicit skipping
+      it should provide next action tool with skip_to_action parameter to jump directly to action
+      it should provide next action tool that requires override_mandatory=True when using skip_to_action
+      it should provide next action tool that detects override intent from natural language user input
+      it should provide next action tool that returns clear error message when override needed but not provided
+      it should provide next behavior tool that moves to next behavior
+    that is exposing instructions tools
+      it should provide get instructions tool that returns current action instructions
+      it should provide get action instructions tool that returns instructions for specific behavior and action
+      it should return instructions as JSON when instructions are dictionary format
+      it should return instructions as string when instructions are string format
+    that is exposing storage tools
+      it should provide store tool that accepts action-specific parameters
+      it should delegate storage to current behavior and current action which handles action-specific storage
+      it should support storing clarification data with key questions answered and evidence provided
+      it should support storing planning data with decisions made and assumptions made
+      it should support storing structured content via structured parameter
+      it should support storing rendered content via rendered parameter
+      it should support storing validation results via validation results parameter
+      it should allow storing output for specific action by action name
+    that is exposing processing tools
+      it should provide get activity log tool that returns activity log
+      it should provide get traceability links tool that returns traceability links
+      it should provide get content tool that returns structured and rendered content
+      it should allow getting content for specific behavior by behavior name
+      it should default to current behavior when behavior name not provided
+  describe Agent that is exposing CLI wrapper
+    that is discovering CLI commands
+      it should load agent configuration from agent.json file
+      it should discover behaviors from agent configuration
+      it should discover actions for each behavior from configuration or use default actions
+      it should build command map from behaviors and actions
+      it should sort behaviors by order property
+    that is providing CLI interface
+      it should provide list commands that shows all available behaviors and actions
+      it should provide execute command that runs specific behavior and action
+      it should provide help text that describes available commands
+      it should support JSON output format for structured data
+      it should support project area parameter for workspace configuration
+    that is executing CLI commands
+      it should instantiate agent with provided agent name and project area
+      it should start workflow at specified behavior
+      it should move to specified action within behavior
+      it should return instructions from current action
+      it should handle errors gracefully with clear error messages
+      it should validate behavior name exists before executing
+      it should validate action name exists for behavior before executing

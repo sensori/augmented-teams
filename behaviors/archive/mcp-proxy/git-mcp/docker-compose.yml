@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  git-mcp:
+    image: ghcr.io/github/github-mcp-server
+    environment:
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN}
+    stdin_open: true
+    tty: true
+    # This runs as a long-running service that mcp-proxy can connect to
+    # mcp-proxy will communicate with it via stdio/docker exec

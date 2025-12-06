@@ -1,0 +1,22 @@
+---
+description: {rule_description}
+globs: ["{glob_patterns}"]
+alwaysApply: {always_apply}
+---
+**When** {context},
+**then** {behavior}.
+
+{rule_overview_text}
+
+**Executing Commands:**
+{executing_commands}
+
+## Conventions
+
+{conventions_section}
+
+{principles_section}
+
+{templates_section}
+
+{commands_section}

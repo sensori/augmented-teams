@@ -1,0 +1,22 @@
+[2025-11-17 18:35:13] [CHARACTER-MCP] Log file initialized: C:\dev\augmented-teams\behaviors\character\code\logs\mcp_server_20251117_183513.log
+[2025-11-17 18:35:13] [CHARACTER-MCP] Starting MCP server initialization...
+[2025-11-17 18:35:13] [CHARACTER-MCP] Python executable: C:\Users\thoma\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe
+[2025-11-17 18:35:13] [CHARACTER-MCP] Python version: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+[2025-11-17 18:35:13] [CHARACTER-MCP] Workspace root: C:\dev\augmented-teams
+[2025-11-17 18:35:13] [CHARACTER-MCP] Current file: C:\dev\augmented-teams\behaviors\character\code\mcp_server.py
+[2025-11-17 18:35:13] [CHARACTER-MCP] Current directory: C:\dev\augmented-teams\behaviors\character\code
+[2025-11-17 18:35:13] [CHARACTER-MCP] Python path updated: ['C:\\dev\\augmented-teams\\behaviors\\character\\code', 'C:\\dev\\augmented-teams', 'C:\\dev\\augmented-teams\\behaviors\\character\\code']
+[2025-11-17 18:35:13] [CHARACTER-MCP] Importing MCP SDK...
+[2025-11-17 18:35:14] [CHARACTER-MCP] MCP SDK imported successfully
+[2025-11-17 18:35:14] [CHARACTER-MCP] Importing character agent modules...
+[2025-11-17 18:35:14] [CHARACTER-MCP] Character agent modules imported successfully
+[2025-11-17 18:35:14] [CHARACTER-MCP] Creating Server instance...
+[2025-11-17 18:35:14] [CHARACTER-MCP] Server instance created successfully
+[2025-11-17 18:35:14] [CHARACTER-MCP] Starting server with stdio transport...
+[2025-11-17 18:35:14] [CHARACTER-MCP] Server is now running and waiting for MCP protocol messages...
+[2025-11-17 18:35:14] [CHARACTER-MCP] ERROR: server startup failed: Server.run() got an unexpected keyword argument 'stdio'
+Traceback (most recent call last):
+  File "C:\dev\augmented-teams\behaviors\character\code\mcp_server.py", line 568, in <module>
+    server.run(stdio=True)
+TypeError: Server.run() got an unexpected keyword argument 'stdio'
+[2025-11-17 18:35:14] [CHARACTER-MCP] Closing log file: C:\dev\augmented-teams\behaviors\character\code\logs\mcp_server_20251117_183513.log

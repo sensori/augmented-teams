@@ -1,0 +1,677 @@
+
+
+
+FUNCTIONAL PURPOSE: Ensure tests follow behavior-driven principles through validation, workflow guidance, and framework-specific patterns
+
+This document describes business scenarios showing how BDD domain concepts interact.
+
+===================================================================================================
+CROSS-DOMAIN INTERACTIONS
+===================================================================================================
+
+BEHAVIOR DEFINITION ↔ VALIDATION:
+- Validation executes behavior rules against test content
+- Specialized rules selected based on test file language
+- Examples from rules guide AI violation detection
+
+BEHAVIOR DEFINITION ↔ WORKFLOW GUIDANCE:
+- Workflow references rules at every phase
+- Validation command triggered after each phase
+- Rules define quality standards for signatures and tests
+
+VALIDATION ↔ WORKFLOW GUIDANCE:
+- Workflow enforces validation checkpoints between phases
+- Validation blocks phase progression if violations exist
+- Sample-validate-learn cycle repeats until clean
+
+SPECIALIZING BEHAVIOR ↔ CODE-DIRECTED AI VALIDATION:
+- Validation uses specialization to select language-specific rules
+- Examples extracted dynamically from specialized rules
+- Framework detection enables specialized validation
+
+SPECIALIZING BEHAVIOR ↔ STATE-BASED COMMAND WORKFLOW:
+- Workflow commands can be specialized per framework
+- State tracking works across any specialized workflow
+- Validation checkpoints apply to all specializations
+
+===================================================================================================
+SCENARIO 1: VALIDATE TEST FILE AGAINST BDD PRINCIPLES
+===================================================================================================
+
+TRIGGER: User invokes validation command on test file
+
+ACTORS:
+- Specializing Behavior (BASE - Part 1)
+- Code-Directed AI Validation (BASE - Part 1)
+- BDD Validation Command (SPECIFIC - Part 2)
+
+FLOW:
+
+1. User invokes BDD validation command
+   → BDD Validation Command (SPECIFIC)
+   → Invokes BDD Validation Runner (SPECIFIC)
+
+2. BDD Validation Runner uses Specializing Behavior (BASE)
+   → Specializing Behavior.Selects Specialized Rule (BASE logic)
+   → File pattern matching (BASE method)
+   → Returns: bdd-jest-rule.mdc or bdd-mamba-rule.mdc (BDD-specific files)
+
+3. BDD Validation Runner uses Code-Directed AI Validation (BASE)
+   → Code-Directed AI Validation.Extracts Practice Examples (BASE logic)
+   → Parses DO/DON'T blocks (BASE method)
+   → Generates checklist from sections (BASE method)
+   → Returns: BDD-specific examples + checklist
+
+4. BDD Validation Runner parses test structure (BDD-SPECIFIC)
+   → Identifies describe/it (Jest) or with describe/with it (Mamba) (BDD logic)
+   → Detects implementation status (BDD logic)
+   → Returns: Test hierarchy (BDD-specific structure)
+
+5. BDD Validation Runner uses Code-Directed AI Validation (BASE)
+   → Code-Directed AI Validation.Assembles AI Prompt (BASE logic)
+   → Injects: Rule + Examples + Checklist + Content (BASE method)
+   → Returns: Structured prompt
+
+6. AI Agent identifies violations
+   → Uses Code-Directed AI Validation analysis (BASE logic)
+   → Compares against DO/DON'T examples (BASE behavior)
+   → Checks BDD principles (BDD-specific rules)
+   → Returns: Violations with locations
+
+7. AI Agent suggests/applies fixes
+   → Uses Code-Directed AI Validation remediation (BASE logic)
+   → Templates from DO examples (BASE behavior)
+   → BDD-specific fixes (BDD logic)
+
+8. BDD Validation Runner generates report
+   → Uses Code-Directed AI Validation reporting (BASE logic)
+   → Formats with severity (BASE method)
+   → BDD principle references (BDD-specific)
+
+BUSINESS RULES:
+- BASE: Rule selection through file pattern matching
+- BASE: DO/DON'T example extraction from rules
+- BASE: Checklist generation from rule sections
+- BDD: Test structure parsing (describe/it hierarchy)
+- BDD: BDD principle validation (5 specific principles)
+- BASE: AI comparison and fix suggestion
+
+RESULT: Validation report (BASE) listing BDD principle violations (BDD) with fixes
+
+IMPLEMENTATION SEPARATION:
+- BASE classes/methods: Specializing Behavior, Code-Directed AI Validation
+- BDD classes/methods: BDD Validation Runner, Test Structure Parser
+- Inheritance: BDD Validation Runner extends base Validation Runner
+
+===================================================================================================
+SCENARIO 2: BUILD TEST SIGNATURES THROUGH ITERATIVE VALIDATION
+===================================================================================================
+
+TRIGGER: User invokes workflow command on empty/partial test file (Phase 0)
+
+ACTORS:
+- State-Based Command Workflow (BASE - Part 1)
+- Code-Directed AI Validation (BASE - Part 1)
+- BDD Workflow Command (SPECIFIC - Part 2)
+- BDD Rules (SPECIFIC - Part 2)
+
+FLOW:
+
+1. User invokes BDD workflow command
+   → BDD Workflow Command (SPECIFIC)
+   → Invokes BDD Workflow Runner (SPECIFIC)
+
+2. BDD Workflow Runner uses State-Based Command Workflow (BASE)
+   → State-Based Workflow.Tracks Multi-Phase State (BASE logic)
+   → Loads or initializes workflow state (BASE method)
+   → Returns: Phase 0 - Signatures (BDD-specific phase)
+
+3. BDD Workflow Runner uses State-Based Command Workflow (BASE)
+   → State-Based Workflow.Controls Iteration Size (BASE logic)
+   → AI identifies sample size using 6-test-max rule (BASE method)
+   → Returns: One lowest-level describe block (BDD-specific structure)
+
+4. AI Agent creates sample test signatures (BDD-SPECIFIC)
+   → Writes describe/it signatures (BDD logic)
+   → Applies BDD fluent language rules (BDD-specific)
+   → Returns: Sample signatures
+
+5. BDD Workflow Runner enforces validation checkpoint (BASE)
+   → State-Based Workflow.Enforces Validation Checkpoints (BASE logic)
+   → Triggers BDD Validation Command (SPECIFIC)
+   → BDD Validation uses Specializing Behavior + Code-Directed AI Validation (BASE)
+
+6. AI Agent identifies violations
+   → Code-Directed AI Validation analysis (BASE logic)
+   → Against BDD principles (BDD-specific rules)
+   → Returns: BDD violations
+
+7. AI Agent fixes violations (BDD-SPECIFIC)
+   → Applies BDD fluent language fixes (BDD logic)
+   → Learns BDD patterns from violations (BDD logic)
+
+8. BDD Workflow Runner tracks learning (BDD-SPECIFIC)
+   → Records BDD violation patterns (BDD logic)
+   → Prepares for next BDD iteration
+
+9. AI creates another sample (BDD-SPECIFIC)
+   → Applies learned BDD patterns (BDD logic)
+   → Writes new sample signatures
+
+10. Loop: sample-validate-learn-expand (BASE)
+    → State-Based Workflow manages iteration (BASE logic)
+    → Until zero violations achieved (BASE enforcement)
+
+11. BDD Workflow Runner updates state (BASE)
+    → State-Based Workflow.Tracks State (BASE logic)
+    → Persists phase completion (BASE method)
+    → Returns: Ready for Phase 1
+
+BUSINESS RULES:
+- BASE: Sample size control (6-test-max iterative pattern)
+- BASE: Validation checkpoint enforcement (mandatory after each sample)
+- BASE: Zero violations required before expansion
+- BASE: State persistence across sessions
+- BDD: Lowest-level describe block sample size
+- BDD: BDD fluent language principles applied
+- BDD: describe/it structure specific to Jest/Mamba
+
+RESULT: Complete test signatures (BDD) validated through iterative refinement (BASE)
+
+IMPLEMENTATION SEPARATION:
+- BASE classes: State-Based Workflow, Code-Directed Validation
+- BDD classes: BDD Workflow Runner (extends base), BDD Validation Runner (extends base)
+- BASE methods: Track state, control size, enforce checkpoints, extract examples
+- BDD methods: Parse test structure, apply BDD rules, generate describe/it
+
+===================================================================================================
+SCENARIO 3: GUIDE THROUGH RED-GREEN-REFACTOR CYCLE
+===================================================================================================
+
+TRIGGER: User invokes workflow command on test file with signatures (Phase 1-3)
+
+ACTORS:
+- State-Based Command Workflow
+- Code-Directed AI Validation
+- Behavior Definition (Rules)
+
+FLOW:
+
+1. User advances to next phase
+   Workflow Command identifies current phase from state
+
+2. Phase 1 (RED): AI implements failing test
+   Identifies sample size (1-2 tests)
+   Writes test implementation for sample
+   Triggers validation command
+   AI fixes violations
+   Code runs tests via framework
+   Verifies tests fail for right reasons
+
+3. Workflow updates state
+   Marks tests as RED
+   Persists progress
+
+4. User proceeds to Phase 2
+
+5. Phase 2 (GREEN): AI implements minimal code
+   Writes production code to make tests pass
+   Triggers validation command
+   AI fixes violations
+   Code runs tests
+   Verifies tests pass
+   Code runs all tests
+   Checks for regressions
+
+6. Workflow updates state
+   Marks tests as GREEN
+   Persists progress
+
+7. User decides: refactor or next test
+
+8. Phase 3a (REFACTOR): AI suggests improvements
+   Analyzes production code
+   Identifies code smells
+   Proposes specific refactorings
+   User approves selections
+
+9. Phase 3b (IMPLEMENT): AI applies refactorings
+   Applies approved changes
+   Code runs all tests
+   Triggers validation command
+   Verifies tests still pass
+   Ensures quality maintained
+
+10. Workflow loops to next test
+    Identifies next unimplemented signature
+    Returns to Phase 1
+
+BUSINESS RULES:
+- Validation mandatory after every phase implementation
+- Tests must fail for right reason (not defined, not syntax error)
+- Minimal code only (no features without tests)
+- Regression check required after GREEN
+- Refactorings must maintain passing tests
+- Validation checkpoints block progression
+- Sample-validate-learn applies in Phase 1 too
+- State persisted after each phase
+
+RESULT: Tested, implemented, refactored code following TDD discipline
+
+===================================================================================================
+SCENARIO 4: SELECT SPECIALIZED RULE BASED ON LANGUAGE
+===================================================================================================
+
+TRIGGER: Validation or workflow command invoked on test file
+
+ACTORS:
+- Specializing Behavior (BASE - Part 1)
+- BDD Validation Runner (SPECIFIC - Part 2)
+
+FLOW:
+
+1. BDD command invoked with test file path
+   → BDD Validation Runner (SPECIFIC)
+   → Receives file path
+
+2. BDD Validation Runner delegates to Specializing Behavior (BASE)
+   → Specializing Behavior.Selects Specialized Rule (BASE logic)
+   → Pattern matching against file extension (BASE method)
+   → Checks Jest patterns: *.test.js, *.spec.mjs, etc (BDD configuration)
+   → Checks Mamba patterns: *_test.py, test_*.py, etc (BDD configuration)
+   → Returns: Framework name (e.g., "jest" or "mamba")
+
+3. Specializing Behavior loads specialized rule file (BASE)
+   → Maps framework name to rule file (BDD configuration: jest → bdd-jest-rule.mdc)
+   → Loads rule file (BASE method)
+   → Returns: Rule content
+
+4. Specializing Behavior extracts from specialized rule (BASE)
+   → Parses DO/DON'T code blocks (BASE method)
+   → Extracts validation checklist (BASE method)
+   → Returns: Framework-specific examples + checklist
+
+5. BDD Validation Runner receives materials
+   → Proceeds with specialized materials
+   → Uses BDD-specific examples for BDD-specific validation
+
+BUSINESS RULES:
+- BASE: File pattern matching logic
+- BASE: Rule file loading and parsing
+- BASE: Example and checklist extraction
+- BDD: Pattern definitions (Jest/Mamba file patterns)
+- BDD: Rule file mappings (framework → bdd-X-rule.mdc)
+- BDD: Rule content (BDD principles and examples)
+
+RESULT: Language-appropriate validation materials (BASE) for BDD validation (SPECIFIC)
+
+IMPLEMENTATION SEPARATION:
+- BASE class: Specializing Behavior (generic rule selection)
+- BDD class: BDD Validation Runner (uses Specializing Behavior)
+- BASE method: Pattern matching, file loading, example extraction
+- BDD configuration: File patterns, rule mappings
+- BDD content: bdd-jest-rule.mdc, bdd-mamba-rule.mdc
+
+===================================================================================================
+SCENARIO 5: GENERATE TEST SIGNATURES FROM DOMAIN MAP
+===================================================================================================
+
+TRIGGER: User invokes scaffolding command on domain map
+
+ACTORS:
+- Domain Scaffolding (Command)
+- Behavior Definition (Rules)
+
+FLOW:
+
+1. User invokes scaffolding command
+   Passes domain map file path
+   Passes control to Scaffolding Command
+
+2. AI Agent parses domain map structure
+   Identifies domain concepts (nouns)
+   Extracts behaviors from each concept (verbs)
+   Understands concept hierarchy and nesting
+
+3. AI Agent translates to test structure
+   Domain concepts → describe blocks
+   Behaviors → it blocks
+   Nested concepts → nested describe blocks
+
+4. AI Agent orders by user mental model
+   Foundation concepts before features
+   Parent concepts before children
+   Matches domain map ordering
+
+5. AI Agent applies behavioral fluency rules
+   Uses BDD principles from base rule
+   Crafts fluent describe/it sentences
+   Ensures "should" language in assertions
+
+6. AI Agent generates test file
+   Creates complete test structure with signatures
+   No implementations (signatures only)
+   Ready for Phase 0 validate-expand cycle
+
+7. Scaffolding Command presents result
+   Shows generated test file to user
+
+8. User reviews and saves test file
+
+BUSINESS RULES:
+- One describe block per domain concept
+- One it block per behavior
+- Nesting matches domain map hierarchy
+- Ordering preserves user mental model from domain
+- Fluent language follows BDD principles
+- Signatures only, no test implementations
+
+RESULT: Behavioral test structure generated from domain model, ready for TDD workflow
+
+===================================================================================================
+SCENARIO 6: TRACK WORKFLOW STATE ACROSS SESSIONS
+===================================================================================================
+
+TRIGGER: User works on TDD workflow across multiple sessions
+
+ACTORS:
+- State-Based Command Workflow
+
+FLOW:
+
+1. User invokes workflow command
+   Code checks for existing state file
+   (.bdd-workflow/<test-file-name>.state.json)
+
+2. If state exists, Code loads previous progress
+   Reads current phase
+   Reads test completion status
+   Reads completed refactorings
+   Resumes where user left off
+
+3. If no state, Code initializes new state
+   Sets phase to Phase 0 (Signatures)
+   Initializes empty test list
+   Creates state directory
+
+4. As workflow progresses, Code updates state
+   After each phase completion
+   After each test status change
+   After each refactoring applied
+
+5. Code persists state to file
+   Writes JSON to state file
+   Enables cross-session continuity
+
+6. User closes session and returns later
+   Workflow resumes from exact point
+   No progress lost
+
+BUSINESS RULES:
+- State persisted after every significant change
+- One state file per test file
+- State includes: phase, test statuses, refactorings
+- State directory: .bdd-workflow/ (alongside tests)
+- State enables long-running TDD sessions
+- State cleared only when workflow complete
+
+RESULT: Workflow progress preserved across sessions, enabling iterative development over time
+
+===================================================================================================
+SCENARIO 7: ENFORCE VALIDATION CHECKPOINTS IN WORKFLOW
+===================================================================================================
+
+TRIGGER: AI Agent attempts to progress to next workflow phase
+
+ACTORS:
+- State-Based Command Workflow
+- Code-Directed AI Validation
+
+FLOW:
+
+1. AI Agent completes work in current phase
+   (Created signatures, or implemented test, or implemented code)
+
+2. Workflow enforces validation checkpoint
+   Command instructions specify: "MANDATORY: AI Agent runs validation"
+   Triggers validation command on current work
+
+3. Validation executes
+   Extracts examples from specialized rule
+   AI compares work against examples
+   Identifies violations
+
+4. If violations found:
+   Workflow blocks phase progression
+   AI Agent must fix ALL violations
+   Validation runs again
+   Loop continues until zero violations
+
+5. If no violations:
+   Workflow allows phase progression
+   Code updates workflow state
+   Marks phase complete
+   Enables next phase
+
+6. If AI attempts to skip validation:
+   Command instructions prevent progression
+   "NO EXCEPTIONS" stated explicitly
+   Forces compliance
+
+BUSINESS RULES:
+- Validation mandatory after EVERY phase (no exceptions)
+- ALL violations must be fixed before proceeding
+- No partial fixes - must achieve zero violations
+- Phase state not saved until validation passes
+- Enforcement through command documentation
+- AI Agent responsible for running validation
+
+RESULT: Quality enforced at every step, violations cannot accumulate
+
+===================================================================================================
+SCENARIO 8: CONTROL SAMPLE SIZE TO PREVENT OVERWHELMING ITERATIONS
+===================================================================================================
+
+TRIGGER: AI Agent prepares to create signatures or implement tests
+
+ACTORS:
+- State-Based Command Workflow (BASE - Part 1)
+- BDD Workflow Runner (SPECIFIC - Part 2)
+
+FLOW:
+
+1. AI Agent begins creating content
+   → BDD Workflow Command guides AI (SPECIFIC)
+   → Specifies BDD-specific work (signatures or test implementations)
+
+2. BDD Workflow Runner applies State-Based Command Workflow (BASE)
+   → State-Based Workflow.Controls Iteration Size (BASE logic)
+   → Uses configurable sample size limit (BASE capability)
+   → BDD configuration: 6 tests maximum (BDD-specific value)
+
+3. BDD Workflow Runner documents sample size rule (BDD-SPECIFIC)
+   → "Lowest-level describe block" (BDD-specific structure)
+   → Documented in BDD runner code comments (BDD documentation)
+
+4. AI Agent identifies sample using BDD criteria (BDD-SPECIFIC)
+   → Finds one lowest-level describe block (BDD logic)
+   → Counts tests in block (BDD structure parsing)
+   → Ensures ≤ 6 tests (BASE enforcement of BDD limit)
+
+5. AI Agent creates sample only
+   → Writes BDD signatures/tests for that sample (BDD logic)
+   → Does not exceed sample size (BASE enforcement)
+
+6. Validation runs on sample (BASE + BDD)
+   → Uses Code-Directed AI Validation (BASE logic)
+   → Against BDD principles (BDD-specific rules)
+   → Returns: Faster feedback on smaller scope (BASE benefit)
+
+7. AI Agent learns from violations (BASE + BDD)
+   → Pattern learning (BASE capability)
+   → Applied to BDD test patterns (BDD-specific)
+
+8. Process repeats (BASE)
+   → State-Based Workflow manages iteration (BASE logic)
+   → Until all BDD samples done (BDD-specific content)
+
+BUSINESS RULES:
+- BASE: Configurable sample size limits
+- BASE: Iteration size control logic
+- BASE: Pattern learning between iterations
+- BDD: 6 tests maximum (specific limit value)
+- BDD: Lowest-level describe block (specific structure unit)
+- BDD: Test signature/implementation scope (specific content)
+
+RESULT: Manageable iterative development (BASE) preventing overwhelming BDD validation cycles
+
+IMPLEMENTATION SEPARATION:
+- BASE class: State-Based Workflow (generic iteration control)
+- BDD class: BDD Workflow Runner (uses State-Based Workflow)
+- BASE method: Controls sample size, manages iterations
+- BDD configuration: 6-test limit, describe block unit
+- BDD method: Identifies describe blocks, parses test structure
+
+===================================================================================================
+SCENARIO 9: USE BASE CAPABILITIES FROM BDD IMPLEMENTATION
+===================================================================================================
+
+TRIGGER: Developer designs BDD classes using base capabilities
+
+ACTORS:
+- All Part 1 Reusable Capabilities (BASE)
+- All Part 2 BDD Implementation (SPECIFIC)
+
+FLOW:
+
+1. Developer designs BDD validation
+   → BDD Validation Runner class (SPECIFIC)
+   → Extends or uses Specializing Behavior (BASE)
+   → Extends or uses Code-Directed AI Validation (BASE)
+
+2. BDD Validation Runner delegates to base capabilities
+   → Calls Specializing Behavior.Selects Rule (BASE method)
+   → Passes BDD file patterns as configuration (BDD config)
+   → Returns: Selected specialized rule
+
+3. BDD Validation Runner delegates example extraction
+   → Calls Code-Directed AI Validation.Extracts Examples (BASE method)
+   → From BDD-specific rule file (BDD content)
+   → Returns: BDD DO/DON'T examples
+
+4. BDD Validation Runner adds BDD-specific logic
+   → Parses describe/it hierarchy (BDD method)
+   → Understands test structure (BDD logic)
+   → Not in base classes
+
+5. Developer designs BDD workflow similarly
+   → BDD Workflow Runner class (SPECIFIC)
+   → Uses State-Based Command Workflow (BASE)
+   → Adds RED-GREEN-REFACTOR phases (BDD-specific)
+
+6. BDD Workflow Runner delegates to base workflow
+   → Calls State-Based Workflow.Tracks State (BASE method)
+   → Calls State-Based Workflow.Controls Sample Size (BASE method)
+   → Calls State-Based Workflow.Enforces Checkpoints (BASE method)
+   → Passes BDD configurations (6-test limit, describe blocks)
+
+7. BDD Workflow Runner adds BDD-specific orchestration
+   → Phase 0-3b management (BDD logic)
+   → Test execution integration (BDD logic)
+   → Not in base classes
+
+BUSINESS RULES:
+- BASE: Provides generic capabilities (rule selection, validation, state tracking)
+- BDD: Extends with domain-specific logic (test parsing, phases, TDD cycle)
+- BASE: Methods are reusable, no BDD knowledge
+- BDD: Configurations passed to base methods
+- BASE: Can be used by other behaviors (clean-code, git-integration, etc)
+- BDD: Cannot be used by other behaviors (too specific)
+- Separation: Through inheritance or composition
+
+RESULT: BDD implementation leverages base capabilities, adds BDD-specific logic
+
+IMPLEMENTATION SEPARATION:
+- BASE package/module: Contains Specializing Behavior, Code-Directed AI Validation, State-Based Workflow
+- BDD package/module: Contains BDD-specific runners, parsers, command implementations
+- BASE methods: select_specialized_rule(), extract_examples(), track_state(), control_sample_size()
+- BDD methods: parse_test_structure(), identify_describe_blocks(), orchestrate_red_green_refactor()
+- Inheritance: BDD runners inherit/compose base capabilities
+
+===================================================================================================
+SCENARIO 10: FIX CODE FIRST, THEN UPDATE DOCUMENTATION
+===================================================================================================
+
+TRIGGER: Misalignment detected between code behavior and documentation
+
+ACTORS:
+- (Meta-scenario about maintaining BDD system itself)
+
+FLOW:
+
+1. User identifies inconsistency
+   Documentation says Code does X
+   But Python runner actually has AI Agent do X
+
+2. User corrects: "Fix code first"
+   AI Agent updates runner files (.py)
+   Updates division of labor in code comments
+   Documents actual responsibilities
+
+3. Code now accurately documents itself
+   Runner comments match actual behavior
+   Division of labor clear in docstrings
+
+4. AI Agent then updates command documentation
+   Updates command files (.md)
+   Aligns with corrected code behavior
+
+5. System achieves consistency
+   Code is source of truth
+   Documentation describes actual code behavior
+   No period of misalignment
+
+BUSINESS RULES:
+- Code is source of truth
+- Documentation describes code, not vice versa
+- Fix order: .py files before .md files
+- Maintains consistency throughout
+- Prevents docs lying about behavior
+
+RESULT: Consistent system where documentation accurately reflects code behavior
+
+===================================================================================================
+KEY DESIGN PRINCIPLES
+===================================================================================================
+
+1. VALIDATION EVERYWHERE
+   - Validation command triggered after every phase
+   - Checkpoints block progression until violations fixed
+   - Sample-validate-learn cycle ensures quality
+
+2. ITERATIVE DEVELOPMENT
+   - Sample size control prevents overwhelming scope
+   - Learn from violations between iterations
+   - Gradually expand after validation passes
+
+3. SPECIALIZATION BY LANGUAGE
+   - Framework detection automatic from file patterns
+   - Specialized rules extend base principles
+   - Examples and validation language-appropriate
+
+4. STATE PERSISTENCE
+   - Workflow state persisted across sessions
+   - Long-running TDD enabled
+   - Resume from exact stopping point
+
+5. CLEAR SEPARATION
+   - Reusable capabilities vs BDD implementation
+   - Generic patterns vs domain specifics
+   - Enables code sharing and integration
+
+6. CODE AS TRUTH
+   - Code documents actual behavior
+   - Documentation describes code
+   - Fixes applied to code first, docs second
+
+

@@ -1,9 +1,0 @@
-{
-  "description": "Evidence or artifacts that must be present or validated before this behavior can proceed",
-  "evidence": [
-    "{Evidence type 1}",
-    "{Evidence type 2}",
-    "{Evidence type 3}"
-  ]
-}
-

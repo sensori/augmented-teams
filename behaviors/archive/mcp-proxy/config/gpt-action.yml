@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: MCP Proxy
+  version: 1.0.0
+  description: HTTP API proxy for MCP server operations - bridges Custom GPT Actions to MCP servers
+
+servers:
+  - url: https://mcp-proxy.icyrock-e61cf3e7.westus2.azurecontainerapps.io
+    description: Production Azure deployment
+  - url: http://localhost:8000
+    description: Local development
+
+paths:
+  /:
+    get:
+      operationId: root
+      summary: Root endpoint
+      description: Health check and service info
+      responses:
+        "200":
+          description: Service info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  version:
+                    type: string
+
+  /health:
+    get:
+      operationId: health
+      summary: Health check
+      description: Check if service is running
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+  /tools:
+    get:
+      operationId: listTools
+      summary: List available MCP tools
+      description: Get list of available MCP tools from the server
+      responses:
+        "200":
+          description: List of available tools
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tools:
+                    type: array
+                    items:
+                      type: string
+  
+  /tools/with-schemas:
+    get:
+      operationId: listToolsWithSchemas
+      summary: List all tools with complete schemas
+      description: |
+        Get all available MCP tools with their complete schemas including parameter 
+        definitions. This enables full introspection for ChatGPT to understand what 
+        parameters each tool expects.
+      responses:
+        "200":
+          description: Tools with complete schemas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tools:
+                    type: array
+                    items:
+                      type: object
+  
+  /tools/{tool_name}/schema:
+    get:
+      operationId: getToolSchema
+      summary: Get schema for a specific tool
+      description: |
+        Get the complete schema for a specific tool including parameter definitions.
+        Use this to understand what parameters a tool expects before calling it.
+      parameters:
+        - name: tool_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Name of the tool
+      responses:
+        "200":
+          description: Tool schema with parameter definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  inputSchema:
+                    type: object
+        "404":
+          description: Tool not found
+
+  /call:
+    post:
+      operationId: callMcpTool
+      summary: Call an MCP tool through the proxy
+      description: |
+        Bridge Custom GPT Actions to MCP protocol servers. This endpoint allows
+        you to call MCP tools like GitHub operations, which are running in the MCP server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tool
+                - input
+              properties:
+                tool:
+                  type: string
+                  description: Name of the MCP tool to call
+                  example: "github_search_code"
+                input:
+                  type: object
+                  description: Input parameters for the tool (format depends on the tool)
+                  example:
+                    query: "python test framework"
+                    language: "python"
+      responses:
+        "200":
+          description: Tool execution result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+                    description: Tool execution result containing tool output
+                required:
+                  - success
+                  - result
+

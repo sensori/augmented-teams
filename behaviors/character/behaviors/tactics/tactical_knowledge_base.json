@@ -1,0 +1,434 @@
+{
+  "version": "1.0",
+  "description": "Tactical recommendation rules that reference compendium data (effects.json, modifiers.json, advantages.json, skills.json)",
+  "compendium_references": {
+    "effects": "../compendium/effects.json",
+    "modifiers": "../compendium/modifiers.json",
+    "advantages": "../compendium/advantages.json",
+    "skills": "../compendium/skills.json"
+  },
+  "tactical_rules": [
+    {
+      "id": "bypass_high_dodge",
+      "name": "Bypass High Dodge",
+      "description": "Use area effects or indirect attacks to bypass Dodge defense",
+      "rulebook_reference": "Area effects don't require attack checks. Indirect allows attacks from any point.",
+      "foe_conditions": {
+        "defenses": {
+          "dodge": "high"
+        }
+      },
+      "recommended_effects": [
+        {"name": "Damage", "modifiers": ["Area", "Indirect"]},
+        {"name": "Affliction", "modifiers": ["Area", "Indirect"]},
+        {"name": "Weaken", "modifiers": ["Area", "Indirect"]}
+      ],
+      "recommended_modifiers": [
+        {"name": "Area", "options": ["Burst", "Cone", "Cloud", "Line"]},
+        {"name": "Indirect", "options": ["Indirect_4"]},
+        {"name": "Increased Range", "options": ["Perception"]}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Area", "Indirect", "Increased Range"],
+        "check_options": true
+      },
+      "priority": 1,
+      "effectiveness": "high"
+    },
+    {
+      "id": "bypass_high_parry",
+      "name": "Bypass High Parry",
+      "description": "Use ranged attacks, area effects, or indirect attacks to bypass Parry",
+      "rulebook_reference": "Parry only works against close attacks. Ranged and area effects bypass it.",
+      "foe_conditions": {
+        "defenses": {
+          "parry": "high"
+        }
+      },
+      "recommended_effects": [
+        {"name": "Damage", "modifiers": ["Increased Range", "Area", "Indirect"]},
+        {"name": "Affliction", "modifiers": ["Increased Range", "Area"]}
+      ],
+      "recommended_modifiers": [
+        {"name": "Increased Range", "options": ["Ranged", "Perception"]},
+        {"name": "Area", "options": ["Burst", "Cone"]},
+        {"name": "Indirect", "options": ["Indirect_4"]}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Increased Range", "Area", "Indirect"],
+        "check_options": true
+      },
+      "priority": 1,
+      "effectiveness": "high"
+    },
+    {
+      "id": "target_low_toughness",
+      "name": "Exploit Low Physical Defense",
+      "description": "Use high-damage attacks that target Toughness when foe has low Toughness",
+      "rulebook_reference": "Damage effects target Toughness. High DC damage is most effective against low Toughness.",
+      "foe_conditions": {
+        "defenses": {
+          "toughness": "low"
+        }
+      },
+      "recommended_effects": [
+        {"name": "Damage", "resistance": "Toughness"},
+        {"name": "Weaken", "resistance": "Toughness"}
+      ],
+      "compendium_lookup": {
+        "effects": ["Damage", "Weaken"],
+        "check_resistance": "Toughness"
+      },
+      "tactical_tags": ["high_damage", "physical_attack"],
+      "priority": 1,
+      "effectiveness": "high"
+    },
+    {
+      "id": "bypass_high_will",
+      "name": "Bypass High Will",
+      "description": "Avoid Will-based attacks, use Fortitude, Dodge, or Toughness instead",
+      "rulebook_reference": "Afflictions can target Fortitude or Will. When Will is high, use Fortitude-based effects.",
+      "foe_conditions": {
+        "defenses": {
+          "will": "high"
+        }
+      },
+      "avoid_resistance_types": ["will"],
+      "recommended_resistance_types": ["toughness", "fortitude", "dodge"],
+      "recommended_effects": [
+        {"name": "Damage", "resistance": "Toughness"},
+        {"name": "Affliction", "resistance": "Fortitude"},
+        {"name": "Weaken", "resistance": "Toughness"}
+      ],
+      "compendium_lookup": {
+        "effects": ["Affliction"],
+        "check_resistance": "Fortitude",
+        "modifiers": ["Alternate Resistance"]
+      },
+      "priority": 2,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "bypass_high_fortitude",
+      "name": "Bypass High Fortitude",
+      "description": "Avoid Fortitude-based attacks, use Will, Dodge, or Toughness instead",
+      "rulebook_reference": "Afflictions can target Fortitude or Will. When Fortitude is high, use Will-based effects.",
+      "foe_conditions": {
+        "defenses": {
+          "fortitude": "high"
+        }
+      },
+      "avoid_resistance_types": ["fortitude"],
+      "recommended_resistance_types": ["toughness", "will", "dodge"],
+      "recommended_effects": [
+        {"name": "Damage", "resistance": "Toughness"},
+        {"name": "Affliction", "resistance": "Will"},
+        {"name": "Weaken", "resistance": "Toughness"}
+      ],
+      "compendium_lookup": {
+        "effects": ["Affliction"],
+        "check_resistance": "Will",
+        "modifiers": ["Alternate Resistance"]
+      },
+      "priority": 2,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "use_ultimate_effort",
+      "name": "Use Ultimate Effort for Inaccurate",
+      "description": "Spend hero point to negate Inaccurate flaw with Ultimate Effort advantage",
+      "rulebook_reference": "Ultimate Effort allows natural 20 on any check, bypassing penalties from flaws like Inaccurate.",
+      "power_conditions": {
+        "flaws": ["Inaccurate"],
+        "advantages": ["Ultimate Effort"]
+      },
+      "compendium_lookup": {
+        "advantages": ["Ultimate Effort"],
+        "modifiers": ["Inaccurate"]
+      },
+      "recommendation": "Use Ultimate Effort to get natural 20, bypassing Inaccurate penalty",
+      "tactical_tags": ["advantage_synergy", "accuracy_boost"],
+      "priority": 1,
+      "effectiveness": "high"
+    },
+    {
+      "id": "multiattack_against_multiple_targets",
+      "name": "Use Multiattack Against Multiple Targets",
+      "description": "Multiattack is most effective when hitting multiple targets or concentrating fire",
+      "rulebook_reference": "Multiattack allows hitting multiple targets or increasing effect rank on single target.",
+      "foe_conditions": {
+        "situation": "multiple_targets"
+      },
+      "recommended_modifiers": [
+        {"name": "Multiattack", "rank": "any"}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Multiattack"]
+      },
+      "tactical_tags": ["multi_target", "area_control"],
+      "priority": 2,
+      "effectiveness": "high"
+    },
+    {
+      "id": "cumulative_affliction",
+      "name": "Use Cumulative Affliction for Persistent Effects",
+      "description": "Cumulative Afflictions build up degrees over multiple attacks",
+      "rulebook_reference": "Cumulative Affliction adds degrees together, making it effective for persistent conditions.",
+      "foe_conditions": {
+        "defenses": {
+          "fortitude": "medium",
+          "will": "medium"
+        }
+      },
+      "recommended_effects": [
+        {"name": "Affliction", "modifiers": ["Cumulative"]}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Cumulative"],
+        "effects": ["Affliction"]
+      },
+      "tactical_tags": ["persistent", "stacking"],
+      "priority": 2,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "penetrating_against_impervious",
+      "name": "Use Penetrating Against Impervious",
+      "description": "Penetrating modifier counters Impervious defense",
+      "rulebook_reference": "Each rank of Penetrating offsets an equivalent rank of Impervious.",
+      "foe_conditions": {
+        "defenses": {
+          "toughness": "high",
+          "has_impervious": true
+        }
+      },
+      "recommended_modifiers": [
+        {"name": "Penetrating", "rank": "match_impervious"}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Penetrating"]
+      },
+      "tactical_tags": ["defense_penetration"],
+      "priority": 1,
+      "effectiveness": "high"
+    },
+    {
+      "id": "secondary_effect_followup",
+      "name": "Use Secondary Effect for Follow-up Damage",
+      "description": "Secondary Effect causes effect to occur again next round automatically",
+      "rulebook_reference": "Secondary Effect causes the effect to occur again in the following round without additional action.",
+      "foe_conditions": {
+        "situation": "sustained_combat"
+      },
+      "recommended_modifiers": [
+        {"name": "Secondary Effect", "rank": 1}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Secondary Effect"]
+      },
+      "tactical_tags": ["sustained_damage", "automatic"],
+      "priority": 3,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "reaction_defensive",
+      "name": "Use Reaction for Defensive Powers",
+      "description": "Reaction modifier allows powers to activate automatically when triggered",
+      "rulebook_reference": "Reaction changes action from standard/move to reaction, allowing automatic activation.",
+      "foe_conditions": {
+        "situation": "defensive_setup"
+      },
+      "recommended_modifiers": [
+        {"name": "Reaction", "options": ["When_Attacked", "When_Hit", "When_Damaged"]}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Reaction"],
+        "check_options": true
+      },
+      "tactical_tags": ["defensive", "automatic"],
+      "priority": 2,
+      "effectiveness": "high"
+    },
+    {
+      "id": "subtle_hidden_attacks",
+      "name": "Use Subtle for Hidden Attacks",
+      "description": "Subtle modifier makes effects less noticeable, harder to detect",
+      "rulebook_reference": "Subtle 1 requires DC 20 Perception check to detect. Subtle 2 is undetectable.",
+      "foe_conditions": {
+        "situation": "stealth_combat"
+      },
+      "recommended_modifiers": [
+        {"name": "Subtle", "options": ["Subtle_1", "Subtle_2"]}
+      ],
+      "compendium_lookup": {
+        "modifiers": ["Subtle"],
+        "check_options": true
+      },
+      "tactical_tags": ["stealth", "concealment"],
+      "priority": 3,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "weaken_before_damage",
+      "name": "Weaken Before Damage",
+      "description": "Use Weaken to reduce defense before following with Damage",
+      "rulebook_reference": "Weaken reduces a defense, making subsequent attacks more effective.",
+      "foe_conditions": {
+        "defenses": {
+          "toughness": "high"
+        }
+      },
+      "recommended_sequence": [
+        {"effect": "Weaken", "resistance": "Toughness"},
+        {"effect": "Damage", "resistance": "Toughness"}
+      ],
+      "compendium_lookup": {
+        "effects": ["Weaken", "Damage"]
+      },
+      "tactical_tags": ["combo", "defense_reduction"],
+      "priority": 2,
+      "effectiveness": "high"
+    },
+    {
+      "id": "nullify_specific_powers",
+      "name": "Use Nullify Against Specific Powers",
+      "description": "Nullify can counter specific power descriptors",
+      "rulebook_reference": "Nullify counters effects with specific descriptors. Very effective against single-power foes.",
+      "foe_conditions": {
+        "offenses": {
+          "power_type": "single_descriptor"
+        }
+      },
+      "recommended_effects": [
+        {"name": "Nullify", "descriptor": "match_foe_power"}
+      ],
+      "compendium_lookup": {
+        "effects": ["Nullify"]
+      },
+      "tactical_tags": ["counter", "power_negation"],
+      "priority": 1,
+      "effectiveness": "very_high"
+    },
+    {
+      "id": "affliction_conditions",
+      "name": "Choose Optimal Affliction Conditions",
+      "description": "Select Affliction conditions based on tactical situation",
+      "rulebook_reference": "Affliction conditions: 1st degree (dazed, hindered, impaired), 2nd degree (stunned, defenseless), 3rd degree (incapacitated, controlled).",
+      "foe_conditions": {
+        "situation": "any"
+      },
+      "recommended_conditions": {
+        "1st_degree": ["hindered", "impaired", "vulnerable"],
+        "2nd_degree": ["stunned", "defenseless"],
+        "3rd_degree": ["incapacitated", "controlled"]
+      },
+      "compendium_lookup": {
+        "effects": ["Affliction"]
+      },
+      "tactical_tags": ["condition_management"],
+      "priority": 2,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "accurate_attack_maneuver",
+      "name": "Use Accurate Attack Maneuver",
+      "description": "Trade effect rank for attack bonus using Accurate Attack advantage",
+      "rulebook_reference": "Accurate Attack allows -5 effect modifier for +5 attack bonus, useful for high-defense targets.",
+      "foe_conditions": {
+        "defenses": {
+          "dodge": "high",
+          "parry": "high"
+        }
+      },
+      "compendium_lookup": {
+        "advantages": ["Accurate Attack"]
+      },
+      "tactical_tags": ["accuracy_boost", "maneuver"],
+      "priority": 2,
+      "effectiveness": "medium"
+    },
+    {
+      "id": "all_out_attack_maneuver",
+      "name": "Use All-Out Attack Maneuver",
+      "description": "Trade defense for attack bonus using All-Out Attack advantage",
+      "rulebook_reference": "All-Out Attack allows -5 active defenses for +5 attack bonus, high risk/high reward.",
+      "foe_conditions": {
+        "situation": "can_afford_defense_penalty"
+      },
+      "compendium_lookup": {
+        "advantages": ["All-out Attack"]
+      },
+      "tactical_tags": ["offensive", "high_risk"],
+      "priority": 3,
+      "effectiveness": "medium"
+    }
+  ],
+  "effect_tactical_properties": {
+    "Damage": {
+      "resistance": "Toughness",
+      "tactical_tags": ["direct_damage", "physical"],
+      "best_against": ["low_toughness"],
+      "synergies": ["Weaken", "Penetrating"]
+    },
+    "Affliction": {
+      "resistance": "Fortitude or Will",
+      "tactical_tags": ["condition", "versatile"],
+      "best_against": ["medium_defenses"],
+      "synergies": ["Cumulative", "Progressive", "Alternate Resistance"]
+    },
+    "Weaken": {
+      "resistance": "varies",
+      "tactical_tags": ["defense_reduction", "setup"],
+      "best_against": ["high_defenses"],
+      "synergies": ["Damage", "Affliction"]
+    },
+    "Nullify": {
+      "resistance": "varies",
+      "tactical_tags": ["counter", "power_negation"],
+      "best_against": ["single_power_foes"],
+      "synergies": []
+    }
+  },
+  "modifier_tactical_properties": {
+    "Area": {
+      "bypasses": ["Dodge", "Parry"],
+      "tactical_tags": ["auto_hit", "multi_target"],
+      "best_options": {
+        "Burst": "360 degree coverage",
+        "Cone": "directional coverage",
+        "Cloud": "lingering area"
+      }
+    },
+    "Indirect": {
+      "bypasses": ["Dodge", "cover"],
+      "tactical_tags": ["unavoidable", "positioning"],
+      "best_rank": 4
+    },
+    "Multiattack": {
+      "tactical_tags": ["multi_target", "concentrated_fire"],
+      "best_use": "multiple targets or single target with high effect"
+    },
+    "Penetrating": {
+      "counters": ["Impervious"],
+      "tactical_tags": ["defense_penetration"],
+      "best_use": "against high Impervious ranks"
+    }
+  },
+  "advantage_tactical_properties": {
+    "Ultimate Effort": {
+      "tactical_tags": ["accuracy_boost", "guaranteed_success"],
+      "best_use": "negate Inaccurate flaw or guarantee critical hit",
+      "synergies": ["Inaccurate powers"]
+    },
+    "Accurate Attack": {
+      "tactical_tags": ["accuracy_boost", "maneuver"],
+      "best_use": "high-defense targets",
+      "trade_off": "effect rank for attack bonus"
+    },
+    "All-out Attack": {
+      "tactical_tags": ["offensive", "maneuver"],
+      "best_use": "when defense penalty is acceptable",
+      "trade_off": "defense for attack bonus"
+    }
+  }
+}

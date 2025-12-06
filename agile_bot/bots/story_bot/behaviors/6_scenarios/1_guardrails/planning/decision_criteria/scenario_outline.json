@@ -1,9 +1,0 @@
-{
-  "description": "Scenario Outline",
-  "question": "Should scenarios be converted to Scenario Outline with Examples?",
-  "outcome": "Determines Scenario Outline creation",
-  "options": [
-    "Yes - formulas/calculations need multiple data points OR domain has named entities from source OR parameter variations exist",
-    "No - behavior is simple/obvious and doesn't need data variations"
-  ]
-}

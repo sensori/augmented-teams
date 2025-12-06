@@ -1,0 +1,24 @@
+---
+description: {rule_description}
+globs: ["{glob_patterns}"]
+alwaysApply: {always_apply}
+---
+**When** {context},
+**then** follow this {specializing_aspect} workflow.
+
+This rule extends and references `{parent_rule_name}.mdc` — all {parent_rule} principles apply throughout.
+
+{rule_overview_text}
+
+**Executing Commands:**
+{executing_commands}
+
+## Conventions
+
+{conventions_section}
+
+{principles_section}
+
+{templates_section}
+
+{commands_section}

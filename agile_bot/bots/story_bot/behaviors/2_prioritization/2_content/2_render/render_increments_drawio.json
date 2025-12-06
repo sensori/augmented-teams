@@ -1,9 +1,0 @@
-{
-  "name": "render_increments_drawio",
-  "path": "docs/stories",
-  "template": "story_graph_increments.json",
-  "renderer": "story_io",
-  "renderer_command": "render-increments",
-  "output": "story-map-increments.drawio"
-}
-

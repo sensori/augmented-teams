@@ -1,0 +1,1375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+	<public>
+		<program name="Hero Lab" url="https://www.wolflair.com">
+			<programinfo>Hero Lab and the Hero Lab logo are Registered Trademarks of LWD Technology, Inc. Free download at https://www.wolflair.com
+Mutants &amp; Masterminds, Third Edition is ©2010-2017 Green Ronin Publishing, LLC. All rights reserved.</programinfo>
+			<version version="8.9h" primary="8" secondary="9" tertiary="h" build="959"/>
+		</program>
+		<localization language="eng" units="imperial"/>
+		<character active="yes" characterindex="1" nature="normal" role="pc" relationship="ally" type="Hero" name="Roach Boy" playername="">
+			<powerpoints text="151 PP" value="151"/>
+			<powerlevel text="PL 10" value="10"/>
+			<size name="Medium"/>
+			<resources startingpp="150" totalpp="150" startingpl="10" currentpl="10" wealth="8">
+				<resource name="Abilities" spent="42"/>
+				<resource name="Powers" spent="71"/>
+				<resource name="Advantages" spent="8"/>
+				<resource name="Skills" spent="8"/>
+				<resource name="Defenses" spent="22"/>
+			</resources>
+			<personal gender="Male" age="18" hair="" eyes="">
+				<description>In the sprawling cityscape, where the forgotten corners were home to those neglected by society, a young boy named Alex found an unexpected family.
+Fleeing from the torment of an abusive household and a blind system that kept returning him to his tormentors, a very young Alex sought refuge in the streets. Here, among the homeless and the destitute, he found kindness and a sense of
+belonging that had eluded him all his life. This makeshift family, led by a wise and kind mentor figure who became particularly close to Alex, helped ALex grow up with the values of community and resilience.
+
+This peace was shattered when Dr. Vile, a shadowy figure obsessed with creating superhumans through genetic experimentation with various ruban pests, targeted the homeless as his subjects. One fateful night, Alex's newfound family was ambushed and several of them, including his mentor, were taken. In the ensuing chaos, Alex found himself dragged
+into Dr. Vile's hidden laboratory beneath the city. Here, he was subjected to a series of bizarre experiments that altered his genetic makeup, fusing his DNA with that of cockroaches.
+
+The experiments bestowed upon Alex incredible abilities. He found himself able to communicate with and control cockroaches, and his body had gained their resilience and strength. Seizing an opportunity amidst the madness of the lab,
+Alex used his newfound powers to escape. Yet, in his frantic bid for freedom, he left behind those who had been taken with him, including his mentor.
+
+Once safe, the gravity of his actions set in. Consumed by guilt for abandoning his adopted family, Alex vowed to use his powers to make amends. He returned to Dr. Vile's lab, determined to rescue them, only iIt was too late; there were no
+survivors. This devastating discovery cemented Alex's resolve. He became Roach-Boy, a guardian of the city's underbelly, dedicated to protecting the vulnerable and fighting against those who preyed on them.
+
+As Roach-Boy, Alex patrols the streets, using his unique abilities to safeguard the homeless community, especially those who had become his second family. He is driven by the memory of his mentor and the haunting guilt of his failure to save
+them. This guilt transformed into a relentless determination to never leave anyone behind again.
+
+Despite his noble intentions, Roach-Boy's appearance and powers often lead to misunderstandings. His insect-like abilities
+and his affinity with cockroaches disgust many, and he is frequently mistaken for a monster or villlain. 
+
+The public's fear and the media's sensationalism make his mission even more challenging. Yet, he perseveres, finding solace in the small victories and the grateful smiles of those he helps.
+
+Roach-Boy's battle against injustice extends beyond the streets. He tirelessly seeks to thwart Dr. Vile's ongoing experiments vowing to put an end to the mad scientist's reign of terror. His encounters with Dr. Vile are both fierce and dangerous, but Roach-Boy's resolve will never waver.
+
+ Roach-boy is a hero born from tragedy and transformed by his unyielding desire to right the wrongs of his past. In the heart
+of the city's underbelly, Roach-Boy has become more than just a superhero; he is a symbol of hope for the downtrodden
+and a reminder that someone is fighting for them.</description>
+				<charheight text="5' 6&quot;" value="66"/>
+				<charweight text="170 lb." value="170"/>
+			</personal>
+			<languages>
+				<language name="Native Language" useradded="no"/>
+			</languages>
+			<attributes>
+				<attribute name="Strength" text="5" base="5" modified="5">
+					<cost text="10 PP" value="10"/>
+				</attribute>
+				<attribute name="Stamina" text="5" base="5" modified="5">
+					<cost text="10 PP" value="10"/>
+				</attribute>
+				<attribute name="Agility" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Dexterity" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Fighting" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Intellect" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Awareness" text="2" base="2" modified="2">
+					<cost text="4 PP" value="4"/>
+				</attribute>
+				<attribute name="Presence" text="1" base="1" modified="1">
+					<cost text="2 PP" value="2"/>
+				</attribute>
+			</attributes>
+			<defenses>
+				<defense name="Dodge" abbr="Dodge" text="8" base="8" modified="8" impervious="0">
+					<cost text="6 PP" value="6"/>
+				</defense>
+				<defense name="Parry" abbr="Parry" text="13" base="13" modified="13" impervious="0">
+					<cost text="11 PP" value="11"/>
+				</defense>
+				<defense name="Fortitude" abbr="Fort" text="6" base="6" modified="6" impervious="0">
+					<cost text="1 PP" value="1"/>
+				</defense>
+				<defense name="Toughness" abbr="Tou" text="6/5" base="5" modified="6" impervious="0">
+					<cost text="0 PP" value="0"/>
+				</defense>
+				<defense name="Will" abbr="Will" text="6" base="6" modified="6" impervious="0">
+					<cost text="4 PP" value="4"/>
+				</defense>
+			</defenses>
+			<initiative total="+2"/>
+			<skills>
+				<skill name="Acrobatics" attrbonus="2" value="+12/+4" base="2" trainedonly="yes">
+					<description>Use Acrobatics to flip, dive, roll, tumble, and perform other acrobatic maneuvers, as well as keeping your balance under difficult circumstances.
+
+Balancing: You can keep your balance and move along a precarious surface at your ground speed minus 1 rank with a successful Acrobatics check against the surface's DC. A degree of failure indicates you spend your move action just maintaining your balance and do not actually move, while two or more degrees of failure means you lose your balance and fall. You are vulnerable while balancing. If you accept a +5 increase to the Acrobatics DC, you are not vulnerable.
+
+Maneuvering: You can make Acrobatics checks for various acrobatic stunts or maneuvers, from back flips to jumping over an opponent (to get behind them), flipping up onto a ledge, tumbling through obstacles, and so forth. The GM sets the DC. Success means you accomplish the maneuver.
+
+Standing: You can make a DC 20 Acrobatics check to go from prone to standing as a free action rather than a move action. A failed check means you remain prone.
+
+Tumbling: You can make an Acrobatics check (DC 5) to lessen damage from a fall, reducing the damage by 1 per degree. A fall reduced to rank 0 damage does no damage and you quickly roll to your feet as a free action. Otherwise, you are prone at the end of a fall.</description>
+					<cost text="1 PP" value="1"/>
+				</skill>
+				<skill name="Athletics" attrbonus="5" value="+5" base="-">
+					<description>Use Athletics for physical feats like climbing, jumping, riding animal mounts, and swimming.
+
+Climbing: With a successful Athletics check, you can climb along a slope, wall, or other steep incline at your ground speed rank minus 2 as a move action. A perfectly smooth, flat, vertical surface can't be climbed without the Wall-crawling effect of Movement (see the Powers chapter).
+
+Jumping: The result of an Athletics check is the distance (in feet) you can clear in a running long-jump. If you make a standing jump, divide the distance in half. If you make a vertical jump (straight up) divide the distance by 5, and if you make a standing vertical jump, divide it by 10. Your Athletics bonus + 10 is the base distance you can jump under routine circumstances.
+
+Running: You can make a DC 15 Athletics check as a free action to run faster: success increases your ground speed rank by +1 for one round.
+
+Swimming: A successful DC 10 Athletics check allows you to swim your ground speed rank minus 2 as a move action. If the check fails, you make no progress through the water during the action. With more than one degree of failure, you go under. If underwater, you must hold your breath to avoid drowning.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Close Combat: Roach Combat" attrbonus="2" value="+12" base="10">
+					<description>You're trained with a particular type of close attack, giving you a bonus to your attack checks with it equal to your skill rank (see Attack Check in The Basics and in the Action &amp; Adventure chapter). Each close attack is a separate Close Combat skill with its own rank, and encompasses a single weapon or power, although an array may be considered one power, at the Gamemaster's discretion (see Arrays in the Powers chapter for more information).</description>
+					<cost text="5 PP" value="5"/>
+				</skill>
+				<skill name="Deception" attrbonus="1" value="+1" base="-">
+					<description>Deception is the skill of getting others to believe what you want them to believe. It covers things like acting, bluffing, fast-talk, trickery, and subterfuge. Deception takes as long as it takes to spin-out your story.
+
+Bluffing: Make a Deception check to tell a believable lie or get someone do go along with you. A bluff is usually opposed by the target's Deception or Insight check. Favorable and unfavorable circumstances weigh heavily on the outcome.
+
+Disguise: You can use makeup, costumes, and other props to change your appearance. Your Deception check result determines the effectiveness of the disguise, opposed by others' Perception check results. The GM makes the Deception check secretly, so you are not sure exactly how well your disguise holds up under scrutiny.
+
+Feinting: You can use Deception as a standard action to mislead an opponent in combat. Make a Deception check as a standard action. If your Deception check succeeds, the target is vulnerable against your next attack, until the end of your next round (see Vulnerable in the Conditions section of The Basics chapter).
+
+Innuendo: You can use Deception to send covert messages using wordplay and double-meanings while apparently talking about other things. The DC for a basic message is 10. Complex messages or messages trying to communicate new information have DCs of 15 or 20, respectively. The recipient of the message must make an Insight check against the same DC to understand it.
+
+Tricking: You can use Deception to mislead an opponent into taking a potentially unwise action, such as trying to hit you while standing in front of an electrical junction box or at the edge of a precipice. If your Deception check opposed by Deception or Insight succeeds, your opponent is heedless of the potential danger and may hit the junction box or lose his balance and fall, if his attack against you fails.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Expertise: Entomology " attrbonus="2" value="+3" base="1" trainedonly="yes">
+					<description>Expertise is a broad skill encompassing knowledge and training in a variety of specialized fields, particularly professional disciplines and scholarship. Each is considered a separate skill and training in each is acquired separately, so a former police officer turned district attorney might have Expertise: Police Officer and Expertise: Law, each with their own ranks, for example.
+
+Sample Expertise domains: Art, Business, Carpentry, Cooking, Criminal, Current Events, Dance, History, Journalism, Law, Law Enforcement, Medicine, Military, Music, Magic, Philosophy, Politics, Popular Culture, Psychiatry, Science, Sociology, Streetwise, Theology.</description>
+					<cost text="0.5 PP" value="0.5"/>
+				</skill>
+				<skill name="Expertise: Inventor" attrbonus="2" value="+3" base="1" trainedonly="yes">
+					<description>Expertise is a broad skill encompassing knowledge and training in a variety of specialized fields, particularly professional disciplines and scholarship. Each is considered a separate skill and training in each is acquired separately, so a former police officer turned district attorney might have Expertise: Police Officer and Expertise: Law, each with their own ranks, for example.
+
+Sample Expertise domains: Art, Business, Carpentry, Cooking, Criminal, Current Events, Dance, History, Journalism, Law, Law Enforcement, Medicine, Military, Music, Magic, Philosophy, Politics, Popular Culture, Psychiatry, Science, Sociology, Streetwise, Theology.</description>
+					<cost text="0.5 PP" value="0.5"/>
+				</skill>
+				<skill name="Expertise: Scavenger" attrbonus="2" value="+3" base="1" trainedonly="yes">
+					<description>Expertise is a broad skill encompassing knowledge and training in a variety of specialized fields, particularly professional disciplines and scholarship. Each is considered a separate skill and training in each is acquired separately, so a former police officer turned district attorney might have Expertise: Police Officer and Expertise: Law, each with their own ranks, for example.
+
+Sample Expertise domains: Art, Business, Carpentry, Cooking, Criminal, Current Events, Dance, History, Journalism, Law, Law Enforcement, Medicine, Military, Music, Magic, Philosophy, Politics, Popular Culture, Psychiatry, Science, Sociology, Streetwise, Theology.</description>
+					<cost text="0.5 PP" value="0.5"/>
+				</skill>
+				<skill name="Insight" attrbonus="2" value="+2" base="-">
+					<description>You can tell someone's true intentions and feelings by paying attention to things like body language, inflection, and your own intuition.
+
+Detect Illusion: The GM makes a secret Insight check to determine if your hero senses the true nature of an illusion (DC 10 + Illusion rank). Success means you pick up on a flaw in the illusion, sensing it is not real. See the Illusion effect in the Powers chapter for details.
+
+Detect Influence: You can make an Insight check to notice someone acting under outside influence. The DC is 10 + the rank of the effect or skill affecting the subject. If you succeed, you notice the subject is not acting entirely of his or her own will. Three or more degrees give you a general idea of what is influencing them (and perhaps even whom, depending on the situation and the Gamemaster's  judgment).
+
+Evaluate: With an Insight check, opposed by Deception, you can tell if someone is trustworthy and honorable (or not) upon meeting them. You can also make an Insight check (DC 20) to evaluate a social situation, getting a feel for the overall mood and prevailing attitudes. Two or more degrees of failure on either check mean you misinterpret the signs, so the GM may make these checks for you in secret.
+
+Innuendo: You can use Insight to pick up on hidden messages sent via the Deception skill (see the Deception skill description).
+
+Resist Influence: Make an Insight check when called to do so to resist or overcome the effects of certain interaction skills, such as Deception or Intimidation. If the result of your check exceeds your opponent's, you are unaffected by their attempt to influence you.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Intimidation" attrbonus="1" value="+1" base="-">
+					<description>You know how to use threats (both real and implied) to get others to do what you want.
+
+Coercing: Make an Intimidation check, opposed by the target's Insight or Will defense (whichever has the highest bonus). If your check succeeds, you may treat the target as friendly, but only for actions taken in your presence. That is, the target retains his normal attitude, but will talk, advise, offer limited help, or advocate on your behalf while intimidated. The target cooperates, but won't necessarily obey your every whim or do anything that would directly endanger him.
+
+Demoralizing: You can use Intimidation in combat as a standard action to undermine an opponent's confidence. Make an Intimidation check as a standard action. If it succeeds, your target is impaired (a -2 circumstance penalty on checks) until the end of your next round. With four or more degrees of success, the target is disabled (a -5 penalty) until the end of your next round.
+
+Intimidating Minions: You can intimidate a whole group of minions - who can all see and hear you - with a single check. If the group has you at a disadvantage, you suffer the usual circumstance penalty on your check. Compare your check result against a single resistance check made by the GM for the entire group. Your Intimidation check must have the same effect on every member of the group.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Investigation" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>You know how to search for and study clues, gather information through interviews and surveillance, and analyze evidence to help solve crimes. The GM may make Investigation checks for you in secret, so you do not know exactly what you have found, or if you may have missed something.
+
+Search: You can search an area for clues, hidden items, traps, and other details. Perception allows you to immediately notice things, while an Investigation check allows you to pick up on details with some effort.
+
+Gather Evidence: To collect a piece of evidence for analysis, make an Investigation check (DC 15). If the check succeeds, the evidence can be analyzed (see the following). If the check fails, an analysis can be done, but with a -5 penalty for highly unfavorable circumstances. With more than one degree of failure, the evidence is ruined and no analysis can be done. On the other hand, two or more degrees of success provide a +2 circumstance bonus to later analysis.
+
+Analyze Evidence: You can make an Investigation check to apply forensic knowledge to evidence. This function of Investigation does not give you clues where none exist. It simply allows you to extract useful information from evidence and clues you have found.
+
+Gather Information: You know how to make contacts, collect gossip and rumors, question informants, and otherwise get information from people.
+
+Surveillance: You can set up surveillance of a particular area, watching from a stationary location. The DC of the subject's Stealth check to evade your notice is equal to the result of your Investigation check. For actively following a subject, see Tailing in the Stealth skill description.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Perception" attrbonus="2" value="+2" base="-">
+					<description>Use this skill to notice and pick up on things. Discerning details - such as clearly hearing conversation or reading fine text - requires at least three degrees of success on the Perception check.
+
+Hearing: Make a check against a DC based on how loud the noise is or against an opposed Stealth check. Normal conversation is DC 0, a soft noise DC 10. Listening through a door is +5 DC, +15 for a solid wall. While you're asleep, hearing something well enough to wake up is +10 DC.
+
+Seeing: Make a check against a DC based on how visible the object is or against an opposed Stealth check. Something in plain sight is DC 0, while something subtle or easily overlooked may be DC 5, 10 or more. Visual perception is also used to detect someone in disguise (see the Deception skill) or to notice a concealed object (see the Sleight of Hand skill).
+
+Other Senses: You can make Perception checks involving other sense types as well (see the Powers chapter for more on sense types). Noticing something obvious to a sense is DC 0. Less obvious things are DC 10 or so, hidden things DC 20 or more, and discerning details requires at least three degrees of success, as usual.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Persuasion" attrbonus="1" value="+1" base="-">
+					<description>You're skilled in dealing with people, from etiquette and social graces to a way with words and public speaking, all of which helps to get your point across, make a good impression, negotiate, and generally win people over to your way of seeing things. In negotiations, all participants roll Persuasion checks to see who gains the advantage. Opposed checks also resolve cases where two advocates plead opposing cases before a third party. Non-player characters each have an initial attitude towards you or your cause. The GM chooses the character's initial attitude based on circumstances. Most of the time, people are favorable or indifferent toward heroes, but a specific circumstance or complication may call for a different attitude.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Sleight of Hand" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>You can perform dexterous feats of legerdemain such as palming small objects, picking pockets, slipping out of restraints, and so forth. Stage magicians use Sleight of Hand legitimately as a performance skill, but it is most commonly known for its criminal applications.
+
+Concealing: You can use Sleight of Hand to conceal a small item on your person, making your check result the DC of an Investigation or Perception check to find it.
+
+Contorting: Make a DC 30 Sleight of Hand check to fit through a tight space wide enough for your head but too narrow for the width of your shoulders, or to reach through an opening wide enough for your hand, but too narrow for your arm.
+
+Escaping: Make a Sleight of Hand check to slip out of various restraints. This takes at least a minute per check.
+
+Legerdemain: Minor feats of Sleight of Hand, such as making a coin or playing card 'vanish', have a DC of 10 unless an observer is focused on noticing what you are doing. When you perform this skill under observation, your check is opposed by the observer's Perception check to see if they notice the trick.
+
+Stealing: To covertly take something from another person make a Sleight of Hand check (DC 20). Your target makes a Perception check and notices the attempt if his check result beats yours, whether you succeed in taking the object or not. You can also make a Sleight of Hand check to plant a small object on someone, slip  something into their pocket, drop something into their drink, place a tiny radio tracer on them, and so forth.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Stealth" attrbonus="2" value="+3" base="1">
+					<description>You're skilled in going unnoticed. While using Stealth, you can move at your speed rank minus 1 with no penalty. Faster than that, up to your full speed, you take a -5 circumstance penalty to your Stealth checks.
+
+Hiding: If you have cover or concealment, make a Stealth check, opposed by an observer's Perception check, to hide and go unnoticed.
+
+Tailing: You can use Stealth to tail someone at your normal speed. This assumes you have some cover or concealment (crowds of people, shadows, fog, etc.). If the subject is worried about being followed, he can make a Perception check (opposed by your Stealth check) every time he changes course (goes around a street corner, exits a building, and so on). If he is unsuspecting, he only gets one Perception check for the scene.</description>
+					<cost text="0.5 PP" value="0.5"/>
+				</skill>
+				<skill name="Technology" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Technology covers operating, building, repairing, and generally working with technological devices and equipment. Without the proper tools or equipment, you take a -5 penalty to Technology checks for highly unfavorable circumstances.
+
+Operating: Most routine operations of technological equipment don't require a skill check and can be done untrained. Using an unfamiliar device does require a check, with the DC determined by how foreign or unusual the device is, from simple (DC 10) to highly advanced (DC 25 or more).
+
+Building: The difficulty and time required to make an item depends on its complexity, as shown on the Building Items table. If your Technology check succeeds, you have made the item after the necessary time.
+
+Repairing: You can also use Technology to repair damaged items, with a -5 to the DC to build the item and -2 to the time rank required. So you can perform repairs on a complex item in eight hours (time rank 12) with a DC of 20.
+
+Jury-rigging: You can also attempt jury-rigged, or temporary, repairs. Doing this reduces the repair DC by an additional 5 (for a total of -10 to the DC to build the item), and allows you to make the Technology check as a standard action. However, a jury-rigged repair can only fix a single problem, and the repair only lasts until the end of the scene.
+
+Demolitions: Careful placement of an explosive against a fixed structure can maximize damage by exploiting vulnerabilities in the structure. This requires at least a minute and a DC 10 Technology check. The GM makes the check, so you don't know exactly how well you have done until the explosive goes off.
+
+Inventing: If you have the Inventor advantage (see the Advantages chapter), you can use Technology to create inventions, temporary devices. See Inventing, page 145, for details.
+
+Security: You can use Technology to disarm or sabotage various security devices, including locks, traps, and sensors. This takes at least a minute, possibly longer, at the GM's discretion. The GM makes your Technology check secretly, so you don't necessarily know right away if you have succeeded.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Treatment" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>You're trained in treating injuries and ailments.
+
+Diagnosis: You can diagnose injuries and ailments with an eye toward further treatment. This takes at least a minute. At the GM's discretion, a successful diagnosis provides a +2 bonus for favorable circumstances on further Treatment checks.
+
+Provide Care: Providing care means treating an injured patient for a day or more. If successful, the patient further reduces the recovery time by 1 rank (see Recovery in the Action &amp; Adventure chapter). You can provide care for up to your Treatment rank in patients at one time.
+
+Revive: You can remove the dazed or stunned conditions from a subject (see Conditions in the Action &amp; Adventure chapter). The check to revive is a standard action. A successful check removes the condition.
+
+Stabilize: As a standard action, a successful Treatment check stabilizes a dying character.
+
+Treat Disease and Poison: You can treat a character afflicted with a disease or poison. Each time the character makes a resistance check against the ailment, you make a Treatment check. One degree of success provides the patient with a +2 circumstance bonus to the resistance check, three or more degrees of success provides a +5 circumstance bonus.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+				<skill name="Vehicles" attrbonus="2" value="-" base="-" trainedonly="yes" usable="no">
+					<description>Use this skill to operate vehicles, from ground vehicles like cars to boats, planes, or even spaceships! See Vehicles in the Gadgets &amp; Gear chapter for details.
+
+Routine tasks, such as ordinary operation of known vehicles, don't require a check and may even be done untrained for some vehicles, particularly common ones like cars. Make a check only when operating the vehicle in a stressful or dramatic situation like being chased or attacked, or trying to reach a destination in a limited amount of time.</description>
+					<cost text="0 PP" value="0"/>
+				</skill>
+			</skills>
+			<advantages>
+				<advantage name="Agile Feint" categorytext="Combat">
+					<description>You can use your Acrobatics bonus or movement speed rank in place of Deception to feint and trick in combat as if your skill bonus or speed rank were your Deception bonus (see the Deception skill description). Your opponent opposes the attempt with Acrobatics or Insight (whichever is better).</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Defensive Roll" categorytext="Combat, Ranked" ranks="1">
+					<description>You can avoid damage through agility and 'rolling' with an attack. You receive a bonus to your Toughness equal to your advantage rank, but it is considered an active defense similar to Dodge and Parry (see Active Defenses in the Abilities chapter), so you lose this bonus whenever you are vulnerable or defenseless. Your total Toughness, including this advantage, is still limited by power level.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<advantagecategory>Ranked</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Favored Environment: Dirt and Filth" categorytext="Combat">
+					<description>You have an environment you're especially suited for fighting in. Examples include in the air, underwater, in space, in extreme heat or cold, in jungles or woodlands, and so forth. While you are in your favored environment, you gain a +2 circumstance bonus to attack checks or your active defenses. Choose at the start of the round whether the bonus applies to attack or defense. The choice remains until the start of your next round. This circumstance bonus is not affected by power level.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Improved Critical 4: Roach Assault: Affliction 8" categorytext="Combat, Ranked" ranks="4">
+					<description>Increase your critical threat range with a particular attack (chosen when you acquire this advantage) by 1, allowing you to score a critical hit on a natural 19 or 20. Only a natural 20 is an automatic hit, however, and an attack that misses is not a critical. Each additional rank applies to a different attack or increases your threat range with an existing attack by one more, to a maximum threat range of 16-20 with 4 ranks.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<advantagecategory>Ranked</advantagecategory>
+					<cost text="4 PP" value="4"/>
+				</advantage>
+				<advantage name="Interpose" categorytext="General">
+					<description>Once per round, when an ally within range of your normal movement is hit by an attack, you can choose to place yourself between the attacker and your ally as a reaction, making you the target of the attack instead. The attack hits you rather than your ally, and you suffer the effects normally. You cannot use this advantage against area effects or perception range attacks, only those requiring an attack check.</description>
+					<advantagecategory>General</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Move-by Action" categorytext="Combat">
+					<description>When taking a standard action and a move action you can move both before and after your standard action, provided the total distance moved isn't greater than your normal movement speed.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Prone Fighting" categorytext="Combat">
+					<description>You suffer no circumstance penalty to attack checks for being prone, and adjacent opponents do not gain the usual circumstance bonus for close attacks against you.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Redirect" categorytext="Combat">
+					<description>If you successfully trick an opponent (see Trick under Deception in the Skills chapter), you can redirect a missed attack against you from that opponent at another target as a reaction. The new target must be adjacent to you and within range of the attack. The attacker makes a new attack check with the same modifiers as the first against the new target.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Set-up" categorytext="Combat, Ranked" ranks="1">
+					<description>You can transfer the benefits of a successful combat use of an interaction skill to your teammate(s). For example, you can feint and have your target vulnerable against one or more allies' next attack(s), rather than yours. Each rank in the advantage lets you transfer the benefit to one ally. Choose who when you make the skill check. The interaction skill check requires its normal action, and the affected allies must be capable of interacting with you (or at least seeing the set-up) to benefit from it.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<advantagecategory>Ranked</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+				<advantage name="Takedown 2" categorytext="Combat, Ranked" ranks="2">
+					<description>If you render a minion incapacitated with an attack, you get an immediate extra attack as a free action against another minion within range and adjacent to the previous target's location. The extra attack is with the same attack and damage bonus as the first. You can continue using this advantage until you miss or there are no more minions within range of your attack or your last target.
+
+A second rank in this advantage allows you to attack non-adjacent minion targets, moving between attacks if necessary to do so. You cannot move more than your total speed in the round, regardless of the number of attacks you make. You stop attacking once you miss, run out of movement, or there are no more minions within range of your attack.</description>
+					<advantagecategory>Combat</advantagecategory>
+					<advantagecategory>Ranked</advantagecategory>
+					<cost text="2 PP" value="2"/>
+				</advantage>
+				<advantage name="Ultimate Effort: Roach Hunger" categorytext="Fortune">
+					<description>You can spend a hero point on a particular check and treat the roll as a 20 (meaning you don't need to roll the die at all, just apply a result of 20 to your modifier). This is not a natural 20, but is treated as a roll of 20 in all other respects. You choose the particular check the advantage applies to when you acquire it and the GM must approve it. You can take Ultimate Effort multiple times; each time, it applies to a different check. This advantage may not be used after you've rolled the die to determine if you succeed. (Examples include Ultimate Aim, Ultimate Resistance, or Ultimate Skill.)</description>
+					<advantagecategory>Fortune</advantagecategory>
+					<cost text="1 PP" value="1"/>
+				</advantage>
+			</advantages>
+			<powers>
+				<power name="Cerci &quot;Hair&quot; Roach Senses" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="32 PP" value="32"/>
+					<description>An array is a set of powers, of which only one can be used at a time.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Normal Focus" info="" ranks="1" range="" displaylevel="1" summary="Advantages: Evasion 2, Improved Defense, Uncanny Dodge">
+							<cost text="31 PP" value="31"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages>
+								<chainedadvantage name="Evasion 2"/>
+								<chainedadvantage name="Improved Defense"/>
+								<chainedadvantage name="Uncanny Dodge"/>
+							</chainedadvantages>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Complete Evasion: Immunity 40" info="" ranks="40" range="" displaylevel="2" summary="Custom: All Area Attacks 40; Reflect; Limited: Must make an Evade Check, Limited: must have sace to move out of blast, Limited - Half Effect, Unreliable (5 uses)">
+									<cost text="10 PP" value="10"/>
+									<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Custom: All Area Attacks" selection="All Area Attacks" ranks="40">
+											<description>Choose a custom immunity here.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Reflect" info="">
+											<description>You can reflect attacks to which you are immune back at the attacker as a free action. Make a normal attack check using your own attack modifier to hit with the reflected attack. It has its normal effect if it hits.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Limited - Half Effect" info="">
+											<description>You suffer half the normal effect rather than being entirely immune to it. For environmental effects, you only make checks half as often. For other effects, halve the effect's rank (round down) before determining its resistance check DC, including for things like Impervious.</description>
+										</flaw>
+										<flaw name="Limited: must have sace to move out of blast" info="must have sace to move out of blast">
+											<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+										</flaw>
+										<flaw name="Limited: Must make an Evade Check" info="Must make an Evade Check">
+											<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+										</flaw>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Enhanced Trait: Enhanced Trait 10.5" info="" ranks="11" range="" displaylevel="2" summary="Traits: Dodge +4 (+12), Perception +2 (+4), Parry +1 (+14), Acrobatics +1 (+13), Agility +2 (+4)">
+									<cost text="11 PP" value="11"/>
+									<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods>
+										<traitmod name="Dodge" bonus="+4"/>
+										<traitmod name="Perception" bonus="+2"/>
+										<traitmod name="Parry" bonus="+1"/>
+										<traitmod name="Acrobatics" bonus="+1"/>
+										<traitmod name="Agility" bonus="+2"/>
+									</traitmods>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Force A  Reroll: Luck Control 1" info="" ranks="1" range="" displaylevel="2" summary="Force a Re-roll, Advantages: Luck 5; Quirk 5: Attack and active Defense rolls only">
+									<cost text="3 PP" value="3"/>
+									<description> You can use your hero points to affect others in various ways (see Hero Points, page 121).</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Force a Re-roll">
+											<description>You can spend a hero point or use Luck to force someone else to re-roll a die roll and take the worse of the two rolls. The target of this last effect may spend a hero point or use Luck to avoid having to re-roll.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages>
+										<chainedadvantage name="Luck 5"/>
+									</chainedadvantages>
+									<extras/>
+									<flaws>
+										<flaw name="Quirk: Attack and active Defense rolls only" ranks="5" info="Attack and active Defense rolls only">
+											<description>A Quirk is some minor nuisance attached to an effect, essentially the reverse of a Feature (see Feature under Extras). A Quirk is generally worth, at most, 2-3 power points, and many are simply 1-point flaws.
+
+As with Features, the GM should ensure a Quirk is truly a flaw (albeit a minor one) and not simply part of the power's descriptors. For example, the fact that an attack with a 'sonic' descriptor likely will not travel through a vacuum is not a Quirk, simply part of the 'sonic' descriptor (especially since the attack may be enhanced by a medium such as water). On the other hand, a shapeshifter unable to change color (losing some of the power's utility), or a telepath unable to lie while using Mental Communication, do have Quirks to their powers.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Ranged Touch: Senses 3" info="" ranks="3" range="" displaylevel="2" summary="Accurate: Touch, Ranged: Touch">
+									<cost text="3 PP" value="3"/>
+									<description>One or more of your senses are improved, or you have additional sensory abilities beyond the normal five senses.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Accurate: Touch" selection="Touch">
+											<description>You can use a sense to pinpoint something's exact location. You can use an accurate sense to target something in combat.</description>
+										</option>
+										<option name="Ranged: Touch" selection="Touch">
+											<description>You can use a sense that normally has no range (taste or touch in humans) to make Perception checks at range, with the normal -1 per 10 feet modifier. This can be enhanced with the Extended Sense effect.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws/>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Total Focus: Immunity 140" info="" ranks="140" range="" displaylevel="1" summary="Fortitude Effects, Toughness Effects, Will Effects; Distracting, Increased Action: full, Limited: Only against attacks that can be evaded or dodged, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+							<descriptors/>
+							<elements/>
+							<options>
+								<option name="Fortitude Effects">
+									<description>You're immune to all effects resisted by Fortitude.</description>
+								</option>
+								<option name="Toughness Effects">
+									<description>You're immune to all effects resisted by Toughness (the equivalent of 40 ranks of Impervious Toughness).</description>
+								</option>
+								<option name="Will Effects">
+									<description>You're immune to all effects resisted by Will.</description>
+								</option>
+							</options>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws>
+								<flaw name="Distracting" info="">
+									<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+								</flaw>
+								<flaw name="Increased Action" info="full">
+									<description>Using an effect requires one of the following types of actions: standard, move, free, or reaction. Each increase in the required action from that effect's base action type (free to move, for example) is a -1 cost per rank modifier.</description>
+								</flaw>
+								<flaw name="Limited: Only against attacks that can be evaded or dodged" info="Only against attacks that can be evaded or dodged">
+									<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+					</otherpowers>
+				</power>
+				<power name="Immunity: Immunity 2" info="" ranks="2" range="" displaylevel="0" summary="Uncommon Descriptor: Radiation" active="yes">
+					<cost text="2 PP" value="2"/>
+					<description>You are immune to certain effects, automatically succeeding on any resistance check against them. You assign ranks of Immunity to various effects to gain immunity to them (with more extensive effects requiring more ranks). These assignments are permanent.</description>
+					<descriptors/>
+					<elements/>
+					<options>
+						<option name="Uncommon Descriptor: Radiation" selection="Radiation">
+							<description>You're immune to an uncommon power descriptor (chemical, gravitic, necromantic, etc).</description>
+						</option>
+					</options>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Move Like A Roach" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="7 PP" value="7"/>
+					<description>Select this power to add multiple effects that are all activated at once.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Leaping: Leaping 1" info="Leap 15 feet at 4 miles/hour" ranks="1" range="" displaylevel="1" summary="Leap 15 feet at 4 miles/hour" active="yes">
+							<cost text="1 PP" value="1"/>
+							<description>You can make prodigious leaps, far more than even a skilled athlete. Your Leaping rank, minus 2, is the distance rank you cover in a single standing jump: so 15 feet at rank 1, 30 feet at rank 2, up to 1,000 miles at rank 20! You do not suffer any damage from landing after a jump, so long as it is within your maximum distance.
+
+The speed rank of your leap maxes out at 7 (around 250 miles per hour), so leaps of greater than distance rank 7 take time equal to the distance rank minus 7. For example, a massive leap of 500 miles (distance rank 17) takes time rank 10 (17 - 7, or two hours) of time in the air! Because of this, leapers may choose to make shorter 'hops' of just a couple miles, leaving them airborne for only a minute or so, to better control their direction.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Movement: Movement 3" info="" ranks="3" range="" displaylevel="1" summary="Slithering, Wall-crawling 2: full speed" active="yes">
+							<cost text="6 PP" value="6"/>
+							<description>You have a special form of movement.</description>
+							<descriptors/>
+							<elements/>
+							<options>
+								<option name="Slithering">
+									<description>You can move while prone at your normal ground speed. You suffer no circumstance penalty for making attacks while prone.</description>
+								</option>
+								<option name="Wall-crawling" ranks="2" info="full speed">
+									<description>You can climb walls and ceilings at your ground speed rank -1 with no chance of falling and no need for an Athletics check. You are still vulnerable while climbing, however. An additional rank of this effect means you climb at your full speed rank and are not vulnerable while climbing.</description>
+								</option>
+							</options>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+					</otherpowers>
+				</power>
+				<power name="Power-Lifting: Enhanced Strength 3" info="+3 STR" ranks="3" range="" displaylevel="0" summary="+3 STR; Limited to Lifting" active="yes">
+					<cost text="3 PP" value="3"/>
+					<description>You can temporarily improve one of your existing traits, chosen when you take this effect. While this effect is active, you increase the affected trait by its rank. So, for example, Enhanced Strength 5 increases your Strength by +5 while it is active. Your enhanced trait is still subject to power level limits, so your unenhanced rank must be below the limit by at least the amount of the enhancement to accommodate it.</description>
+					<descriptors/>
+					<elements>
+						<element name="Ability: Strength" info="Strength"/>
+					</elements>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws>
+						<flaw name="Limited to Lifting" info="">
+							<description>Your lifting and carrying capacity is out of proportion with the rest of your Strength. Each rank in this power gives you +1 to your Strength rank for determining how much weight you can lift and carry, but does not increase your Strength damage or other effects of your Strength rank.</description>
+						</flaw>
+					</flaws>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Roach Combat" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="18 PP" value="18"/>
+					<description>An array is a set of powers, of which only one can be used at a time.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Counter: Damage 10" info="" ranks="10" range="10ft." displaylevel="1" summary="DC 25; Reach (melee) 2: 10 ft., Reaction 3: reaction; Distracting, Grab-based, Source: Insects, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Reach (melee)" ranks="2" info="10 ft.">
+									<description>Each time you apply this modifier to a close range effect, you extend its reach by 5 feet. This may represent a short-ranged effect or one with a somewhat greater reach, like a whip, spear, or similar weapon.
+
+This version of Reach is intended for a long-ranged melee weapon, like a whip or spear, and uses your Fighting ability to attack.</description>
+								</extra>
+								<extra name="Reaction" ranks="3" info="reaction">
+									<description>Each effect has a default action required to use it: standard, free, or none (for permanent effects). This modifier changes an effect's required action from a standard or free to a reaction, occurring automatically when a specific triggering event occurs. This is similar to the Triggered modifier (later in this section) but reaction effects do not need to be 'set', originate from their user, and can function repeatedly, so long as their triggering requirement is met.
+
+Specify a triggering circumstance that activates the effect, such as someone touching or attacking the user, activating a particular effect or power in the user's presence, and so forth. The GM is the final arbiter as to whether or not a triggering circumstance is suitable for a particular effect in the context of the series. Caution should be used to keep this option from being abused.
+
+The Reaction modifier applies +1 cost per rank to effects with a default action of free, +3 cost per rank to effects with a default standard action.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Distracting" info="">
+									<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+								</flaw>
+								<flaw name="Grab-based" info="">
+									<description>An attack effect with this flaw requires you to successfully grab a target before using the effect (see Grab, page 176). This generally applies to an effect that is close range, since you have to be in close combat to grab anyway. If the effect's default range is not close, apply the Close modifier as well. If you do not succeed on the grab, you cannot use the effect. If your grab attempt succeeds, the effect occurs automatically as a reaction.</description>
+								</flaw>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Move With The Roaches" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Insubstantial: Insubstantial 1" info="Fluid" ranks="1" range="" displaylevel="2" summary="Fluid; Absent Strength, Noticeable: Body Iof Insects, Source: Insects">
+									<cost text="2 PP" value="2"/>
+									<description>You can assume a less solid form, with each Insubstantial rank becoming progressively less solid. You do not gain the ability to assume lower-ranked Insubstantial forms at higher ranks, but you can acquire a lower-ranked form as an Alternate Effect of a higher-ranked one. You can switch between normal and Insubstantial form at will as a free action once per round. The default is that substantial is your 'normal' form, but the GM may permit you to make Insubstantial your 'normal' form, in which case remaining solid is a sustained duration for you!</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws>
+										<flaw name="Absent Strength" info="">
+											<description>This flaw applies only to rank 1 Insubstantial and removes your effective Strength while in that form, leaving you with limited ability to affect the physical world like the higher ranks of the effect.</description>
+										</flaw>
+										<flaw name="Noticeable: Body Iof Insects" info="Body Iof Insects">
+											<description>A continuous or permanent effect with this modifier is noticeable in some way (see Noticing Power Effects at the start of the chapter). Choose a noticeable display for the effect. For example, Noticeable Protection may take the form of armored plates or a tough, leathery-looking hide, making it clear the character is tougher than normal.</description>
+										</flaw>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Movement: Movement 2" info="" ranks="2" range="" displaylevel="2" summary="Safe Fall, Swinging; Source: Insects">
+									<cost text="2 PP" value="2"/>
+									<description>You have a special form of movement.</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Safe Fall">
+											<description>So long as you are capable of action, you can fall any distance without harm. You can also stop your fall at any point along a distance so long as there is a handhold or projection for you to grab (such as a ledge, flagpole, branch, etc.). If you have the Wall-crawling power (later in Movement), any surface you can climb provides you with a handhold. Safe Fall may be Limited to only when you are near a surface (such as the side of a building); you're assumed to be using the surface to help slow your fall.</description>
+										</option>
+										<option name="Swinging">
+											<description>You can swing through the air at your normal ground speed rank, using a swing-line you provide or available lines and projections (tree limbs, flagpoles, vines, telephone- and power-lines, etc.).</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Speed: Speed 6" info="Speed: 120 miles/hour, 1800 feet/round" ranks="6" range="" displaylevel="2" summary="Speed: 120 miles/hour, 1800 feet/round; Source: Insects">
+									<cost text="3 PP" value="3"/>
+									<description>You can move faster than normal. You have a ground speed rank equal to your effect rank. This also improves all forms of movement based on ground speed.</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Overwhelming Chatter: Weaken 14" info="" ranks="14" range="" displaylevel="1" summary="Affects: Awareness, Resisted by: Fortitude, DC 24; Alternate Resistance: Dodge, Indirect 3: any point in fixed direction or fixed point in any direction; Inaccurate 3: -6, Source: Insects, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You can temporarily lower one of a target's traits, chosen when this effect is acquired. You must touch the target, making a normal close attack check. Multiple failed resistance checks against a Weaken effect are cumulative, up to a maximum of the Weaken rank, at which point the effect cannot weaken the trait further. Lost points return at a rate of 1 per round at the end of each of the target's turns. Inanimate objects do not recover weakened Toughness; they must be repaired. Objects may or may not recover other weakened traits, at the GM's discretion and depending on the effect's descriptors.</description>
+							<descriptors/>
+							<elements>
+								<element name="Affects: Awareness" info="Awareness"/>
+								<element name="Resisted by: Fortitude" info="Fortitude"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Alternate Resistance: Dodge" info="Dodge">
+									<description>An effect with this modifier has a different resistance than usual. The resistance check difficulty class remains the same, only the resistance differs. If the change is to a generally lower (and therefore more advantageous) resistance, this extra increases cost per rank by +1. If, in the GM's opinion, there is no real increase in effectiveness, just a chance to the resistance, it has a net modifier of +0.
+
+Note: To set this extra's modifier to +0, set its ranks to 0.</description>
+								</extra>
+								<extra name="Indirect" ranks="3" info="any point in fixed direction or fixed point in any direction">
+									<description>A ranged effect with this modifier can originate from a point other than the user, ignoring cover between the user and the target, such as walls and other intervening barriers, so long as they do not provide cover between the effect's origin point and the target. An Indirect effect normally originates from a fixed point directed away from you. In some cases, an Indirect effect may count as a surprise attack.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Inaccurate" ranks="3" info="-6">
+									<description>An effect with this flaw is hard to control or wildly inaccurate. Each rank gives you a -2 penalty to attack checks with the effect.</description>
+								</flaw>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Regeneration: Regeneration 10" info="Every 1 round" ranks="10" range="" displaylevel="1" summary="Every 1 round; Source: Insects">
+							<cost text="1 PP" value="1"/>
+							<description>You recover quickly from damage. Remove penalties to your Toughness checks due to damage equal to your Regeneration rank each minute. You then recover other damage conditions equal to your Regeneration rank each minute, starting from your most severe condition. Spread this recovery out evenly over a minute (10 action rounds). So with Regeneration 5, you remove a -1 Toughness penalty every other round (every round with Regeneration 10, and up to a -2 penalty per round with Regeneration 20).
+
+Characters with no Stamina do not heal (see Absent Abilities in the Abilities chapter). One or more ranks of Regeneration overcome this. An absent Stamina character with Regeneration 1 recovers at a normal rate; additional Regeneration ranks speed up that rate.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Roach Assault: Affliction 8" info="" ranks="8" range="" displaylevel="1" summary="1st degree: Impaired, 2nd degree: Disabled, 3rd degree: Unaware, Resisted by: Will, DC 18, Advantages: Improved Critical 4; Triggered: 1 use - Step in Pile Of Roaches; Source: Insects, Unreliable (5 uses)">
+							<cost text="8 PP" value="8"/>
+							<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+							<descriptors/>
+							<elements>
+								<element name="1st degree: Impaired" info="Impaired"/>
+								<element name="2nd degree: Disabled" info="Disabled"/>
+								<element name="3rd degree: Unaware" info="Unaware"/>
+								<element name="Resisted by: Will" info="Will"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages>
+								<chainedadvantage name="Improved Critical 4: Roach Assault: Affliction 8"/>
+							</chainedadvantages>
+							<extras>
+								<extra name="Triggered: Step in Pile Of Roaches" info="1 use - Step in Pile Of Roaches">
+									<description>You can 'set' an instant duration effect with this modifier to activate under particular circumstances, such as in response to a particular danger, after a set amount of time, in response to a particular event, and so forth - chosen when you apply the modifier. Once chosen, the trigger cannot be changed.
+
+The circumstances must be detectable by your senses. You can acquire Senses Limited and Linked to Triggered effects, if desired. Setting the effect requires the same action as using it normally.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Roach Cloud Cover: Burst Area Concealment Attack 5" info="" ranks="5" range="10ft." displaylevel="1" summary="Other Sense: Touch, Sense - Hearing, Sense - Sight, Sense - Smell, DC 15; Alternate Resistance (no cost): Dodge, Burst Area: 30 feet radius sphere, DC 15, Attack: Dodge, Reach (melee) 2: 10 ft.; Source: Insects, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You gain total concealment from a particular sense while this effect is active, although you are still detectable to other senses (even other senses of the same sense type; so you could have full concealment against normal sight, but not infravision or any other sense in the sight sense type). Each additional rank gives you concealment from another sense; two ranks give you concealment for an entire sense type.
+
+Concealment from visual senses costs double (2 ranks for one visual sense, 4 ranks for all visual senses). You cannot have concealment from tactile senses, since that requires being incorporeal (see the Insubstantial effect). So with Concealment 5, you can have total concealment from all visual senses (4 ranks) and normal hearing (1 rank), for example. With Concealment 10 you have total concealment from all sense types other than tactile.</description>
+							<descriptors/>
+							<elements/>
+							<options>
+								<option name="Other Sense: Touch" selection="Touch">
+									<description>You are concealed from another sense.</description>
+								</option>
+								<option name="Sense - Hearing">
+									<description>You are concealed from hearing.</description>
+								</option>
+								<option name="Sense - Sight">
+									<description>You are concealed from normal sight.</description>
+								</option>
+								<option name="Sense - Smell">
+									<description>You are concealed from smell.</description>
+								</option>
+							</options>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Alternate Resistance (no cost): Dodge" info="Dodge">
+									<description>An effect with this modifier has a different resistance than usual. The resistance check difficulty class remains the same, only the resistance differs. If the change is to a generally lower (and therefore more advantageous) resistance, this extra increases cost per rank by +1. If, in the GM's opinion, there is no real increase in effectiveness, just a chance to the resistance, it has a net modifier of +0.
+
+Note: To set this extra's modifier to +0, set its ranks to 0.</description>
+								</extra>
+								<extra name="Area (Burst)" info="30 feet radius sphere, DC 15">
+									<description>The effect fills a sphere with a 30-foot radius (distance rank 0). Bursts on level surfaces (like the ground) create hemispheres 30 feet in radius and height.</description>
+								</extra>
+								<extra name="Attack: Dodge" info="Dodge">
+									<description>Use this extra for a Concealment effect you can impose on others (whether they want to be concealed or not). An invisibility ray, for example, is a Visual Concealment Attack, while a field of darkness is a Burst Area Visual Concealment Attack.</description>
+								</extra>
+								<extra name="Reach (melee)" ranks="2" info="10 ft.">
+									<description>Each time you apply this modifier to a close range effect, you extend its reach by 5 feet. This may represent a short-ranged effect or one with a somewhat greater reach, like a whip, spear, or similar weapon.
+
+This version of Reach is intended for a long-ranged melee weapon, like a whip or spear, and uses your Fighting ability to attack.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Roach Floor" info="" ranks="1" range="" displaylevel="1" summary="">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Environment: Environment 1" info="Radius: 30 feet" ranks="1" range="" displaylevel="2" summary="Impede Movement (1 rank), Impede Movement (2 ranks), Radius: 30 feet; Source: Insects, Unreliable (5 uses)">
+									<cost text="1 PP" value="1"/>
+									<description>You can change the environment in an area: raising or lowering the temperature, creating light, causing rain, and so forth (see The Environment in the Action &amp; Adventure chapter for details).
+
+Your Environment affects a 30 foot radius around you at rank 1. Each additional rank moves the radius up one distance rank, for a reach of approximately 2,000 miles at rank 20, sufficient to alter the environment of an entire continent!</description>
+									<descriptors/>
+									<elements/>
+									<options>
+										<option name="Impede Movement (1 rank)">
+											<description>Any movement through the area is reduced by 1 rank.</description>
+										</option>
+										<option name="Impede Movement (2 ranks)">
+											<description>Any movement through the area is reduced by 2 ranks.</description>
+										</option>
+									</options>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras/>
+									<flaws>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+								<power name="Weaken: Burst Area Broad Weaken 10" info="" ranks="10" range="" displaylevel="2" summary="Affects: Dodge, Resisted by: Will, DC 20; Burst Area: 30 feet radius sphere, DC 20, Broad: Dodge and Parry, Triggered 2: 2 uses - Being or walking into Environment; Limited: not vs flying people, Limited: dissapears as soon as target leaves area, Source: Insects, Unreliable (5 uses)">
+									<cost text="6 PP" value="6"/>
+									<description>You can temporarily lower one of a target's traits, chosen when this effect is acquired. You must touch the target, making a normal close attack check. Multiple failed resistance checks against a Weaken effect are cumulative, up to a maximum of the Weaken rank, at which point the effect cannot weaken the trait further. Lost points return at a rate of 1 per round at the end of each of the target's turns. Inanimate objects do not recover weakened Toughness; they must be repaired. Objects may or may not recover other weakened traits, at the GM's discretion and depending on the effect's descriptors.</description>
+									<descriptors/>
+									<elements>
+										<element name="Affects: Dodge" info="Dodge"/>
+										<element name="Resisted by: Will" info="Will"/>
+									</elements>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Area (Burst)" info="30 feet radius sphere, DC 20">
+											<description>The effect fills a sphere with a 30-foot radius (distance rank 0). Bursts on level surfaces (like the ground) create hemispheres 30 feet in radius and height.</description>
+										</extra>
+										<extra name="Broad: Dodge and Parry" info="Dodge and Parry">
+											<description>You can Weaken any of a broad set of traits, one at a time suited to your effects descriptors. So you might be able to Weaken Abilities, for example, or Weaken Mental Effects. You choose which trait from the set is weakened when you use the effect.</description>
+										</extra>
+										<extra name="Triggered: Being or walking into Environment" ranks="2" info="2 uses - Being or walking into Environment">
+											<description>You can 'set' an instant duration effect with this modifier to activate under particular circumstances, such as in response to a particular danger, after a set amount of time, in response to a particular event, and so forth - chosen when you apply the modifier. Once chosen, the trigger cannot be changed.
+
+The circumstances must be detectable by your senses. You can acquire Senses Limited and Linked to Triggered effects, if desired. Setting the effect requires the same action as using it normally.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Limited: dissapears as soon as target leaves area" info="dissapears as soon as target leaves area">
+											<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+										</flaw>
+										<flaw name="Limited: not vs flying people" info="not vs flying people">
+											<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+										</flaw>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+										<flaw name="Unreliable (5 uses)" info="">
+											<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Roach Hunger: Strength-based Damage 12" info="" ranks="12" range="10ft." displaylevel="1" summary="DC 32; Alternate Resistance: Fortitude, Indirect 4: any point, any direction, Multiattack, Reach (melee) 2: 10 ft., Secondary Effect; Distracting, Inaccurate 6: -12, Limited: Wont work against Solid Objects, Source: Insects, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Alternate Resistance: Fortitude" info="Fortitude">
+									<description>An effect with this modifier has a different resistance than usual. The resistance check difficulty class remains the same, only the resistance differs. If the change is to a generally lower (and therefore more advantageous) resistance, this extra increases cost per rank by +1. If, in the GM's opinion, there is no real increase in effectiveness, just a chance to the resistance, it has a net modifier of +0.
+
+Note: To set this extra's modifier to +0, set its ranks to 0.</description>
+								</extra>
+								<extra name="Indirect" ranks="4" info="any point, any direction">
+									<description>A ranged effect with this modifier can originate from a point other than the user, ignoring cover between the user and the target, such as walls and other intervening barriers, so long as they do not provide cover between the effect's origin point and the target. An Indirect effect normally originates from a fixed point directed away from you. In some cases, an Indirect effect may count as a surprise attack.</description>
+								</extra>
+								<extra name="Multiattack" info="">
+									<description>A Multiattack effect allows you to hit multiple targets, or a single target multiple times, in the same standard action. Multiattack can apply to any effect requiring an attack check. There are three ways in which a Multiattack effect can be used: single target, mulitple targets, or as a covering attack.</description>
+								</extra>
+								<extra name="Reach (melee)" ranks="2" info="10 ft.">
+									<description>Each time you apply this modifier to a close range effect, you extend its reach by 5 feet. This may represent a short-ranged effect or one with a somewhat greater reach, like a whip, spear, or similar weapon.
+
+This version of Reach is intended for a long-ranged melee weapon, like a whip or spear, and uses your Fighting ability to attack.</description>
+								</extra>
+								<extra name="Secondary Effect" info="">
+									<description>An instant duration effect with this modifier affects the target once immediately (when the effect is used) and then once again on the following round, at the end of the attacker's turn. The target gets the normal resistance check against the secondary effect.
+
+Secondary Effects don't stack, so if you attack a target with your Secondary Effect on the round after a successful hit, it doesn't affect the target twice; it simply delays the second effect for another round. You can attack the target with a different effect, however.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Distracting" info="">
+									<description>Using a Distracting effect requires more concentration than usual, causing you become vulnerable when you use the effect, until the start of your next turn.</description>
+								</flaw>
+								<flaw name="Inaccurate" ranks="6" info="-12">
+									<description>An effect with this flaw is hard to control or wildly inaccurate. Each rank gives you a -2 penalty to attack checks with the effect.</description>
+								</flaw>
+								<flaw name="Limited: Wont work against Solid Objects" info="Wont work against Solid Objects">
+									<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+								</flaw>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="See Through Roach's Eyes: Remote Sensing 3" info="Range: 250 feet" ranks="3" range="" displaylevel="1" summary="Affects: 2 Types, inc. Visual - Sight, Hearing, Range: 250 feet; Source: Insects [2 ranks only]">
+							<cost text="1 PP" value="1"/>
+							<description>You can displace one or more of your senses over a distance, perceiving as if you were at that location, up to 60 feet away. Each additional rank increases your range one distance rank, so rank 2 is 120 feet, rank 3 is 250 feet, and so on. Remote Sensing overrides your normal sense(s) while you are using it.
+
+Subjects observed via Remote Sensing can 'feel' it with an Insight check (DC 10 + rank). You can make Perception checks normally using your displaced senses, taking the normal action to do so. To search a large area for someone or something, use the search guidelines given in the description of the Investigation skill.</description>
+							<descriptors/>
+							<elements>
+								<element name="Affects: Sight, Hearing: 2 Types, inc. Visual (3/r)" info="2 Types, inc. Visual - Sight, Hearing"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Spiked Frenzy" info="" ranks="1" range="" displaylevel="1" summary="" active="yes">
+							<cost text="1 PP" value="1"/>
+							<description>Select this power to add multiple effects that are all activated at once.</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras/>
+							<flaws/>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers>
+								<power name="Damage: Strength-based Damage 3" info="" ranks="3" range="" displaylevel="2" summary="DC 23; Multiattack [5 extra ranks]; Source: Insects [2 extra ranks]" active="yes">
+									<cost text="6 PP" value="6"/>
+									<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+									<descriptors/>
+									<elements/>
+									<options/>
+									<traitmods/>
+									<chainedadvantages/>
+									<extras>
+										<extra name="Multiattack" info="">
+											<description>A Multiattack effect allows you to hit multiple targets, or a single target multiple times, in the same standard action. Multiattack can apply to any effect requiring an attack check. There are three ways in which a Multiattack effect can be used: single target, mulitple targets, or as a covering attack.</description>
+										</extra>
+									</extras>
+									<flaws>
+										<flaw name="Source: Insects" info="Insects">
+											<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+										</flaw>
+									</flaws>
+									<usernotes/>
+									<alternatepowers/>
+									<otherpowers/>
+								</power>
+							</otherpowers>
+						</power>
+						<power name="Swarming Nuisance: Cumulative Affliction 14" info="" ranks="14" range="" displaylevel="1" summary="1st degree: Vulnerable, 2nd degree: Defenseless, Resisted by: Dodge, overcome by Dodge, DC 24; Cumulative, Secondary Effect, Triggered: 1 use - Walking into swarm of roaches; Inaccurate 3: -6, Limited Degree, Source: Insects, Unreliable (5 uses)">
+							<cost text="1 PP" value="1"/>
+							<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+							<descriptors/>
+							<elements>
+								<element name="1st degree: Vulnerable: -Choose-" info="Vulnerable"/>
+								<element name="2nd degree: Defenseless: -Choose-" info="Defenseless"/>
+								<element name="Resisted by: Dodge, overcome by Dodge: -Choose-" info="Dodge, overcome by Dodge"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Cumulative" info="">
+									<description>Normally, an Affliction does not have a cumulative effect on the same target, so getting two results of one degree, one after the other, has no more or less effect than a single one degree result; you have to get a higher degree with a later attack, which replaces the initial result. A Cumulative Affliction adds any further degrees to the existing degrees on the target. For example, if you hit a target and impose a vulnerable condition (one degree), then attack again and get one degree on the effect, you impose the Affliction's second degree condition.</description>
+								</extra>
+								<extra name="Customize" info="">
+									<description>Instead of picking a resistance and conditions from menus, add this extra to enter your own choices as text.</description>
+								</extra>
+								<extra name="Secondary Effect" info="">
+									<description>An instant duration effect with this modifier affects the target once immediately (when the effect is used) and then once again on the following round, at the end of the attacker's turn. The target gets the normal resistance check against the secondary effect.
+
+Secondary Effects don't stack, so if you attack a target with your Secondary Effect on the round after a successful hit, it doesn't affect the target twice; it simply delays the second effect for another round. You can attack the target with a different effect, however.</description>
+								</extra>
+								<extra name="Triggered: Walking into swarm of roaches" info="1 use - Walking into swarm of roaches">
+									<description>You can 'set' an instant duration effect with this modifier to activate under particular circumstances, such as in response to a particular danger, after a set amount of time, in response to a particular event, and so forth - chosen when you apply the modifier. Once chosen, the trigger cannot be changed.
+
+The circumstances must be detectable by your senses. You can acquire Senses Limited and Linked to Triggered effects, if desired. Setting the effect requires the same action as using it normally.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Inaccurate" ranks="3" info="-6">
+									<description>An effect with this flaw is hard to control or wildly inaccurate. Each rank gives you a -2 penalty to attack checks with the effect.</description>
+								</flaw>
+								<flaw name="Limited Degree" info="">
+									<description>Your Affliction is limited to no more than two degrees of effect. With two applications of this modifier, it is limited to no more than one degree of effect.</description>
+								</flaw>
+								<flaw name="Source: Insects" info="Insects">
+									<description>Your power only functions when you have access to a particular source, such as blood, electricity, sand, scrap metal, sunlight, and so forth.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+					</otherpowers>
+				</power>
+				<power name="Roach reach: Elongation 2" info="Elongation: 30 feet, +2 to grab" ranks="2" range="" displaylevel="0" summary="Elongation: 30 feet, +2 to grab; Limited: Only with Roach Powers" active="yes">
+					<cost text="1 PP" value="1"/>
+					<description>You can elongate your body and/or limbs to extend your reach. Add your effect rank to your normal size rank to determine how far you can elongate; for a normal-sized human (size rank -2) this is 15 feet at rank 1, 30 feet at rank 2, and so forth. Rank 20 Elongation can stretch 1,000 miles! 'Snapping back' to your normal shape is a free action.
+
+You can use Elongation to make 'close' attacks at a greater distance by elongating your limbs. Once elongated, you can make melee attacks within your new reach as a standard action. If you can't accurately sense your target (you're elongating around a corner, for example), apply the rules for concealment (see Concealment in the Action &amp; Adventure chapter). In addition, Elongation allows you to wrap up and entangle an opponent so it grants a +1 bonus to grab checks per rank (limited by PL).</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws>
+						<flaw name="Limited: Only with Roach Powers" info="Only with Roach Powers">
+							<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+						</flaw>
+					</flaws>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers/>
+				</power>
+				<power name="Taunt And Confuse" info="" ranks="1" range="" displaylevel="0" summary="" active="yes">
+					<cost text="8 PP" value="8"/>
+					<description>Select this power to add multiple effects that are all activated at once.</description>
+					<descriptors/>
+					<elements/>
+					<options/>
+					<traitmods/>
+					<chainedadvantages/>
+					<extras/>
+					<flaws/>
+					<usernotes/>
+					<alternatepowers/>
+					<otherpowers>
+						<power name="Feint: Enhanced Trait 1" info="" ranks="1" range="" displaylevel="1" summary="Advantages: Agile Feint; Reaction: reaction; Unreliable (5 uses)" active="yes">
+							<cost text="1 PP" value="1"/>
+							<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods/>
+							<chainedadvantages>
+								<chainedadvantage name="Agile Feint"/>
+							</chainedadvantages>
+							<extras>
+								<extra name="Reaction" info="reaction">
+									<description>Each effect has a default action required to use it: standard, free, or none (for permanent effects). This modifier changes an effect's required action from a standard or free to a reaction, occurring automatically when a specific triggering event occurs. This is similar to the Triggered modifier (later in this section) but reaction effects do not need to be 'set', originate from their user, and can function repeatedly, so long as their triggering requirement is met.
+
+Specify a triggering circumstance that activates the effect, such as someone touching or attacking the user, activating a particular effect or power in the user's presence, and so forth. The GM is the final arbiter as to whether or not a triggering circumstance is suitable for a particular effect in the context of the series. Caution should be used to keep this option from being abused.
+
+The Reaction modifier applies +1 cost per rank to effects with a default action of free, +3 cost per rank to effects with a default standard action.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Taunt: Burst Area Affliction 10" info="" ranks="10" range="" displaylevel="1" summary="1st degree: Impaired, 2nd degree: Disabled, DC 20; Burst Area: 30 feet radius sphere, DC 20, Reaction 3: reaction; Limited 2: Only affects target when hey can't attack Roach-Boy, Limited Degree, Sense-dependent: Hearing, Unreliable (5 uses)" active="yes">
+							<cost text="5 PP" value="5"/>
+							<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+							<descriptors/>
+							<elements>
+								<element name="1st degree: Impaired" info="Impaired"/>
+								<element name="2nd degree: Disabled" info="Disabled"/>
+							</elements>
+							<options/>
+							<traitmods/>
+							<chainedadvantages/>
+							<extras>
+								<extra name="Area (Burst)" info="30 feet radius sphere, DC 20">
+									<description>The effect fills a sphere with a 30-foot radius (distance rank 0). Bursts on level surfaces (like the ground) create hemispheres 30 feet in radius and height.</description>
+								</extra>
+								<extra name="Reaction" ranks="3" info="reaction">
+									<description>Each effect has a default action required to use it: standard, free, or none (for permanent effects). This modifier changes an effect's required action from a standard or free to a reaction, occurring automatically when a specific triggering event occurs. This is similar to the Triggered modifier (later in this section) but reaction effects do not need to be 'set', originate from their user, and can function repeatedly, so long as their triggering requirement is met.
+
+Specify a triggering circumstance that activates the effect, such as someone touching or attacking the user, activating a particular effect or power in the user's presence, and so forth. The GM is the final arbiter as to whether or not a triggering circumstance is suitable for a particular effect in the context of the series. Caution should be used to keep this option from being abused.
+
+The Reaction modifier applies +1 cost per rank to effects with a default action of free, +3 cost per rank to effects with a default standard action.</description>
+								</extra>
+							</extras>
+							<flaws>
+								<flaw name="Limited Degree" info="">
+									<description>Your Affliction is limited to no more than two degrees of effect. With two applications of this modifier, it is limited to no more than one degree of effect.</description>
+								</flaw>
+								<flaw name="Limited: Only affects target when hey can't attack Roach-Boy" ranks="2" info="Only affects target when hey can't attack Roach-Boy">
+									<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+								</flaw>
+								<flaw name="Sense-dependent: Hearing" info="Hearing">
+									<description>The target of a Sense-dependent effect must be able to perceive the effect for it to work. The target gets a Dodge resistance check. Success means the target has managed to avert his eyes, cover his ears, etc. and the effect doesn't work. Otherwise the effect works normally and the target makes the usual resistance check against it, if any.
+
+Opponents aware of a Sense-dependent effect can also deliberately block the targeted sense: looking away, covering or blocking their ears, etc. This provides a +10 bonus to resistance checks against the effect, but gives others partial concealment from that sense. An opponent unable to use a sense (blind, deaf, etc.) is immune to effects dependent on it. Opponents can do this by closing their eyes, wearing ear- or nose-plugs, or using another effect like Concealment. This gives you total concealment from that sense.
+
+Sensory effects are Sense-dependent by definition, and cannot apply this flaw. To give a target additional resistance to a sensory effect, use the Resistible flaw.</description>
+								</flaw>
+								<flaw name="Unreliable (5 uses)" info="">
+									<description>An Unreliable effect doesn't work all the time. Instead of having a reliability roll, you can choose to have five uses where your effect works normally, then it stops working altogether until you can 'recover' it in some way (see the Fades flaw for more on this). The GM may allow you to spend a hero point to automatically recover a spent Unreliable power.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+						<power name="Trick: Enhanced Trait 6" info="" ranks="6" range="" displaylevel="1" summary="Traits: Acrobatics +8 (+12), Advantages: Redirect, Set-up; Limited 2: Only for Tricks and Feints to taunted foe" active="yes">
+							<cost text="2 PP" value="2"/>
+							<description>You have an enhancement to a non-effect trait, such as an ability (including saving throws) or skill (including attack or defense bonus). Since Toughness save cannot be increased on its own,use the Protection effect instead of Enhanced Toughness (see Protection later in this chapter).</description>
+							<descriptors/>
+							<elements/>
+							<options/>
+							<traitmods>
+								<traitmod name="Acrobatics" bonus="+8"/>
+							</traitmods>
+							<chainedadvantages>
+								<chainedadvantage name="Redirect"/>
+								<chainedadvantage name="Set-up"/>
+							</chainedadvantages>
+							<extras/>
+							<flaws>
+								<flaw name="Limited: Only for Tricks and Feints to taunted foe" ranks="2" info="Only for Tricks and Feints to taunted foe">
+									<description>An effect with this flaw is not effective all the time. Limited powers generally break down into two types: those usable only in certain situations and those usable only on certain things. For example Only While Singing Loudly, Only While Flying, Only on Men (or Women), Only Against Fire, Not Usable on Yellow Things, and so forth. As a general rule, the effect must lose about half its usefulness to qualify for this modifier. Anything less limiting is better handled as an occasional complication.</description>
+								</flaw>
+							</flaws>
+							<usernotes/>
+							<alternatepowers/>
+							<otherpowers/>
+						</power>
+					</otherpowers>
+				</power>
+			</powers>
+			<attacks>
+				<attack name="Counter: Damage 10" attack="+10" dc="25" crit="20" special="" descriptor="">
+					<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+				</attack>
+				<attack name="Damage: Strength-based Damage 3" attack="+12" dc="23" crit="20" special="" descriptor="">
+					<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+				</attack>
+				<attack name="Grab" attack="+4" dc="17" crit="20" special="" descriptor="Bludgeon">
+					<description>You can make a Grab attack to restrain or bind your opponent.</description>
+				</attack>
+				<attack name="Overwhelming Chatter: Weaken 14" attack="+6" dc="24" crit="20" special="" descriptor="">
+					<description>You can temporarily lower one of a target's traits, chosen when this effect is acquired. You must touch the target, making a normal close attack check. Multiple failed resistance checks against a Weaken effect are cumulative, up to a maximum of the Weaken rank, at which point the effect cannot weaken the trait further. Lost points return at a rate of 1 per round at the end of each of the target's turns. Inanimate objects do not recover weakened Toughness; they must be repaired. Objects may or may not recover other weakened traits, at the GM's discretion and depending on the effect's descriptors.</description>
+				</attack>
+				<attack name="Roach Assault: Affliction 8" attack="+12" dc="18" crit="16-20" special="" descriptor="">
+					<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+				</attack>
+				<attack name="Roach Cloud Cover: Burst Area Concealment Attack 5" attack="+12" dc="15" crit="20" special="" descriptor="">
+					<description>You gain total concealment from a particular sense while this effect is active, although you are still detectable to other senses (even other senses of the same sense type; so you could have full concealment against normal sight, but not infravision or any other sense in the sight sense type). Each additional rank gives you concealment from another sense; two ranks give you concealment for an entire sense type.
+
+Concealment from visual senses costs double (2 ranks for one visual sense, 4 ranks for all visual senses). You cannot have concealment from tactile senses, since that requires being incorporeal (see the Insubstantial effect). So with Concealment 5, you can have total concealment from all visual senses (4 ranks) and normal hearing (1 rank), for example. With Concealment 10 you have total concealment from all sense types other than tactile.</description>
+				</attack>
+				<attack name="Roach Hunger: Strength-based Damage 12" attack="+0" dc="32" crit="20" special="" descriptor="">
+					<description>You can inflict damage by making a close attack. The exact nature of your Damage is up to you; it can be anything from a powerful impact to razor claws, energy fields, or some other damaging medium with the GM's permission. The target resists Damage with Toughness.</description>
+				</attack>
+				<attack name="Swarming Nuisance: Cumulative Affliction 14" attack="+6" dc="24" crit="20" special="" descriptor="">
+					<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+				</attack>
+				<attack name="Taunt: Burst Area Affliction 10" attack="+2" dc="20" crit="20" special="" descriptor="">
+					<description>You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction causes at each degree when you acquire it and they may not be changed. Higher degree conditions replace lower degree conditions and do not stack with them. See the possible conditions for each degree under the Affliction Resistance Check table. The target resists with Fortitude or Will defense (chosen when you take the effect).</description>
+				</attack>
+				<attack name="Throw" attack="+2" dc="20" crit="20" special="" descriptor="Bludgeon">
+					<description>Your basic thrown attack.</description>
+				</attack>
+				<attack name="Unarmed" attack="+2" dc="20" crit="20" special="" descriptor="Bludgeon">
+					<description>Your basic unarmed attack.</description>
+				</attack>
+				<attack name="Weaken: Burst Area Broad Weaken 10" attack="+12" dc="20" crit="20" special="" descriptor="">
+					<description>You can temporarily lower one of a target's traits, chosen when this effect is acquired. You must touch the target, making a normal close attack check. Multiple failed resistance checks against a Weaken effect are cumulative, up to a maximum of the Weaken rank, at which point the effect cannot weaken the trait further. Lost points return at a rate of 1 per round at the end of each of the target's turns. Inanimate objects do not recover weakened Toughness; they must be repaired. Objects may or may not recover other weakened traits, at the GM's discretion and depending on the effect's descriptors.</description>
+				</attack>
+			</attacks>
+			<gear>
+				<item name="Dropped to Ground (empty)" quantity="1">
+					<cost text="" value="0"/>
+					<description>Any equipment dropped to the ground is held in this container.
+You can move an item from one container to another by clicking the "Gear" button beside its info button.</description>
+				</item>
+				<item name="Grab" quantity="1">
+					<cost text="" value="0"/>
+					<description>You can make a Grab attack to restrain or bind your opponent.</description>
+				</item>
+				<item name="Throw" quantity="1">
+					<cost text="" value="0"/>
+					<description>Your basic thrown attack.</description>
+				</item>
+				<item name="Unarmed" quantity="1">
+					<cost text="" value="0"/>
+					<description>Your basic unarmed attack.</description>
+				</item>
+			</gear>
+			<complications>
+				<complication name="Acceptance">
+					<description>Roach-Boy craves acceptance, especially from the Super-Hero community or figues of authority. He is at risk of being manipulated by less than savory people who prey on his desire to be mentored by someone he sees as anestablished hero, and by his desire for friends who are heroic.</description>
+				</complication>
+				<complication name="Cockroaches cant be everywhere">
+					<description>Roach Control and his Roach Warning System only work if cockroaches are able to be available on mass. This is not a problem for dirty, or even moderately clean areas. Pristine areas may take awhile for cockroaches to appear, sealed areas are an impossibility.</description>
+				</complication>
+				<complication name="Enemy: Evil Experimenter">
+					<description>Roach-boy is on a constant lookout for the evil doctor that is contiuing to kidnap people off the streets and transform them into monstrosoties that do his evil bidding. Roach-boy has disrupted his plans in the past and made a powerful enemy.</description>
+				</complication>
+				<complication name="Enemy: The Department Of Urban Sanitation">
+					<description>DOUSe has beent tasked with cleanng up the city, and oversees the effort to demolish and urbanifiy some of the more decrebid ghettoes in town. They have been responsible for forcibly removing undesirable elements from certain neibohoods before demolition and rebuild. 
+
+Roach-boy in his defense of the homeless has interfered numerous times with DOUSe, who also have a special department that deals with super powered pests eg Sewer Reptile Monsters, Rodent and Bat Creatures, and yes of course Insect powered nusiances.</description>
+				</complication>
+				<complication name="Gross">
+					<description>Roach- Boy's appearance and powers bring about disgust in almost everyone. He is shunned by every day people. He is often mistaken as a villain, and police will often fire at him on sight. The tablid press love to right fabricated stories about his monstrous acts. Other super heroes even look at him initially with revulsion and contempt. 
+
+Roach-boy often has to win acceptance through heroics and his noble behavior.
+</description>
+				</complication>
+				<complication name="Motivation:Guilty Savior Complex">
+					<description>Roach-Boy failed to save the other victims of experimentation that caused his transformation. A core number of his street people 'family' that were kidnapped by the evil (what do we call this guy). When he had a chance to escape, he took it. When we finally came to his senses and returned for his adopted family, it was to late.
+
+As a result, roach-Bot is always looking to assuage his guilt by trying to save everyone he can. </description>
+				</complication>
+				<complication name="Responsibility: Street People Family">
+					<description>Roach-Boy was informally adopted by a tight night group of home-less / near homeless people from a very young age, when he was fleeing an abusive family, and an unsympathetic system. 
+
+Roach-boy is extremely protective of this group of people and of homeless people in general. He is also an active defender of the poor and people who are just on the fringe of becoming destitute. He spends a good portion of his time at holmeless shelters and food banks, helping in any way he can.
+
+Roach-boy in particular is commited to improving the lives of his adopted troup of street folks, doing what he can to get them of the street.</description>
+				</complication>
+				<complication name="Weakness: Insectiside">
+					<description>Chemicals specifically designed to target insects, arthrapods, etc will do extra damage to Roach-Boy. Cleaning Agent related powers and attacks will also have extra effect and send his roaches scurrying, removing many of his powers.</description>
+				</complication>
+			</complications>
+			<journals>
+				<journal name="Title" gamedate="0" realdate="20250807" pp="0" pl="0" wealth="0">
+					<description/>
+				</journal>
+			</journals>
+			<images>
+				<image filename="Roach_Boy-image001.jpg"/>
+				<image filename="Roach_Boy-image002.jpg"/>
+				<image filename="Roach_Boy-image003.jpg"/>
+				<image filename="Roach_Boy-image004.jpg"/>
+			</images>
+			<validation>
+				<report>Roach Combat - Counter: Damage 10: Attack Bonus exceeds Power Level limit by 2; Too many PP spent (151, max 150); Taunt: Burst Area Affliction 10 - Resisted by: You must choose an option; Total Focus: Immunity 140 - Increased Action: Power must start with an Action.</report>
+				<validmessage>Warning: Roach Combat - Counter: Damage 10: Attack Bonus exceeds Power Level limit by 2</validmessage>
+				<validmessage>Error: Too many PP spent (151, max 150)</validmessage>
+				<validmessage>Error: Taunt: Burst Area Affliction 10 - Resisted by: You must choose an option</validmessage>
+				<validmessage>Error: Total Focus: Immunity 140 - Increased Action: Power must start with an Action.</validmessage>
+			</validation>
+			<settings summary="Sourcebooks -&gt; Cosmic Handbook: Cosmic Handbook; Sourcebooks -&gt; Hero High: Hero High; Sourcebooks -&gt; Supernatural Handbook: Supernatural Handbook Equipment &amp; Complications; Sourcebooks -&gt; Gamemaster's Guide: Gamemaster's Guide Equipment"/>
+			<minions/>
+		</character>
+	</public>
+</document>

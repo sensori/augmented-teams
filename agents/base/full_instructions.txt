@@ -1,0 +1,109 @@
+**Agent-level rules:** Agent-level rules that apply to all behaviors (shape, prioritization, discovery, exploration)
+
+**Agent-level examples:**
+DO:
+  - Use verb-noun format for all story elements (epic names, feature names, story titles)
+  - Use verb-noun language in scenario sentences
+  - Maintain verb-noun consistency from epic to feature to story to scenario
+  - Focus stories on user interactions and observable system behavior
+  - Ensure stories follow INVEST principles (Independent, Negotiable, Valuable, Estimable, Small, Testable)
+  - Use business domain language that stakeholders understand
+  - Write stories that can be developed and tested in a matter of days
+DON'T:
+  - Mix verb-noun with other formats
+  - Use technical implementation language in user-facing story elements
+  - Focus on delivery or development tasks required to build a system
+  - Focus on system internals (technical stories)
+  - Use development task language: implement, create, refactor, optimize, fix, build, set up
+  - Use technical implementation details: query database, call API, update table
+
+**Behavior-level rules:** Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.
+
+**Rule:** Focus story maps on both user AND system activities, not tasks. Stories should outline user and system behavior patterns.
+  DO: Include both user and system activities in story descriptions: User submits order, System validates payment
+  DON'T: Avoid task-oriented language that describes implementation: Implement order submission, Create payment validation
+  DO: Show user actions and corresponding system responses: Customer views products, System displays inventory
+  DON'T: Don't use task language for building or setting up: Build product listing page, Set up inventory display
+
+**Rule:** Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.
+  DO: Create stories that represent complete flows within the effort range: Customer places order (complete flow, 3-5 days)
+  DON'T: Avoid stories that are too large and span multiple weeks: Order management system (too large, 20+ days)
+
+**Rule:** Balance fine-grained stories with testable and valuable independent units. Stories must deliver value and be independently testable.
+  DO: Create stories that are complete interactions with value: Customer places order (complete interaction, testable, valuable)
+  DON'T: Avoid stories that are too small and have no value alone: Add order button (too fine-grained, no value alone)
+
+**Rule:** Apply 7±2 rule for hierarchy: epics contain 4-9 features, features contain 4-9 stories. Split when exceeding, merge when below minimum.
+  DO: Maintain hierarchy within the 7±2 cognitive limit range: Epic with 6 features, each feature with 5-7 stories
+  DON'T: Split when hierarchy exceeds the maximum threshold: Epic with 12 features (split into 2 epics), feature with 15 stories (split into 2 features)
+
+**Rule:** Use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.
+  DO: Use action verbs to describe what happens: User submits order, System validates payment
+  DON'T: Avoid capability nouns that describe functions rather than behaviors: Order Management, Payment Processing (capability nouns)
+
+**Rule:** Ensure business experts can understand the language of stories. Use business domain language, not technical implementation details.
+  DO: Use business language that stakeholders understand: Customer places order with payment details
+  DON'T: Avoid technical API and implementation details: POST /api/orders with JSON payload containing payment object
+
+**Rule:** Create lightweight but precise documentation during shaping. Focus on structure and scope, not detailed specifications.
+  DO: Document the hierarchy and structure during shaping: Epic: Manage Orders → Feature: Place Order → Story: Customer places order
+  DON'T: Avoid detailed technical specifications during shaping phase: Epic: Manage Orders → Feature: Place Order → Story: Customer places order → Detailed API specs, database schema, UI mockups
+
+**Rule:** Identify marketable increments with business priorities and relative sizing. Design increments as VERTICAL SLICES (end-to-end flows across multiple epics/features, NOT horizontal layers).
+  DO: Define increments with business value and priorities as vertical slices: Marketable increment: Basic Order Flow (NOW priority, Small relative size) - includes PARTIAL features from MULTIPLE epics delivering complete end-to-end flow
+  DON'T: Avoid technical increments without business value or horizontal layers: Increment: API endpoints (no priority, no sizing) OR Complete Epic A then Epic B (horizontal layers)
+
+
+**Previous Clarification Decisions:**
+**PRIORITY RULE: If there are contradictions between clarification answers from different stages, the clarification answers from LATER stages TRUMP answers from EARLIER stages.**
+
+**Key Questions Answered:**
+- user_types: Game Masters (GMs) - initial users. Players will be enabled later (much later phase, not in scope for initial increments).
+- key_goals_behaviors: Key goals and behaviors are defined in the provided diagram/image: Handle Mob Strategies (Attack Most Powerful Enemy, Attack whom last most damaging Attack, Follow Leader, Attack with most damaging Attack, Attack Common Target, Defend Leader, Attack Most Damaged, Attack Weakest), Edit Mobs (Group Minions Into Mob, View Mob Groupings in Combat Tracker, Add minion to Mob, Remove minion, Spawn Mobs from Actor, Spawn Mixed mobs from actors), Choose Target (Target Most Powerful, Target Least Powerful, Retaliation - target attacker, Protect - Target Defendees Assailant, Target based on Aggro system), Select Attack Effect (Choose Mob Attack Manually, Auto select powerful attack, Auto Select most effective against opponent), Determine Available Attack (Attack With Range, Attack With Melee, Attack With Pathfinding, Attack With Area Attack), Auto - Flee (Auto Resist and Apply Effect).
+- primary_users: Game Masters (GMs) running Foundry VTT sessions. Players are impacted indirectly as mobs act against them, but players will not be users of this system in initial increments.
+- first_action: Group multiple minion tokens from the canvas into a mob. For first increment: Put everyone into a mob, leader assigned randomly (since everybody is the same), then when it is that mobs turn, only click on the leaders action (no one elses), click on target token and that becomes the mobs target from here on in with no way of changing it.
+- problems_inefficiencies: Churn and taking forever to do big epic minion battles. Also about experiencing more fun because multiple players and GMs could have these mobs and they are all doing interesting things without any intervention.
+- struggling_points: During combat when managing many minions, requiring repeated individual selections and actions for each minion token. Big epic minion battles take too long.
+- systems_integration: Foundry VTT core systems: Canvas (for token selection and positioning), Combat Tracker (for displaying mob groupings and managing combat - likely through Mutants & Masterminds extension), Actor system (for minion data and spawning mobs from actors - likely through Mutants & Masterminds extension), Token system (for token selection and manipulation), Combat system (for executing attacks, determining range, movement, area attacks), Chat area (for combat messages). More often than not interfacing with the Mutants & Masterminds system that sits on top of Foundry. Reference: https://github.com/Ethaks/foundry-mm3
+- integration_behaviors: Canvas → Token selection → Mob creation. Combat Tracker (via Mutants & Masterminds extension) → Display mob groupings → Show mob membership. Actor system (via Mutants & Masterminds extension) → Spawn mobs from actor templates → Create multiple tokens. Strategy system → Target selection → Attack execution. Range/Melee/Pathfinding systems → Determine available attacks → Execute appropriate attack type. Leader selection: Initially random assignment, later phases can explicitly mark certain token as leader, even someone outside the mob as being the leader. Action execution: Click on token to select leader (if no other mechanism), later phases will have explicit leader marking.
+
+**Evidence Provided:**
+- User journey maps: Diagram/image provided showing feature breakdown: Handle Mob Strategies, Edit Mobs, Choose Target, Select Attack Effect, Determine Available Attack, Auto - Flee
+- Technical specifications: Foundry VTT system integration requirements. Mutants & Masterminds system integration (https://github.com/Ethaks/foundry-mm3). First increment scope: Basic mob creation with random leader assignment, click target = mob target, no strategy selection yet.
+
+**Additional Questions Answered:**
+
+
+**MANDATORY: You MUST apply ALL planning decisions and assumptions below to guide your generation.**
+These decisions contain critical constraints and strategies that override default patterns.
+
+**Previous Planning Decisions and Assumptions:**
+**PRIORITY RULE: If there are contradictions between planning decisions from different stages, the decisions from LATER stages (higher order behaviors) TRUMP decisions from EARLIER stages (lower order behaviors).**
+**For example: If 'discovery' stage decisions contradict 'shape' stage decisions, use the 'discovery' decisions.**
+
+
+**SHAPE Stage:**
+  **Decisions Made:**
+    - story_drill_down: Component-level drill down (lower than normal) because Foundry is proprietary. Need to track interactions between Mob manager/mob domain, Foundry/Mutants & Masterminds Combat Tracker, Actors, and Tokens as first-class actors. Sending/forwarding information across components as first-class stories. Focus on drilling down 1-2 stories that cross all components, then extrapolate the rest.
+    - flow_scope_granularity: End-to-end user-system behavior - One user interaction followed by one system response. Focus on creating mobs and having mobs act within the virtual tabletop. Do NOT include journey-level scope (character creation outside VTT, etc.). Be very explicit between components when drilling down.
+  **Assumptions Made:**
+    - auto_flee: Auto-Flee is later functionality - needs to be in story map but not in early increments
+    - ai_assisted: Need increments for AI-assisted behavior and strategies later (to be figured out)
+    - component_level: Stories will track component-level interactions because Foundry is proprietary - Mob manager, Combat Tracker, Actors, Tokens are first-class actors
+    - explicit_components: Be very explicit between components when drilling down - focus on 1-2 stories that cross all components, then extrapolate
+
+**CRITICAL: Current behavior 'shape' decisions and assumptions MUST be followed:**
+**YOU MUST apply these decisions directly to your generation work. These override any default patterns.**
+**PRIORITY RULE: If there are contradictions between planning decisions from different stages, the decisions from LATER stages (higher order behaviors) TRUMP decisions from EARLIER stages (lower order behaviors).**
+**For example: If 'discovery' stage decisions contradict 'shape' stage decisions, use the 'discovery' decisions.**
+  **Decisions:**
+    - story_drill_down: Component-level drill down (lower than normal) because Foundry is proprietary. Need to track interactions between Mob manager/mob domain, Foundry/Mutants & Masterminds Combat Tracker, Actors, and Tokens as first-class actors. Sending/forwarding information across components as first-class stories. Focus on drilling down 1-2 stories that cross all components, then extrapolate the rest.
+    - flow_scope_granularity: End-to-end user-system behavior - One user interaction followed by one system response. Focus on creating mobs and having mobs act within the virtual tabletop. Do NOT include journey-level scope (character creation outside VTT, etc.). Be very explicit between components when drilling down.
+  **ACTION REQUIRED:** Review each decision above. If a decision specifies selective drill-down (e.g., 'focus on 1-2 stories'), you MUST enumerate only those stories and use 'story_count' notation for all others.
+  **Assumptions:**
+    - auto_flee: Auto-Flee is later functionality - needs to be in story map but not in early increments
+    - ai_assisted: Need increments for AI-assisted behavior and strategies later (to be figured out)
+    - component_level: Stories will track component-level interactions because Foundry is proprietary - Mob manager, Combat Tracker, Actors, Tokens are first-class actors
+    - explicit_components: Be very explicit between components when drilling down - focus on 1-2 stories that cross all components, then extrapolate
+Build the structured story map content using the story_graph.json schema file. The schema file defines the exact structure you must follow. Load and use the schema file to ensure your output matches the required format exactly. CRITICAL: In build_structure phase, ONLY create the structured JSON file (story_graph.json). DO NOT render any documentation, DO NOT create markdown files, DO NOT perform any transformation work. All documentation rendering and transformation happens in the render_output phase. Your only task here is to build the structured JSON content. MANDATORY: You MUST review ALL planning decisions and assumptions provided above. These planning decisions contain critical constraints and strategies that MUST guide your story generation. For example, if planning decisions specify 'focus on drilling down 1-2 stories that cross all components, then extrapolate the rest', you MUST follow this strategy: enumerate only 1-2 stories that demonstrate component interactions, and use 'story_count' notation (e.g., '~5 stories') for all other features. DO NOT enumerate all stories unless planning decisions explicitly require it. Planning decisions override default patterns - you MUST apply them directly to your story generation. ADDITIONAL QUESTIONS REQUIREMENT: Load clarification.json and check for 'additional_questions_answered' section. Use these detailed workflow questions and answers to inform story creation, especially for features that involve Foundry system interactions (canvas, tokens, actors, combat tracker, UI panels). The additional_questions_answered contain detailed workflow information that should be reflected in story behavioral acceptance criteria and story purposes.
+

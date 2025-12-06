@@ -1,0 +1,94 @@
+{
+  "last_updated": "Tue Nov 25 16:44:28 2025",
+  "total_behaviors": 11,
+  "behaviors": [
+    {
+      "feature": "ddd",
+      "file": "ddd-rule.mdc",
+      "type": ".mdc",
+      "path": "behaviors\\ddd\\ddd-rule.mdc",
+      "modified_timestamp": 1763842278.3156142,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "feature-outline.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\feature-outline.md",
+      "modified_timestamp": 1763842278.3176136,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-interaction-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\interaction\\ddd-interaction-cmd.md",
+      "modified_timestamp": 1763842278.3176136,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-interaction-correct-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\interaction\\ddd-interaction-correct-cmd.md",
+      "modified_timestamp": 1763842278.3176136,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-interaction-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\interaction\\ddd-interaction-generate-cmd.md",
+      "modified_timestamp": 1763842278.3186133,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-interaction-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\interaction\\ddd-interaction-validate-cmd.md",
+      "modified_timestamp": 1763842278.3186133,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-structure-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure\\ddd-structure-cmd.md",
+      "modified_timestamp": 1763842278.3196132,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-structure-correct-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure\\ddd-structure-correct-cmd.md",
+      "modified_timestamp": 1763842278.3196132,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-structure-generate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure\\ddd-structure-generate-cmd.md",
+      "modified_timestamp": 1763842278.3206139,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd-structure-validate-cmd.md",
+      "type": ".md",
+      "path": "behaviors\\ddd\\structure\\ddd-structure-validate-cmd.md",
+      "modified_timestamp": 1763842278.3206139,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    },
+    {
+      "feature": "ddd",
+      "file": "ddd_runner.py",
+      "type": ".py",
+      "path": "behaviors\\ddd\\ddd_runner.py",
+      "modified_timestamp": 1763842278.3156142,
+      "purpose": "[AI should update this purpose after reviewing the file]"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "behavior_name": "episode",
+  "description": "Episode management - set current episode, start new episodes, summarize, and update plot",
+  "usage_documentation": {
+    "purpose": "Manage episodes - set current episode, start new episodes, summarize, and update plot. AI intelligently parses parameters to determine intent. Once an episode is set as current, all character-chat commands automatically write to that episode.",
+    "key_concept": "Episodes are the primary output destination for character interactions. Once an episode is set as current via episode command, all character-chat commands automatically write to that episode file.",
+    "episode_as_output_destination": {
+      "description": "Episodes are the primary output destination for character interactions",
+      "critical_note": "All character-chat responses automatically write to the current episode file set by episode command",
+      "no_episode_parameter_needed": "Character chat commands do NOT require an episode parameter - they automatically use the current episode",
+      "episode_files_accumulate": "Episode files accumulate character interaction history chronologically",
+      "current_episode_setting": "Current episode is set via episode start or episode [episode-number] commands",
+      "roll_note": "character-roll does NOT automatically write to episode files. Roll results can be incorporated into episode content through character-chat if needed."
+    },
+    "episode_content_structure": {
+      "description": "Episode files contain:",
+      "episode_header": "Episode header (title, description, date, character name - metadata only)",
+      "episode_content_section": {
+        "format": "Simple format:",
+        "original_input": "Original input (what the character is responding to)",
+        "character_response": "Character response (what the character says/does)",
+        "no_metadata": "No metadata in content (no timestamps, character name, mode, etc. - just the content)"
+      },
+      "roll_results": "Roll results can be incorporated through character responses if needed"
+    },
+    "episode_lifecycle": {
+      "description": "Two-Phase Approval Workflow",
+      "phase1_start": {
+        "action": "Create episode with episode start [character-name] [title]",
+        "creates": "Current episode file in character's episodes folder",
+        "sets": "Sets as current episode for automatic writing"
+      },
+      "phase2_write": {
+        "description": "Character interactions automatically write to current episode",
+        "character_chat": "All character-chat responses append to current episode",
+        "roll_results": "Roll results can be incorporated into episode content through character-chat if needed"
+      },
+      "phase3_summarize": {
+        "action": "Extract key events with episode summarize [character-name]",
+        "generates": "Generates structured summary using character profile for context",
+        "presents": "Presents summary for user approval (does NOT write to file yet)",
+        "user_approval": "User must explicitly approve the summary before proceeding"
+      },
+      "phase4_update_plot": {
+        "action": "Append approved summary with episode update plot [character-name] [approved-summary]",
+        "takes": "Takes the approved summary from Phase 1",
+        "appends": "Appends approved summary to character's plot file Section 4 (PRIMARY SOURCE - actualized canon)",
+        "renames": "Renames current episode file to completed episode file (preserves full session log)",
+        "syncs_npcs": "Automatically syncs NPCs (creates/updates NPC journal files in npcs/ directory)"
+      }
+    },
+    "episode_summarization": {
+      "description": "Episodes can be summarized using character profile context",
+      "extracts": "Summarization extracts key events and interactions",
+      "identifies_npcs": "Summarization identifies NPC interactions for journal updates",
+      "uses_profile": "Summarization uses character profile (background, personality, interests) for contextual understanding",
+      "follows_template": "Summary follows structured template format"
+    },
+    "npc_journal_management": {
+      "description": "NPC journals track character interactions with NPCs across episodes",
+      "automatic_sync": "NPC journals are automatically created/updated during character synchronization after plot update",
+      "manual_update": "NPC journals can be manually updated if needed",
+      "provides_context": "NPC journals provide context for future interactions",
+      "file_structure": {
+        "content": {
+          "episode_appearances": "List of episodes where NPC appeared",
+          "character_information": "Role, description, personality, relationship",
+          "episode_specific_information": "Key actions/events, notes from each episode"
+        }
+      },
+      "sync_process": {
+        "description": "NPC journals are automatically synchronized after plot update",
+        "extracts": "NPCs are extracted from 'New NPCs Encountered' section of approved episode summary",
+        "creates_or_updates": "For each NPC: If new, create NPC journal. If existing, update with new episode appearance",
+        "accumulates": "NPC files accumulate episode-specific information over time"
+      }
+    },
+    "character_profile_integration": {
+      "description": "Character profiles provide context for episode summarization",
+      "uses": "Character background, personality, and interests are used to understand episode events"
+    },
+    "canon_source_hierarchy": {
+      "description": "Episode files use a canonical source hierarchy for plot information",
+      "primary": "Approved episode summaries (Section 4) - actualized canon, always takes precedence",
+      "secondary": "Background/intended arcs (Sections 2-3) - supporting details when episodes don't specify",
+      "conflict_resolution": "Episodes override plot background when conflicts occur"
+    },
+    "actions": {
+      "start": {
+        "keywords": ["start", "create", "new episode", "this is a new episode", "begin episode"],
+        "description": "Creates new episode file and sets as current episode",
+        "parameters": {
+          "character_name": "Character name (required)",
+          "episode_title": "Episode title (optional, defaults to 'Episode {episode-number}' or 'Episode {date}')",
+          "episode_description": "Episode description (optional)"
+        },
+        "creates": "Current episode file in character's episodes folder"
+      },
+      "summarize": {
+        "keywords": ["summarize", "summary", "create summary"],
+        "description": "Generates structured summary from episode content",
+        "parameters": {
+          "character_name": "Character name (required)",
+          "episode_number": "Episode number/ID (optional, defaults to current-episode-in-progress.md)"
+        },
+        "output": "Presents summary for user approval (does NOT write to file yet)"
+      },
+      "update_plot": {
+        "keywords": ["update plot", "append", "approve", "finalize"],
+        "description": "Appends approved summary to plot file and finalizes episode",
+        "parameters": {
+          "character_name": "Character name (required)",
+          "episode_number": "Episode number/ID (optional, defaults to next sequential number)",
+          "approved_summary": "Approved summary text (required - from Phase 1)"
+        },
+        "file_operations": {
+          "appends_to": "Character's plot file Section 4 (PRIMARY SOURCE - actualized canon)",
+          "renames": "Current episode file to completed episode file"
+        },
+        "post_action": "Automatically triggers character synchronization (creates/updates NPC files in npcs/)"
+      },
+      "set_current": {
+        "description": "Sets episode as current episode for automatic writing",
+        "trigger": "Episode number/ID detected without action keywords",
+        "parameters": {
+          "character_name": "Character name (required)",
+          "episode_number": "Episode number/ID (required)"
+        },
+        "important": "Once set as current episode, ALL character-chat commands will automatically write to this episode file until a different episode is set"
+      },
+      "list": {
+        "description": "Lists all episodes for a character",
+        "parameters": {
+          "character_name": "Character name (required)"
+        }
+      },
+      "undo": {
+        "description": "Remove the last entry (user input + response) from the current episode file",
+        "parameters": {
+          "character_name": "Character name (required)"
+        }
+      },
+      "edit": {
+        "description": "Replace the last entry (user input + response) in the current episode file",
+        "parameters": {
+          "character_name": "Character name (required)",
+          "new_user_input": "New user input text (required)",
+          "new_response": "New character response text (required)"
+        }
+      }
+    },
+    "do_and_dont": {
+      "do": {
+        "episode_creation": [
+          "DO create episodes with clear, descriptive titles",
+          "DO include title and description when starting episodes",
+          "DO set episode as current episode for automatic writing",
+          "DO use episode start to create new episodes"
+        ],
+        "episode_writing": [
+          "DO write all character interactions to episode files (automatic via character-chat)",
+          "DO maintain chronological order in episode files",
+          "DO use simple format: original input followed by character response (no metadata like timestamps, character name, mode)",
+          "DO incorporate roll results into episode content through character-chat if needed"
+        ],
+        "episode_summarization": [
+          "DO use character profile context for summarization",
+          "DO extract key events and interactions",
+          "DO identify NPC interactions for journal updates",
+          "DO preserve important details in summaries",
+          "DO present summaries for user approval before writing"
+        ],
+        "plot_management": [
+          "DO append approved summaries to plot.md Section 4",
+          "DO maintain chronological order in plot file",
+          "DO rename current episode to episode-[N].md after plot update",
+          "DO automatically sync NPCs after plot update"
+        ]
+      },
+      "dont": {
+        "episode_creation": [
+          "DON'T write to episode files without episode context (use episode start first)",
+          "DON'T skip episode creation before writing",
+          "DON'T lose episode content when summarizing",
+          "DON'T write character sheet queries to episode files",
+          "DON'T require episode parameters in character-chat commands (they use current episode automatically)"
+        ]
+      }
+    }
+  },
+  "mcp_tool": {
+    "name": "character_episode_manage",
+    "description": "Manage episodes - set current episode, start new episodes, summarize, update plot, list episodes, undo last entry, or edit last entry",
+    "parameters": {
+      "character_name": {
+        "type": "string",
+        "required": true,
+        "description": "Character name"
+      },
+      "action": {
+        "type": "string",
+        "required": true,
+        "enum": ["start", "summarize", "update-plot", "set-current", "list", "undo", "edit"],
+        "description": "Action to perform"
+      },
+      "episode_title": {
+        "type": "string",
+        "required": false,
+        "description": "Episode title (required for 'start' action)"
+      },
+      "episode_number": {
+        "type": ["string", "integer"],
+        "required": false,
+        "description": "Episode number/ID"
+      },
+      "episode_filename": {
+        "type": "string",
+        "required": false,
+        "description": "Episode filename for 'set-current' action (e.g., 'roach-boyt-loves-anticipator.md'). Use 'list' action to see available episodes."
+      },
+      "new_user_input": {
+        "type": "string",
+        "required": false,
+        "description": "New user input for 'edit' action (required for 'edit')"
+      },
+      "new_response": {
+        "type": "string",
+        "required": false,
+        "description": "New response for 'edit' action (required for 'edit')"
+      }
+    }
+  }
+}
+

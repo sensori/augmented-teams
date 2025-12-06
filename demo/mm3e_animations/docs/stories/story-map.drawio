@@ -1,0 +1,188 @@
+<mxfile host="65bd71144e">
+    <diagram id="story-map" name="Story Map">
+        <mxGraphModel dx="2183" dy="2150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0"/>
+                <mxCell id="epic1" value="Build Animation from Components" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="epic-group" vertex="1">
+                    <mxGeometry x="20" width="790" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic2" value="Launch Animation on Attack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="epic-group" vertex="1">
+                    <mxGeometry x="830" width="1240" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic3" value="Associate Descriptors with Animations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="epic-group" vertex="1">
+                    <mxGeometry x="2090" width="670" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="epic4" value="Analyze Power Items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="epic-group" vertex="1">
+                    <mxGeometry x="2780" width="400" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1" value="Assemble Animation from Base Templates&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;6&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s1" value="Receive Power Characteristics" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="32" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s2" value="Request Base Templates" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="92" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s3" value="Instantiate Cast Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="152" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s4" value="Instantiate Project Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="212" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s5" value="Instantiate Affect Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="272" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f1s6" value="Combine Templates into Sequence" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="332" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2" value="Parameterize Animation Components&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;6&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s1" value="Receive Component Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="422" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s2" value="Apply Animation File Path" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="482" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s3" value="Apply Duration Parameter" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="542" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s4" value="Apply Sound File" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="602" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s5" value="Apply Motion Effects" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="662" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1f2s6" value="Create Configured Component" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="722" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1" value="Trigger Animation on Attack Hit&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;6&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="840" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s1" value="Receive Attack Rolled Hook" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="842" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s2" value="Extract Power Item" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="902" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s3" value="Extract Target Token" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="962" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s4" value="Request Hit Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1022" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s5" value="Assemble Hit Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1082" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f1s6" value="Execute Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1142" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2" value="Trigger Animation on Attack Miss&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;6&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="1230" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s1" value="Receive Miss Hook Event" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1232" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s2" value="Request Miss Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1292" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s3" value="Assemble Miss Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1352" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s4" value="Modify Projection for Miss" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1412" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s5" value="Add Fizzle Effect" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1472" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f2s6" value="Execute Miss Animation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1532" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3" value="Launch Animation from Chat Button&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;7&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="1620" y="200" width="440" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s1" value="Add Run Animation Button" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1622" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s2" value="Handle Button Click" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1682" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s3" value="Extract Power Item ID" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1742" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s4" value="Extract Target Token ID" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1802" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s5" value="Extract Attack Condition" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1862" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s6" value="Request Animation from Trigger" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1922" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2f3s7" value="Process Manual Trigger" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="1982" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1" value="Lookup Animation Components by Descriptor&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;5&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="2100" y="200" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1s1" value="Construct Lookup Key" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2102" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1s2" value="Request Configuration" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2162" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1s3" value="Lookup Descriptor Mapping" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2222" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1s4" value="Return Component Configuration" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2282" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f1s5" value="Use Configuration for Assembly" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2342" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2" value="Register New Descriptor Configuration&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;5&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="2430" y="200" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s1" value="Receive Registration Request" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2432" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s2" value="Validate Configuration Structure" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2492" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s3" value="Verify Component References" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2552" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s4" value="Store Descriptor Mapping" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2612" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3f2s5" value="Make Descriptor Available" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2672" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1" value="Extract Power Characteristics from Item&lt;br&gt;&lt;i style=&quot;border-color: rgb(218, 220, 224); font-size: 8px;&quot;&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;6&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;border-color: rgb(218, 220, 224); text-align: left;&quot;&gt;stories&lt;/span&gt;&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="2790" y="200" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s1" value="Receive Power Item" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2792" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s2" value="Extract Descriptor" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2852" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s3" value="Determine Range Type" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2912" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s4" value="Determine Area Shape" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="2972" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s5" value="Determine Effect Type" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="3032" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4f1s6" value="Return Power Characteristics" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="3092" y="270" width="50" height="50" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

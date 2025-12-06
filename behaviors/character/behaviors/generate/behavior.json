@@ -1,0 +1,108 @@
+{
+  "behavior_name": "generate",
+  "description": "Character profile generation - creates folder structure and template files for new characters",
+  "usage_documentation": {
+    "purpose": "Generate character profile template structure and interactively populate it. Creates the folder structure, template files, and interactively populates them with character information.",
+    "key_concept": "Character profiles are generated FROM templates, not templates themselves. The template contains parameterized placeholders that get filled in during generation, creating a profile file with actual character data.",
+    "generation_process": {
+      "description": "Three-step process for creating a new character profile",
+      "step1_folder_creation": {
+        "action": "Create folder structure",
+        "creates": "Base folder, context/ subfolder, and episodes/ subfolder in behaviors/character/characters/{character-name}/",
+        "validates": "Checks character name uniqueness (folder must not already exist)"
+      },
+      "step2_template_copying": {
+        "action": "Copy character profile template",
+        "source": "behaviors/character/behaviors/generate/templates/character_profile_template.md",
+        "destination": "behaviors/character/characters/{character-name}/character-profile.mdc",
+        "result": "Copied file contains parameterized placeholders ready to be filled"
+      },
+      "step3_interactive_population": {
+        "action": "Interactively populate template placeholders",
+        "process": "Tool prompts user for each placeholder in the template",
+        "placeholders": [
+          "character-background-content",
+          "multiple-identities-content (optional)",
+          "personality-traits-content",
+          "interests-content",
+          "dialogue-style-content",
+          "style-reference-examples (optional)",
+          "narrative style examples (4 mode combinations: combat/non-combat × speak/act)",
+          "topics-content (optional)",
+          "character-specific-prompt-variations-content (optional)",
+          "combat-context-keywords (optional, defaults available)",
+          "non-combat-context-keywords (optional, defaults available)"
+        ],
+        "result": "After filling all placeholders, the file becomes a generated character data file (no longer a template)"
+      }
+    },
+    "template_structure": {
+      "description": "Character profile template includes sections for:",
+      "sections": [
+        "Character Background",
+        "Multiple Identities (optional - for characters with costumed/secret identities)",
+        "Personality Traits",
+        "Interests",
+        "Dialogue Style (including optional Style Reference Examples)",
+        "Narrative Style Examples (4 mode combinations - combat/non-combat × speak/act)",
+        "Topics (optional - character-specific topics with descriptions)",
+        "Character-Specific Prompt Variations (optional)",
+        "Character-Specific Keywords (optional - combat and non-combat keywords for context detection, defaults available)"
+      ],
+      "template_location": "behaviors/character/behaviors/generate/templates/character_profile_template.md"
+    },
+    "generated_profile": {
+      "description": "The generated character profile contains actual character data (not placeholders)",
+      "location": "behaviors/character/characters/{character-name}/character-profile.mdc",
+      "usage": "Generated profile is used by character chat commands to inject data into prompt templates",
+      "content": "All placeholders are replaced with actual text content provided during interactive population"
+    },
+    "character_name_validation": {
+      "description": "Character names must meet validation requirements",
+      "requirements": [
+        "Alphanumeric characters, hyphens, and underscores only",
+        "Must be unique (folder must not already exist)",
+        "Leading/trailing whitespace is trimmed",
+        "Name is used for folder and file naming"
+      ]
+    },
+    "optional_templates": {
+      "description": "Additional optional templates may be copied if they exist",
+      "keywords_template": {
+        "name": "character_keywords_template.md",
+        "purpose": "Character-specific keywords for context detection (optional)",
+        "location": "behaviors/character/behaviors/generate/templates/character_keywords_template.md"
+      }
+    },
+    "do_and_dont": {
+      "do": [
+        "DO create folder structure before copying template",
+        "DO copy template from behaviors/character/behaviors/generate/ to behaviors/character/characters/{character-name}/",
+        "DO replace all parameterized placeholders with actual content",
+        "DO validate all parameters are filled before completion",
+        "DO preserve template structure while replacing placeholders",
+        "DO allow keywords to be left empty (defaults will be used)"
+      ],
+      "dont": [
+        "DON'T modify source template in behaviors/character/behaviors/generate/",
+        "DON'T leave parameterized placeholders unfilled (except keywords which can use defaults)",
+        "DON'T create character profiles without using template",
+        "DON'T skip validation step",
+        "DON'T create separate keywords files (keywords are part of the profile)",
+        "DON'T use character names that already exist"
+      ]
+    }
+  },
+  "mcp_tool": {
+    "name": "character_profile_generate",
+    "description": "Generate character profile template structure and interactively populate it",
+    "parameters": {
+      "character_name": {
+        "type": "string",
+        "required": true,
+        "description": "Character name used for folder and file naming"
+      }
+    }
+  }
+}
+

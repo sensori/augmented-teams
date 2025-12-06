@@ -1,0 +1,101 @@
+{
+  "file": "",
+  "language": "",
+  "violations": [
+    {
+      "line": 0,
+      "start_line": 0,
+      "end_line": 0,
+      "line_numbers": [0],
+      "function": "",
+      "class": "",
+      "severity": "",
+      "principle": "",
+      "issue": "",
+      "suggestion": "",
+      "current_code": "",
+      "recommended_code": "",
+      "code_snippet": "",
+      "context_lines": 3,
+      "benefits": ""
+    }
+  ],
+  "summary": {
+    "critical": 0,
+    "important": 0,
+    "suggested": 0,
+    "total": 0
+  },
+  "code_design": {
+    "architecture": "",
+    "layers": [],
+    "domain_objects": [],
+    "functions": [],
+    "classes": [],
+    "dependencies": [],
+    "error_handling_strategy": "",
+    "integration_points": []
+  },
+  "code_structure": {
+    "functions": 0,
+    "classes": 0,
+    "total_lines": 0,
+    "functions_detail": [
+      {
+        "name": "",
+        "line": 0,
+        "length": 0,
+        "parameters": 0,
+        "nesting_depth": 0,
+        "responsibility": "",
+        "dependencies": [],
+        "layer": ""
+      }
+    ],
+    "classes_detail": [
+      {
+        "name": "",
+        "line": 0,
+        "length": 0,
+        "methods": 0,
+        "responsibility": "",
+        "dependencies": [],
+        "layer": ""
+      }
+    ]
+  },
+  "heuristics": {
+    "deep_nesting": [],
+    "magic_numbers": [],
+    "single_letter_variables": [],
+    "commented_code": [],
+    "large_functions": [],
+    "too_many_parameters": [],
+    "large_classes": []
+  },
+  "inputs_from_previous_phases": {
+    "stories": [],
+    "domain_objects": [],
+    "bdd_tests": [],
+    "existing_code": []
+  },
+  "ai_analysis": "",
+  "recommendations": {
+    "priority_actions": [],
+    "examples": [],
+    "refactoring_examples": [
+      {
+        "title": "",
+        "violation_line": 0,
+        "function": "",
+        "current_code": "",
+        "recommended_code": "",
+        "step_by_step": [],
+        "benefits": []
+      }
+    ],
+    "complete_list": []
+  }
+}
+
+

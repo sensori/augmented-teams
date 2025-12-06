@@ -1,0 +1,267 @@
+describe a code agent command
+  that extends the base command
+    it should pass generate and validate instructions to base command
+    it should store the command folder for template loading
+  that loads templates
+    when given a template name
+      it should find the template in the command folder
+      it should read the template content
+      it should format the template with provided keyword arguments
+      it should return the formatted template content
+    when the template does not exist
+      it should raise a file not found error
+
+describe a feature command
+  that extends code agent command
+    it should initialize with feature name location and purpose
+    it should create a base rule from code agent rule file
+    it should create content for the feature directory
+    it should set up generate and validate instructions
+    it should store feature name location and purpose
+  that generates a feature
+    when the feature does not already exist
+      it should create the feature directory
+      it should generate behavior json file
+      it should generate runner file from template
+      it should generate feature outline from template
+      it should display generated results
+      it should return ai generation instructions
+    when the feature already exists
+      it should raise a value error
+  that generates behavior json
+    it should create behavior json file in feature directory
+    it should set deployed to false
+    it should set feature name from instance
+    it should set description from feature purpose or default
+    it should write json with proper indentation
+    it should return the path to the created file
+  that generates runner file
+    it should create runner file with feature name prefix
+    it should load runner template
+    it should format template with feature purpose and name
+    it should write formatted content to file
+    it should return the path to the created file
+  that generates feature outline
+    it should create feature outline markdown file
+    it should load feature outline template
+    it should format template with feature name and purpose
+    it should write formatted content to file
+    it should return the path to the created file
+  that is extended with code augmented command
+    that validates features
+      it should scan for code violations in feature structure
+      it should inject violations into validation prompt
+      it should return validation results specific to feature files
+    that has been called through the cli
+      it should parse feature name location and purpose
+      it should create code augmented feature command
+      it should call execute generate or validate method based on action
+
+describe a command command
+  that extends code agent command
+    it should initialize with feature name command name command purpose target entity
+    it should create a base rule from feature rule file
+    it should create content for the command directory
+    it should set up generate and validate instructions
+    it should store feature name command name command purpose target entity
+  that generates a command
+    when the command does not already exist
+      it should create the command directory
+      it should generate command cmd markdown file from template
+      it should generate command generate cmd markdown file
+      it should generate command validate cmd markdown file
+      it should update runner file with command class
+      it should update rule file with command reference
+      it should display generated results
+      it should return ai generation instructions
+    when the command already exists
+      it should raise a value error
+  that generates command files
+    it should create command cmd markdown file in command directory from template
+    it should create command generate cmd markdown file that delegates to main command
+    it should create command validate cmd markdown file that delegates to main command
+    it should return paths to all created files
+  that updates existing files
+    it should read existing runner file and append command class
+    it should read existing rule file and append command reference to executing commands section
+    it should write updated content to files
+  that is extended with code augmented command
+    that validates commands
+      it should scan for code violations in command structure
+      it should inject violations into validation prompt
+      it should return validation results specific to command files and runner updates
+    that has been called through the cli
+      it should parse feature name command name command purpose target entity
+      it should create code augmented command command
+      it should call execute generate validate or plan method based on action
+
+describe a sync command
+  that extends code agent command
+    it should initialize with feature name force flag target directories
+    it should set up generate and validate instructions
+    it should store feature name force flag target directories
+  that syncs files
+    when syncing all deployed code agent features
+      it should discover deployed code agent features in source directories
+      it should sync files for each code agent feature
+      it should route files to correct destinations based on extension
+      it should merge mcp configs and tasks json files
+      it should skip excluded files
+      it should track sync results with has changes flag
+      it should display sync results
+      it should return ai generation instructions
+    when syncing specific code agent feature
+      it should discover only the specified code agent feature
+      it should sync files for that code agent feature only
+  that is discovering code agent features to be deployed
+    it should scan target directories for behavior json files
+    it should parse behavior json and check deployed flag
+    it should return list of code agent feature info objects
+  that has discovered a feature that needs to be deployed
+    it should skip py files docs directories and draft or experimental files
+    with known configuration files that need to be merged
+      it should merge the mcp with existing config if exists
+      it should create the mcp config file if it doesn't exist
+      it should merge tasks json files with vscode tasks json
+      it should create the tasks json file if it doesn't exist
+    with configuration files the runner does not know how to merge or deploy
+      it should update the generate prompt with instructions to the AI to try to move these files and or merge to the best of its knowledge based on the context
+    with files that need to be deployed (ex rules and commands)
+    where the destination file does not exist
+      it should copy file to destination and return true
+    where the destination exists and source is newer
+      it should copy file to destination and return true
+    where the destination exists and source is older
+      it should skip file unless force flag is set and return false
+  that is extended with code augmented command
+    that validates sync operations
+      it should scan for code violations in sync logic
+      it should inject violations into validation prompt
+      it should return validation results specific to file routing and merging
+    that has been called through the cli
+      it should parse feature name force flag target directories
+      it should create appropriate sync command wrapper based on command type
+      it should call generate or validate method based on action
+
+describe an index command
+  that extends code agent command
+    it should initialize with feature name target directories
+  that indexes behaviors
+    when indexing all deployed features
+      it should discover deployed features in target directories
+      it should scan behavior files for each feature
+      it should build index entries preserving existing purposes
+      it should write global index to cursor behavior index json
+      it should write local indexes to feature directories
+      it should display index results
+      it should return ai generation instructions that make the AI awareof all code agents that have been deployed and what their capabilities are
+    when indexing specific feature
+      it should discover only the specified feature
+      it should index behavior files for that feature only
+  that scans behavior files
+    it should find all mdc md py and json files recursively
+    it should exclude runner files behavior json index files docs directories and draft or experimental files
+    it should return list of file paths
+    it should only include folders and subfolders that have behavior json file with deploy true
+  that builds index entries
+    when entry exists in existing index
+      it should preserve existing purpose if present
+      it should update modification timestamp
+      it should update the available commands, the rule file, and the runners being used for this behavior, specifying the deployed locations
+      it should return updated entry
+    when entry is new
+      it should set  purpose
+      it should set modification timestamp
+      it should set the available commands, the rule file, and the runners being used for this behavior, specifying the deployed locations
+      it should return new entry
+  that writes index
+    it should calculate total behaviors and features count
+    it should set last updated timestamp
+    it should write global index to cursor behavior index json
+    it should write local index to feature code agent index json
+  that is extended with code augmented command
+    that validates index operations
+      it should scan for violations in index structure using code heuristics (structurally sound. Number of entries match what is deployed. etc)
+      it should inject violations into validation prompt
+      it should return validation results specific to index format and purpose preservation
+    that has been called through the cli
+      it should parse feature name target directories
+      it should create code augmented index command
+      it should call generate or validate method based on action
+
+describe a sync index command
+  that extends code agent command
+    it should initialize with feature name force flag target directories
+    it should create inner sync command instance
+    it should create inner index command instance
+  that orchestrates sync and index
+    it should call sync command generate
+    it should call index command generate if sync made changes
+  that has been called through the cli
+    it should parse feature name force flag target directories
+    it should create code augmented sync index command
+    it should call generate or validate method based on action
+
+describe a rule command
+  that extends code agent command
+    it should initialize with feature name rule name rule purpose rule type parent rule name
+    it should create a base rule from feature rule file
+    it should store feature name rule name rule purpose rule type parent rule name
+  that generates a rule
+    when the rule does not already exist
+      it should create the rules directory if needed
+      it should generate rule mdc file with frontmatter principles and examples
+      it should generate rule file that can be loaded by BaseRule
+      it should generate specializing rule file that can be loaded
+      it should generate specialized rule file that can be loaded
+      it should generate rule class file if custom logic is needed
+      it should update rule file with command reference if updating
+      it should display generated results
+      it should return ai generation instructions
+    when the rule already exists
+      it should raise a value error
+  that generates rule files
+    it should create rule mdc file in rules directory from template
+    it should generate frontmatter with description globs and always apply
+    it should generate principles section with numbered format
+    it should generate examples section with do dont format
+    it should generate rule references for specializing and specialized rules
+    it should return path to created file
+  that generates rule class file
+    when custom business logic is required
+      it should create python class file extending base rule specializing rule or specialized rule
+      it should ensure class works with existing rule parser and example loading
+    when no custom logic is needed
+      it should not generate class file
+  that validates rule files
+    it should check rule file exists and has proper structure
+    it should validate frontmatter format
+    it should validate principles have required structure
+    it should validate examples format do dont
+    it should validate specializing rules have specialized rules
+    it should validate code heuristics are attached to principles not commands
+    it should validate rule instances can load examples
+  that loads rule templates
+    when rule type is base
+      it should load base rule template
+    when rule type is specializing
+      it should load specializing rule template
+    when rule type is specialized
+      it should load specialized rule template
+  that is extended with code augmented command
+    that validates rules
+      it should scan for code violations in rule structure
+      it should inject violations into validation prompt
+      it should return validation results specific to rule files and principle structure
+    that has been called through the cli
+      it should parse feature name rule name rule purpose rule type parent rule name
+      it should create code augmented rule command
+      it should call execute generate validate or plan method based on action
+
+describe the main cli entry point
+  when invoked without arguments
+    it should display usage information
+    it should exit with error code
+  when invoked with unknown command
+    it should display unknown command message
+    it should exit with error code

@@ -1,0 +1,922 @@
+{
+  "rules": {
+    "description": "Agent-level rules that apply to all behaviors (shaping, domain_discovery, domain_partitioning, event_storming, bounded_context_mapping, exploration, domain_specification)",
+    "examples": {
+      "do": [
+        "Use domain terminology consistently throughout all artifacts",
+        "Maintain ubiquitous language between business and technology",
+        "Focus on domain concepts, behaviors, and rules",
+        "Separate domain logic from technical implementation",
+        "Model domain concepts in domain terms",
+        "Use domain language that business experts understand",
+        "Identify bounded contexts and their boundaries clearly"
+      ],
+      "dont": [
+        "Mix domain language with technical implementation details",
+        "Use technical terms when domain terms exist",
+        "Focus on technical architecture over domain modeling",
+        "Create domain models without domain expert input",
+        "Use implementation language in domain artifacts",
+        "Skip ubiquitous language validation with domain experts"
+      ]
+    },
+    "diagnostic": "ddd_agent_validate_ubiquitous_language"
+  },
+  "behaviors": {
+    "shaping": {
+      "order": 1,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the shaping behavior, you MUST ask the user these questions and wait for their explicit answers. DO NOT infer, assume, or proceed without user responses.\n\n**MANDATORY WORKFLOW - THIS STEP CAN NEVER BE SKIPPED:**\n1. Present each required question to the user clearly and explicitly in the chat window\n2. Wait for the user to answer each question\n3. **MANDATORY PRESENTATION STEP - NEVER SKIP:** After receiving answers, you MUST present in the chat window:\n   - **Questions Asked:** List each question you asked the user\n   - **Answers Provided:** Show the exact answers the user provided for each question\n   - **Gap Analysis:** A focused analysis highlighting where questions were NOT properly answered or need more detail\n   - **Request for Corrections:** Explicitly ask the user to review and provide corrections or additional detail\n4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification\n5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers\n6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST call `agent_store_clarification()` MCP tool with:\n   - `key_questions_answered`: dict mapping question keys to answer strings\n   - `evidence_provided`: dict mapping evidence types to evidence content\n7. DO NOT proceed to planning until:\n   - You have presented questions and answers in the chat window\n   - The user has reviewed and confirmed or corrected the answers\n   - ALL questions have complete, unambiguous answers confirmed by the user\n   - You have successfully stored the clarification data using `agent_store_clarification()`",
+          "key_questions": [
+            "What is the business domain we are modeling?",
+            "What are the core business concepts and their relationships?",
+            "What are the distinct sub-domains or business capabilities?",
+            "What are the boundaries between different parts of the domain?",
+            "What domain events occur in this business domain?",
+            "What are the key business rules and constraints?",
+            "What domain language do business experts use to describe this domain?"
+          ],
+          "evidence": [
+            "Business process documentation",
+            "Domain expert interviews",
+            "Existing system documentation",
+            "Business glossaries or dictionaries",
+            "Financial statements",
+            "industry literature",
+            "Event storming outputs",
+            "Domain models from similar systems"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Bounded context identification",
+              "question": "How are we identifying and defining bounded contexts?",
+              "outcome": "Determines how domain boundaries are established",
+              "options": [
+                "By business capability - group by what the business does",
+                "By organizational structure - align with teams or departments",
+                "By data ownership - group by who owns the data",
+                "By integration patterns - group by how systems interact",
+                "By domain complexity - separate complex from simple domains"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Focus on core domain over supporting domains",
+            "Identify bounded contexts before detailed modeling",
+            "Use ubiquitous language from domain sources",
+            "Model domain concepts, not technical implementation",
+            "Separate domain logic from infrastructure concerns"
+          ],
+          "recommended_human_activity": [
+            "Review the AI-generated bounded contexts to verify they align with business capabilities",
+            "Validate that domain concepts use language from domain experts",
+            "Review the AI's approach to identifying bounded contexts to confirm they reflect business reality"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Shared structured content schema across all DDD behaviors",
+          "instructions": "Build the structured domain map content using the domain_graph.json schema file. The schema file defines the exact structure you must follow. Load and use the schema file to ensure your output matches the required format exactly. CRITICAL: In build_structure phase, ONLY create the structured JSON file (domain_graph.json). DO NOT render any documentation, DO NOT create markdown files, DO NOT perform any transformation work. All documentation rendering and transformation happens in the render_output phase. Your only task here is to build the structured JSON content. Reference the Domain Driven Design Training presentation content (extracted_content.txt and extracted_content.md) for domain modeling guidance. For shaping phase, create high-level structure with bounded contexts and aggregates (~concept counts, not detailed enumeration)."
+        },
+        "outputs": [
+          {
+            "name": "domain_model_description",
+            "path": "docs/domain/shaping",
+            "transformer": "ddd_agent_transform_domain_model_description_to_markdown",
+            "template": "templates/domain-model-description-template.md",
+            "instructions": "Transform the structured domain map into a domain model description markdown document using the domain-model-description-template.md template file. The description should use natural language that domain experts understand, explaining what each concept represents in the business domain, describing relationships and constraints between concepts, and using examples to illustrate domain concepts. Follow the example format provided in the template."
+          },
+          {
+            "name": "domain_model_diagram",
+            "path": "docs/domain/shaping",
+            "transformer": "ddd_agent_transform_domain_model_diagram_to_markdown",
+            "template": "templates/domain-model-diagram-template.md",
+            "instructions": "Transform the structured domain map into a domain model diagram markdown document using the domain-model-diagram-template.md template file. Generate Mermaid diagrams from the domain_graph.json structure:\n\n1. **Bounded Contexts Diagram**: Use Mermaid `graph TB` or `graph LR` to show bounded contexts as subgraphs or containers. Each bounded context should be clearly labeled.\n\n2. **Aggregates Diagram**: Use Mermaid `classDiagram` or `graph` to show aggregates within each bounded context, their relationships, and key properties.\n\n3. **Integration Points Diagram**: Use Mermaid `graph` to show how bounded contexts interact, with arrows indicating integration points.\n\nExample Mermaid syntax:\n- `graph TB` for top-to-bottom flow\n- `classDiagram` for class/aggregate relationships\n- `subgraph` for bounded context boundaries\n- Use proper Mermaid syntax with correct indentation\n\nGenerate three separate Mermaid code blocks for the three diagram types."
+          },
+          {
+            "name": "domain_model_scaffold",
+            "path": "src",
+            "transformer": "ddd_agent_transform_domain_model_scaffold_to_source",
+            "template": null,
+            "instructions": "Generate source code scaffold files in the src directory based on the structured domain map from domain_graph.json. Create actual source code files (Python .py files, TypeScript .ts files, or appropriate language files) for each bounded context and aggregate.\n\n**File Structure:**\n- Create a directory structure: `src/{bounded_context_slug}/`\n- Create files: `src/{bounded_context_slug}/{aggregate_slug}.py` (or appropriate extension)\n\n**Code Structure:**\n- Each aggregate should be a class with:\n  - Class docstring describing the aggregate\n  - Basic structure (properties, methods)\n  - TODO comments for domain logic to be implemented\n  - Domain event placeholders\n  - Invariant validation placeholders\n\n**Output Format:**\n- Generate actual source code files (not markdown)\n- Use proper Python/TypeScript syntax\n- Include appropriate imports\n- Add docstrings and comments\n- Create __init__.py files for Python packages\n\n**Example Python structure:**\n```python\n\"\"\"\nAggregate: {AggregateName}\nBounded Context: {BoundedContextName}\n\"\"\"\nfrom dataclasses import dataclass\nfrom typing import Optional\n\n@dataclass\nclass {AggregateName}:\n    \"\"\"Aggregate root for {aggregate description}\"\"\"\n    id: Optional[str] = None\n    # TODO: Add aggregate properties\n    \n    def __post_init__(self):\n        \"\"\"Validate invariants\"\"\"\n        # TODO: Implement invariant validation\n        pass\n```\n\nGenerate the actual source code files and save them to the src directory structure."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to shaping/initial domain modeling behavior",
+        "patterns": [
+          "shape.*domain",
+          "model.*domain",
+          "identify.*bounded.*contexts",
+          "map.*domain",
+          "discover.*domain.*concepts",
+          "define.*ubiquitous.*language",
+          "start.*domain.*modeling",
+          "begin.*ddd",
+          "explore.*domain",
+          "domain.*shaping"
+        ],
+        "priority": 8
+      },
+      "rules": [
+        {
+          "description": "Domain Model JSON (domain_graph.json) - Structure domain model using proper JSON schema with bounded contexts, aggregates, and domain concepts.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create proper domain model JSON structure with bounded contexts and aggregates",
+                "content": "**Domain Model JSON (DO):**\n```json\n{\n  \"solution\": {\n    \"name\": \"Educational Program Management\",\n    \"purpose\": \"Manage educational programs, student applications, and funding eligibility\"\n  },\n  \"bounded_contexts\": [\n    {\n      \"name\": \"Program Management\",\n      \"purpose\": \"Manages educational programs and their costs\",\n      \"aggregates\": [\n        {\n          \"name\": \"Program Aggregate\",\n          \"purpose\": \"Manages program information and costs\",\n          \"aggregate_count\": \"~1\",\n          \"domain_ac\": {\n            \"concepts\": [\n              {\n                \"name\": \"Program\",\n                \"definition\": \"Represents all program information maintained for each Educational Institution\",\n                \"behaviors\": [\"Calculates Total Cost\", \"Checks Eligibility For Funding Instrument\"]\n              },\n              {\n                \"name\": \"Program Cost\",\n                \"definition\": \"Costs associated with a program, either Fixed, Flexible or Student Centric\",\n                \"behaviors\": []\n              }\n            ]\n          },\n          \"entities\": [\n            {\n              \"name\": \"Program\",\n              \"root\": true,\n              \"description\": \"Represents all program information maintained for each Educational Institution\",\n              \"responsibilities\": [\n                {\n                  \"name\": \"programName\",\n                  \"description\": \"Name of the program\",\n                  \"type\": \"property\",\n                  \"determines_identity\": true\n                }\n              ],\n              \"collaborators\": [\n                {\n                  \"name\": \"Program Cost\",\n                  \"owned\": true,\n                  \"association_type\": \"composition\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                },\n                {\n                  \"name\": \"Educational Institution\",\n                  \"owned\": false,\n                  \"association_type\": \"association\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}\n```"
+              },
+              "dont": {
+                "description": "Don't include technical implementation details or skip required schema fields",
+                "content": "**Domain Model JSON (DON'T):**\n```json\n{\n  \"solution\": {\n    \"name\": \"ProgramService\"\n  },\n  \"bounded_contexts\": [\n    {\n      \"name\": \"ProgramService\",\n      \"classes\": [\n        {\n          \"name\": \"ProgramRepository\",\n          \"methods\": [\"save\", \"findById\"],\n          \"database_table\": \"programs\"\n        }\n      ]\n    }\n  ]\n}\n```\n**Issues:**\n- Uses technical terms (Service, Repository) instead of domain terms\n- Includes implementation details (database_table, methods)\n- Missing required schema fields (purpose, aggregates, entities structure)\n- Missing domain_ac concepts and behaviors"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Domain Model Description - Write natural language descriptions that domain experts understand, explaining concepts, relationships, and constraints.",
+          "examples": [
+            {
+              "do": {
+                "description": "Write clear domain model descriptions using natural language and domain terminology",
+                "content": "**Domain Model Description (DO):**\n\nA **Program** represents all program information maintained by OSAP for each Educational Institution.\n\nStudents enrolled in a Program do not have Eligibility to apply for specific Funding Instruments.\n\nFunding Instruments Eligibility for a Program is determined by the Educational Institution providing the Program. Each Program has a set of Program Costs that are either Fixed, Flexible or Student Centric.\n\nA Program may be defined by a Student when making an Application for a specific Course. This will set the type of Program Cost to Student Centric.\n\nThe resulting Student Centric Program would be associated with the Student and the Application that created it."
+              },
+              "dont": {
+                "description": "Don't use technical language or skip relationship explanations",
+                "content": "**Domain Model Description (DON'T):**\n\nThe Program entity is stored in the programs table. It has a one-to-many relationship with ProgramCost objects. The ProgramService class manages CRUD operations for programs. Programs are persisted using the ProgramRepository which implements the IRepository interface.\n\n**Issues:**\n- Uses technical terms (entity, table, CRUD, Service, Repository, interface)\n- Focuses on implementation rather than domain meaning\n- Doesn't explain what a Program represents in business terms\n- Doesn't describe relationships in domain language\n- Missing context about Educational Institution, Students, Applications"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Domain Model Scaffold - Generate source code files with proper domain structure, using domain terminology and clear separation of concerns.",
+          "examples": [
+            {
+              "do": {
+                "description": "Create proper domain model scaffold with domain classes and clear structure",
+                "content": "**Domain Model Scaffold (DO):**\n\n`src/program_management/program.py`:\n```python\n\"\"\"\nProgram aggregate root.\n\nA Program represents all program information maintained for each Educational Institution.\nEach Program has a set of Program Costs that are either Fixed, Flexible or Student Centric.\n\"\"\"\nfrom typing import List\nfrom dataclasses import dataclass\n\n\n@dataclass\nclass ProgramCost:\n    \"\"\"Represents a cost associated with a program.\"\"\"\n    cost_type: str  # Fixed, Flexible, or Student Centric\n    amount: float\n    # TODO: Add domain logic for cost calculations\n\n\nclass Program:\n    \"\"\"\n    Program aggregate root.\n    \n    A Program represents all program information maintained for each \n    Educational Institution.\n    \"\"\"\n    \n    def __init__(self, program_name: str, educational_institution_id: str):\n        self.program_name = program_name\n        self.educational_institution_id = educational_institution_id\n        self._program_costs: List[ProgramCost] = []\n    \n    def add_program_cost(self, cost: ProgramCost) -> None:\n        \"\"\"Add a program cost to this program.\"\"\"\n        # TODO: Add invariant validation\n        self._program_costs.append(cost)\n    \n    def calculate_total_cost(self) -> float:\n        \"\"\"Calculate the total cost of the program.\"\"\"\n        # TODO: Implement domain logic for cost calculation\n        return sum(cost.amount for cost in self._program_costs)\n    \n    def check_eligibility_for_funding_instrument(self, funding_instrument_id: str) -> bool:\n        \"\"\"Check if this program is eligible for a specific funding instrument.\"\"\"\n        # TODO: Implement eligibility checking logic\n        # TODO: Collaborate with Educational Institution to determine eligibility\n        pass\n```\n\n**Characteristics:**\n- Uses domain terminology (Program, Program Cost, Educational Institution)\n- Clear docstrings explaining domain concepts\n- TODO comments for domain logic to be implemented\n- Proper class structure with domain methods\n- No technical implementation details (no database, no repositories)"
+              },
+              "dont": {
+                "description": "Don't include technical implementation details or use generic/technical naming",
+                "content": "**Domain Model Scaffold (DON'T):**\n\n`src/services/program_service.py`:\n```python\nimport sqlalchemy\nfrom sqlalchemy.orm import relationship\n\nclass ProgramEntity:\n    __tablename__ = 'programs'\n    \n    id = Column(Integer, primary_key=True)\n    name = Column(String)\n    institution_id = Column(Integer, ForeignKey('institutions.id'))\n    \n    costs = relationship('ProgramCostEntity', back_populates='program')\n    \n    def save(self):\n        session.add(self)\n        session.commit()\n    \n    @staticmethod\n    def find_by_id(id: int):\n        return session.query(ProgramEntity).filter_by(id=id).first()\n```\n\n**Issues:**\n- Uses technical terms (Entity, Service, Repository)\n- Includes database/ORM implementation details (SQLAlchemy, Column, ForeignKey)\n- Generic naming (Entity suffix)\n- Technical methods (save, find_by_id) instead of domain methods\n- Missing domain logic and business rules\n- No docstrings explaining domain concepts"
+              }
+            }
+          ]
+        },
+        {
+          "description": "Ubiquitous Language - Use the same language in code, JSON, and descriptions that domain experts use. Code should directly reflect domain concepts without translation layers.",
+          "examples": [
+            {
+              "do": {
+                "description": "Use domain terminology consistently across code, JSON, and descriptions",
+                "content": "**Ubiquitous Language in Code (DO):**\n\n```python\nclass Program:\n    \"\"\"A Program represents all program information maintained for each Educational Institution.\"\"\"\n    \n    def __init__(self, program_name: str, educational_institution: EducationalInstitution):\n        self.program_name = program_name\n        self.educational_institution = educational_institution\n        self.program_costs: List[ProgramCost] = []\n    \n    def add_program_cost(self, program_cost: ProgramCost) -> None:\n        \"\"\"Add a Program Cost to this Program.\"\"\"\n        self.program_costs.append(program_cost)\n    \n    def check_eligibility_for_funding_instrument(self, funding_instrument: FundingInstrument) -> bool:\n        \"\"\"Check if this Program is eligible for a Funding Instrument.\"\"\"\n        # Domain logic here\n        pass\n```\n\n**Ubiquitous Language in JSON (DO):**\n```json\n{\n  \"entities\": [\n    {\n      \"name\": \"Program\",\n      \"description\": \"Represents all program information maintained for each Educational Institution\",\n      \"collaborators\": [\n        {\n          \"name\": \"Program Cost\",\n          \"association_type\": \"composition\"\n        },\n        {\n          \"name\": \"Educational Institution\",\n          \"association_type\": \"association\"\n        },\n        {\n          \"name\": \"Funding Instrument\",\n          \"association_type\": \"association\"\n        }\n      ]\n    }\n  ]\n}\n```\n\n**Ubiquitous Language in Description (DO):**\n\"A Program represents all program information maintained by OSAP for each Educational Institution. Each Program has a set of Program Costs that are either Fixed, Flexible or Student Centric. Funding Instruments Eligibility for a Program is determined by the Educational Institution providing the Program.\"\n\n**Key Principles:**\n- Class names use domain terms: `Program`, `ProgramCost`, `EducationalInstitution`, `FundingInstrument`\n- Method names use domain language: `check_eligibility_for_funding_instrument` (not `isEligible` or `validateFunding`)\n- Variable names match domain concepts: `program_costs` (not `costs` or `prices`)\n- JSON uses same terminology as code and descriptions\n- All artifacts use identical domain terminology"
+              },
+              "dont": {
+                "description": "Don't translate domain terms to technical terms or use different terminology across artifacts",
+                "content": "**Ubiquitous Language Violations (DON'T):**\n\n**Code (DON'T):**\n```python\nclass ProgramEntity:  # DON'T: Added 'Entity' suffix\n    def __init__(self, name: str, institution: Institution):  # DON'T: Shortened 'Educational Institution' to 'Institution'\n        self.name = name  # DON'T: Generic 'name' instead of 'program_name'\n        self.institution = institution\n        self.costs = []  # DON'T: Generic 'costs' instead of 'program_costs'\n    \n    def isEligible(self, funding: Funding):  # DON'T: Generic method name, shortened 'Funding Instrument'\n        pass\n```\n\n**JSON (DON'T):**\n```json\n{\n  \"entities\": [\n    {\n      \"name\": \"ProgramEntity\",  # DON'T: Technical suffix\n      \"description\": \"Program data model\",  # DON'T: Technical description\n      \"relationships\": [  # DON'T: Generic term instead of 'collaborators'\n        {\n          \"name\": \"Cost\",  # DON'T: Shortened 'Program Cost'\n          \"type\": \"one-to-many\"  # DON'T: Technical relationship type\n        }\n      ]\n    }\n  ]\n}\n```\n\n**Description (DON'T):**\n\"The ProgramEntity class stores program data. It has a one-to-many relationship with Cost objects. The ProgramService checks funding eligibility.\"\n\n**Issues:**\n- Different terminology in code vs JSON vs descriptions\n- Technical suffixes (Entity, Service) instead of domain terms\n- Shortened or generic names (Institution, Cost, Funding) instead of full domain terms\n- Generic method names (isEligible) instead of domain-specific names\n- Technical language (data model, one-to-many) instead of domain language\n- Translation layer between domain concepts and code"
+              }
+            },
+            {
+              "do": {
+                "description": "Infer domain concepts from story map and use those exact terms in all artifacts",
+                "content": "**Inferring Concepts from Story Map (DO):**\n\n**From Story Map:**\n- Keywords: \"Product\", \"Plan\", \"Chargeable Item\", \"Price Item\"\n- Acceptance Criteria: \"A product has many prices based on the plan\"\n\n**In Code:**\n```python\nclass Product:\n    def __init__(self, product_name: str):\n        self.product_name = product_name\n        self.chargeable_items: List[ChargeableItem] = []\n    \n    def get_prices_for_plan(self, plan: Plan) -> List[PriceItem]:\n        \"\"\"Get prices for this Product based on the Plan.\"\"\"\n        # Domain logic: A product has many prices based on the plan\n        pass\n```\n\n**In JSON:**\n```json\n{\n  \"entities\": [\n    {\n      \"name\": \"Product\",\n      \"collaborators\": [\n        {\"name\": \"ChargeableItem\"},\n        {\"name\": \"Plan\"},\n        {\"name\": \"PriceItem\"}\n      ]\n    }\n  ]\n}\n```\n\n**In Description:**\n\"A Product has many prices based on the Plan. Each Product price is based on its individual Chargeable Items. Each Plan has its own Price Items.\"\n\n**Key:** All artifacts use the exact same terms from the story map: Product, Plan, Chargeable Item, Price Item"
+              },
+              "dont": {
+                "description": "Don't rename or translate domain concepts when moving from story map to code/JSON",
+                "content": "**Inferring Concepts - DON'T:**\n\n**From Story Map:**\n- Keywords: \"Product\", \"Plan\", \"Chargeable Item\", \"Price Item\"\n\n**In Code (DON'T):**\n```python\nclass ProductEntity:  # DON'T: Added suffix\n    def __init__(self, name: str):\n        self.name = name\n        self.items = []  # DON'T: Lost 'Chargeable' qualifier\n    \n    def getPrices(self, pricingPlan):  # DON'T: Renamed 'Plan' to 'pricingPlan', 'PriceItem' to 'Prices'\n        pass\n```\n\n**In JSON (DON'T):**\n```json\n{\n  \"entities\": [\n    {\n      \"name\": \"ProductEntity\",  # DON'T: Different name\n      \"relationships\": [\n        {\"name\": \"Item\"},  # DON'T: Lost 'Chargeable' qualifier\n        {\"name\": \"PricingPlan\"}  # DON'T: Renamed 'Plan'\n      ]\n    }\n  ]\n}\n```\n\n**Issues:**\n- Renamed domain concepts (Plan → pricingPlan, ChargeableItem → Item)\n- Lost qualifiers (Chargeable Item → Item)\n- Added technical suffixes (Entity)\n- Different names across artifacts\n- Translation between story map terms and code/JSON terms"
+              }
+            }
+          ]
+        }
+      ]
+    },
+   
+    "domain_discovery": {
+      "order": 2,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the domain discovery behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "What is the scope of the discovery we are doing? (Which increment or set of stories are we discovering?)",
+            "How are you determining the scope? (Best source: increments designed as part of the story agent work in the prioritization phase)",
+            "What are the core domain objects identified in the story map?",
+            "What are the relationships between these core domain objects?",
+            "What are the responsibilities of each core domain object?",
+            "What story refinements are needed based on the discovered relationships and responsibilities?"
+          ],
+          "evidence": [
+            "Increments from story agent prioritization phase (BEST SOURCE for determining discovery scope)",
+            "Story map from story agent (docs/stories/map/)",
+            "Story graph JSON (docs/stories/story_graph.json)",
+            "Domain model from Shaping stage (for reference only - discovery does not modify it)",
+            "Domain expert knowledge"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Discovery scope and granularity",
+              "question": "What is the scope and granularity of domain discovery?",
+              "outcome": "Determines which stories and increments to analyze and how deeply to discover relationships",
+              "options": [
+                "Single increment focus - deep discovery for one increment at a time",
+                "Multiple increments - discover across related increments",
+                "Epic-level scope - discover relationships across all stories in an epic",
+                "Feature-level scope - discover relationships within a feature",
+                "Full story map scope - discover across entire story map"
+              ]
+            },
+            {
+              "description": "Relationship discovery depth",
+              "question": "How deeply should we discover relationships between domain objects?",
+              "outcome": "Determines level of detail in relationship mapping",
+              "options": [
+                "High-level relationships only - identify main connections",
+                "Detailed relationships - map all relationships with multiplicities and types",
+                "Deep semantic relationships - understand business meaning of all relationships",
+                "Relationship patterns - identify common relationship patterns across domain"
+              ]
+            },
+            {
+              "description": "Story refinement approach",
+              "question": "How should story refinements be handled?",
+              "outcome": "Determines approach to updating stories based on discoveries",
+              "options": [
+                "Conservative - only refine when clear gaps are identified",
+                "Comprehensive - refine all stories to reflect discovered relationships",
+                "Selective - refine only stories with significant relationship discoveries"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Domain discovery focuses on understanding relationships and responsibilities, not partitioning into DDD structures",
+            "Story map is the primary source for identifying domain objects",
+            "Relationships discovered should inform substantialchanges stories for the slice if appropriate",
+            "Story refinements should maintain story independence and testability",
+            "Domain objects discovered are business concepts, not technical implementations",
+            "Focus on core domain objects that appear frequently in stories",
+            "Relationships should be expressed in domain language, not technical terms, but can still be highly specific in terms of cardinality"
+          ],
+          "recommended_human_activity": [
+            "Review discovered domain objects to verify they represent true business concepts",
+            "Validate relationships discovered match business understanding",
+            "Review story refinement recommendations before approving updates",
+            "Confirm that discovered responsibilities align with business rules"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "story_graph.json",
+          "path": "docs/stories",
+          "description": "Domain Discovery determines relationships and responsibilities between core domain objects by walking through the story map, then suggests story refinements. The output is domain objects with their relationships and responsibilities - NOT yet partitioned into entities, value objects, aggregates, etc. That partitioning happens in the Domain Partitioning phase.",
+          "instructions": "**CRITICAL DISCOVERY PROCESS - RELATIONSHIPS, RESPONSIBILITIES, AND STORY REFINEMENTS:**\n\n1. **Determine Discovery Scope:** The scope of discovery should be determined from increments designed as part of the story agent work in the prioritization phase. Load story increments from docs/stories/increments/ to understand which increments are in scope for discovery. If story increments are not available, use the scope defined in clarification answers.\n\n2. **Go Through All Stories in Scope:** For each increment:\n   - Load all stories within the increment from docs/stories/map/\n   - Load the story_graph.json file from docs/stories/\n   - Review the story map structure (personas, epics, features, stories, acceptance criteria)\n   - Identify which stories belong to the discovery scope\n\n3. **Identify Core Domain Objects from Story Map:** For each story in scope:\n   - Extract all key words and domain terms from:\n     * Story titles\n     * Story descriptions\n     * Acceptance criteria (especially domain_ac concepts and behaviors)\n     * User personas\n     * Feature names\n     * Epic names\n   - Identify the core domain objects (these are the main concepts, not aggregates/entities/value objects)\n   - Create a comprehensive list of all unique core domain objects\n\n4. **Ask Clarifying Questions for Each Core Domain Object:** For each core domain object identified:\n   - Ask: \"What does this core domain object mean in the business domain?\"\n   - Ask: \"What are the responsibilities of this core domain object?\"\n   - Ask: \"How does this core domain object relate to other core domain objects?\"\n   - Document the answers to build understanding of relationships and responsibilities\n\n5. **Determine Relationships Between Core Domain Objects:** Using the clarified core domain objects:\n   - Map relationships between core domain objects (e.g., Product, Plan, Chargeable Item, Price Item)\n   - Identify relationship types (composition, aggregation, association)\n   - Document multiplicities (1-to-1, 1-to-many, many-to-many)\n   - Use fishbone diagram structure to visualize relationships\n   - Document all relationships clearly\n\n6. **Determine Responsibilities of Core Domain Objects:** For each core domain object:\n   - Identify what behaviors/responsibilities each core domain object has\n   - Document responsibilities based on story acceptance criteria and domain_ac behaviors\n   - Ensure responsibilities are expressed in domain language\n\n7. **Generate Story Refinement Recommendations:** Based on discovered relationships and responsibilities, generate recommendations for story changes to complement the domain model:\n   - Review each story in the increment\n   - Identify where stories need refinement based on:\n     * Discovered relationships between core domain objects\n     * Discovered responsibilities of core domain objects\n     * Missing or unclear acceptance criteria\n     * Gaps in domain_ac concepts or behaviors\n   - Generate specific recommendations for:\n     * Story descriptions\n     * Domain acceptance criteria (domain_ac concepts and behaviors)\n     * Behavioral acceptance criteria\n     * Story structure or organization\n   - Document all suggested refinements with rationale\n\n8. **Present Recommendations to User:** Present the story refinement recommendations to the user in the chat:\n   - Refined domain_ac concepts (adding discovered core domain objects and their descriptions)\n   - Refined domain_ac behaviors (adding discovered responsibilities)\n   - Updated story descriptions based on discovered relationships\n   - Updated acceptance criteria to reflect discovered relationships and responsibilities\n   - Any new stories or story splits needed based on discoveries\n\n9. **Update Story Map:** Update the story map markdown files to reflect:\n   - Refined stories with updated descriptions\n   - Updated domain acceptance criteria\n   - Updated behavioral acceptance criteria\n   - New relationships discovered between core domain objects\n   - Document the discovery process and refinements in the source material section\n\n10. **Reference Planning Decisions:** ALWAYS load planning.json and check for \"discovery\" section with decisions_made and assumptions_made. These decisions and assumptions MUST guide all discovery work.\n\n11. **Document Discovery Process:** In the story map source material section, document:\n   - What core domain objects were identified\n   - What relationships were discovered\n   - What responsibilities were determined\n   - What story refinements were suggested and why\n   - How the story map was updated to complement the domain model"
+        },
+        "outputs": [
+          {
+            "name": "story_refinement_recommendations",
+            "path": "docs/domain/discovery",
+            "transformer": null,
+            "template": null,
+            "instructions": "Generate story refinement recommendations document that presents proposed changes to story_graph.json and story map files. The document should:\n- List all recommended story changes with clear rationale\n- Show proposed updates to domain_ac concepts (adding discovered core domain objects and their descriptions)\n- Show proposed updates to domain_ac behaviors (adding discovered responsibilities)\n- Show proposed updates to story descriptions based on discovered relationships\n- Show proposed updates to acceptance criteria to reflect discovered relationships and responsibilities\n- Identify any new stories or story splits needed based on discoveries\n- Present recommendations in a format that allows user to review and approve/reject\n- DO NOT directly update story files - these are recommendations only\n- After user approval, call the story agent to make the actual updates"
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to domain discovery behavior",
+        "patterns": [
+          "discover.*domain.*objects",
+          "identify.*core.*domain.*objects",
+          "determine.*relationships.*responsibilities",
+          "domain.*discovery"
+        ],
+        "priority": 10
+      },
+      "rules": [
+        {
+          "description": "Domain Discovery determines relationships and responsibilities between core domain objects by walking through the story map, then suggests story refinements to rebuild the story map to complement the domain model.",
+          "examples": [
+            {
+              "do": {
+                "description": "Extract keywords from story map and determine relationships and responsibilities",
+                "content": "**Story Map JSON (DO):**\n```json\n{\n  \"solution\": {\n    \"name\": \"Product Catalogue Management\",\n    \"purpose\": \"Enable Product Managers to define products and configure plans\"\n  },\n  \"epics\": [\n    {\n      \"name\": \"Define Product Catalogue\",\n      \"purpose\": \"Allow Product Managers to create and manage products and plans\",\n      \"features\": [\n        {\n          \"name\": \"Define Products\",\n          \"purpose\": \"Create products with chargeable items\",\n          \"story_count\": \"~2 stories\",\n          \"domain_ac\": {\n            \"concepts\": [\n              {\n                \"name\": \"Product\",\n                \"description\": \"A product represents a service offering with chargeable items\"\n              },\n              {\n                \"name\": \"Chargeable Item\",\n                \"description\": \"Individual components that make up a product (e.g., Voice Mins, SMS/MMS, Data)\"\n              }\n            ],\n            \"behaviors\": [\n              {\n                \"concept\": \"Product\",\n                \"behavior\": \"A product has many prices based on the plan\"\n              },\n              {\n                \"concept\": \"Product\",\n                \"behavior\": \"Each product price is based on its individual items\"\n              }\n            ]\n          },\n          \"stories\": [\n            {\n              \"name\": \"Define Products\",\n              \"description\": \"Product Manager creates a new product with chargeable items\",\n              \"behavioral_ac\": [\n                \"Given a Product Manager\\nWhen they create a product\\nThen the product must have at least one chargeable item\"\n              ]\n            }\n          ]\n        },\n        {\n          \"name\": \"Configure Plans for Products\",\n          \"purpose\": \"Define plans that include products with pricing\",\n          \"story_count\": \"~2 stories\",\n          \"domain_ac\": {\n            \"concepts\": [\n              {\n                \"name\": \"Plan\",\n                \"description\": \"A plan represents a bundle of products with specific pricing\"\n              },\n              {\n                \"name\": \"Price Item\",\n                \"description\": \"Pricing for a specific chargeable item within a plan\"\n              }\n            ],\n            \"behaviors\": [\n              {\n                \"concept\": \"Plan\",\n                \"behavior\": \"Each plan has its own prices\"\n              }\n            ]\n          },\n          \"stories\": [\n            {\n              \"name\": \"Configure Plans for Products\",\n              \"description\": \"Product Manager creates a 'Teen Choice Plan' with Voice 500 Mins, 3000 SMS/MMS, 1 GB Data\",\n              \"behavioral_ac\": [\n                \"Given a Product Manager\\nWhen they create a plan with products\\nThen the plan must have prices for each chargeable item\"\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"increments\": [\n    {\n      \"name\": \"Product Catalogue Setup\",\n      \"priority\": \"NOW\",\n      \"relative_size\": \"Medium\",\n      \"stories\": [\n        \"Define Products\",\n        \"Configure Plans for Products\"\n      ]\n    }\n  ]\n}\n```\n\n**Keywords Identified:** Product, Product Catalogue, Plan, Chargeable Items, Price Items\n\n**Domain Model JSON (DO):**\n```json\n{\n  \"solution\": {\n    \"name\": \"Product Catalogue Management\",\n    \"purpose\": \"Enable Product Managers to define products and configure plans\"\n  },\n  \"bounded_contexts\": [\n    {\n      \"name\": \"Product Catalogue\",\n      \"purpose\": \"Manages products, plans, and their pricing structure\",\n      \"aggregates\": [\n        {\n          \"name\": \"Product Aggregate\",\n          \"purpose\": \"Manages products and their chargeable items\",\n          \"aggregate_count\": \"1\",\n          \"entities\": [\n            {\n              \"name\": \"Product\",\n              \"root\": true,\n              \"description\": \"A product represents a service offering with chargeable items\",\n              \"responsibilities\": [\n                {\n                  \"name\": \"name\",\n                  \"description\": \"Product name\",\n                  \"type\": \"property\",\n                  \"determines_identity\": true\n                },\n                {\n                  \"name\": \"addChargeableItem\",\n                  \"description\": \"Add a chargeable item to the product\",\n                  \"type\": \"behavior\",\n                  \"collaborators\": [\"ChargeableItem\"]\n                }\n              ],\n              \"collaborators\": [\n                {\n                  \"name\": \"ChargeableItem\",\n                  \"owned\": true,\n                  \"association_type\": \"composition\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                },\n                {\n                  \"name\": \"Plan\",\n                  \"owned\": false,\n                  \"association_type\": \"association\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                }\n              ]\n            },\n            {\n              \"name\": \"ChargeableItem\",\n              \"root\": false,\n              \"description\": \"Individual components that make up a product (e.g., Voice Mins, SMS/MMS, Data)\",\n              \"responsibilities\": [\n                {\n                  \"name\": \"itemType\",\n                  \"description\": \"Type of chargeable item (Voice, SMS/MMS, Data)\",\n                  \"type\": \"property\",\n                  \"determines_identity\": true\n                }\n              ],\n              \"collaborators\": [\n                {\n                  \"name\": \"PriceItem\",\n                  \"owned\": false,\n                  \"association_type\": \"association\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"name\": \"Plan Aggregate\",\n          \"purpose\": \"Manages plans and their pricing\",\n          \"aggregate_count\": \"1\",\n          \"entities\": [\n            {\n              \"name\": \"Plan\",\n              \"root\": true,\n              \"description\": \"A plan represents a bundle of products with specific pricing\",\n              \"responsibilities\": [\n                {\n                  \"name\": \"planName\",\n                  \"description\": \"Plan name (e.g., 'Teen Choice Plan')\",\n                  \"type\": \"property\",\n                  \"determines_identity\": true\n                },\n                {\n                  \"name\": \"addPriceItem\",\n                  \"description\": \"Add a price item to the plan\",\n                  \"type\": \"behavior\",\n                  \"collaborators\": [\"PriceItem\"]\n                }\n              ],\n              \"collaborators\": [\n                {\n                  \"name\": \"Product\",\n                  \"owned\": false,\n                  \"association_type\": \"association\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                },\n                {\n                  \"name\": \"PriceItem\",\n                  \"owned\": true,\n                  \"association_type\": \"composition\",\n                  \"constructor_dependency\": false,\n                  \"part_of_identity\": false\n                }\n              ]\n            },\n            {\n              \"name\": \"PriceItem\",\n              \"root\": false,\n              \"description\": \"Pricing for a specific chargeable item within a plan\",\n              \"responsibilities\": [\n                {\n                  \"name\": \"price\",\n                  \"description\": \"Price amount\",\n                  \"type\": \"property\",\n                  \"determines_identity\": false\n                },\n                {\n                  \"name\": \"quantity\",\n                  \"description\": \"Quantity included in plan (e.g., 500 Mins, 3000 SMS/MMS, 1 GB)\",\n                  \"type\": \"property\",\n                  \"determines_identity\": false\n                }\n              ],\n              \"collaborators\": [\n                {\n                  \"name\": \"ChargeableItem\",\n                  \"owned\": false,\n                  \"association_type\": \"association\",\n                  \"constructor_dependency\": true,\n                  \"part_of_identity\": false\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}\n```\n\n**Relationship Structure:**\n- Product (1) ←→ (*) Plan (many-to-many: products can be in multiple plans, plans contain multiple products)\n- Product aggregates (*) ChargeableItem (composition: chargeable items belong to product)\n- Plan aggregates (*) PriceItem (composition: price items belong to plan)\n- PriceItem → ChargeableItem (association: price item references chargeable item)"
+              },
+              "dont": {
+                "description": "Don't skip keyword identification or build domain model without story map analysis",
+                "content": "**DON'T:**\n- Skip going through stories in the increment\n- Ignore keywords in acceptance criteria\n- Build domain model without asking what keywords mean\n- Create domain concepts without understanding relationships from story map\n- Use technical terms instead of domain terms from stories"
+              }
+            },
+            {
+              "do": {
+                "description": "Use fishbone diagram structure to show domain relationships",
+                "content": "**Fishbone Domain Model Structure (DO):**\n- Show clear entity relationships with proper multiplicities (1, *, etc.)\n- Use aggregation/composition relationships where appropriate\n- Include attributes that describe domain concepts\n- Show how entities relate based on story map acceptance criteria\n- Example: Product (1) ←→ (*) Plan, Product aggregates (*) Chargeable Items, Plan aggregates (*) Price Items"
+              },
+              "dont": {
+                "description": "Don't create flat domain models or ignore relationship structure",
+                "content": "**DON'T:**\n- Create domain models without showing relationships\n- Ignore multiplicities and relationship types\n- Create isolated entities without connections\n- Use generic relationship names instead of domain-specific ones\n- Skip the fishbone/relationship diagram structure"
+              }
+            },
+            {
+              "do": {
+                "description": "Go through all stories in increment and identify ALL keywords",
+                "content": "**Process (DO):**\n1. Load all stories from increment scope\n2. Extract keywords from story titles, descriptions, acceptance criteria\n3. For each keyword, ask: 'What does this mean?' and 'How does it relate to other keywords?'\n4. Document answers to build domain understanding\n5. Map keywords to domain entities based on clarified meanings"
+              },
+              "dont": {
+                "description": "Don't skip stories or miss keywords in acceptance criteria",
+                "content": "**DON'T:**\n- Only look at story titles, ignore acceptance criteria\n- Skip stories that seem less important\n- Assume keyword meanings without asking\n- Miss relationships described in acceptance criteria\n- Create domain model without going through all stories in scope"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "domain_partitioning": {
+      "order": 3,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the domain partitioning behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "**Questions for Identifying Entities:**\n- If two instances of a thing (Person, Product, etc) have the same name, are they automatically the same thing?\n- What business concepts are identified by more than the value of their attributes?\n- What attributes, or rules can we use to establish / verify the identity of a thing?\n- If two instances of the same object have different attribute values, but same identity value, are they the same entity?\n- Which elements require thoughtful identity management?",
+            "**Questions for Identifying Value Objects:**\n- What business concepts are identified ONLY by the value of their attributes (not by identity)?\n- Which elements are really just fancy primitives?\n- What parts of the system can we assume are immutable?\n- What attributes are shared by many different entities and should be considered read-only?",
+            "**Questions for Identifying Aggregates:**\n- Which parts of our domain can we directly access?\n- Which domain concepts get updated together as a single cohesive unit? Which domain concepts get updated separately?\n- When / How frequently do we coordinate updates made to aggregates that have relationships to other aggregates?\n- Which elements do we directly access and which elements change with them?\n- Where in our model should element changes not occur in real time?",
+            "**Questions for Identifying Bounded Contexts:**\n- Where in our organization / teams / solutions do similar concepts get represented in different ways, or where the same terms can mean different things?\n- How do we resolve dependencies between domain elements that exist across multiple contexts?\n- What parts of our domain can be thought of in a truly independent way?\n- Which parts of the business can be thought of in a highly decoupled way?",
+            "**Questions for Identifying Domain Services:**\n- What business logic doesn't naturally fit in a single entity?\n- What operations need to be exposed to the rest of the system?\n- What business rules, business logic, and business validation need to be encapsulated for this domain?",
+            "**Questions for Identifying Domain Events:**\n- What conditions and state changes happen within this domain that other parts of the system need to know about?\n- When should events be raised (e.g., when Patient changes Address, Insurance, Pickup Method)?\n- What integrations across contexts should occur asynchronously through events?",
+            "**Questions for Identifying Repositories:**\n- What aggregates need persistence?\n- What business-specific search/access/modify operations are needed?\n- How can we search for domain objects (by what combinations of attributes)?"
+          ],
+          "evidence": [
+            "Domain objects from domain discovery phase",
+            "Relationships and responsibilities from domain discovery",
+            "Story map with refined domain acceptance criteria",
+            "Domain expert knowledge"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Aggregate design and root identification",
+              "question": "How should aggregates be designed and what should be aggregate roots?",
+              "outcome": "Determines aggregate granularity, boundaries, and which entities become aggregate roots",
+              "options": [
+                "One aggregate per major business concept (default) - each major business concept has its own aggregate with its own root",
+                "Fine-grained aggregates - smaller aggregates based on reusable abstractions",
+                "Decoupled fine-grained aggregates - aggregates decoupled and fine-grained based on external systems that have their own boundaries",
+                "Business transaction boundaries - aggregates match business transaction boundaries"
+              ]
+            },
+            {
+              "description": "Cross-aggregate dependency synchronization",
+              "question": "How should cross-aggregate dependencies be synchronized?",
+              "outcome": "Determines how aggregates coordinate changes and maintain consistency across boundaries",
+              "options": [
+                "Event-driven - use domain events for asynchronous synchronization across aggregates",
+                "Services - use direct service calls for immediate consistency",
+                "Explicit interfaces - aggregates communicate only through a very particular set of publicly available methods and operations",
+                "Batch processes - aggregates synchronized through batch processes",
+                "CQRS pattern - aggregates synchronized through the CQRS pattern using commands",
+                "Bounded context patterns - use context mapping patterns (shared kernel, customer-supplier, conformist, etc.)",
+                "Eventual consistency - allow temporary inconsistency, synchronize eventually through events",
+                "Hybrid approach - combine events for cross-context, synchronous for within-context"
+              ]
+            },
+            {
+              "description": "Bounded context strategy",
+              "question": "How should bounded contexts be defined?",
+              "outcome": "Determines boundaries and organization of bounded contexts",
+              "options": [
+                "Organize around domains - group by business domain and business capabilities",
+                "Organize around systems - align with external systems that have their own boundaries",
+                "By organizational structure - align with teams or departments",
+                "By data ownership - group by who owns the data",
+                "By domain complexity - separate complex from simple domains",
+                "Hybrid approach - combine domain organization with system boundaries"
+              ]
+            },
+            {
+              "description": "Service identification and exposure",
+              "question": "How should domain operations be exposed to external consumers?",
+              "outcome": "Determines whether to use domain services as gatekeepers or expose aggregate roots directly",
+              "options": [
+                "Service-oriented architecture - domain service represents every external action including getting data exposed by the bounded context",
+                "Direct aggregate exposure - aggregate roots are exposed directly and used by consumers (same deployment environment)",
+                "Hybrid - services for cross-context operations, direct aggregate access within same context",
+                "Business logic gatekeeper - services only for complex business rules and validation that don't fit in entities",
+                "Integration gatekeeper - services only for operations exposed to other bounded contexts"
+              ]
+            },
+            {
+              "description": "Event strategy and cross-domain communication",
+              "question": "How should cross-domain and cross-context communication be handled?",
+              "outcome": "Determines whether to use events, direct service calls, or direct domain communication",
+              "options": [
+                "Event-driven - use domain events for all cross-context communication (asynchronous)",
+                "Direct service-to-service - use synchronous service calls between bounded contexts",
+                "Direct domain-to-domain - expose aggregate roots directly for cross-domain access (same deployment)",
+                "No events - use only direct communication (service calls or domain access)",
+                "Hybrid - events for cross-context, direct calls for within-context",
+                "Selective events - events only for specific state changes or business milestones, direct calls for others"
+              ]
+            },
+            {
+              "description": "Repository design",
+              "question": "How should repositories be organized?",
+              "outcome": "Determines repository structure and whether aggregates share repositories",
+              "options": [
+                "One repository per aggregate (default) - each domain aggregate has its own repository",
+                "Shared repository within bounded context - multiple aggregates share the same repository within a bounded context (rare cases only)",
+                "Global repository across several bounded contacts (done for legacy reasons only)"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Entities require identity management beyond simple attributes",
+            "Value objects are immutable and shared across entities",
+            "Aggregates should be small enough to maintain consistency boundaries",
+            "Aggregate roots are the only entry points for accessing aggregate contents",
+            "Domain services encapsulate business logic that doesn't fit in entities",
+            "Domain events support asynchronous integration across contexts",
+            "Repositories provide business-specific interfaces,  beyond generic CRUD",
+            "Bounded contexts ensure consistency of domain language and model",
+            "Partitioning decisions should be based on business questions, not technical assumptions",
+            "Design constraints (immutability for value objects, identity operations for entities) must be followed"
+          ],
+          "recommended_human_activity": [
+            "Review entity/value object classifications to verify identity criteria are correct",
+            "Validate aggregate boundaries match business transaction boundaries",
+            "Review bounded context definitions to ensure they align with organizational structure",
+            "Confirm domain services expose appropriate business operations",
+            "Validate domain events capture all necessary state changes and integration points",
+            "Review repository interfaces to ensure they provide business-specific operations"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Domain Partitioning takes domain objects discovered in domain discovery and partitions them into entities, value objects, aggregates, services, events, repositories, and bounded contexts",
+          "instructions": "**CRITICAL DOMAIN PARTITIONING PROCESS - PARTITIONING DOMAIN OBJECTS INTO DDD STRUCTURES:**\n\n**DDD CONCEPT DEFINITIONS (from slide 39):**\n\n**A. Entities:**\n- Definition: Have an identity that remains the same regardless of changes to specific data. Are the primary domain concepts we care about.\n- Example: We identify a Unique Patient In The System by their PHIN, and through a unique combination of Address, Name, and Phone.\n\n**B. Value Objects:**\n- Definition: Are attributes, they do not have any inherent identity, and shared by many different Entities, considered Read Only.\n- Example: The parts of the system can we assume are immutable include Pick Up Methods and Addresses.\n\n**C. Aggregates:**\n- Definition: A grouping of closely associated objects that should be treated as a single unit for the purpose of data access and changes, defined in terms of roots that are directly accessible, and boundaries.\n- Example: We access all Patient Information directly through the Patient.\n\n**D. Services:**\n- Definition: Gatekeeper to accessing business logic for a particular domain, services control/encapsulate business rules, business logic and business validation for a particular domain.\n- Example: The public operations for Patient that we want to expose to the rest of the system include Search, Merge, etc.\n\n**E. Events:**\n- Definition: The Conditions and state changes that happen within the domain that are made available for the rest of the system to consume. Most integrations across Contexts should occur asynchronously through Events.\n- Example: Events are raised whenever Patients change their Address, Insurance, Pickup Method, etc.\n\n**F. Repository:**\n- Definition: Represents the persistence layer required to search/access/modify domain objects, Repositories are a simple and business specific interface for all operations on stored data.\n- Example: We can search for Patients by any combination of PHIN, Fname, Lname, Address, etc.\n\n**G. Bounded Context:**\n- Definition: A hard boundary that is explicitly managed so that all concepts within it are kept consistent. A Bounded Context defines where the details of a subset of our Domain is set to be consistent and true. Pertains to all artifacts inside the boundary, the model, the language, and the code. Often a one-to-one match to a team, i.e., a team operates and owns one bounded context. Many systems operate across multiple organizational and solution specific Bounded Contexts. We illustrate how to translate across these contexts by using a Bounded Context Map.\n- Example: The Patient Bounded Context contains the Patient aggregate (with Patient as root entity, Clinical Information, Insurance, Address as value object, Pick Up Method as value object), Patients Repository, Patient Service (with operations like Search, Merge), and Patient Merged Created event. The way we represent Patients and all of its internal will be consistent for everyone working within this bounded context.\n\n**PARTITIONING PROCESS - ASK BUSINESS QUESTIONS FOR EACH DDD STRUCTURE:**\n\n1. **Load Domain Objects from Domain Discovery:** Load the domain objects, relationships, and responsibilities discovered in the domain discovery phase.\n\n2. **Identify Entities - Ask Business Questions:** For each core domain object, ask the business:\n   - \"If two instances of this thing have the same name, are they automatically the same thing?\"\n   - \"What business concepts are identified by more than the value of their attributes?\"\n   - \"What attributes, or rules can we use to establish / verify the identity of this thing?\"\n   - \"If two instances have different attribute values, but same identity value, are they the same entity?\"\n   - \"Which elements require thoughtful identity management?\"\n   - Based on answers: If the business says identity matters beyond attributes, classify as Entity\n   - Document the identity criteria (e.g., PHIN for Patient, unique combination of Address + Name + Phone)\n   - **Design Constraint:** Entities should have an operation that is guaranteed to produce a unique result that will identify the object within the system. The interface should be reduced to operations/attributes necessary to identify or search for it/match its identity, and to coordinate operations of objects they own. Factor out all other behavior to \"owned\" objects.\n\n3. **Identify Value Objects - Ask Business Questions:** For each core domain object, ask the business:\n   - \"What business concepts are identified ONLY by the value of their attributes (not by identity)?\"\n   - \"Which elements are really just fancy primitives?\"\n   - \"What parts of the system can we assume are immutable?\"\n   - \"What attributes are shared by many different entities and should be considered read-only?\"\n   - Based on answers: If the business says it's identified only by value and is immutable/shared, classify as Value Object\n   - Document immutability and sharing characteristics\n   - **Design Constraint:** Value objects should be treated as immutable. This helps optimize performance as we can safely share value objects. A Value object may safely pass attributes to another object without worrying about it being unsafely modified. Design value objects so they are never changed; rather they are created and possibly replaced.\n\n4. **Group into Aggregates - Ask Business Questions:** For grouping entities and value objects, ask the business:\n   - \"Which parts of our domain can we directly access?\"\n   - \"Which domain concepts get updated together as a single cohesive unit? Which domain concepts get updated separately?\"\n   - \"When / How frequently do we coordinate updates made to aggregates that have relationships to other aggregates?\"\n   - \"Which elements do we directly access and which elements change with them?\"\n   - \"Where in our model should element changes not occur in real time?\"\n   - Based on answers: Group concepts that are updated together as a single unit into an Aggregate\n   - Identify aggregate roots (entities that are directly accessible - answer to \"which parts can we directly access?\")\n   - Define aggregate boundaries (what belongs inside vs outside based on update coordination answers)\n   - Ensure aggregates are treated as single units for data access and changes\n   - **Key Principle:** An aggregate is a collection of objects that represent a single concept. All objects inside an aggregate can only be accessed through a pre-defined Root. All objects associated with the Root can only be updated/deleted/etc together - they are treated as a single concept. When object relationships exist across aggregates, we must consider how to keep changes synchronized across aggregates.\n\n5. **Identify Domain Services - Ask Business Questions:**\n   - \"What business logic doesn't naturally fit in a single entity?\"\n   - \"What operations need to be exposed to the rest of the system?\"\n   - \"What business rules, business logic, and business validation need to be encapsulated for this domain?\"\n   - Based on answers: Identify services that gatekeep business logic access\n   - Document public operations and their business rules\n   - **Key Principle:** Services are gatekeepers to accessing business logic for a particular domain. Services control/encapsulate business rules, business logic and business validation for a particular domain.\n\n6. **Identify Domain Events - Ask Business Questions:**\n   - \"What conditions and state changes happen within this domain that other parts of the system need to know about?\"\n   - \"When should events be raised (e.g., when Patient changes Address, Insurance, Pickup Method)?\"\n   - \"What integrations across contexts should occur asynchronously through events?\"\n   - Based on answers: Identify state changes and conditions that need to be communicated\n   - Document when events are raised (e.g., when Patient changes Address)\n   - Ensure events support asynchronous integration across contexts\n   - **Key Principle:** Events are the conditions and state changes that happen within the domain that are made available for the rest of the system to consume. Most integrations across Contexts should occur asynchronously through Events.\n\n7. **Identify Repositories - Ask Business Questions:**\n   - \"What aggregates need persistence?\"\n   - \"What business-specific search/access/modify operations are needed?\"\n   - \"How can we search for domain objects (by what combinations of attributes)?\"\n   - Based on answers: Identify what aggregates need persistence and what business-specific operations are needed\n   - Document search/access/modify operations (e.g., search for Patients by any combination of PHIN, Fname, Lname, Address)\n   - Ensure repositories provide business-specific interface (not generic CRUD)\n   - **Key Principle:** Repositories represent the persistence layer required to search/access/modify domain objects. Repositories are a simple and business specific interface for all operations on stored data.\n\n8. **Define Bounded Contexts - Ask Business Questions:**\n   - \"Where in our organization / teams / solutions do similar concepts get represented in different ways, or where the same terms can mean different things?\"\n   - \"How do we resolve dependencies between domain elements that exist across multiple contexts?\"\n   - \"What parts of our domain can be thought of in a truly independent way?\"\n   - \"Which parts of the business can be thought of in a highly decoupled way?\"\n   - Based on answers: Group aggregates, services, repositories, and events into bounded contexts where concepts are consistent\n   - Ensure consistency of domain language, domain model, and domain code within each context\n   - Define boundaries explicitly based on organizational/team/solution boundaries\n   - Document integration points between bounded contexts\n   - **Key Principle:** A Bounded Context is a boundary explicitly set where the details of a subset of the domain is consistent and uniformly true. Consistency is expected to be true for the business domain language, domain model, and domain code, for a domain focused team. Often a one-to-one match to a team - a team operates and owns one bounded context.\n\n9. **Create Domain Model Structure:** Update domain_graph.json with:\n   - Bounded contexts with their aggregates\n   - Aggregates with entities (marking root entities)\n   - Value objects within aggregates\n   - Domain services with public operations\n   - Domain events with their triggers\n   - Repositories with their operations\n\n10. **Reference Planning Decisions:** ALWAYS load planning.json and check for \"domain_partitioning\" section with decisions_made and assumptions_made. These decisions and assumptions MUST guide all partitioning work."
+        },
+        "outputs": [
+          {
+            "name": "domain_model_diagram",
+            "path": "docs/domain/partitioning",
+            "transformer": "ddd_agent_transform_domain_model_diagram_to_markdown",
+            "template": "templates/domain-model-diagram-template.md",
+            "instructions": "Generate domain model diagram using Mermaid that shows:\n- Bounded context boundaries (thick dashed lines)\n- Aggregates within bounded contexts (dotted line boundaries)\n- Entities within aggregates (rectangles, marking root entities)\n- Value objects (rectangles)\n- Domain services (rectangles, labeled as Service)\n- Repositories (cylindrical shapes)\n- Domain events (rectangles, outside bounded context, connected with thick dashed lines)\n- Relationships between entities (solid arrows)\n- Aggregate boundaries (dotted lines)\n\nExample structure:\n```mermaid\ngraph TB\n    subgraph BC[\"Patient Bounded Context\"]\n        subgraph AG[\"Patient Aggregate\"]\n            P[Patient - Root Entity]\n            CI[Clinical Information]\n            INS[Insurance]\n            ADDR[Address - Value Object]\n            PUM[Pick Up Method - Value Object]\n        end\n        REP[(Patients Repository)]\n    end\n    PS[Patient Service]\n    PE[Patient Merged Created Event]\n    \n    P --> CI\n    P --> INS\n    P --> ADDR\n    ADDR --> PUM\n    BC -.->|thick dashed| PS\n    BC -.->|thick dashed| PE\n    PE -.->|dotted| P\n```\n\nUse proper Mermaid syntax with:\n- `subgraph` for bounded contexts and aggregates\n- Rectangles for entities and value objects\n- Cylindrical shapes `[(...)]` for repositories\n- Solid arrows `-->` for relationships\n- Dotted lines `-.->` for aggregate boundaries and event connections\n- Thick dashed lines for bounded context boundaries and external connections"
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to domain partitioning behavior",
+        "patterns": [
+          "partition.*domain",
+          "create.*entities",
+          "define.*aggregates",
+          "identify.*value.*objects",
+          "domain.*partitioning",
+          "partition.*bounded.*contexts"
+        ],
+        "priority": 11
+      },
+      "rules": [
+        {
+          "description": "Domain Partitioning takes domain objects and partitions them into DDD structures (entities, value objects, aggregates, services, events, repositories, bounded contexts) following the definitions from slide 39.",
+          "examples": [
+            {
+              "do": {
+                "description": "Ask business questions to properly partition domain objects into DDD structures",
+                "content": "**Domain Partitioning (DO):**\n\n**From Domain Discovery:**\n- Core Domain Objects: Patient, Address, Pick Up Method, Clinical Information, Insurance\n- Relationships: Patient has Address, Address has Pick Up Method, Patient has Clinical Information, Patient has Insurance\n- Responsibilities: Patient manages identity, Address is immutable location data\n\n**Ask Business Questions and Use Answers:**\n\n**For Entities - Business Answers:**\n- Q: \"If two Patients have the same name, are they the same?\" A: \"No, we identify by PHIN + Address + Name + Phone\"\n- Q: \"What identifies a Patient beyond attributes?\" A: \"PHIN (unique identifier) and combination of Address, Name, Phone\"\n- **Result:** Patient is an Entity with identity: PHIN + Address + Name + Phone\n\n**For Value Objects - Business Answers:**\n- Q: \"What parts are immutable?\" A: \"Address and Pick Up Method don't change once created\"\n- Q: \"Which are fancy primitives?\" A: \"Address is just location data, Pick Up Method is just a method type\"\n- **Result:** Address and Pick Up Method are Value Objects (immutable, shared)\n\n**For Aggregates - Business Answers:**\n- Q: \"What can we directly access?\" A: \"Patient - we access everything through Patient\"\n- Q: \"What gets updated together?\" A: \"Patient, Clinical Information, and Insurance always update together\"\n- **Result:** Patient Aggregate with Patient as root, containing Clinical Information, Insurance, Address, Pick Up Method\n\n**For Services - Business Answers:**\n- Q: \"What operations need to be exposed?\" A: \"Search for patients, Merge patient records\"\n- **Result:** Patient Service with operations: Search, Merge\n\n**For Repositories - Business Answers:**\n- Q: \"How do we search for Patients?\" A: \"By any combination of PHIN, Fname, Lname, Address\"\n- **Result:** Patients Repository with search by PHIN, Fname, Lname, Address\n\n**For Events - Business Answers:**\n- Q: \"When should other systems know about changes?\" A: \"When Patient changes Address, Insurance, or Pick Up Method\"\n- **Result:** Patient Merged Created event (raised when Patient changes Address, Insurance, Pick Up Method)\n\n**For Bounded Contexts - Business Answers:**\n- Q: \"Where are concepts consistent?\" A: \"Patient representation is consistent for everyone working on Payments Module\"\n- **Result:** Patient Bounded Context containing Patient Aggregate, Patient Service, Patients Repository"
+              },
+              "dont": {
+                "description": "Don't skip business questions or make technical assumptions without asking the business",
+                "content": "**Domain Partitioning (DON'T):**\n\n**DON'T:**\n- Skip asking business questions and assume technical answers (e.g., \"Patient is an entity because it has an ID\")\n- Create generic CRUD repositories instead of asking \"How do we search?\" and getting business-specific answers\n- Skip value objects and make everything entities without asking \"What's immutable?\" and \"What are fancy primitives?\"\n- Create aggregates without asking \"What gets updated together?\" and \"What can we directly access?\"\n- Mix technical services (e.g., PatientService with database operations) with domain services without asking \"What business logic needs to be exposed?\"\n- Create events without asking \"When should other systems know about changes?\"\n- Define bounded contexts without asking \"Where are concepts consistent?\" and \"Where do same terms mean different things?\"\n- Skip documenting identity criteria for entities without asking \"What identifies this beyond attributes?\"\n- Ignore immutability for value objects without asking \"What parts are immutable?\""
+              }
+            },
+            {
+              "do": {
+                "description": "Create proper Mermaid diagram showing bounded context with aggregates, entities, value objects, services, repositories, and events",
+                "content": "**Mermaid Diagram (DO):**\n\n```mermaid\ngraph TB\n    subgraph BC[\"Patient Bounded Context\"]\n        subgraph AG[\"Patient Aggregate\"]\n            P[Patient - Root Entity]\n            CI[Clinical Information]\n            INS[Insurance]\n            ADDR[Address - Value Object]\n            PUM[Pick Up Method - Value Object]\n        end\n        REP[(Patients Repository)]\n    end\n    PS[Patient Service]\n    PE[Patient Merged Created Event]\n    \n    P --> CI\n    P --> INS\n    P --> ADDR\n    ADDR --> PUM\n    BC -.->|thick dashed| PS\n    BC -.->|thick dashed| PE\n    PE -.->|dotted| P\n```\n\n**Key Elements:**\n- Bounded context as outer subgraph with thick dashed boundary\n- Aggregate as inner subgraph with dotted boundary\n- Root entity clearly marked\n- Value objects identified\n- Repository shown as cylindrical shape\n- Service and events outside bounded context, connected with thick dashed lines\n- Event connected to entity with dotted line"
+              },
+              "dont": {
+                "description": "Don't create flat diagrams or miss DDD structural elements",
+                "content": "**Mermaid Diagram (DON'T):**\n\n```mermaid\ngraph TB\n    P[Patient]\n    A[Address]\n    P --> A\n```\n\n**Issues:**\n- Missing bounded context boundary\n- Missing aggregate boundary\n- No distinction between entities and value objects\n- Missing services, repositories, events\n- No clear aggregate root\n- Flat structure without DDD organization"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "event_storming": {
+      "order": 4,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the event storming discovery behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "What is the scope of the event storming? (An increment, epic, feature, collection of stories, or entire story map?)",
+            "What story map or story collection should be used as the primary input? (Load from docs/stories/map/ or docs/stories/increments/)",
+            "If no story map is available, what logical sequence of commands, reactions, events can be inferred from the domain model?",
+            "What are the key business events that occur in this domain flow?",
+            "What commands trigger these events? (Commands often represent user or external domain interactions)",
+            "What reactions occur after events? (Reactions are things that need to happen in response to an event, always described in imperative)",
+            "What aggregates or bounded contexts are involved in processing commands and producing events?"
+          ],
+          "evidence": [
+            "Story map from story agent (docs/stories/map/) - PRIMARY SOURCE",
+            "Story increments from story agent prioritization phase (docs/stories/increments/) - BEST SOURCE for determining scope",
+            "Domain model from Shaping stage",
+            "Business process documentation",
+            "Event storming workshop outputs"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Event storming scope and source",
+              "question": "What is the scope and source for the event storming session?",
+              "outcome": "Determines which stories or logical flow to use as input and how to structure the event storming map",
+              "options": [
+                "Increment-level scope - event storming for all stories in an increment (from story agent prioritization)",
+                "Epic-level scope - event storming across all stories in an epic",
+                "Feature-level scope - event storming for stories within a feature",
+                "Collection of stories - event storming for a specific set of related stories",
+                "Full story map - comprehensive event storming across entire story map",
+                "Logical sequence - event storming from logical ordering of commands/reactions/events (no story map available)"
+              ]
+            },
+            {
+              "description": "Story decomposition strategy",
+              "question": "What is the approach to decomposing a single story into commands, reactions, and events?",
+              "outcome": "Determines how stories are broken down into event storming elements and which stories become commands vs events vs reactions",
+              "options": [
+                "One story = One command - Each story becomes a single command that triggers events and reactions",
+                "Story as user journey - Decompose story into multiple commands representing user interactions, with events and reactions for each step",
+                "Story as business process - Break story into commands (triggers), events (state changes), and reactions (responses) following business process flow",
+                "Story as aggregate operation - Each story maps to an aggregate operation (command), producing events that trigger reactions in other aggregates",
+                "Story as bounded context interaction - Stories span multiple bounded contexts, decompose into commands/events/reactions crossing context boundaries",
+                "Granular decomposition - Break each story into fine-grained commands, events, and reactions for detailed event storming",
+                "Coarse-grained decomposition - Keep stories at high level, identify only major commands, events, and reactions"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Event storming extends the story map by adding commands, reactions, and events to create a more detailed flow",
+            "Primary input is a story map (increment, epic, feature, collection, or full map) from the story agent",
+            "If no story map is available, we can logically order a sequence of commands, reactions, and events",
+            "Commands often represent user interactions and are always described in imperative",
+            "Reactions are things that need to happen in Reaction to an event, always described in imperative",
+            "Events are something that notifies others of a state change, always described in past-tense",
+            "The event storming map shows one or more stories will relate to a sequence of commands and/or reactions, and events",
+            "Event storming is a separate artifactLeverages (does not modify) the original story map",
+            "Newly discovered commands, events, and reactions are added to the domain model (commands → service or aggregate root methods (depending on how you're exposing the bounded context), event → events, reactions → aggregate root or service operations)",
+            "Event storming helps identify domain boundaries and refine bounded context scope"
+          ],
+          "recommended_human_activity": [
+            "Review identified events to verify they represent true business occurrences",
+            "Validate commands and their relationships to events",
+            "Review aggregate boundaries identified from event flow",
+            "Confirm event flow matches business process understanding"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Event Storming Discovery extends the story map by adding commands, reactions, and events to create a detailed event storming map. The output shows stories linearly with commands, reactions, and events underneath, extending (not modifying) the original story map.",
+          "instructions": "**CRITICAL EVENT STORMING DISCOVERY PROCESS (Based on slides 6, 50, 55, 56, 57, 58, 59):**\n\n1. **Load Story Map or Determine Logical Sequence:**\n   - PRIMARY SOURCE: Load story map from docs/stories/map/ (increment, epic, feature, collection, or full map)\n   - BEST SOURCE FOR SCOPE: Load increments from docs/stories/increments/ (from story agent prioritization phase)\n   - ALTERNATIVE: If no story map is available, work with domain experts to logically order a sequence of commands, reactions, and events\n   - The story map (or logical sequence) will be the foundation for the event storming map\n\n2. **Understand Event Storming Concepts (from slides 56, 57, 58, 59):**\n   - **Commands**: Often represent user interactions. Always described in imperative (e.g., \"Submit Customer Credit Application Details\", \"Sign Up Customer for Credit Card Plan\", \"Use Credit Card\")\n   - **Reactions**: Something that needs to happen after something else happens. Always described in imperative (e.g., \"Evaluate Credit Eligibility\", \"Send Denied Notification to Customer\", \"Mail CC & Activation Code to Customer\")\n   - **Events**: Something that creates a state change. Always described in past-tense (e.g., \"Credit Application Submitted\", \"Credit Application Approved\", \"Credit Card Account Created\", \"Credit Card Transaction Completed\")\n   - **Key Principle**: \"Important events cause reactions elsewhere in the system, and it's often important to understand why those reactions occurred\"\n\n3. **Create Event Storming Map Structure:**\n   - Line up stories linearly from the source (increment/epic/feature/collection/entire story map)\n   - Underneath the stories, add commands, reactions, and events in roughly equivalent way as seen in the diagrams (slides 57, 58)\n   - The structure should show: Story → Command → Event → Reaction → Event → ... (flowing left to right)\n   - Group related commands, events, and reactions by their associated aggregates or bounded contexts\n\n4. **Identify Commands:** For each story or logical step:\n   - What user interaction or system action triggers this step? (Command)\n   - Who or what initiates the command?\n   - What data is required for the command?\n   - What validation must occur before the command is processed?\n   - Commands are added to the event storming map underneath their associated stories\n\n5. **Identify Domain Events:** For each command or reaction:\n   - What state change occurs? (Event - past tense)\n   - What business milestone is reached? (Event - past tense)\n   - What do other parts of the system need to know about? (Event - past tense)\n   - Events are added to the event storming map between commands and reactions\n\n6. **Identify Reactions:** For each event:\n   - What needs to happen after this event occurs? (Reaction - imperative)\n   - What system behavior is triggered by this event? (Reaction - imperative)\n   - What external system or aggregate needs to respond? (Reaction - imperative)\n   - Reactions are added to the event storming map after events\n\n7. **Group by Aggregates and Bounded Contexts:**\n   - Group events and stories to refine the exact scope of responsibility for each bounded context (slide 58)\n   - Identify which aggregates process which commands\n   - Identify which aggregates produce which events\n   - Identify aggregate boundaries based on consistency requirements\n   - Use grouping to help determine context boundaries (slide 55)\n\n8. **Extend (Do Not Modify) Story Map:**\n   - The event storming map is an additional artifact to the story map that adda commands, reactions, and events\n   - DO NOT modify the original story map\n   - The event storming map shows the story map with additional detail (commands/reactions/events) added\n   - If new stories are discovered during event storming, they should be recommended to the user for approval, then the story agent should be called to update the story map\n\n9. **Add Discovered Items to Domain Model:**\n   - If event storming discovers new commands, events, or reactions not in the original domain model:\n     * **Commands** → Add as Service aggregate operations (methods on domain services)\n     * **Events** → Add as Events in the domain model\n     * **Reactions** → Add as behaviors inside aggregate entities, value objects, factories, etc.\n   - These additions extend the domain model from the shaping phase\n\n10. **Reference Planning Decisions:** ALWAYS load planning.json and check for \"event_storming_discovery\" section with decisions_made and assumptions_made. These decisions and assumptions MUST guide all event storming work.\n\n11. **Create Event Storming Map Output:**\n    - Stories lined up linearly (from increment/epic/feature/collection/entire story map)\n    - Commands, reactions, and events shown underneath stories in chronological flow\n    - Grouping by aggregates and bounded contexts\n    - Visual representation similar to slides 57, 58 showing the flow: Story → Command → Event → Reaction → Event → ...\n    - Clear indication of which items are extensions (not in original story map)"
+        },
+        "outputs": [
+          {
+            "name": "event_storming_map",
+            "path": "docs/domain/event-storming",
+            "transformer": null,
+            "template": null,
+            "instructions": "Generate event storming map that presents:\n- Stories lined up linearly (from increment/epic/feature/collection/entire story map)\n- Commands, reactions, and events shown underneath stories in chronological flow (left to right)\n- Visual structure similar to slides 57, 58 showing: Story → Command → Event → Reaction → Event → ...\n- Grouping by aggregates and bounded contexts\n- Clear indication of which items extend the original story map (newly discovered)\n- Mermaid diagram showing the event storming timeline with stories, commands, reactions, and events\n- Textual description of the flow and any newly discovered domain concepts\n- Reference to original story map source (increment/epic/feature/collection/full map)\n\n**Format Requirements:**\n- Use Mermaid timeline or flowchart to show the linear flow\n- Clearly label commands (imperative), events (past-tense), and reactions (imperative)\n- Show stories at the top level, with commands/reactions/events underneath\n- Group related items by aggregate or bounded context\n- Mark any newly discovered items that extend the original story map"
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to event storming discovery behavior",
+        "patterns": [
+          "event.*storming",
+          "identify.*domain.*events",
+          "discover.*events",
+          "event.*timeline",
+          "map.*event.*flow"
+        ],
+        "priority": 9
+      },
+      "rules": []
+    },
+    "bounded_context_mapping": {
+      "order": 5,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the bounded context mapping behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "Do different parts of the business think about the same thing differently? (Where do similar concepts get represented in different ways, or where the same terms can mean different things?)",
+            "Does the state of something need to be different in different areas? (For example, do we care about very different things when managing a lead versus managing a real customer? Do we care about different aspects of a product when managing its assembly versus marketing it to consumers?)",
+            "How related are things transactionally? (Do transactions occur at dramatically different rates? For example, are customers and accounts acquired/updated much less frequently than customers purchasing products? Does inventory replenishment happen at a different cadence than customer transactions?)",
+            "How coupled are these concepts from a business perspective? (Which domain concepts get updated together as a single cohesive unit? Which get updated separately? How frequently do we coordinate updates between concepts?)",
+            "What are the most important subject areas of the business? (What are the concrete business concepts that matter to stakeholders who directly serve the market? For example, in pharmacies: prescriptions, disbursements, patients, medical providers)",
+            "Are there regulatory or compliance requirements that span multiple domains but should be in their own bounded context? (For example, 'know your customer' regulations that are consistent across banking products)",
+            "Do different market actors (customer segments, user personas) have different enough needs to warrant separate bounded contexts? (For example, global small business customers versus large commercial business customers with different workflows, reversibility, auditability requirements)",
+            "What events flow between bounded contexts? (From event storming map - which events cross context boundaries?)",
+            "What are the team structures and ownership? (Which teams, departments, or communities should own which bounded contexts? Often a one-to-one match: one team operates and owns one bounded context)"
+          ],
+          "evidence": [
+            "Event storming map from event_storming stage - PRIMARY SOURCE for understanding event flows between contexts",
+            "Domain model from domain_partitioning stage - contains bounded contexts, aggregates, services, events",
+            "Domain model from domain_discovery stage - contains relationships between domain objects",
+            "Story map from story agent - shows user journeys across contexts",
+            "Organizational structure documentation - team ownership and boundaries",
+            "The Software Organization chapter (the-software-organization.md) - guidance on bounded context maps"
+          ]
+        },
+        "planning": {
+          "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+          "decision_making_criteria": [
+            {
+              "description": "Integration pattern strategy",
+              "question": "What integration patterns should be used between bounded contexts?",
+              "outcome": "Determines how bounded contexts communicate and collaborate",
+              "options": [
+                "Event-driven only - all cross-context communication through events",
+                "Shared Kernel - contexts share domain concepts requiring intimate collaboration",
+                "Customer/Supplier - one context depends on another with well-formed API",
+                "Published Language - one context enables another without API changes",
+                "Hybrid approach - different patterns for different context relationships",
+                "Organize around systems - bounded contexts align with external system boundaries"
+              ]
+            },
+            {
+              "description": "Team alignment strategy",
+              "question": "How should bounded contexts align with team structure?",
+              "outcome": "Determines organizational boundaries and team ownership",
+              "options": [
+                "One team per bounded context (default) - each bounded context owned by one team",
+                "Multiple teams per bounded context - larger contexts shared across teams",
+                "Organize around domains - teams align with business domains",
+                "Organize around systems - teams align with system boundaries",
+                "Hybrid - combine domain and system organization"
+              ]
+            }
+          ],
+          "typical_assumptions": [
+            "Bounded context map illustrates relationships across solution and different teams",
+            "Bounded context map shows how dependencies are managed on large scale programs",
+            "Integration patterns determine interaction model between teams",
+            "Event flows from event storming inform bounded context relationships",
+            "Bounded contexts may span entire system, portion of system, or across several systems",
+            "Bounded context map identifies where contexts may be shared across teams",
+            "Bounded context map determines appropriate integration strategies"
+          ],
+          "recommended_human_activity": [
+            "Review bounded context map to verify boundaries align with team structure",
+            "Validate integration patterns match team collaboration needs",
+            "Review event flows to ensure they align with bounded context boundaries",
+            "Confirm bounded context map reflects organizational reality",
+            "Validate that integration patterns support team autonomy"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Bounded Context Mapping creates a bounded context map that shows relationships between bounded contexts, integration patterns, and team ownership. Uses all input from event storming to inform the final bounded context map.",
+          "instructions": "**CRITICAL BOUNDED CONTEXT MAPPING PROCESS:**\n\n**DEFINITIONS (from slides 61, 62):**\n\n**Bounded Context:**\n- Explicitly set boundaries in which the context of a model is applicable and explicitly managed to be uniform\n- Organizational: a team, department, community, etc.\n- Implementation: code base, database schema, etc.\n\n**Bounded Context Map:**\n- Marks the boundaries and relationships between different models and/or system contexts in a specific project, program, or organization\n- Determines appropriate integration strategies\n- Identifies where a context may be shared across teams\n- May span an entire system, a portion of a system, or across several systems within the enterprise\n- A Bounded Dependency Map illustrates the relationship across our solution and the different teams, calling out how dependencies are managed on large scale programs\n\n**MAPPING PROCESS:**\n\n1. **Load All Inputs:**\n   - PRIMARY: Load event storming map from event_storming stage - this shows event flows between bounded contexts\n   - Load domain model from domain_partitioning stage - contains all bounded contexts, aggregates, services, events, repositories\n   - Load domain model from domain_discovery stage - contains relationships between domain objects\n   - Load story map from story agent - shows user journeys that may span contexts\n   - Load organizational structure documentation - team ownership and boundaries\n   - Reference \"The Software Organization\" chapter (the-software-organization.md) for guidance\n\n2. **Identify All Bounded Contexts:**\n   - Extract all bounded contexts from domain_partitioning domain model\n   - For each bounded context, identify:\n     * Aggregates within the context\n     * Services within the context\n     * Repositories within the context\n     * Events produced by the context\n     * Team/department that owns the context\n\n3. **Analyze Event Flows from Event Storming - Use Event Storming to Update Bounded Context Map:**\n   - Review event storming map to identify:\n     * Which events flow between which bounded contexts\n     * Commands (C) that trigger cross-context events\n     * Read Models/Requests (R) that trigger events\n     * Reactions that occur across context boundaries\n     * Event-driven dependencies between contexts\n     * Event types for each event (e.g., \"Created, Available, Removed\" for CC Account Event)\n     * Services that produce events and services that subscribe to events\n   - For each bounded context, identify:\n     * Commands (C) within the context and the events (E) they produce\n     * Read Models/Requests (R) within the context and the events (E) they produce\n     * Event types for each event (detailed event types, not just event names)\n     * Services that produce events (actions that produce events)\n     * Services that subscribe to events (services that react to events from other contexts)\n   - Use event flows to identify relationships and dependencies\n   - Update bounded context map based on event storming discoveries:\n     * Add events discovered during event storming that weren't in initial domain partitioning\n     * Refine bounded context boundaries based on event flows (contexts that share many events may need different boundaries)\n     * Identify integration patterns based on event subscription patterns (contexts with many event subscriptions may need Shared Kernel or Customer/Supplier)\n     * Document event types in detail (e.g., CC Account Event types: \"Created, Available, Removed\"; Credit Card Event types: \"Rate Updated For Card, Activation Code Sent, Transaction Completed\")\n   - **Example from event storming:** If event storming shows \"Sign Up Customer for CC Plan\" (Command) produces \"Credit Card Account Created\" (Event), and this event is subscribed to by Credit Card Service, this informs the relationship between Credit Card Account and Credit Card bounded contexts\n   \n   **Step 3a. Extend Domain Model with Services and Events (from event storming):**\n   For each bounded context, extend the domain model by incorporating services and events discovered during event storming:\n   - **Services:** Document services with their actions and what they produce/subscribe to:\n     * List all actions for each service (e.g., CC Account Service actions: \"Create New Customer Account\", \"Make CC Plan Available for all Customers\", \"Remove CC Plan from plans available for customers\")\n     * Document what each action produces (e.g., \"Create New Customer Account\" produces: \"CC Customer, CC Account, CC Account Event\")\n     * Document event subscriptions (e.g., CC Account Service subscribes to \"Credit Card Event\" and \"Credit Card Plan Event\")\n   - **Events:** Document events with detailed event types:\n     * For each event, specify \"For a\" (which entity/aggregate it relates to, e.g., \"CC Account Event\" is \"For a: CC Account\")\n     * List all event types in detail (e.g., CC Account Event types: \"Created, Available, Removed\"; Credit Card Event types: \"Rate Updated For Card, Activation Code Sent, Transaction Completed\")\n     * Document which entities/services produce each event\n     * Document which services subscribe to each event\n   - **Commands and Read Models:** For each bounded context, document:\n     * Commands (C) and the events (E) they produce (e.g., \"Sign Up Customer for CC Plan\" (C) -> \"Credit Card Account Created\" (E))\n     * Read Models/Requests (R) and the events (E) they produce (e.g., \"Make CC Plan Available for Cust.\" (R) -> \"CC Plan Available for all Customer\" (E))\n     * Organize by bounded context (e.g., Credit Card Plan Context, Credit Card Account Context, Credit Card Context)\n   - **Event Flows:** Document how events flow between bounded contexts:\n     * Show which events from one context are subscribed to by services in another context\n     * Document cross-context event dependencies\n     * Use this to refine bounded context boundaries and integration patterns\n\n4. **Identify Relationships Between Bounded Contexts - Determine How Contexts Relate:**\n   For each dependency that exists across bounded contexts, we need to call out:\n   - Mapping (how contexts relate)\n   - Integration mechanism (how systems integrate)\n   - Team engagement model (how teams collaborate)\n   \n   **Step 4a. Identify Key Domain Constructs/Objects:**\n   - Identify key domain constructs/objects that are relevant across more than one bounded context\n   - For example: Customer (in Accounts System) and Lead (in CRM System) both relate to Campaign, Company, Job, Interests, Contact\n   - Document which domain concepts appear in multiple contexts\n   \n   **Step 4b. Map Out How Elements Relate:**\n   - Map out how the specific elements relate to each other across contexts\n   - Identify shared concepts (e.g., Campaign, Company shared between Accounts and CRM)\n   - Identify concepts that translate across contexts (e.g., Lead in CRM becomes Customer in Accounts)\n   - Document the relationships and translations\n   \n   **Step 4c. Determine Integration Pattern - Ask Business Questions:**\n   For each relationship between bounded contexts, ask these questions to determine which integration pattern to use:\n   \n   **Questions for Shared Kernel Pattern:**\n   - Do two bounded contexts overlap and share domain concepts? (e.g., CRM and Customer contexts sharing Demographics and Contact Info)\n   - Do impacts to shared elements affect both teams?\n   - Does this require intimate collaboration and shared code ownership?\n   - Is daily integration common?\n   - Are two teams both working on interrelated domain concepts for the first time?\n   - Are major changes being made to both teams' representation of these domain concepts?\n   - Will workable solutions require trial and error across both teams?\n   - **Use Shared Kernel when:** Two teams need to work closely together on shared concepts, daily integration is feasible, and both teams need to coordinate changes to shared elements.\n   - **Warning:** Shared kernels can also come from accidental architecture, dependency magnets, and tight coupling. Where possible, try to refactor to minimize this form of coupling.\n   \n   **Questions for Customer/Supplier Pattern:**\n   - Does one bounded context depend on another but they remain separate?\n   - Do changes to one context require minimal changes to the other?\n   - Is there a well-formed, stable API between contexts?\n   - Can the supplier team gather requirements from the customer team (preferably in the form of acceptance tests)?\n   - Can the supplier team implement changes needed and review/demo results with the customer team?\n   - Is the relationship more decoupled than shared kernel?\n   - **Use Customer/Supplier when:** One context depends on another, but they can remain separate with a stable API. The supplier team can act as a service provider to the customer team.\n   \n   **Questions for Published Language Pattern:**\n   - Would direct translation to and from the existing domain models be overly complex or poorly factored?\n   - Can we use a well-documented shared language that can express the necessary domain information?\n   - Does one bounded context enable another without requiring API changes?\n   - Does the supplying team act as an enabler providing well-tested API?\n   - Are no changes needed to API/underlying code to support dependent team?\n   - Does the supplying team provide great support to dependent team?\n   - Is the API easy and obvious to use?\n   - **Use Published Language when:** Direct translation to and from existing domain models may not be a good solution (models may be overly complex or poorly factored). Use a well-documented shared language that can express the necessary domain information as a common medium of communication, translating as necessary into and out of that language. A bounded context requires no change to the API or underlying code to support the needs of the team/context with the dependency. The supplying team acts as an enabler.\n   \n   **Questions for Conformist Pattern:**\n   - Are two teams in different companies or very far apart in the management hierarchy?\n   - Are we delivering an enterprise package solution (e.g., PeopleSoft, SAP) that requires slight or moderate customization/configuration?\n   - Can we force the team with the dependencies to adhere to the model of the team upon which they depend?\n   - Would this greatly simplify integration even if it doesn't yield the ideal model for the application?\n   - **Use Conformist when:** Two teams are in different companies or very far apart in the management hierarchy. Force the team with the dependencies to adhere to the model of the team upon which they depend. This may not yield the ideal model for the application but greatly simplifies integration. Often appropriate when delivering an enterprise package solution that requires slight or moderate customization/configuration.\n   \n   **Questions for Anticorruption Layer Pattern:**\n   - Is a new system being built with a large interface to another system with an established model?\n   - Do we need to prevent the new model from being modified ad-hoc to resemble the other system's model?\n   - Can we create an isolation layer that requires little or no modification to the other system?\n   - Does the other system have an existing interface we can talk to?\n   - **Use Anticorruption Layer when:** A new system is being built that has a large interface with another system with an established model. Prevent the new model from being modified ad-hoc to resemble the other system's model by creating an isolation layer. The isolation layer provides clients with functionality in terms of their own domain model. The layer talks to the other system through its existing interface, requiring little or no modification to the other system. Internally, the layer translates in both directions as necessary between the two models.\n   \n   **Questions for Open Host Services Pattern:**\n   - Does a subsystem have to be integrated with many others?\n   - Can we define a common protocol that gives access as a set of services?\n   - Can we open the protocol to all teams who need access?\n   - Can we enhance and expand the protocol to handle new requirements as necessary?\n   - **Use Open Host Services when:** A subsystem has to be integrated with many others. Define a common protocol that gives access as a set of services. Open the protocol to all teams who need access can use it. Enhance and expand the protocol to handle new requirements as necessary.\n   \n   **Questions for Separate Ways Pattern:**\n   - Is the value of integration outweighed by the cost to do so?\n   - Can two teams approach similar concepts and functionality in entirely different ways?\n   - Can we agree to go on separate paths?\n   - Would integration create more complexity than value?\n   - **Use Separate Ways when:** Sometimes the value of integration is outweighed by the cost to do so. In this case two teams may approach similar concepts and functionality in entirely different ways and agree to go on their own separate path. Agreeing to disagree.\n   \n   **Questions for Organizing Around Systems:**\n   - Are we working with packaged software or legacy systems?\n   - Do system representations vary from system to system?\n   - Is delivery flow considerably different across systems? (e.g., older technology being slow due to manual testing, onerous deployments, poor documentation)\n   - Do different systems have different ecosystems of tools (IDEs, build tools, testing tools)?\n   - **Use Organizing Around Systems when:** Solution relies on packaged software and integrating legacy systems. Bounded contexts align with system boundaries rather than domain aggregates.\n   \n   **Questions for Organizing Around Domains:**\n   - Should we organize around business domains and business capabilities?\n   - Do we want teams aligned with business domains?\n   - Are we working with concrete business concepts that matter to stakeholders?\n   - **Use Organizing Around Domains when:** We want to organize around concrete business concepts that matter to stakeholders who directly serve the market. This is the preferred approach for new systems.\n   \n   **Step 4d. Identify Integration Mechanism - Ask Technical Questions:**\n   For each relationship, determine HOW the systems will integrate:\n   - **Events:** Should integration occur asynchronously through domain events? (Most integrations across contexts should occur asynchronously through events)\n   - **Batch:** Should integration occur through batch processes? (Use when data synchronization can happen on a schedule)\n   - **Messaging:** Should integration occur through messaging systems? (Use for asynchronous communication with message queues)\n   - **REST/API:** Should integration occur through synchronous REST APIs? (Use when immediate consistency is required)\n   - Ask: \"What is the required latency and consistency model?\" \"Does this need to be real-time or can it be eventual?\" \"What is the volume and frequency of data exchange?\"\n   \n   **Step 4e. Identify Team Collaboration Model - Ask Organizational Questions:**\n   For each relationship, determine HOW the teams will collaborate:\n   - **Travelling Team Members (Significant Change):** Do members from multiple teams need to work as a single team? Is this appropriate for significant changes or when two teams are both working on interrelated domain concepts for the first time? (Use when intense collaboration is required, workable solutions require trial and error across both teams)\n   - **Service Provider (Small Change):** Can one team make changes according to needs of other team? Does the supplier team gather requirements from customer team, implement changes, and review/demo results? (Use when changes to one context require minimal changes to the other, well-formed stable API exists)\n   - **Enabler (No Change):** Can one team provide support to enable another team to use their code? Does the supplying team provide well-tested API that is easy and obvious to use? Are no changes needed to API/underlying code? (Use when a bounded context requires no change to support dependent team)\n   - Ask: \"What level of change is expected?\" \"How closely do teams need to collaborate?\" \"Can one team work independently or do they need to coordinate?\"\n\n5. **Define Integration Patterns (from Eric Evans and slides):**\n   \n   For each relationship between bounded contexts, identify and document the integration pattern:\n   \n   a. **Shared Kernel**: Where two bounded contexts overlap and share domain concepts:\n      - Characteristics: Impacts to shared elements affect both teams; requires intimate collaboration and shared code ownership; daily integration is common; often uses single repository or pipeline\n      - When to use: Appropriate when two teams are both working on interrelated domain concepts for the first time, or when major changes to both teams' representation of these domain concepts are being made. Workable solutions require trial and error across both teams; intense collaboration is required.\n      - Warning: Shared kernels can also come from accidental architecture, dependency magnets, and other forms of tight coupling. Where possible, try to refactor your solution to minimize this form of coupling.\n      - Example: CRM and Customer contexts sharing Demographics and Contact Info\n   \n   b. **Customer/Supplier**: Where one bounded context depends on another but they remain separate:\n      - Characteristics: More decoupled than shared kernel; changes to one context require minimal changes to the other; well-formed, stable API between contexts\n      - When to use: The supplier team gathers requirements from the customer team (preferably in the form of acceptance tests), implements the changes needed, and reviews/demos the results with the customer team\n      - Example: Orders context depends on Customer context; Customer team acts as service provider to Orders team\n   \n   c. **Published Language**: Where one bounded context enables another without requiring API changes:\n      - Characteristics: Supplying team acts as an enabler; provides well-tested API that is easy and obvious to use; provides great support to dependent team; no changes needed to API/underlying code to support dependent team\n      - When to use: When a bounded context requires no change to the API or underlying code in order to support the needs of the team/context with the dependency\n      - Example: Orders team enabled by CRM team for sales domain; CRM team provides stable, well-documented API\n\n6. **Document Integration Patterns in domain_graph.json:**\n   - For each relationship between bounded contexts, specify:\n     * Source bounded context\n     * Target bounded context\n     * Integration pattern (shared kernel, customer/supplier, conformist, anticorruption layer, open host services, published language, separate ways, organize around systems, organize around domains)\n     * Shared concepts (for shared kernel)\n     * API/interface details (for customer/supplier, published language, open host services) * Isolation layer details (for anticorruption layer)\n     * Integration mechanism (Events, Batch, Messaging, REST/API)\n     * Team collaboration model (Travelling Team Members, Service Provider, Enabler)\n     * Events that flow between contexts\n     * Domain topics/concepts that cross boundaries\n\n7. **Create Bounded Context Map Diagram:**\n   - Use Mermaid `graph` to show:\n     * Bounded contexts as nodes (circles for domain contexts, rectangles for systems)\n     * Relationships between contexts as arrows\n     * Integration pattern labels on arrows (Shared Kernel, Customer/Supplier, Conformist, Anticorruption Layer, Open Host Services, Published Language, Separate Ways, Service Provider, Enablement, Travelling Team Member)\n     * Integration mechanism labels (Events, Batch, Messaging, REST/API)\n     * Overlapping areas for shared kernels\n     * Event flows between contexts (dashed arrows labeled \"Event\")\n     * Domain topics/concepts that cross boundaries (as text labels on arrows)\n     * Team ownership (as shaded rectangles or labels)\n   - Visual structure similar to slide 62 (domain-based) and slide 67 (system-based)\n   - Support both organizing around domains (slide 62) and organizing around systems (slide 67)\n   \n   **Example 1 - Domain-Based (slide 62):**\n   ```mermaid\n   graph LR\n       CreditCheck[Credit Check Bounded Context]\n       CCPlans[Credit Card Plans Bounded Context]\n       CCAccounts[CC Accounts Bounded Context]\n       Payments[Payments Bounded Context]\n       CCBilling[CC Billing Bounded Context]\n       CreditCard[Credit Card Bounded Context]\n       \n       CreditCheck -.->|Event| CCAccounts\n       CCPlans -.->|Event| CCAccounts\n       CCAccounts -.->|Event| Payments\n       CCAccounts -.->|Event| CreditCard\n       Payments -.->|Event| CCBilling\n       CCBilling -.->|Event| CreditCard\n       CreditCard -.->|Event| CCBilling\n   ```\n   \n   **Example 2 - System-Based (slide 67):**\n   ```mermaid\n   graph TB\n       subgraph ERP[ERP System]\n           Assets[Assets Management Inventory Context]\n       end\n       subgraph EDW[Enterprise Data Warehouse]\n           EngData[Engineering Data Context]\n           Other[Other Context]\n       end\n       subgraph Site[Site Management System]\n           Plant[Plant Maintenance Module]\n           MOC[Asset Management Of Change Module]\n       end\n       ACM[Asset Content Management]\n       \n       Assets -->|Service Provider| ACM\n       ACM -->|Transmittals Lifecycle Mgmt| Other\n       Plant -->|Enablement| ACM\n   ```\n   \n   Use different line styles:\n   - Dotted lines `-.->` for shared kernel (overlapping boundaries) and event flows\n   - Solid arrows `-->` for customer/supplier (dependency) and service provider\n   - Dashed arrows `-.->` for published language (enabling) and enablement\n   - Label arrows with integration mechanism (Events, Batch, Messaging, REST/API) and domain topics\n\n8. **Reference Planning Decisions:** ALWAYS load planning.json and check for \"bounded_context_mapping\" section with decisions_made and assumptions_made. These decisions and assumptions MUST guide all bounded context mapping work.\n\n9. **Key Principle:** Bounded context maps are an effective way to organize boundaries across multiple teams on large programs. They help decouple organizations into separate pieces that can change at different speeds, while bringing people together based on their ability to collaborate. When organizing around systems rather than domain aggregates (legacy/packaged software scenarios), bounded context maps are especially important to identify how teams should collaborate where domain entities are represented in multiple systems and need to work on integration to ensure the overall solution works consistently."
+        },
+        "outputs": [
+          {
+            "name": "bounded_context_map",
+            "path": "docs/domain/bounded-context-mapping",
+            "transformer": null,
+            "template": null,
+            "instructions": "Generate bounded context map document that presents:\n- All bounded contexts identified from domain partitioning\n- Relationships between bounded contexts\n- Integration patterns (Shared Kernel, Customer/Supplier, Conformist, Anticorruption Layer, Open Host Services, Published Language, Separate Ways) for each relationship\n- Integration mechanisms (Events, Batch, Messaging, REST/API) for each relationship\n- Team collaboration models (Travelling Team Members, Service Provider, Enabler) for each relationship\n- Event flows between bounded contexts (from event storming map)\n- **Detailed event information from event storming:**\n  * For each bounded context, list Commands (C) and Read Models/Requests (R) with their corresponding Events (E)\n  * For each event, specify event types in detail (e.g., CC Account Event types: \"Created, Available, Removed\")\n  * Services that produce events (with their actions)\n  * Services that subscribe to events (showing event subscriptions)\n  * Event flows showing which commands/read models trigger which events\n- Team ownership and organizational boundaries\n- Mermaid diagram showing bounded context map with integration patterns and event flows\n- Textual description of integration patterns, integration mechanisms, and team collaboration approaches\n- Reference to event storming map as primary input source\n\n**Format Requirements:**\n- Use Mermaid `graph` to show bounded contexts as nodes\n- Show relationships as arrows with integration pattern labels\n- Show event flows as dashed arrows labeled \"Event\"\n- Use different line styles for different integration patterns\n- Include overlapping areas for shared kernels\n- Clearly label all bounded contexts and relationships\n- **Include detailed event tables showing:**\n  * Commands (C) and Read Models (R) for each bounded context\n  * Events (E) produced by each command/read model\n  * Event types for each event (detailed list)\n  * Services with their actions and event productions/subscriptions\n- Follow the example structure from the domain model diagram showing Services, Events, Commands, and Read Models in detail"
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to bounded context mapping behavior",
+        "patterns": [
+          "bounded.*context.*map",
+          "create.*bounded.*context.*map",
+          "define.*integration.*patterns",
+          "map.*bounded.*contexts",
+          "context.*mapping"
+        ],
+        "priority": 10
+      },
+      "rules": []
+    },
+    "domain exploration": {
+      "order": 6,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the exploration behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "Which increment, epic, or feature are we exploring?",
+            "What acceptance criteria exist from story exploration for this increment/epic/feature?",
+            "What stories are grouped together in this increment/epic/feature?",
+            "What are the behavioral triggers and outcomes for domain concepts?",
+            "What domain concepts interact with each other in the acceptance criteria?",
+            "What domain rules and business logic emerge from the acceptance criteria?",
+            "What are the invariants that must be maintained?",
+            "What are the domain events and when do they occur?",
+            "What are the commands and their validation rules?",
+            "What are the relationships between aggregates?",
+            "What are the integration contracts between bounded contexts?"
+          ],
+          "evidence": [
+            "Acceptance criteria from story exploration stage (PRIMARY SOURCE) - at increment, epic, or feature level",
+            "Story exploration documents from story agent (after story shaping exploration)",
+            "Domain map from Domain Partitioning stage",
+            "Domain model from Domain Discovery stage",
+            "Domain expert knowledge",
+            "Business rules documentation",
+            "Event storming outputs"
+          ]
+        }
+      },
+      "planning": {
+        "decision_instructions": "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+        "decision_making_criteria": [
+          {
+            "description": "Exploration scope and granularity",
+            "question": "What is the scope and granularity for domain exploration?",
+            "outcome": "Determines which stories, increments, epics, or features to explore and at what level to create behavioral acceptance criteria",
+            "options": [
+              "Increment-level scope - create behavioral acceptance criteria for all stories in an increment",
+              "Epic-level scope - create behavioral acceptance criteria for all stories in an epic",
+              "Feature-level scope - create behavioral acceptance criteria for all stories in a feature",
+              "Story group scope - create behavioral acceptance criteria for a specific group of related stories",
+              "Full story map scope - create behavioral acceptance criteria across entire story map"
+            ]
+          },
+          {
+            "description": "Behavioral acceptance criteria detail level",
+            "question": "How detailed should behavioral acceptance criteria be?",
+            "outcome": "Determines level of detail in behavioral acceptance criteria and domain descriptions",
+            "options": [
+              "High-level only - focus on main triggers and outcomes",
+              "Detailed - include all triggers, outcomes, and domain concept interactions",
+              "Comprehensive - include triggers, outcomes, domain descriptions, and all business rules",
+              "Story-aligned - match detail level to story acceptance criteria"
+            ]
+          },
+          {
+            "description": "Domain model update approach",
+            "question": "How should the domain model be updated based on behavioral acceptance criteria?",
+            "outcome": "Determines approach to updating domain model and description",
+            "options": [
+              "Conservative - only add new concepts and relationships explicitly mentioned in acceptance criteria",
+              "Comprehensive - extract all concepts, relationships, and behaviors from acceptance criteria and domain descriptions",
+              "Incremental - update domain model incrementally as acceptance criteria are processed",
+              "Validated - update domain model only after domain expert validation"
+            ]
+          }
+        ],
+        "typical_assumptions": [
+          "Domain exploration happens after story exploration stage in story shaping",
+          "Acceptance criteria from story exploration are the primary input for creating behavioral acceptance criteria",
+          "Behavioral acceptance criteria use the format 'When <trigger> Then <outcome>'",
+          "Domain descriptions explain how concepts interact using the form '<A Concept> <interacts with> <another Concept>'",
+          "Domain model and description are updated based on behavioral acceptance criteria and domain descriptions",
+          "Domain exploration creates a domain exploration document similar to story exploration documents",
+          "Domain graph is updated with behavioral acceptance criteria, domain descriptions, and updated domain concepts",
+          "Focus on domain concepts that appear in acceptance criteria",
+          "Domain descriptions should use natural language that domain experts understand",
+          "Behavioral acceptance criteria should specify outcomes that result from user and system triggers"
+        ],
+        "recommended_human_activity": [
+          "Review behavioral acceptance criteria to verify they accurately reflect domain behavior",
+          "Validate domain descriptions match business understanding of concept interactions",
+          "Review updated domain model to ensure it reflects all concepts and relationships from acceptance criteria",
+          "Review updated domain description to ensure it explains domain concepts in business terms",
+          "Confirm domain exploration document captures all behavioral acceptance criteria and domain descriptions"
+        ]
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Domain Exploration creates behavioral acceptance criteria for domain concepts based on story acceptance criteria, adds domain descriptions to explain domain concepts and relationships, and updates the domain model and description - similar to how story exploration adds acceptance criteria to stories (see slides 78-83, 85)",
+          "instructions": "**CRITICAL DOMAIN EXPLORATION PROCESS (based on slides 78-83, 85):**\n\n**PREREQUISITE:** This stage should be performed AFTER story exploration stage in story shaping, so that acceptance criteria from stories are available.\n\n1. **Load Planning Decisions:** ALWAYS load planning.json and check for \"domain_exploration\" section with decisions_made and assumptions_made. Also check \"domain_discovery\" and \"domain_partitioning\" sections for decisions that affect exploration. These decisions and assumptions MUST guide all exploration work.\n\n2. **Load Story Acceptance Criteria (PRIMARY INPUT):**\n   - Load acceptance criteria from story exploration stage for the increment/epic/feature being explored\n   - Acceptance criteria may be at increment level, epic level, or feature level\n   - These acceptance criteria define the behavioral triggers and outcomes for stories\n   - Example format from slides: \"When a Customer signs up to use a Product, Then a Product Agreement is created, And the Product is activated for that Customer\"\n\n3. **Create Behavioral Acceptance Criteria for Domain Concepts:**\n   - For each group of stories (increment/epic/feature), create behavioral acceptance criteria that describe domain behavior\n   - Use the format: \"When <trigger> Then <outcome>\" (from slide 80)\n   - Good behavioral acceptance criteria specify outcomes that result from user and system triggers\n   - Example from slide 80:\n     * \"When a Customer signs up to use a Product, Then a Product Agreement is created, And the Product is activated for that Customer\"\n     * \"When the Product is activated for the Customer, Then associated Chargeable Activity for that Customer will flagged to be tracked\"\n     * \"When a Customer conducts Chargeable Activity, Then that Chargeable Activity will be tracked\"\n     * \"When a Billing Period is completed, Then a Customer Bill will be generated for all relevant Chargeable Activity\"\n\n4. **Add Domain Descriptions to Acceptance Criteria (from slides 81-83):**\n   - For each acceptance criterion, add domain descriptions that explain:\n     * What domain concepts are involved\n     * How domain concepts interact with each other\n     * The relationships between domain concepts\n     * Business rules and constraints\n   - Use the form: \"<A Concept> <interacts with> <another Concept>\" (from slide 83)\n   - Example from slide 81:\n     * \"The Product Agreement lists the Terms and Conditions where the Customer can use a specific Product and be charged according to a Product Plan\"\n     * \"Individual Pricing Items in the Product Plan specify the specific pricing for a Types Of Chargeable Activity that the Customer may conduct\"\n     * \"Associated Chargeable Activity is identified by referring to the Type Of Chargeable Activity priced through a Price Item in the Product Plan\"\n   - Example from slide 82:\n     * \"Associated Chargeable Activity is identified by referring to the Type Of Chargeable Activity priced through a Price Item in the Product Plan that is associated with a Customer through the Product Agreement\"\n     * \"The Type Of Chargeable Activity, the Customer, and the Billing Period is tracked\"\n   - Example from slide 83:\n     * \"A Bill is calculated based on Chargeable Activity for a specific Customer within a Billing Period\"\n     * \"The Chargeable Activity is found by looking up the Product Plan referred to by the Customer's Product Agreement, and calculating a Charge for each Pricing Items in the Product plan\"\n     * \"The volume of Chargeable Activity for the Pricing Item is collected for the Type Of Chargeable Activity being priced by the Price item\"\n     * \"Each Price Item will calculate a Charge by running the Chargeable Activity through it's Billing Calculation Method, creating A Bill Line Item\"\n     * \"The total price of the Customer Bill will calculated from the total of the Bill Line Items\"\n\n5. **Update Domain Model Based on Behavioral Acceptance Criteria:**\n   - Extract domain concepts from acceptance criteria and domain descriptions\n   - Identify relationships between concepts (from \"<A Concept> <interacts with> <another Concept>\" statements)\n   - Update domain model to reflect:\n     * New domain concepts discovered from acceptance criteria\n     * Relationships between concepts\n     * Behaviors and operations on concepts\n     * Constraints and business rules\n   - Reference slide 85 for example of updated domain model showing:\n     * Product Agreement (signed by Customer, agrees to use Product at Price)\n     * Product Plan\n     * Chargeable Activity (conducted by Customer)\n     * Charge Activity (is charged)\n     * Relationships between these concepts\n\n6. **Update Domain Description Based on Behavioral Acceptance Criteria:**\n   - Create or update domain description that explains:\n     * What each domain concept represents in the business domain\n     * How concepts relate to each other\n     * The behaviors and operations on concepts\n     * Business rules and constraints\n   - Use natural language that domain experts understand\n   - Reference slide 85 for example domain description:\n     * \"The Product Agreement lists the Terms and Conditions defining how the signing Customer can use a specific Product and be charged according to a Product Plan\"\n     * \"Individual Pricing Items in the Product Plan specify the specific pricing for a Types Of Chargeable Activity that the Customer may conduct\"\n     * \"The Type Of Chargeable Activity, the Customer, and the Billing Period is tracked for all Chargeable Activity\"\n     * \"A Bill is calculated at the end of every Billing Period, calculated based on all Chargeable Activity for each Customer\"\n     * \"A Charge calculated a for each Pricing Items in the Product plan, by collecting all The total Chargeable Activity for the Pricing Item is collected by referring to Type Of Chargeable Activity being priced by the Price item\"\n     * \"Each Price Item will calculate a Charge by running the Chargeable Activity through it's Charge Calculation Method, creating A Bill Line Item\"\n\n7. **Update Structured Content (domain_graph.json):**\n   - Update the structured domain map content with:\n     * Behavioral acceptance criteria (at increment/epic/feature level)\n     * Domain descriptions for each acceptance criterion\n     * Domain Rules (increment level, aggregated from all aggregates in the increment)\n     * Invariants/Behaviors (aggregate level for all aggregates in the increment)\n     * Updated domain concepts and relationships discovered from acceptance criteria\n\n8. **Domain Rules Scope:** Use increment/epic/feature-scoped domain perspective for Domain Rules (define rules, invariants, and behaviors relevant to THIS increment/epic/feature).\n\n9. **Reference Planning Decisions:** When writing domain rules, invariants, and behavioral acceptance criteria, explicitly reference planning.json domain_exploration.decisions_made and domain_exploration.assumptions_made, as well as domain_discovery.decisions_made, domain_discovery.assumptions_made, domain_partitioning.decisions_made, and domain_partitioning.assumptions_made to ensure consistency.\n\n10. **Increment/Epic/Feature Size:** If increment/epic/feature is too large, consider breaking into smaller increments."
+        },
+        "outputs": [
+          {
+            "name": "domain_exploration",
+            "path": "docs/domain/exploration",
+            "transformer": "ddd_agent_transform_domain_exploration_to_markdown",
+            "template": "templates/domain-exploration-template.md",
+            "instructions": "**CRITICAL DOMAIN EXPLORATION DOCUMENT CREATION (based on slides 78-83, 85):**\n\n1. **Load Planning Decisions:** ALWAYS load planning.json and check for \"domain_exploration\" section with decisions_made and assumptions_made. Also check \"domain_discovery\" and \"domain_partitioning\" sections for decisions that affect exploration. These decisions and assumptions MUST guide all exploration work.\n\n2. **Load Story Acceptance Criteria:** Load acceptance criteria from story exploration stage for the increment/epic/feature being explored.\n\n3. **Create Domain Exploration Document:** Create domain exploration document that includes:\n   \n   **a. Behavioral Acceptance Criteria Section:**\n   - List all behavioral acceptance criteria for the increment/epic/feature\n   - Format: \"When <trigger> Then <outcome>\" (from slide 80)\n   - Group by story/epic/feature as appropriate\n   - Example from slide 80:\n     * \"When a Customer signs up to use a Product, Then a Product Agreement is created, And the Product is activated for that Customer\"\n     * \"When the Product is activated for the Customer, Then associated Chargeable Activity for that Customer will flagged to be tracked\"\n     * \"When a Customer conducts Chargeable Activity, Then that Chargeable Activity will be tracked\"\n     * \"When a Billing Period is completed, Then a Customer Bill will be generated for all relevant Chargeable Activity\"\n   \n   **b. Domain Descriptions Section (for each acceptance criterion):**\n   - For each acceptance criterion, provide domain descriptions that explain:\n     * What domain concepts are involved\n     * How domain concepts interact with each other (format: \"<A Concept> <interacts with> <another Concept>\")\n     * The relationships between domain concepts\n     * Business rules and constraints\n   - Examples from slides 81-83 (see instructions in structured_content for full examples)\n   \n   **c. Updated Domain Model Section:**\n   - Show the domain model updated based on behavioral acceptance criteria\n   - Include domain concepts, relationships, and behaviors discovered from acceptance criteria\n   - Reference slide 85 for example structure\n   \n   **d. Updated Domain Description Section:**\n   - Provide natural language description of the domain based on acceptance criteria\n   - Explain what each domain concept represents in the business domain\n   - Describe relationships and behaviors\n   - Reference slide 85 for example format\n   \n   **e. Domain Rules Section:**\n   - Core Domain Rules + Invariants + Behaviors aggregated from all aggregates in increment/epic/feature\n   - Detailed Invariants/Behaviors for all aggregates in the increment/epic/feature\n   \n4. **Domain Rules Format:** ALL domain rules written in domain exploration document. Ensure rules reflect planning decisions and are derived from behavioral acceptance criteria.\n\n5. **Reference Planning Decisions:** When writing domain rules, behavioral acceptance criteria, and domain descriptions, explicitly reference planning.json domain_exploration.decisions_made and domain_exploration.assumptions_made, as well as domain_discovery.decisions_made, domain_discovery.assumptions_made, domain_partitioning.decisions_made, and domain_partitioning.assumptions_made to ensure consistency.\n\n6. **Increment/Epic/Feature Size:** If increment/epic/feature is too large, consider breaking into smaller increments.\n\n7. **Update Domain Graph:** After creating the domain exploration document, update the domain_graph.json with:\n   - Behavioral acceptance criteria\n   - Domain descriptions for acceptance criteria\n   - Updated domain concepts and relationships\n   - Updated domain rules, invariants, and behaviors"
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to exploration behavior",
+        "patterns": [
+          "explore.*domain.*rules",
+          "define.*invariants",
+          "model.*domain.*behaviors",
+          "explore.*aggregate",
+          "domain.*exploration",
+          "exploration"
+        ],
+        "priority": 11
+      }
+    },
+    "domain_specification": {
+      "order": 7,
+      "guardrails": {
+        "required_context": {
+          "clarification_instructions": "CRITICAL: For the domain_specification behavior, you MUST ask the user these questions.",
+          "key_questions": [
+            "What is the complete ubiquitous language for this increment?",
+            "What are the exact domain concepts and their definitions?",
+            "What are the relationships and associations between concepts?",
+            "What are the domain events with their full payloads?",
+            "What are the commands with their validation rules?",
+            "What are the value objects and their constraints?",
+            "What are the aggregate boundaries and consistency rules?"
+          ],
+          "evidence": [
+            "Increment exploration from Exploration stage",
+            "Domain expert validation",
+            "Ubiquitous language glossary",
+            "CRC cards or UML diagrams"
+          ]
+        }
+      },
+      "content": {
+        "structured_content": {
+          "schema": "domain_graph.json",
+          "path": "docs/domain",
+          "description": "Domain specification creates detailed domain model documentation with complete ubiquitous language definitions - similar to how specification creates detailed story documents with scenarios",
+          "instructions": "Update domain model documentation with complete ubiquitous language definitions, detailed aggregate structures, domain event specifications, and command definitions. This is the final detailed specification phase for domain models."
+        },
+        "outputs": [
+          {
+            "name": "domain_model",
+            "path": "docs/domain/models",
+            "transformer": "ddd_agent_transform_domain_model_to_markdown",
+            "template": "templates/domain-model-template.md",
+            "instructions": "Create detailed domain model document with complete ubiquitous language definitions, aggregate specifications, domain event payloads, command validation rules, and invariant specifications. This is the final detailed specification for domain models."
+          }
+        ]
+      },
+      "trigger_words": {
+        "description": "Behavior-level trigger words - specific to domain specification behavior",
+        "patterns": [
+          "model.*ubiquitous.*language",
+          "define.*domain.*concepts",
+          "specify.*aggregates",
+          "document.*domain.*events",
+          "domain.*modeling",
+          "ubiquitous.*language"
+        ],
+        "priority": 12
+      }
+    }
+  },
+  "trigger_words": {
+    "description": "Agent-level trigger words - general terms that indicate when to use the DDD agent",
+    "patterns": [
+      "domain.*driven.*design",
+      "ddd",
+      "domain.*modeling",
+      "bounded.*context",
+      "aggregate",
+      "domain.*event",
+      "ubiquitous.*language",
+      "domain.*expert"
+    ],
+    "priority": 5
+  },
+  "mcp": {
+    "server_name": "agent-ddd",
+    "command": "python",
+    "args": [
+      "agents/base/src/agent_mcp_server.py",
+      "domain_driven_design"
+    ],
+    "cwd": "C:\\dev\\augmented-teams",
+    "env": {
+      "AGENT_NAME": "domain_driven_design",
+      "PYTHONPATH": "C:\\dev\\augmented-teams"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+# AI Agent Execution Context - Memory Reference
+
+**CRITICAL: Command Execution - USE COMMAND EXECUTOR**
+
+**MANDATORY**: When a user invokes a command (e.g., `/code-agent-sync`), AI agents MUST use the command executor. DO NOT run terminal commands manually.
+
+**Required Pattern**:
+```python
+from behaviors.code_agent.utils.command_executor import execute_command
+
+# Execute command automatically
+result = execute_command("code-agent-sync", "generate")
+# Or with parameters:
+result = execute_command("code-agent-sync", "generate", feature_name="bdd", force=True)
+```
+
+**What the Executor Does**:
+- Automatically finds and parses command file metadata
+- Tries Python import first (fastest, type-safe)
+- Falls back to CLI if Python import fails
+- Handles all parameter mapping
+- Returns structured results
+
+**DO NOT**:
+- ❌ Manually construct CLI commands: `python behaviors/code-agent/code_agent_runner.py sync`
+- ❌ Parse command files manually
+- ❌ Run terminal commands via subprocess
+- ❌ Navigate directories or handle paths manually
+
+**DO**:
+- ✅ Always use `execute_command(command_name, action, **params)`
+- ✅ Let the executor handle everything automatically
+- ✅ Use the structured result returned by the executor
+
+**Legacy Context (Only if executor fails)**:
+If the executor completely fails, fallback to:
+1. **ALWAYS run from workspace root**: `C:\dev\augmented-teams`
+2. **PowerShell syntax**: Use semicolon `;` not `&&`
+3. **Path format**: Runner paths relative to workspace root

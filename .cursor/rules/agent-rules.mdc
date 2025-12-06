@@ -1,0 +1,199 @@
+---
+description: Agent workflow safeguard rules - NEVER modify agent artifacts directly, ALWAYS use agent MCP tools (agent-stories, agent-clean-code, etc.)
+globs:
+  - "**/docs/stories/**/*.md"
+  - "**/docs/**/story-map*.md"
+  - "**/docs/**/*epic*.md"
+  - "**/docs/**/*feature*.md"
+  - "**/docs/**/*story*.md"
+  - "**/docs/clean-code/**/*.json"
+  - "**/violations_report.json"
+---
+**When** working with agent artifacts (story maps, epics, features, stories, acceptance criteria, scenarios, clean code violations reports, etc.)
+**then** ALWAYS use the appropriate agent MCP tools and workflow - NEVER modify artifacts directly.
+
+## CRITICAL SAFEGUARDS
+
+### 1. NEVER Modify Agent Artifacts Directly
+
+**❌ FORBIDDEN:**
+- Directly editing story map files (`*-story-map.md`, `*-story-map-increments.md`)
+- Directly editing epic/feature/story documents (`🎯 Epic Name/`, `⚙️ Feature Name/`, `📝 Story Name.md`)
+- Directly modifying acceptance criteria or scenarios
+- Directly editing clean code violations reports (`violations_report.json`)
+- Using `search_replace`, `write`, or other file editing tools on agent artifacts
+- Bypassing the agent workflow system
+
+**✅ REQUIRED:**
+- Use agent MCP tools for ALL agent work:
+  - **Story Agent**: Use `agent-stories` MCP tools for story work
+  - **Clean Code Agent**: Use `agent-clean-code` MCP tools for clean code analysis
+- Follow the agent workflow (clarification → planning → build_structure → render_output → validate → correct)
+- Use `mcp_agent-{agent_name}_agent_store_action_output` to save content
+- Use `mcp_agent-{agent_name}_agent_next_action` to progress through workflow
+- Use `mcp_agent-{agent_name}_agent_get_instructions` to check current workflow state
+
+### 2. ALWAYS Check Agent Instructions Before Starting
+
+**MANDATORY FIRST STEP:**
+Before starting ANY agent work, you MUST:
+
+1. Call `mcp_agent-{agent_name}_agent_get_instructions` with user input (e.g., `mcp_agent-stories_agent_get_instructions` or `mcp_agent-clean-code_agent_get_instructions`)
+2. Review the returned instructions
+3. **CRITICAL - Project Location Confirmation:**
+   - If instructions indicate project location needs to be set or confirmed:
+     - **Print the project location** that will be used (either detected or proposed)
+     - **Ask the user to confirm:** "I will create/use the project at: `[project_path]`. Is this correct?"
+     - **Wait for user response:**
+       - User says **"yes"** or **"yes it does belong here"** → Proceed with that location
+       - User says **"no"** or **"no put it in [folder]"** → Update project location and ask for confirmation again
+     - **NEVER proceed without explicit user confirmation** of the project location
+4. Follow all other instructions exactly (may require waiting for user confirmation at other decision points, etc.)
+5. NEVER proceed without checking instructions first
+
+**Why:** The agent workflow has safeguards (like requiring `project_area` to be set and confirmed) that only trigger when using MCP tools. Bypassing these tools bypasses all safeguards.
+
+### 3. ALWAYS Use Agent MCP Tools for Agent Work
+
+**Available Agents:**
+- **agent-stories** - Story writing and management (story maps, epics, features, stories, acceptance criteria)
+- **agent-clean_code** - Clean code validation and refactoring (code analysis, violations reports)
+
+**Required Tool Pattern:**
+- `mcp_agent-{agent_name}_agent_get_instructions` - Check workflow state and get instructions
+- `mcp_agent-{agent_name}_agent_get_state` - Get current behavior/action
+- `mcp_agent-{agent_name}_agent_store_action_output` - Save workflow content
+- `mcp_agent-{agent_name}_agent_next_action` - Progress workflow
+- `mcp_agent-{agent_name}_agent_move_to_action` - Navigate to specific action
+- `mcp_agent-{agent_name}_agent_move_to_behavior` - Navigate to specific behavior
+
+**Agent Name Mapping:**
+- Story agent name: `stories` → MCP server: `agent-stories` → Tool prefix: `mcp_agent-stories_`
+- Clean code agent name: `clean_code` → MCP server: `agent-clean_code` → Tool prefix: `mcp_agent-clean_code_`
+
+### 4. Workflow Enforcement
+
+**The agent workflow enforces:**
+- **Project location confirmation** - MUST print proposed project location and get explicit user confirmation before proceeding
+- Project area must be set before starting work (prevents creating files in workspace root)
+- User confirmation required at key decision points (clarification, planning, consolidation reviews)
+- Validation checks before proceeding
+- Proper sequencing of behaviors (agent-specific)
+- Proper sequencing of actions (clarification → planning → build_structure → render_output → validate → correct)
+
+**These safeguards ONLY work when using MCP tools.** Direct file editing bypasses all safeguards.
+
+## Examples
+
+### ❌ WRONG - Direct File Editing
+```python
+# NEVER DO THIS:
+search_replace(
+    file_path="docs/stories/map/mob-handling-story-map.md",
+    old_string="🎯 Manage Mobs",
+    new_string="🎯 Manage Mobs (updated)"
+)
+
+# NEVER DO THIS:
+write(
+    file_path="docs/stories/map/🎯 Epic Name/⚙️ Feature Name/📝 Story Name.md",
+    contents=story_content
+)
+
+# NEVER DO THIS:
+write(
+    file_path="docs/clean-code/violations_report.json",
+    contents=violations_data
+)
+```
+
+### ✅ CORRECT - Using Agent Tools
+
+**For Story Agent:**
+```python
+# ALWAYS DO THIS:
+# 1. Check instructions first
+instructions = mcp_agent-stories_agent_get_instructions(
+    user_input="I want to update the story map"
+)
+
+# 2. If instructions require project location confirmation:
+if "PROJECT LOCATION" in instructions or "project location" in instructions.lower():
+    # Print the project location to user
+    project_path = instructions.get("project_path") or agent.project_area
+    print(f"I will create/use the project at: {project_path}")
+    print("Is this correct? (yes/no or 'no put it in [folder]')")
+    # WAIT for user response - do NOT proceed until user confirms
+    # If user says "no put it in [folder]", update and ask again
+    user_response = wait_for_user_input()
+    if "no" in user_response.lower():
+        new_location = extract_path_from_response(user_response)
+        # Update project location and ask for confirmation again
+        return  # Don't proceed until confirmed
+
+# 3. Follow workflow - store content through agent
+mcp_agent-stories_agent_store_action_output(
+    kwargs=json.dumps({
+        "structured": updated_story_graph,
+        "rendered": updated_story_map_markdown
+    })
+)
+
+# 4. Progress workflow
+mcp_agent-stories_agent_next_action()
+```
+
+**For Clean Code Agent:**
+```python
+# ALWAYS DO THIS:
+# 1. Check instructions first
+instructions = mcp_agent-clean_code_agent_get_instructions(
+    user_input="I want to analyze code quality"
+)
+
+# 2. Follow workflow - store content through agent
+mcp_agent-clean_code_agent_store_action_output(
+    kwargs=json.dumps({
+        "structured": violations_report_data
+    })
+)
+
+# 3. Progress workflow
+mcp_agent-clean_code_agent_next_action()
+```
+
+## Agent-Specific Workflows
+
+### Story Agent Behaviors (in order):
+1. **shape** - Create story map structure
+2. **prioritization** - Organize increments with priorities
+3. **arrange** - Create folder structure
+4. **discovery** - Refine stories for increment(s) in focus
+5. **exploration** - Write acceptance criteria and scenarios
+6. **specification** - Add detailed test specifications
+
+### Clean Code Agent Behaviors:
+1. **code** - Analyze code quality and generate violations reports
+
+**Agent Name:** `clean_code` (with underscore)
+
+**Each behavior has actions:**
+- clarification - Ask required questions
+- planning - Present assumptions and decision criteria
+- build_structure - Generate structured content
+- render_output - Transform to markdown artifacts
+- validate - Check against rules
+- correct - Fix violations
+
+**NEVER skip these steps or modify artifacts directly.**
+
+## Enforcement
+
+**If you find yourself:**
+- Editing story map files directly → STOP and use agent-stories tools instead
+- Editing violations reports directly → STOP and use agent-clean-code tools instead
+- Not checking `mcp_agent-{agent_name}_agent_get_instructions` first → STOP and check instructions
+- Bypassing the workflow → STOP and follow the workflow
+- Creating files in workspace root → STOP - agent will prevent this if you use tools
+
+**Remember:** The agent workflow exists to enforce safeguards, ensure proper sequencing, maintain consistency, and prevent creating files in wrong locations. Bypassing it defeats its purpose.
