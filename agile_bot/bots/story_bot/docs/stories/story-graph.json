@@ -226,6 +226,15 @@
               ],
               "Steps": [],
               "story_type": "technical"
+            },
+            {
+              "name": "Track Builders Synchers Transformers in Story Graph",
+              "sequential_order": 18.0,
+              "users": [
+                "Story IO Diagram"
+              ],
+              "Steps": [],
+              "story_type": "technical"
             }
           ]
             }

@@ -93,6 +93,234 @@ class BaseBotCli:
             print(f"  - {action}")
         sys.stdout.flush()
     
+    def help_behaviors_and_actions(self):
+        """List all available behaviors and actions with descriptions from behavior instructions."""
+        print(f"\n**PLEASE SHOW THIS OUTPUT TO THE USER**\n")
+        print(f"Available Behaviors and Actions for {self.bot_name}:\n")
+        print("=" * 70)
+        
+        for behavior_name in self.bot.behaviors:
+            # Get behavior description
+            behavior_description = self._get_behavior_description(f'{self.bot_name}-{behavior_name}')
+            
+            print(f"\nBehavior: {behavior_name}")
+            print(f"  Description: {behavior_description}")
+            
+            # Get actions for this behavior
+            try:
+                behavior_obj = getattr(self.bot, behavior_name)
+                actions = self._get_behavior_actions(behavior_obj)
+                
+                if actions:
+                    print(f"  Actions:")
+                    for action in actions:
+                        # Try to get action description from base_actions
+                        action_description = self._get_action_description(action)
+                        print(f"    - {action}: {action_description}")
+                else:
+                    print(f"  Actions: None")
+            except Exception as e:
+                print(f"  Actions: Error loading actions - {e}")
+        
+        print("\n" + "=" * 70)
+        print("\nUsage:")
+        print(f"  {self.bot_name} [behavior] [action] [--options]")
+        print(f"  {self.bot_name} --help          # Show this help")
+        print(f"  {self.bot_name} --list          # List behaviors/actions")
+        print(f"  {self.bot_name} --help-cursor   # List cursor commands")
+        print(f"  {self.bot_name} --close         # Close current action")
+        sys.stdout.flush()
+    
+    def _get_action_description(self, action_name: str) -> str:
+        """Get action description from base_actions instructions."""
+        # Try to load from base_actions
+        base_actions_dir = self.workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        
+        # Check numbered format (e.g., 1_initialize_project, 2_gather_context)
+        action_prefixes = {
+            'initialize_project': '1_initialize_project',
+            'gather_context': '2_gather_context',
+            'decide_planning_criteria': '3_decide_planning_criteria',
+            'build_knowledge': '4_build_knowledge',
+            'render_output': '5_render_output',
+            'validate_rules': '7_validate_rules',
+            'correct_bot': '6_correct_bot'
+        }
+        
+        action_folder = action_prefixes.get(action_name, action_name)
+        instructions_path = base_actions_dir / action_folder / 'instructions.json'
+        
+        if instructions_path.exists():
+            try:
+                import json
+                instructions = json.loads(instructions_path.read_text(encoding='utf-8'))
+                
+                # Extract description from instructions
+                if isinstance(instructions, dict):
+                    # Look for description field or first line of instructions
+                    if 'description' in instructions:
+                        return instructions['description']
+                    elif 'instructions' in instructions and isinstance(instructions['instructions'], list):
+                        # Get first meaningful line from instructions
+                        for line in instructions['instructions']:
+                            if line and not line.startswith('**') and len(line.strip()) > 10:
+                                # Return first substantial line, truncated if too long
+                                desc = line.strip()
+                                if len(desc) > 80:
+                                    desc = desc[:77] + '...'
+                                return desc
+            except Exception:
+                pass
+        
+        # Fallback to formatted action name
+        return action_name.replace('_', ' ').title()
+    
+    def help_cursor_commands(self):
+        """List all available cursor commands and their parameters."""
+        commands_dir = self.workspace_root / '.cursor' / 'commands'
+        
+        if not commands_dir.exists():
+            print(f"No cursor commands directory found at {commands_dir}")
+            return
+        
+        # Find all command files for this bot
+        command_files = sorted(commands_dir.glob(f'{self.bot_name}*.md'))
+        
+        if not command_files:
+            print(f"No cursor commands found for {self.bot_name}")
+            return
+        
+        print(f"\n**PLEASE SHOW THIS OUTPUT TO THE USER**\n")
+        print(f"Available Cursor Commands for {self.bot_name}:\n")
+        print("=" * 70)
+        
+        for cmd_file in command_files:
+            # Extract command name from filename (remove .md extension)
+            cmd_name = cmd_file.stem
+            
+            # Read command content
+            try:
+                cmd_content = cmd_file.read_text(encoding='utf-8').strip()
+                
+                # Extract parameters from ${1:}, ${2:}, etc.
+                import re
+                params = re.findall(r'\$\{(\d+):\}', cmd_content)
+                
+                # Get meaningful description from behavior instructions
+                description = self._get_behavior_description(cmd_name)
+                
+                print(f"\n/{cmd_name}")
+                print(f"  Description: {description}")
+                
+                if params:
+                    print(f"  Parameters:")
+                    for i, param_num in enumerate(params, 1):
+                        # Try to infer parameter meaning from command name and content
+                        param_desc = self._infer_parameter_description(cmd_name, param_num, cmd_content)
+                        print(f"    ${param_num}: {param_desc}")
+                else:
+                    print(f"  Parameters: None")
+                
+            except Exception as e:
+                print(f"\n/{cmd_name}")
+                print(f"  Error reading command: {e}")
+        
+        print("\n" + "=" * 70)
+        print("\nUsage: Type /{command-name} in Cursor command palette")
+        print("Parameters are optional placeholders that Cursor will prompt for")
+        sys.stdout.flush()
+    
+    def _get_behavior_description(self, cmd_name: str) -> str:
+        """Get meaningful description from behavior instructions."""
+        # Extract behavior name from command name
+        # e.g., "story_bot-shape" -> "shape"
+        behavior_name = cmd_name.replace(f'{self.bot_name}-', '').replace('-', '_')
+        
+        # Special cases for utility commands
+        if behavior_name in ['continue', 'help', 'initialize_project', 'confirm_project_area']:
+            if behavior_name == 'continue':
+                return 'Close current action and continue to next action in workflow'
+            elif behavior_name == 'help':
+                return 'List all available cursor commands and their parameters'
+            elif behavior_name == 'initialize_project':
+                return 'Initialize project location for workflow state persistence'
+            elif behavior_name == 'confirm_project_area':
+                return 'Confirm or change project area location'
+            else:
+                return behavior_name.replace('_', ' ').title()
+        
+        # Try to load behavior instructions
+        # First try direct name
+        behavior_instructions_path = (
+            self.workspace_root / 'agile_bot' / 'bots' / self.bot_name / 
+            'behaviors' / behavior_name / 'instructions.json'
+        )
+        
+        # Also check numbered behavior folders (e.g., 1_shape, 2_prioritization)
+        if not behavior_instructions_path.exists():
+            # Try numbered format - check all numbered folders
+            behaviors_dir = self.workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'behaviors'
+            if behaviors_dir.exists():
+                for folder in behaviors_dir.iterdir():
+                    if folder.is_dir():
+                        # Check if folder name ends with behavior_name (e.g., "1_shape" ends with "shape")
+                        folder_name = folder.name
+                        if folder_name.endswith(f'_{behavior_name}') or folder_name == behavior_name:
+                            potential_path = folder / 'instructions.json'
+                            if potential_path.exists():
+                                behavior_instructions_path = potential_path
+                                break
+        
+        if behavior_instructions_path.exists():
+            try:
+                import json
+                instructions = json.loads(behavior_instructions_path.read_text(encoding='utf-8'))
+                
+                # Extract top 2-3 lines about outcome: description, goal, outputs
+                description_parts = []
+                
+                if instructions.get('description'):
+                    description_parts.append(instructions['description'])
+                
+                if instructions.get('goal'):
+                    description_parts.append(instructions['goal'])
+                
+                if instructions.get('outputs') and len(description_parts) < 3:
+                    outputs = instructions['outputs']
+                    if isinstance(outputs, str):
+                        # Take first part of outputs (before comma or first item)
+                        first_output = outputs.split(',')[0].strip()
+                        description_parts.append(f"Outputs: {first_output}")
+                
+                if description_parts:
+                    # Join with " | " separator, limit to 2-3 meaningful lines
+                    return ' | '.join(description_parts[:3])
+            except Exception:
+                pass
+        
+        # Fallback to formatted name
+        return behavior_name.replace('_', ' ').title()
+    
+    def _infer_parameter_description(self, cmd_name: str, param_num: str, cmd_content: str) -> str:
+        """Infer parameter description from command name and content."""
+        # Common patterns
+        if 'initialize-project' in cmd_name:
+            if param_num == '1':
+                return 'Behavior name (e.g., shape)'
+            elif param_num == '2':
+                return 'Project area path (e.g., demo/my_project)'
+        elif 'confirm-project-area' in cmd_name:
+            if param_num == '1':
+                return 'confirm/true (confirm current) or path (change location)'
+        elif 'shape' in cmd_name or 'discovery' in cmd_name or 'exploration' in cmd_name:
+            if param_num == '1':
+                return 'Optional action name or file path'
+        elif 'continue' in cmd_name or 'help' in cmd_name:
+            return 'No parameters'
+        
+        # Default fallback
+        return f'Parameter {param_num}'
+    
     def _get_behavior_actions(self, behavior_obj) -> list:
         excluded_attrs = {'forward_to_current_action', 'dir', 'current_project_file'}
         actions = []
@@ -109,12 +337,14 @@ class BaseBotCli:
         return callable(getattr(behavior_obj, attr_name))
     
     @staticmethod
-    def parse_arguments(description: str = "Bot CLI") -> Tuple[argparse.Namespace, Dict[str, str]]:
-        parser = argparse.ArgumentParser(description=description)
+    def parse_arguments(description: str = "Bot CLI", custom_help_handler=None) -> Tuple[argparse.Namespace, Dict[str, str]]:
+        parser = argparse.ArgumentParser(description=description, add_help=False)
         parser.add_argument('behavior', nargs='?', help='Behavior name (optional)')
         parser.add_argument('action', nargs='?', help='Action name (optional)')
         parser.add_argument('--close', action='store_true', help='Close current action')
         parser.add_argument('--list', action='store_true', help='List available options')
+        parser.add_argument('--help-cursor', action='store_true', help='List all cursor commands and parameters')
+        parser.add_argument('-h', '--help', action='store_true', help='Show this help message and exit')
         # Allow any additional arguments to be passed through as context
         parser.add_argument('context', nargs='*', help='Additional context (file paths, parameters, etc.)')
         
@@ -208,7 +438,13 @@ class BaseBotCli:
         args, params = BaseBotCli.parse_arguments(description=f"{self.bot_name} CLI")
         
         try:
-            if args.list:
+            if args.help:
+                self.help_behaviors_and_actions()
+                return None
+            elif args.help_cursor:
+                self.help_cursor_commands()
+                return None
+            elif args.list:
                 self._handle_list_command(args.behavior)
                 return None
             else:
@@ -260,10 +496,11 @@ class BaseBotCli:
         - Bot command: routes to current behavior/action
         - Behavior commands: one per behavior, accepts optional action parameter via ${1:}
           If no action parameter provided, uses default/current action
+        - Initialize project command: for confirming project location
         
         Args:
             commands_dir: Directory where cursor command files will be written (.cursor/commands/)
-            cli_script_path: Path to the CLI script that will be invoked
+            cli_script_path: Path to the Python CLI script that will be invoked
             
         Returns:
             Dict mapping command name to file path
@@ -273,10 +510,47 @@ class BaseBotCli:
         current_command_files = self._get_current_command_files(commands_dir)
         commands = {}
         
+        # Use Python directly instead of script wrapper
+        cli_script_str = str(cli_script_path).replace('\\', '/')
+        python_command = f"python {cli_script_str}"
+        
         # Bot command: routes to current behavior/action
-        cli_script_str = str(cli_script_path)
-        bot_command = f"{cli_script_str}"
+        bot_command = f"{python_command}"
         commands[f'{self.bot_name}'] = self._write_command_file(commands_dir / f'{self.bot_name}.md', bot_command)
+        
+        # Initialize project command: for confirming project location (requires behavior)
+        # ${1:} is behavior name, ${2:} is project area path
+        init_command = f"{python_command} ${{1:}} initialize_project --project_area=${{2:}} --confirm=true"
+        commands[f'{self.bot_name}-initialize-project'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-initialize-project.md',
+            init_command
+        )
+        
+        # Confirm project area command: confirms current location or changes to new location
+        # ${1:} can be "confirm"/"true" (confirm current) or a path (change to new location)
+        # If ${1:} is empty, "confirm", or "true", confirms current directory
+        # If ${1:} is a path, changes to that location
+        # Bot logic handles "confirm"/"true" as "use current directory"
+        # Use Python to conditionally add project_area parameter
+        confirm_script = f'''python -c "import sys; from pathlib import Path; import subprocess; param = sys.argv[1] if len(sys.argv) > 1 else ''; workspace_root = Path.cwd(); script = workspace_root / r'{cli_script_str}'; cmd = [sys.executable, str(script), 'shape', 'initialize_project', '--confirm=true']; cmd.extend(['--project_area=' + param] if param else []); subprocess.run(cmd)" ${{1:}}'''
+        commands[f'{self.bot_name}-confirm-project-area'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-confirm-project-area.md',
+            confirm_script
+        )
+        
+        # Continue command: closes current action and continues to next
+        continue_command = f"{python_command} --close"
+        commands[f'{self.bot_name}-continue'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-continue.md',
+            continue_command
+        )
+        
+        # Help command: lists all cursor commands and their parameters
+        help_command = f"{python_command} --help-cursor"
+        commands[f'{self.bot_name}-help'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-help.md',
+            help_command
+        )
         
         # Behavior commands: accept optional action parameter and any additional context
         for behavior_name in self.bot.behaviors:
@@ -285,9 +559,7 @@ class BaseBotCli:
             # If no action provided, behavior uses default/current action
             # Note: Cursor will replace ${1:} and ${2:} with user input or empty string
             # Additional arguments can be passed as --key=value or file paths
-            # Convert cli_script_path to string for command
-            cli_script_str = str(cli_script_path)
-            behavior_command = f"{cli_script_str} {behavior_name} ${{1:}}"
+            behavior_command = f"{python_command} {behavior_name} ${{1:}}"
             commands[f'{self.bot_name}-{behavior_name}'] = self._write_command_file(
                 commands_dir / f'{self.bot_name}-{behavior_name}.md', 
                 behavior_command

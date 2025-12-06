@@ -1,0 +1,34 @@
+{
+  "name": "render_story_map_discovery_drawio",
+  "description": "Render discovery story map to DrawIO diagram.",
+  "path": "docs/stories",
+  "input": "story-graph.json",
+  "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",
+  "renderer_command": "render-discovery",
+  "output": "story-map-discovery.drawio"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

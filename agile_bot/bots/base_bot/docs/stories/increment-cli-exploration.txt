@@ -61,6 +61,36 @@ Business Outcome: Enable users to invoke bot tools and behaviors through command
             (AC) AND CLI works same as close_current_action MCP tool
             (AC) AND If current action is terminal (next_action=null), bot indicates workflow complete
             (AC) AND If action requires confirmation but not confirmed, bot returns error message
+        and
+        (S) Human --> Get Help for Command Line Functions
+            (AC) WHEN Human executes CLI command with --help-cursor flag (e.g., `bot story_bot --help-cursor`)
+            (AC) THEN CLI scans all cursor command files for the bot in `.cursor/commands/` directory
+            (AC) AND CLI loads behavior instructions from `behaviors/{behavior_name}/instructions.json` for each behavior command
+            (AC) AND CLI extracts meaningful descriptions from behavior instructions (description, goal, outputs - top 2-3 lines about outcomes)
+            (AC) AND CLI displays formatted list of all cursor commands with:
+            (AC)   - Command name (e.g., `/story_bot-shape`)
+            (AC)   - Meaningful description extracted from behavior instructions
+            (AC)   - Parameters with descriptions (e.g., `$1: Optional action name or file path`)
+            (AC) AND CLI includes instruction at top: "**PLEASE SHOW THIS OUTPUT TO THE USER**"
+            (AC) AND CLI displays usage instructions at bottom
+            (AC) AND Output is shown to user (AI agent displays the help output)
+            (AC) AND CLI handles missing behavior instructions gracefully with fallback descriptions
+            (AC) AND CLI handles missing cursor commands directory gracefully with informative message
+            (AC) AND CLI displays utility commands (continue, help, initialize-project, confirm-project-area) with appropriate descriptions
+            (AC) WHEN Human executes CLI command with --help flag (e.g., `bot story_bot --help`)
+            (AC) THEN CLI loads all behaviors from bot configuration
+            (AC) AND CLI loads behavior instructions from `behaviors/{behavior_name}/instructions.json` for each behavior
+            (AC) AND CLI extracts meaningful descriptions from behavior instructions (description, goal, outputs - top 2-3 lines about outcomes)
+            (AC) AND CLI loads action instructions from `base_actions/{action_name}/instructions.json` for each action
+            (AC) AND CLI extracts action descriptions from base_actions instructions
+            (AC) AND CLI displays formatted list of all behaviors with:
+            (AC)   - Behavior name (e.g., `shape`)
+            (AC)   - Meaningful description extracted from behavior instructions
+            (AC)   - List of actions for each behavior with descriptions extracted from base_actions
+            (AC) AND CLI includes instruction at top: "**PLEASE SHOW THIS OUTPUT TO THE USER**"
+            (AC) AND CLI displays usage instructions at bottom
+            (AC) AND Output is shown to user (AI agent displays the help output)
+            (AC) AND CLI handles missing behavior instructions gracefully with fallback descriptions
 
 Domain Concepts (Increment Level):
 

@@ -76,3 +76,24 @@ fix disocvered AC are marked as found during testing vs up front
 help for user testing  --> copuld be generation of comand that have steps AI can do iwth some data
 
 links ion story md to code
+
+more deliberatelymoving workflow out of the instructions so that no workflow happens if you drag and drop something inYou have to be specific as it's confusing the actual code, that all we only include it if we're not using codes
+we need the concepts of runs because a workflow only makes sense within the concept of a run EG we might be doing a workflow on a particular single story while also doing a run on a particular epicSo we need to be able to set the run and then go back to that run
+all render documents should have hyperlinks to other render documentsas appropriate
+
+
+standsalone synch command 
+
+ 
+
+
+
+
+
+
+
+
+
+------------------
+call a behaviorCall all behaviors with one action
+need something to in the background just update everything based on what has changed the latest so if the story graph was changed it just runs render automatically or if an artifact was changed it renders extract and then render

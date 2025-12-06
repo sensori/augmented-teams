@@ -83,10 +83,19 @@ class Workflow:
             try:
                 state_data = json.loads(self.file.read_text(encoding='utf-8'))
                 current_behavior = state_data.get('current_behavior', '')
-                completed_actions = state_data.get('completed_actions', [])
+                current_action = state_data.get('current_action', '')
                 
                 if current_behavior == f'{self.bot_name}.{self.behavior}':
-                    # Determine from completed_actions (source of truth), NOT current_action (may be stale)
+                    # Use current_action from file as source of truth
+                    # Extract action name from format: 'bot.behavior.action' -> 'action'
+                    if current_action:
+                        action_name = current_action.split('.')[-1]
+                        if action_name in self.states:
+                            self.machine.set_state(action_name)
+                            return
+                    
+                    # Fallback: if current_action not found or invalid, determine from completed_actions
+                    completed_actions = state_data.get('completed_actions', [])
                     next_action = self._determine_next_action_from_completed(completed_actions)
                     
                     if next_action and next_action in self.states:

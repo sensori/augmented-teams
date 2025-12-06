@@ -2,7 +2,7 @@
 Complete Workflow Integration Test
 
 End-to-end test of the complete workflow with all fixes:
-1. Workflow determines action from completed_actions
+1. Workflow determines action from current_action (with fallback to completed_actions)
 2. Guardrails load with number prefixes
 3. Actions save state when called directly
 4. Close tool marks complete and transitions

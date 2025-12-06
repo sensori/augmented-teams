@@ -563,16 +563,26 @@ def load_state(self):
 - `workflow.machine` - transitions library state machine
 - **Use:** Manages transitions, enforces valid state changes
 
-**3. completed_actions (Source of Truth)**
-- Array of `{action_state, timestamp}` entries
+**3. current_action (Source of Truth)**
+- String format: `bot.behavior.action`
 - **Use:** Determines which action to execute next
-- **Why:** current_action may be stale/corrupted
+- **Why:** This is the authoritative current state
+
+**4. completed_actions (Fallback)**
+- Array of `{action_state, timestamp}` entries
+- **Use:** Fallback when current_action is missing or invalid
+- **Why:** Provides backup when current_action unavailable
 
 ### Precedence Rules
 
 When determining next action:
 
-1. **Primary:** `completed_actions` array
+1. **Primary:** `current_action` field
+   - Extract action name from format: `bot.behavior.action` → `action`
+   - Set state machine to that action
+   - Use this as source of truth
+
+2. **Fallback:** `completed_actions` array (if current_action missing/invalid)
    - Find last completed action for this behavior
    - Look up next action in transitions
    - Set state machine to that action
@@ -772,7 +782,10 @@ def find_behavior_folder(workspace_root, bot_name, behavior):
 
 ### 4. Source of Truth
 
-- `completed_actions` array = source of truth
+- `current_action` field = primary source of truth
+- Current action extracted directly from current_action field
+- State machine follows current_action
+- `completed_actions` array = fallback when current_action missing/invalid
 - Current action derived from completed actions
 - State machine follows completed actions
 
@@ -943,7 +956,7 @@ mcp_story-bot_story_bot_close_current_action()
 2. **Forwarding chain** - Each level delegates to next
 3. **State synchronization** - Reload from file on each forward
 4. **Explicit completion** - Close tool marks actions complete
-5. **Source of truth** - completed_actions drives state determination
+5. **Source of truth** - current_action drives state determination (with completed_actions as fallback)
 6. **Direct calls** - Actions set state before saving
 7. **Generator** - Dynamically creates all tools from config
 

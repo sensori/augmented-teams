@@ -1,1 +1,1 @@
-agile_bot\bots\story_bot\story_bot_cli.ps1 examples ${1:}
+python agile_bot/bots/story_bot/src/story_bot_cli.py examples ${1:}

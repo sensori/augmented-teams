@@ -119,7 +119,7 @@
           "collaborators": ["Agile Bot", "Bot Behavior"]
         },
         {
-          "name": "Determines Next Action From Completed Actions",
+          "name": "Determines Next Action From Current Action",
           "collaborators": ["Completed Actions", "Action Configuration", "Transitions"]
         },
         {

@@ -1,7 +1,7 @@
 {
   "actionName": "build_knowledge",
   "instructions": [
-    "**MANDATORY: Before generating any content, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.**",
+    "**MANDATORY: Before generating any content, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.**",
     "",
     "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work (e.g., discovery decisions affect exploration).**",
     "",

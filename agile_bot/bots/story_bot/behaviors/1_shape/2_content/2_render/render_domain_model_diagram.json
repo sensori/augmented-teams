@@ -1,8 +1,9 @@
 {
   "name": "render_domain_model_diagram",
   "path": "docs/stories",
+  "input": "story-graph.json",
   "template": "templates/domain-model-diagram-template.md",
   "output": "{solution_name_slug}-domain-model-diagram.md",
-  "instructions": "Transform the structured domain map into a domain model diagram markdown document using the domain-model-diagram-template.md template file. Generate Mermaid diagrams from the domain_graph.json structure."
+  "instructions": "Transform the domain_concepts from story-graph.json into a domain model diagram markdown document using the domain-model-diagram-template.md template file. Extract domain_concepts from all epics and sub_epics in story-graph.json. Generate Mermaid diagrams from the extracted domain_concepts structure."
 }
 

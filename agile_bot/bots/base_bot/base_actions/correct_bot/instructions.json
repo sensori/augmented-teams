@@ -1,7 +1,7 @@
 {
   "actionName": "correct_bot",
   "instructions": [
-    "**MANDATORY: Before applying corrections, you MUST load and review the project's clarification.json and planning.json files from the project's docs/ directory. These files contain critical requirements and decisions that MUST be maintained and incorporated when correcting content.**",
+    "**MANDATORY: Before applying corrections, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements and decisions that MUST be maintained and incorporated when correcting content.**",
     "",
     "Apply corrections based on the violations and user feedback provided.",
     "",

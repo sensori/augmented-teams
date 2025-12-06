@@ -24,7 +24,7 @@ Specific Bot
 
 Workflow
     Orders Behavior Action Steps: Agile Bot, Bot Behavior
-    Determines Next Action From Completed Actions: Completed Actions, Action Configuration, Transitions
+    Determines Next Action From Current Action: Current Action, Completed Actions (Fallback), Action Configuration, Transitions
     Checks If Action Is Completed: Completed Actions, Workflow State
     Saves Completed Action To Workflow State: Workflow State, Completed Actions, File System
     Transitions To Next Action In Behavior: State Machine, Action Configuration, Transitions

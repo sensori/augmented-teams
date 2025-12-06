@@ -203,9 +203,18 @@ class Behavior:
         action.track_activity_on_start()
         
         # Check if this is a confirmation response from user
-        if parameters.get('confirm') and parameters.get('project_area'):
-            # User is responding with their location choice (confirmation response)
-            data = action.confirm_location(project_location=parameters['project_area'])
+        if parameters.get('confirm'):
+            # User is confirming location
+            project_area = parameters.get('project_area')
+            # If project_area is "confirm" or "true", treat as "use current directory"
+            if project_area and project_area.lower() not in ['confirm', 'true']:
+                # User provided specific location - confirm that location
+                data = action.confirm_location(project_location=project_area)
+            else:
+                # User confirming current location - use current directory
+                from pathlib import Path
+                current_dir = Path.cwd()
+                data = action.confirm_location(project_location=str(current_dir))
         else:
             # Initial call - propose location and ask for confirmation
             # (project_area here is just a hint, we still ask for confirmation)
@@ -366,5 +375,37 @@ class Bot:
         
         # Forward to behavior
         behavior_instance = getattr(self, current_behavior)
+        return behavior_instance.forward_to_current_action()
+    
+    def close_current_action(self) -> BotResult:
+        """Mark current action as complete and transition to next action."""
+        # Get current behavior from workflow state
+        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.name
+        state_file = bot_dir / 'project_area' / 'workflow_state.json'
+        
+        current_behavior = None
+        if state_file.exists():
+            try:
+                state_data = json.loads(state_file.read_text(encoding='utf-8'))
+                current_behavior_path = state_data.get('current_behavior', '')
+                if current_behavior_path:
+                    current_behavior = current_behavior_path.split('.')[-1]
+            except Exception:
+                pass
+        
+        if not current_behavior or current_behavior not in self.behaviors:
+            # Default to FIRST behavior in bot config
+            current_behavior = self.behaviors[0]
+        
+        # Get behavior instance
+        behavior_instance = getattr(self, current_behavior)
+        
+        # Mark current action as complete and transition to next
+        behavior_instance.workflow.load_state()
+        current_action = behavior_instance.workflow.current_state
+        behavior_instance.workflow.save_completed_action(current_action)
+        behavior_instance.workflow.transition_to_next()
+        
+        # Forward to the next action
         return behavior_instance.forward_to_current_action()
 

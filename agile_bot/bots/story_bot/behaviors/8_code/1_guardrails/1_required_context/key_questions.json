@@ -1,0 +1,90 @@
+{
+  "description": "Key questions that must be answered before this behavior can proceed",
+  "questions": [
+    "What programming language specialization should be used? (python, javascript, or both)",
+    "What is the target file or module name and location?",
+    "What are the main functions, features, or capabilities that need to be implemented?",
+    "What are the major domain objects, entities, or data structures involved?",
+    "What programming paradigm should be used: functional programming, object-oriented programming, or a hybrid approach?",
+    "How should the code be organized into layers or modules? (e.g., domain layer, service layer, presentation layer, data access layer)",
+    "What are the key responsibilities and behaviors of each major component?",
+    "What dependencies exist between components, modules, or external systems?",
+    "Are there any existing code patterns, architectural styles, or design patterns to follow?",
+    "What inputs are available from previous phases? (Check for: story documents, domain maps, BDD test files, existing code structure)",
+    "What are the integration points with existing code or external systems?",
+    "What error handling and validation requirements exist?",
+    "What are the performance, scalability, or resource constraints?",
+    "Are there any language-specific idioms, patterns, or conventions that must be respected?"
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

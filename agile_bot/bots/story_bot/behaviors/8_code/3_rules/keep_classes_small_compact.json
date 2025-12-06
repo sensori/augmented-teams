@@ -1,0 +1,108 @@
+{
+  "description": "Classes should be small and free of dead code. Keep classes under 200-300 lines, eliminate dead/unused code, and favor many small classes over few large ones.",
+  "examples": [
+    {
+      "do": {
+        "description": "Keep classes small and focused",
+        "content": [
+          "Keep classes under 200-300 lines",
+          "Eliminate dead/unused code",
+          "Favor many small classes over few large ones",
+          "Each class should be easy to understand",
+          "",
+          "Correct Examples (small classes):",
+          "- 10 small classes of 50 lines each",
+          "- Each class focused on single responsibility",
+          "- Clear names, easy to navigate",
+          "- No commented-out code",
+          "",
+          "Small Class Benefits:",
+          "- Easier to understand and maintain",
+          "- Easier to test in isolation",
+          "- Easier to reuse",
+          "- Lower coupling",
+          "- Clearer responsibilities"
+        ]
+      },
+      "dont": {
+        "description": "Don't let classes grow without bounds or keep dead code",
+        "content": [
+          "Don't let classes grow without bounds",
+          "Don't keep commented-out code",
+          "Don't mix multiple languages in one source file",
+          "",
+          "Wrong Examples (too large):",
+          "- 2000-line class with 50 methods",
+          "- Class mixing many responsibilities",
+          "- Hundreds of lines of commented-out code",
+          "- File with SQL strings, HTML templates, and business logic",
+          "",
+          "Large Class Indicators (REFACTOR):",
+          "- Class exceeds 200-300 lines",
+          "- Many methods (10+)",
+          "- Commented-out code blocks",
+          "- Mixed languages (SQL, HTML, etc. in source)",
+          "- Difficult to name clearly",
+          "",
+          "Refactoring Strategy:",
+          "- Extract related methods into separate classes",
+          "- Remove all commented-out code (it's in git)",
+          "- Extract embedded languages to separate files",
+          "- Prefer 5 classes of 100 lines over 1 class of 500 lines",
+          "- Use composition to combine small classes"
+        ]
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

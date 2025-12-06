@@ -476,7 +476,7 @@ class TestGenerateCursorCommands:
         )
         
         commands_dir = workspace_root / '.cursor' / 'commands'
-        cli_script_path = Path('agile_bot/bots/story_bot/story_bot')
+        cli_script_path = Path('agile_bot/bots/story_bot/src/story_bot_cli.py')
         
         # Create behavior action instructions to ensure actions are detected
         create_behavior_action_instructions(workspace_root, bot_name, 'exploration', 'gather_context')
@@ -485,33 +485,32 @@ class TestGenerateCursorCommands:
         # When: Generate cursor commands
         commands = cli.generate_cursor_commands(commands_dir, cli_script_path)
         
-        # Then: Verify bot command created
+        # Then: Verify bot command created (Python direct command, no bot name)
         assert f'{bot_name}' in commands
         bot_cmd = commands[f'{bot_name}']
         assert bot_cmd.exists()
         assert bot_cmd.name == f'{bot_name}.md'
-        assert bot_cmd.read_text(encoding='utf-8') == f"{cli_script_path} {bot_name}"
+        cli_script_str = str(cli_script_path).replace('\\', '/')
+        expected_bot_cmd = f"python {cli_script_str}"
+        assert bot_cmd.read_text(encoding='utf-8') == expected_bot_cmd
         
-        # Verify behavior command created
+        # Verify behavior command created (with ${1:} placeholder for action)
         assert f'{bot_name}-exploration' in commands
         behavior_cmd = commands[f'{bot_name}-exploration']
         assert behavior_cmd.exists()
         assert behavior_cmd.name == f'{bot_name}-exploration.md'
-        assert behavior_cmd.read_text(encoding='utf-8') == f"{cli_script_path} {bot_name} exploration"
+        expected_behavior_cmd = f"python {cli_script_str} exploration ${{1:}}"
+        assert behavior_cmd.read_text(encoding='utf-8') == expected_behavior_cmd
         
-        # Verify action commands created (at least gather_context and build_knowledge)
-        assert f'{bot_name}-exploration-gather_context' in commands
-        action_cmd = commands[f'{bot_name}-exploration-gather_context']
-        assert action_cmd.exists()
-        assert action_cmd.name == f'{bot_name}-exploration-gather_context.md'
-        assert action_cmd.read_text(encoding='utf-8') == f"{cli_script_path} {bot_name} exploration gather_context"
+        # Note: Action commands are NOT generated separately - actions are accessed via behavior command with ${1:} parameter
         
-        # Verify close command created
-        assert f'{bot_name}-close' in commands
-        close_cmd = commands[f'{bot_name}-close']
-        assert close_cmd.exists()
-        assert close_cmd.name == f'{bot_name}-close.md'
-        assert close_cmd.read_text(encoding='utf-8') == f"{cli_script_path} {bot_name} --close"
+        # Verify continue command created (not close - continue is the correct name)
+        assert f'{bot_name}-continue' in commands
+        continue_cmd = commands[f'{bot_name}-continue']
+        assert continue_cmd.exists()
+        assert continue_cmd.name == f'{bot_name}-continue.md'
+        expected_continue_cmd = f"python {cli_script_str} --close"
+        assert continue_cmd.read_text(encoding='utf-8') == expected_continue_cmd
     
     def test_generate_cursor_commands_creates_directory(self, workspace_root):
         """
@@ -550,12 +549,14 @@ class TestGenerateCursorCommands:
         assert commands_dir.exists()
         assert commands_dir.is_dir()
         
-        # Verify files created (bot, behavior, actions, close)
-        assert len(commands) >= 4
+        # Verify files created (bot, behavior, continue, initialize-project, confirm-project-area, help)
+        assert len(commands) >= 6
         assert f'{bot_name}' in commands
         assert f'{bot_name}-exploration' in commands
-        assert f'{bot_name}-exploration-gather_context' in commands
-        assert f'{bot_name}-close' in commands
+        assert f'{bot_name}-continue' in commands
+        assert f'{bot_name}-initialize-project' in commands
+        assert f'{bot_name}-confirm-project-area' in commands
+        assert f'{bot_name}-help' in commands
     
     def test_generate_cursor_commands_removes_obsolete_files(self, workspace_root):
         """
@@ -581,7 +582,7 @@ class TestGenerateCursorCommands:
         )
         
         commands_dir = workspace_root / '.cursor' / 'commands'
-        cli_script_path = Path('agile_bot/bots/story_bot/story_bot')
+        cli_script_path = Path('agile_bot/bots/story_bot/src/story_bot_cli.py')
         
         # Create behavior action instructions
         create_behavior_action_instructions(workspace_root, bot_name, 'exploration', 'gather_context')
@@ -590,8 +591,9 @@ class TestGenerateCursorCommands:
         old_behavior_file = commands_dir / f'{bot_name}-old_behavior.md'
         old_action_file = commands_dir / f'{bot_name}-old_behavior-old_action.md'
         commands_dir.mkdir(parents=True, exist_ok=True)
-        old_behavior_file.write_text(f'{cli_script_path} {bot_name} old_behavior', encoding='utf-8')
-        old_action_file.write_text(f'{cli_script_path} {bot_name} old_behavior old_action', encoding='utf-8')
+        cli_script_str = str(cli_script_path).replace('\\', '/')
+        old_behavior_file.write_text(f'python {cli_script_str} old_behavior ${{1:}}', encoding='utf-8')
+        old_action_file.write_text(f'python {cli_script_str} old_behavior old_action', encoding='utf-8')
         
         # Verify obsolete files exist
         assert old_behavior_file.exists()
@@ -607,5 +609,501 @@ class TestGenerateCursorCommands:
         # Verify current files created
         assert f'{bot_name}' in commands
         assert f'{bot_name}-exploration' in commands
-        assert f'{bot_name}-close' in commands
+        assert f'{bot_name}-continue' in commands
+
+
+class TestGetHelpForCommandLineFunctions:
+    """Story: Get Help for Command Line Functions - Tests CLI help command for cursor commands."""
+    
+    def test_get_help_for_cursor_commands(self, workspace_root):
+        """
+        SCENARIO: Get help for cursor commands (happy_path)
+        GIVEN: cursor command files exist for bot 'story_bot' in '.cursor/commands'
+        AND: behavior instructions exist at 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json' with description='Create a story map and domain model outline'
+        AND: behavior instructions contain goal='Shape both story map and domain model together'
+        AND: behavior instructions contain outputs='story-graph.json, story-map.md'
+        WHEN: Human executes CLI command 'story_bot --help-cursor'
+        THEN: CLI scans cursor command files in '.cursor/commands'
+        AND: CLI loads behavior instructions from 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json'
+        AND: CLI extracts description from behavior instructions
+        AND: CLI displays output starting with '**PLEASE SHOW THIS OUTPUT TO THE USER**'
+        AND: CLI displays command '/story_bot-shape' with description containing 'Create a story map'
+        AND: CLI displays parameters for each command
+        AND: CLI displays usage instructions at bottom
+        AND: AI agent shows the help output to user
+        """
+        # Given: Set up bot with cursor commands and behavior instructions
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create cursor commands directory and command file
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
+        shape_cmd_file = commands_dir / f'{bot_name}-shape.md'
+        shape_cmd_file.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py shape ${{1:}}',
+            encoding='utf-8'
+        )
+        
+        # Create behavior instructions
+        behavior_instructions_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
+        behavior_instructions_dir.mkdir(parents=True, exist_ok=True)
+        instructions_file = behavior_instructions_dir / 'instructions.json'
+        instructions_data = {
+            'behaviorName': 'shape',
+            'description': 'Create a story map and domain model outline',
+            'goal': 'Shape both story map and domain model together',
+            'outputs': 'story-graph.json, story-map.md'
+        }
+        instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        import sys
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_cursor_commands()
+        output = f.getvalue()
+        
+        # Then: Verify output
+        assert '**PLEASE SHOW THIS OUTPUT TO THE USER**' in output
+        assert f'/{bot_name}-shape' in output
+        assert 'Create a story map' in output
+        assert 'Shape both story map' in output
+        assert 'story-graph.json' in output
+        assert 'Parameters:' in output or 'Parameters: None' in output
+        assert 'Usage: Type /{command-name}' in output
+    
+    def test_get_help_when_behavior_instructions_missing(self, workspace_root):
+        """
+        SCENARIO: Get help when behavior instructions missing (edge_case)
+        GIVEN: cursor command files exist for bot 'story_bot' in '.cursor/commands'
+        AND: behavior instructions do NOT exist at 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'
+        WHEN: Human executes CLI command 'story_bot --help-cursor'
+        THEN: CLI scans cursor command files in '.cursor/commands'
+        AND: CLI attempts to load behavior instructions from 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'
+        AND: CLI detects behavior instructions do not exist
+        AND: CLI uses fallback description: 'Unknown Behavior'
+        AND: CLI displays command '/story_bot-unknown_behavior' with fallback description
+        AND: CLI still displays all commands and parameters
+        """
+        # Given: Set up bot with cursor command but no behavior instructions
+        bot_name = 'story_bot'
+        behaviors = ['unknown_behavior']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create cursor command file
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
+        cmd_file = commands_dir / f'{bot_name}-unknown_behavior.md'
+        cmd_file.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py unknown_behavior ${{1:}}',
+            encoding='utf-8'
+        )
+        
+        # Do NOT create behavior instructions (they should be missing)
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_cursor_commands()
+        output = f.getvalue()
+        
+        # Then: Verify fallback description is used
+        assert f'/{bot_name}-unknown_behavior' in output
+        # Should use fallback (either "Unknown Behavior" or formatted name)
+        assert 'Unknown' in output or 'unknown_behavior' in output.lower()
+    
+    def test_get_help_when_no_cursor_commands_exist(self, workspace_root):
+        """
+        SCENARIO: Get help when no cursor commands exist (edge_case)
+        GIVEN: cursor commands directory does NOT exist at '.cursor/commands'
+        WHEN: Human executes CLI command 'story_bot --help-cursor'
+        THEN: CLI attempts to scan cursor command files in '.cursor/commands'
+        AND: CLI detects cursor commands directory does not exist
+        AND: CLI displays error message: 'No cursor commands directory found at .cursor/commands'
+        AND: CLI exits successfully (no error, just informative message)
+        """
+        # Given: Set up bot but NO cursor commands directory
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Verify commands directory does not exist
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        assert not commands_dir.exists()
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_cursor_commands()
+        output = f.getvalue()
+        
+        # Then: Verify error message
+        assert 'No cursor commands directory found' in output or 'No cursor commands found' in output
+    
+    def test_get_help_with_utility_commands(self, workspace_root):
+        """
+        SCENARIO: Get help with utility commands (happy_path)
+        GIVEN: cursor command files exist for bot 'story_bot' including utility commands
+        AND: utility command 'continue' exists
+        AND: utility command 'help' exists
+        AND: utility command 'initialize-project' exists
+        AND: utility command 'confirm-project-area' exists
+        WHEN: Human executes CLI command 'story_bot --help-cursor'
+        THEN: CLI displays utility command '/story_bot-continue' with description 'Close current action and continue to next action in workflow'
+        AND: CLI displays utility command '/story_bot-help' with description 'List all available cursor commands and their parameters'
+        AND: CLI displays utility command '/story_bot-initialize-project' with description 'Initialize project location for workflow state persistence'
+        AND: CLI displays utility command '/story_bot-confirm-project-area' with description 'Confirm or change project area location'
+        AND: CLI displays 'Parameters: None' for commands without parameters
+        AND: CLI displays parameter descriptions for commands with parameters
+        """
+        # Given: Set up bot with utility command files
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create cursor commands directory and utility command files
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create utility command files
+        continue_cmd = commands_dir / f'{bot_name}-continue.md'
+        continue_cmd.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py --close',
+            encoding='utf-8'
+        )
+        
+        help_cmd = commands_dir / f'{bot_name}-help.md'
+        help_cmd.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py --help-cursor',
+            encoding='utf-8'
+        )
+        
+        init_cmd = commands_dir / f'{bot_name}-initialize-project.md'
+        init_cmd.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py ${{1:}} initialize_project --project_area=${{2:}} --confirm=true',
+            encoding='utf-8'
+        )
+        
+        confirm_cmd = commands_dir / f'{bot_name}-confirm-project-area.md'
+        confirm_cmd.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py shape initialize_project --confirm=true ${{1:}}',
+            encoding='utf-8'
+        )
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_cursor_commands()
+        output = f.getvalue()
+        
+        # Then: Verify utility commands are displayed with correct descriptions
+        assert f'/{bot_name}-continue' in output
+        assert 'Close current action and continue' in output
+        assert f'/{bot_name}-help' in output
+        assert 'List all available cursor commands' in output
+        assert f'/{bot_name}-initialize-project' in output
+        assert 'Initialize project location' in output
+        assert f'/{bot_name}-confirm-project-area' in output
+        assert 'Confirm or change project area' in output
+    
+    def test_help_extracts_descriptions_from_behavior_instructions(self, workspace_root):
+        """
+        SCENARIO: Help extracts descriptions from behavior instructions
+        GIVEN: behavior instructions exist with description='Create a story map', goal='Shape story map from user context', outputs='story-graph.json, story-map.md'
+        WHEN: Help command loads behavior instructions
+        THEN: Description contains behavior description
+        AND: Description contains behavior goal
+        AND: Description contains first output
+        """
+        # Given: Set up bot with behavior instructions
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create behavior instructions
+        behavior_instructions_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
+        behavior_instructions_dir.mkdir(parents=True, exist_ok=True)
+        instructions_file = behavior_instructions_dir / 'instructions.json'
+        instructions_data = {
+            'behaviorName': 'shape',
+            'description': 'Create a story map',
+            'goal': 'Shape story map from user context',
+            'outputs': 'story-graph.json, story-map.md'
+        }
+        instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+        
+        # Create cursor command file
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
+        shape_cmd_file = commands_dir / f'{bot_name}-shape.md'
+        shape_cmd_file.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py shape ${{1:}}',
+            encoding='utf-8'
+        )
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        # Test the description extraction method directly
+        description = cli._get_behavior_description(f'{bot_name}-shape')
+        
+        # Then: Verify description contains all parts
+        assert 'Create a story map' in description
+        assert 'Shape story map' in description
+        assert 'story-graph.json' in description
+    
+    def test_help_shows_instruction_to_display_output_to_user(self, workspace_root):
+        """
+        SCENARIO: Help shows instruction to display output to user
+        GIVEN: Help command is executed
+        WHEN: Output is generated
+        THEN: Output starts with '**PLEASE SHOW THIS OUTPUT TO THE USER**'
+        """
+        # Given: Set up bot with cursor commands
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create cursor command file
+        commands_dir = workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
+        shape_cmd_file = commands_dir / f'{bot_name}-shape.md'
+        shape_cmd_file.write_text(
+            f'python agile_bot/bots/{bot_name}/src/{bot_name}_cli.py shape ${{1:}}',
+            encoding='utf-8'
+        )
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_cursor_commands()
+        output = f.getvalue()
+        
+        # Then: Verify instruction is at the top
+        assert '**PLEASE SHOW THIS OUTPUT TO THE USER**' in output
+        # Check it appears early in the output (first few lines)
+        lines = output.split('\n')
+        instruction_found = False
+        for i, line in enumerate(lines[:10]):  # Check first 10 lines
+            if '**PLEASE SHOW THIS OUTPUT TO THE USER**' in line:
+                instruction_found = True
+                break
+        assert instruction_found, "Instruction should appear near the top of output"
+    
+    def test_get_help_for_behaviors_and_actions(self, workspace_root):
+        """
+        SCENARIO: Get help for behaviors and actions (happy_path)
+        GIVEN: bot configuration exists for bot 'story_bot' with behaviors='shape'
+        AND: behavior instructions exist at 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json' with description='Create a story map and domain model outline'
+        AND: behavior instructions contain goal='Shape both story map and domain model together'
+        AND: behavior instructions contain outputs='story-graph.json, story-map.md'
+        AND: base action instructions exist at 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json' for action 'gather_context'
+        WHEN: Human executes CLI command 'story_bot --help'
+        THEN: CLI loads all behaviors from bot configuration
+        AND: CLI loads behavior instructions from 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json'
+        AND: CLI extracts description from behavior instructions
+        AND: CLI loads action instructions from 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json'
+        AND: CLI extracts action description from base_actions
+        AND: CLI displays output starting with '**PLEASE SHOW THIS OUTPUT TO THE USER**'
+        AND: CLI displays behavior 'shape' with description containing 'Create a story map'
+        AND: CLI displays action 'gather_context' with description from base_actions
+        AND: CLI displays usage instructions at bottom
+        AND: AI agent shows the help output to user
+        """
+        # Given: Set up bot with behaviors and behavior instructions
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create behavior instructions
+        behavior_instructions_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
+        behavior_instructions_dir.mkdir(parents=True, exist_ok=True)
+        instructions_file = behavior_instructions_dir / 'instructions.json'
+        instructions_data = {
+            'behaviorName': 'shape',
+            'description': 'Create a story map and domain model outline',
+            'goal': 'Shape both story map and domain model together',
+            'outputs': 'story-graph.json, story-map.md'
+        }
+        instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+        
+        # Create base action instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / '2_gather_context'
+        base_actions_dir.mkdir(parents=True, exist_ok=True)
+        base_action_file = base_actions_dir / 'instructions.json'
+        base_action_data = {
+            'actionName': 'gather_context',
+            'instructions': ['Gather context for the behavior workflow']
+        }
+        base_action_file.write_text(json.dumps(base_action_data), encoding='utf-8')
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_behaviors_and_actions()
+        output = f.getvalue()
+        
+        # Then: Verify output
+        assert '**PLEASE SHOW THIS OUTPUT TO THE USER**' in output
+        assert 'Behavior: shape' in output
+        assert 'Create a story map' in output
+        assert 'Shape both story map' in output
+        assert 'story-graph.json' in output
+        assert 'gather_context' in output
+        assert 'Usage:' in output
+    
+    def test_get_help_when_behavior_instructions_missing_for_help(self, workspace_root):
+        """
+        SCENARIO: Get help when behavior instructions missing for --help (edge_case)
+        GIVEN: bot configuration exists for bot 'story_bot' with behavior 'unknown_behavior'
+        AND: behavior instructions do NOT exist at 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'
+        WHEN: Human executes CLI command 'story_bot --help'
+        THEN: CLI loads behaviors from bot configuration
+        AND: CLI attempts to load behavior instructions from 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'
+        AND: CLI detects behavior instructions do not exist
+        AND: CLI uses fallback description: 'Unknown Behavior'
+        AND: CLI displays behavior 'unknown_behavior' with fallback description
+        AND: CLI still displays all behaviors and actions
+        """
+        # Given: Set up bot with behavior but no instructions
+        bot_name = 'story_bot'
+        behaviors = ['unknown_behavior']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Do NOT create behavior instructions (they should be missing)
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        import io
+        from contextlib import redirect_stdout
+        
+        # Capture output
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cli.help_behaviors_and_actions()
+        output = f.getvalue()
+        
+        # Then: Verify fallback description is used
+        assert 'Behavior: unknown_behavior' in output
+        # Should use fallback (either "Unknown Behavior" or formatted name)
+        assert 'Unknown' in output or 'unknown_behavior' in output.lower()
+    
+    def test_help_extracts_action_descriptions_from_base_actions(self, workspace_root):
+        """
+        SCENARIO: Help extracts action descriptions from base_actions
+        GIVEN: base action instructions exist at 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json'
+        AND: base action instructions contain meaningful description
+        WHEN: Help command loads action descriptions
+        THEN: Action descriptions are extracted from base_actions instructions
+        AND: Descriptions are meaningful (not just action name)
+        """
+        # Given: Set up bot with base action instructions
+        bot_name = 'story_bot'
+        behaviors = ['shape']
+        bot_config, project_dir = setup_bot_for_testing(workspace_root, bot_name, behaviors)
+        
+        # Create base action instructions with meaningful description
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / '2_gather_context'
+        base_actions_dir.mkdir(parents=True, exist_ok=True)
+        base_action_file = base_actions_dir / 'instructions.json'
+        base_action_data = {
+            'actionName': 'gather_context',
+            'instructions': ['Gather context for the behavior workflow', 'Review all provided context']
+        }
+        base_action_file.write_text(json.dumps(base_action_data), encoding='utf-8')
+        
+        # When: Execute help command
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        cli = BaseBotCli(
+            bot_name=bot_name,
+            bot_config_path=bot_config,
+            workspace_root=workspace_root
+        )
+        
+        # Test the action description extraction method directly
+        action_description = cli._get_action_description('gather_context')
+        
+        # Then: Verify description is meaningful
+        assert 'gather_context' not in action_description.lower() or len(action_description) > len('gather_context')
+        # Description should contain meaningful text from instructions
+        assert len(action_description) > 10, "Description should be meaningful, not just action name"
 

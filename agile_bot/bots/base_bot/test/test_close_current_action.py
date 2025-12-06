@@ -10,14 +10,16 @@ Covers all acceptance criteria:
 3. Error when action requires confirmation (not in completed_actions)
 4. Works regardless of invocation method
 5. Idempotent completion
+6. Bot class has close_current_action method (CLI routes to bot.close_current_action)
 """
 import pytest
 import json
 from pathlib import Path
 from agile_bot.bots.base_bot.src.state.workflow import Workflow
+from agile_bot.bots.base_bot.src.bot.bot import Bot
 from conftest import (
     create_bot_dir, create_project_dir, create_current_project_file,
-    create_workflow_state_file
+    create_workflow_state_file, create_bot_config_file, create_base_actions_structure
 )
 
 
@@ -183,4 +185,57 @@ def test_close_handles_action_already_completed_gracefully(tmp_path):
     
     # Then should still work fine
     assert workflow.is_action_completed('gather_context')
+
+
+def test_bot_class_has_close_current_action_method(tmp_path):
+    """
+    Scenario: Bot class has close_current_action method (CLI routes to bot.close_current_action)
+    
+    Story: Close Current Action via CLI
+    Acceptance Criteria: "CLI routes to bot close_current_action functionality"
+    
+    This test verifies that Bot class has the close_current_action method that CLI calls.
+    Without this method, CLI --close command would fail with AttributeError.
+    """
+    # Given bot is configured with behavior "shape"
+    bot_name = 'story_bot'
+    behavior = 'shape'
+    
+    # Setup bot directory structure
+    create_bot_dir(tmp_path, bot_name)
+    project_dir = create_project_dir(tmp_path)
+    create_current_project_file(tmp_path, bot_name, str(project_dir))
+    create_base_actions_structure(tmp_path)
+    
+    # Create workflow state at "gather_context" action
+    completed = [{'action_state': f'{bot_name}.{behavior}.initialize_project', 'timestamp': '2025-12-04T15:55:00.000000'}]
+    workflow_file = create_workflow_state_file(project_dir, bot_name, behavior, 'gather_context', completed)
+    
+    # Create bot config
+    config_file = create_bot_config_file(tmp_path, bot_name, [behavior])
+    
+    # When Bot instance is created
+    bot = Bot(
+        bot_name=bot_name,
+        workspace_root=tmp_path,
+        config_path=config_file
+    )
+    
+    # Then Bot class has close_current_action method
+    assert hasattr(bot, 'close_current_action'), "Bot class must have close_current_action method for CLI --close to work"
+    assert callable(getattr(bot, 'close_current_action')), "close_current_action must be callable"
+    
+    # And When close_current_action is called
+    result = bot.close_current_action()
+    
+    # Then action "gather_context" is marked complete
+    # And workflow transitions to next action "decide_planning_criteria"
+    assert result.status == 'completed'
+    assert result.behavior == behavior
+    
+    # Verify workflow state was updated
+    updated_state = json.loads(workflow_file.read_text())
+    assert len(updated_state['completed_actions']) == 2
+    assert updated_state['completed_actions'][1]['action_state'] == f'{bot_name}.{behavior}.gather_context'
+    assert updated_state['current_action'] == f'{bot_name}.{behavior}.decide_planning_criteria'
 

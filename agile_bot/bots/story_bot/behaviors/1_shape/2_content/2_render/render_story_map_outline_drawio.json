@@ -1,8 +1,8 @@
 {
   "name": "render_story_map_outline_drawio",
   "path": "docs/stories",
-  "template": "story-graph.json",
-  "renderer": "story_io",
+  "input": "story-graph.json",
+  "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",
   "renderer_command": "render-outline",
   "output": "story-map-outline.drawio"
 }

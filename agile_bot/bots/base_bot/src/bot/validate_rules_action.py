@@ -11,7 +11,19 @@ class ValidateRulesAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
-        instructions = self.inject_behavior_specific_and_bot_rules()
+        rules_data = self.inject_behavior_specific_and_bot_rules()
+        action_instructions = rules_data.get('action_instructions', [])
+        validation_rules = rules_data.get('validation_rules', [])
+        
+        # Format instructions properly - action_instructions are primary, rules are context
+        instructions = {
+            'action': 'validate_rules',
+            'behavior': self.behavior,
+            'base_instructions': action_instructions,  # Primary instructions from instructions.json
+            'validation_rules': validation_rules,  # Rules to validate against (supporting context)
+            'content_to_validate': self._identify_content_to_validate()
+        }
+        
         return {'instructions': instructions}
     
     def inject_common_bot_rules(self) -> Dict[str, Any]:
@@ -119,5 +131,65 @@ class ValidateRulesAction(BaseAction):
     
     def inject_next_action_instructions(self):
         return ""  # Empty string for terminal action
+    
+    def _identify_content_to_validate(self) -> Dict[str, Any]:
+        """Identify what content needs to be validated from the project."""
+        project_dir = self.current_project
+        content_info = {
+            'project_location': str(project_dir),
+            'rendered_outputs': [],
+            'clarification_file': None,
+            'planning_file': None,
+            'report_path': None
+        }
+        
+        # Find docs_path from behavior config or default
+        try:
+            from agile_bot.bots.base_bot.src.bot.bot import Behavior
+            behavior_folder = Behavior.find_behavior_folder(
+                self.workspace_root,
+                self.bot_name,
+                self.behavior
+            )
+            # Try to find config that specifies docs_path
+            config_file = behavior_folder / 'instructions.json'
+            if config_file.exists():
+                config_data = read_json_file(config_file)
+                docs_path = config_data.get('docs_path', 'docs/stories')
+            else:
+                docs_path = 'docs/stories'
+        except FileNotFoundError:
+            docs_path = 'docs/stories'
+        
+        docs_dir = project_dir / docs_path
+        
+        # Find clarification.json and planning.json
+        clarification_file = docs_dir / 'clarification.json'
+        planning_file = docs_dir / 'planning.json'
+        
+        if clarification_file.exists():
+            content_info['clarification_file'] = str(clarification_file)
+        if planning_file.exists():
+            content_info['planning_file'] = str(planning_file)
+        
+        # Set validation report path (where AI should save the report)
+        report_file = docs_dir / 'validation-report.md'
+        content_info['report_path'] = str(report_file)
+        
+        # Find rendered outputs (story maps, domain models, etc.)
+        if docs_dir.exists():
+            # Look for common rendered output files
+            rendered_patterns = [
+                '*-story-map.md',
+                '*-domain-model-description.md',
+                '*-domain-model-diagram.md',
+                'story-graph.json',
+                '*-increments.md'
+            ]
+            for pattern in rendered_patterns:
+                for file_path in docs_dir.glob(pattern):
+                    content_info['rendered_outputs'].append(str(file_path))
+        
+        return content_info
 
 

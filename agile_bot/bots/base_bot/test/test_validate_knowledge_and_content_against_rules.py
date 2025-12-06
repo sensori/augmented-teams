@@ -345,3 +345,205 @@ class TestCompleteValidateRulesAction:
         # Then: Behavior workflow is complete
         assert is_complete
 
+    def test_validate_rules_returns_instructions_with_rules_as_context(self, workspace_root):
+        """
+        SCENARIO: validate_rules returns instructions with rules as supporting context
+        GIVEN: validate_rules action has base instructions and validation rules
+        WHEN: validate_rules action executes
+        THEN: Return value contains base_instructions (primary) and validation_rules (context)
+        AND: Return value contains content_to_validate information
+        """
+        # Given: Base action instructions exist
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        validate_rules_dir = base_actions_dir / '7_validate_rules'
+        validate_rules_dir.mkdir(parents=True, exist_ok=True)
+        
+        base_instructions = {
+            'instructions': [
+                'Load and review clarification.json and planning.json',
+                'Check Content Data against all rules listed above',
+                'Generate a validation report'
+            ]
+        }
+        instructions_file = validate_rules_dir / 'instructions.json'
+        instructions_file.write_text(json.dumps(base_instructions), encoding='utf-8')
+        
+        # Given: Behavior-specific rules exist
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+        behavior_dir = bot_dir / 'behaviors' / '1_shape'
+        rules_dir = behavior_dir / '3_rules'
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        
+        rule_file = rules_dir / 'test_rule.json'
+        rule_file.write_text(json.dumps({
+            'description': 'Test rule',
+            'examples': []
+        }), encoding='utf-8')
+        
+        # Given: Project directory with current_project.json
+        project_dir = workspace_root / 'demo' / 'test_project'
+        project_dir.mkdir(parents=True, exist_ok=True)
+        docs_dir = project_dir / 'docs' / 'stories'
+        docs_dir.mkdir(parents=True, exist_ok=True)
+        
+        current_project_file = bot_dir / 'current_project.json'
+        current_project_file.parent.mkdir(parents=True, exist_ok=True)
+        current_project_file.write_text(
+            json.dumps({'current_project': str(project_dir)}),
+            encoding='utf-8'
+        )
+        
+        # When: Action executes
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+        action = ValidateRulesAction(
+            bot_name='story_bot',
+            behavior='shape',
+            workspace_root=workspace_root
+        )
+        result = action.do_execute(parameters={})
+        
+        # Then: Return value has instructions structure
+        assert 'instructions' in result, "Result should contain 'instructions' key"
+        instructions = result['instructions']
+        
+        # Then: base_instructions are primary (list of instruction strings)
+        assert 'base_instructions' in instructions, (
+            f"Expected 'base_instructions' in instructions, but got keys: {instructions.keys()}"
+        )
+        base_instructions_list = instructions['base_instructions']
+        assert isinstance(base_instructions_list, list), (
+            f"base_instructions should be a list, got: {type(base_instructions_list)}"
+        )
+        assert len(base_instructions_list) > 0, "base_instructions should not be empty"
+        assert 'Load and review clarification.json' in ' '.join(base_instructions_list), (
+            "base_instructions should contain the action instructions"
+        )
+        
+        # Then: validation_rules are supporting context (not primary)
+        assert 'validation_rules' in instructions, (
+            f"Expected 'validation_rules' in instructions, but got keys: {instructions.keys()}"
+        )
+        validation_rules = instructions['validation_rules']
+        assert isinstance(validation_rules, list), (
+            f"validation_rules should be a list, got: {type(validation_rules)}"
+        )
+        # Should have at least the behavior rule we created
+        assert len(validation_rules) > 0, "validation_rules should contain rules"
+        
+        # Then: content_to_validate provides project information
+        assert 'content_to_validate' in instructions, (
+            f"Expected 'content_to_validate' in instructions, but got keys: {instructions.keys()}"
+        )
+        content_info = instructions['content_to_validate']
+        assert 'project_location' in content_info, (
+            "content_to_validate should contain project_location"
+        )
+        assert str(project_dir) in content_info['project_location'], (
+            "project_location should point to the project directory"
+        )
+        assert 'rendered_outputs' in content_info, (
+            "content_to_validate should contain rendered_outputs list"
+        )
+        
+        # Then: Action and behavior are specified
+        assert instructions.get('action') == 'validate_rules', (
+            "instructions should specify action='validate_rules'"
+        )
+        assert instructions.get('behavior') == 'shape', (
+            "instructions should specify behavior='shape'"
+        )
+        
+        # Then: report_path is provided for saving validation report
+        assert 'report_path' in content_info, (
+            "content_to_validate should contain report_path where validation report should be saved"
+        )
+        report_path = content_info['report_path']
+        assert report_path.endswith('validation-report.md'), (
+            f"report_path should point to validation-report.md, got: {report_path}"
+        )
+        assert str(docs_dir) in report_path, (
+            f"report_path should be in docs directory, got: {report_path}"
+        )
+
+    def test_validate_rules_provides_report_path_for_saving_validation_report(self, workspace_root):
+        """
+        SCENARIO: validate_rules provides report_path for saving validation report
+        GIVEN: validate_rules action executes
+        AND: project directory has docs/stories/ folder
+        WHEN: Action identifies content to validate
+        THEN: Action includes report_path in content_to_validate
+        AND: report_path points to {project_area}/docs/stories/validation-report.md
+        AND: base_instructions include instruction to save report to report_path
+        AND: AI receives clear instruction to write validation report to file
+        """
+        # Given: Base action instructions exist with save report instruction
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        validate_rules_dir = base_actions_dir / '7_validate_rules'
+        validate_rules_dir.mkdir(parents=True, exist_ok=True)
+        
+        base_instructions = {
+            'instructions': [
+                'Load and review clarification.json and planning.json',
+                'Check Content Data against all rules listed above',
+                'Generate a validation report',
+                'Save the validation report to validation-report.md in docs/stories/'
+            ]
+        }
+        instructions_file = validate_rules_dir / 'instructions.json'
+        instructions_file.write_text(json.dumps(base_instructions), encoding='utf-8')
+        
+        # Given: Project directory with docs/stories/ folder
+        project_dir = workspace_root / 'demo' / 'test_project'
+        project_dir.mkdir(parents=True, exist_ok=True)
+        docs_dir = project_dir / 'docs' / 'stories'
+        docs_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Given: Bot directory with current_project.json
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+        current_project_file = bot_dir / 'current_project.json'
+        current_project_file.parent.mkdir(parents=True, exist_ok=True)
+        current_project_file.write_text(
+            json.dumps({'current_project': str(project_dir)}),
+            encoding='utf-8'
+        )
+        
+        # When: Action executes
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+        action = ValidateRulesAction(
+            bot_name='story_bot',
+            behavior='shape',
+            workspace_root=workspace_root
+        )
+        result = action.do_execute(parameters={})
+        
+        # Then: report_path is included in content_to_validate
+        instructions = result['instructions']
+        content_info = instructions['content_to_validate']
+        
+        assert 'report_path' in content_info, (
+            "content_to_validate must include report_path for saving validation report"
+        )
+        
+        report_path = content_info['report_path']
+        expected_report_path = docs_dir / 'validation-report.md'
+        
+        assert report_path == str(expected_report_path), (
+            f"report_path should be {expected_report_path}, got: {report_path}"
+        )
+        
+        # Then: base_instructions include instruction to save report
+        base_instructions_list = instructions['base_instructions']
+        instructions_text = ' '.join(base_instructions_list)
+        assert 'save' in instructions_text.lower() or 'write' in instructions_text.lower() or 'validation-report' in instructions_text.lower(), (
+            "base_instructions should include instruction to save/write validation report"
+        )
+        
+        # Then: report_path is accessible and in correct location
+        report_path_obj = Path(report_path)
+        assert report_path_obj.parent == docs_dir, (
+            f"report_path parent should be docs/stories directory, got: {report_path_obj.parent}"
+        )
+        assert report_path_obj.name == 'validation-report.md', (
+            f"report_path filename should be validation-report.md, got: {report_path_obj.name}"
+        )
+

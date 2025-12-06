@@ -1,0 +1,118 @@
+{
+  "description": "CRITICAL: Tests should be as clean as production code. Keep tests readable and maintainable, use descriptive test names, and follow FIRST principles (Fast, Independent, Repeatable, Self-validating, Timely).",
+  "examples": [
+    {
+      "do": {
+        "description": "Keep tests clean and maintainable",
+        "content": [
+          "Keep tests readable and maintainable",
+          "Use descriptive test names",
+          "Follow FIRST principles:",
+          "  - Fast: Tests run quickly",
+          "  - Independent: Tests don't depend on each other",
+          "  - Repeatable: Tests work in any environment",
+          "  - Self-validating: Tests have boolean output (pass/fail)",
+          "  - Timely: Tests written at right time (before production code)",
+          "",
+          "Correct Examples (quality tests):",
+          "test('calculates order total including tax and shipping', () => {",
+          "  const order = createTestOrder({ subtotal: 100 });",
+          "  const total = calculateTotal(order);",
+          "  expect(total).toBe(115); // 100 + 10 tax + 5 shipping",
+          "});",
+          "",
+          "Test Quality Requirements:",
+          "- Test code as clean as production code",
+          "- Clear, descriptive test names",
+          "- Fast execution (milliseconds)",
+          "- No dependencies between tests",
+          "- Consistent pass/fail behavior"
+        ]
+      },
+      "dont": {
+        "description": "Don't let test code decay or skip tests",
+        "content": [
+          "Don't let test code decay",
+          "Don't skip 'trivial' tests",
+          "Don't make tests dependent on each other",
+          "",
+          "Wrong Examples (poor test quality):",
+          "test('test1', () => {  // bad name",
+          "  globalState.user = createUser(); // sets global state",
+          "  expect(process()).toBe(true);",
+          "});",
+          "",
+          "test('test2', () => {  // depends on test1!",
+          "  expect(globalState.user.name).toBe('John');",
+          "});",
+          "",
+          "Poor Test Quality Indicators (FIX):",
+          "- Generic test names (test1, test2)",
+          "- Tests depending on execution order",
+          "- Slow tests (seconds per test)",
+          "- Flaky tests (intermittent failures)",
+          "- Commented-out tests",
+          "- Skipped tests without tickets",
+          "",
+          "Improvement Actions:",
+          "- Rename tests descriptively",
+          "- Remove inter-test dependencies",
+          "- Speed up slow tests",
+          "- Fix or delete flaky tests",
+          "- Unskip or delete skipped tests"
+        ]
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

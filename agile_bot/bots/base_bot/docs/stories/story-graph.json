@@ -1342,7 +1342,42 @@
                       "users": [
                         "Bot-Behavior"
                       ],
-                      "story_type": "user"
+                      "story_type": "user",
+                      "Steps": [
+                        "Given behavior folder exists with 2_content/2_render/ folder",
+                        "When render_output action executes for the behavior",
+                        "Then render_output discovers render folder using *_content/*_render pattern",
+                        "And render_output loads all *.json files from render folder (render JSON files)",
+                        "When render folder contains instructions.json file",
+                        "Then render_output loads instructions.json if it exists",
+                        "And render_output injects render_instructions into merged instructions",
+                        "When render_output loads render JSON file",
+                        "Then render_output reads configuration (name, path, template, output, builder if specified)",
+                        "And render_output checks if render JSON has template field (and no builder field)",
+                        "When render JSON specifies template file without builder field",
+                        "Then render_output loads template file from 2_render/templates/ folder",
+                        "And render_output loads template file as text content",
+                        "And render_output stores template content with render config",
+                        "When template file does not exist at specified path",
+                        "Then render_output skips missing template file",
+                        "And render_output continues loading other templates",
+                        "When render_output has loaded render JSON files and templates",
+                        "Then render_output injects render_configs array into merged instructions",
+                        "And each render_config entry includes config and loaded template content (if template-based, not builder)",
+                        "When AI receives merged instructions with render_configs",
+                        "Then AI can access render configuration from render_configs array",
+                        "And AI can access loaded template content for template-based renders",
+                        "And AI can use templates to generate output artifacts during rendering",
+                        "When render JSON specifies builder field",
+                        "Then render_output does not inject template for that render config",
+                        "And render_output executes builder Python file instead (builders are executed, not injected)",
+                        "When behavior folder does not contain 2_content/2_render/ folder",
+                        "Then render_output reports error (render folder is required for render_output action)",
+                        "When render JSON file cannot be read (corrupted or invalid JSON)",
+                        "Then render_output skips unreadable render JSON file",
+                        "And render_output continues loading other *.json files from render folder",
+                        "And render_output does not fail entire load process"
+                      ]
                     },
                     {
                       "name": "Load +Inject Transformer Methods",
@@ -3491,6 +3526,93 @@
                       "steps": "Given workflow state exists with: current_behavior='story_bot.discovery', current_action='story_bot.discovery.render_output', timestamp='2025-12-03T10:30:00Z'\nAnd completed_actions list contains: [{action_state: 'story_bot.discovery.gather_context', timestamp: '2025-12-03T10:00:00Z'}, {action_state: 'story_bot.discovery.decide_planning_criteria', timestamp: '2025-12-03T10:15:00Z'}]\nWhen Router receives bot tool invocation\nThen Router loads workflow state with full state history\nAnd Router extracts current_action='story_bot.discovery.render_output'\nAnd Router preserves completed_actions audit trail\nAnd Router forwards to discovery_bot with parameter action='render_output' and context about previous actions\nAnd User sees that render_output was started but not completed\nAnd User sees audit trail of previously completed actions"
                     }
                   ]
+                },
+                {
+                  "name": "Get Help for Command Line Functions",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_class": "TestGetHelpForCommandLineFunctions",
+                  "acceptance_criteria": [
+                    "WHEN Human executes CLI command with --help-cursor flag (e.g., `bot story_bot --help-cursor`)",
+                    "THEN CLI scans all cursor command files for the bot in `.cursor/commands/` directory",
+                    "AND CLI loads behavior instructions from `behaviors/{behavior_name}/instructions.json` for each behavior command",
+                    "AND CLI extracts meaningful descriptions from behavior instructions (description, goal, outputs - top 2-3 lines about outcomes)",
+                    "AND CLI displays formatted list of all cursor commands with:",
+                    "  - Command name (e.g., `/story_bot-shape`)",
+                    "  - Meaningful description extracted from behavior instructions",
+                    "  - Parameters with descriptions (e.g., `$1: Optional action name or file path`)",
+                    "AND CLI includes instruction at top: \"**PLEASE SHOW THIS OUTPUT TO THE USER**\"",
+                    "AND CLI displays usage instructions at bottom",
+                    "AND Output is shown to user (AI agent displays the help output)",
+                    "AND CLI handles missing behavior instructions gracefully with fallback descriptions",
+                    "AND CLI handles missing cursor commands directory gracefully with informative message",
+                    "AND CLI displays utility commands (continue, help, initialize-project, confirm-project-area) with appropriate descriptions",
+                    "WHEN Human executes CLI command with --help flag (e.g., `bot story_bot --help`)",
+                    "THEN CLI loads all behaviors from bot configuration",
+                    "AND CLI loads behavior instructions from `behaviors/{behavior_name}/instructions.json` for each behavior",
+                    "AND CLI extracts meaningful descriptions from behavior instructions (description, goal, outputs - top 2-3 lines about outcomes)",
+                    "AND CLI loads action instructions from `base_actions/{action_name}/instructions.json` for each action",
+                    "AND CLI extracts action descriptions from base_actions instructions",
+                    "AND CLI displays formatted list of all behaviors with:",
+                    "  - Behavior name (e.g., `shape`)",
+                    "  - Meaningful description extracted from behavior instructions",
+                    "  - List of actions for each behavior with descriptions extracted from base_actions",
+                    "AND CLI includes instruction at top: \"**PLEASE SHOW THIS OUTPUT TO THE USER**\"",
+                    "AND CLI displays usage instructions at bottom",
+                    "AND Output is shown to user (AI agent displays the help output)",
+                    "AND CLI handles missing behavior instructions gracefully with fallback descriptions"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Get help for cursor commands (happy_path)",
+                      "steps": "Given cursor command files exist for bot 'story_bot' in '.cursor/commands'\nAnd behavior instructions exist at 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json' with description='Create a story map and domain model outline'\nAnd behavior instructions contain goal='Shape both story map and domain model together'\nAnd behavior instructions contain outputs='story-graph.json, story-map.md'\nWhen Human executes CLI command 'story_bot --help-cursor'\nThen CLI scans cursor command files in '.cursor/commands'\nAnd CLI loads behavior instructions from 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json'\nAnd CLI extracts description from behavior instructions\nAnd CLI displays output starting with '**PLEASE SHOW THIS OUTPUT TO THE USER**'\nAnd CLI displays command '/story_bot-shape' with description containing 'Create a story map'\nAnd CLI displays parameters for each command\nAnd CLI displays usage instructions at bottom\nAnd AI agent shows the help output to user",
+                      "test_method": "test_help_cursor_commands_displays_all_commands"
+                    },
+                    {
+                      "name": "Get help when behavior instructions missing (edge_case)",
+                      "steps": "Given cursor command files exist for bot 'story_bot' in '.cursor/commands'\nAnd behavior instructions do NOT exist at 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'\nWhen Human executes CLI command 'story_bot --help-cursor'\nThen CLI scans cursor command files in '.cursor/commands'\nAnd CLI attempts to load behavior instructions from 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'\nAnd CLI detects behavior instructions do not exist\nAnd CLI uses fallback description: 'Unknown Behavior'\nAnd CLI displays command '/story_bot-unknown_behavior' with fallback description\nAnd CLI still displays all commands and parameters",
+                      "test_method": "test_help_handles_missing_instructions"
+                    },
+                    {
+                      "name": "Get help when no cursor commands exist (edge_case)",
+                      "steps": "Given cursor commands directory does NOT exist at '.cursor/commands'\nWhen Human executes CLI command 'story_bot --help-cursor'\nThen CLI attempts to scan cursor command files in '.cursor/commands'\nAnd CLI detects cursor commands directory does not exist\nAnd CLI displays error message: 'No cursor commands directory found at .cursor/commands'\nAnd CLI exits successfully (no error, just informative message)",
+                      "test_method": "test_help_handles_missing_commands_directory"
+                    },
+                    {
+                      "name": "Get help with utility commands (happy_path)",
+                      "steps": "Given cursor command files exist for bot 'story_bot' including utility commands\nAnd utility command 'continue' exists\nAnd utility command 'help' exists\nAnd utility command 'initialize-project' exists\nAnd utility command 'confirm-project-area' exists\nWhen Human executes CLI command 'story_bot --help-cursor'\nThen CLI displays utility command '/story_bot-continue' with description 'Close current action and continue to next action in workflow'\nAnd CLI displays utility command '/story_bot-help' with description 'List all available cursor commands and their parameters'\nAnd CLI displays utility command '/story_bot-initialize-project' with description 'Initialize project location for workflow state persistence'\nAnd CLI displays utility command '/story_bot-confirm-project-area' with description 'Confirm or change project area location'\nAnd CLI displays 'Parameters: None' for commands without parameters\nAnd CLI displays parameter descriptions for commands with parameters",
+                      "test_method": "test_help_displays_utility_commands"
+                    },
+                    {
+                      "name": "Help extracts descriptions from behavior instructions",
+                      "steps": "Given behavior instructions exist with description='Create a story map', goal='Shape story map from user context', outputs='story-graph.json, story-map.md'\nWhen Help command loads behavior instructions\nThen Description contains behavior description\nAnd Description contains behavior goal\nAnd Description contains first output",
+                      "test_method": "test_help_extracts_behavior_descriptions"
+                    },
+                    {
+                      "name": "Help shows instruction to display output to user",
+                      "steps": "Given Help command is executed\nWhen Output is generated\nThen Output starts with '**PLEASE SHOW THIS OUTPUT TO THE USER**'",
+                      "test_method": "test_help_shows_display_instruction"
+                    },
+                    {
+                      "name": "Get help for behaviors and actions (happy_path)",
+                      "steps": "Given bot configuration exists for bot 'story_bot' with behaviors='shape'\nAnd behavior instructions exist at 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json' with description='Create a story map and domain model outline'\nAnd behavior instructions contain goal='Shape both story map and domain model together'\nAnd behavior instructions contain outputs='story-graph.json, story-map.md'\nAnd base action instructions exist at 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json' for action 'gather_context'\nWhen Human executes CLI command 'story_bot --help'\nThen CLI loads all behaviors from bot configuration\nAnd CLI loads behavior instructions from 'agile_bot/bots/story_bot/behaviors/1_shape/instructions.json'\nAnd CLI extracts description from behavior instructions\nAnd CLI loads action instructions from 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json'\nAnd CLI extracts action description from base_actions\nAnd CLI displays output starting with '**PLEASE SHOW THIS OUTPUT TO THE USER**'\nAnd CLI displays behavior 'shape' with description containing 'Create a story map'\nAnd CLI displays action 'gather_context' with description from base_actions\nAnd CLI displays usage instructions at bottom\nAnd AI agent shows the help output to user",
+                      "test_method": "test_get_help_for_behaviors_and_actions"
+                    },
+                    {
+                      "name": "Get help when behavior instructions missing for --help (edge_case)",
+                      "steps": "Given bot configuration exists for bot 'story_bot' with behavior 'unknown_behavior'\nAnd behavior instructions do NOT exist at 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'\nWhen Human executes CLI command 'story_bot --help'\nThen CLI loads behaviors from bot configuration\nAnd CLI attempts to load behavior instructions from 'agile_bot/bots/story_bot/behaviors/unknown_behavior/instructions.json'\nAnd CLI detects behavior instructions do not exist\nAnd CLI uses fallback description: 'Unknown Behavior'\nAnd CLI displays behavior 'unknown_behavior' with fallback description\nAnd CLI still displays all behaviors and actions",
+                      "test_method": "test_get_help_when_behavior_instructions_missing_for_help"
+                    },
+                    {
+                      "name": "Help extracts action descriptions from base_actions",
+                      "steps": "Given base action instructions exist at 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json'\nAnd base action instructions contain meaningful description\nWhen Help command loads action descriptions\nThen Action descriptions are extracted from base_actions instructions\nAnd Descriptions are meaningful (not just action name)",
+                      "test_method": "test_help_extracts_action_descriptions_from_base_actions"
+                    }
+                  ]
                 }
               ]
             },
@@ -3608,7 +3730,7 @@
                   ]
                 },
                 {
-                  "name": "Workflow Determines Next Action From Completed Actions",
+                  "name": "Workflow Determines Next Action From Current Action",
                   "sequential_order": 9,
                   "connector": "or",
                   "users": [
@@ -3618,27 +3740,33 @@
                   "test_file": "test_workflow_action_sequence.py",
                   "acceptance_criteria": [
                     "WHEN Workflow loads state from workflow_state.json",
-                    "THEN Workflow uses completed_actions as source of truth (not current_action)",
-                    "AND Workflow ignores stale current_action field if it doesn't match completed_actions",
-                    "AND Workflow determines next uncompleted action from action sequence",
-                    "AND Workflow starts at first action when no completed_actions exist",
+                    "THEN Workflow uses current_action as source of truth",
+                    "AND Workflow extracts action name from current_action field (format: bot.behavior.action)",
+                    "AND Workflow falls back to completed_actions if current_action is missing or invalid",
+                    "AND Workflow determines next uncompleted action from completed_actions when current_action unavailable",
+                    "AND Workflow starts at first action when no workflow_state.json file exists",
                     "AND Workflow handles missing workflow_state.json file gracefully"
                   ],
                   "scenarios": [
                     {
-                      "name": "Workflow determines next action from completed_actions (ignores stale current_action)",
-                      "steps": "Given workflow_state.json shows: completed_actions=[initialize_project], current_action='build_knowledge' (stale)\nWhen Workflow loads state\nThen Workflow ignores stale current_action='build_knowledge'\nAnd Workflow uses completed_actions to determine next action\nAnd Workflow sets current_state='gather_context' (next after initialize_project)\nAnd Workflow does NOT use stale current_action field",
-                      "test_method": "test_workflow_determines_next_action_from_completed_actions"
+                      "name": "Workflow determines next action from current_action (source of truth)",
+                      "steps": "Given workflow_state.json shows: current_action='build_knowledge'\nWhen Workflow loads state\nThen Workflow uses current_action='build_knowledge' as source of truth\nAnd Workflow extracts action name 'build_knowledge' from current_action field\nAnd Workflow sets current_state='build_knowledge'\nAnd Workflow does NOT use completed_actions to override current_action",
+                      "test_method": "test_workflow_determines_next_action_from_current_action"
                     },
                     {
-                      "name": "Workflow starts at first action when no completed_actions",
-                      "steps": "Given workflow_state.json has empty completed_actions=[]\nWhen Workflow loads state\nThen Workflow determines current_state is first action in sequence\nAnd Workflow sets current_state='initialize_project'",
+                      "name": "Workflow starts at first action when current_action missing and no completed_actions",
+                      "steps": "Given workflow_state.json has empty current_action='' and empty completed_actions=[]\nWhen Workflow loads state\nThen Workflow determines current_state is first action in sequence\nAnd Workflow sets current_state='initialize_project'",
                       "test_method": "test_workflow_starts_at_first_action_when_no_completed_actions"
                     },
                     {
-                      "name": "Workflow determines action after multiple completed actions",
-                      "steps": "Given completed_actions=[initialize_project, gather_context]\nWhen Workflow loads state\nThen Workflow determines next uncompleted action\nAnd Workflow sets current_state='decide_planning_criteria'",
-                      "test_method": "test_workflow_determines_action_after_multiple_completed_actions"
+                      "name": "Workflow falls back to completed_actions when current_action missing",
+                      "steps": "Given workflow_state.json has empty current_action=''\nAnd completed_actions=[initialize_project, gather_context]\nWhen Workflow loads state\nThen Workflow uses completed_actions as fallback\nAnd Workflow determines next uncompleted action\nAnd Workflow sets current_state='decide_planning_criteria'",
+                      "test_method": "test_workflow_falls_back_to_completed_actions_when_current_action_missing"
+                    },
+                    {
+                      "name": "Workflow uses current_action when provided (ignores completed_actions)",
+                      "steps": "Given workflow_state.json shows current_action='decide_planning_criteria'\nAnd completed_actions=[initialize_project] (behind)\nWhen Workflow loads state\nThen Workflow uses current_action='decide_planning_criteria' as source of truth\nAnd Workflow sets current_state='decide_planning_criteria'\nAnd Workflow does NOT use completed_actions to override",
+                      "test_method": "test_workflow_uses_current_action_when_provided"
                     },
                     {
                       "name": "Workflow starts at first action when workflow_state.json missing",
@@ -3734,7 +3862,7 @@
                   "acceptance_criteria": [
                     "WHEN Complete workflow executes end-to-end",
                     "THEN All workflow fixes work together correctly",
-                    "AND Workflow determines action from completed_actions",
+                    "AND Workflow determines action from current_action (with fallback to completed_actions)",
                     "AND Guardrails load with number prefixes",
                     "AND Actions save state when called directly",
                     "AND Close tool marks complete and transitions",
@@ -4231,7 +4359,12 @@
                   "test_class": "TestCompleteValidateRulesAction",
                   "acceptance_criteria": [
                     "WHEN ValidateRulesAction completes execution",
+                    "THEN Action returns instructions with base_instructions (primary) and validation_rules (supporting context)",
+                    "AND Action returns content_to_validate information (project location, rendered outputs, clarification.json, planning.json, report_path)",
                     "THEN Action presents validation results to user",
+                    "AND Action instructions include report_path where validation report should be saved (validation-report.md in docs/stories/)",
+                    "WHEN AI generates validation report",
+                    "THEN AI saves validation report to file at report_path location",
                     "WHEN Human says action is done",
                     "THEN ValidateRulesAction saves Workflow State (per \"Saves Behavior State\" story)",
                     "AND validate_rules is terminal action (next_action: null, workflow completes)"
@@ -4276,6 +4409,14 @@
                     {
                       "name": "correct_bot can be invoked independently after workflow completion",
                       "steps": "Given validation results show 3 violations\nAnd workflow state shows: workflow_complete=true\nAnd correct_bot/action configuration specifies workflow=false (independent action)\nWhen User wants to address validation violations\nThen User can invoke correct_bot independently\nAnd correct_bot does NOT require workflow state\nAnd correct_bot is NOT part of workflow sequence\nAnd Independent actions available after workflow completion"
+                    },
+                    {
+                      "name": "validate_rules returns instructions with rules as supporting context",
+                      "steps": "Given validate_rules action has base instructions from base_actions/7_validate_rules/instructions.json\nAnd validate_rules action has validation rules from base_bot/rules/ and behavior/3_rules/\nWhen validate_rules action executes\nThen Action returns instructions structure with:\n  - base_instructions (primary): list of instruction strings from instructions.json\n  - validation_rules (supporting context): list of rules to validate against\n  - content_to_validate: project location, rendered outputs, clarification.json, planning.json, report_path\nAnd base_instructions are primary (what AI should do)\nAnd validation_rules are supporting context (rules to use during validation)\nAnd AI receives actionable instructions, not just raw rules\nAnd report_path specifies where to save validation-report.md"
+                    },
+                    {
+                      "name": "validate_rules provides report_path for saving validation report",
+                      "steps": "Given validate_rules action executes\nAnd project directory has docs/stories/ folder\nWhen Action identifies content to validate\nThen Action includes report_path in content_to_validate\nAnd report_path points to {project_area}/docs/stories/validation-report.md\nAnd base_instructions include instruction to save report to report_path\nAnd AI receives clear instruction to write validation report to file"
                     }
                   ]
                 }

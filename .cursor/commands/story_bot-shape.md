@@ -1,1 +1,1 @@
-agile_bot\bots\story_bot\story_bot_cli.ps1 shape ${1:}
+python agile_bot/bots/story_bot/src/story_bot_cli.py shape ${1:}

@@ -1,0 +1,445 @@
+{
+  "_explanation": {
+    "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
+    "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "domain_placement": "domain_concepts: 'local' if relevant to single sub_epic, 'global' if relevant to multiple sub_epics. Place at most specific level (local preferred), but elevate to parent if used by multiple children.",
+    "tests": "Each story contains test cases with test_type, test_data, expected_result, and test_steps. Tests validate scenarios and scenario outlines from previous behaviors.",
+    "test_mapping": "Lowest-level sub_epics (with empty sub_epics array) have test_file field. Stories have test_class field. Scenarios map to test_method field."
+  },
+  "epics": [
+    {
+      "name": "Render Diagram",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "domain_concepts": [
+        {
+          "name": "Story Graph",
+          "responsibilities": [
+            {
+              "name": "Track component references",
+              "collaborators": ["Builder", "Synchronizer", "Transformer"]
+            }
+          ]
+        },
+        {
+          "name": "Component Registry",
+          "responsibilities": [
+            {
+              "name": "Store component paths and metadata",
+              "collaborators": ["Story Graph"]
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "Render Story IO Diagram",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "domain_concepts": [
+            {
+              "name": "Builder",
+              "responsibilities": [
+                {
+                  "name": "Generate output from template",
+                  "collaborators": ["Story Graph", "Component Registry"]
+                }
+              ]
+            },
+            {
+              "name": "Synchronizer",
+              "responsibilities": [
+                {
+                  "name": "Sync DrawIO with story graph",
+                  "collaborators": ["Story Graph", "Component Registry"]
+                }
+              ]
+            },
+            {
+              "name": "Transformer",
+              "responsibilities": [
+                {
+                  "name": "Transform data formats",
+                  "collaborators": ["Story Graph", "Component Registry"]
+                }
+              ]
+            }
+          ],
+          "sub_epics": [],
+          "test_file": "test_track_builders_synchers_transformers.py",
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "Track Builders Synchers Transformers in Story Graph",
+                  "sequential_order": 18,
+                  "connector": null,
+                  "users": ["Story IO Diagram"],
+                  "story_type": "technical",
+                  "test_class": "TestTrackBuildersSynchersTransformersInStoryGraph",
+                  "scenarios": [
+                    {
+                      "name": "Story graph stores builder reference",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains builder reference at path \"2_content/2_render/templates/builder.py\"",
+                        "And builder file exists at behavior folder relative path",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph stores builder path in component registry",
+                        "And Story Graph stores builder type as \"builder\"",
+                        "And Story Graph includes builder metadata if specified"
+                      ],
+                      "test_method": "test_story_graph_stores_builder_reference"
+                    },
+                    {
+                      "name": "Story graph stores synchronizer reference",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains synchronizer reference at path \"2_content/3_synchronize/synchronize_drawio.json\"",
+                        "And synchronizer configuration file exists at behavior folder relative path",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph stores synchronizer path in component registry",
+                        "And Story Graph stores synchronizer type as \"synchronizer\"",
+                        "And Story Graph includes synchronizer configuration metadata"
+                      ],
+                      "test_method": "test_story_graph_stores_synchronizer_reference"
+                    },
+                    {
+                      "name": "Story graph stores transformer reference",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains transformer reference at path \"2_content/2_render/templates/transformer.py\"",
+                        "And transformer file exists at behavior folder relative path",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph stores transformer path in component registry",
+                        "And Story Graph stores transformer type as \"transformer\"",
+                        "And Story Graph includes transformer metadata if specified"
+                      ],
+                      "test_method": "test_story_graph_stores_transformer_reference"
+                    },
+                    {
+                      "name": "Story graph persists component references on save",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given Story Graph has loaded builder reference",
+                        "And Story Graph has loaded synchronizer reference",
+                        "And Story Graph has loaded transformer reference",
+                        "When Story Graph saves to JSON file",
+                        "Then JSON file contains component references array",
+                        "And JSON file preserves builder path and metadata",
+                        "And JSON file preserves synchronizer path and metadata",
+                        "And JSON file preserves transformer path and metadata"
+                      ],
+                      "test_method": "test_story_graph_persists_component_references_on_save"
+                    },
+                    {
+                      "name": "Story graph makes component references available for rendering",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given Story Graph has loaded builder reference",
+                        "And Story Graph has loaded synchronizer reference",
+                        "When render output action executes",
+                        "Then render output action can access builder path from Story Graph",
+                        "And render output action can access synchronizer path from Story Graph",
+                        "And render output action can execute builder using stored path",
+                        "And render output action can execute synchronizer using stored path"
+                      ],
+                      "test_method": "test_story_graph_makes_component_references_available_for_rendering"
+                    },
+                    {
+                      "name": "Story graph validates component path exists",
+                      "type": "error_case",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains builder reference at invalid path \"nonexistent/builder.py\"",
+                        "And builder file does not exist at specified path",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph validation detects missing component",
+                        "And Story Graph reports error for invalid component reference",
+                        "And Story Graph marks component reference as invalid"
+                      ],
+                      "test_method": "test_story_graph_validates_component_path_exists"
+                    },
+                    {
+                      "name": "Story graph updates component metadata",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given Story Graph has loaded builder reference with initial metadata",
+                        "And builder metadata needs to be updated",
+                        "When Story Graph updates component metadata",
+                        "Then Story Graph updates builder information in registry",
+                        "And Story Graph preserves other component references unchanged",
+                        "And Story Graph persists updated metadata on save"
+                      ],
+                      "test_method": "test_story_graph_updates_component_metadata"
+                    },
+                    {
+                      "name": "Story graph maintains multiple component references",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains multiple builder references",
+                        "And story graph JSON contains multiple synchronizer references",
+                        "And story graph JSON contains multiple transformer references",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph maintains separate entries for each builder",
+                        "And Story Graph maintains separate entries for each synchronizer",
+                        "And Story Graph maintains separate entries for each transformer",
+                        "And Story Graph allows querying components by type"
+                      ],
+                      "test_method": "test_story_graph_maintains_multiple_component_references"
+                    },
+                    {
+                      "name": "Story graph queries components by type",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given Story Graph has loaded multiple builder references",
+                        "And Story Graph has loaded multiple synchronizer references",
+                        "When Story Graph queries components by type \"builder\"",
+                        "Then Story Graph returns all builder references",
+                        "And Story Graph does not return synchronizer references",
+                        "And Story Graph does not return transformer references"
+                      ],
+                      "test_method": "test_story_graph_queries_components_by_type"
+                    },
+                    {
+                      "name": "Story graph handles component reference with configuration",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Story IO Diagram is initialized with story_graph_path",
+                        "And story graph JSON file exists at story_graph_path",
+                        "And behavior folder structure exists with components"
+                      ],
+                      "steps": [
+                        "Given story graph JSON contains builder reference with configuration object",
+                        "And builder configuration includes template path and output path",
+                        "When Story Graph loads from JSON file",
+                        "Then Story Graph stores builder path in component registry",
+                        "And Story Graph stores builder configuration object",
+                        "And Story Graph makes configuration available for builder execution",
+                        "And Story Graph preserves configuration on save"
+                      ],
+                      "test_method": "test_story_graph_handles_component_reference_with_configuration"
+                    }
+                  ],
+                  "scenario_outlines": [],
+                  "test_cases": [
+                    {
+                      "name": "Test builder reference storage",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_builder.json",
+                        "builder_path": "2_content/2_render/templates/builder.py"
+                      },
+                      "expected_result": "Story Graph contains builder reference with correct path and type",
+                      "test_steps": [
+                        "Step 1: Load story graph from JSON file",
+                        "Step 2: Verify builder reference is stored in component registry",
+                        "Step 3: Verify builder type is set to 'builder'",
+                        "Step 4: Verify builder path matches expected value"
+                      ]
+                    },
+                    {
+                      "name": "Test synchronizer reference storage",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_synchronizer.json",
+                        "synchronizer_path": "2_content/3_synchronize/synchronize_drawio.json"
+                      },
+                      "expected_result": "Story Graph contains synchronizer reference with correct path and type",
+                      "test_steps": [
+                        "Step 1: Load story graph from JSON file",
+                        "Step 2: Verify synchronizer reference is stored in component registry",
+                        "Step 3: Verify synchronizer type is set to 'synchronizer'",
+                        "Step 4: Verify synchronizer path matches expected value"
+                      ]
+                    },
+                    {
+                      "name": "Test transformer reference storage",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_transformer.json",
+                        "transformer_path": "2_content/2_render/templates/transformer.py"
+                      },
+                      "expected_result": "Story Graph contains transformer reference with correct path and type",
+                      "test_steps": [
+                        "Step 1: Load story graph from JSON file",
+                        "Step 2: Verify transformer reference is stored in component registry",
+                        "Step 3: Verify transformer type is set to 'transformer'",
+                        "Step 4: Verify transformer path matches expected value"
+                      ]
+                    },
+                    {
+                      "name": "Test component reference persistence",
+                      "test_type": "integration",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_components.json",
+                        "output_path": "test_data/story_graph_saved.json"
+                      },
+                      "expected_result": "Component references are preserved in saved JSON file",
+                      "test_steps": [
+                        "Step 1: Load story graph with component references",
+                        "Step 2: Save story graph to JSON file",
+                        "Step 3: Reload story graph from saved file",
+                        "Step 4: Verify all component references are preserved"
+                      ]
+                    },
+                    {
+                      "name": "Test component reference validation",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_invalid_component.json",
+                        "invalid_path": "nonexistent/builder.py"
+                      },
+                      "expected_result": "Story Graph validation detects and reports invalid component path",
+                      "test_steps": [
+                        "Step 1: Load story graph with invalid component path",
+                        "Step 2: Verify validation error is detected",
+                        "Step 3: Verify error message indicates missing component",
+                        "Step 4: Verify component reference is marked as invalid"
+                      ]
+                    },
+                    {
+                      "name": "Test component metadata update",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_builder.json",
+                        "updated_metadata": {
+                          "template": "new_template.md",
+                          "output": "new_output.md"
+                        }
+                      },
+                      "expected_result": "Component metadata is updated and persisted",
+                      "test_steps": [
+                        "Step 1: Load story graph with builder reference",
+                        "Step 2: Update builder metadata",
+                        "Step 3: Verify metadata is updated in registry",
+                        "Step 4: Save and reload to verify persistence"
+                      ]
+                    },
+                    {
+                      "name": "Test multiple component references",
+                      "test_type": "integration",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_multiple_components.json",
+                        "builder_count": 3,
+                        "synchronizer_count": 2,
+                        "transformer_count": 1
+                      },
+                      "expected_result": "All component references are stored and can be queried separately",
+                      "test_steps": [
+                        "Step 1: Load story graph with multiple component references",
+                        "Step 2: Verify all builders are stored",
+                        "Step 3: Verify all synchronizers are stored",
+                        "Step 4: Verify all transformers are stored",
+                        "Step 5: Query components by type and verify correct results"
+                      ]
+                    },
+                    {
+                      "name": "Test component query by type",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_multiple_components.json",
+                        "query_type": "builder"
+                      },
+                      "expected_result": "Only components of specified type are returned",
+                      "test_steps": [
+                        "Step 1: Load story graph with multiple component types",
+                        "Step 2: Query components by type 'builder'",
+                        "Step 3: Verify only builder references are returned",
+                        "Step 4: Verify synchronizer and transformer references are not returned"
+                      ]
+                    },
+                    {
+                      "name": "Test component reference with configuration",
+                      "test_type": "unit",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_builder_config.json",
+                        "builder_config": {
+                          "template": "template.md",
+                          "output": "output.md",
+                          "parameters": {}
+                        }
+                      },
+                      "expected_result": "Component reference includes configuration and makes it available",
+                      "test_steps": [
+                        "Step 1: Load story graph with builder reference and configuration",
+                        "Step 2: Verify builder path is stored",
+                        "Step 3: Verify builder configuration is stored",
+                        "Step 4: Verify configuration is accessible for execution"
+                      ]
+                    },
+                    {
+                      "name": "Test component reference availability for rendering",
+                      "test_type": "integration",
+                      "test_data": {
+                        "story_graph_path": "test_data/story_graph_with_components.json",
+                        "render_action": "render_output"
+                      },
+                      "expected_result": "Render output action can access and use component references",
+                      "test_steps": [
+                        "Step 1: Load story graph with component references",
+                        "Step 2: Execute render output action",
+                        "Step 3: Verify render action can access builder path",
+                        "Step 4: Verify render action can access synchronizer path",
+                        "Step 5: Verify render action can execute components using stored paths"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "story_groups": []
+    }
+  ]
+}
+

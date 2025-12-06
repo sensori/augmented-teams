@@ -1,8 +1,9 @@
 {
   "name": "render_domain_model_description",
   "path": "docs/stories",
+  "input": "story-graph.json",
   "template": "templates/domain-model-description-template.md",
   "output": "{solution_name_slug}-domain-model-description.md",
-  "instructions": "Transform the structured domain map into a domain model description markdown document using the domain-model-description-template.md template file. The description should use natural language that domain experts understand, explaining what each concept represents in the business domain, describing relationships and constraints between concepts, and using examples to illustrate domain concepts. Follow the example format provided in the template."
+  "instructions": "Transform the domain_concepts from story-graph.json into a domain model description markdown document using the domain-model-description-template.md template file. Extract domain_concepts from all epics and sub_epics in story-graph.json. The description should use natural language that domain experts understand, explaining what each concept represents in the business domain, describing relationships and constraints between concepts, and using examples to illustrate domain concepts."
 }
 

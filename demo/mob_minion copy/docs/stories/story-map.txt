@@ -1,0 +1,33 @@
+(E) Manage Mobs
+    (E) Create and Configure Mobs
+        (S) Game Master --> Create mob from selected minions
+        and (S) Game Master --> Group minions into existing mob
+    or
+        (S) Game Master --> Spawn mob from actor templates
+        or (S) Game Master --> Spawn mob from mob templates
+    (E) Edit and Modify Mobs
+        (S) Game Master --> Edit mob configuration
+        and (S) Game Master --> Remove minions from mob
+
+(E) Select Strategy
+    (E) Choose Strategy Type
+        (S) Game Master --> Select attack most powerful target strategy
+        or (S) Game Master --> Select attack weakest target strategy
+        or (S) Game Master --> Select defend leader strategy
+        or (S) Game Master --> Select attack most damaged target strategy
+
+(E) Choose Targets
+    (E) Target Selection Methods
+        (S) Game Master --> Choose target by power level
+        or (S) Game Master --> Choose target by health/damage
+        or (S) Game Master --> Choose target by proximity
+        or (S) Game Master --> Choose fleeing targets
+
+(E) Execute Actions
+    (E) Attack Actions
+        (S) Game Master --> Execute melee attack
+        or (S) Game Master --> Execute ranged attack
+        or (S) Game Master --> Execute area attack
+    (E) Movement and Range
+        (S) Game Master --> Move minions to target when out of range
+        and (S) Game Master --> Execute action on any mob member to trigger all members

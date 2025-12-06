@@ -68,8 +68,8 @@ class CliGenerator:
         # Generate PowerShell script wrapper (Windows)
         cli_powershell_path = self._generate_powershell_script()
         
-        # Generate cursor command files (use PowerShell script for Windows compatibility)
-        cursor_commands = self._generate_cursor_commands(cli_powershell_path)
+        # Generate cursor command files (use Python script directly)
+        cursor_commands = self._generate_cursor_commands(cli_python_path)
         
         return {
             'cli_python': cli_python_path,
@@ -215,7 +215,7 @@ python "$SCRIPT_DIR\\src\\{self.bot_name}_cli.py" $args
         """Generate cursor command files for bot.
         
         Args:
-            cli_script_path: Path to the CLI script that will be invoked (PowerShell script for Windows)
+            cli_script_path: Path to the Python CLI script that will be invoked
             
         Returns:
             Dict mapping command names to cursor command file paths
@@ -233,18 +233,15 @@ python "$SCRIPT_DIR\\src\\{self.bot_name}_cli.py" $args
         # Generate cursor commands in .cursor/commands directory
         commands_dir = self.workspace_root / '.cursor' / 'commands'
         
-        # Use relative path from workspace root for the CLI script
-        # The cli_script_path should be absolute (from _generate_powershell_script)
+        # Use relative path from workspace root for the Python CLI script
         if cli_script_path.is_absolute():
             rel_cli_script_path = cli_script_path.relative_to(self.workspace_root)
         else:
             # If not absolute, construct path relative to workspace root
-            rel_cli_script_path = self.bot_location / cli_script_path.name
+            rel_cli_script_path = self.bot_location / 'src' / cli_script_path.name
         
-        # Convert to string path using backslashes for Windows PowerShell
-        # Always use the PowerShell script path explicitly
-        rel_cli_script_path = self.bot_location / f'{self.bot_name}_cli.ps1'
-        cli_script_str = str(rel_cli_script_path).replace('/', '\\')
+        # Convert to forward slashes for cross-platform compatibility (Python handles both)
+        cli_script_str = str(rel_cli_script_path).replace('\\', '/')
         
         return cli.generate_cursor_commands(commands_dir, Path(cli_script_str))
 
