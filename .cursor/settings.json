@@ -1,0 +1,13 @@
+{
+    "terminal.integrated.env.windows": {
+        "PYTHONUNBUFFERED": "1",
+        "CURSOR_AGENT": "1"
+    },
+    "terminal.integrated.shellIntegration.enabled": true,
+    "cursor.agent.legacyTerminalTool": true
+}
+
+
+
+
+

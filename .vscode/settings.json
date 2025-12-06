@@ -16,5 +16,12 @@
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "cursor.ai.autoAcceptFileWrites": true,
-    "cursor.general.autoAcceptFileWrites": true
+    "cursor.general.autoAcceptFileWrites": true,
+    "terminal.integrated.env.windows": {
+        "PYTHONUNBUFFERED": "1"
+    },
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.enablePersistentSessions": false,
+    "cursor.agent.legacyTerminalTool": true,
+    "python.defaultInterpreterPath": "C:\\Users\\thoma\\AppData\\Local\\Programs\\Python\\Python313-arm64\\python.exe"
 }

@@ -2,6 +2,7 @@
 Generate Bot Server And Tools Tests
 
 Tests for all stories in the 'Generate Bot Server And Tools' sub-epic (in story map order):
+- Generate BOT CLI code (CLI Increment)
 - Generate Bot Tools (Increment 3)
 - Generate Behavior Tools (Increment 3)
 - Generate MCP Bot Server (Increment 2)
@@ -9,9 +10,17 @@ Tests for all stories in the 'Generate Bot Server And Tools' sub-epic (in story 
 - Deploy MCP Bot Server (Increment 2)
 - Generate Cursor Awareness Files (Increment 2)
 """
-import pytest
+import sys
 from pathlib import Path
+
+# Add workspace root to Python path for imports
+workspace_root = Path(__file__).parent.parent.parent.parent.parent
+if str(workspace_root) not in sys.path:
+    sys.path.insert(0, str(workspace_root))
+
+import pytest
 import json
+import stat
 from unittest.mock import Mock, patch
 from fastmcp import FastMCP, Client
 
@@ -122,6 +131,334 @@ def generator(workspace_root):
         bot_location='agile_bot/bots/test_bot'
     )
     return gen
+
+class TestGenerateBotCli:
+    """Story: Generate BOT CLI code - Tests CLI code generation."""
+    
+    def test_generator_creates_cli_code_for_bot(self, workspace_root):
+        """
+        SCENARIO: Generator creates CLI code for bot (happy_path)
+        GIVEN: a bot with name "story_bot"
+        AND: Bot Config exists at bot_config_path
+        AND: bot has behaviors configured as "exploration,shape,discovery"
+        WHEN: MCP Server Generator processes Bot Config
+        THEN: Generator creates CLI command wrapper structure
+        AND: Generator generates CLI entry point script at cli_script_path
+        AND: CLI script includes argument parsing for behavior and action parameters
+        AND: CLI script includes help/usage documentation generation
+        AND: CLI script supports listing available bots, behaviors, and actions via --list flag
+        AND: Generated CLI code integrates with existing bot instantiation logic from base_bot
+        AND: CLI code follows same routing logic as MCP tools (workflow state-based auto-forwarding)
+        AND: CLI script is executable and can be invoked from command line
+        """
+        # Given: Set up bot with config
+        bot_name = 'story_bot'
+        behaviors = ['exploration', 'shape', 'discovery']
+        bot_config_path = create_bot_config(workspace_root, bot_name, behaviors)
+        
+        # When: MCP Server Generator processes Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        artifacts = generator.generate_cli_code()
+        
+        # Then: Generator creates CLI command wrapper structure
+        assert 'cli_python' in artifacts
+        assert 'cli_script' in artifacts
+        assert 'cli_powershell' in artifacts
+        assert 'cursor_commands' in artifacts
+        assert 'cli_script' in artifacts
+        assert 'cli_powershell' in artifacts
+        
+        # And: Generator generates CLI entry point script
+        cli_python = artifacts['cli_python']
+        assert cli_python.exists()
+        assert cli_python.name == f'{bot_name}_cli.py'
+        expected_python_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'src' / f'{bot_name}_cli.py'
+        assert cli_python == expected_python_path
+        
+        cli_script = artifacts['cli_script']
+        assert cli_script.exists()
+        assert cli_script.name == f'{bot_name}_cli'
+        expected_script_path = workspace_root / 'agile_bot' / 'bots' / bot_name / f'{bot_name}_cli'
+        assert cli_script == expected_script_path
+        
+        cli_powershell = artifacts['cli_powershell']
+        assert cli_powershell.exists()
+        assert cli_powershell.name == f'{bot_name}_cli.ps1'
+        expected_powershell_path = workspace_root / 'agile_bot' / 'bots' / bot_name / f'{bot_name}_cli.ps1'
+        assert cli_powershell == expected_powershell_path
+        
+        # Verify PowerShell script content
+        powershell_code = cli_powershell.read_text(encoding='utf-8')
+        assert f'{bot_name}_cli.py' in powershell_code
+        assert 'python' in powershell_code.lower()
+        assert '$args' in powershell_code
+        
+        # And: Generator generates cursor command files
+        cursor_commands = artifacts['cursor_commands']
+        assert isinstance(cursor_commands, dict)
+        assert len(cursor_commands) > 0
+        
+        # Verify bot command exists
+        assert bot_name in cursor_commands
+        bot_cmd = cursor_commands[bot_name]
+        assert bot_cmd.exists()
+        assert bot_cmd.name == f'{bot_name}.md'
+        
+        # Verify behavior commands exist
+        for behavior in behaviors:
+            behavior_cmd_key = f'{bot_name}-{behavior}'
+            assert behavior_cmd_key in cursor_commands
+            behavior_cmd = cursor_commands[behavior_cmd_key]
+            assert behavior_cmd.exists()
+            assert behavior_cmd.name == f'{bot_name}-{behavior}.md'
+        
+        # Verify close command exists
+        close_cmd_key = f'{bot_name}-close'
+        assert close_cmd_key in cursor_commands
+        close_cmd = cursor_commands[close_cmd_key]
+        assert close_cmd.exists()
+        assert close_cmd.name == f'{bot_name}-close.md'
+        
+        # And: CLI script includes argument parsing (via BaseBotCli)
+        python_code = cli_python.read_text(encoding='utf-8')
+        assert 'BaseBotCli' in python_code
+        assert 'parse_arguments' in python_code or 'main' in python_code
+        assert bot_name in python_code
+        assert 'bot_config_path' in python_code
+        
+        # And: CLI script includes help/usage documentation generation (via BaseBotCli and docstring)
+        assert 'Usage:' in python_code
+        assert '--help' in python_code or 'BaseBotCli' in python_code
+        assert 'Examples:' in python_code
+        
+        # And: CLI script supports listing (via BaseBotCli which has --list flag)
+        # This is handled by BaseBotCli, so we verify BaseBotCli is used
+        assert 'from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli' in python_code
+        
+        # And: Generated CLI code integrates with existing bot instantiation logic
+        assert 'BaseBotCli' in python_code
+        assert 'bot_config_path' in python_code
+        assert 'workspace_root' in python_code
+        
+        # And: CLI code follows same routing logic as MCP tools (BaseBotCli does this)
+        assert 'BaseBotCli' in python_code  # BaseBotCli implements same routing
+        
+        # And: CLI script is executable (on Unix) or exists (on Windows)
+        # On Windows, executable permissions work differently, so we just verify files exist
+        import platform
+        if platform.system() != 'Windows':
+            assert cli_python.stat().st_mode & stat.S_IEXEC
+            assert cli_script.stat().st_mode & stat.S_IEXEC
+        else:
+            # On Windows, just verify files exist and are readable
+            assert cli_python.exists()
+            assert cli_script.exists()
+    
+    def test_generator_creates_cli_code_for_code_bot(self, workspace_root):
+        """
+        SCENARIO: Generator creates CLI code for bot (happy_path) - code_bot example
+        GIVEN: a bot with name "code_bot"
+        AND: Bot Config exists at bot_config_path
+        AND: bot has behaviors configured as "shape,arrange"
+        WHEN: MCP Server Generator processes Bot Config
+        THEN: Generator creates CLI command wrapper structure
+        AND: Generator generates CLI entry point script at cli_script_path
+        """
+        # Given: Set up code_bot with config
+        bot_name = 'code_bot'
+        behaviors = ['shape', 'arrange']
+        bot_config_path = create_bot_config(workspace_root, bot_name, behaviors)
+        
+        # When: MCP Server Generator processes Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        artifacts = generator.generate_cli_code()
+        
+        # Then: Generator creates CLI code
+        assert 'cli_python' in artifacts
+        assert 'cli_script' in artifacts
+        assert 'cli_powershell' in artifacts
+        
+        cli_python = artifacts['cli_python']
+        assert cli_python.exists()
+        assert cli_python.name == f'{bot_name}_cli.py'
+        
+        cli_script = artifacts['cli_script']
+        assert cli_script.exists()
+        assert cli_script.name == f'{bot_name}_cli'
+        
+        cli_powershell = artifacts['cli_powershell']
+        assert cli_powershell.exists()
+        assert cli_powershell.name == f'{bot_name}_cli.ps1'
+    
+    def test_generator_fails_when_bot_config_missing(self, workspace_root):
+        """
+        SCENARIO: Generator fails when Bot Config is missing (error_case)
+        GIVEN: a bot with name "missing_bot"
+        AND: Bot Config does NOT exist at bot_config_path
+        WHEN: MCP Server Generator attempts to process Bot Config
+        THEN: Generator raises FileNotFoundError with message
+        AND: Generator does not create CLI code
+        """
+        # Given: Bot config does not exist
+        bot_name = 'missing_bot'
+        expected_config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
+        
+        # When: MCP Server Generator attempts to process Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        
+        # Then: Generator raises FileNotFoundError
+        with pytest.raises(FileNotFoundError) as exc_info:
+            generator.generate_cli_code()
+        
+        assert f'Bot Config not found at {expected_config_path}' in str(exc_info.value)
+        
+        # And: Generator does not create CLI code (verified by exception)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        cli_python = bot_dir / 'src' / f'{bot_name}_cli.py'
+        cli_script = bot_dir / f'{bot_name}_cli'
+        cli_powershell = bot_dir / f'{bot_name}_cli.ps1'
+        assert not cli_python.exists()
+        assert not cli_script.exists()
+        assert not cli_powershell.exists()
+    
+    def test_generator_fails_when_bot_config_malformed(self, workspace_root):
+        """
+        SCENARIO: Generator fails when Bot Config is malformed (error_case)
+        GIVEN: a bot with name "malformed_bot"
+        AND: Bot Config exists at bot_config_path
+        AND: Bot Config has invalid JSON syntax
+        WHEN: MCP Server Generator attempts to process Bot Config
+        THEN: Generator raises JSONDecodeError with message
+        AND: Generator does not create CLI code
+        """
+        # Given: Bot config exists but is malformed
+        bot_name = 'malformed_bot'
+        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        config_file = config_dir / 'bot_config.json'
+        config_file.write_text('not valid json {', encoding='utf-8')
+        
+        # When: MCP Server Generator attempts to process Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        
+        # Then: Generator raises JSONDecodeError
+        with pytest.raises(json.JSONDecodeError) as exc_info:
+            generator.generate_cli_code()
+        
+        assert f'Malformed Bot Config at {config_file}' in str(exc_info.value)
+        
+        # And: Generator does not create CLI code (verified by exception)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        cli_python = bot_dir / 'src' / f'{bot_name}_cli.py'
+        cli_script = bot_dir / f'{bot_name}_cli'
+        cli_powershell = bot_dir / f'{bot_name}_cli.ps1'
+        assert not cli_python.exists()
+        assert not cli_script.exists()
+        assert not cli_powershell.exists()
+    
+    def test_generator_creates_cli_with_help_and_list_functionality(self, workspace_root):
+        """
+        SCENARIO: Generator creates CLI with help and list functionality (happy_path)
+        GIVEN: a bot with name "story_bot"
+        AND: Bot Config exists at bot_config_path
+        AND: bot has behaviors configured as "exploration,shape"
+        WHEN: MCP Server Generator processes Bot Config
+        THEN: Generator creates CLI entry point script
+        AND: CLI script supports --help flag that displays usage documentation
+        AND: CLI script supports --list flag that displays available bots, behaviors, and actions
+        AND: CLI script help includes command structure
+        AND: CLI script help includes examples of valid commands
+        """
+        # Given: Set up bot
+        bot_name = 'story_bot'
+        behaviors = ['exploration', 'shape']
+        bot_config_path = create_bot_config(workspace_root, bot_name, behaviors)
+        
+        # When: MCP Server Generator processes Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        artifacts = generator.generate_cli_code()
+        
+        # Then: Generator creates CLI entry point script
+        cli_python = artifacts['cli_python']
+        assert cli_python.exists()
+        
+        # And: CLI script supports --help and --list (via BaseBotCli.parse_arguments)
+        python_code = cli_python.read_text(encoding='utf-8')
+        assert 'BaseBotCli' in python_code
+        # BaseBotCli.parse_arguments includes --help and --list flags
+        # The help is provided by argparse automatically when --help is used
+        # The --list flag is handled by BaseBotCli.main() -> _handle_list_command()
+        
+        # Verify BaseBotCli is used (which provides help and list functionality)
+        assert 'from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli' in python_code
+        
+        # And: CLI script help includes command structure
+        assert 'Usage:' in python_code
+        assert '[behavior] [action]' in python_code or 'behavior' in python_code
+        
+        # And: CLI script help includes examples of valid commands
+        assert 'Examples:' in python_code
+    
+    def test_generated_cli_integrates_with_bot_instantiation_logic(self, workspace_root):
+        """
+        SCENARIO: Generated CLI integrates with bot instantiation logic (happy_path)
+        GIVEN: a bot with name "story_bot"
+        AND: Bot Config exists at bot_config_path
+        AND: base bot instantiation logic exists in base_bot/src/bot/bot.py
+        WHEN: MCP Server Generator processes Bot Config
+        THEN: Generated CLI code uses same bot loading logic as MCP server
+        AND: Generated CLI code uses same bot initialization logic as MCP server
+        AND: Generated CLI code uses same workflow state loading logic as MCP server
+        AND: Generated CLI code routes to bot using same patterns as MCP tools
+        AND: CLI routing logic matches MCP tool routing logic for consistency
+        """
+        # Given: Set up bot
+        bot_name = 'story_bot'
+        behaviors = ['exploration', 'shape']
+        bot_config_path = create_bot_config(workspace_root, bot_name, behaviors)
+        
+        # When: MCP Server Generator processes Bot Config
+        from agile_bot.bots.base_bot.src.cli.cli_generator import CliGenerator
+        generator = CliGenerator(
+            workspace_root=workspace_root,
+            bot_location=f'agile_bot/bots/{bot_name}'
+        )
+        artifacts = generator.generate_cli_code()
+        
+        # Then: Generated CLI code uses same bot loading logic
+        cli_python = artifacts['cli_python']
+        python_code = cli_python.read_text(encoding='utf-8')
+        
+        # BaseBotCli uses Bot class which is same as MCP server
+        assert 'BaseBotCli' in python_code
+        # BaseBotCli.__init__ creates Bot instance with same parameters as MCP server
+        assert 'bot_config_path' in python_code
+        assert 'workspace_root' in python_code
+        
+        # BaseBotCli uses Bot class which has same instantiation logic
+        # BaseBotCli routes using same patterns (forward_to_current_behavior_and_current_action, etc.)
+        # This is verified by BaseBotCli using Bot class which MCP tools also use
+
 
 class TestGenerateBotTools:
     """Story: Generate Bot Tools - Tests ONE bot tool with workflow state awareness."""

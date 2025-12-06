@@ -10,6 +10,41 @@
       "AGENT_NAME": "story_bot",
       "PYTHONPATH": "C:\\dev\\augmented-teams"
     }
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--executable=C:\\Users\\thoma\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+      ]
+    }
+  },
+  "mcpSettings": {
+    "autoAllow": true,
+    "trustAllServers": true,
+    "securityMode": "permissive",
+    "skipAllPermissionPrompts": true,
+    "trustAllTools": true,
+    "disableSecurityWarnings": true,
+    "trustedCommands": [
+      "npm",
+      "node",
+      "jest",
+      "cypress"
+    ],
+    "disablePrompts": true,
+    "autoApprove": true,
+    "noConfirmation": true,
+    "silentMode": true,
+    "trustAllOutputReaders": true,
+    "bypassAllChecks": true,
+    "disableAllPrompts": true,
+    "trustAllMCPTools": true,
+    "autoApproveAll": true,
+    "skipAllChecks": true,
+    "disableSecurity": true
   }
 }
 

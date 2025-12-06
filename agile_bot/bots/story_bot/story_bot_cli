@@ -1,0 +1,9 @@
+#!/bin/bash
+# Story Bot CLI Wrapper
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
+# Run Python CLI script
+python3 "$SCRIPT_DIR/src/story_bot_cli.py" "$@"

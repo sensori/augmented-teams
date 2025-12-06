@@ -112,6 +112,15 @@
                       "test_method": "test_clear_python_bytecode_cache"
                     }
                   ]
+                },
+                {
+                  "name": "Generate BOT CLI code",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "system"
                 }
               ]
             }
@@ -389,6 +398,33 @@
                     "AND Bot.Behavior compiles and returns instructions",
                     "AND MCP tool injects instructions into AI Chat context"
                   ]
+                },
+                {
+                  "name": "Invoke Bot CLI",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Invoke Bot Behavior CLI",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Invoke Bot Behavior Action CLI",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
                 }
               ]
             }
@@ -4591,8 +4627,456 @@
       ]
     },
     {
+      "name": "CLI",
+      "priority": 6.5,
+      "epics": [
+        {
+          "name": "Build Agile Bots",
+          "sequential_order": 1,
+          "sub_epics": [
+            {
+              "name": "Generate Bot Server And Tools",
+              "sequential_order": 1,
+              "sub_epics": [],
+              "stories": [
+                {
+                  "name": "Generate BOT CLI code",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "system"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Invoke MCP Bot Server",
+          "sequential_order": 2,
+          "sub_epics": [
+            {
+              "name": "Invoke Bot Tool",
+              "sequential_order": 2,
+              "test_file": "test_invoke_bot_cli.py",
+              "sub_epics": [],
+              "stories": [
+                {
+                  "name": "Invoke Bot CLI",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_class": "TestInvokeBotCli",
+                  "scenario_outlines": [
+                    {
+                      "name": "Invoke bot CLI with workflow state",
+                      "type": "happy_path",
+                      "test_method": "test_invoke_bot_cli_with_workflow_state",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And workflow_state.json exists at \"<workspace_root>/workflow_state.json\""
+                      ],
+                      "steps": [
+                        "Given workflow state contains current_behavior=\"<current_behavior>\"",
+                        "And workflow state contains current_action=\"<current_action>\"",
+                        "When Human executes CLI command \"./<bot_name>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI loads workflow state from \"<workspace_root>/workflow_state.json\"",
+                        "And CLI extracts current_behavior=\"<current_behavior>\" from workflow state",
+                        "And CLI extracts current_action=\"<current_action>\" from workflow state",
+                        "And CLI routes to bot and invokes current behavior and current action",
+                        "And Bot executes action \"<current_action>\"",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)",
+                        "And Bot updates workflow state after action execution"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "current_behavior", "current_action", "bot_name", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "story_bot.exploration", "story_bot.exploration.gather_context", "story_bot", "success"],
+                          ["agile_bot/bots/code_bot/config/bot_config.json", "c:/dev/augmented-teams", "code_bot.shape", "code_bot.shape.build_knowledge", "code_bot", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot CLI without workflow state",
+                      "type": "edge_case",
+                      "test_method": "test_invoke_bot_cli_without_workflow_state",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And workflow_state.json does NOT exist at \"<workspace_root>/workflow_state.json\""
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI detects workflow_state.json does not exist",
+                        "And CLI defaults to first behavior \"<first_behavior>\"",
+                        "And CLI defaults to first action \"<first_action>\"",
+                        "And CLI routes to bot and invokes \"<first_behavior>\" and \"<first_action>\"",
+                        "And Bot executes action \"<first_action>\"",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "bot_name", "first_behavior", "first_action", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "story_bot", "story_bot.exploration", "story_bot.exploration.initialize_project", "success"],
+                          ["agile_bot/bots/code_bot/config/bot_config.json", "c:/dev/augmented-teams", "code_bot", "code_bot.shape", "code_bot.shape.initialize_project", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot CLI with invalid bot name",
+                      "type": "error_case",
+                      "test_method": "test_invoke_bot_cli_with_invalid_bot_name",
+                      "background": [
+                        "Given workspace root is set to \"<workspace_root>\"",
+                        "And bot configuration does NOT exist at \"<bot_config_path>\""
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name>\"",
+                        "Then CLI attempts to load bot configuration from \"<bot_config_path>\"",
+                        "And CLI detects bot configuration does not exist",
+                        "And CLI returns error message \"<error_message>\"",
+                        "And CLI exits with exit code 1"
+                      ],
+                      "examples": {
+                        "columns": ["workspace_root", "bot_config_path", "bot_name", "error_message"],
+                        "rows": [
+                          ["c:/dev/augmented-teams", "agile_bot/bots/invalid_bot/config/bot_config.json", "invalid_bot", "Bot 'invalid_bot' not found in configuration"],
+                          ["c:/dev/augmented-teams", "agile_bot/bots/missing_bot/config/bot_config.json", "missing_bot", "Bot 'missing_bot' not found in configuration"]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Invoke Bot Behavior CLI",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_class": "TestInvokeBotBehaviorCli",
+                  "scenario_outlines": [
+                    {
+                      "name": "Invoke bot behavior CLI with workflow state",
+                      "type": "happy_path",
+                      "test_method": "test_invoke_bot_behavior_cli_with_workflow_state",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And workflow_state.json exists at \"<workspace_root>/workflow_state.json\"",
+                        "And behavior \"<behavior_name>\" exists in bot configuration"
+                      ],
+                      "steps": [
+                        "Given workflow state contains current_action=\"<current_action>\" for behavior \"<behavior_name>\"",
+                        "When Human executes CLI command \"./<bot_name> <behavior_name>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<behavior_name>\" exists",
+                        "And CLI loads workflow state from \"<workspace_root>/workflow_state.json\"",
+                        "And CLI routes to bot and specified behavior \"<behavior_name>\"",
+                        "And CLI extracts current_action=\"<current_action>\" from workflow state",
+                        "And CLI routes to current action \"<current_action>\" in behavior \"<behavior_name>\"",
+                        "And Bot executes action \"<current_action>\"",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)",
+                        "And Bot updates workflow state after action execution"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "behavior_name", "current_action", "bot_name", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "exploration", "story_bot.exploration.gather_context", "story_bot", "success"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "shape", "story_bot.shape.build_knowledge", "story_bot", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot behavior CLI without workflow state",
+                      "type": "edge_case",
+                      "test_method": "test_invoke_bot_behavior_cli_without_workflow_state",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And workflow_state.json does NOT exist at \"<workspace_root>/workflow_state.json\"",
+                        "And behavior \"<behavior_name>\" exists in bot configuration"
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name> <behavior_name>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<behavior_name>\" exists",
+                        "And CLI detects workflow_state.json does not exist",
+                        "And CLI defaults to first action \"<first_action>\" of behavior \"<behavior_name>\"",
+                        "And CLI routes to bot and behavior \"<behavior_name>\"",
+                        "And CLI routes to first action \"<first_action>\"",
+                        "And Bot executes action \"<first_action>\"",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "behavior_name", "bot_name", "first_action", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "exploration", "story_bot", "story_bot.exploration.initialize_project", "success"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "shape", "story_bot", "story_bot.shape.initialize_project", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot behavior CLI with invalid behavior",
+                      "type": "error_case",
+                      "test_method": "test_invoke_bot_behavior_cli_with_invalid_behavior",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And behavior \"<invalid_behavior>\" does NOT exist in bot configuration"
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name> <invalid_behavior>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<invalid_behavior>\" does not exist",
+                        "And CLI returns error message \"<error_message>\"",
+                        "And CLI exits with exit code 1"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "invalid_behavior", "bot_name", "error_message"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "invalid_behavior", "story_bot", "Behavior 'invalid_behavior' not found in bot configuration"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "nonexistent", "story_bot", "Behavior 'nonexistent' not found in bot configuration"]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Invoke Bot Behavior Action CLI",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_class": "TestInvokeBotBehaviorActionCli",
+                  "scenario_outlines": [
+                    {
+                      "name": "Invoke bot behavior action CLI with parameters",
+                      "type": "happy_path",
+                      "test_method": "test_invoke_bot_behavior_action_cli_with_parameters",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And behavior \"<behavior_name>\" exists in bot configuration",
+                        "And action \"<action_name>\" exists in behavior \"<behavior_name>\""
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name> <behavior_name> <action_name> --<param_name>=<param_value>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<behavior_name>\" exists",
+                        "And CLI validates action \"<action_name>\" exists",
+                        "And CLI loads workflow state if it exists",
+                        "And CLI routes to bot and specified behavior \"<behavior_name>\" and action \"<action_name>\"",
+                        "And CLI passes parameter \"<param_name>\"=\"<param_value>\" to action",
+                        "And Bot executes action \"<action_name>\" with parameters",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)",
+                        "And Bot updates workflow state after action execution"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "behavior_name", "action_name", "bot_name", "param_name", "param_value", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "exploration", "gather_context", "story_bot", "increment_file", "increment-cli-exploration.txt", "success"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "shape", "build_knowledge", "story_bot", "context_file", "clarification.json", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot behavior action CLI without parameters",
+                      "type": "happy_path",
+                      "test_method": "test_invoke_bot_behavior_action_cli_without_parameters",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And behavior \"<behavior_name>\" exists in bot configuration",
+                        "And action \"<action_name>\" exists in behavior \"<behavior_name>\""
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name> <behavior_name> <action_name>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<behavior_name>\" exists",
+                        "And CLI validates action \"<action_name>\" exists",
+                        "And CLI loads workflow state if it exists",
+                        "And CLI routes to bot and specified behavior \"<behavior_name>\" and action \"<action_name>\"",
+                        "And Bot executes action \"<action_name>\" without parameters",
+                        "And CLI returns result with status=\"<expected_status>\"",
+                        "And Action is NOT marked as completed (human must close action separately)",
+                        "And Bot updates workflow state after action execution"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "behavior_name", "action_name", "bot_name", "expected_status"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "exploration", "gather_context", "story_bot", "success"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "shape", "build_knowledge", "story_bot", "success"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Invoke bot behavior action CLI with invalid action",
+                      "type": "error_case",
+                      "test_method": "test_invoke_bot_behavior_action_cli_with_invalid_action",
+                      "background": [
+                        "Given bot configuration exists at \"<bot_config_path>\"",
+                        "And workspace root is set to \"<workspace_root>\"",
+                        "And behavior \"<behavior_name>\" exists in bot configuration",
+                        "And action \"<invalid_action>\" does NOT exist in behavior \"<behavior_name>\""
+                      ],
+                      "steps": [
+                        "When Human executes CLI command \"./<bot_name> <behavior_name> <invalid_action>\"",
+                        "Then CLI loads bot configuration from \"<bot_config_path>\"",
+                        "And CLI validates behavior \"<behavior_name>\" exists",
+                        "And CLI validates action \"<invalid_action>\" does not exist",
+                        "And CLI returns error message \"<error_message>\"",
+                        "And CLI exits with exit code 1"
+                      ],
+                      "examples": {
+                        "columns": ["bot_config_path", "workspace_root", "behavior_name", "invalid_action", "bot_name", "error_message"],
+                        "rows": [
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "exploration", "invalid_action", "story_bot", "Action 'invalid_action' not found in behavior 'exploration'"],
+                          ["agile_bot/bots/story_bot/config/bot_config.json", "c:/dev/augmented-teams", "shape", "nonexistent", "story_bot", "Action 'nonexistent' not found in behavior 'shape'"]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Generate Cursor Command Files",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Human calls generate_cursor_commands(commands_dir, cli_script_path)",
+                    "THEN CLI creates .cursor/commands/ directory if it doesn't exist",
+                    "AND CLI creates <bot-name>.md command file that invokes CLI with bot name (routes to current behavior/action)",
+                    "AND CLI creates <bot-name>-<behavior>.md command file for each behavior in bot that invokes CLI with bot name and behavior (auto-forwards to current action)",
+                    "AND CLI creates <bot-name>-<behavior>-<action>.md command file for each action in each behavior that invokes CLI with bot name, behavior, and action",
+                    "AND CLI creates <bot-name>-close.md command file that invokes CLI with bot name and --close parameter",
+                    "AND Each command file contains simple wrapper command that calls CLI script",
+                    "AND Bot name, behavior, and action are hardcoded in command files (no parameters needed)",
+                    "AND CLI removes obsolete command files for behaviors/actions that no longer exist in bot",
+                    "AND CLI returns dict mapping command names (e.g., story_bot, story_bot-exploration, story_bot-exploration-gather_context, story_bot-close) to file paths"
+                  ],
+                  "test_class": "TestGenerateCursorCommands",
+                  "scenario_outlines": [
+                    {
+                      "name": "Generate cursor command files",
+                      "type": "happy_path",
+                      "test_method": "test_generate_cursor_commands_creates_all_files",
+                      "background": [
+                        "Given CLI instance is initialized with bot_name=\"<bot_name>\"",
+                        "And bot has behavior \"<behavior>\"",
+                        "And bot has action \"<action>\" in behavior \"<behavior>\"",
+                        "And commands directory path is \"<commands_dir>\"",
+                        "And CLI script path is \"<cli_script_path>\""
+                      ],
+                      "steps": [
+                        "When Human calls generate_cursor_commands(commands_dir, cli_script_path)",
+                        "Then CLI creates .cursor/commands directory",
+                        "And CLI creates bot command file at \"<commands_dir>/<bot_name>.md\"",
+                        "And CLI creates behavior command file at \"<commands_dir>/<bot_name>-<behavior>.md\"",
+                        "And CLI creates action command file at \"<commands_dir>/<bot_name>-<behavior>-<action>.md\"",
+                        "And CLI creates close command file at \"<commands_dir>/<bot_name>-close.md\"",
+                        "And bot command file contains \"<cli_script_path> <bot_name>\"",
+                        "And behavior command file contains \"<cli_script_path> <bot_name> <behavior>\"",
+                        "And action command file contains \"<cli_script_path> <bot_name> <behavior> <action>\"",
+                        "And close command file contains \"<cli_script_path> <bot_name> --close\"",
+                        "And CLI returns dict with key \"<bot_name>\" mapping to bot command file path",
+                        "And CLI returns dict with key \"<bot_name>-<behavior>\" mapping to behavior command file path",
+                        "And CLI returns dict with key \"<bot_name>-<behavior>-<action>\" mapping to action command file path",
+                        "And CLI returns dict with key \"<bot_name>-close\" mapping to close command file path"
+                      ],
+                      "examples": {
+                        "columns": ["commands_dir", "cli_script_path", "bot_name", "behavior", "action"],
+                        "rows": [
+                          [".cursor/commands", "agile_bot/bots/story_bot/story_bot", "story_bot", "exploration", "gather_context"],
+                          [".cursor/commands", "agile_bot/bots/code_bot/code_bot", "code_bot", "shape", "build_knowledge"],
+                          [".cursor/commands", "agile_bot/bots/story_bot/story_bot", "story_bot", "exploration", "build_knowledge"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Generate cursor commands removes obsolete files when behavior removed",
+                      "type": "edge_case",
+                      "test_method": "test_generate_cursor_commands_removes_obsolete_files",
+                      "background": [
+                        "Given CLI instance is initialized with bot_name=\"<bot_name>\"",
+                        "And bot previously had behavior \"<removed_behavior>\"",
+                        "And obsolete command file exists at \"<commands_dir>/<bot_name>-<removed_behavior>.md\"",
+                        "And obsolete action command file exists at \"<commands_dir>/<bot_name>-<removed_behavior>-<removed_action>.md\"",
+                        "And bot no longer has behavior \"<removed_behavior>\"",
+                        "And commands directory path is \"<commands_dir>\"",
+                        "And CLI script path is \"<cli_script_path>\""
+                      ],
+                      "steps": [
+                        "When Human calls generate_cursor_commands(commands_dir, cli_script_path)",
+                        "Then CLI creates new command files for current behaviors and actions",
+                        "And CLI removes obsolete command file \"<commands_dir>/<bot_name>-<removed_behavior>.md\"",
+                        "And CLI removes obsolete action command file \"<commands_dir>/<bot_name>-<removed_behavior>-<removed_action>.md\"",
+                        "And Obsolete command files no longer exist"
+                      ],
+                      "examples": {
+                        "columns": ["commands_dir", "cli_script_path", "bot_name", "removed_behavior", "removed_action"],
+                        "rows": [
+                          [".cursor/commands", "agile_bot/bots/story_bot/story_bot", "story_bot", "old_behavior", "old_action"],
+                          [".cursor/commands", "agile_bot/bots/code_bot/code_bot", "code_bot", "deprecated_behavior", "deprecated_action"]
+                        ]
+                      }
+                    },
+                    {
+                      "name": "Generate cursor commands creates directory if missing",
+                      "type": "edge_case",
+                      "test_method": "test_generate_cursor_commands_creates_directory",
+                      "background": [
+                        "Given CLI instance is initialized with bot_name=\"<bot_name>\"",
+                        "And bot has behaviors=\"<behaviors>\"",
+                        "And commands directory does NOT exist at \"<commands_dir>\"",
+                        "And CLI script path is \"<cli_script_path>\""
+                      ],
+                      "steps": [
+                        "When Human calls generate_cursor_commands(commands_dir, cli_script_path)",
+                        "Then CLI creates .cursor/commands directory",
+                        "And CLI creates bot command file at \"<commands_dir>/<bot_name>.md\"",
+                        "And CLI creates behavior command file for each behavior in \"<behaviors>\"",
+                        "And CLI creates action command file for each action in each behavior",
+                        "And CLI creates close command file at \"<commands_dir>/<bot_name>-close.md\"",
+                        "And All command files contain correct CLI invocations with hardcoded bot name, behaviors, and actions"
+                      ],
+                      "examples": {
+                        "columns": ["commands_dir", "cli_script_path", "bot_name", "behaviors"],
+                        "rows": [
+                          [".cursor/commands", "agile_bot/bots/story_bot/story_bot", "story_bot", "exploration,discovery"],
+                          [".cursor/commands", "agile_bot/bots/code_bot/code_bot", "code_bot", "shape,arrange"]
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Later",
-      "priority": 6,
+      "priority": 7,
       "epics": []
     }
   ]

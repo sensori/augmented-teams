@@ -16,6 +16,7 @@ Uses transitions state machine for workflow state management.
 import pytest
 from pathlib import Path
 import json
+from agile_bot.bots.base_bot.src.bot.bot import Bot
 from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
 
 # ============================================================================
@@ -113,6 +114,23 @@ def create_base_action_instructions(workspace: Path, action: str) -> Path:
     instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
     return instructions_file
 
+def create_bot_instance(bot_name: str, workspace_root: Path, config_path: Path) -> Bot:
+    """Helper: Create bot instance with configuration.
+    
+    Args:
+        bot_name: Name of the bot
+        workspace_root: Root workspace directory
+        config_path: Path to bot configuration file
+        
+    Returns:
+        Initialized Bot instance
+    """
+    return Bot(
+        bot_name=bot_name,
+        workspace_root=workspace_root,
+        config_path=config_path
+    )
+
 class TestBotToolInvocation:
     """Bot tool invocation behavior tests (Increment 1/2 foundational)."""
 
@@ -128,12 +146,7 @@ class TestBotToolInvocation:
         create_base_action_instructions(workspace_root, 'gather_context')
         
         # When: Call REAL Bot API
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            workspace_root=workspace_root,
-            config_path=test_bot_config
-        )
+        bot = create_bot_instance('test_bot', workspace_root, test_bot_config)
         result = bot.invoke_tool(
             tool_name='test_bot_shape_gather_context',
             parameters={'behavior': 'shape', 'action': 'gather_context'}
@@ -166,12 +179,7 @@ class TestBotToolInvocation:
         create_workflow_state(workspace_root, 'test_bot.exploration', 'test_bot.exploration.build_knowledge')
         
         # When: Call REAL Bot API for specific behavior
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            workspace_root=workspace_root,
-            config_path=test_bot_config
-        )
+        bot = create_bot_instance('test_bot', workspace_root, test_bot_config)
         result = bot.invoke_tool(
             tool_name='test_bot_exploration_build_knowledge',
             parameters={'behavior': 'exploration', 'action': 'build_knowledge'}
@@ -229,8 +237,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
         # Then
@@ -249,8 +256,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape', 'discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(bot_name='story_bot', workspace_root=workspace_root, config_path=bot_config)
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
         # Then
@@ -274,12 +280,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='story_bot',
-            workspace_root=workspace_root,
-            config_path=bot_config
-        )
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         result = bot.discovery.forward_to_current_action()
         
         # Then
@@ -298,12 +299,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['discovery', 'exploration'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='story_bot',
-            workspace_root=workspace_root,
-            config_path=bot_config
-        )
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         result = bot.exploration.forward_to_current_action()
         
         # Then
@@ -322,12 +318,7 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(workspace_root, 'story_bot', ['shape'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='story_bot',
-            workspace_root=workspace_root,
-            config_path=bot_config
-        )
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         result = bot.shape.forward_to_current_action()
         
         # Then
@@ -353,12 +344,7 @@ class TestForwardToCurrentAction:
         (bot_dir / 'current_project.json').write_text(json.dumps({'current_project': str(project_dir)}))
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='story_bot',
-            workspace_root=workspace_root,
-            config_path=bot_config
-        )
+        bot = create_bot_instance('story_bot', workspace_root, bot_config)
         
         # Verify no workflow state exists yet
         workflow_file = project_dir / 'workflow_state.json'

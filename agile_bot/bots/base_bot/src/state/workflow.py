@@ -89,6 +89,15 @@ class Workflow:
                     # Determine from completed_actions (source of truth), NOT current_action (may be stale)
                     next_action = self._determine_next_action_from_completed(completed_actions)
                     
+                    # If no completed actions, try to use current_action as fallback
+                    if not completed_actions or next_action == self.states[0]:
+                        current_action_path = state_data.get('current_action', '')
+                        if current_action_path:
+                            # Extract action name: 'bot.behavior.action' -> 'action'
+                            action_name = current_action_path.split('.')[-1]
+                            if action_name in self.states:
+                                next_action = action_name
+                    
                     if next_action and next_action in self.states:
                         self.machine.set_state(next_action)
             except Exception as e:

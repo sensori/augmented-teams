@@ -345,26 +345,69 @@ class Bot:
         return action_method(parameters)
     
     def forward_to_current_behavior_and_current_action(self) -> BotResult:
-        # Read workflow state from bot directory
-        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.name
-        state_file = bot_dir / 'project_area' / 'workflow_state.json'
+        """Forward to current behavior and action from workflow state.
         
-        current_behavior = None
-        if state_file.exists():
-            try:
-                state_data = json.loads(state_file.read_text(encoding='utf-8'))
-                current_behavior_path = state_data.get('current_behavior', '')
-                # Extract: 'story_bot.discovery' -> 'discovery'
-                if current_behavior_path:
-                    current_behavior = current_behavior_path.split('.')[-1]
-            except Exception:
-                pass
-        
-        if not current_behavior or current_behavior not in self.behaviors:
-            # Default to FIRST behavior in bot config
-            current_behavior = self.behaviors[0]
-        
-        # Forward to behavior
+        Returns:
+            BotResult from current action execution
+        """
+        current_behavior = self._get_current_behavior_from_state()
         behavior_instance = getattr(self, current_behavior)
         return behavior_instance.forward_to_current_action()
+    
+    def close_current_action(self) -> BotResult:
+        """Close current action and transition to next action.
+        
+        Returns:
+            BotResult indicating action was closed and workflow transitioned
+        """
+        current_behavior = self._get_current_behavior_from_state()
+        behavior_instance = getattr(self, current_behavior)
+        
+        workflow = behavior_instance.workflow
+        workflow.load_state()
+        current_action = workflow.current_state
+        
+        if not workflow.is_action_completed(current_action):
+            workflow.save_completed_action(current_action)
+        
+        workflow.transition_to_next()
+        
+        next_action = workflow.current_state
+        
+        return BotResult(
+            status='completed',
+            behavior=current_behavior,
+            action=current_action,
+            data={
+                'message': f'Action {current_action} closed',
+                'next_action': next_action
+            }
+        )
+    
+    def _get_current_behavior_from_state(self) -> str:
+        """Get current behavior name from workflow state.
+        
+        Returns:
+            Current behavior name, or first behavior if state not found
+        """
+        current_behavior = None
+        
+        for behavior_name in self.behaviors:
+            behavior_instance = getattr(self, behavior_name)
+            workflow = behavior_instance.workflow
+            
+            if workflow.file.exists():
+                try:
+                    state_data = json.loads(workflow.file.read_text(encoding='utf-8'))
+                    current_behavior_path = state_data.get('current_behavior', '')
+                    if current_behavior_path.startswith(f'{self.name}.{behavior_name}'):
+                        current_behavior = behavior_name
+                        break
+                except Exception:
+                    continue
+        
+        if not current_behavior:
+            current_behavior = self.behaviors[0]
+        
+        return current_behavior
 
