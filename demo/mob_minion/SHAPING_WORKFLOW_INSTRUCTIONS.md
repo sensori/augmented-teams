@@ -8,6 +8,63 @@
 
 ---
 
+## Test Variant Configuration
+
+**Current Variant:** {{VARIANT}}
+**Valid Variants:** CLI_BEHAVIOR | CLI_ACTION | MCP_BEHAVIOR | MCP_ACTION
+
+### Variant Definitions
+
+| Variant | Channel | Granularity | Entry Pattern | Progression Method |
+|---------|---------|-------------|---------------|-------------------|
+| CLI_BEHAVIOR | CLI | Behavior | `/story_bot-shape @input.txt` | Auto (use `/story_bot-continue` between phases) |
+| CLI_ACTION | CLI | Action | `/story_bot-shape initialize_project @input.txt` | Manual (explicit action calls for each phase) |
+| MCP_BEHAVIOR | MCP | Behavior | "shape stories for mob minion" | Auto (use `story_bot_close_current_action` to mark done, then call behavior tool again with trigger words to continue) |
+| MCP_ACTION | MCP | Action | "initialize project for mob minion" | Manual (trigger words invoke specific action tools) |
+
+### Entry Point Mapping Table
+
+| Phase | Action | CLI_BEHAVIOR | CLI_ACTION | MCP_BEHAVIOR | MCP_ACTION |
+|-------|--------|--------------|-----------|--------------|------------|
+| 1 | initialize_project | `/story_bot-shape @input.txt` | `/story_bot-shape initialize_project @input.txt` | "shape stories for mob minion" → `story_bot_shape_tool` | "initialize project" or "set project location" → `story_bot_shape_initialize_project` |
+| 2 | gather_context | `/story_bot-continue` | `/story_bot-shape gather_context` | `story_bot_close_current_action` then "continue shaping" → `story_bot_shape_tool` | "gather context" → `story_bot_shape_gather_context` |
+| 3 | decide_planning_criteria | `/story_bot-continue` | `/story_bot-shape decide_planning_criteria` | `story_bot_close_current_action` then "continue shaping" → `story_bot_shape_tool` | "decide planning" → `story_bot_shape_decide_planning` |
+| 4 | build_knowledge | `/story_bot-continue` | `/story_bot-shape build_knowledge` | `story_bot_close_current_action` then "continue shaping" → `story_bot_shape_tool` | "build knowledge" or "create structure" → `story_bot_shape_build_knowledge` |
+| 5 | render_output | `/story_bot-continue` | `/story_bot-shape render_output` | `story_bot_close_current_action` then "continue shaping" → `story_bot_shape_tool` | "render output" → `story_bot_shape_render_output` |
+| 6 | validate_rules | `/story_bot-continue` | `/story_bot-shape validate_rules` | `story_bot_close_current_action` then "continue shaping" → `story_bot_shape_tool` | "validate rules" or "check against rules" → `story_bot_shape_validate_rules` |
+
+### MCP Tool Names Reference
+
+**Bot-Level Tools:**
+- `story_bot_tool` - Routes to current behavior and action
+- `story_bot_close_current_action` - Marks current action complete and transitions to next
+
+**Behavior-Level Tools:**
+- `story_bot_shape_tool` - Routes to current action in shape behavior
+
+**Action-Level Tools:**
+- `story_bot_shape_initialize_project` - Execute initialize_project action
+- `story_bot_shape_gather_context` - Execute gather_context action
+- `story_bot_shape_decide_planning` - Execute decide_planning_criteria action (normalized name)
+- `story_bot_shape_build_knowledge` - Execute build_knowledge action
+- `story_bot_shape_render_output` - Execute render_output action
+- `story_bot_shape_validate_rules` - Execute validate_rules action
+
+### Trigger Words Reference
+
+**Behavior-Level Trigger Words** (from `1_shape/trigger_words.json`):
+- "shape.*capability", "story.*shape", "new.*project", "begin.*new", "start.*new", "create.*new", "want.*to.*build", etc.
+
+**Action-Level Trigger Words** (from `base_actions/{action}/trigger_words.json`):
+- `initialize_project`: "update.*project.*location", "set.*project.*to", "project.*location", "change.*project.*location"
+- `build_knowledge`: "create.*structure", "build.*content"
+- `validate_rules`: "check.*against.*rule", "validate.*content", "verify.*compliance"
+- `correct_bot`: "please make.*correction", "fix.*because", "apply.*correction"
+
+**Note:** Actions without explicit trigger_words.json files should use the action name as trigger (e.g., "gather context", "decide planning", "render output")
+
+---
+
 ## Execution Modes
 
 This test can be run in two modes:
@@ -17,7 +74,7 @@ This test can be run in two modes:
 **Purpose:** Run the entire workflow automatically and provide a comprehensive report at the end.
 
 **Instructions for AI:**
-- Execute ALL phases (0-8) sequentially without stopping
+- Execute ALL phases (0-7) sequentially without stopping
 - Complete each step and move immediately to the next
 - Do NOT pause for user confirmation between steps
 - At the end, provide a comprehensive report with:
@@ -77,11 +134,17 @@ This test can be run in two modes:
    - User says "straight-through", "automated", "run all", "no pauses" → Use **Straight-Through Mode**
    - User says "pause mode", "step by step", "one at a time", "pause after each" → Use **Pause Mode**
    - No mode specified → Use **Pause Mode** (default for safety)
-2. Announce the selected mode clearly:
-   - **Straight-Through:** "Running in STRAIGHT-THROUGH mode - will complete all phases automatically and provide final report at the end"
-   - **Pause Mode:** "Running in PAUSE mode - will pause after each step for your review and confirmation"
+2. Determine which variant to use based on user instruction or test context:
+   - User says "CLI behavior", "CLI_BEHAVIOR" → Use **CLI_BEHAVIOR** variant
+   - User says "CLI action", "CLI_ACTION" → Use **CLI_ACTION** variant
+   - User says "MCP behavior", "MCP_BEHAVIOR" → Use **MCP_BEHAVIOR** variant
+   - User says "MCP action", "MCP_ACTION" → Use **MCP_ACTION** variant
+   - No variant specified → Use **CLI_BEHAVIOR** (default)
+3. Announce the selected mode and variant clearly:
+   - **Straight-Through:** "Running in STRAIGHT-THROUGH mode with {{VARIANT}} variant - will complete all phases automatically and provide final report at the end"
+   - **Pause Mode:** "Running in PAUSE mode with {{VARIANT}} variant - will pause after each step for your review and confirmation"
 
-**Default:** If mode not specified, use **Pause Mode** for safety.
+**Default:** If mode not specified, use **Pause Mode** for safety. If variant not specified, use **CLI_BEHAVIOR**.
 
 ---
 
@@ -106,8 +169,9 @@ This test can be run in two modes:
 
 ## Phase 1: Initialize Project
 
-### Step 1.1: Run Shape Command
+### Step 1.1: Entry Point (Variant-Specific)
 
+<!-- START_VARIANT:CLI_BEHAVIOR -->
 **Command:** `/story_bot-shape @demo/mob_minion/input.txt`
 
 **Expected Behavior:**
@@ -117,17 +181,121 @@ This test can be run in two modes:
 **Validation:**
 - Instructions received should specify project location: `demo/mob_minion/`
 - Instructions should ask for confirmation
+<!-- END_VARIANT:CLI_BEHAVIOR -->
+
+<!-- START_VARIANT:CLI_ACTION -->
+**Command:** `/story_bot-shape initialize_project @demo/mob_minion/input.txt`
+
+**Expected Behavior:**
+- Command should execute `initialize_project` action directly
+- Instructions should ask to confirm project location
+
+**Validation:**
+- Instructions received should specify project location: `demo/mob_minion/`
+- Instructions should ask for confirmation
+- Action executed directly (not routed through behavior)
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**User Input:** "shape stories for mob minion" (matches trigger pattern from `1_shape/trigger_words.json`)
+
+**AI Action:**
+1. Recognize trigger words match behavior-level patterns (e.g., "shape.*capability", "story.*shape", "new.*project")
+2. Check available MCP tools
+3. Invoke `story_bot_shape_tool` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_tool` should be called
+- Tool should route to current action (initialize_project if no state exists)
+- Instructions should be returned for initialize_project action
+- Instructions should ask to confirm project location
+
+**Validation:**
+- MCP tool `story_bot_shape_tool` was called
+- Tool returned instructions for initialize_project action
+- Instructions specify project location: `demo/mob_minion/`
+- Instructions ask for confirmation
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**User Input:** "initialize project for mob minion" or "set project location to demo/mob_minion"
+**Note:** These match trigger patterns from `base_actions/1_initialize_project/trigger_words.json` (e.g., "update.*project.*location", "set.*project.*to", "project.*location")
+
+**AI Action:**
+1. Recognize trigger words match action-level patterns
+2. Check available MCP tools
+3. Invoke `story_bot_shape_initialize_project` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_initialize_project` should be called
+- Tool should execute initialize_project action directly
+- Instructions should be returned for initialize_project action
+- Instructions should ask to confirm project location
+
+**Validation:**
+- MCP tool `story_bot_shape_initialize_project` was called
+- Tool executed initialize_project action
+- Instructions specify project location: `demo/mob_minion/`
+- Instructions ask for confirmation
+<!-- END_VARIANT:MCP_ACTION -->
 
 ### Step 1.2: Confirm Project Location
 
 **Action:** Follow the instructions to confirm the project location is `demo/mob_minion/`
 
+<!-- START_VARIANT:CLI_BEHAVIOR -->
+**Action:** Confirm the project location when prompted
+
 **Validation:**
 - `agile_bot/bots/story_bot/current_project.json` should be created
 - File should contain: `{"current_project": "C:\\dev\\augmented-teams\\demo\\mob_minion"}`
+<!-- END_VARIANT:CLI_BEHAVIOR -->
 
-### Step 1.3: Continue to Next Action
+<!-- START_VARIANT:CLI_ACTION -->
+**Action:** Confirm the project location when prompted
 
+**Validation:**
+- `agile_bot/bots/story_bot/current_project.json` should be created
+- File should contain: `{"current_project": "C:\\dev\\augmented-teams\\demo\\mob_minion"}`
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**Action:** When `initialize_project` returns `requires_confirmation: true`, you MUST call the action-level tool with `confirm=True` to actually confirm and create the workflow state:
+
+1. Call `story_bot_shape_initialize_project` MCP tool with parameters:
+   - `{"confirm": True, "project_area": "C:\\dev\\augmented-teams\\demo\\mob_minion"}`
+
+**Expected Behavior:**
+- Action-level tool should execute with confirmation
+- `workflow_state.json` should be created
+- `current_project.json` should be updated/confirmed
+
+**Validation:**
+- `agile_bot/bots/story_bot/current_project.json` should exist with correct location
+- `demo/mob_minion/workflow_state.json` should be created
+- Workflow state should contain `completed_actions` with `initialize_project` entry
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**Action:** When `initialize_project` returns `requires_confirmation: true`, call the action-level tool again with `confirm=True`:
+
+1. Call `story_bot_shape_initialize_project` MCP tool with parameters:
+   - `{"confirm": True, "project_area": "C:\\dev\\augmented-teams\\demo\\mob_minion"}`
+
+**Expected Behavior:**
+- Action-level tool should execute with confirmation
+- `workflow_state.json` should be created
+- `current_project.json` should be updated/confirmed
+
+**Validation:**
+- `agile_bot/bots/story_bot/current_project.json` should exist with correct location
+- `demo/mob_minion/workflow_state.json` should be created
+- Workflow state should contain `completed_actions` with `initialize_project` entry
+<!-- END_VARIANT:MCP_ACTION -->
+
+### Step 1.3: Continue to Next Action (Variant-Specific)
+
+<!-- START_VARIANT:CLI_BEHAVIOR -->
 **Command:** `/story_bot-continue` (or use `--close` flag)
 
 **Expected Behavior:**
@@ -138,12 +306,85 @@ This test can be run in two modes:
 - `demo/mob_minion/workflow_state.json` should be created
 - State should show: `current_action: "story_bot.shape.gather_context"`
 - Instructions should contain key questions to ask
+<!-- END_VARIANT:CLI_BEHAVIOR -->
 
-**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 2.1
+<!-- START_VARIANT:CLI_ACTION -->
+**Command:** `/story_bot-shape gather_context`
+
+**Expected Behavior:**
+- Command should execute `gather_context` action directly
+- Instructions should be returned for gathering context
+
+**Validation:**
+- `demo/mob_minion/workflow_state.json` should be created (if not already exists)
+- Instructions should contain key questions to ask
+- Action executed directly (not routed through continue)
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**AI Action:** After completing initialize_project, invoke `story_bot_close_current_action` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_close_current_action` should be called
+- Tool should mark initialize_project as complete
+- Tool should transition workflow to `gather_context` action
+- Tool should NOT execute the next action - it only marks complete and transitions
+
+**Validation:**
+- MCP tool `story_bot_close_current_action` was called
+- `demo/mob_minion/workflow_state.json` should be created
+- State should show: `current_action: "story_bot.shape.gather_context"`
+- `completed_actions` should include `initialize_project`
+- No instructions returned (tool only transitions, doesn't execute)
+
+**Next Step:** To actually execute the next action, call the behavior tool again using trigger words (e.g., "I want to continue shaping" or "shape stories for mob minion")
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**User Input:** "gather context"
+
+**AI Action:**
+1. Recognize trigger words match action name (or check for action-level trigger words if they exist)
+2. Check available MCP tools
+3. Invoke `story_bot_shape_gather_context` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_gather_context` should be called
+- Tool should execute gather_context action directly
+- Instructions should be returned for gathering context
+
+**Validation:**
+- MCP tool `story_bot_shape_gather_context` was called
+- Tool executed gather_context action
+- Instructions should contain key questions to ask
+<!-- END_VARIANT:MCP_ACTION -->
+
+**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 2.0
 
 ---
 
 ## Phase 2: Gather Context
+
+### Step 2.0: Execute Next Action (MCP_BEHAVIOR Only)
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**User Input:** "I want to continue shaping" or "shape stories for mob minion" (trigger words to continue workflow)
+
+**AI Action:**
+1. Recognize trigger words match behavior-level patterns
+2. Check available MCP tools
+3. Invoke `story_bot_shape_tool` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_tool` should be called
+- Tool should route to current action (gather_context after transition)
+- Instructions should be returned for gather_context action
+
+**Validation:**
+- MCP tool `story_bot_shape_tool` was called
+- Tool returned instructions for gather_context action
+- Instructions contain key questions to ask
+<!-- END_VARIANT:MCP_BEHAVIOR -->
 
 ### Step 2.1: Review Gather Context Instructions
 
@@ -164,8 +405,9 @@ This test can be run in two modes:
 - File should contain answers organized under `shape.key_questions`
 - Verify all key questions have been answered
 
-### Step 2.3: Continue to Next Action
+### Step 2.3: Continue to Next Action (Variant-Specific)
 
+<!-- START_VARIANT:CLI_BEHAVIOR -->
 **Command:** `/story_bot-continue`
 
 **Expected Behavior:**
@@ -175,12 +417,83 @@ This test can be run in two modes:
 **Validation:**
 - `workflow_state.json` should show: `current_action: "story_bot.shape.decide_planning_criteria"`
 - `completed_actions` should include `gather_context`
+<!-- END_VARIANT:CLI_BEHAVIOR -->
 
-**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 3.1
+<!-- START_VARIANT:CLI_ACTION -->
+**Command:** `/story_bot-shape decide_planning_criteria`
+
+**Expected Behavior:**
+- Command should execute `decide_planning_criteria` action directly
+- Instructions should be returned for planning
+
+**Validation:**
+- Instructions should be returned for planning
+- Action executed directly
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**AI Action:** After completing gather_context, invoke `story_bot_close_current_action` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_close_current_action` should be called
+- Tool should mark gather_context as complete
+- Tool should transition workflow to `decide_planning_criteria` action
+- Tool should NOT execute the next action - it only marks complete and transitions
+
+**Validation:**
+- MCP tool `story_bot_close_current_action` was called
+- `workflow_state.json` should show: `current_action: "story_bot.shape.decide_planning_criteria"`
+- `completed_actions` should include `gather_context`
+- No instructions returned (tool only transitions, doesn't execute)
+
+**Next Step:** To actually execute the next action, call the behavior tool again using trigger words (e.g., "I want to continue shaping")
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**User Input:** "decide planning" or "decide planning criteria"
+
+**AI Action:**
+1. Recognize trigger words match action name (decide_planning_criteria normalizes to decide_planning)
+2. Check available MCP tools
+3. Invoke `story_bot_shape_decide_planning` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_decide_planning` should be called
+- Tool should execute decide_planning_criteria action directly
+- Instructions should be returned for planning
+
+**Validation:**
+- MCP tool `story_bot_shape_decide_planning` was called
+- Tool executed decide_planning_criteria action
+- Instructions should be returned for planning
+<!-- END_VARIANT:MCP_ACTION -->
+
+**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 3.0
 
 ---
 
 ## Phase 3: Decide Planning Criteria
+
+### Step 3.0: Execute Next Action (MCP_BEHAVIOR Only)
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**User Input:** "I want to continue shaping" or "shape stories for mob minion" (trigger words to continue workflow)
+
+**AI Action:**
+1. Recognize trigger words match behavior-level patterns
+2. Check available MCP tools
+3. Invoke `story_bot_shape_tool` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_tool` should be called
+- Tool should route to current action (decide_planning_criteria after transition)
+- Instructions should be returned for decide_planning_criteria action
+
+**Validation:**
+- MCP tool `story_bot_shape_tool` was called
+- Tool returned instructions for decide_planning_criteria action
+- Instructions contain assumptions and decision criteria
+<!-- END_VARIANT:MCP_BEHAVIOR -->
 
 ### Step 3.1: Review Planning Instructions
 
@@ -204,8 +517,9 @@ This test can be run in two modes:
 
 **PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 3.3
 
-### Step 3.3: Continue to Next Action
+### Step 3.3: Continue to Next Action (Variant-Specific)
 
+<!-- START_VARIANT:CLI_BEHAVIOR -->
 **Command:** `/story_bot-continue`
 
 **Expected Behavior:**
@@ -215,12 +529,83 @@ This test can be run in two modes:
 **Validation:**
 - `workflow_state.json` should show: `current_action: "story_bot.shape.build_knowledge"`
 - `completed_actions` should include both `gather_context` and `decide_planning_criteria`
+<!-- END_VARIANT:CLI_BEHAVIOR -->
 
-**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 4.1
+<!-- START_VARIANT:CLI_ACTION -->
+**Command:** `/story_bot-shape build_knowledge`
+
+**Expected Behavior:**
+- Command should execute `build_knowledge` action directly
+- Instructions should be returned for building knowledge graph
+
+**Validation:**
+- Instructions should be returned for building knowledge graph
+- Action executed directly
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**AI Action:** After completing decide_planning_criteria, invoke `story_bot_close_current_action` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_close_current_action` should be called
+- Tool should mark decide_planning_criteria as complete
+- Tool should transition workflow to `build_knowledge` action
+- Tool should NOT execute the next action - it only marks complete and transitions
+
+**Validation:**
+- MCP tool `story_bot_close_current_action` was called
+- `workflow_state.json` should show: `current_action: "story_bot.shape.build_knowledge"`
+- `completed_actions` should include both `gather_context` and `decide_planning_criteria`
+- No instructions returned (tool only transitions, doesn't execute)
+
+**Next Step:** To actually execute the next action, call the behavior tool again using trigger words (e.g., "I want to continue shaping")
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**User Input:** "build knowledge" or "create structure" (matches trigger patterns from `base_actions/4_build_knowledge/trigger_words.json`)
+
+**AI Action:**
+1. Recognize trigger words match action-level patterns ("create.*structure", "build.*content")
+2. Check available MCP tools
+3. Invoke `story_bot_shape_build_knowledge` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_build_knowledge` should be called
+- Tool should execute build_knowledge action directly
+- Instructions should be returned for building knowledge graph
+
+**Validation:**
+- MCP tool `story_bot_shape_build_knowledge` was called
+- Tool executed build_knowledge action
+- Instructions should be returned for building knowledge graph
+<!-- END_VARIANT:MCP_ACTION -->
+
+**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 4.0
 
 ---
 
 ## Phase 4: Build Knowledge
+
+### Step 4.0: Execute Next Action (MCP_BEHAVIOR Only)
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**User Input:** "I want to continue shaping" or "shape stories for mob minion" (trigger words to continue workflow)
+
+**AI Action:**
+1. Recognize trigger words match behavior-level patterns
+2. Check available MCP tools
+3. Invoke `story_bot_shape_tool` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_tool` should be called
+- Tool should route to current action (build_knowledge after transition)
+- Instructions should be returned for build_knowledge action
+
+**Validation:**
+- MCP tool `story_bot_shape_tool` was called
+- Tool returned instructions for build_knowledge action
+- Instructions reference knowledge graph templates
+<!-- END_VARIANT:MCP_BEHAVIOR -->
 
 ### Step 4.1: Review Build Knowledge Instructions
 
@@ -286,7 +671,7 @@ This test can be run in two modes:
 
 2. **Execute Synchronizers:**
    - For each config with `"synchronizer"` field, execute the synchronizer command
-   - Example: `python -m story_io synchronize render-outline --input demo/mob_minion/docs/stories/story-graph.json --output demo/mob_minion/docs/stories/story-map-outline.drawio`
+   - Example: `python -m agile_bot.bots.story_bot.src.synchronizers.story_io.story_io_cli render-outline --story-graph demo/mob_minion/docs/stories/story-graph.json --output demo/mob_minion/docs/stories/story-map-outline.drawio`
 
 3. **Render Templates:**
    - For each config with only `"template"` field (no builder/synchronizer), render template directly
@@ -328,8 +713,9 @@ This test can be run in two modes:
 
 **PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 5.5
 
-### Step 5.5: Continue to Next Action
+### Step 5.5: Continue to Next Action (Variant-Specific)
 
+<!-- START_VARIANT:CLI_BEHAVIOR -->
 **Command:** `/story_bot-continue`
 
 **Expected Behavior:**
@@ -339,12 +725,83 @@ This test can be run in two modes:
 **Validation:**
 - `workflow_state.json` should show: `current_action: "story_bot.shape.validate_rules"`
 - `completed_actions` should include `render_output`
+<!-- END_VARIANT:CLI_BEHAVIOR -->
 
-**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 6.1
+<!-- START_VARIANT:CLI_ACTION -->
+**Command:** `/story_bot-shape validate_rules`
+
+**Expected Behavior:**
+- Command should execute `validate_rules` action directly
+- Instructions should be returned for validation
+
+**Validation:**
+- Instructions should be returned for validation
+- Action executed directly
+<!-- END_VARIANT:CLI_ACTION -->
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**AI Action:** After completing render_output, invoke `story_bot_close_current_action` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_close_current_action` should be called
+- Tool should mark render_output as complete
+- Tool should transition workflow to `validate_rules` action
+- Tool should NOT execute the next action - it only marks complete and transitions
+
+**Validation:**
+- MCP tool `story_bot_close_current_action` was called
+- `workflow_state.json` should show: `current_action: "story_bot.shape.validate_rules"`
+- `completed_actions` should include `render_output`
+- No instructions returned (tool only transitions, doesn't execute)
+
+**Next Step:** To actually execute the next action, call the behavior tool again using trigger words (e.g., "I want to continue shaping")
+<!-- END_VARIANT:MCP_BEHAVIOR -->
+
+<!-- START_VARIANT:MCP_ACTION -->
+**User Input:** "validate rules" or "check against rules" (matches trigger patterns from `base_actions/7_validate_rules/trigger_words.json`)
+
+**AI Action:**
+1. Recognize trigger words match action-level patterns ("check.*against.*rule", "validate.*content", "verify.*compliance")
+2. Check available MCP tools
+3. Invoke `story_bot_shape_validate_rules` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_validate_rules` should be called
+- Tool should execute validate_rules action directly
+- Instructions should be returned for validation
+
+**Validation:**
+- MCP tool `story_bot_shape_validate_rules` was called
+- Tool executed validate_rules action
+- Instructions should be returned for validation
+<!-- END_VARIANT:MCP_ACTION -->
+
+**PAUSE MODE:** After validation, report completion and wait for user confirmation before proceeding to Step 6.0
 
 ---
 
 ## Phase 6: Validate Rules
+
+### Step 6.0: Execute Next Action (MCP_BEHAVIOR Only)
+
+<!-- START_VARIANT:MCP_BEHAVIOR -->
+**User Input:** "I want to continue shaping" or "shape stories for mob minion" (trigger words to continue workflow)
+
+**AI Action:**
+1. Recognize trigger words match behavior-level patterns
+2. Check available MCP tools
+3. Invoke `story_bot_shape_tool` MCP tool
+
+**Expected Behavior:**
+- MCP tool `story_bot_shape_tool` should be called
+- Tool should route to current action (validate_rules after transition)
+- Instructions should be returned for validate_rules action
+
+**Validation:**
+- MCP tool `story_bot_shape_tool` was called
+- Tool returned instructions for validate_rules action
+- Instructions are actionable (not just raw rules)
+<!-- END_VARIANT:MCP_BEHAVIOR -->
 
 ### Step 6.1: Review Validate Rules Instructions
 
@@ -462,18 +919,21 @@ This test can be run in two modes:
 
 ---
 
-## Phase 8: Test Edge Cases
+## Phase 8: Test Edge Cases (OPTIONAL - Only if explicitly requested)
+
+**NOTE: Phase 7 is the end of the main shaping workflow. Phase 8 is optional edge case testing. If the user says "continue" after Phase 7 is complete, respond with "Done" - do NOT automatically proceed to Phase 8.**
 
 ### Step 8.1: Test Workflow Resume After Interruption
 
 **Action:** 
 1. Note the current workflow state
 2. Simulate an interruption (don't actually interrupt, just verify the state would allow resume)
-3. Verify that running `/story_bot-shape` again would resume at the correct action
+3. Verify that running the entry point again would resume at the correct action
 
 **Validation:**
 - Workflow state should be sufficient to resume
 - Current action should be clear from workflow_state.json
+- Entry point (CLI command or MCP tool) should correctly resume workflow
 
 ### Step 8.2: Test Activity Logging
 
@@ -498,6 +958,7 @@ The workflow test is successful if:
 6. ✅ Content quality is acceptable (domain concepts present, stories follow format)
 7. ✅ Synchronize functionality works (if tested)
 8. ✅ Workflow can be resumed from any point
+9. ✅ Variant-specific entry points work correctly (CLI vs MCP, behavior vs action level)
 
 ---
 
@@ -506,20 +967,22 @@ The workflow test is successful if:
 When running in Straight-Through mode, provide a comprehensive report at the end with:
 
 ### Executive Summary
-- Total phases completed: X/8
+- Total phases completed: X/7
 - Total steps completed: X
+- Variant tested: {{VARIANT}}
 - Overall status: Success / Partial Success / Failed
 - Total execution time: [if tracked]
 
 ### Phase-by-Phase Results
 
-For each phase (0-8):
+For each phase (0-7):
 - **Phase X: [Name]**
   - Status: ✅ Completed / ⚠️ Partial / ❌ Failed
   - Steps completed: X/Y
   - Files created: [list]
   - Validation results: [pass/fail for each check]
   - Issues encountered: [if any]
+  - Variant-specific notes: [if applicable]
 
 ### Files Created
 
@@ -543,6 +1006,13 @@ Final state of `workflow_state.json`:
 - Completed actions: [list]
 - Timestamps: [if relevant]
 
+### Variant-Specific Results
+
+- Entry points tested: [list]
+- MCP tools invoked: [list] (if MCP variant)
+- Trigger words matched: [list] (if MCP variant)
+- CLI commands executed: [list] (if CLI variant)
+
 ### Recommendations
 
 - Any issues that need attention
@@ -558,7 +1028,7 @@ Final state of `workflow_state.json`:
 - **Simulate human-in-the-loop** - when instructions say "present to user" or "ask user", simulate providing reasonable answers based on input.txt
 - **Check file contents** - don't just check files exist, verify they have correct content
 - **Report issues** - if any step fails, document what failed and why
-- **Use commands exactly as specified** - `/story_bot-shape`, `/story_bot-continue`, etc.
+- **Use commands/tools exactly as specified** - follow variant-specific instructions
 
 **CRITICAL: WHEN WORKFLOW IS DONE, SAY "DONE"**
 - **When Phase 7 (Final Validation) is complete, the workflow is DONE**
@@ -568,7 +1038,7 @@ Final state of `workflow_state.json`:
 - **The shaping workflow ends at Phase 7 - validate_rules is the terminal action**
 
 **CRITICAL: NO WORKAROUNDS OR FIXES**
-- **DO NOT create temporary scripts, wrappers, or workarounds** when commands fail**
+- **DO NOT create temporary scripts, wrappers, or workarounds** when commands fail
 - **DO NOT fix system bugs** - this is a test of existing functionality, not a development session
 - **If a command fails:**
   1. Report the exact error message
@@ -578,13 +1048,33 @@ Final state of `workflow_state.json`:
 - **The goal is to test the system as-is** - creating workarounds defeats the purpose of the test
 - **If something doesn't work, that's valuable test information** - document it and stop
 
+### Variant-Specific Instructions
+
+**For CLI Variants:**
+- Use exact CLI commands as specified
+- Verify commands execute correctly
+- Check that workflow state updates appropriately
+
+**For MCP Variants:**
+- **CRITICAL:** Before invoking MCP tools, check available MCP tools first
+- Recognize trigger words from the trigger word patterns listed above
+- Invoke the correct MCP tool based on trigger words
+- Verify MCP tool was called and returned expected results
+- **For MCP_BEHAVIOR:** The flow is:
+  1. Execute action (via behavior tool with trigger words like "shape stories for mob minion" or "I want to continue shaping")
+  2. Complete the action work (follow instructions, create files, etc.)
+  3. Call `story_bot_close_current_action` to mark action complete and transition to next action (this does NOT execute the next action)
+  4. Call behavior tool again with trigger words to actually execute the next action
+  5. Repeat steps 2-4
+- **For MCP_ACTION:** Use specific action tools for each phase (each action is executed directly via its action tool)
+
 ### Mode-Specific Behavior
 
 **Straight-Through Mode:**
 - Execute all steps without pausing
 - Collect validation results as you go
 - At the end, provide comprehensive report covering all phases
-- Report should include: summary, files created, validation results, any issues, final state
+- Report should include: summary, files created, validation results, any issues, final state, variant-specific results
 
 **Pause Mode:**
 - After EACH step marked with "PAUSE MODE", you MUST:
@@ -599,13 +1089,25 @@ Final state of `workflow_state.json`:
 
 ## Command Reference
 
-- `/story_bot-shape @demo/mob_minion/input.txt` - Start shape workflow with input file
+### CLI Commands
+- `/story_bot-shape @demo/mob_minion/input.txt` - Start shape workflow with input file (CLI_BEHAVIOR)
+- `/story_bot-shape initialize_project @demo/mob_minion/input.txt` - Execute specific action (CLI_ACTION)
 - `/story_bot-shape` - Resume shape workflow (uses current project from state)
-- `/story_bot-continue` - Close current action and continue to next
+- `/story_bot-continue` - Close current action and continue to next (CLI_BEHAVIOR)
 - `python agile_bot/bots/story_bot/src/story_bot_cli.py shape` - Direct CLI invocation
 - `python agile_bot/bots/story_bot/src/story_bot_cli.py --close` - Close current action
+
+### MCP Tools
+- `story_bot_tool` - Bot-level tool (routes to current behavior/action)
+- `story_bot_close_current_action` - Close current action and transition (MCP_BEHAVIOR)
+- `story_bot_shape_tool` - Behavior-level tool (routes to current action in shape) (MCP_BEHAVIOR)
+- `story_bot_shape_initialize_project` - Action-level tool (MCP_ACTION)
+- `story_bot_shape_gather_context` - Action-level tool (MCP_ACTION)
+- `story_bot_shape_decide_planning` - Action-level tool (MCP_ACTION)
+- `story_bot_shape_build_knowledge` - Action-level tool (MCP_ACTION)
+- `story_bot_shape_render_output` - Action-level tool (MCP_ACTION)
+- `story_bot_shape_validate_rules` - Action-level tool (MCP_ACTION)
 
 ---
 
 **End of Instructions**
-

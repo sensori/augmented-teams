@@ -1,7 +1,16 @@
 {
   "actionName": "render_output",
   "instructions": [
-    "**MANDATORY: Before rendering any output, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements, decisions, and context that MUST be reflected in all rendered artifacts.**",
+    "**MANDATORY: Before rendering any output, you MUST load and review the project's context files:**",
+    "1. Load `{project_area}/docs/stories/clarification.json` - Contains key questions and evidence (generated file)",
+    "2. Load `{project_area}/docs/stories/planning.json` - Contains assumptions and decisions (generated file)",
+    "3. Load `{project_area}/docs/context/input.txt` (or similar) - Original input/source material (original context)",
+    "",
+    "**CRITICAL: File locations:**",
+    "- **Generated files:** `{project_area}/docs/stories/clarification.json`, `{project_area}/docs/stories/planning.json`",
+    "- **Original input:** `{project_area}/docs/context/input.txt` and other original context files",
+    "",
+    "These files contain critical requirements, decisions, and context that MUST be reflected in all rendered artifacts.",
     "",
     "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work.**",
     "",
@@ -53,7 +62,7 @@
     "1. Load the template file:",
     "   - Location: `{bot}/behaviors/{behavior}/2_content/2_render/templates/{template_file}`",
     "",
-    "2. Load input data (usually from `{project_path}/docs/stories/story-graph.json` or clarification.json)",
+    "2. Load input data (usually from `{project_path}/docs/stories/story-graph.json` or `{project_path}/docs/stories/clarification.json`)",
     "",
     "3. Render template with data substitution",
     "",
@@ -93,5 +102,3 @@
     "When this action is complete, AI MUST pause and wait for human feedback. When human says 'done' or confirms completion, you MUST proceed to the next step: **validate_rules** (call the validate_rules action tool)."
   ]
 }
-
-

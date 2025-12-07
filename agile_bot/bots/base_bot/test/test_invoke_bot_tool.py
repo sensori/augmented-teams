@@ -1,7 +1,7 @@
 """
 Invoke Bot Tool Tests
 
-Tests for 'Invoke Bot Tool' sub-epic (foundational + increment 3):
+Tests for 'Invoke Bot Tool' sub-epic and 'Perform Behavior Action' sub-epic:
 
 Foundational Tests (Increment 1/2):
 - Bot Tool Invocation
@@ -10,6 +10,7 @@ Foundational Tests (Increment 1/2):
 Increment 3 Tests:
 - Forward To Current Behavior and Current Action
 - Forward To Current Action
+- Activity Logged To Project Area Not Bot Area
 
 Uses transitions state machine for workflow state management.
 """
@@ -373,3 +374,68 @@ class TestForwardToCurrentAction:
         assert state_data['current_behavior'] == 'story_bot.shape'
         assert state_data['current_action'] == 'story_bot.shape.gather_context'
         assert result.action == 'gather_context'
+
+
+class TestActivityTrackingLocation:
+    """Story: Activity Logged To Project Area Not Bot Area - Tests that activity is tracked in the correct project_area location."""
+
+    def test_activity_logged_to_project_area_not_bot_area(self, workspace_root):
+        """
+        SCENARIO: Activity logged to project_area not bot area
+        GIVEN: current_project.json specifies project_area='agile_bot/bots/base_bot/docs/stories'
+        AND: action 'gather_context' executes
+        WHEN: Activity logger creates entry
+        THEN: Activity log file is at: project_area/activity_log.json
+        AND: Activity log is NOT at: agile_bot/bots/story_bot/activity_log.json
+        AND: Activity log location matches project_area from current_project.json
+        """
+        # Given: workspace root and current_project set
+        workspace = workspace_root
+        
+        # Create current_project.json so activity tracking works
+        from agile_bot.bots.base_bot.test.test_helpers import create_saved_location
+        create_saved_location(workspace, 'story_bot', str(workspace))
+        
+        # When: Activity tracker tracks activity
+        from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
+        tracker = ActivityTracker(workspace_root=workspace, bot_name='story_bot')
+        tracker.track_start('story_bot', 'shape', 'gather_context')
+        
+        # Then: Activity log exists in workspace root (no project_area subdirectory)
+        expected_log = workspace / 'activity_log.json'
+        assert expected_log.exists(), f"Activity log should be at {expected_log}"
+        
+        # And: Activity log does NOT exist in bot's area
+        bot_area_log = workspace / 'agile_bot' / 'bots' / 'story_bot' / 'activity_log.json'
+        assert not bot_area_log.exists(), f"Activity log should NOT be at {bot_area_log}"
+
+    def test_activity_log_contains_correct_entry(self, workspace_root):
+        """
+        SCENARIO: Activity log contains correct entry
+        GIVEN: action 'gather_context' executes in behavior 'discovery'
+        WHEN: Activity logger creates entry
+        THEN: Activity log entry includes:
+          - action_state='story_bot.discovery.gather_context'
+          - timestamp
+          - Full path includes bot_name.behavior.action
+        """
+        # Given: workspace root and current_project set
+        workspace = workspace_root
+        
+        # Create current_project.json so activity tracking works
+        from agile_bot.bots.base_bot.test.test_helpers import create_saved_location
+        create_saved_location(workspace, 'story_bot', str(workspace))
+        
+        # When: Activity tracker tracks activity
+        from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
+        tracker = ActivityTracker(workspace_root=workspace, bot_name='story_bot')
+        tracker.track_start('story_bot', 'shape', 'gather_context')
+        
+        # Then: Activity log has entry
+        from tinydb import TinyDB
+        log_file = workspace / 'activity_log.json'
+        with TinyDB(log_file) as db:
+            entries = db.all()
+            assert len(entries) == 1
+            assert entries[0]['action_state'] == 'story_bot.shape.gather_context'
+            assert entries[0]['status'] == 'started'

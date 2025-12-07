@@ -1,12 +1,21 @@
 {
   "actionName": "validate_rules",
   "instructions": [
-    "**MANDATORY: Before validating any content, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements and decisions that MUST be checked against during validation.**",
+    "**MANDATORY: Before validating any content, you MUST load and review the project's context files:**",
+    "1. Load `{project_area}/docs/stories/clarification.json` - Contains key questions and evidence (generated file)",
+    "2. Load `{project_area}/docs/stories/planning.json` - Contains assumptions and decisions (generated file)",
+    "3. Load `{project_area}/docs/context/input.txt` (or similar) - Original input/source material if needed for validation (original context)",
+    "",
+    "**CRITICAL: File locations:**",
+    "- **Generated files:** `{project_area}/docs/stories/clarification.json`, `{project_area}/docs/stories/planning.json`",
+    "- **Original input:** `{project_area}/docs/context/input.txt` and other original context files",
+    "",
+    "These files contain critical requirements, decisions, and context that MUST be checked against during validation.",
     "",
     "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work.**",
     "",
     "**Instructions:**",
-    "1. Load and review clarification.json and planning.json to understand all requirements and decisions",
+    "1. Load and review `{project_area}/docs/stories/clarification.json` and `{project_area}/docs/stories/planning.json` to understand all requirements and decisions",
     "2. Check planning.json for the current behavior's decisions_made and assumptions_made sections",
     "3. Evaluate the Content Data against all rules listed above",
     "4. Check for violations of each rule",
@@ -19,7 +28,8 @@
     "7. If no violations found, confirm that Content Data follows all rules and incorporates all requirements",
     "8. **MANDATORY: Save the validation report to a file**",
     "   - File name: `validation-report.md`",
-    "   - Location: `{project_area}/{docs_path}/validation-report.md` (same location as clarification.json and planning.json)",
+    "   - Location: `{project_area}/{docs_path}/validation-report.md` (validation report goes in docs_path, NOT in context folder)",
+    "   - Note: Generated context files (clarification.json, planning.json) are in `{project_area}/docs/stories/`, and validation report is also output to `{project_area}/{docs_path}/`",
     "   - Format: Markdown with sections for Status, Violations Found, Suggested Corrections",
     "   - Include: Total documents validated, violations count, rules checked count, summary",
     "   - After generating the report, write it to the file using standard file writing operations",
@@ -50,4 +60,18 @@
   }
 }
 
+  "templates": {
+    "validation_results": {
+      "template": "Validation Results:\n\n**Status:** {{validation_status}}\n\n**Violations Found:**\n{{violations_list}}\n\n**Suggested Corrections:**\n{{suggested_corrections}}\n\nYou may request a second validation pass with corrections applied.",
+      "description": "Used to present validation results to user"
+    }
+  }
+}
 
+  "templates": {
+    "validation_results": {
+      "template": "Validation Results:\n\n**Status:** {{validation_status}}\n\n**Violations Found:**\n{{violations_list}}\n\n**Suggested Corrections:**\n{{suggested_corrections}}\n\nYou may request a second validation pass with corrections applied.",
+      "description": "Used to present validation results to user"
+    }
+  }
+}

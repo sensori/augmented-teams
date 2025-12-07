@@ -1,7 +1,16 @@
 {
   "actionName": "correct_bot",
   "instructions": [
-    "**MANDATORY: Before applying corrections, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements and decisions that MUST be maintained and incorporated when correcting content.**",
+    "**MANDATORY: Before applying corrections, you MUST load and review the project's context files:**",
+    "1. Load `{project_area}/docs/stories/clarification.json` - Contains key questions and evidence (generated file)",
+    "2. Load `{project_area}/docs/stories/planning.json` - Contains assumptions and decisions (generated file)",
+    "3. Load `{project_area}/docs/context/input.txt` (or similar) - Original input/source material if needed (original context)",
+    "",
+    "**CRITICAL: File locations:**",
+    "- **Generated files:** `{project_area}/docs/stories/clarification.json`, `{project_area}/docs/stories/planning.json`",
+    "- **Original input:** `{project_area}/docs/context/input.txt` and other original context files",
+    "",
+    "These files contain critical requirements, decisions, and context that MUST be maintained and incorporated when correcting content.",
     "",
     "Apply corrections based on the violations and user feedback provided.",
     "",
@@ -24,4 +33,16 @@
   }
 }
 
+    "correction_prompt": {
+      "template": "Applying corrections based on:\n\n**Violations:**\n{{violations}}\n\n**User Feedback:**\n{{user_feedback}}\n\nRegenerating content with corrections applied.",
+      "description": "Used when applying corrections"
+    }
+  }
+}
 
+    "correction_prompt": {
+      "template": "Applying corrections based on:\n\n**Violations:**\n{{violations}}\n\n**User Feedback:**\n{{user_feedback}}\n\nRegenerating content with corrections applied.",
+      "description": "Used when applying corrections"
+    }
+  }
+}

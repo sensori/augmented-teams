@@ -1,16 +1,13 @@
 """
-Test the close_current_action functionality.
+Close Current Action Tests
 
-Story: Close Current Action
-Tests that users can explicitly mark an action as complete and transition to the next action.
-
-Covers all acceptance criteria:
-1. Close current action and transition to next
-2. Close final action and transition to next behavior
-3. Error when action requires confirmation (not in completed_actions)
-4. Works regardless of invocation method
-5. Idempotent completion
-6. Bot class has close_current_action method (CLI routes to bot.close_current_action)
+Tests for 'Close Current Action' story:
+- Close current action and transition to next
+- Close final action and transition to next behavior
+- Error when action requires confirmation (not in completed_actions)
+- Works regardless of invocation method
+- Idempotent completion
+- Bot class has close_current_action method (CLI routes to bot.close_current_action)
 """
 import pytest
 import json
@@ -24,7 +21,7 @@ from conftest import (
 
 
 # ============================================================================
-# INLINE HELPERS - Used only by tests in this file
+# HELPER FUNCTIONS - Used only by tests in this file
 # ============================================================================
 
 def create_test_workflow(
@@ -64,7 +61,14 @@ def create_test_workflow(
     return workflow, workflow_file
 
 
-def test_close_current_action_marks_complete_and_transitions(tmp_path):
+# ============================================================================
+# STORY: Close Current Action
+# ============================================================================
+
+class TestCloseCurrentAction:
+    """Story: Close Current Action - Tests that users can explicitly mark an action as complete and transition to the next action."""
+
+    def test_close_current_action_marks_complete_and_transitions(self, tmp_path):
     """Scenario: Close current action and transition to next"""
     
     # Given workflow is at action "gather_context"
@@ -93,7 +97,7 @@ def test_close_current_action_marks_complete_and_transitions(tmp_path):
     assert updated_state['current_action'] == f'{bot_name}.{behavior}.decide_planning_criteria'
 
 
-def test_close_action_at_final_action_stays_at_final(tmp_path):
+    def test_close_action_at_final_action_stays_at_final(self, tmp_path):
     """Scenario: Close action when already at final action"""
     
     # Given workflow is at action "validate_rules" (final action)
@@ -121,7 +125,7 @@ def test_close_action_at_final_action_stays_at_final(tmp_path):
     assert workflow.is_action_completed('validate_rules')
 
 
-def test_close_final_action_transitions_to_next_behavior(tmp_path):
+    def test_close_final_action_transitions_to_next_behavior(self, tmp_path):
     """Scenario: Close final action and transition to next behavior"""
     
     # Given workflow is at final action "validate_rules" of behavior "shape"
@@ -151,7 +155,7 @@ def test_close_final_action_transitions_to_next_behavior(tmp_path):
     # NOTE: Behavior transition to "prioritization" would happen at Bot level (in MCP tool)
 
 
-def test_error_when_closing_action_that_requires_confirmation(tmp_path):
+    def test_error_when_closing_action_that_requires_confirmation(self, tmp_path):
     """Scenario: Close action that requires confirmation but wasn't confirmed"""
     
     # Given workflow is at "initialize_project"
@@ -165,7 +169,7 @@ def test_error_when_closing_action_that_requires_confirmation(tmp_path):
     assert not workflow.is_action_completed('initialize_project')
 
 
-def test_close_handles_action_already_completed_gracefully(tmp_path):
+    def test_close_handles_action_already_completed_gracefully(self, tmp_path):
     """Scenario: Close action that's already marked complete (idempotent)"""
     
     # Given action already complete
@@ -187,7 +191,7 @@ def test_close_handles_action_already_completed_gracefully(tmp_path):
     assert workflow.is_action_completed('gather_context')
 
 
-def test_bot_class_has_close_current_action_method(tmp_path):
+    def test_bot_class_has_close_current_action_method(self, tmp_path):
     """
     Scenario: Bot class has close_current_action method (CLI routes to bot.close_current_action)
     

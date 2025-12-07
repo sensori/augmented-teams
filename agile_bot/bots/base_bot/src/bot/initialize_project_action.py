@@ -73,10 +73,17 @@ class InitializeProjectAction(BaseAction):
                 json.dumps({'current_project': str(current_dir)}),
                 encoding='utf-8'
             )
+            # Also create context folder inside docs when resuming (no confirmation needed)
+            docs_folder = current_dir / 'docs'
+            docs_folder.mkdir(parents=True, exist_ok=True)
+            context_folder = docs_folder / 'context'
+            context_folder.mkdir(parents=True, exist_ok=True)
+            stories_folder = docs_folder / 'stories'
+            stories_folder.mkdir(parents=True, exist_ok=True)
         
         return data
     
-    def confirm_location(self, project_location: str) -> Dict[str, Any]:
+    def confirm_location(self, project_location: str, input_file: str = None) -> Dict[str, Any]:
         # Parse location
         if not Path(project_location).is_absolute():
             location = self.workspace_root / project_location
@@ -90,10 +97,78 @@ class InitializeProjectAction(BaseAction):
             encoding='utf-8'
         )
         
+        # MANDATORY: Create context folder inside docs folder immediately after project confirmation
+        docs_folder = location / 'docs'
+        docs_folder.mkdir(parents=True, exist_ok=True)
+        context_folder = docs_folder / 'context'
+        context_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Also ensure docs/stories folder exists for generated files
+        stories_folder = docs_folder / 'stories'
+        stories_folder.mkdir(parents=True, exist_ok=True)
+        
+        # If input file provided, copy it to context folder
+        if input_file:
+            input_path = Path(input_file)
+            if input_path.exists():
+                context_input = context_folder / 'input.txt'
+                # Copy file (don't move - preserve original)
+                import shutil
+                shutil.copy2(input_path, context_input)
+        
         return {
             'project_location': str(location),
             'saved': True,
+            'context_folder_created': True,
             'message': f'Project location saved: {location}'
         }
 
+        docs_folder = location / 'docs'
+        docs_folder.mkdir(parents=True, exist_ok=True)
+        context_folder = docs_folder / 'context'
+        context_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Also ensure docs/stories folder exists for generated files
+        stories_folder = docs_folder / 'stories'
+        stories_folder.mkdir(parents=True, exist_ok=True)
+        
+        # If input file provided, copy it to context folder
+        if input_file:
+            input_path = Path(input_file)
+            if input_path.exists():
+                context_input = context_folder / 'input.txt'
+                # Copy file (don't move - preserve original)
+                import shutil
+                shutil.copy2(input_path, context_input)
+        
+        return {
+            'project_location': str(location),
+            'saved': True,
+            'context_folder_created': True,
+            'message': f'Project location saved: {location}'
+        }
 
+        docs_folder = location / 'docs'
+        docs_folder.mkdir(parents=True, exist_ok=True)
+        context_folder = docs_folder / 'context'
+        context_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Also ensure docs/stories folder exists for generated files
+        stories_folder = docs_folder / 'stories'
+        stories_folder.mkdir(parents=True, exist_ok=True)
+        
+        # If input file provided, copy it to context folder
+        if input_file:
+            input_path = Path(input_file)
+            if input_path.exists():
+                context_input = context_folder / 'input.txt'
+                # Copy file (don't move - preserve original)
+                import shutil
+                shutil.copy2(input_path, context_input)
+        
+        return {
+            'project_location': str(location),
+            'saved': True,
+            'context_folder_created': True,
+            'message': f'Project location saved: {location}'
+        }

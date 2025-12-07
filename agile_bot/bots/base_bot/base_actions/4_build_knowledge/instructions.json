@@ -1,7 +1,17 @@
 {
   "actionName": "build_knowledge",
   "instructions": [
-    "**MANDATORY: Before generating any content, you MUST load and review the project's clarification.json and planning.json files from `{project_area}/{docs_path}/`. The docs_path is specified in the behavior's configuration files (typically `docs/stories/` for story_bot). These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.**",
+    "**MANDATORY: Before generating any content, you MUST load and review the project's context files:**",
+    "1. Load `{project_area}/docs/stories/clarification.json` - Contains key questions and evidence (generated file)",
+    "2. Load `{project_area}/docs/stories/planning.json` - Contains assumptions and decisions (generated file)",
+    "3. Load `{project_area}/docs/context/input.txt` (or similar) - Original input/source material (original context)",
+    "4. Load any other original context files from `{project_area}/docs/context/` folder",
+    "",
+    "**CRITICAL: File locations:**",
+    "- **Generated files:** `{project_area}/docs/stories/clarification.json`, `{project_area}/docs/stories/planning.json`",
+    "- **Original input:** `{project_area}/docs/context/input.txt` and other original context files",
+    "",
+    "These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.",
     "",
     "**CRITICAL: Load planning.json and check for the current behavior's section (e.g., 'shape', 'discovery', 'exploration', 'specification'). Reference decisions_made and assumptions_made for the current behavior, as well as any previous behaviors that affect this work (e.g., discovery decisions affect exploration).**",
     "",
@@ -45,4 +55,21 @@
   }
 }
 
+
+    "knowledge_graph_template": {
+      "template": "{{knowledge_template}}",
+      "description": "Knowledge graph template loaded from {bot}/behaviors/{behavior}/content/knowledge_graph/{knowledge_template}.json",
+      "location": "{bot}/behaviors/{behavior}/content/knowledge_graph/{knowledge_template}.json"
+    }
+  }
+}
+
+
+    "knowledge_graph_template": {
+      "template": "{{knowledge_template}}",
+      "description": "Knowledge graph template loaded from {bot}/behaviors/{behavior}/content/knowledge_graph/{knowledge_template}.json",
+      "location": "{bot}/behaviors/{behavior}/content/knowledge_graph/{knowledge_template}.json"
+    }
+  }
+}
 

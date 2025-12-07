@@ -1,28 +1,26 @@
 {
   "shape": {
-    "assumptions_made": {
-      "focus_user_flow": "Focus on user flow over internal systems",
-      "end_to_end": "Cover the end-to-end scenario",
-      "customer_facing": "Prioritize customer-facing features",
-      "independent_testable": "Assume stories should be independently testable",
-      "user_value": "Assume each story delivers user value",
-      "technical_infrastructure": "Assume technical infrastructure stories are implicit",
-      "drill_down_architectural": "Drill down where architectural uncertainty is high – unknown integration patterns, new technology, or unclear system boundaries require deeper exploration",
-      "drill_down_business_complexity": "Drill down where business complexity is significant – complex business rules, regulatory requirements, or domain logic that needs clarification",
-      "drill_down_uniqueness": "Drill down where uniqueness creates risk – novel approaches, first-of-kind features, or untested patterns benefit from detailed shaping",
-      "drill_down_integration": "Drill down where integration complexity exists – multiple systems, data dependencies, or coordination challenges need detailed mapping",
-      "drill_down_user_behavior": "Drill down where user behavior is highly variable – diverse user needs, multiple personas, or inconsistent workflows require deeper understanding",
-      "skip_well_established": "Skip deep drill-down where patterns are well-established – standard CRUD operations, familiar workflows, or proven integration patterns can stay high-level",
-      "core_domain": "Focus on core domain over supporting domains",
-      "domain_concepts_first": "Identify overall domain concepts and relationships before detailed modeling",
-      "ubiquitous_language": "Use ubiquitous language from domain sources",
-      "domain_not_technical": "Model domain concepts, not technical implementation",
-      "separate_domain_infrastructure": "Separate domain logic from infrastructure concerns, where they are mentioned"
-    },
+    "assumptions_made": [
+      "Focus on user flow over internal systems",
+      "Cover the end-to-end scenario",
+      "Prioritize customer-facing features (GM-facing features for Foundry VTT)",
+      "Assume stories should be independently testable",
+      "Assume each story delivers user value",
+      "Assume technical infrastructure stories are implicit",
+      "Focus on core domain over supporting domains",
+      "Identify overall domain concepts and relationships before detailed modeling",
+      "Use ubiquitous language from domain sources (RPG/VTT terminology)",
+      "Model domain concepts, not technical implementation",
+      "Separate domain logic from infrastructure concerns",
+      "Drill down where integration complexity exists (Foundry VTT integration requires detailed mapping)",
+      "Drill down where user behavior is highly variable (different strategies, target selection methods, attack types)"
+    ],
     "decisions_made": {
+      "drill_down_approach": "Dig deep on system interactions (Foundry VTT integration) and user workflows (mob management, strategy selection)",
       "flow_scope_and_granularity": "End-to-end user-system behavior – One user interaction followed by one system response",
-      "drill_down_approach": "Dig deep on system interactions",
-      "reasoning": "This project requires deep integration with Foundry VTT's actor, token, combat, and range systems. The focus should be on user interactions (creating mobs, applying strategies, executing actions) and how they interact with Foundry's systems. End-to-end user-system behavior is appropriate since each user action (e.g., 'create mob', 'apply strategy', 'execute attack') should result in a system response."
+      "depth_of_shaping": "Workflow -> Figure out logical process, alternate/or conditions",
+      "structure_exploration_depth": "Behavioral -> Explore Business and Domain AC"
     }
   }
 }
+

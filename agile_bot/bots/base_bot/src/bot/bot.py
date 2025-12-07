@@ -206,27 +206,38 @@ class Behavior:
         if parameters.get('confirm'):
             # User is confirming location
             project_area = parameters.get('project_area')
+            input_file = parameters.get('input_file')
             # If project_area is "confirm" or "true", treat as "use current directory"
             if project_area and project_area.lower() not in ['confirm', 'true']:
                 # User provided specific location - confirm that location
-                data = action.confirm_location(project_location=project_area)
+                data = action.confirm_location(project_location=project_area, input_file=input_file)
             else:
                 # User confirming current location - use current directory
                 from pathlib import Path
                 current_dir = Path.cwd()
-                data = action.confirm_location(project_location=str(current_dir))
+                data = action.confirm_location(project_location=str(current_dir), input_file=input_file)
+            
+            # After confirmation, save workflow state and mark action as completed
+            # Ensure workflow state machine is set to initialize_project before saving
+            if self.workflow.current_state != 'initialize_project':
+                self.workflow.machine.set_state('initialize_project')
+            self.workflow.save_state()
+            self.workflow.save_completed_action('initialize_project')
         else:
             # Initial call - propose location and ask for confirmation
             # (project_area here is just a hint, we still ask for confirmation)
             project_area = parameters.get('project_area')
             data = action.initialize_location(project_area=project_area)
+            
+            # Do NOT save workflow state if confirmation is required
+            # Workflow state should only be created after confirmation
+            if not data.get('requires_confirmation'):
+                # No confirmation needed (resuming existing project)
+                self.workflow.save_state()
+                self.workflow.save_completed_action('initialize_project')
         
         # Track activity completion
         action.track_activity_on_completion(outputs=data)
-        
-        # Save completed action to workflow state only if confirmed
-        if not data.get('requires_confirmation'):
-            self.workflow.save_completed_action('initialize_project')
         
         return BotResult(
             status='completed',
@@ -272,6 +283,11 @@ class Behavior:
         current_action = self.workflow.current_state
         action_method = getattr(self, current_action)
         result = action_method()
+        
+        # Only save state if action doesn't require confirmation
+        # (initialize_project handles its own state saving after confirmation)
+        if not (result.data and result.data.get('requires_confirmation')):
+            self.workflow.save_state()
         
         if self.workflow.is_action_completed(current_action):
             self.workflow.transition_to_next()
@@ -379,9 +395,13 @@ class Bot:
     
     def close_current_action(self) -> BotResult:
         """Mark current action as complete and transition to next action."""
-        # Get current behavior from workflow state
-        bot_dir = self.workspace_root / 'agile_bot' / 'bots' / self.name
-        state_file = bot_dir / 'project_area' / 'workflow_state.json'
+        # Get current behavior from workflow state using the correct workflow file path
+        # Use the first behavior's workflow to get the correct state file path
+        first_behavior = self.behaviors[0]
+        behavior_instance = getattr(self, first_behavior)
+        
+        # Use workflow's file property to get correct path
+        state_file = behavior_instance.workflow.file
         
         current_behavior = None
         if state_file.exists():
@@ -408,4 +428,39 @@ class Bot:
         
         # Forward to the next action
         return behavior_instance.forward_to_current_action()
-
+            except Exception:
+                pass
+        
+        if not current_behavior or current_behavior not in self.behaviors:
+            # Default to FIRST behavior in bot config
+            current_behavior = self.behaviors[0]
+        
+        # Get behavior instance
+        behavior_instance = getattr(self, current_behavior)
+        
+        # Mark current action as complete and transition to next
+        behavior_instance.workflow.load_state()
+        current_action = behavior_instance.workflow.current_state
+        behavior_instance.workflow.save_completed_action(current_action)
+        behavior_instance.workflow.transition_to_next()
+        
+        # Forward to the next action
+        return behavior_instance.forward_to_current_action()
+            except Exception:
+                pass
+        
+        if not current_behavior or current_behavior not in self.behaviors:
+            # Default to FIRST behavior in bot config
+            current_behavior = self.behaviors[0]
+        
+        # Get behavior instance
+        behavior_instance = getattr(self, current_behavior)
+        
+        # Mark current action as complete and transition to next
+        behavior_instance.workflow.load_state()
+        current_action = behavior_instance.workflow.current_state
+        behavior_instance.workflow.save_completed_action(current_action)
+        behavior_instance.workflow.transition_to_next()
+        
+        # Forward to the next action
+        return behavior_instance.forward_to_current_action()

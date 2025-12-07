@@ -64,6 +64,40 @@ Then Project loads agent configuration from agent.json
 And Project creates Workflow instance
 ```
 
+### Scenario Outline: {scenario_outline_name} ({type})
+
+**Note:** Scenario Outlines with Examples tables are included ONLY when decision criteria chooses Scenario Outline (formulas/calculations need multiple data points OR domain has named entities OR parameter variations exist).
+
+**Steps:**
+```gherkin
+Given <step with "<variable>">
+And <step with "<variable>">
+When <step with "<variable>">
+Then <step with "<expected>">
+And <step with "<result>">
+```
+
+**Examples:**
+| variable | variable | expected | result |
+|----------|----------|----------|--------|
+| value1   | value2   | result1  | result2 |
+| value3   | value4   | result3  | result4 |
+
+**Example:**
+```gherkin
+Given user types request message "<request_message>"
+And MCP Server is unavailable due to "<unavailability_reason>"
+When request is processed
+Then user receives error "<expected_error_message>"
+```
+
+**Examples:**
+| request_message | unavailability_reason | expected_error_message |
+|-----------------|----------------------|------------------------|
+| build story map | server_not_running    | "MCP Server is not available. Please check server status." |
+| plan project    | connection_timeout    | "Connection to MCP Server timed out. Please retry." |
+| shape domain    | server_error          | "MCP Server encountered an error. Please check logs." |
+
 ## Generated Artifacts
 
 The specification_scenarios stage generates the following artifacts from acceptance criteria and story context:
@@ -76,6 +110,11 @@ The specification_scenarios stage generates the following artifacts from accepta
 - Background section with common setup steps (shared across 3+ scenarios)
 - Scenarios covering happy path, edge cases, and error cases
 - Plain English Given/When/Then steps (no variables or test data)
+- **Scenario Outlines with Examples tables (when decision criteria = 'Yes')**
+  - Variables in angle brackets: <variable_name>
+  - Examples tables with concrete test data
+  - All variables in steps have matching columns in Examples table
+  - Examples include both input and output/expected result variables
 
 **Example structure:**
 ```markdown
@@ -88,6 +127,16 @@ And Project is finished initializing
 Given test project area is set up at test_data/projects/valid-project
 When Project initializes with project_path='test_data/projects/valid-project'
 Then Project loads agent configuration from agent.json
+
+### Scenario Outline: Process request with error handling
+Given user types request message "<request_message>"
+And MCP Server is unavailable due to "<unavailability_reason>"
+When request is processed
+Then user receives error "<expected_error_message>"
+
+Examples:
+| request_message | unavailability_reason | expected_error_message |
+| build story map | server_not_running    | "MCP Server is not available..." |
 ```
 
 ### Structured Data (structured.json)
@@ -96,6 +145,7 @@ Then Project loads agent configuration from agent.json
 **Content:**
 - JSON representation of epic/feature/story hierarchy
 - Scenario definitions with Background and Steps
+- Scenario Outline definitions with Examples tables (when decision criteria = 'Yes')
 - Scenario types (happy_path, edge_case, error_case)
 - Structured data for programmatic processing
 
@@ -112,6 +162,20 @@ Then Project loads agent configuration from agent.json
           "background": ["Given Agent is initialized..."],
           "steps": ["Given test project area...", "When Project initializes...", "Then Project loads..."]
         }
+      ],
+      "scenario_outlines": [
+        {
+          "name": "{scenario_outline_name}",
+          "type": "error_case",
+          "background": ["Given Agent is initialized..."],
+          "steps": ["Given user types request message \"<request_message>\"..."],
+          "examples": {
+            "columns": ["request_message", "unavailability_reason", "expected_error_message"],
+            "rows": [
+              ["build story map", "server_not_running", "MCP Server is not available..."]
+            ]
+          }
+        }
       ]
     }
   ]
@@ -125,5 +189,47 @@ Then Project loads agent configuration from agent.json
 ## Source Material
 
 {source_material}
+          "background": ["Given Agent is initialized..."],
+          "steps": ["Given user types request message \"<request_message>\"..."],
+          "examples": {
+            "columns": ["request_message", "unavailability_reason", "expected_error_message"],
+            "rows": [
+              ["build story map", "server_not_running", "MCP Server is not available..."]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
+## Notes
 
+---
+
+## Source Material
+
+{source_material}
+          "background": ["Given Agent is initialized..."],
+          "steps": ["Given user types request message \"<request_message>\"..."],
+          "examples": {
+            "columns": ["request_message", "unavailability_reason", "expected_error_message"],
+            "rows": [
+              ["build story map", "server_not_running", "MCP Server is not available..."]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Notes
+
+---
+
+## Source Material
+
+{source_material}

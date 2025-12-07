@@ -1,18 +1,11 @@
 {
   "name": "render_story_scenarios",
-  "description": "Render story documents with scenarios section added (and scenario outlines with examples if decision criteria chosen)",
-  "input": "docs/stories/story-graph.json",
-  "output": "docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md",
-  "template": "templates/story-doc-scenarios.md (for regular scenarios), templates/story-doc-examples.md (for scenario outlines with examples)",
-  "process": [
-    "Check decision criteria: agile_bot/bots/story_bot/behaviors/6_scenarios/1_guardrails/planning/decision_criteria/scenario_outline.json",
-    "Load story graph from project area",
-    "For each story in graph, load existing story document",
-    "Add Background section if story has background steps",
-    "Add Scenarios section with all scenarios from graph",
-    "IF decision criteria = 'Yes': Add Scenario Outlines section with Examples tables",
-    "Save updated story documents to project area"
-  ]
+  "type": "synchronizer",
+  "path": "docs/stories",
+  "input": "story-graph.json",
+  "synchronizer": "synchronizers.story_scenarios.StoryScenariosSynchronizer",
+  "output": "docs/stories",
+  "instructions": "Render story-graph.json to story markdown files with scenarios. The synchronizer reads the story graph and generates markdown files for all Bot/system stories (excluding Human/AI Chat stories). Each story file includes acceptance criteria and scenarios sections. Files are placed in the appropriate epic/feature folder structure based on the graph hierarchy."
 }
 
 

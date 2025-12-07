@@ -290,4 +290,67 @@ class TestInitializeProjectLocation:
         saved_data = json.loads(current_project_file.read_text(encoding='utf-8'))
         assert saved_data['current_project'] == user_choice
         assert saved_data['current_project'] != proposed
+    
+    def test_workflow_state_not_created_when_confirmation_required(self, workspace_root):
+        """
+        SCENARIO: Workflow state not created when confirmation required
+        GIVEN: Bot proposes location requiring confirmation
+        WHEN: initialize_project is called and requires_confirmation is True
+        THEN: workflow_state.json is NOT created
+        AND: close_current_action cannot proceed without workflow state
+        """
+        # Given: Bot proposes location requiring confirmation
+        config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
+        bot = Bot('test_bot', workspace_root, config_path)
+        
+        # When: initialize_project is called (requires confirmation)
+        result = bot.shape.initialize_project(parameters={'project_area': 'test-project'})
+        
+        # Then: workflow_state.json is NOT created
+        assert result.data['requires_confirmation'] == True
+        project_location = workspace_root / 'test-project'
+        workflow_state_file = project_location / 'workflow_state.json'
+        assert not workflow_state_file.exists(), "Workflow state should NOT be created when confirmation is required"
+    
+    def test_workflow_state_created_after_confirmation(self, workspace_root):
+        """
+        SCENARIO: Workflow state created after confirmation
+        GIVEN: Bot proposed location requiring confirmation
+        WHEN: User confirms location with confirm=True
+        THEN: workflow_state.json IS created
+        AND: workflow_state.json contains current_behavior, current_action, and completed_actions
+        AND: close_current_action can proceed
+        """
+        # Given: Bot proposed location requiring confirmation
+        config_path = create_bot_config(workspace_root, 'test_bot', ['shape'])
+        bot = Bot('test_bot', workspace_root, config_path)
+        project_area = 'test-project'
+        
+        result1 = bot.shape.initialize_project(parameters={'project_area': project_area})
+        proposed = result1.data['proposed_location']
+        
+        # When: User confirms location
+        result2 = bot.shape.initialize_project(parameters={
+            'confirm': True,
+            'project_area': proposed
+        })
+        
+        # Then: workflow_state.json IS created
+        assert result2.status == 'completed'
+        assert result2.data.get('requires_confirmation', False) == False
+        
+        project_location = workspace_root / project_area
+        workflow_state_file = project_location / 'workflow_state.json'
+        assert workflow_state_file.exists(), "Workflow state SHOULD be created after confirmation"
+        
+        # AND: workflow_state.json contains correct structure
+        state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
+        assert 'current_behavior' in state_data, "Workflow state must have current_behavior"
+        assert 'current_action' in state_data, "Workflow state must have current_action"
+        assert 'completed_actions' in state_data, "Workflow state must have completed_actions"
+        
+        assert state_data['current_behavior'] == 'test_bot.shape'
+        assert state_data['current_action'] == 'test_bot.shape.initialize_project'
+        assert len(state_data['completed_actions']) == 1
+        assert state_data['completed_actions'][0]['action_state'] == 'test_bot.shape.initialize_project'
 

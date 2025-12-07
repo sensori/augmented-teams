@@ -1,12 +1,12 @@
 """
-Complete Workflow Integration Test
+Complete Workflow Integration Tests
 
-End-to-end test of the complete workflow with all fixes:
-1. Workflow determines action from current_action (with fallback to completed_actions)
-2. Guardrails load with number prefixes
-3. Actions save state when called directly
-4. Close tool marks complete and transitions
-5. Jumping to different behavior-action updates state correctly
+Tests for 'Complete Workflow Integration' story:
+- Workflow determines action from current_action (with fallback to completed_actions)
+- Guardrails load with number prefixes
+- Actions save state when called directly
+- Close tool marks complete and transitions
+- Jumping to different behavior-action updates state correctly
 """
 import pytest
 import json
@@ -14,7 +14,14 @@ from pathlib import Path
 from agile_bot.bots.base_bot.src.bot.bot import Bot
 
 
-def test_complete_workflow_end_to_end(tmp_path):
+# ============================================================================
+# STORY: Complete Workflow Integration
+# ============================================================================
+
+class TestCompleteWorkflowIntegration:
+    """Story: Complete Workflow Integration - End-to-end test of the complete workflow with all fixes."""
+
+    def test_complete_workflow_end_to_end(self, tmp_path):
     """
     Complete end-to-end workflow test demonstrating all fixes working together.
     

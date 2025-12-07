@@ -30,7 +30,3 @@ Rendered increment:
     First few: ['Receive Power Characteristics', 'Request Base Templates', 'Instantiate Cast Template']...
 
 [SUCCESS] Priority structure preserved!
-Function returned: 100
-Result written to: c:\dev\augmented-teams\test_result.txt
-File exists: True
-File content: 100
