@@ -773,7 +773,7 @@
                   ]
                 }
               ]
-        },
+        },     
         {
           "name": "Invoke CLI",
           "sequential_order": 3.0,
