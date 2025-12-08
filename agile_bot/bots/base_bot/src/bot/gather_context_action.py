@@ -209,37 +209,7 @@ class GatherContextAction(BaseAction):
         }
 
             
-        except FileNotFoundError:
-            guardrails_dir = None
-        
-        instructions = {'guardrails': {}}
-        
-        if not guardrails_dir:
-            return instructions
-        
-        # Load questions (may have number prefix like 1_key_questions.json or just key_questions.json)
-        questions_file = None
-        for file in guardrails_dir.glob('*key_questions.json'):
-            if file.is_file():
-                questions_file = file
-                break
-        
-        if questions_file and questions_file.exists():
-            questions_data = read_json_file(questions_file)
-            instructions['guardrails']['key_questions'] = questions_data.get('questions', [])
-        
-        # Load evidence (may have number prefix like 1_evidence.json or just evidence.json)
-        evidence_file = None
-        for file in guardrails_dir.glob('*evidence.json'):
-            if file.is_file():
-                evidence_file = file
-                break
-        
-        if evidence_file and evidence_file.exists():
-            evidence_data = read_json_file(evidence_file)
-            instructions['guardrails']['evidence'] = evidence_data.get('evidence', [])
-        
-        return instructions
+
     
     def inject_gather_context_instructions(self) -> Dict[str, Any]:
         rendered_dir = (
@@ -258,38 +228,6 @@ class GatherContextAction(BaseAction):
         }
 
             
-        except FileNotFoundError:
-            guardrails_dir = None
-        
-        instructions = {'guardrails': {}}
-        
-        if not guardrails_dir:
-            return instructions
-        
-        # Load questions (may have number prefix like 1_key_questions.json or just key_questions.json)
-        questions_file = None
-        for file in guardrails_dir.glob('*key_questions.json'):
-            if file.is_file():
-                questions_file = file
-                break
-        
-        if questions_file and questions_file.exists():
-            questions_data = read_json_file(questions_file)
-            instructions['guardrails']['key_questions'] = questions_data.get('questions', [])
-        
-        # Load evidence (may have number prefix like 1_evidence.json or just evidence.json)
-        evidence_file = None
-        for file in guardrails_dir.glob('*evidence.json'):
-            if file.is_file():
-                evidence_file = file
-                break
-        
-        if evidence_file and evidence_file.exists():
-            evidence_data = read_json_file(evidence_file)
-            instructions['guardrails']['evidence'] = evidence_data.get('evidence', [])
-        
-        return instructions
-    
     def inject_gather_context_instructions(self) -> Dict[str, Any]:
         rendered_dir = (
             self.workspace_root /

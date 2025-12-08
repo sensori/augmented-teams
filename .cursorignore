@@ -55,8 +55,9 @@ agile_bot/bots/character/code/logs/
 *.pyo
 *.pyd
 
-# Diagram files (draw.io XML files can be large)
-*.drawio
+# Diagram files (draw.io XML files) - KEPT INDEXED for AI access
+# NOTE: DrawIO files are intentionally NOT excluded so AI can read diagram content
+# *.drawio
 
 # ============================================================================
 # Test Output and Artifacts
@@ -74,6 +75,14 @@ agile_bot/bots/character/code/logs/
 **/test/**/synced-*.json
 **/test/**/temp-*.json
 **/test/**/extracted-*.json
+
+# Test scenario generated artifacts (keep test code, exclude generated JSON)
+**/test/**/scenarios/**/synced-*.json
+**/test/**/scenarios/**/temp_*.json
+**/test/**/scenarios/**/actual-*.json
+**/test/**/scenarios/**/expected-*.json
+**/test/**/scenarios/**/*-merge-report.json
+**/test/**/scenarios/**/*-layout.json
 
 # Backup directories
 **/* backup/

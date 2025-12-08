@@ -428,39 +428,3 @@ class Bot:
         
         # Forward to the next action
         return behavior_instance.forward_to_current_action()
-            except Exception:
-                pass
-        
-        if not current_behavior or current_behavior not in self.behaviors:
-            # Default to FIRST behavior in bot config
-            current_behavior = self.behaviors[0]
-        
-        # Get behavior instance
-        behavior_instance = getattr(self, current_behavior)
-        
-        # Mark current action as complete and transition to next
-        behavior_instance.workflow.load_state()
-        current_action = behavior_instance.workflow.current_state
-        behavior_instance.workflow.save_completed_action(current_action)
-        behavior_instance.workflow.transition_to_next()
-        
-        # Forward to the next action
-        return behavior_instance.forward_to_current_action()
-            except Exception:
-                pass
-        
-        if not current_behavior or current_behavior not in self.behaviors:
-            # Default to FIRST behavior in bot config
-            current_behavior = self.behaviors[0]
-        
-        # Get behavior instance
-        behavior_instance = getattr(self, current_behavior)
-        
-        # Mark current action as complete and transition to next
-        behavior_instance.workflow.load_state()
-        current_action = behavior_instance.workflow.current_state
-        behavior_instance.workflow.save_completed_action(current_action)
-        behavior_instance.workflow.transition_to_next()
-        
-        # Forward to the next action
-        return behavior_instance.forward_to_current_action()
