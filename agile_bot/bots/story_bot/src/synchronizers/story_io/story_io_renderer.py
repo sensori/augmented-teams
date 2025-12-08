@@ -245,7 +245,7 @@ class DrawIORenderer:
         
         # render_outline always renders in outline mode (no acceptance criteria)
         # Use render_exploration() if you want acceptance criteria
-            is_exploration = False
+        is_exploration = False
         
         xml_output = self._generate_diagram(story_graph, layout_data, is_increments=False, is_exploration=is_exploration)
         

@@ -176,8 +176,8 @@ class TestProceedToDecidePlanning:
 # STORY: Inject Guardrails as Part of Clarify Requirements
 # ============================================================================
 
-class TestInjectGuardrailsAsPartOfClarifyRequirements:
-    """Story: Inject Guardrails as Part of Clarify Requirements - Tests guardrail injection."""
+class TestProvideGuardrailsForClarifyingRequirements:
+    """Story: Provide Guardrails for Clarifying Requirements - Tests guardrail injection."""
 
     def test_action_injects_questions_and_evidence(self, workspace_root):
         bot_name = 'test_bot'

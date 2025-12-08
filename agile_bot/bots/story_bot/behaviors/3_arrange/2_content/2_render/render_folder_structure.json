@@ -1,0 +1,9 @@
+{
+  "name": "render_folder_structure",
+  "type": "synchronizer",
+  "path": "docs/stories",
+  "input": "story-graph.json",
+  "synchronizer": "synchronizers.folder_structure.FolderStructureSynchronizer",
+  "output": "map",
+  "instructions": "Render folder structure from story-graph.json. Creates map/ directory with epic and sub-epic folders matching story graph hierarchy with emoji prefixes (🎯 for epics, ⚙️ for sub_epics). Execute: python -c \"from agile_bot.bots.story_bot.src.synchronizers.folder_structure import FolderStructureSynchronizer; from pathlib import Path; sync = FolderStructureSynchronizer(); result = sync.render('{project_path}/docs/stories/story-graph.json', '{project_path}/docs/stories'); print(f'Created {result[\\\"summary\\\"][\\\"total_folders\\\"]} folders in {result[\\\"output_path\\\"]}')\""
+}
