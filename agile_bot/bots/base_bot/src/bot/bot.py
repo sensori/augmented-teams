@@ -33,6 +33,46 @@ def load_workflow_states_and_transitions(bot_directory: Path) -> Tuple[List[str]
             {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
         ]
         return states, transitions
+    
+    # Load workflow actions from action_config.json files
+    workflow_actions = []
+    for action_folder in base_actions_dir.iterdir():
+        if not action_folder.is_dir():
+            continue
+        
+        action_config_file = action_folder / 'action_config.json'
+        if not action_config_file.exists():
+            continue
+        
+        try:
+            config_data = read_json_file(action_config_file)
+            if config_data.get('workflow', False):
+                workflow_actions.append({
+                    'name': config_data.get('name', action_folder.name),
+                    'order': config_data.get('order', 999),
+                    'next_action': config_data.get('next_action')
+                })
+        except Exception as e:
+            logger.warning(f'Failed to load action config from {action_config_file}: {e}')
+            continue
+    
+    # Sort by order
+    workflow_actions.sort(key=lambda x: x['order'])
+    
+    # Build states list
+    states = [action['name'] for action in workflow_actions]
+    
+    # Build transitions list
+    transitions = []
+    for action in workflow_actions:
+        if action['next_action']:
+            transitions.append({
+                'trigger': 'proceed',
+                'source': action['name'],
+                'dest': action['next_action']
+            })
+    
+    return states, transitions
 
 
 
@@ -172,6 +212,10 @@ class Behavior:
         
         
         data = action.execute(parameters)
+        
+        # Ensure data is a dict (action.execute should return a dict)
+        if data is None:
+            data = {}
   
         
         # Add working_dir to response so user knows where files are being created
@@ -185,6 +229,12 @@ class Behavior:
             data=data
         )
     
+    
+    def initialize_workspace(self, parameters: Dict[str, Any] = None) -> BotResult:
+        """Initialize workspace - currently just forwards to gather_context."""
+        # For now, initialize_workspace just forwards to gather_context
+        # In the future, this could have its own InitializeWorkspaceAction
+        return self.gather_context(parameters)
     
     def gather_context(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
@@ -213,8 +263,19 @@ class Behavior:
         self.workflow.load_state()
         
         current_action = self.workflow.current_state
+        if not current_action:
+            # Default to first action if no current state
+            current_action = 'gather_context'
+            self.workflow.machine.set_state(current_action)
+        
+        if not hasattr(self, current_action):
+            raise AttributeError(f"Behavior {self.name} does not have action method '{current_action}'")
+        
         action_method = getattr(self, current_action)
         result = action_method(parameters=parameters)
+        
+        if result is None:
+            raise RuntimeError(f"Action method '{current_action}' returned None instead of BotResult")
         
         # Save state after action completion
         if not (result.data and result.data.get('requires_confirmation')):

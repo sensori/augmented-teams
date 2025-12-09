@@ -32,20 +32,42 @@ class TriggerTestSetup:
         self.workspace_directory = workspace_directory
         self.bot_name = bot_name
         self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'tests']
-        self.actions = ['initialize_project', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+        self.actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
         self.bot_config = None
-        self.project_dir = None
     
     def setup_bot(self):
         """Set up bot with all behaviors and actions."""
-        self.bot_config, self.project_dir = setup_bot_for_testing(
-            self.bot_directory, self.bot_name, self.behaviors, project_dir=None
+        # workspace_root is bot_directory's parent.parent.parent (tmp_path)
+        workspace_root = self.bot_directory.parent.parent.parent
+        self.bot_config = setup_bot_for_testing(
+            workspace_root, self.bot_name, self.behaviors
         )
+        # Ensure behavior folders exist
+        behaviors_dir = workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'behaviors'
+        for behavior in self.behaviors:
+            behavior_dir = behaviors_dir / behavior
+            behavior_dir.mkdir(parents=True, exist_ok=True)
+            # Create knowledge graph folder for build_knowledge action
+            kg_dir = behavior_dir / 'content' / 'knowledge_graph'
+            kg_dir.mkdir(parents=True, exist_ok=True)
+            # Create a dummy config file with template field pointing to a template file
+            template_filename = 'test_template.json'
+            kg_config = {'template': template_filename}
+            (kg_dir / 'build_story_graph_outline.json').write_text(
+                json.dumps(kg_config), encoding='utf-8'
+            )
+            # Create the actual template file (JSON format)
+            template_content = {'instructions': ['Test knowledge graph template']}
+            (kg_dir / template_filename).write_text(
+                json.dumps(template_content), encoding='utf-8'
+            )
         return self
     
     def add_bot_triggers(self, patterns: list):
         """Add bot-level trigger words."""
-        create_bot_trigger_words(self.bot_directory, self.bot_name, patterns)
+        # workspace_root is bot_directory's parent.parent.parent (tmp_path)
+        workspace_root = self.bot_directory.parent.parent.parent
+        create_bot_trigger_words(workspace_root, self.bot_name, patterns)
         return self
     
     def add_behavior_triggers(self, behavior_patterns: dict):
@@ -54,13 +76,17 @@ class TriggerTestSetup:
         Args:
             behavior_patterns: Dict mapping behavior -> trigger patterns list
         """
+        # workspace_root is bot_directory's parent.parent.parent (tmp_path)
+        workspace_root = self.bot_directory.parent.parent.parent
         for behavior, patterns in behavior_patterns.items():
-            create_behavior_trigger_words(self.bot_directory, self.bot_name, behavior, patterns)
+            create_behavior_trigger_words(workspace_root, self.bot_name, behavior, patterns)
         return self
     
     def add_action_triggers(self, behavior: str, action: str, patterns: list):
         """Add action-level trigger words."""
-        create_action_trigger_words(self.bot_directory, self.bot_name, behavior, action, patterns)
+        # workspace_root is bot_directory's parent.parent.parent (tmp_path)
+        workspace_root = self.bot_directory.parent.parent.parent
+        create_action_trigger_words(workspace_root, self.bot_name, behavior, action, patterns)
         return self
     
     def add_all_action_triggers(self, template: str):
@@ -78,7 +104,7 @@ class TriggerTestSetup:
     def create_workflow_state(self, current_behavior: str, current_action: str):
         """Create workflow state file."""
         return create_workflow_state_file(
-            self.project_dir,
+            self.workspace_directory,
             self.bot_name,
             current_behavior,
             current_action,
@@ -110,7 +136,9 @@ class TriggerRouterTestHelper:
         from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
         
         # Create fresh instances to avoid state leakage between test iterations
-        router = TriggerRouter(bot_directory=self.bot_directory, bot_name=self.bot_name)
+        # TriggerRouter needs workspace_root - use workspace_directory's parent (tmp_path)
+        workspace_root = self.workspace_directory.parent
+        router = TriggerRouter(workspace_root=workspace_root, bot_name=self.bot_name)
         route = router.match_trigger(
             message=trigger_message,
             current_behavior=current_behavior,
@@ -120,11 +148,14 @@ class TriggerRouterTestHelper:
         if route is None:
             return None, None
         
+        # Bootstrap environment before creating CLI (needs BOT_DIRECTORY)
+        from agile_bot.bots.base_bot.test.conftest import bootstrap_env
+        bootstrap_env(self.bot_directory, self.workspace_directory)
+        
         # Create fresh CLI instance for each execution
         cli = BaseBotCli(
             bot_name=self.bot_name,
-            bot_config_path=self.bot_config,
-            bot_directory=self.bot_directory
+            bot_config_path=self.bot_config
         )
         
         if route.get('action_name') == 'close_current_action':
@@ -173,7 +204,7 @@ def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior
 def create_base_action_instructions(workspace: Path, action: str) -> Path:
     """Helper: Create base action instructions file with numbered prefix."""
     action_prefixes = {
-        'initialize_project': '1_initialize_project',
+        'initialize_workspace': '1_initialize_workspace',
         'gather_context': '2_gather_context',
         'decide_planning_criteria': '3_decide_planning_criteria',
         'build_knowledge': '4_build_knowledge',
@@ -192,25 +223,29 @@ def create_base_action_instructions(workspace: Path, action: str) -> Path:
     instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
     return instructions_file
 
-def setup_bot_for_testing(workspace: Path, bot_name: str, behaviors: list, project_dir: Path = None):
-    """Helper: Set up complete bot structure for testing."""
+def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
+    """Helper: Set up complete bot structure for testing.
+    
+    Args:
+        workspace_root: Root workspace directory (tmp_path)
+        bot_name: Name of the bot
+        behaviors: List of behavior names
+    """
+    # Construct bot directory path
+    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+    
     # Create bot config
-    bot_config = create_bot_config_file(workspace, bot_name, behaviors)
+    bot_config = create_bot_config_file(bot_dir, bot_name, behaviors)
     
     # Create base actions structure
-    create_base_actions_structure(workspace)
-    
-    # Create project directory and current_project.json
-    if project_dir is None:
-        project_dir = create_project_dir(workspace)
-    create_current_project_file(workspace, bot_name, str(project_dir))
+    create_base_actions_structure(workspace_root)
     
     # Create base action instructions
-    for action in ['initialize_project', 'gather_context', 'decide_planning_criteria', 
+    for action in ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
                    'build_knowledge', 'render_output', 'validate_rules']:
-        create_base_action_instructions(workspace, action)
+        create_base_action_instructions(workspace_root, action)
     
-    return bot_config, project_dir
+    return bot_config
 
 def create_bot_trigger_words(workspace: Path, bot_name: str, patterns: list) -> Path:
     """Helper: Create bot-level trigger words file."""
@@ -273,7 +308,7 @@ class TestDetectTriggerWordsThroughExtension:
             'ready to work on stories'
         ])
         
-        helper = TriggerRouterTestHelper(workspace_root, setup.bot_name, setup.bot_config)
+        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
         trigger_message = 'lets work on stories'
         
         # Act & Assert: Test all behavior/action combinations
@@ -290,8 +325,8 @@ class TestDetectTriggerWordsThroughExtension:
                 # Verify route is correct
                 helper.assert_route(route, setup.bot_name, current_behavior, current_action, 'bot_only')
                 
-                # Verify CLI executed - note initialize_project auto-advances to gather_context
-                expected_action = 'gather_context' if current_action == 'initialize_project' else current_action
+                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
+                expected_action = 'gather_context' if current_action == 'initialize_workspace' else current_action
                 helper.assert_cli_result(result, current_behavior, expected_action)
 
     def test_trigger_bot_and_behavior_no_action_specified(self, bot_directory, workspace_directory):
@@ -320,7 +355,7 @@ class TestDetectTriggerWordsThroughExtension:
             {behavior: [trigger] for behavior, trigger in behavior_triggers.items()}
         )
         
-        helper = TriggerRouterTestHelper(workspace_root, setup.bot_name, setup.bot_config)
+        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
         
         # Act & Assert: Test all behavior/action combinations
         for behavior, trigger_message in behavior_triggers.items():
@@ -336,8 +371,8 @@ class TestDetectTriggerWordsThroughExtension:
                 # Verify route is correct
                 helper.assert_route(route, setup.bot_name, behavior, current_action, 'bot_and_behavior')
                 
-                # Verify CLI executed - note initialize_project auto-advances to gather_context
-                expected_action = 'gather_context' if current_action == 'initialize_project' else current_action
+                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
+                expected_action = 'gather_context' if current_action == 'initialize_workspace' else current_action
                 helper.assert_cli_result(result, behavior, expected_action)
 
     def test_trigger_bot_behavior_and_action_explicitly(self, bot_directory, workspace_directory):
@@ -351,7 +386,7 @@ class TestDetectTriggerWordsThroughExtension:
         """
         # Arrange: Set up bot with action-level triggers for all combinations
         action_trigger_templates = {
-            'initialize_project': 'set up the project area for {behavior}',
+            'initialize_workspace': 'set up the workspace area for {behavior}',
             'gather_context': 'gather context for {behavior}',
             'decide_planning_criteria': 'decide planning criteria for {behavior}',
             'build_knowledge': 'build the knowledge base for {behavior}',
@@ -366,7 +401,7 @@ class TestDetectTriggerWordsThroughExtension:
                 trigger = template.format(behavior=behavior)
                 setup.add_action_triggers(behavior, action, [trigger])
         
-        helper = TriggerRouterTestHelper(workspace_root, setup.bot_name, setup.bot_config)
+        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
         
         # Act & Assert: Test all behavior/action combinations
         for behavior in setup.behaviors:
@@ -382,8 +417,8 @@ class TestDetectTriggerWordsThroughExtension:
                 # Verify route is correct
                 helper.assert_route(route, setup.bot_name, behavior, action, 'bot_behavior_action')
                 
-                # Verify CLI executed - note initialize_project auto-advances to gather_context
-                expected_action = 'gather_context' if action == 'initialize_project' else action
+                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
+                expected_action = 'gather_context' if action == 'initialize_workspace' else action
                 helper.assert_cli_result(result, behavior, expected_action)
     
     def test_trigger_close_current_action(self, bot_directory, workspace_directory):
@@ -403,7 +438,7 @@ class TestDetectTriggerWordsThroughExtension:
             'continue to next action'
         ])
         
-        helper = TriggerRouterTestHelper(workspace_root, setup.bot_name, setup.bot_config)
+        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
         trigger_message = 'done with this step'
         
         # Act & Assert: Test close for all behavior/action combinations

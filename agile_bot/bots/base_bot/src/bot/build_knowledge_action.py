@@ -89,8 +89,7 @@ class BuildKnowledgeAction(BaseAction):
         validate_action = ValidateRulesAction(
             bot_name=self.bot_name,
             behavior=self.behavior,
-                bot_directory=self.bot_directory,
-            working_dir=self.working_dir
+            bot_directory=self.bot_directory
         )
         
         # Use existing method to load both common and behavior-specific rules
