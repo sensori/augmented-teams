@@ -43,7 +43,7 @@ class MCPServer:
             # Try to find the split point between behavior and action
             # Common actions: gather_context, decide_planning_criteria, build_knowledge, etc.
             action_keywords = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 
-                              'render_output', 'validate_rules', 'correct_bot']
+                              'render_output', 'validate_rules']
             
             behavior = None
             action = None

@@ -20,7 +20,6 @@
     "   **Name increments after the quality improvements they add (e.g., 'Automated Payment Processing', 'Dynamic Shipping Calculation', 'Admin Interface for Orders').**",
     "5. Render Output - Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json, prioritization: render increment backlog",
     "6. Validate Rules - Follow agile_bot/bots/base_bot/base_actions/7_validate_rules/instructions.json, prioritization: validate vertical slices",
-    "7. Correct Bot - Follow agile_bot/bots/base_bot/base_actions/6_correct_bot/instructions.json, prioritization: correct increment prioritization",
     "",
     "**Workflow Control:**",
     "- **STOP for human feedback** when told to stop or when action requires user input",

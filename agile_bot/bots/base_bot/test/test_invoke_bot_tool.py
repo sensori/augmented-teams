@@ -36,7 +36,7 @@ def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> P
 
 def create_base_instructions(workspace: Path):
     """Helper: Create base instructions for all actions."""
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules', 'correct_bot']
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
     for action in actions:
         action_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action
         action_dir.mkdir(parents=True, exist_ok=True)
@@ -99,7 +99,6 @@ def create_base_action_instructions(workspace: Path, action: str) -> Path:
         'decide_planning_criteria': '3_decide_planning_criteria',
         'build_knowledge': '4_build_knowledge',
         'render_output': '5_render_output',
-        'correct_bot': 'correct_bot',
         'validate_rules': '7_validate_rules'
     }
     
@@ -159,7 +158,7 @@ class TestBotToolInvocation:
         create_base_action_instructions(workspace_root, 'build_knowledge')
         
         # Create base actions structure with action_config.json (needed for workflow)
-        from conftest import create_base_actions_structure
+        from agile_bot.bots.base_bot.test.conftest import create_base_actions_structure
         create_base_actions_structure(workspace_root)
         
         # Create current_project and workflow state so action can execute

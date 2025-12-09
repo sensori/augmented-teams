@@ -40,6 +40,7 @@ class CliGenerator:
             - 'cli_script': Path to shell script wrapper (bash)
             - 'cli_powershell': Path to PowerShell script wrapper (Windows)
             - 'cursor_commands': Dict mapping command names to cursor command file paths
+            - 'registry': Path to updated bot registry
             
         Raises:
             FileNotFoundError: If bot config does not exist
@@ -71,11 +72,15 @@ class CliGenerator:
         # Generate cursor command files (use Python script directly)
         cursor_commands = self._generate_cursor_commands(cli_python_path)
         
+        # Update bot registry
+        registry_path = self._update_bot_registry(cli_python_path)
+        
         return {
             'cli_python': cli_python_path,
             'cli_script': cli_script_path,
             'cli_powershell': cli_powershell_path,
-            'cursor_commands': cursor_commands
+            'cursor_commands': cursor_commands,
+            'registry': registry_path
         }
     
     def _generate_python_cli_script(self) -> Path:
@@ -244,4 +249,65 @@ python "$SCRIPT_DIR\\src\\{self.bot_name}_cli.py" $args
         cli_script_str = str(rel_cli_script_path).replace('\\', '/')
         
         return cli.generate_cursor_commands(commands_dir, Path(cli_script_str))
+    
+    def _update_bot_registry(self, cli_script_path: Path) -> Path:
+        """Update bot registry with this bot's information.
+        
+        Args:
+            cli_script_path: Path to the bot's CLI script
+            
+        Returns:
+            Path to the registry file
+        """
+        registry_path = self.workspace_root / 'agile_bot' / 'bots' / 'registry.json'
+        
+        # Load existing registry or create new one
+        if registry_path.exists():
+            try:
+                registry = read_json_file(registry_path)
+            except (json.JSONDecodeError, FileNotFoundError):
+                registry = {}
+        else:
+            registry = {}
+            registry_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Load bot-level trigger patterns
+        trigger_patterns = self._load_bot_trigger_patterns()
+        
+        # Compute relative CLI path from workspace root
+        if cli_script_path.is_absolute():
+            rel_cli_path = str(cli_script_path.relative_to(self.workspace_root))
+        else:
+            rel_cli_path = str(self.bot_location / 'src' / cli_script_path.name)
+        
+        # Update registry entry for this bot
+        registry[self.bot_name] = {
+            'trigger_patterns': trigger_patterns,
+            'cli_path': rel_cli_path.replace('\\', '/')
+        }
+        
+        # Write updated registry
+        registry_path.write_text(
+            json.dumps(registry, indent=2, sort_keys=True),
+            encoding='utf-8'
+        )
+        
+        return registry_path
+    
+    def _load_bot_trigger_patterns(self) -> list:
+        """Load bot-level trigger patterns from trigger_words.json.
+        
+        Returns:
+            List of trigger patterns, or empty list if file doesn't exist
+        """
+        trigger_file = self.workspace_root / self.bot_location / 'trigger_words.json'
+        
+        if not trigger_file.exists():
+            return []
+        
+        try:
+            trigger_data = read_json_file(trigger_file)
+            return trigger_data.get('patterns', [])
+        except (json.JSONDecodeError, FileNotFoundError):
+            return []
 

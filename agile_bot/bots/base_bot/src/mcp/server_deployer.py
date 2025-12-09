@@ -95,8 +95,7 @@ class ServerDeployer:
             'decide_planning_criteria',
             'build_knowledge',
             'render_output',
-            'validate_rules',
-            'correct_bot'
+            'validate_rules'
         ]
         
         for behavior in behaviors:

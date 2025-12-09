@@ -143,8 +143,7 @@ class BaseBotCli:
             'decide_planning_criteria': '3_decide_planning_criteria',
             'build_knowledge': '4_build_knowledge',
             'render_output': '5_render_output',
-            'validate_rules': '7_validate_rules',
-            'correct_bot': '6_correct_bot'
+            'validate_rules': '7_validate_rules'
         }
         
         action_folder = action_prefixes.get(action_name, action_name)

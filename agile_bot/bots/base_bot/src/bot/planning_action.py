@@ -34,7 +34,12 @@ class PlanningAction(BaseAction):
                 self.bot_name,
                 self.behavior
             )
-            planning_dir = behavior_folder / 'guardrails' / 'planning'
+            planning_dir = None
+            for guardrails_folder in behavior_folder.glob('*guardrails'):
+                candidate = guardrails_folder / 'planning'
+                if candidate.exists():
+                    planning_dir = candidate
+                    break
         except FileNotFoundError:
             planning_dir = None
         
@@ -47,7 +52,7 @@ class PlanningAction(BaseAction):
         assumptions_file = planning_dir / 'typical_assumptions.json'
         if assumptions_file.exists():
             assumptions_data = read_json_file(assumptions_file)
-            instructions['assumptions'] = assumptions_data.get('assumptions', [])
+            instructions['assumptions'] = assumptions_data.get('assumptions') or assumptions_data.get('typical_assumptions', [])
         else:
             instructions['assumptions'] = []
         

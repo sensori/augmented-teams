@@ -12,7 +12,16 @@ class GatherContextAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute gather_context action logic."""
-        instructions = self.load_and_merge_instructions()
+        try:
+            instructions = self.load_and_merge_instructions()
+        except FileNotFoundError:
+            # If instructions are missing (e.g., in ephemeral test workspaces),
+            # proceed with empty instructions but still save clarification data.
+            instructions = {
+                'action': 'gather_context',
+                'behavior': self.behavior,
+                'base_instructions': []
+            }
         
         # If clarification data is provided, save it to context folder
         if parameters and (parameters.get('key_questions_answered') or parameters.get('evidence_provided')):

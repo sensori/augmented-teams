@@ -1,0 +1,220 @@
+{
+  "project": "Foundry VTT Mob Minion System",
+  "domain": "Virtual Tabletop Game Management",
+  "increments": [
+    {
+      "id": "increment_1",
+      "name": "Core Mob Grouping",
+      "description": "Enable GMs to group minion tokens into mobs and execute unified actions",
+      "priority": "must_have",
+      "stories": [
+        {
+          "id": "story_1_1",
+          "title": "Create Mob from Selected Minions",
+          "as_a": "Game Master",
+          "i_want": "to select multiple minion tokens and group them into a mob",
+          "so_that": "I can control them as a single unit instead of clicking each one individually",
+          "acceptance_criteria": [
+            "GM can select multiple minion tokens in Foundry",
+            "GM can create a mob from selected tokens",
+            "Mob is persisted and visible in mob management UI",
+            "All tokens in the mob are marked as belonging to that mob"
+          ]
+        },
+        {
+          "id": "story_1_2",
+          "title": "Execute Unified Action on Mob",
+          "as_a": "Game Master",
+          "i_want": "to click any minion token in a mob and have all members perform the same action",
+          "so_that": "I don't have to manually command each minion separately during combat",
+          "acceptance_criteria": [
+            "GM clicks any token in the mob",
+            "Action selection interface appears",
+            "When action is selected, all mob members execute the same action",
+            "Actions complete successfully for all valid targets"
+          ]
+        },
+        {
+          "id": "story_1_3",
+          "title": "Edit Mob Membership",
+          "as_a": "Game Master",
+          "i_want": "to add or remove minions from an existing mob",
+          "so_that": "I can adjust mob composition as the encounter evolves",
+          "acceptance_criteria": [
+            "GM can access mob editing interface",
+            "GM can add new minions to existing mob",
+            "GM can remove minions from mob",
+            "Changes are immediately reflected in mob behavior"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "increment_2",
+      "name": "Strategy-Based Target Selection",
+      "description": "Enable mobs to automatically select targets based on combat strategies",
+      "priority": "should_have",
+      "stories": [
+        {
+          "id": "story_2_1",
+          "title": "Assign Strategy to Mob",
+          "as_a": "Game Master",
+          "i_want": "to select a combat strategy for a mob (attack strongest, attack weakest, attack most damaged, defend leader)",
+          "so_that": "the mob automatically selects appropriate targets without manual selection",
+          "acceptance_criteria": [
+            "GM can access strategy selection UI for a mob",
+            "Available strategies are displayed (attack strongest, weakest, most damaged, defend leader)",
+            "GM can assign a strategy to the mob",
+            "Strategy is persisted with the mob"
+          ]
+        },
+        {
+          "id": "story_2_2",
+          "title": "Attack Strongest Target Strategy",
+          "as_a": "Game Master",
+          "i_want": "mob with 'attack strongest' strategy to automatically target the most powerful enemy",
+          "so_that": "the mob focuses fire on dangerous threats",
+          "acceptance_criteria": [
+            "Strategy identifies strongest target based on power level/stats",
+            "All mob members attack the identified target",
+            "Target selection updates if strongest target changes",
+            "Strategy works correctly in Foundry combat system"
+          ]
+        },
+        {
+          "id": "story_2_3",
+          "title": "Attack Weakest Target Strategy",
+          "as_a": "Game Master",
+          "i_want": "mob with 'attack weakest' strategy to automatically target the most vulnerable enemy",
+          "so_that": "the mob eliminates easy targets quickly",
+          "acceptance_criteria": [
+            "Strategy identifies weakest target based on current health/power",
+            "All mob members attack the identified target",
+            "Target selection updates if weakest target changes",
+            "Strategy works correctly in Foundry combat system"
+          ]
+        },
+        {
+          "id": "story_2_4",
+          "title": "Attack Most Damaged Strategy",
+          "as_a": "Game Master",
+          "i_want": "mob with 'attack most damaged' strategy to automatically target the most injured enemy",
+          "so_that": "the mob finishes off wounded targets",
+          "acceptance_criteria": [
+            "Strategy identifies most damaged target based on health/damage taken",
+            "All mob members attack the identified target",
+            "Target selection updates as damage changes",
+            "Strategy works correctly in Foundry combat system"
+          ]
+        },
+        {
+          "id": "story_2_5",
+          "title": "Defend Leader Strategy",
+          "as_a": "Game Master",
+          "i_want": "mob with 'defend leader' strategy to protect a designated leader",
+          "so_that": "the mob acts as bodyguards",
+          "acceptance_criteria": [
+            "GM can designate a leader for the mob",
+            "Mob members position near leader",
+            "Mob attacks threats targeting the leader",
+            "Strategy works correctly in Foundry combat system"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "increment_3",
+      "name": "Combat Action Execution",
+      "description": "Handle range/melee attacks and movement within Foundry VTT combat system",
+      "priority": "must_have",
+      "stories": [
+        {
+          "id": "story_3_1",
+          "title": "Melee Attack Execution",
+          "as_a": "Game Master",
+          "i_want": "mob members to move to target and execute melee attacks",
+          "so_that": "close-range combat works correctly",
+          "acceptance_criteria": [
+            "System detects when target requires melee range",
+            "Mob members move to melee range of target",
+            "Melee attacks are executed through Foundry combat system",
+            "Attack results are displayed correctly"
+          ]
+        },
+        {
+          "id": "story_3_2",
+          "title": "Ranged Attack Execution",
+          "as_a": "Game Master",
+          "i_want": "mob members to execute ranged attacks without moving if within range",
+          "so_that": "ranged combat works efficiently",
+          "acceptance_criteria": [
+            "System detects when target is within ranged attack range",
+            "Mob members execute ranged attacks without unnecessary movement",
+            "Range limitations are respected",
+            "Attack results are displayed correctly"
+          ]
+        },
+        {
+          "id": "story_3_3",
+          "title": "Handle Out of Range Scenarios",
+          "as_a": "Game Master",
+          "i_want": "to be notified when mob members cannot reach their targets",
+          "so_that": "I understand why actions fail",
+          "acceptance_criteria": [
+            "System detects when targets are out of range",
+            "Clear notification is displayed to GM",
+            "Mob members that can reach target still execute actions",
+            "No errors occur for unreachable targets"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "increment_4",
+      "name": "Mob Templates and Spawning",
+      "description": "Create reusable mob templates for quick spawning",
+      "priority": "nice_to_have",
+      "stories": [
+        {
+          "id": "story_4_1",
+          "title": "Create Mob Template",
+          "as_a": "Game Master",
+          "i_want": "to save a mob configuration as a reusable template",
+          "so_that": "I can quickly spawn similar mobs in future encounters",
+          "acceptance_criteria": [
+            "GM can access template creation interface",
+            "GM can define mob composition (minion types, count, strategy)",
+            "Template is saved with descriptive name",
+            "Template appears in available templates list"
+          ]
+        },
+        {
+          "id": "story_4_2",
+          "title": "Spawn Mob from Template",
+          "as_a": "Game Master",
+          "i_want": "to spawn a mob from a saved template",
+          "so_that": "I can quickly set up encounters",
+          "acceptance_criteria": [
+            "GM can browse available mob templates",
+            "GM can select a template and specify spawn location",
+            "Mob is created with all minions and configured strategy",
+            "Spawned mob is immediately usable"
+          ]
+        },
+        {
+          "id": "story_4_3",
+          "title": "Edit and Update Templates",
+          "as_a": "Game Master",
+          "i_want": "to modify existing mob templates",
+          "so_that": "I can improve templates based on gameplay experience",
+          "acceptance_criteria": [
+            "GM can access template editing interface",
+            "GM can modify template composition and strategy",
+            "Changes are saved to template",
+            "Existing mobs spawned from template are not affected"
+          ]
+        }
+      ]
+    }
+  ]
+}

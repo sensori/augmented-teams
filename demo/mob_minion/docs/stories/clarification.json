@@ -1,0 +1,27 @@
+{
+  "shape": {
+    "key_questions": {
+      "user_types": "Game Masters (GMs) running RPG sessions in Foundry VTT. These are operational users who need to manage multiple minion tokens efficiently during combat encounters.",
+      "key_goals_behaviors": "Goal: Control multiple minion tokens as a unified group (mob) without clicking each token individually. Behaviors: Group minions into mobs, assign combat strategies (attack strongest/weakest/most damaged, defend leader), execute coordinated actions. Decisions: Choosing which strategy to apply to a mob, selecting targets based on strategy rules.",
+      "primary_users": "Game Masters (GMs) using Foundry Virtual Tabletop system for RPG sessions.",
+      "first_user_action": "Create a mob by grouping existing minion tokens together so they can be controlled as a single unit.",
+      "problems_eliminated": "Eliminates the need to click on every individual minion token to perform the same action. Currently, GMs must manually control each minion separately, which is time-consuming and disrupts game flow during combat.",
+      "user_struggles": "During combat encounters when managing multiple minions - having to individually click and command each minion token slows down gameplay and creates repetitive manual work.",
+      "system_interactions": "Foundry Virtual Tabletop (VTT) system - specifically its actor/token management system, targeting system, and combat/action resolution mechanics.",
+      "integration_points": "Token selection and grouping within Foundry. Strategy selection interface. Target selection based on strategy rules (power level, damage state, etc.). Combat action execution (range/melee attacks, movement). Actor/token data access (stats, position, status).",
+      "business_domain": "Virtual Tabletop (VTT) Game Management - specifically minion/mob combat coordination within Foundry VTT.",
+      "core_concepts": "Minion: Individual token/actor in the game. Mob: Collection of minions that act together. Strategy: Attack/defense pattern (attack strongest, attack weakest, defend leader, attack most damaged). Target: Entity selected based on strategy rules. Action: Combat operations (melee attack, ranged attack, movement). Relationships: Minions grouped into Mobs → Mobs use Strategies → Strategies select Targets → Actions executed on Targets.",
+      "sub_domains": "Mob Management: Creating, editing, grouping minions into mobs. Strategy Selection: Choosing and applying combat strategies. Target Selection: Identifying targets based on strategy criteria. Combat Execution: Performing attacks (ranged/melee), movement, fleeing.",
+      "domain_boundaries": "Mob Management boundary: Handles mob lifecycle (create, edit, spawn from templates). Strategy Application boundary: Translates strategy rules into target selection. Combat Execution boundary: Interfaces with Foundry's combat system for actual action resolution.",
+      "domain_events": "Mob Created, Minion Added to Mob, Strategy Selected, Target Identified, Combat Action Executed, Mob Spawned from Template.",
+      "business_rules": "All minions in a mob must perform the same action. Strategies determine target selection automatically. Must work within Foundry VTT system constraints. Range vs melee attacks require different positioning. One click on any mob member triggers action for entire mob.",
+      "domain_language": "Minion: Low-level NPCs/enemies. Mob: Group of minions acting as one. Token: Visual representation of actor on game board. Actor: Character/NPC entity with stats. Strategy: Combat behavior pattern. VTT: Virtual Tabletop. GM: Game Master. Foundry: The Foundry Virtual Tabletop platform."
+    },
+    "evidence": {
+      "user_research": "Input.txt contains user's description of needs and workflow",
+      "similar_systems": "Reference to existing Foundry VTT functionality",
+      "technical_specifications": "To be gathered - Foundry API details, module structure requirements",
+      "existing_system_documentation": "To be gathered - Foundry VTT API documentation, existing module examples"
+    }
+  }
+}

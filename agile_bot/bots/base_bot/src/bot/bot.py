@@ -9,24 +9,22 @@ logger = logging.getLogger(__name__)
 
 
 def load_workflow_states_and_transitions(workspace_root: Path) -> Tuple[List[str], List[Dict]]:
-
     base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-    
+
     # Fallback if path doesn't exist (for tests with temp workspaces)
     if not base_actions_dir.exists():
         # Use hardcoded defaults
         states = ['initialize_project', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 
-                  'render_output', 'validate_rules', 'correct_bot']
+                  'render_output', 'validate_rules']
         transitions = [
             {'trigger': 'proceed', 'source': 'initialize_project', 'dest': 'gather_context'},
             {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
             {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
             {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
             {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
-            {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'correct_bot'},
         ]
         return states, transitions
-    
+
     # Load all action configs
     actions = []
     for action_dir in base_actions_dir.iterdir():
@@ -203,6 +201,7 @@ class Behavior:
         action.track_activity_on_start()
         
         # Check if this is a confirmation response from user
+        action_name = 'initialize_project'
         if parameters.get('confirm'):
             # User is confirming location
             project_area = parameters.get('project_area')
@@ -223,6 +222,9 @@ class Behavior:
                 self.workflow.machine.set_state('initialize_project')
             self.workflow.save_state()
             self.workflow.save_completed_action('initialize_project')
+            # Move to next action automatically after confirmation
+            self.workflow.transition_to_next()
+            action_name = self.workflow.current_state
         else:
             # Initial call - propose location and ask for confirmation
             # (project_area here is just a hint, we still ask for confirmation)
@@ -235,6 +237,8 @@ class Behavior:
                 # No confirmation needed (resuming existing project)
                 self.workflow.save_state()
                 self.workflow.save_completed_action('initialize_project')
+                self.workflow.transition_to_next()
+                action_name = self.workflow.current_state
         
         # Track activity completion
         action.track_activity_on_completion(outputs=data)
@@ -242,7 +246,7 @@ class Behavior:
         return BotResult(
             status='completed',
             behavior=self.name,
-            action='initialize_project',
+            action=action_name,
             data=data
         )
     
@@ -265,17 +269,6 @@ class Behavior:
     def validate_rules(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         return self.execute_action('validate_rules', ValidateRulesAction, parameters)
-    
-    def correct_bot(self, parameters: Dict[str, Any] = None) -> BotResult:
-        # correct_bot has no action class yet - just returns empty data
-        # Template will still handle state management and BotResult wrapping
-        class CorrectBotAction:
-            def __init__(self, bot_name, behavior, workspace_root):
-                pass
-            def execute(self, params):
-                return {}
-        
-        return self.execute_action('correct_bot', CorrectBotAction, parameters)
     
     def forward_to_current_action(self) -> BotResult:
         self.workflow.load_state()

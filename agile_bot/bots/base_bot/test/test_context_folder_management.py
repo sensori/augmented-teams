@@ -33,6 +33,29 @@ class TestInitializeProjectCreatesContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(json.dumps({'instructions': [f'{action_name} base instructions']}), encoding='utf-8')
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -79,6 +102,32 @@ class TestInputFileCopiedToContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,   
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -136,6 +185,32 @@ class TestGatherContextSavesToContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -204,6 +279,32 @@ class TestBuildKnowledgeLoadsFromContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -256,11 +357,6 @@ class TestBuildKnowledgeLoadsFromContextFolder:
         # AND: build_knowledge incorporates all context into generated content
         # (This would be verified by checking generated content includes context information)
 
-Tests verify that initialize_project creates context folder at {project_area}/docs/context/
-and all actions reference context files from correct locations:
-- Original input files: {project_area}/docs/context/
-- Generated files (clarification.json, planning.json): {project_area}/docs/stories/
-"""
 import json
 from pathlib import Path
 import pytest
@@ -288,6 +384,32 @@ class TestInitializeProjectCreatesContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -334,6 +456,32 @@ class TestInputFileCopiedToContextFolder:
             'behaviors': ['shape']
         }), encoding='utf-8')
         
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
+
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
         
@@ -390,6 +538,32 @@ class TestGatherContextSavesToContextFolder:
             'name': 'base_bot',
             'behaviors': ['shape']
         }), encoding='utf-8')
+        
+        # Ensure base_actions structure exists so gather_context can load instructions
+        base_actions_dir = workspace_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        workflow_actions = [
+            ('1_initialize_project', 'initialize_project', 1, 'gather_context'),
+            ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
+            ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
+            ('4_build_knowledge', 'build_knowledge', 4, 'render_output'),
+            ('5_render_output', 'render_output', 5, 'validate_rules'),
+            ('7_validate_rules', 'validate_rules', 7, None),
+        ]
+        for folder_name, action_name, order, next_action in workflow_actions:
+            action_dir = base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            if next_action:
+                action_config['next_action'] = next_action
+            (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+            (action_dir / 'instructions.json').write_text(
+                json.dumps({'instructions': [f'{action_name} base instructions']}),
+                encoding='utf-8'
+            )
         
         bot = Bot('base_bot', workspace_root, config_path)
         project_area = 'test-project'
@@ -511,11 +685,7 @@ class TestBuildKnowledgeLoadsFromContextFolder:
         # AND: build_knowledge incorporates all context into generated content
         # (This would be verified by checking generated content includes context information)
 
-Tests verify that initialize_project creates context folder at {project_area}/docs/context/
-and all actions reference context files from correct locations:
-- Original input files: {project_area}/docs/context/
-- Generated files (clarification.json, planning.json): {project_area}/docs/stories/
-"""
+
 import json
 from pathlib import Path
 import pytest

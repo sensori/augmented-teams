@@ -57,7 +57,7 @@ def create_base_actions_structure(workspace: Path):
 
 def create_base_instructions(workspace: Path):
     """Helper: Create base instructions for all actions."""
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules', 'correct_bot']
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
     for action in actions:
         action_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action
         action_dir.mkdir(parents=True, exist_ok=True)

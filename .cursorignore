@@ -117,7 +117,3 @@ desktop.ini
 # **/extracted-*.json
 # **/structured*.json
 
-# ============================================================================
-# Story Map Documentation (temporarily excluded)
-# ============================================================================
-agile_bot/bots/base_bot/docs/stories/map/**/*.md

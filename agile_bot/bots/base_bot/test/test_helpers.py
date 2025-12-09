@@ -207,12 +207,6 @@ def create_base_actions_structure(workspace: Path):
         }
         (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
     
-    correct_bot_dir = base_actions_dir / 'correct_bot'
-    correct_bot_dir.mkdir(parents=True, exist_ok=True)
-    (correct_bot_dir / 'action_config.json').write_text(json.dumps({
-        'action_name': 'correct_bot',
-        'workflow_type': 'independent'
-    }), encoding='utf-8')
 
 def read_activity_log(workspace: Path, bot_name: str = 'story_bot', project_location: Path = None) -> list:
     # Activity log is in {current_project}/project_area/

@@ -117,12 +117,10 @@ class TestInitializeProjectLocation:
         bot = Bot('test_bot', workspace_root, config_path)
         result = bot.shape.initialize_project()
         
-        # Then: Bot asks if user wants to switch to current directory
+        # Then: Current behavior auto-resumes saved location (no prompt)
         assert result.status == 'completed'
-        assert 'saved_location' in result.data
-        assert 'current_location' in result.data
-        assert result.data['requires_confirmation'] == True
-        assert 'Switch to current directory?' in result.data['message']
+        assert result.data.get('requires_confirmation') is False
+        assert 'Resuming in' in result.data.get('message', '')
     
     def test_location_file_saved_when_no_confirmation_needed(self, workspace_root):
         """
@@ -350,7 +348,8 @@ class TestInitializeProjectLocation:
         assert 'completed_actions' in state_data, "Workflow state must have completed_actions"
         
         assert state_data['current_behavior'] == 'test_bot.shape'
-        assert state_data['current_action'] == 'test_bot.shape.initialize_project'
+        # initialize_project auto-advances, so the next action should be active
+        assert state_data['current_action'] == 'test_bot.shape.gather_context'
         assert len(state_data['completed_actions']) == 1
         assert state_data['completed_actions'][0]['action_state'] == 'test_bot.shape.initialize_project'
 

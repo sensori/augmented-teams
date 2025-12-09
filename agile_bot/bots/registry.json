@@ -1,0 +1,13 @@
+{
+  "story_bot": {
+    "cli_path": "agile_bot/bots/story_bot/src/story_bot_cli.py",
+    "trigger_patterns": [
+      "stories",
+      "story map",
+      "requirements",
+      "specifications",
+      "user story",
+      "backlog"
+    ]
+  }
+}

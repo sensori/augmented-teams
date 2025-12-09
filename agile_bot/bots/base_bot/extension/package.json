@@ -1,0 +1,42 @@
+{
+  "name": "trigger-awareness",
+  "displayName": "Trigger Awareness",
+  "description": "Detect trigger phrases in user messages and route through TriggerRouter",
+  "version": "0.0.1",
+  "publisher": "yourname",
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/trigger-awareness.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./trigger_awareness.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cursor.onUserMessage",
+        "title": "Handle User Message (Trigger Awareness)"
+      },
+      {
+        "command": "trigger-awareness.checkStatus",
+        "title": "Check Extension Status"
+      },
+      {
+        "command": "trigger-awareness.activate",
+        "title": "Activate Trigger Awareness Extension"
+      },
+      {
+        "command": "trigger-awareness.reload",
+        "title": "Reload Trigger Awareness Extension"
+      }
+    ]
+  }
+}
+

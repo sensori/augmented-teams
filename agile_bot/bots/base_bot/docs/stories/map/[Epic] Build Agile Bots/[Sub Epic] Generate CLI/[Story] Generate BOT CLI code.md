@@ -24,6 +24,9 @@ Generate BOT CLI code functionality for the bot system.
 - **AND CLI code supports listing available bots, behaviors, and actions**
 - **AND Generated CLI code integrates with existing bot instantiation logic**
 - **AND CLI code follows same routing logic as MCP tools for consistency**
+- **AND Generator updates bot registry at agile_bot/bots/registry.json**
+- **AND Registry entry includes bot name, bot-level trigger patterns, and CLI path**
+- **AND Generator loads trigger patterns from bot's trigger_words.json file**
 
 ## Background
 

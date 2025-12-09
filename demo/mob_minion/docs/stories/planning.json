@@ -1,0 +1,24 @@
+{
+  "shape": {
+    "organizing_principle": "Feature-based decomposition by mob management capabilities",
+    "increment_strategy": "Vertical slices delivering end-to-end mob functionality",
+    "decomposition_approach": "User capability level (GM can create mob, GM can apply strategy, GM can execute attack), integration points with Foundry VTT system, technical complexity (UI, strategy engine, combat integration)",
+    "prioritization_factors": {
+      "must_have": "Core mob grouping and basic attack execution",
+      "should_have": "Strategy selection and target identification",
+      "nice_to_have": "Templates, advanced strategies, fleeing behavior"
+    },
+    "key_milestones": [
+      "Basic mob creation and unified action execution",
+      "Strategy-driven target selection",
+      "Combat integration with range/melee handling",
+      "Template-based mob spawning"
+    ]
+  }
+}
+
+
+
+
+
+

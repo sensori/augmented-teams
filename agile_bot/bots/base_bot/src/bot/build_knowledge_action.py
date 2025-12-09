@@ -15,8 +15,8 @@ class BuildKnowledgeAction(BaseAction):
         try:
             instructions = self.inject_knowledge_graph_template()
         except FileNotFoundError:
-            # Template not required for all behaviors
-            instructions = {}
+            # Fallback for behaviors without knowledge_graph: check for behavior-specific templates
+            instructions = self.inject_behavior_specific_templates()
         return {'instructions': instructions}
     
     def inject_knowledge_graph_template(self) -> Dict[str, Any]:
@@ -46,6 +46,35 @@ class BuildKnowledgeAction(BaseAction):
         return {
             'knowledge_graph_template': str(template_path)
         }
+
+    def inject_behavior_specific_templates(self) -> Dict[str, Any]:
+        """
+        For behaviors that don't use knowledge_graph, optionally load behavior-specific templates.
+        Example: tests behavior uses story-graph-tests.json and test_file.json under 2_content/.
+        """
+        from agile_bot.bots.base_bot.src.bot.bot import Behavior
+        try:
+            behavior_folder = Behavior.find_behavior_folder(
+                self.workspace_root,
+                self.bot_name,
+                self.behavior
+            )
+        except FileNotFoundError:
+            return {}
+
+        instructions: Dict[str, Any] = {}
+
+        # Look for 2_content/test_file.json
+        test_file_cfg = behavior_folder / '2_content' / 'test_file.json'
+        if test_file_cfg.exists():
+            instructions['test_file_config'] = str(test_file_cfg)
+
+        # Look for 2_content/templates/story-graph-tests.json
+        tests_template = behavior_folder / '2_content' / 'templates' / 'story-graph-tests.json'
+        if tests_template.exists():
+            instructions['tests_template'] = str(tests_template)
+
+        return instructions
 
 
 

@@ -18,7 +18,6 @@
     "   - Refine domain model concepts, relationships, and responsibilities based on story discovery details",
     "5. Render Output - Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json, discovery: render story map increments",
     "6. Validate Rules - Follow agile_bot/bots/base_bot/base_actions/7_validate_rules/instructions.json, discovery: validate story decomposition AND domain model refinements",
-    "7. Correct Bot - Follow agile_bot/bots/base_bot/base_actions/6_correct_bot/instructions.json, discovery: correct story refinements AND domain model updates",
     "",
     "**Workflow Control:**",
     "- **STOP for human feedback** when told to stop or when action requires user input",

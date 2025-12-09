@@ -17,14 +17,19 @@ Detect Trigger Words Through Extension functionality for the bot system.
 ### Behavioral Acceptance Criteria
 
 - **WHEN Cursor extension detects trigger words in user input**
-- **THEN Extension identifies trigger patterns from bot configuration**
-- **AND Extension matches trigger words to corresponding bot behaviors and actions**
-- **AND Extension provides trigger word context to CLI**
-- **AND CLI receives trigger word information from extension**
-- **AND CLI routes to appropriate bot behavior and action based on trigger words**
+- **THEN Extension loads bot registry to discover available bots**
+- **AND Extension performs two-stage routing: first match bot, then match behavior/action**
+- **AND Extension identifies target bot from bot-level trigger patterns**
+- **AND Extension loads target bot's behavior/action trigger patterns**
+- **AND Extension matches trigger words to corresponding behavior and action**
+- **AND Extension provides trigger word context and route to CLI**
+- **AND CLI receives bot, behavior, action, and context from extension**
+- **AND CLI routes to appropriate bot behavior and action based on trigger route**
 - **AND Bot executes action with trigger word context**
 - **AND Extension handles multiple trigger word matches gracefully**
 - **AND Extension provides feedback when no trigger words are detected**
+- **AND CliGenerator maintains bot registry when generating CLI**
+- **AND Bot registry contains bot name, trigger patterns, and CLI path for each bot**
 
 ## Background
 
@@ -36,6 +41,31 @@ And action is executing
 ```
 
 ## Scenarios
+
+### Scenario: Two-stage routing - Match bot from registry then match behavior/action
+
+**Steps:**
+```gherkin
+Given bot registry exists at agile_bot/bots/registry.json
+And registry contains multiple bots with trigger patterns
+And registry contains story_bot with patterns ["stories", "story map", "requirements"]
+And registry contains code_bot with patterns ["write code", "implement", "refactor"]
+When user types message "lets work on stories"
+Then TriggerRouter loads bot registry
+And TriggerRouter matches "stories" to story_bot
+And TriggerRouter loads story_bot's behavior/action triggers
+And TriggerRouter matches behavior/action within story_bot
+And TriggerRouter returns route {bot: story_bot, behavior: shape, action: gather_context}
+```
+
+**Examples:**
+| message | matched_bot | bot_pattern | behavior | action |
+| --- | --- | --- | --- | --- |
+| lets work on stories | story_bot | stories | shape | gather_context |
+| write code for authentication | code_bot | write code | implementation | generate_code |
+| refactor the payment logic | code_bot | refactor | refactoring | refactor_code |
+| update story map requirements | story_bot | requirements | discovery | gather_context |
+
 
 ### Scenario: Trigger bot only (no behavior or action specified)
 
@@ -53,62 +83,54 @@ And Bot executes behavior "<current_behavior>" action "<current_action>"
 **Examples:**
 | trigger_message | bot_name | current_behavior | current_action | cli_command |
 | --- | --- | --- | --- | --- |
-| run story bot shape initialize_project | story_bot | shape | initialize_project | story_bot |
-| run story bot shape gather_context | story_bot | shape | gather_context | story_bot |
-| run story bot shape decide_planning_criteria | story_bot | shape | decide_planning_criteria | story_bot |
-| run story bot shape build_knowledge | story_bot | shape | build_knowledge | story_bot |
-| run story bot shape render_output | story_bot | shape | render_output | story_bot |
-| run story bot shape validate_rules | story_bot | shape | validate_rules | story_bot |
-| run story bot shape correct_bot | story_bot | shape | correct_bot | story_bot |
-| run story bot prioritization initialize_project | story_bot | prioritization | initialize_project | story_bot |
-| run story bot prioritization gather_context | story_bot | prioritization | gather_context | story_bot |
-| run story bot prioritization decide_planning_criteria | story_bot | prioritization | decide_planning_criteria | story_bot |
-| run story bot prioritization build_knowledge | story_bot | prioritization | build_knowledge | story_bot |
-| run story bot prioritization render_output | story_bot | prioritization | render_output | story_bot |
-| run story bot prioritization validate_rules | story_bot | prioritization | validate_rules | story_bot |
-| run story bot prioritization correct_bot | story_bot | prioritization | correct_bot | story_bot |
-| run story bot arrange initialize_project | story_bot | arrange | initialize_project | story_bot |
-| run story bot arrange gather_context | story_bot | arrange | gather_context | story_bot |
-| run story bot arrange decide_planning_criteria | story_bot | arrange | decide_planning_criteria | story_bot |
-| run story bot arrange build_knowledge | story_bot | arrange | build_knowledge | story_bot |
-| run story bot arrange render_output | story_bot | arrange | render_output | story_bot |
-| run story bot arrange validate_rules | story_bot | arrange | validate_rules | story_bot |
-| run story bot arrange correct_bot | story_bot | arrange | correct_bot | story_bot |
-| run story bot discovery initialize_project | story_bot | discovery | initialize_project | story_bot |
-| run story bot discovery gather_context | story_bot | discovery | gather_context | story_bot |
-| run story bot discovery decide_planning_criteria | story_bot | discovery | decide_planning_criteria | story_bot |
-| run story bot discovery build_knowledge | story_bot | discovery | build_knowledge | story_bot |
-| run story bot discovery render_output | story_bot | discovery | render_output | story_bot |
-| run story bot discovery validate_rules | story_bot | discovery | validate_rules | story_bot |
-| run story bot discovery correct_bot | story_bot | discovery | correct_bot | story_bot |
-| run story bot exploration initialize_project | story_bot | exploration | initialize_project | story_bot |
-| run story bot exploration gather_context | story_bot | exploration | gather_context | story_bot |
-| run story bot exploration decide_planning_criteria | story_bot | exploration | decide_planning_criteria | story_bot |
-| run story bot exploration build_knowledge | story_bot | exploration | build_knowledge | story_bot |
-| run story bot exploration render_output | story_bot | exploration | render_output | story_bot |
-| run story bot exploration validate_rules | story_bot | exploration | validate_rules | story_bot |
-| run story bot exploration correct_bot | story_bot | exploration | correct_bot | story_bot |
-| run story bot scenarios initialize_project | story_bot | scenarios | initialize_project | story_bot |
-| run story bot scenarios gather_context | story_bot | scenarios | gather_context | story_bot |
-| run story bot scenarios decide_planning_criteria | story_bot | scenarios | decide_planning_criteria | story_bot |
-| run story bot scenarios build_knowledge | story_bot | scenarios | build_knowledge | story_bot |
-| run story bot scenarios render_output | story_bot | scenarios | render_output | story_bot |
-| run story bot scenarios validate_rules | story_bot | scenarios | validate_rules | story_bot |
-| run story bot scenarios correct_bot | story_bot | scenarios | correct_bot | story_bot |
-| run story bot examples initialize_project | story_bot | examples | initialize_project | story_bot |
-| run story bot examples gather_context | story_bot | examples | gather_context | story_bot |
-| run story bot examples decide_planning_criteria | story_bot | examples | decide_planning_criteria | story_bot |
-| run story bot examples build_knowledge | story_bot | examples | build_knowledge | story_bot |
-| run story bot examples render_output | story_bot | examples | render_output | story_bot |
-| run story bot examples validate_rules | story_bot | examples | validate_rules | story_bot |
-| run story bot examples correct_bot | story_bot | examples | correct_bot | story_bot |
-| run story bot tests initialize_project | story_bot | tests | initialize_project | story_bot |
-| run story bot tests gather_context | story_bot | tests | gather_context | story_bot |
-| run story bot tests decide_planning_criteria | story_bot | tests | decide_planning_criteria | story_bot |
-| run story bot tests build_knowledge | story_bot | tests | build_knowledge | story_bot |
-| run story bot tests render_output | story_bot | tests | render_output | story_bot |
-| run story bot tests validate_rules | story_bot | tests | validate_rules | story_bot |
-| run story bot tests correct_bot | story_bot | tests | correct_bot | story_bot |
+| hey lets get going on some stories | story_bot | shape | initialize_project | story_bot |
+| lets launch the stories work | story_bot | shape | gather_context | story_bot |
+| lets get back into writing stories | story_bot | shape | decide_planning_criteria | story_bot |
+| ready to work on stories | story_bot | shape | build_knowledge | story_bot |
+| time to kick off stories | story_bot | shape | render_output | story_bot |
+| lets do some stories now | story_bot | shape | validate_rules | story_bot |
+| lets launch the stories work | story_bot | prioritization | initialize_project | story_bot |
+| lets get back into writing stories | story_bot | prioritization | gather_context | story_bot |
+| ready to work on stories | story_bot | prioritization | decide_planning_criteria | story_bot |
+| time to kick off stories | story_bot | prioritization | build_knowledge | story_bot |
+| lets do some stories now | story_bot | prioritization | render_output | story_bot |
+| hey lets get going on some stories | story_bot | prioritization | validate_rules | story_bot |
+| lets get back into writing stories | story_bot | arrange | initialize_project | story_bot |
+| ready to work on stories | story_bot | arrange | gather_context | story_bot |
+| time to kick off stories | story_bot | arrange | decide_planning_criteria | story_bot |
+| lets do some stories now | story_bot | arrange | build_knowledge | story_bot |
+| hey lets get going on some stories | story_bot | arrange | render_output | story_bot |
+| lets launch the stories work | story_bot | arrange | validate_rules | story_bot |
+| ready to work on stories | story_bot | discovery | initialize_project | story_bot |
+| time to kick off stories | story_bot | discovery | gather_context | story_bot |
+| lets do some stories now | story_bot | discovery | decide_planning_criteria | story_bot |
+| hey lets get going on some stories | story_bot | discovery | build_knowledge | story_bot |
+| lets launch the stories work | story_bot | discovery | render_output | story_bot |
+| lets get back into writing stories | story_bot | discovery | validate_rules | story_bot |
+| time to kick off stories | story_bot | exploration | initialize_project | story_bot |
+| lets do some stories now | story_bot | exploration | gather_context | story_bot |
+| hey lets get going on some stories | story_bot | exploration | decide_planning_criteria | story_bot |
+| lets launch the stories work | story_bot | exploration | build_knowledge | story_bot |
+| lets get back into writing stories | story_bot | exploration | render_output | story_bot |
+| ready to work on stories | story_bot | exploration | validate_rules | story_bot |
+| lets do some stories now | story_bot | scenarios | initialize_project | story_bot |
+| hey lets get going on some stories | story_bot | scenarios | gather_context | story_bot |
+| lets launch the stories work | story_bot | scenarios | decide_planning_criteria | story_bot |
+| lets get back into writing stories | story_bot | scenarios | build_knowledge | story_bot |
+| ready to work on stories | story_bot | scenarios | render_output | story_bot |
+| time to kick off stories | story_bot | scenarios | validate_rules | story_bot |
+| hey lets get going on some stories | story_bot | examples | initialize_project | story_bot |
+| lets launch the stories work | story_bot | examples | gather_context | story_bot |
+| lets get back into writing stories | story_bot | examples | decide_planning_criteria | story_bot |
+| ready to work on stories | story_bot | examples | build_knowledge | story_bot |
+| time to kick off stories | story_bot | examples | render_output | story_bot |
+| lets do some stories now | story_bot | examples | validate_rules | story_bot |
+| lets launch the stories work | story_bot | tests | initialize_project | story_bot |
+| lets get back into writing stories | story_bot | tests | gather_context | story_bot |
+| ready to work on stories | story_bot | tests | decide_planning_criteria | story_bot |
+| time to kick off stories | story_bot | tests | build_knowledge | story_bot |
+| lets do some stories now | story_bot | tests | render_output | story_bot |
+| hey lets get going on some stories | story_bot | tests | validate_rules | story_bot |
 
 
 ### Scenario: Trigger bot and behavior (no action specified)
@@ -127,62 +149,54 @@ And Bot executes action "<current_action>"
 **Examples:**
 | trigger_message | bot_name | behavior_name | current_action | cli_command |
 | --- | --- | --- | --- | --- |
-| story bot shape initialize_project | story_bot | shape | initialize_project | story_bot shape |
-| story bot shape gather_context | story_bot | shape | gather_context | story_bot shape |
-| story bot shape decide_planning_criteria | story_bot | shape | decide_planning_criteria | story_bot shape |
-| story bot shape build_knowledge | story_bot | shape | build_knowledge | story_bot shape |
-| story bot shape render_output | story_bot | shape | render_output | story_bot shape |
-| story bot shape validate_rules | story_bot | shape | validate_rules | story_bot shape |
-| story bot shape correct_bot | story_bot | shape | correct_bot | story_bot shape |
-| story bot prioritization initialize_project | story_bot | prioritization | initialize_project | story_bot prioritization |
-| story bot prioritization gather_context | story_bot | prioritization | gather_context | story_bot prioritization |
-| story bot prioritization decide_planning_criteria | story_bot | prioritization | decide_planning_criteria | story_bot prioritization |
-| story bot prioritization build_knowledge | story_bot | prioritization | build_knowledge | story_bot prioritization |
-| story bot prioritization render_output | story_bot | prioritization | render_output | story_bot prioritization |
-| story bot prioritization validate_rules | story_bot | prioritization | validate_rules | story_bot prioritization |
-| story bot prioritization correct_bot | story_bot | prioritization | correct_bot | story_bot prioritization |
-| story bot arrange initialize_project | story_bot | arrange | initialize_project | story_bot arrange |
-| story bot arrange gather_context | story_bot | arrange | gather_context | story_bot arrange |
-| story bot arrange decide_planning_criteria | story_bot | arrange | decide_planning_criteria | story_bot arrange |
-| story bot arrange build_knowledge | story_bot | arrange | build_knowledge | story_bot arrange |
-| story bot arrange render_output | story_bot | arrange | render_output | story_bot arrange |
-| story bot arrange validate_rules | story_bot | arrange | validate_rules | story_bot arrange |
-| story bot arrange correct_bot | story_bot | arrange | correct_bot | story_bot arrange |
-| story bot discovery initialize_project | story_bot | discovery | initialize_project | story_bot discovery |
-| story bot discovery gather_context | story_bot | discovery | gather_context | story_bot discovery |
-| story bot discovery decide_planning_criteria | story_bot | discovery | decide_planning_criteria | story_bot discovery |
-| story bot discovery build_knowledge | story_bot | discovery | build_knowledge | story_bot discovery |
-| story bot discovery render_output | story_bot | discovery | render_output | story_bot discovery |
-| story bot discovery validate_rules | story_bot | discovery | validate_rules | story_bot discovery |
-| story bot discovery correct_bot | story_bot | discovery | correct_bot | story_bot discovery |
-| story bot exploration initialize_project | story_bot | exploration | initialize_project | story_bot exploration |
-| story bot exploration gather_context | story_bot | exploration | gather_context | story_bot exploration |
-| story bot exploration decide_planning_criteria | story_bot | exploration | decide_planning_criteria | story_bot exploration |
-| story bot exploration build_knowledge | story_bot | exploration | build_knowledge | story_bot exploration |
-| story bot exploration render_output | story_bot | exploration | render_output | story_bot exploration |
-| story bot exploration validate_rules | story_bot | exploration | validate_rules | story_bot exploration |
-| story bot exploration correct_bot | story_bot | exploration | correct_bot | story_bot exploration |
-| story bot scenarios initialize_project | story_bot | scenarios | initialize_project | story_bot scenarios |
-| story bot scenarios gather_context | story_bot | scenarios | gather_context | story_bot scenarios |
-| story bot scenarios decide_planning_criteria | story_bot | scenarios | decide_planning_criteria | story_bot scenarios |
-| story bot scenarios build_knowledge | story_bot | scenarios | build_knowledge | story_bot scenarios |
-| story bot scenarios render_output | story_bot | scenarios | render_output | story_bot scenarios |
-| story bot scenarios validate_rules | story_bot | scenarios | validate_rules | story_bot scenarios |
-| story bot scenarios correct_bot | story_bot | scenarios | correct_bot | story_bot scenarios |
-| story bot examples initialize_project | story_bot | examples | initialize_project | story_bot examples |
-| story bot examples gather_context | story_bot | examples | gather_context | story_bot examples |
-| story bot examples decide_planning_criteria | story_bot | examples | decide_planning_criteria | story_bot examples |
-| story bot examples build_knowledge | story_bot | examples | build_knowledge | story_bot examples |
-| story bot examples render_output | story_bot | examples | render_output | story_bot examples |
-| story bot examples validate_rules | story_bot | examples | validate_rules | story_bot examples |
-| story bot examples correct_bot | story_bot | examples | correct_bot | story_bot examples |
-| story bot tests initialize_project | story_bot | tests | initialize_project | story_bot tests |
-| story bot tests gather_context | story_bot | tests | gather_context | story_bot tests |
-| story bot tests decide_planning_criteria | story_bot | tests | decide_planning_criteria | story_bot tests |
-| story bot tests build_knowledge | story_bot | tests | build_knowledge | story_bot tests |
-| story bot tests render_output | story_bot | tests | render_output | story_bot tests |
-| story bot tests validate_rules | story_bot | tests | validate_rules | story_bot tests |
-| story bot tests correct_bot | story_bot | tests | correct_bot | story_bot tests |
+| kick off shaping for a new feature | story_bot | shape | initialize_project | story_bot shape |
+| define scope for the new capability | story_bot | shape | gather_context | story_bot shape |
+| map acceptance requirements | story_bot | shape | decide_planning_criteria | story_bot shape |
+| kick off shaping for a new feature | story_bot | shape | build_knowledge | story_bot shape |
+| define scope for the new capability | story_bot | shape | render_output | story_bot shape |
+| map acceptance requirements | story_bot | shape | validate_rules | story_bot shape |
+| rank the backlog for launch | story_bot | prioritization | initialize_project | story_bot prioritization |
+| set priorities for upcoming features | story_bot | prioritization | gather_context | story_bot prioritization |
+| groom the backlog items | story_bot | prioritization | decide_planning_criteria | story_bot prioritization |
+| rank the backlog for launch | story_bot | prioritization | build_knowledge | story_bot prioritization |
+| set priorities for upcoming features | story_bot | prioritization | render_output | story_bot prioritization |
+| groom the backlog items | story_bot | prioritization | validate_rules | story_bot prioritization |
+| arrange the feature map layout | story_bot | arrange | initialize_project | story_bot arrange |
+| organize epics and features | story_bot | arrange | gather_context | story_bot arrange |
+| restructure the story map | story_bot | arrange | decide_planning_criteria | story_bot arrange |
+| arrange the feature map layout | story_bot | arrange | build_knowledge | story_bot arrange |
+| organize epics and features | story_bot | arrange | render_output | story_bot arrange |
+| restructure the story map | story_bot | arrange | validate_rules | story_bot arrange |
+| start discovery for the new product | story_bot | discovery | initialize_project | story_bot discovery |
+| collect insights for the domain | story_bot | discovery | gather_context | story_bot discovery |
+| explore user needs | story_bot | discovery | decide_planning_criteria | story_bot discovery |
+| start discovery for the new product | story_bot | discovery | build_knowledge | story_bot discovery |
+| collect insights for the domain | story_bot | discovery | render_output | story_bot discovery |
+| explore user needs | story_bot | discovery | validate_rules | story_bot discovery |
+| begin the exploration phase | story_bot | exploration | initialize_project | story_bot exploration |
+| investigate solution options | story_bot | exploration | gather_context | story_bot exploration |
+| clarify exploration scope | story_bot | exploration | decide_planning_criteria | story_bot exploration |
+| begin the exploration phase | story_bot | exploration | build_knowledge | story_bot exploration |
+| investigate solution options | story_bot | exploration | render_output | story_bot exploration |
+| clarify exploration scope | story_bot | exploration | validate_rules | story_bot exploration |
+| draft behavior scenarios | story_bot | scenarios | initialize_project | story_bot scenarios |
+| write gherkin cases | story_bot | scenarios | gather_context | story_bot scenarios |
+| outline test scenarios | story_bot | scenarios | decide_planning_criteria | story_bot scenarios |
+| draft behavior scenarios | story_bot | scenarios | build_knowledge | story_bot scenarios |
+| write gherkin cases | story_bot | scenarios | render_output | story_bot scenarios |
+| outline test scenarios | story_bot | scenarios | validate_rules | story_bot scenarios |
+| prepare usage examples | story_bot | examples | initialize_project | story_bot examples |
+| draft sample flows | story_bot | examples | gather_context | story_bot examples |
+| capture illustrative examples | story_bot | examples | decide_planning_criteria | story_bot examples |
+| prepare usage examples | story_bot | examples | build_knowledge | story_bot examples |
+| draft sample flows | story_bot | examples | render_output | story_bot examples |
+| capture illustrative examples | story_bot | examples | validate_rules | story_bot examples |
+| design test coverage | story_bot | tests | initialize_project | story_bot tests |
+| plan validation cases | story_bot | tests | gather_context | story_bot tests |
+| define acceptance tests | story_bot | tests | decide_planning_criteria | story_bot tests |
+| design test coverage | story_bot | tests | build_knowledge | story_bot tests |
+| plan validation cases | story_bot | tests | render_output | story_bot tests |
+| define acceptance tests | story_bot | tests | validate_rules | story_bot tests |
 
 
 ### Scenario: Trigger bot, behavior, and action explicitly
@@ -201,61 +215,53 @@ And Bot executes action "<action_name>"
 **Examples:**
 | trigger_message | bot_name | behavior_name | action_name | cli_command |
 | --- | --- | --- | --- | --- |
-| story bot shape initialize_project | story_bot | shape | initialize_project | story_bot shape initialize_project |
-| story bot shape gather_context | story_bot | shape | gather_context | story_bot shape gather_context |
-| story bot shape decide_planning_criteria | story_bot | shape | decide_planning_criteria | story_bot shape decide_planning_criteria |
-| story bot shape build_knowledge | story_bot | shape | build_knowledge | story_bot shape build_knowledge |
-| story bot shape render_output | story_bot | shape | render_output | story_bot shape render_output |
-| story bot shape validate_rules | story_bot | shape | validate_rules | story_bot shape validate_rules |
-| story bot shape correct_bot | story_bot | shape | correct_bot | story_bot shape correct_bot |
-| story bot prioritization initialize_project | story_bot | prioritization | initialize_project | story_bot prioritization initialize_project |
-| story bot prioritization gather_context | story_bot | prioritization | gather_context | story_bot prioritization gather_context |
-| story bot prioritization decide_planning_criteria | story_bot | prioritization | decide_planning_criteria | story_bot prioritization decide_planning_criteria |
-| story bot prioritization build_knowledge | story_bot | prioritization | build_knowledge | story_bot prioritization build_knowledge |
-| story bot prioritization render_output | story_bot | prioritization | render_output | story_bot prioritization render_output |
-| story bot prioritization validate_rules | story_bot | prioritization | validate_rules | story_bot prioritization validate_rules |
-| story bot prioritization correct_bot | story_bot | prioritization | correct_bot | story_bot prioritization correct_bot |
-| story bot arrange initialize_project | story_bot | arrange | initialize_project | story_bot arrange initialize_project |
-| story bot arrange gather_context | story_bot | arrange | gather_context | story_bot arrange gather_context |
-| story bot arrange decide_planning_criteria | story_bot | arrange | decide_planning_criteria | story_bot arrange decide_planning_criteria |
-| story bot arrange build_knowledge | story_bot | arrange | build_knowledge | story_bot arrange build_knowledge |
-| story bot arrange render_output | story_bot | arrange | render_output | story_bot arrange render_output |
-| story bot arrange validate_rules | story_bot | arrange | validate_rules | story_bot arrange validate_rules |
-| story bot arrange correct_bot | story_bot | arrange | correct_bot | story_bot arrange correct_bot |
-| story bot discovery initialize_project | story_bot | discovery | initialize_project | story_bot discovery initialize_project |
-| story bot discovery gather_context | story_bot | discovery | gather_context | story_bot discovery gather_context |
-| story bot discovery decide_planning_criteria | story_bot | discovery | decide_planning_criteria | story_bot discovery decide_planning_criteria |
-| story bot discovery build_knowledge | story_bot | discovery | build_knowledge | story_bot discovery build_knowledge |
-| story bot discovery render_output | story_bot | discovery | render_output | story_bot discovery render_output |
-| story bot discovery validate_rules | story_bot | discovery | validate_rules | story_bot discovery validate_rules |
-| story bot discovery correct_bot | story_bot | discovery | correct_bot | story_bot discovery correct_bot |
-| story bot exploration initialize_project | story_bot | exploration | initialize_project | story_bot exploration initialize_project |
-| story bot exploration gather_context | story_bot | exploration | gather_context | story_bot exploration gather_context |
-| story bot exploration decide_planning_criteria | story_bot | exploration | decide_planning_criteria | story_bot exploration decide_planning_criteria |
-| story bot exploration build_knowledge | story_bot | exploration | build_knowledge | story_bot exploration build_knowledge |
-| story bot exploration render_output | story_bot | exploration | render_output | story_bot exploration render_output |
-| story bot exploration validate_rules | story_bot | exploration | validate_rules | story_bot exploration validate_rules |
-| story bot exploration correct_bot | story_bot | exploration | correct_bot | story_bot exploration correct_bot |
-| story bot scenarios initialize_project | story_bot | scenarios | initialize_project | story_bot scenarios initialize_project |
-| story bot scenarios gather_context | story_bot | scenarios | gather_context | story_bot scenarios gather_context |
-| story bot scenarios decide_planning_criteria | story_bot | scenarios | decide_planning_criteria | story_bot scenarios decide_planning_criteria |
-| story bot scenarios build_knowledge | story_bot | scenarios | build_knowledge | story_bot scenarios build_knowledge |
-| story bot scenarios render_output | story_bot | scenarios | render_output | story_bot scenarios render_output |
-| story bot scenarios validate_rules | story_bot | scenarios | validate_rules | story_bot scenarios validate_rules |
-| story bot scenarios correct_bot | story_bot | scenarios | correct_bot | story_bot scenarios correct_bot |
-| story bot examples initialize_project | story_bot | examples | initialize_project | story_bot examples initialize_project |
-| story bot examples gather_context | story_bot | examples | gather_context | story_bot examples gather_context |
-| story bot examples decide_planning_criteria | story_bot | examples | decide_planning_criteria | story_bot examples decide_planning_criteria |
-| story bot examples build_knowledge | story_bot | examples | build_knowledge | story_bot examples build_knowledge |
-| story bot examples render_output | story_bot | examples | render_output | story_bot examples render_output |
-| story bot examples validate_rules | story_bot | examples | validate_rules | story_bot examples validate_rules |
-| story bot examples correct_bot | story_bot | examples | correct_bot | story_bot examples correct_bot |
-| story bot tests initialize_project | story_bot | tests | initialize_project | story_bot tests initialize_project |
-| story bot tests gather_context | story_bot | tests | gather_context | story_bot tests gather_context |
-| story bot tests decide_planning_criteria | story_bot | tests | decide_planning_criteria | story_bot tests decide_planning_criteria |
-| story bot tests build_knowledge | story_bot | tests | build_knowledge | story_bot tests build_knowledge |
-| story bot tests render_output | story_bot | tests | render_output | story_bot tests render_output |
-| story bot tests validate_rules | story_bot | tests | validate_rules | story_bot tests validate_rules |
-| story bot tests correct_bot | story_bot | tests | correct_bot | story_bot tests correct_bot |
+| set up the project area for shape | story_bot | shape | initialize_project | story_bot shape initialize_project |
+| gather context for shape | story_bot | shape | gather_context | story_bot shape gather_context |
+| decide planning criteria for shape | story_bot | shape | decide_planning_criteria | story_bot shape decide_planning_criteria |
+| build the knowledge base for shape | story_bot | shape | build_knowledge | story_bot shape build_knowledge |
+| render outputs for shape | story_bot | shape | render_output | story_bot shape render_output |
+| validate outputs for shape | story_bot | shape | validate_rules | story_bot shape validate_rules |
+| set up the project area for prioritization | story_bot | prioritization | initialize_project | story_bot prioritization initialize_project |
+| gather context for prioritization | story_bot | prioritization | gather_context | story_bot prioritization gather_context |
+| decide planning criteria for prioritization | story_bot | prioritization | decide_planning_criteria | story_bot prioritization decide_planning_criteria |
+| build the knowledge base for prioritization | story_bot | prioritization | build_knowledge | story_bot prioritization build_knowledge |
+| render outputs for prioritization | story_bot | prioritization | render_output | story_bot prioritization render_output |
+| validate outputs for prioritization | story_bot | prioritization | validate_rules | story_bot prioritization validate_rules |
+| set up the project area for arrange | story_bot | arrange | initialize_project | story_bot arrange initialize_project |
+| gather context for arrange | story_bot | arrange | gather_context | story_bot arrange gather_context |
+| decide planning criteria for arrange | story_bot | arrange | decide_planning_criteria | story_bot arrange decide_planning_criteria |
+| build the knowledge base for arrange | story_bot | arrange | build_knowledge | story_bot arrange build_knowledge |
+| render outputs for arrange | story_bot | arrange | render_output | story_bot arrange render_output |
+| validate outputs for arrange | story_bot | arrange | validate_rules | story_bot arrange validate_rules |
+| set up the project area for discovery | story_bot | discovery | initialize_project | story_bot discovery initialize_project |
+| gather context for discovery | story_bot | discovery | gather_context | story_bot discovery gather_context |
+| decide planning criteria for discovery | story_bot | discovery | decide_planning_criteria | story_bot discovery decide_planning_criteria |
+| build the knowledge base for discovery | story_bot | discovery | build_knowledge | story_bot discovery build_knowledge |
+| render outputs for discovery | story_bot | discovery | render_output | story_bot discovery render_output |
+| validate outputs for discovery | story_bot | discovery | validate_rules | story_bot discovery validate_rules |
+| set up the project area for exploration | story_bot | exploration | initialize_project | story_bot exploration initialize_project |
+| gather context for exploration | story_bot | exploration | gather_context | story_bot exploration gather_context |
+| decide planning criteria for exploration | story_bot | exploration | decide_planning_criteria | story_bot exploration decide_planning_criteria |
+| build the knowledge base for exploration | story_bot | exploration | build_knowledge | story_bot exploration build_knowledge |
+| render outputs for exploration | story_bot | exploration | render_output | story_bot exploration render_output |
+| validate outputs for exploration | story_bot | exploration | validate_rules | story_bot exploration validate_rules |
+| set up the project area for scenarios | story_bot | scenarios | initialize_project | story_bot scenarios initialize_project |
+| gather context for scenarios | story_bot | scenarios | gather_context | story_bot scenarios gather_context |
+| decide planning criteria for scenarios | story_bot | scenarios | decide_planning_criteria | story_bot scenarios decide_planning_criteria |
+| build the knowledge base for scenarios | story_bot | scenarios | build_knowledge | story_bot scenarios build_knowledge |
+| render outputs for scenarios | story_bot | scenarios | render_output | story_bot scenarios render_output |
+| validate outputs for scenarios | story_bot | scenarios | validate_rules | story_bot scenarios validate_rules |
+| set up the project area for examples | story_bot | examples | initialize_project | story_bot examples initialize_project |
+| gather context for examples | story_bot | examples | gather_context | story_bot examples gather_context |
+| decide planning criteria for examples | story_bot | examples | decide_planning_criteria | story_bot examples decide_planning_criteria |
+| build the knowledge base for examples | story_bot | examples | build_knowledge | story_bot examples build_knowledge |
+| render outputs for examples | story_bot | examples | render_output | story_bot examples render_output |
+| validate outputs for examples | story_bot | examples | validate_rules | story_bot examples validate_rules |
+| set up the project area for tests | story_bot | tests | initialize_project | story_bot tests initialize_project |
+| gather context for tests | story_bot | tests | gather_context | story_bot tests gather_context |
+| decide planning criteria for tests | story_bot | tests | decide_planning_criteria | story_bot tests decide_planning_criteria |
+| build the knowledge base for tests | story_bot | tests | build_knowledge | story_bot tests build_knowledge |
+| render outputs for tests | story_bot | tests | render_output | story_bot tests render_output |
+| validate outputs for tests | story_bot | tests | validate_rules | story_bot tests validate_rules |
 
 
