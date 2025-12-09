@@ -421,7 +421,7 @@ class TestActivityTrackingLocation:
         bot_area_log = workspace / 'agile_bot' / 'bots' / 'story_bot' / 'activity_log.json'
         assert not bot_area_log.exists(), f"Activity log should NOT be at {bot_area_log}"
 
-        def test_activity_log_contains_correct_entry(self, bot_directory, workspace_directory):
+    def test_activity_log_contains_correct_entry(self, bot_directory, workspace_directory):
         """
         SCENARIO: Activity log contains correct entry
         GIVEN: action 'gather_context' executes in behavior 'discovery'
