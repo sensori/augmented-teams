@@ -16,11 +16,9 @@ import json
 from conftest import (
     create_bot_config_file,
     create_workflow_state_file,
-    create_base_actions_structure,
-    create_bot_dir,
-    create_project_dir,
-    create_current_project_file
+    create_base_actions_structure
 )
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env
 
 # ============================================================================
 # HELPER CLASSES
@@ -29,8 +27,9 @@ from conftest import (
 class TriggerTestSetup:
     """Helper class to set up bot with trigger words for testing."""
     
-    def __init__(self, workspace_root: Path, bot_name: str = 'story_bot'):
-        self.workspace_root = workspace_root
+    def __init__(self, bot_directory: Path, workspace_directory: Path, bot_name: str = 'story_bot'):
+        self.bot_directory = bot_directory
+        self.workspace_directory = workspace_directory
         self.bot_name = bot_name
         self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'tests']
         self.actions = ['initialize_project', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
@@ -40,13 +39,13 @@ class TriggerTestSetup:
     def setup_bot(self):
         """Set up bot with all behaviors and actions."""
         self.bot_config, self.project_dir = setup_bot_for_testing(
-            self.workspace_root, self.bot_name, self.behaviors, project_dir=None
+            self.bot_directory, self.bot_name, self.behaviors, project_dir=None
         )
         return self
     
     def add_bot_triggers(self, patterns: list):
         """Add bot-level trigger words."""
-        create_bot_trigger_words(self.workspace_root, self.bot_name, patterns)
+        create_bot_trigger_words(self.bot_directory, self.bot_name, patterns)
         return self
     
     def add_behavior_triggers(self, behavior_patterns: dict):
@@ -56,12 +55,12 @@ class TriggerTestSetup:
             behavior_patterns: Dict mapping behavior -> trigger patterns list
         """
         for behavior, patterns in behavior_patterns.items():
-            create_behavior_trigger_words(self.workspace_root, self.bot_name, behavior, patterns)
+            create_behavior_trigger_words(self.bot_directory, self.bot_name, behavior, patterns)
         return self
     
     def add_action_triggers(self, behavior: str, action: str, patterns: list):
         """Add action-level trigger words."""
-        create_action_trigger_words(self.workspace_root, self.bot_name, behavior, action, patterns)
+        create_action_trigger_words(self.bot_directory, self.bot_name, behavior, action, patterns)
         return self
     
     def add_all_action_triggers(self, template: str):
@@ -88,10 +87,12 @@ class TriggerTestSetup:
 
 
 class TriggerRouterTestHelper:
+    
     """Helper class for testing trigger routing and CLI execution."""
     
-    def __init__(self, workspace_root: Path, bot_name: str, bot_config: Path):
-        self.workspace_root = workspace_root
+    def __init__(self, bot_directory: Path, workspace_directory: Path, bot_name: str, bot_config: Path):
+        self.bot_directory = bot_directory
+        self.workspace_directory = workspace_directory
         self.bot_name = bot_name
         self.bot_config = bot_config
         self.router = None
@@ -109,7 +110,7 @@ class TriggerRouterTestHelper:
         from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
         
         # Create fresh instances to avoid state leakage between test iterations
-        router = TriggerRouter(workspace_root=self.workspace_root, bot_name=self.bot_name)
+        router = TriggerRouter(bot_directory=self.bot_directory, bot_name=self.bot_name)
         route = router.match_trigger(
             message=trigger_message,
             current_behavior=current_behavior,
@@ -123,7 +124,7 @@ class TriggerRouterTestHelper:
         cli = BaseBotCli(
             bot_name=self.bot_name,
             bot_config_path=self.bot_config,
-            workspace_root=self.workspace_root
+            bot_directory=self.bot_directory
         )
         
         if route.get('action_name') == 'close_current_action':
@@ -255,7 +256,7 @@ def workspace_root(tmp_path):
 class TestDetectTriggerWordsThroughExtension:
     """Story: Detect Trigger Words Through Extension (Sub-epic: Invoke CLI)"""
 
-    def test_trigger_bot_only_no_behavior_or_action_specified(self, workspace_root):
+    def test_trigger_bot_only_no_behavior_or_action_specified(self, bot_directory, workspace_directory):
         """
         SCENARIO: Trigger bot only (no behavior or action specified)
         GIVEN: user types message containing trigger words
@@ -266,7 +267,7 @@ class TestDetectTriggerWordsThroughExtension:
         AND: CLI executes current behavior and action
         """
         # Arrange: Set up bot with bot-level triggers
-        setup = TriggerTestSetup(workspace_root).setup_bot().add_bot_triggers([
+        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_bot_triggers([
             'lets work on stories',
             'time to kick off stories',
             'ready to work on stories'
@@ -293,7 +294,7 @@ class TestDetectTriggerWordsThroughExtension:
                 expected_action = 'gather_context' if current_action == 'initialize_project' else current_action
                 helper.assert_cli_result(result, current_behavior, expected_action)
 
-    def test_trigger_bot_and_behavior_no_action_specified(self, workspace_root):
+    def test_trigger_bot_and_behavior_no_action_specified(self, bot_directory, workspace_directory):
         """
         SCENARIO: Trigger bot and behavior (no action specified)
         GIVEN: user types message containing behavior-specific trigger words
@@ -315,7 +316,7 @@ class TestDetectTriggerWordsThroughExtension:
             'tests': 'design test coverage'
         }
         
-        setup = TriggerTestSetup(workspace_root).setup_bot().add_behavior_triggers(
+        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_behavior_triggers(
             {behavior: [trigger] for behavior, trigger in behavior_triggers.items()}
         )
         
@@ -339,7 +340,7 @@ class TestDetectTriggerWordsThroughExtension:
                 expected_action = 'gather_context' if current_action == 'initialize_project' else current_action
                 helper.assert_cli_result(result, behavior, expected_action)
 
-    def test_trigger_bot_behavior_and_action_explicitly(self, workspace_root):
+    def test_trigger_bot_behavior_and_action_explicitly(self, bot_directory, workspace_directory):
         """
         SCENARIO: Trigger bot, behavior, and action explicitly
         GIVEN: user types message containing action-specific trigger words
@@ -358,7 +359,7 @@ class TestDetectTriggerWordsThroughExtension:
             'validate_rules': 'validate outputs for {behavior}'
         }
         
-        setup = TriggerTestSetup(workspace_root).setup_bot()
+        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot()
         
         for behavior in setup.behaviors:
             for action, template in action_trigger_templates.items():
@@ -385,7 +386,7 @@ class TestDetectTriggerWordsThroughExtension:
                 expected_action = 'gather_context' if action == 'initialize_project' else action
                 helper.assert_cli_result(result, behavior, expected_action)
     
-    def test_trigger_close_current_action(self, workspace_root):
+    def test_trigger_close_current_action(self, bot_directory, workspace_directory):
         """
         SCENARIO: Trigger close current action
         GIVEN: user types message containing close trigger words
@@ -396,7 +397,7 @@ class TestDetectTriggerWordsThroughExtension:
         AND: CLI closes current action and advances workflow
         """
         # Arrange: Set up bot with close trigger words
-        setup = TriggerTestSetup(workspace_root).setup_bot().add_bot_triggers([
+        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_bot_triggers([
             'close current action',
             'done with this step',
             'continue to next action'

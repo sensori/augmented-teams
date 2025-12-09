@@ -1,0 +1,43 @@
+# MCP Tool Awareness
+
+## Bot: test_bot
+
+## Priority: Check MCP Tools First
+
+**CRITICAL RULE:** When user mentions workflow operations with trigger words, ALWAYS check for and use MCP test_bot tools FIRST before falling back to manual file operations.
+
+## Behaviors and Trigger Words
+
+
+
+## Error Handling
+
+**CRITICAL:** If a registered tool is broken or returns an error:
+
+1. **DO NOT automatically attempt a workaround**
+2. **Inform user of the exact error details** (include full error message, tool name, parameters used)
+3. **Ask user:** "The tool returned an error. Should I attempt to repair the tool, or proceed manually?"
+4. **Wait for user decision** before taking any action
+
+## Workflow Pattern
+
+When you recognize a trigger word:
+
+1. **Check if MCP tools are available** (ask mode vs agent mode)
+2. **If in ask mode:** Inform user to switch to agent mode for MCP tool access
+3. **If in agent mode:** Look for matching MCP tool and invoke it
+4. **If tool returns error:** Follow error handling above (do NOT workaround)
+5. **If no matching tool found:** Fall back to manual operations with explanation
+
+## Example Usage
+
+**User says:** "trigger word"
+
+**AI should:**
+1. Recognize trigger word from behavior section above
+2. Check: Am I in agent mode?
+3. Check: Is `test_bot_shape_gather_context` available?
+4. If yes → Invoke the tool
+5. If no → Explain and ask how to proceed
+
+**DO NOT** immediately start reading files manually without checking for tools first.

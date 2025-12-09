@@ -611,61 +611,6 @@ class MCPServerGenerator:
         workflow_state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
 
     
-    def register_behavior_action_tool(
-        self,
-        mcp_server: FastMCP,
-        behavior: str,
-        action: str
-    ):
-        # Normalize names to keep tool names under 60 chars
-        normalized_behavior = self._normalize_name_for_tool(behavior)
-        normalized_action = self._normalize_name_for_tool(action)
-        
-        tool_name = f'{self.bot_name}_{normalized_behavior}_{normalized_action}'
-        
-        trigger_patterns = self._load_trigger_words_from_behavior_folder(
-            behavior=behavior,
-            action=action
-        )
-        
-        description = f'{behavior} {action} for {self.bot_name}.'
-        if trigger_patterns:
-            description += f'\nTrigger patterns: {", ".join(trigger_patterns)}'
-        
-        @mcp_server.tool(name=tool_name, description=description)
-        async def behavior_action_tool(parameters: dict = None):
-            if parameters is None:
-                parameters = {}
-            
-            if self.bot is None:
-                return {"error": "Bot not initialized"}
-            
-            behavior_obj = getattr(self.bot, behavior, None)
-            if behavior_obj is None:
-                return {"error": f"Behavior {behavior} not found"}
-            
-            action_method = getattr(behavior_obj, action, None)
-            if action_method is None:
-                return {"error": f"Action {action} not found in {behavior}"}
-            
-            result = action_method(parameters=parameters)
-            
-            # Return serializable dict instead of BotResult object
-            return {
-                "status": result.status,
-                "behavior": result.behavior,
-                "action": result.action,
-                "data": result.data
-            }
-        
-        self.registered_tools.append({
-            'name': tool_name,
-            'behavior': behavior,
-            'action': action,
-            'trigger_patterns': trigger_patterns,
-            'description': description
-        })
-    
     def _load_trigger_words_from_behavior_folder(
         self,
         behavior: str,
