@@ -37,13 +37,10 @@ def render_increments_backlog_to_text(story_graph_path, output_path):
         output.append(f"## Increment {inc_priority}: {inc_name}")
         output.append("")
         
-        # Collect all stories from all epics/features in this increment
+        # Collect all stories from all epics/sub_epics in this increment
         all_stories = []
         for epic in increment.get('epics', []):
-            # Handle features (prioritization structure)
-            for feature in epic.get('features', []):
-                all_stories.extend(feature.get('stories', []))
-            # Handle sub_epics (shape structure) - recursively collect
+            # Handle sub_epics (standardized structure) - recursively collect
             for sub_epic in epic.get('sub_epics', []):
                 collect_stories_from_sub_epic(sub_epic, all_stories)
         

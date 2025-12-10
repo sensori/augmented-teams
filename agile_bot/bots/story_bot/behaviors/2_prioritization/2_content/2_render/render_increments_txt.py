@@ -66,14 +66,7 @@ def render_increments_to_text(story_graph_path, output_path):
         for epic in increment.get('epics', []):
             output.append(f"(E) {epic['name']}")
             
-            # Handle features (prioritization structure)
-            for feature in epic.get('features', []):
-                if feature.get('stories'):
-                    output.append(f"    (E) {feature['name']}")
-                    for story in feature.get('stories', []):
-                        output.append(render_story(story, 2))
-            
-            # Handle sub_epics (shape structure)
+            # Handle sub_epics (standardized structure)
             for sub_epic in epic.get('sub_epics', []):
                 output.extend(render_sub_epic_stories(sub_epic, 1))
             

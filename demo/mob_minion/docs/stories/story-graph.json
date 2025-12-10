@@ -395,7 +395,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "Create Mob",
               "users": ["Game Master"],
@@ -454,7 +454,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "Execute Mob Action",
               "users": ["Game Master"],
@@ -519,7 +519,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "Select Strategy",
               "users": ["Game Master"],
@@ -602,7 +602,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "Edit Mob",
               "users": ["Game Master"],
@@ -654,7 +654,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "Spawn From Template",
               "users": ["Game Master"],

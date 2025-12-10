@@ -10,7 +10,7 @@
           "name": "",
           "users": [],
           "sequential_order": 1,
-          "features": [
+          "sub_epics": [
             {
               "name": "",
               "users": [],
@@ -32,7 +32,7 @@
           ]
         }
       ],
-      "features": [
+      "sub_epics": [
         {
           "name": "",
           "users": [],

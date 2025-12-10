@@ -599,19 +599,19 @@ class StoryIODiagram(StoryIOComponent):
         else:
             graph_data = self._to_story_graph_format(include_increments=True)
         
-        # Render using renderer
-        # Pass raw JSON path so renderer can access features with stories (not transformed sub_epics)
-        raw_json_path = None
-        if isinstance(story_graph, (str, Path)):
-            raw_json_path = Path(story_graph)
-        elif hasattr(self, '_source_path'):
-            raw_json_path = self._source_path
+        # If we have a source JSON file, load it directly to preserve stories in increments
+        if self._source_path and self._source_path.exists():
+            import json
+            with open(self._source_path, 'r', encoding='utf-8') as f:
+                raw_graph_data = json.load(f)
+            # Use raw JSON data which preserves stories in increments' sub_epics
+            graph_data = raw_graph_data
         
+        # Render using renderer
         return self._renderer.render_increments(
             story_graph=graph_data,
             output_path=output_path,
-            layout_data=layout_data,
-            raw_json_path=raw_json_path
+            layout_data=layout_data
         )
     
     @staticmethod

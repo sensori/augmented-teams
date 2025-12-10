@@ -2241,94 +2241,1569 @@ class DrawIORenderer:
     def _generate_increments_diagram(self, story_graph: Dict[str, Any], layout_data: Dict[str, Any], root_elem: ET.Element, xml_root: ET.Element) -> str:
         """
         Generate DrawIO XML for increments mode.
-        Renders epics/features at top (like outline), then stories in increment swim lanes below.
-        
-        Args:
-            story_graph: Story graph with increments
-            layout_data: Optional layout data
-            root_elem: Root XML element to append to (this is the <root> element)
-            xml_root: Root of the entire XML tree (mxfile element)
+        Uses exact outline rendering code.
         """
-        # Build map of story -> increment(s) it belongs to
-        # Story key format: "epic_name|feature_name|story_name"
-        story_to_increments = {}  # Maps story_key -> list of increment indices
+        # Set flags for outline code
+        is_increments = True
+        is_exploration = False
+        
+        # Standard outline rendering (non-exploration mode)
+        epic_group = ET.SubElement(root_elem, 'mxCell', id='epic-group', value='',
+                     style='group', parent='1', vertex='1', connectable='0')
+        epic_group_geom = ET.SubElement(epic_group, 'mxGeometry', x='0', y='0', width='1', height='1')
+        epic_group_geom.set('as', 'geometry')
+        
+        # Collect all background rectangles here - will be inserted after root cells
+        all_background_rectangles = []
+        epic_estimate_geoms = {}
         
         # Helper to get sub_epics (supports both old 'features' and new 'sub_epics' format)
         def get_sub_epics(epic):
             return epic.get('sub_epics', []) or epic.get('features', [])
         
+        # Helper to normalize story_groups (supports legacy 'stories' format)
+        def normalize_story_groups(feature_or_sub_epic):
+            """Convert legacy 'stories' format to 'story_groups' format if needed."""
+            story_groups = feature_or_sub_epic.get('story_groups', [])
+            # Legacy support: if no story_groups but has stories directly, convert to story_groups format
+            if not story_groups and feature_or_sub_epic.get('stories'):
+                legacy_stories = feature_or_sub_epic.get('stories', [])
+                # Convert legacy format: wrap stories in a single story_group
+                story_groups = [{
+                    'stories': legacy_stories,
+                    'connector': None  # No connector for legacy format
+                }]
+            return story_groups
+        
+        x_pos = 20
+        shown_users = set()  # Track which users have been shown
+        
+        for epic_idx, epic in enumerate(story_graph.get('epics', []), 1):
+            features = get_sub_epics(epic)  # Get sub_epics (or features for backwards compatibility)
+            
+            # In exploration mode: filter epics/sub-epics to only those with stories that have AC
+            if is_exploration:
+                filtered_features = []
+                for feature in features:
+                    # Check if feature has any stories with AC (supports both story_groups and legacy stories)
+                    story_groups = normalize_story_groups(feature)
+                    if not story_groups:
+                        continue  # Skip features without story_groups
+                    
+                    # Check story_groups structure
+                    has_story_with_ac = False
+                    for group in story_groups:
+                        for story in group.get('stories', []):
+                            if story.get('acceptance_criteria'):
+                                has_story_with_ac = True
+                                break
+                        if has_story_with_ac:
+                            break
+                    
+                    if has_story_with_ac:
+                        filtered_features.append(feature)
+                
+                # Skip epic if no features have stories with AC
+                if not filtered_features:
+                    continue
+                
+                features = filtered_features
+            
+            # Check if layout data has coordinates for this epic
+            epic_key = f"EPIC|{epic['name']}"
+            if epic_key in layout_data:
+                # Use stored epic coordinates and dimensions
+                epic_x = layout_data[epic_key]['x']
+                epic_y = layout_data[epic_key]['y']
+                epic_width = layout_data[epic_key].get('width', 0)
+                epic_height = 60  # Always 60px, don't use layout_data height
+                use_epic_layout = True
+            else:
+                # Use calculated positions
+                epic_x = x_pos
+                epic_y = self.EPIC_Y
+                epic_width = 0
+                epic_height = 60  # Always 60px
+                use_epic_layout = False
+            
+            feature_x = epic_x + 10 if use_epic_layout else x_pos + 10
+            feature_y = epic_y + epic_height  # Features directly below epic
+            
+            # Pre-calculate which features have AC cards to adjust positioning
+            feature_has_ac = {}
+            for feature in features:
+                stories = feature.get('stories', [])
+                has_ac = any(
+                    s.get('acceptance_criteria') 
+                    for s in stories
+                )
+                feature_has_ac[feature['name']] = has_ac
+            
+            feature_positions = []
+            previous_feature_rightmost_x = None
+            # In exploration mode, features align with epics (no offset)
+            # Otherwise, start features 10px from epic left edge
+            feature_x_offset = 0 if is_exploration else 10
+            current_feature_x = epic_x + feature_x_offset
+            # Features positioned directly below epic
+            current_feature_y = epic_y + epic_height  # Start Y position for first feature (below epic)
+            # Helper function to recursively collect nested sub-epics with story_groups, maintaining order
+            def collect_nested_with_stories(sub_epics, collected):
+                """Recursively collect all nested sub-epics that have story_groups, in order"""
+                # Sort by sequential_order to maintain order
+                sorted_sub_epics = sorted(sub_epics, key=lambda x: x.get('sequential_order', 999))
+                for sub_epic in sorted_sub_epics:
+                    sub_story_groups = normalize_story_groups(sub_epic)
+                    sub_nested = sub_epic.get('sub_epics', [])
+                    if sub_story_groups and len(sub_story_groups) > 0:
+                        # This sub-epic has story_groups - add it to collected list
+                        collected.append(sub_epic)
+                    elif sub_nested:
+                        # This sub-epic has nested sub_epics - recurse
+                        collect_nested_with_stories(sub_nested, collected)
+            
+            # Build features_to_render list, replacing middle-level features with their nested sub-epics
+            # We need to preserve parent's sequential_order when replacing with nested sub-epics
+            features_to_render = []
+            for feature in features:
+                feature_story_groups = normalize_story_groups(feature)
+                nested_sub_epics = feature.get('sub_epics', [])
+                parent_order = feature.get('sequential_order', 999)
+                
+                if feature_story_groups and len(feature_story_groups) > 0:
+                    # This feature has story_groups - render it
+                    features_to_render.append(feature)
+                elif nested_sub_epics and (not feature_story_groups or len(feature_story_groups) == 0):
+                    # This is a middle-level sub-epic - replace it with its nested sub-epics that have story_groups
+                    nested_with_stories = []
+                    collect_nested_with_stories(nested_sub_epics, nested_with_stories)
+                elif not is_exploration and (not feature_story_groups or len(feature_story_groups) == 0) and not nested_sub_epics:
+                    # In outline mode: render empty features (they're part of the story map structure)
+                    features_to_render.append(feature)
+                    # Sort nested sub-epics by their sequential_order (relative to parent)
+                    nested_with_stories.sort(key=lambda x: x.get('sequential_order', 999))
+                    # Assign parent's sequential_order to nested sub-epics so they maintain parent's position
+                    # Use a fractional offset based on their relative order to maintain sorting within parent
+                    for idx, nested in enumerate(nested_with_stories):
+                        # Create a composite order: parent_order + fractional offset based on relative position
+                        # This ensures nested sub-epics appear where parent would be, in correct relative order
+                        nested['_render_order'] = parent_order + (nested.get('sequential_order', 999) / 10000.0)
+                    features_to_render.extend(nested_with_stories)
+                # Features with no story_groups and no nested sub_epics are skipped
+            
+            # Sort all features by _render_order if present, otherwise by sequential_order
+            features_to_render.sort(key=lambda x: x.get('_render_order', x.get('sequential_order', 999)))
+            
+            for feat_idx, feature in enumerate(features_to_render, 1):
+                
+                # Check if layout data has coordinates for this feature
+                feature_key = f"FEATURE|{epic['name']}|{feature['name']}"
+                if feature_key in layout_data:
+                    # Use stored feature coordinates and dimensions
+                    feat_x = layout_data[feature_key]['x']
+                    feat_y = layout_data[feature_key]['y']
+                    feat_width = layout_data[feature_key].get('width', 0)
+                    feat_height = layout_data[feature_key].get('height', 60)
+                    use_feature_layout = True
+                else:
+                    # Use calculated positions
+                    # Always use horizontal layout: features side-by-side
+                    # First feature aligns with epic's left edge (no offset)
+                    if feat_idx == 0:
+                        feat_x = epic_x
+                    else:
+                        feat_x = current_feature_x
+                    feat_y = current_feature_y  # Features directly below epic (epic_y + epic_height)
+                    feat_width = 0
+                    feat_height = 60
+                    use_feature_layout = False
+                
+                # Get story_groups (supports legacy 'stories' format)
+                story_groups = normalize_story_groups(feature)
+                
+                # Process story groups - flatten stories from all groups
+                stories = []
+                for group in story_groups:
+                    group_stories = group.get('stories', [])
+                    # In exploration mode: filter to only stories with AC
+                    if is_exploration:
+                        group_stories = [
+                            s for s in group_stories
+                            if s.get('acceptance_criteria')
+                        ]
+                    stories.extend(group_stories)
+                
+                # Skip feature if no stories AND no estimated_stories (in exploration mode, skip if no stories with AC)
+                if is_exploration and len(stories) == 0:
+                    continue
+                # In outline mode: always render features (even if empty) - they're part of the story map structure
+                # Only skip if in exploration mode and no stories with AC
+                
+                # Group stories by sequential_order and create a mapping to position index
+                stories_by_seq = {}
+                seq_orders = []
+                for story in stories:
+                    seq_order = story.get('sequential_order', 1)
+                    if seq_order not in stories_by_seq:
+                        stories_by_seq[seq_order] = []
+                    stories_by_seq[seq_order].append(story)
+                    if seq_order not in seq_orders:
+                        seq_orders.append(seq_order)
+                
+                # Sort sequential orders and separate sequential vs optional stories
+                sorted_seq_orders = sorted(seq_orders)
+                
+                # Separate sequential (flag: false) and optional (flag: true) stories for positioning
+                sequential_orders = []
+                has_optional = False
+                for seq_order in sorted_seq_orders:
+                    stories_in_seq = stories_by_seq[seq_order]
+                    for story in stories_in_seq:
+                        if story.get('flag', False):
+                            has_optional = True  # Has optional stories
+                        else:
+                            if seq_order not in sequential_orders:
+                                sequential_orders.append(seq_order)
+                
+                # Position mapping only for sequential stories (optional stack vertically at one X position)
+                seq_to_position = {seq: idx for idx, seq in enumerate(sequential_orders)}
+                
+                
+                # Calculate width: sequential stories get horizontal positions
+                # Optional stories stack vertically, so only need one additional horizontal slot
+                max_position = len(sequential_orders) - 1 if sequential_orders else 0
+                if has_optional:
+                    max_position += 1  # Add one slot for optional stories (they stack vertically)
+                
+                # Only calculate width if not using layout
+                if not use_feature_layout:
+                    # Check if any story has acceptance criteria (AC boxes are wider than stories)
+                    has_acceptance_criteria = any(
+                        s.get('acceptance_criteria') 
+                        for story_list in stories_by_seq.values() 
+                        for s in story_list
+                    )
+                    
+                    # Base width calculation
+                    # If no stories but has estimated_stories, use minimum width
+                    if max_position == 0 and not has_optional and feature.get('estimated_stories'):
+                        base_width = 100  # Minimum width for features with only estimated_stories
+                    elif max_position == 0 and not has_optional and not stories:
+                        # Empty feature (no stories, no estimated_stories) - use minimum width for feature label
+                        base_width = 100
+                    else:
+                        base_width = (max_position + 1) * self.STORY_SPACING_X + 20
+                    
+                    # If AC is present, account for AC box width (120px) vs story width (50px)
+                    # AC boxes align with stories but extend 70px beyond them
+                    if has_acceptance_criteria:
+                        # Add the extra width needed for AC boxes
+                        feat_width = base_width + (self.ACCEPTANCE_CRITERIA_WIDTH - self.STORY_WIDTH)
+                    else:
+                        feat_width = base_width
+                
+                feature_positions.append({
+                    'feature': feature,
+                    'x': feat_x,
+                    'y': feat_y,
+                    'width': feat_width,
+                    'height': feat_height,
+                    'stories_by_seq': stories_by_seq,
+                    'seq_to_position': seq_to_position,
+                    'use_layout': use_feature_layout
+                })
+                
+                # Calculate next feature X position (horizontal layout)
+                # This will be updated after rendering stories/AC to use actual positions
+                if not use_feature_layout:
+                    # Features are horizontal, so position next feature to the right
+                    # Use calculated width if available, otherwise estimate based on story count
+                    if feat_width > 0:
+                        current_feature_x = feat_x + feat_width + self.FEATURE_SPACING_X
+                    else:
+                        # Estimate width based on story count (will be updated after rendering)
+                        estimated_width = max(200, len(stories) * self.STORY_SPACING_X + 20)
+                        current_feature_x = feat_x + estimated_width + self.FEATURE_SPACING_X
+                    # Epic width will be calculated from actual rendered bounds after all stories are rendered
+                    # Don't sum feature widths here - that makes epics too wide
+                    # We'll use feature_min_x and feature_max_x to calculate actual width later
+                elif not use_epic_layout:
+                    # If epic doesn't have layout but feature does, still need to track epic width
+                    if feat_width > 0:
+                        # Estimate epic width based on feature positions
+                        estimated_feature_right = feat_x + feat_width
+                        if estimated_feature_right > (epic_x + epic_width):
+                            epic_width = estimated_feature_right - epic_x
+                    # Estimate rightmost for layout features too
+                    if feature_has_ac.get(feature['name'], False):
+                        max_story_x = feat_x + (max_position * self.STORY_SPACING_X) + self.STORY_WIDTH
+                        estimated_rightmost = max_story_x + (self.ACCEPTANCE_CRITERIA_WIDTH - self.STORY_WIDTH)
+                        if previous_feature_rightmost_x is None or estimated_rightmost > previous_feature_rightmost_x:
+                            previous_feature_rightmost_x = estimated_rightmost
+                    else:
+                        if previous_feature_rightmost_x is None or (feat_x + feat_width) > previous_feature_rightmost_x:
+                            previous_feature_rightmost_x = feat_x + feat_width
+            
+            # Epic width will be calculated from actual rendered bounds (feature_min_x, feature_max_x)
+            # after all stories, nested stories, users, and AC boxes are rendered
+            # Set initial width to minimum - actual width will be set during shrinking phase
+            if epic_width == 0:
+                epic_width = 100  # Minimum epic width (will be expanded based on actual content)
+            
+            # Track actual bounds for shrinking epics/features after layout
+            # Initialize epic_min_x to epic_x (first feature aligns to epic, so epic_min_x should start at epic_x)
+            epic_min_x = epic_x
+            epic_max_x = -float('inf')
+            feature_geometries = []  # Store feature geometries to update later
+            
+            # Collect epic-level users (will be rendered above the epic box)
+            epic_users = epic.get('users', [])
+            epic_users_to_render = []  # Store users to render above epic
+            for user in epic_users:
+                if user not in shown_users:
+                    epic_users_to_render.append(user)
+                    shown_users.add(user)
+            
+            # Calculate epic story display
+            # For increments: show total_stories in top right
+            # For outline: show estimated_stories as separate text box grouped with epic
+            epic_story_text = ""
+            has_estimated_stories = False
+            estimated_stories_count = 0
+            if is_increments:
+                # In increments mode: calculate total_stories and show in top right
+                epic_total_stories = self._calculate_total_stories_for_epic_in_increment(epic)
+                if epic_total_stories > 0:
+                    epic_story_count_html = self._get_story_count_display_html(epic_total_stories, position='top-right')
+                    epic_story_text = f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{epic['name']}</span>{epic_story_count_html}</div>"
+                else:
+                    epic_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{epic['name']}</div>"
+            else:
+                # Outline mode: show estimated_stories as separate text box grouped with epic
+                if 'estimated_stories' in epic and epic['estimated_stories']:
+                    has_estimated_stories = True
+                    estimated_stories_count = epic['estimated_stories']
+                    epic_story_text = f"<span style=\"border-color: rgb(218, 220, 224); flex: 1 1 0%;\">{epic['name']}</span><div style=\"border-color: rgb(218, 220, 224); position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); z-index: 10;\"></div><div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\"></div>"
+                else:
+                    epic_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{epic['name']}</div>"
+            
+            # Render epic cell (without grouping)
+            epic_cell = ET.SubElement(root_elem, 'mxCell', id=f'epic{epic_idx}', 
+                                     value=epic_story_text,
+                                     style='rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;',
+                                     parent='1', vertex='1')
+            epic_geom = ET.SubElement(epic_cell, 'mxGeometry', x=str(epic_x), y=str(epic_y), width=str(epic_width), 
+                         height=str(epic_height))
+            epic_geom.set('as', 'geometry')
+
+            estimated_geom = None
+            if has_estimated_stories and not is_increments:
+                estimated_text = f"~{estimated_stories_count} stories"
+                estimated_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx + 200), 
+                                              value=f"<span style=\"font-family: Helvetica; font-size: 8px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;\">{estimated_text}</span>",
+                                              style='text;whiteSpace=wrap;html=1;align=right;verticalAlign=middle;fontColor=default;labelBackgroundColor=none;',
+                                              vertex='1', parent='1')
+                estimated_geom = ET.SubElement(estimated_cell, 'mxGeometry', 
+                                              x=str(epic_x + max(0, epic_width - 60 - self.EPIC_ESTIMATE_RIGHT_MARGIN)), 
+                                              y=str(epic_y - 5), 
+                                              width='60', height='30')
+                estimated_geom.set('as', 'geometry')
+                epic_estimate_geoms[epic_idx] = estimated_geom
+            
+            # Render epic-level users above the epic box
+            if epic_users_to_render:
+                epic_user_y = self.EPIC_Y - self.USER_LABEL_OFFSET  # 130 - 60 = 70
+                epic_user_x_offset = 0
+                
+                for user in epic_users_to_render:
+                    # Check if layout data has coordinates for this epic-level user
+                    user_key = f"{epic['name']}|{user}"
+                    if user_key in layout_data:
+                        user_x = layout_data[user_key]['x']
+                        layout_user_y = layout_data[user_key]['y']
+                        # Only use layout if it's above the epic (y < EPIC_Y + margin)
+                        if layout_user_y < self.EPIC_Y + 50:
+                            user_y = layout_user_y
+                        else:
+                            user_x = epic_x + epic_user_x_offset
+                            user_y = epic_user_y
+                    else:
+                        user_x = epic_x + epic_user_x_offset
+                        user_y = epic_user_y
+                    
+                    user_label = ET.SubElement(root_elem, 'mxCell',
+                                              id=f'user_epic{epic_idx}_{user}',
+                                              value=user,
+                                              style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
+                                              parent='1', vertex='1')
+                    user_geom = ET.SubElement(user_label, 'mxGeometry',
+                                             x=str(user_x),
+                                             y=str(user_y),
+                                             width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
+                    user_geom.set('as', 'geometry')
+                    
+                    epic_user_x_offset += self.STORY_SPACING_X
+                    
+                    # Track epic-level user bounds for epic shrinking
+                    epic_min_x = min(epic_min_x, user_x)
+                    epic_max_x = max(epic_max_x, user_x + self.STORY_WIDTH)
+            
+            # Track rightmost AC position across all features in this epic (for dynamic adjustment)
+            epic_rightmost_ac_x = None
+            
+            # Track bottom Y of each feature for vertical stacking when AC is present
+            feature_bottom_y = {}  # Maps feature index -> bottom Y (including AC boxes)
+            
+            for feat_idx, feat_data in enumerate(feature_positions, 1):
+                feature = feat_data['feature']
+                feat_x = feat_data['x']
+                feat_y = feat_data['y'] + self.SUB_EPIC_VERTICAL_SHIFT
+                feat_width = feat_data['width']
+                feat_height = feat_data['height']
+                use_feature_layout = feat_data.get('use_layout', False)
+                stories_by_seq = feat_data['stories_by_seq']
+                seq_to_position = feat_data['seq_to_position']
+                
+                # Features always use horizontal layout, so Y position is fixed
+                
+                # Initialize feature bounds tracking
+                feature_min_x = float('inf')
+                feature_max_x = -float('inf')
+                # Track sequential story positions separately from nested stories
+                # This prevents "or" connector nested stories from making features excessively wide
+                leftmost_sequential_story_x = float('inf')
+                rightmost_sequential_story_x = -float('inf')
+                
+                # Track story positions for rendering grey background rectangles (story groups)
+                story_positions = {}  # Maps story name -> {'x': x, 'y': y, 'width': width, 'height': height}
+                bg_rectangles_to_insert = []  # Collect grey background rectangles for this feature
+                first_story_cell_ref = None  # Track first story cell to insert backgrounds before it
+                
+                # Collect all users for this feature (epic/feature/story level)
+                all_feature_users = []
+                feature_users = feature.get('users', [])
+                for user in feature_users:
+                    if user not in shown_users:
+                        all_feature_users.append(user)
+                        shown_users.add(user)
+                
+                # Place feature-level users horizontally
+                user_x_offset = 0
+                for user in all_feature_users:
+                    # Check if layout data has coordinates for this feature-level user
+                    user_key = f"{epic['name']}|{feature['name']}|{user}"
+                    if user_key in layout_data:
+                        user_x = layout_data[user_key]['x']
+                        layout_user_y = layout_data[user_key]['y']
+                        # Skip users at top of map (y < 50) - treat as not found, place above feature
+                        if layout_user_y < 50:
+                            user_x = feat_x + user_x_offset
+                            user_y = feat_y - self.USER_LABEL_OFFSET
+                        else:
+                            user_y = layout_user_y
+                    else:
+                        # User has no coordinates (in story graph but not in DrawIO) - place above feature
+                        user_x = feat_x + user_x_offset
+                        user_y = feat_y - self.USER_LABEL_OFFSET
+                    
+                    user_label = ET.SubElement(root_elem, 'mxCell',
+                                              id=f'user_e{epic_idx}f{feat_idx}_{user}',
+                                              value=user,
+                                              style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
+                                              parent='1', vertex='1')
+                    user_geom = ET.SubElement(user_label, 'mxGeometry', 
+                                             x=str(user_x), 
+                                             y=str(user_y),
+                                             width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
+                    user_geom.set('as', 'geometry')
+                    
+                    # Track feature-level user bounds for feature shrinking
+                    feature_min_x = min(feature_min_x, user_x)
+                    feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
+                    
+                    user_x_offset += self.STORY_SPACING_X
+                
+                # Calculate sub-epic story display
+                # For increments: show total_stories in top right
+                # For outline: show estimated_stories as separate text box grouped with sub-epic
+                feature_has_estimated_stories = False
+                feature_estimated_stories_count = 0
+                if is_increments:
+                    # In increments mode: calculate total_stories and show in top right
+                    feature_total_stories = self._calculate_total_stories_for_feature_in_increment(feature)
+                    if feature_total_stories > 0:
+                        feature_story_count_html = self._get_story_count_display_html(feature_total_stories, position='top-right')
+                        feature_story_text = f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{feature['name']}</span>{feature_story_count_html}</div>"
+                    else:
+                        feature_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{feature['name']}</div>"
+                else:
+                    # Outline mode: show estimated_stories as separate text box grouped with feature
+                    if 'estimated_stories' in feature and feature['estimated_stories']:
+                        feature_has_estimated_stories = True
+                        feature_estimated_stories_count = feature['estimated_stories']
+                        feature_story_text = f"<span style=\"border-color: rgb(218, 220, 224); flex: 1 1 0%;\">{feature['name']}</span><div style=\"border-color: rgb(218, 220, 224); position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); z-index: 10;\"></div><div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\"></div>"
+                    elif 'story_count' in feature and feature['story_count']:
+                        # Legacy field support - show in top-right corner
+                        feature_story_count_html = self._get_story_count_display_html(feature['story_count'], position='top-right')
+                        feature_story_text = f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{feature['name']}</span>{feature_story_count_html}</div>"
+                    elif feature.get('stories') and len(feature.get('stories', [])) > 0:
+                        # Stories are fully enumerated (no estimated_stories) - don't show count in feature label
+                        feature_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{feature['name']}</div>"
+                    else:
+                        # No stories and no estimate - show nothing
+                        feature_story_text = f"<div style=\"display: flex; align-items: center; justify-content: center; width: 100%;\">{feature['name']}</div>"
+                
+                # Features are horizontal in exploration mode (when AC is present)
+                # Y position is fixed at FEATURE_Y
+                
+                # Use updated X position from feat_data if it was updated by previous feature
+                actual_feat_x = feat_data.get('x', feat_x)
+                
+                # Create sub-epic with absolute positioning (no groups)
+                if feature_has_estimated_stories and not is_increments:
+                    # Sub-epic cell with absolute positioning
+                    feature_cell = ET.SubElement(root_elem, 'mxCell', 
+                                                 id=f'e{epic_idx}f{feat_idx}',
+                                                 value=feature_story_text,
+                                                 style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
+                                                 parent='1', vertex='1')
+                    feature_geom = ET.SubElement(feature_cell, 'mxGeometry',
+                                                 x=str(actual_feat_x), y=str(feat_y),
+                                                 width=str(feat_width), height=str(feat_height))
+                    feature_geom.set('as', 'geometry')
+                    
+                    # Estimated stories text box with absolute positioning
+                    estimated_text = f"~{feature_estimated_stories_count} stories"
+                    estimated_cell = ET.SubElement(root_elem, 'mxCell', id=str(epic_idx * 1000 + feat_idx * 100 + 10), 
+                                                  value=f"<span style=\"font-family: Helvetica; font-size: 8px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;\">{estimated_text}</span>",
+                                                  style='text;whiteSpace=wrap;html=1;align=right;verticalAlign=middle;fontColor=default;labelBackgroundColor=none;',
+                                                  vertex='1', parent='1')
+                    # Position text box above feature (absolute positioning)
+                    if feat_width < 80:
+                        estimated_x = max(0, actual_feat_x - self.ESTIMATED_TEXT_X_OFFSET)
+                    else:
+                        estimated_x = max(0, actual_feat_x + feat_width - 60 - self.ESTIMATED_TEXT_X_OFFSET)
+                    estimated_geom = ET.SubElement(estimated_cell, 'mxGeometry', 
+                                                  x=str(estimated_x), y=str(feat_y - 5), 
+                                                  width='60', height='30')
+                    estimated_geom.set('as', 'geometry')
+                else:
+                    # No estimated stories - render feature normally
+                    feature_cell = ET.SubElement(root_elem, 'mxCell', 
+                                                 id=f'e{epic_idx}f{feat_idx}',
+                                                 value=feature_story_text,
+                                                 style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
+                                                 parent='1', vertex='1')
+                    feature_geom = ET.SubElement(feature_cell, 'mxGeometry', x=str(actual_feat_x), y=str(feat_y),
+                                 width=str(feat_width), height=str(feat_height))
+                    feature_geom.set('as', 'geometry')
+                
+                # Update feat_x to use actual position for story rendering
+                feat_x = actual_feat_x
+                
+                # Store feature geometry for later shrinking
+                feature_geometries.append({
+                    'geom': feature_geom,
+                    'x': feat_x
+                })
+                
+                story_idx = 1
+                story_user_x_offset = {}  # Track user X position per story row
+                
+                # All features now use story_groups structure
+                feature_story_groups = feature.get('story_groups', [])
+                nested_sub_epics = feature.get('sub_epics', [])
+                if not feature_story_groups and not nested_sub_epics:
+                    # Skip features without story_groups and without nested sub_epics
+                    continue
+                
+                # Track actual bottom of feature (including all groups and stories) - initialize BEFORE story groups loop
+                actual_feature_bottom_y = feat_y + feat_height
+                
+                if True:  # Always use story_groups path
+                    # NEW STRUCTURE: Process story groups
+                    # In exploration mode: filter story_groups to only include groups with stories that have AC
+                    if is_exploration:
+                        filtered_story_groups = []
+                        for group in feature_story_groups:
+                            # Filter stories within group to only those with AC
+                            group_stories = group.get('stories', [])
+                            filtered_group_stories = [
+                                s for s in group_stories
+                                if s.get('acceptance_criteria')
+                            ]
+                            # Only include group if it has stories with AC
+                            if filtered_group_stories:
+                                # Create a copy of the group with filtered stories
+                                filtered_group = group.copy()
+                                filtered_group['stories'] = filtered_group_stories
+                                filtered_story_groups.append(filtered_group)
+                        feature_story_groups = filtered_story_groups
+                    
+                    # Position groups based on connector, and stories within groups based on group type
+                    current_group_x = feat_x + 2  # Start position for first group
+                    current_group_y = feat_y + feat_height + self.STORY_OFFSET_FROM_FEATURE
+                    previous_group_bottom_y = None  # Track bottom of previous group
+                    previous_group_rightmost_x = None  # Track rightmost X of previous group
+                    previous_group_start_x = None  # Track start X of previous group (for "or" connector alignment)
+                    previous_group_has_users = False  # Track if previous group has users (for spacing with "or" connector)
+                    previous_story_users = None
+                    rendered_positions = []  # Track all rendered element positions (x, y, width, height) for collision detection
+                    
+                    # Track shown users at feature/column level - each user should only appear once per column
+                    feature_shown_users = set()
+                    
+                    for group_idx, group in enumerate(feature_story_groups):
+                        group_type = group.get('type', 'and')  # 'and' = horizontal, 'or' = vertical
+                        group_connector = group.get('connector')  # 'and' = horizontal, 'or' = vertical, null = first
+                        group_stories = group.get('stories', [])
+                        
+                        if not group_stories:
+                            continue
+                        
+                        # Position group based on connector
+                        if group_connector is None:
+                            # First group - start at feature start
+                            group_start_x = feat_x + 2
+                            group_start_y = current_group_y
+                        elif group_connector == 'and':
+                            # Horizontal connector - position to the right of previous group
+                            group_start_x = current_group_x
+                            group_start_y = current_group_y  # Same Y as previous group (stories align)
+                            
+                            # Check if this group has users and if any user would collide with existing boxes
+                            current_group_has_users = any(story.get('users') for story in group_stories)
+                            if current_group_has_users:
+                                # Check all users in this group for collisions
+                                collision = False
+                                for check_story_idx, story in enumerate(group_stories):
+                                    if story.get('users'):
+                                        story_x = group_start_x + check_story_idx * self.STORY_SPACING_X
+                                        story_y = group_start_y
+                                        user_y = story_y - self.USER_LABEL_OFFSET
+                                        
+                                        for user_idx, user in enumerate(story.get('users', [])):
+                                            user_x = story_x + user_idx * self.STORY_SPACING_X
+                                            
+                                            # Check for collision with any rendered element
+                                            for (rx, ry, rw, rh) in rendered_positions:
+                                                if (user_x < rx + rw and user_x + 50 > rx and
+                                                    user_y < ry + rh and user_y + 50 > ry):
+                                                    collision = True
+                                                    break
+                                            if collision:
+                                                break
+                                    if collision:
+                                        break
+                                
+                                if collision:
+                                    group_start_y = current_group_y + 20  # Move down to avoid collision
+                                    current_group_y = group_start_y  # Update for next group
+                        elif group_connector == 'or':
+                            # Vertical connector - position below previous group
+                            # "Sticky" X position: align with previous group's start X (not rightmost + spacing)
+                            if previous_group_start_x is not None:
+                                group_start_x = previous_group_start_x  # Align with previous group's start X
+                            else:
+                                group_start_x = feat_x + 2  # Fallback to feature start
+                            
+                            # Check if this group has users and if there's a collision
+                            current_group_has_users = any(story.get('users') for story in group_stories)
+                            extra_spacing = 0
+                            
+                            if current_group_has_users:
+                                # Check if any user in this group would collide with any existing box
+                                # Calculate where each story with users would be positioned
+                                collision = False
+                                for check_story_idx, story in enumerate(group_stories):
+                                    if story.get('users'):
+                                        # Calculate story position based on group type
+                                        if group_type == 'and':
+                                            story_x = group_start_x + check_story_idx * self.STORY_SPACING_X
+                                        else:  # group_type == 'or'
+                                            story_x = group_start_x
+                                        
+                                        if previous_group_bottom_y is not None:
+                                            if group_type == 'and':
+                                                story_y = previous_group_bottom_y + self.STORY_SPACING_Y
+                                            else:  # group_type == 'or'
+                                                story_y = previous_group_bottom_y + self.STORY_SPACING_Y + check_story_idx * self.STORY_SPACING_Y
+                                        else:
+                                            if group_type == 'and':
+                                                story_y = current_group_y + self.STORY_SPACING_Y
+                                            else:  # group_type == 'or'
+                                                story_y = current_group_y + self.STORY_SPACING_Y + check_story_idx * self.STORY_SPACING_Y
+                                        
+                                        # Check each user for this story
+                                        for user_idx, user in enumerate(story.get('users', [])):
+                                            user_x = story_x + user_idx * self.STORY_SPACING_X
+                                            user_y = story_y - self.USER_LABEL_OFFSET
+                                            
+                                            # Check for collision with any rendered element
+                                            for (rx, ry, rw, rh) in rendered_positions:
+                                                # Check if user box (50x50) overlaps with existing element
+                                                if (user_x < rx + rw and user_x + 50 > rx and
+                                                    user_y < ry + rh and user_y + 50 > ry):
+                                                    collision = True
+                                                    break
+                                            
+                                            if collision:
+                                                break
+                                    
+                                    if collision:
+                                        break
+                                
+                                if collision:
+                                    extra_spacing = 20  # Move down to avoid collision
+                            
+                            if previous_group_bottom_y is not None:
+                                # Position below previous group's bottom, with extra spacing only if collision detected
+                                # Small gap (15px) between groups connected with "or"
+                                group_start_y = previous_group_bottom_y + 15 + extra_spacing
+                            else:
+                                # Fallback: use current_group_y
+                                group_start_y = current_group_y + 15 + extra_spacing
+                            current_group_y = group_start_y  # Update for next group
+                        
+                        # Track the bottom of this group for positioning next group
+                        group_bottom_y = group_start_y
+                        
+                        # Sort stories by sequential_order to preserve left-to-right order
+                        sorted_group_stories = sorted(group_stories, key=lambda s: s.get('sequential_order', 999))
+                        
+                        # First pass: Check for user collisions and calculate maximum adjustment needed for group
+                        max_group_adjustment = 0
+                        for story_idx_in_group, story in enumerate(sorted_group_stories):
+                            # Calculate story position based on group type
+                            if group_type == 'and':
+                                story_x = group_start_x + story_idx_in_group * self.STORY_SPACING_X
+                                story_y = group_start_y
+                            else:  # group_type == 'or'
+                                story_x = group_start_x
+                                story_y = group_start_y + story_idx_in_group * self.STORY_SPACING_Y
+                            
+                            # Check if this story has users that would collide
+                            story_users = set(story.get('users', []))
+                            if story_users:
+                                # Check first user (users are only rendered when set changes, so check first one)
+                                initial_user_y = story_y - self.USER_LABEL_OFFSET
+                                user_width = self.STORY_WIDTH
+                                user_height = self.STORY_HEIGHT
+                                
+                                # Check for collision with any rendered element
+                                collision_detected = True
+                                test_user_y = initial_user_y
+                                while collision_detected:
+                                    collision_detected = False
+                                    for (rx, ry, rw, rh) in rendered_positions:
+                                        # Check if user box would overlap with existing element
+                                        if (group_start_x < rx + rw and group_start_x + user_width > rx and
+                                            test_user_y < ry + rh and test_user_y + user_height > ry):
+                                            collision_detected = True
+                                            test_user_y += 10
+                                            break
+                                
+                                # Calculate adjustment needed
+                                adjustment = test_user_y - initial_user_y
+                                if adjustment > 0:
+                                    # User would need to move down, so story needs to move down too
+                                    # Calculate new story position: user_bottom + 10px gap
+                                    new_user_bottom = test_user_y + user_height
+                                    new_story_y = new_user_bottom + 10
+                                    story_adjustment = new_story_y - story_y
+                                    max_group_adjustment = max(max_group_adjustment, story_adjustment)
+                        
+                        # Adjust group_start_y if any story needs to move down
+                        if max_group_adjustment > 0:
+                            group_start_y += max_group_adjustment
+                            # Recalculate group_bottom_y
+                            if group_type == 'and':
+                                group_bottom_y = group_start_y
+                            else:  # group_type == 'or'
+                                group_bottom_y = group_start_y + (len(sorted_group_stories) - 1) * self.STORY_SPACING_Y
+                        
+                        # Position stories within group based on group type
+                        story_x = group_start_x
+                        story_y = group_start_y
+                        
+                        for story_idx_in_group, story in enumerate(sorted_group_stories):
+                            # Always calculate position based on sequential_order and group type
+                            # Don't use layout_data for stories to ensure correct left-to-right ordering
+                            if group_type == 'and':
+                                # Horizontal layout - stories go left to right
+                                story_x = group_start_x + story_idx_in_group * self.STORY_SPACING_X
+                                story_y = group_start_y
+                            else:  # group_type == 'or'
+                                # Vertical layout - stories go top to bottom
+                                story_x = group_start_x
+                                story_y = group_start_y + story_idx_in_group * self.STORY_SPACING_Y
+                            
+                            # Render users for this story - only show each user once per column/feature
+                            story_users = set(story.get('users', []))
+                            new_story_users = []
+                            # Only render users that haven't been shown in this feature/column yet
+                            for user in story_users:
+                                if user not in feature_shown_users:
+                                    new_story_users.append(user)
+                                    feature_shown_users.add(user)
+                            
+                            previous_story_users = story_users
+                            
+                            # Render users
+                            user_bottom_y = None  # Track the bottom of the rightmost/lowest user
+                            if new_story_users:
+                                for user_idx, user in enumerate(new_story_users):
+                                    user_key = f"{epic['name']}|{feature['name']}|{story['name']}|{user}"
+                                    initial_user_y = story_y - self.USER_LABEL_OFFSET
+                                    if user_key in layout_data:
+                                        user_x = layout_data[user_key]['x']
+                                        layout_user_y = layout_data[user_key]['y']
+                                        if layout_user_y < 50:
+                                            user_x = story_x  # Align user with story's x position
+                                            user_y = initial_user_y
+                                        else:
+                                            user_y = layout_user_y
+                                    else:
+                                        user_x = story_x  # Align user with story's x position
+                                        user_y = initial_user_y
+                                    
+                                    # Check for collision with any rendered element and adjust position if needed
+                                    user_width = self.STORY_WIDTH
+                                    user_height = self.STORY_HEIGHT
+                                    collision_detected = True
+                                    while collision_detected:
+                                        collision_detected = False
+                                        for (rx, ry, rw, rh) in rendered_positions:
+                                            # Check if user box overlaps with existing element
+                                            if (user_x < rx + rw and user_x + user_width > rx and
+                                                user_y < ry + rh and user_y + user_height > ry):
+                                                collision_detected = True
+                                                # Move user down by 10px to avoid collision
+                                                user_y += 10
+                                                break
+                                    
+                                    user_label = ET.SubElement(root_elem, 'mxCell',
+                                                              id=f'user_e{epic_idx}f{feat_idx}s{story_idx}_{user}',
+                                                              value=user,
+                                                              style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
+                                                              parent='1', vertex='1')
+                                    user_geom = ET.SubElement(user_label, 'mxGeometry',
+                                                             x=str(user_x), y=str(user_y),
+                                                             width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
+                                    user_geom.set('as', 'geometry')
+                                    
+                                    # Track user position for collision detection
+                                    rendered_positions.append((user_x, user_y, self.STORY_WIDTH, self.STORY_HEIGHT))
+                                    
+                                    # Track the bottom of the rightmost/lowest user
+                                    if user_bottom_y is None or user_y + user_height > user_bottom_y:
+                                        user_bottom_y = user_y + user_height
+                                    
+                                    feature_min_x = min(feature_min_x, user_x)
+                                    feature_max_x = max(feature_max_x, user_x + self.STORY_WIDTH)
+                            
+                            # Adjust story position if user was moved down (user_bottom_y is below the expected story position)
+                            if user_bottom_y is not None and user_bottom_y > story_y:
+                                # User moved down due to collision - position story below user with proper spacing
+                                story_y = user_bottom_y + 10  # 10px gap below user
+                            
+                            # Render story
+                            story_cell = ET.SubElement(root_elem, 'mxCell',
+                                                       id=f'e{epic_idx}f{feat_idx}s{story_idx}',
+                                                       value=story['name'],
+                                                       style=self._get_story_style(story),
+                                                       parent='1', vertex='1')
+                            story_geom = ET.SubElement(story_cell, 'mxGeometry',
+                                                       x=str(story_x), y=str(story_y),
+                                                       width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
+                            story_geom.set('as', 'geometry')
+                            
+                            # Track story position for collision detection
+                            rendered_positions.append((story_x, story_y, self.STORY_WIDTH, self.STORY_HEIGHT))
+                            
+                            # Track first story cell for inserting background rectangles before it
+                            if first_story_cell_ref is None:
+                                first_story_cell_ref = story_cell
+                            
+                            # Track story position for grey background rectangles
+                            story_positions[story['name']] = {
+                                'x': story_x,
+                                'y': story_y,
+                                'width': self.STORY_WIDTH,
+                                'height': self.STORY_HEIGHT
+                            }
+                            
+                            # Track bounds
+                            feature_min_x = min(feature_min_x, story_x)
+                            feature_max_x = max(feature_max_x, story_x + self.STORY_WIDTH)
+                            leftmost_sequential_story_x = min(leftmost_sequential_story_x, story_x)
+                            rightmost_sequential_story_x = max(rightmost_sequential_story_x, story_x + self.STORY_WIDTH)
+                            
+                            # Render acceptance criteria if in exploration mode
+                            if is_exploration:
+                                steps = story.get('acceptance_criteria', [])
+                                # Sort by sequential_order to ensure top-to-bottom rendering order
+                                if steps and isinstance(steps[0], dict) and 'sequential_order' in steps[0]:
+                                    steps = sorted(steps, key=lambda s: s.get('sequential_order', 999))
+                                if steps:
+                                    acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10
+                                    # Render all AC boxes in order
+                                    for ac_box_idx in range(len(steps)):
+                                        acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, ac_box_idx)
+                                        if not acceptance_text:
+                                            break  # No more content to render
+                                        
+                                        ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
+                                        if ac_key in layout_data:
+                                            ac_x = layout_data[ac_key]['x']
+                                            ac_y = layout_data[ac_key]['y']
+                                            ac_width = layout_data[ac_key].get('width', ac_width)
+                                        else:
+                                            ac_x = story_x
+                                            ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                        
+                                        ac_cell = ET.SubElement(root_elem, 'mxCell',
+                                                               id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
+                                                               value=acceptance_text,
+                                                               style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
+                                                               parent='1', vertex='1')
+                                        ac_geom = ET.SubElement(ac_cell, 'mxGeometry',
+                                                               x=str(ac_x), y=str(ac_y),
+                                                               width=str(ac_width), height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
+                                        ac_geom.set('as', 'geometry')
+                                        
+                                        feature_min_x = min(feature_min_x, ac_x)
+                                        feature_max_x = max(feature_max_x, ac_x + ac_width)
+                                        if epic_rightmost_ac_x is None or (ac_x + ac_width) > epic_rightmost_ac_x:
+                                            epic_rightmost_ac_x = ac_x + ac_width
+                            
+                            story_idx += 1
+                            
+                            # Update group bottom Y (track the bottommost story in this group)
+                            group_bottom_y = max(group_bottom_y, story_y + self.STORY_HEIGHT)
+                            
+                            # Track bottom Y including AC boxes for vertical feature stacking
+                            if is_exploration and ac_box_idx > 0:
+                                # AC boxes extend below stories
+                                last_ac_y = acceptance_criteria_y + (ac_box_idx - 1) * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                group_bottom_y = max(group_bottom_y, last_ac_y + self.ACCEPTANCE_CRITERIA_HEIGHT)
+                        
+                        # Calculate rightmost position of this group for next group positioning
+                        group_rightmost_x = group_start_x
+                        if group_type == 'and':
+                            # Horizontal group - rightmost story is last story
+                            if sorted_group_stories:
+                                last_story_idx = len(sorted_group_stories) - 1
+                                group_rightmost_x = group_start_x + last_story_idx * self.STORY_SPACING_X + self.STORY_WIDTH
+                        else:
+                            # Vertical group - rightmost is just the story width
+                            group_rightmost_x = group_start_x + self.STORY_WIDTH
+                        
+                        # Check if this group has users (for spacing with next group if it has "or" connector)
+                        group_has_users = any(story.get('users') for story in group_stories)
+                        
+                        # Update current_group_x, previous_group_bottom_y, previous_group_rightmost_x, previous_group_start_x, and previous_group_has_users for next group
+                        if group_connector == 'and':
+                            # Horizontal connector - position next group to the right
+                            # Use smaller spacing for group-to-group horizontal spacing
+                            current_group_x = group_rightmost_x + self.FEATURE_SPACING_X
+                            # Keep same Y for next group
+                            previous_group_bottom_y = group_bottom_y
+                            previous_group_rightmost_x = group_rightmost_x
+                            previous_group_start_x = group_start_x  # Track start X for potential "or" connector
+                            previous_group_has_users = group_has_users  # Track if this group has users
+                        elif group_connector == 'or':
+                            # Vertical connector - next group goes below, but maintain X position
+                            # Don't reset current_group_x - it will be used if next group has connector 'and'
+                            # Update Y for next group based on this group's bottom
+                            previous_group_bottom_y = group_bottom_y
+                            previous_group_rightmost_x = group_rightmost_x
+                            previous_group_start_x = group_start_x  # Track start X for potential "or" connector
+                            previous_group_has_users = group_has_users  # Track if this group has users
+                        else:  # group_connector is None (first group)
+                            # First group - update for next group
+                            # Use smaller spacing for group-to-group horizontal spacing
+                            current_group_x = group_rightmost_x + self.FEATURE_SPACING_X
+                            previous_group_bottom_y = group_bottom_y
+                            previous_group_rightmost_x = group_rightmost_x
+                            previous_group_start_x = group_start_x  # Track start X for potential "or" connector
+                            previous_group_has_users = group_has_users  # Track if this group has users
+                            previous_group_start_x = group_start_x  # Track start X for potential "or" connector
+                        
+                        # Track feature bottom Y (including all groups and AC boxes) for vertical stacking
+                        if is_exploration:
+                            # Track the bottommost Y of this feature (including AC boxes)
+                            if feat_idx not in feature_bottom_y:
+                                feature_bottom_y[feat_idx] = feat_y + feat_height
+                            feature_bottom_y[feat_idx] = max(feature_bottom_y[feat_idx], group_bottom_y + 20)
+                        
+                        # Update actual feature bottom (for nested sub-epic positioning)
+                        # This tracks the bottommost story group - group_bottom_y already includes story height
+                        actual_feature_bottom_y = max(actual_feature_bottom_y, group_bottom_y)
+                    
+                    # Render grey background rectangles for story groups (non-exploration mode only)
+                    if feature_story_groups and story_positions and not is_exploration:
+                        # Find highest ID to start new IDs from
+                        max_id = 0
+                        for cell in root_elem.findall('.//mxCell'):
+                            cell_id = cell.get('id', '')
+                            if cell_id and cell_id.replace('_', '').isdigit():
+                                try:
+                                    max_id = max(max_id, int(cell_id.replace('_', '')))
+                                except ValueError:
+                                    pass
+                        
+                        bg_rect_id = max_id + 1
+                        padding = 5  # Padding around stories
+                        
+                        for group_idx, group in enumerate(feature_story_groups):
+                            group_stories = group.get('stories', [])
+                            if len(group_stories) < 2:
+                                continue  # Only render rectangles for groups with 2+ stories
+                            
+                            # Find bounding box for stories in this group
+                            group_story_positions = []
+                            for story in group_stories:
+                                story_name = story.get('name')
+                                if story_name in story_positions:
+                                    group_story_positions.append(story_positions[story_name])
+                            
+                            if len(group_story_positions) < 2:
+                                continue  # Need at least 2 stories with positions to draw a rectangle
+                            
+                            # Calculate bounding box
+                            min_x = min(pos['x'] for pos in group_story_positions) - padding
+                            max_x = max(pos['x'] + pos['width'] for pos in group_story_positions) + padding
+                            min_y = min(pos['y'] for pos in group_story_positions) - padding
+                            max_y = max(pos['y'] + pos['height'] for pos in group_story_positions) + padding
+                            
+                            rect_width = max_x - min_x
+                            rect_height = max_y - min_y
+                            
+                            # Create grey background rectangle element
+                            bg_rect = ET.Element('mxCell',
+                                                id=str(bg_rect_id),
+                                                value='',
+                                                style='rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;',
+                                                parent='1', vertex='1')
+                            bg_geom = ET.SubElement(bg_rect, 'mxGeometry',
+                                                    x=str(min_x), y=str(min_y),
+                                                    width=str(rect_width), height=str(rect_height))
+                            bg_geom.set('as', 'geometry')
+                            
+                            bg_rectangles_to_insert.append((bg_rect_id, bg_rect))
+                            bg_rect_id += 1
+                        
+                        # Insert background rectangles into XML (behind everything, so insert before first story/user)
+                        # In DrawIO XML, elements that appear earlier are drawn behind later elements
+                        # Insert right after the sub-epic cell, before any users or stories
+                        if bg_rectangles_to_insert:
+                            # Find the sub-epic cell for this feature
+                            feature_cell_id = f'e{epic_idx}f{feat_idx}'
+                            children = list(root_elem)
+                            feature_cell = None
+                            for child in children:
+                                if child.get('id') == feature_cell_id:
+                                    feature_cell = child
+                                    break
+                            
+                            if feature_cell is not None:
+                                # Insert backgrounds right after the sub-epic cell
+                                feature_index = children.index(feature_cell)
+                                # Insert in reverse order so first group is at the back
+                                for bg_rect_id, bg_rect in reversed(bg_rectangles_to_insert):
+                                    root_elem.insert(feature_index + 1, bg_rect)
+                            elif first_story_cell_ref is not None:
+                                # Fallback: insert before first story/user cell
+                                try:
+                                    first_story_index = children.index(first_story_cell_ref)
+                                    for bg_rect_id, bg_rect in reversed(bg_rectangles_to_insert):
+                                        root_elem.insert(first_story_index, bg_rect)
+                                except ValueError:
+                                    # Last resort: append at end
+                                    for bg_rect_id, bg_rect in bg_rectangles_to_insert:
+                                        root_elem.append(bg_rect)
+                    elif bg_rectangles_to_insert:
+                        # No stories rendered, just append backgrounds
+                        for bg_rect_id, bg_rect in bg_rectangles_to_insert:
+                            root_elem.append(bg_rect)
+                    
+                    # Update feature geometry width and calculate next feature X position (if not using layout)
+                    # Calculate feature width from feature_max_x
+                    if not use_feature_layout:
+                        # Use rightmost_sequential_story_x if available, otherwise feature_max_x
+                        rightmost_x = rightmost_sequential_story_x if rightmost_sequential_story_x > -float('inf') else feature_max_x
+                        if rightmost_x > -float('inf'):
+                            # Calculate actual feature width (including AC boxes if present)
+                            actual_feature_rightmost = max(rightmost_x, epic_rightmost_ac_x if epic_rightmost_ac_x else rightmost_x)
+                            # Add padding
+                            actual_feature_rightmost += 20
+                            
+                            # Update feature position to align with stories (absolute positioning, no groups)
+                            if feature_min_x < float('inf'):
+                                # Position feature at leftmost story, width spans to rightmost story + padding
+                                feature_x = feature_min_x
+                                actual_feature_width = actual_feature_rightmost - feature_min_x
+                                
+                                # Shift first sub-epic in each epic left by configured pixels (but maintain alignment with stories)
+                                if feat_idx == 1:
+                                    feature_x = feature_min_x - self.FIRST_SUB_EPIC_LEFT_SHIFT
+                                    # Adjust width to maintain right edge alignment
+                                    actual_feature_width = actual_feature_rightmost - feature_x
+                            else:
+                                # Fallback: use original position
+                                feature_x = feat_x
+                                actual_feature_width = actual_feature_rightmost - feat_x
+                            
+                            # Update feature geometry position and width
+                            feature_geom.set('x', str(feature_x))
+                            feature_geom.set('width', str(actual_feature_width))
+                        else:
+                            # Fallback: use a default width if no stories were rendered
+                            default_width = 282  # Default feature width
+                            actual_feature_width = default_width
+                            feature_geom.set('width', str(default_width))
+                        
+                        # Calculate next feature X position based on actual rendered width
+                        # Use updated feature_x if it was changed, otherwise use original feat_x
+                        if feature_min_x < float('inf'):
+                            actual_feature_rightmost = feature_x + actual_feature_width
+                        else:
+                            actual_feature_rightmost = feat_x + actual_feature_width
+                        # Update feat_data so next iteration uses correct position
+                        feat_data['x'] = feature_x if feature_min_x < float('inf') else feat_x
+                        feat_data['width'] = actual_feature_width  # Update width
+                        # Update current_feature_x for next feature (used in first loop for next epic)
+                        next_feature_x = actual_feature_rightmost + self.FEATURE_SPACING_X
+                        current_feature_x = next_feature_x
+                        
+                        # Update next feature's X position in feature_positions
+                        # feat_idx is 1-based, so next feature is at index feat_idx in the list (0-based)
+                        if feat_idx < len(feature_positions):
+                            next_feat_data = feature_positions[feat_idx]
+                            if not next_feat_data.get('use_layout', False):
+                                # Update next feature's X position in feat_data
+                                # This will be used when we render that feature (it checks feat_data.get('x'))
+                                next_feat_data['x'] = next_feature_x
+                                # Also update the geometry X position if it's already been created
+                                # Geometry is created at line 838, before stories are rendered
+                                # So we need to find it and update it
+                                next_feat_cell_id = f'e{epic_idx}f{feat_idx + 1}'
+                                # Search through all cells to find the next feature's geometry
+                                for cell in root_elem.iter():
+                                    if cell.get('id') == next_feat_cell_id:
+                                        # Found the feature cell, now find its geometry
+                                        geom = cell.find('mxGeometry')
+                                        if geom is not None:
+                                            geom.set('x', str(next_feature_x))
+                                            # Also update feat_x for story rendering
+                                            next_feat_data['x'] = next_feature_x
+                                        break
+                
+                # All features now use story_groups structure - legacy path removed
+                
+                # Grey background rectangles are rendered above (in the story_groups rendering section)
+                        
+                        # Render acceptance criteria below story in exploration mode
+                        if is_exploration:
+                            steps = story.get('acceptance_criteria', []) or story.get('Steps', []) or story.get('steps', [])
+                            # Sort by sequential_order to ensure top-to-bottom rendering order
+                            if steps and isinstance(steps[0], dict) and 'sequential_order' in steps[0]:
+                                steps = sorted(steps, key=lambda s: s.get('sequential_order', 999))
+                            if steps:
+                                # Render acceptance criteria boxes below the story
+                                acceptance_criteria_y = story_y + self.STORY_HEIGHT + 10  # Start below story
+                                
+                                # Render all AC boxes in order
+                                for ac_box_idx in range(len(steps)):
+                                    acceptance_text, ac_width = self._format_steps_as_acceptance_criteria(steps, ac_box_idx)
+                                    if not acceptance_text:
+                                        break  # No more content to render
+                                    
+                                    # Check if layout data exists for this acceptance criteria
+                                    ac_key = f"{epic['name']}|{feature['name']}|{story['name']}|AC{ac_box_idx}"
+                                    if ac_key in layout_data:
+                                        ac_x = layout_data[ac_key]['x']
+                                        ac_y = layout_data[ac_key]['y']
+                                        # Use layout width if provided, otherwise use calculated
+                                        ac_width = layout_data[ac_key].get('width', ac_width)
+                                    else:
+                                        # AC boxes align with their story (same X position)
+                                        ac_x = story_x
+                                        ac_y = acceptance_criteria_y + ac_box_idx * self.ACCEPTANCE_CRITERIA_SPACING_Y
+                                    
+                                    # Create acceptance criteria box (rectangle, not square)
+                                    ac_cell = ET.SubElement(root_elem, 'mxCell',
+                                                           id=f'ac_e{epic_idx}f{feat_idx}s{story_idx}_{ac_box_idx}',
+                                                           value=acceptance_text,
+                                                           style='rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;',
+                                                           parent='1', vertex='1')
+                                    ac_geom = ET.SubElement(ac_cell, 'mxGeometry',
+                                                           x=str(ac_x), y=str(ac_y),
+                                                           width=str(ac_width),
+                                                           height=str(self.ACCEPTANCE_CRITERIA_HEIGHT))
+                                    ac_geom.set('as', 'geometry')
+                                    
+                                    # Track acceptance criteria bounds for feature expansion
+                                    feature_min_x = min(feature_min_x, ac_x)
+                                    feature_max_x = max(feature_max_x, ac_x + ac_width)
+                                    
+                                    # Track rightmost AC position for this epic (for epic width calculation)
+                                    if epic_rightmost_ac_x is None or (ac_x + ac_width) > epic_rightmost_ac_x:
+                                        epic_rightmost_ac_x = ac_x + ac_width
+                            
+                        story_idx += 1
+                    
+                    # Optional stories are now handled through story_groups
+                
+                # Grey background rectangles are rendered in the story_groups section above
+                
+                # Shrink feature to fit actual story bounds (with padding) - only if not using layout
+                if use_feature_layout:
+                    # Use stored feature coordinates and dimensions - don't shrink
+                    # Track feature bounds for epic shrinking (use stored position)
+                    epic_min_x = min(epic_min_x, feat_x)
+                    epic_max_x = max(epic_max_x, feat_x + feat_width)
+                    # Update previous_feature_rightmost_x for next feature positioning
+                    feature_rightmost = feat_x + feat_width
+                    if previous_feature_rightmost_x is None or feature_rightmost > previous_feature_rightmost_x:
+                        previous_feature_rightmost_x = feature_rightmost
+                elif feature_min_x != float('inf') and feature_max_x != -float('inf'):
+                    # In exploration mode, feature should span from epic_x to rightmost AC box + padding
+                    # Otherwise, calculate from min/max story bounds
+                    if is_exploration:
+                        # Feature aligns with epic and spans to rightmost AC + padding
+                        # Padding is 30px for first epic's feature, 6px for subsequent epics' features (to match expected layout)
+                        actual_feature_x = epic_x
+                        # Calculate padding: if feature_max_x is close to epic end, use smaller padding
+                        # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
+                        feature_padding = 30 if epic_idx == 1 else 6
+                        # Constrain to sequential stories if available, otherwise use full feature_max_x
+                        if rightmost_sequential_story_x != -float('inf') and leftmost_sequential_story_x != float('inf'):
+                            # Use sequential story positions to constrain feature width
+                            constrained_max_x = max(rightmost_sequential_story_x, epic_rightmost_ac_x if epic_rightmost_ac_x is not None else rightmost_sequential_story_x)
+                            actual_feature_width = constrained_max_x - epic_x + feature_padding
+                        else:
+                            actual_feature_width = feature_max_x - epic_x + feature_padding
+                    else:
+                        # Constrain feature width to sequential story positions ONLY, not nested story positions
+                        # This prevents "or" connector nested stories from making features excessively wide
+                        # ALWAYS use sequential story positions for width calculation - never use nested story positions
+                        if rightmost_sequential_story_x != -float('inf') and leftmost_sequential_story_x != float('inf'):
+                            # Use sequential story positions to constrain feature width
+                            constrained_feature_min_x = leftmost_sequential_story_x
+                            constrained_feature_max_x = rightmost_sequential_story_x
+                            actual_feature_width = constrained_feature_max_x - constrained_feature_min_x + 20  # Add padding
+                            calculated_feature_x = constrained_feature_min_x - 10  # Adjust X to align with stories
+                        else:
+                            # Fallback: if no sequential stories, use initial calculated width from max_position
+                            # This prevents features from becoming too wide when only nested stories exist
+                            if 'max_position' in locals() and max_position >= 0:
+                                # Use the original width calculation based on sequential story count
+                                actual_feature_width = (max_position + 1) * self.STORY_SPACING_X + 20
+                                calculated_feature_x = feat_x  # Keep original X position
+                            else:
+                                # Last resort: use feature bounds but cap at reasonable width
+                                actual_feature_width = min(feature_max_x - feature_min_x + 20, 600)  # Cap at 600px
+                                calculated_feature_x = feature_min_x - 10  # Adjust X to align with stories
+                        actual_feature_x = max(feat_x, calculated_feature_x)  # Ensure we don't move left
+                        
+                        # Shift first sub-epic in each epic left by configured pixels
+                        if feat_idx == 1:
+                            actual_feature_x = max(feat_x - self.FIRST_SUB_EPIC_LEFT_SHIFT,
+                                                   calculated_feature_x - self.FIRST_SUB_EPIC_LEFT_SHIFT)
+                            # Adjust width to maintain right edge alignment
+                            actual_feature_width = actual_feature_width + (
+                                actual_feature_x - max(feat_x, calculated_feature_x))
+                    
+                    feature_geometries[-1]['geom'].set('width', str(actual_feature_width))
+                    feature_geometries[-1]['geom'].set('x', str(actual_feature_x))
+                    
+                    # Update previous_feature_rightmost_x with actual rightmost position (including AC cards)
+                    # This will be used to position the next feature
+                    actual_feature_rightmost = actual_feature_x + actual_feature_width
+                    if previous_feature_rightmost_x is None or actual_feature_rightmost > previous_feature_rightmost_x:
+                        previous_feature_rightmost_x = actual_feature_rightmost
+                    
+                    # Update current_feature_x for next feature positioning (if not using layout)
+                    # This ensures next feature doesn't overlap with current feature
+                    # Always use horizontal layout
+                    if not use_feature_layout:
+                        current_feature_x = actual_feature_rightmost + self.FEATURE_SPACING_X
+                    
+                    # Track feature bounds for epic shrinking (use actual shrunk position)
+                    epic_min_x = min(epic_min_x, actual_feature_x)
+                    epic_max_x = max(epic_max_x, actual_feature_x + actual_feature_width)
+                else:
+                    # No stories, use original width
+                    epic_min_x = min(epic_min_x, feat_x)
+                    epic_max_x = max(epic_max_x, feat_x + feat_width)
+                    # Update previous_feature_rightmost_x for next feature positioning
+                    feature_rightmost = feat_x + feat_width
+                    if previous_feature_rightmost_x is None or feature_rightmost > previous_feature_rightmost_x:
+                        previous_feature_rightmost_x = feature_rightmost
+                    
+                    # Track feature bottom Y for vertical stacking when AC is present
+                    if is_exploration:
+                        if feat_idx not in feature_bottom_y:
+                            feature_bottom_y[feat_idx] = feat_y + feat_height
+                
+                # Features always use horizontal layout, so no need to update current_feature_y
+            
+            # Update epic_max_x to include AC cards if present (features already expand to fit AC)
+            # Only update if in exploration mode - in normal mode, features are already constrained to sequential stories
+            # Constrain epic_rightmost_ac_x to not exceed the rightmost feature position to prevent nested story AC from expanding epic width
+            if epic_rightmost_ac_x is not None and is_exploration:
+                # Don't let AC from nested stories expand epic beyond feature bounds
+                feature_rights = [float(fg['geom'].get('x', 0)) + float(fg['geom'].get('width', 0)) 
+                                 for fg in feature_geometries if fg.get('geom')]
+                max_feature_right = max(feature_rights) if feature_rights else epic_max_x
+                constrained_ac_x = min(epic_rightmost_ac_x, max_feature_right + 100)  # Allow some AC expansion but cap it
+                epic_max_x = max(epic_max_x, constrained_ac_x)
+            
+            # Shrink epic to fit actual feature bounds (with padding) - only if not using layout
+            if use_epic_layout:
+                # Use stored epic coordinates and dimensions - don't shrink
+                # Update x_pos for next epic using stored epic width
+                # In exploration mode, use 30px spacing between epics to match expected layout
+                epic_spacing = 30 if is_exploration else 20
+                x_pos = epic_x + epic_width + epic_spacing
+            elif epic_min_x != float('inf') and epic_max_x != -float('inf'):
+                # In exploration mode, epic should span from epic_x to rightmost AC box + padding
+                # Otherwise, calculate from min/max feature bounds
+                if is_exploration and epic_rightmost_ac_x is not None:
+                    # Epic spans from epic_x to rightmost AC + padding
+                    # Constrain AC position to not exceed feature bounds too much
+                    feature_rights = [float(fg['geom'].get('x', 0)) + float(fg['geom'].get('width', 0)) 
+                                     for fg in feature_geometries if fg.get('geom')]
+                    max_feature_right = max(feature_rights) if feature_rights else epic_max_x
+                    constrained_ac_x = min(epic_rightmost_ac_x, max_feature_right + 100)  # Allow some AC expansion but cap it
+                    # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = constrained_ac_x - epic_x + epic_padding
+                    actual_epic_x = epic_x
+                else:
+                    # Calculate width from actual rendered bounds
+                    # epic_min_x starts at epic_x, epic_max_x tracks rightmost content
+                    # When sub_epics (features) are present, epic width should be exactly the width of its sub-epics (no padding)
+                    # This prevents epics from becoming too wide when "or" connector nested stories extend horizontally
+                    actual_epic_width = epic_max_x - epic_min_x  # No padding - epic should match sub-epic width exactly
+                    actual_epic_x = epic_x  # Keep epic at its original position (first feature aligns to epic, not vice versa)
+                    # Ensure minimum width
+                    if actual_epic_width < 100:
+                        actual_epic_width = 100
+                epic_geom.set('width', str(actual_epic_width))
+                estimated_geom = epic_estimate_geoms.get(epic_idx)
+                if estimated_geom is not None:
+                    estimated_x = actual_epic_x + max(0, actual_epic_width - 60 - self.EPIC_ESTIMATE_RIGHT_MARGIN)
+                    estimated_geom.set('x', str(estimated_x))
+                    estimated_geom.set('y', str(epic_y - 5))
+                # Only set x if epic is NOT in a group (if parent is not a group ID)
+                epic_parent = epic_cell.get('parent', '')
+                if not epic_parent or epic_parent == '1' or epic_parent == 'epic-group':
+                    # Epic is not in a group - set absolute x
+                    epic_geom.set('x', str(actual_epic_x))
+                # If epic is in a group (parent is like "101", "102"), don't set x - it's relative to group
+                
+                # Update x_pos for next epic using actual epic width
+                # In exploration mode, use 30px spacing between epics to match expected layout
+                epic_spacing = 30 if is_exploration else 20
+                x_pos = actual_epic_x + actual_epic_width + epic_spacing
+            else:
+                # Fallback to original calculation
+                x_pos += epic_width + 20
+        
+        # Right-align epics: DISABLED - this was causing epics to be positioned incorrectly
+        # Epics should be positioned left-to-right based on their actual content width
+        # epic_cells = root_elem.findall('.//mxCell[@parent="epic-group"]')
+        epic_cells = []  # Disabled - set to empty list
+        if False and epic_cells:
+            max_right_edge = 0
+            epic_data = []
+            for epic_cell in epic_cells:
+                epic_geom = epic_cell.find('mxGeometry')
+                if epic_geom is not None:
+                    epic_x = float(epic_geom.get('x', 0))
+                    epic_width = float(epic_geom.get('width', 0))
+                    right_edge = epic_x + epic_width
+                    max_right_edge = max(max_right_edge, right_edge)
+                    epic_id = epic_cell.get('id', '')
+                    # Collect all features in this epic
+                    features = []
+                    for feature_cell in root_elem.findall(f'.//mxCell[@parent="{epic_id}"]'):
+                        feature_geom = feature_cell.find('mxGeometry')
+                        if feature_geom is not None:
+                            feat_x = float(feature_geom.get('x', 0))
+                            feat_width = float(feature_geom.get('width', 0))
+                            features.append((feature_cell, feature_geom, feat_x, feat_width))
+                    # Sort features by X position (left to right)
+                    features.sort(key=lambda f: f[2])
+                    epic_data.append((epic_cell, epic_geom, epic_x, epic_width, epic_id, features))
+            
+            # Reposition all epics so their right edges align
+            for epic_cell, epic_geom, old_epic_x, epic_width, epic_id, features in epic_data:
+                new_epic_x = max_right_edge - epic_width
+                epic_geom.set('x', str(new_epic_x))
+                
+                # Position features: first feature at left edge, last feature at right edge
+                if len(features) > 0:
+                    # First feature aligns to left edge of epic
+                    first_feat_cell, first_feat_geom, first_feat_x, first_feat_width = features[0]
+                    first_feat_geom.set('x', str(new_epic_x + 10))  # 10px padding from left
+                    
+                    # Last feature aligns to right edge of epic
+                    if len(features) > 1:
+                        last_feat_cell, last_feat_geom, last_feat_x, last_feat_width = features[-1]
+                        last_feat_right = new_epic_x + epic_width - 10  # 10px padding from right
+                        last_feat_geom.set('x', str(last_feat_right - last_feat_width))
+                        
+                        # Distribute middle features evenly between first and last
+                        if len(features) > 2:
+                            first_feat_right = new_epic_x + 10 + first_feat_width
+                            last_feat_left = last_feat_right - last_feat_width
+                            available_width = last_feat_left - first_feat_right
+                            middle_features = features[1:-1]
+                            if len(middle_features) > 0:
+                                spacing = available_width / (len(middle_features) + 1)
+                                for idx, (feat_cell, feat_geom, old_feat_x, feat_width) in enumerate(middle_features):
+                                    new_feat_x = first_feat_right + (idx + 1) * spacing
+                                    feat_geom.set('x', str(new_feat_x))
+                    
+                    # Update all stories and AC cards within features
+                    for feat_cell, feat_geom, old_feat_x, feat_width in features:
+                        new_feat_x = float(feat_geom.get('x', 0))
+                        feat_x_offset = new_feat_x - old_feat_x
+                        feature_id = feat_cell.get('id', '')
+                        for story_cell in root_elem.findall(f'.//mxCell[@parent="{feature_id}"]'):
+                            story_geom = story_cell.find('mxGeometry')
+                            if story_geom is not None:
+                                story_x = float(story_geom.get('x', 0))
+                                new_story_x = story_x + feat_x_offset
+                                story_geom.set('x', str(new_story_x))
+        
+        # Update epic-group width to span all epics (for exploration mode)
+        if is_exploration:
+            # Find rightmost epic position
+            epic_group_rightmost = 0
+            for epic_cell in root_elem.findall('.//mxCell[@parent="epic-group"]'):
+                epic_geom = epic_cell.find('mxGeometry')
+                if epic_geom is not None:
+                    epic_x = float(epic_geom.get('x', 0))
+                    epic_width = float(epic_geom.get('width', 0))
+                    epic_group_rightmost = max(epic_group_rightmost, epic_x + epic_width)
+            # Update epic-group geometry to span all epics
+            if epic_group_rightmost > 0:
+                epic_group_geom.set('width', str(epic_group_rightmost))
+                epic_group_geom.set('height', '190')  # Match expected height
+        
+        # Insert all background rectangles right after root cells (id='0' and id='1'), before epic-group
+        # This ensures backgrounds are behind all other elements
+        if all_background_rectangles:
+            # Find epic-group element to insert before it
+            epic_group_elem = root_elem.find(".//mxCell[@id='epic-group']")
+            if epic_group_elem is not None:
+                # Get index of epic-group
+                epic_group_index = list(root_elem).index(epic_group_elem)
+                # Insert all backgrounds in reverse order (so first one is at the back)
+                for bg_rect_id, bg_rect in reversed(all_background_rectangles):
+                    root_elem.insert(epic_group_index, bg_rect)
+            else:
+                # Fallback: insert after id='1' cell
+                id1_elem = root_elem.find(".//mxCell[@id='1']")
+                if id1_elem is not None:
+                    id1_index = list(root_elem).index(id1_elem)
+                    for bg_rect_id, bg_rect in reversed(all_background_rectangles):
+                        root_elem.insert(id1_index + 1, bg_rect)
+        
+        # Build story-to-increment mapping from increments data
+        story_to_increments = {}  # Maps story_key -> list of increment indices
+        increment_stories_map = {}  # Maps story_key -> story_data
+        
         # Build story-to-increment mapping from increments data
         for inc_idx, increment in enumerate(story_graph.get('increments', []), 1):
             for epic in increment.get('epics', []):
                 epic_name = epic['name']
-                for feature in get_sub_epics(epic):
+                # In increments, sub_epics contain stories directly
+                features = epic.get('sub_epics', [])
+                
+                for feature in features:
                     feature_name = feature['name']
-                    for story in feature.get('stories', []):
+                    
+                    # Handle both 'stories' and 'story_groups' formats
+                    stories_list = []
+                    if 'stories' in feature:
+                        stories_list = feature['stories']
+                    elif 'story_groups' in feature:
+                        for group in feature['story_groups']:
+                            stories_list.extend(group.get('stories', []))
+                    
+                    for story in stories_list:
                         story_name = story['name']
                         story_key = f"{epic_name}|{feature_name}|{story_name}"
                         if story_key not in story_to_increments:
                             story_to_increments[story_key] = []
                         story_to_increments[story_key].append(inc_idx)
-        
-        # Use outline rendering for epics/features, but track story positions for increment lanes
-        # First, render epics and features using outline logic (but don't render stories yet)
-        # We'll collect story positions and render them in increment lanes
-        
-        # Call outline rendering with a flag to skip story rendering
-        # Actually, we need to render epics/features ourselves, then render stories in lanes
-        # Let's use the outline code structure but modify story rendering
-        
-        # Render epics and features at top using outline logic
-        # Then render stories in increment lanes below
-        
-        # For now, use outline rendering but intercept story rendering
-        # Better approach: copy outline rendering code and modify story Y positions
-        
-        # Use outline rendering but modify story Y to be in increment lanes
-        # Generate outline first, then move stories to increment lanes
-        outline_output = self._generate_diagram(story_graph, layout_data, is_increments=False, is_exploration=False)
-        
-        # Parse the outline XML and modify story positions to be in increment lanes
-        outline_root = ET.fromstring(outline_output)
-        
-        # Find all story cells and move them to increment lanes
-        # But we need to rebuild from scratch to properly handle increment lanes
-        
-        # Better: Render epics/features manually using outline logic, then add increment lanes
-        epic_group = ET.SubElement(root_elem, 'mxCell', id='epic-group', value='', 
-                     style='group', parent='1', vertex='1', connectable='0')
-        epic_group_geom = ET.SubElement(epic_group, 'mxGeometry', x='0', y='0', width='1', height='1')
-        epic_group_geom.set('as', 'geometry')
-        
-        # Render epics and features using outline logic (copy from _generate_diagram)
-        # But instead of rendering stories below features, collect them and render in lanes
-        
-        # Use top-level epics from story_graph for structure
-        # But we'll get story data from increments
-        all_epics = story_graph.get('epics', [])
-        
-        # Also build a map of stories from increments for lookup
-        increment_stories_map = {}  # Maps story_key -> story_data
-        for increment in story_graph.get('increments', []):
-            for epic in increment.get('epics', []):
-                epic_name = epic['name']
-                for feature in get_sub_epics(epic):
-                    feature_name = feature['name']
-                    for story in feature.get('stories', []):
-                        story_name = story['name']
-                        story_key = f"{epic_name}|{feature_name}|{story_name}"
                         if story_key not in increment_stories_map:
                             increment_stories_map[story_key] = story
         
+        # Find all story cells rendered by outline code and map them to increments
+        story_cells_to_move = []  # List of (cell, story_x, story_data, increment_indices)
+        
+        # Get all epics and features to build mapping from cell IDs to story keys
+        all_epics = story_graph.get('epics', [])
+        
+        # Find all story cells rendered by outline code and map them to increments
+        for cell in root_elem.findall('mxCell'):
+            cell_id = cell.get('id', '')
+            # Story cells have pattern: e{epic}f{feature}s{story}
+            if cell_id and 's' in cell_id and cell_id.startswith('e') and 'f' in cell_id and not cell_id.startswith('user_'):
+                parts = cell_id.split('s')
+                if len(parts) == 2:
+                    epic_feat_part = parts[0]  # e.g., "e1f1"
+                    story_idx_part = parts[1]   # e.g., "1"
+                    if epic_feat_part.startswith('e') and 'f' in epic_feat_part:
+                        # Extract epic and feature indices
+                        try:
+                            epic_part = epic_feat_part[1:].split('f')[0]
+                            feat_part = epic_feat_part.split('f')[1]
+                            if epic_part.isdigit() and feat_part.isdigit():
+                                epic_idx = int(epic_part)
+                                feat_idx = int(feat_part)
+                                if 1 <= epic_idx <= len(all_epics):
+                                    epic = all_epics[epic_idx - 1]
+                                    features = get_sub_epics(epic)
+                                    if 1 <= feat_idx <= len(features):
+                                        feature = features[feat_idx - 1]
+                                        story_name = cell.get('value', '')
+                                        story_key = f"{epic['name']}|{feature['name']}|{story_name}"
+                                        
+                                        # Check if this story is in any increment
+                                        if story_key in story_to_increments:
+                                            geom = cell.find('mxGeometry')
+                                            if geom is not None:
+                                                story_x = float(geom.get('x', 0))
+                                                story_data = increment_stories_map.get(story_key)
+                                                increment_indices = story_to_increments[story_key]
+                                                story_cells_to_move.append((cell, story_x, story_data, increment_indices, story_key))
+                        except (ValueError, IndexError):
+                            # Skip if parsing fails
+                            continue
+        
         # Calculate increment lane positions
         increments = story_graph.get('increments', [])
-        increment_lane_height = 100  # Height per increment lane
-        increment_lane_y_start = self.FEATURE_Y + 60 + self.STORY_OFFSET_FROM_FEATURE + 50  # Below where stories would normally be
+        increment_lane_height = 100
+        # Find bottom of all content to place increment lanes below
+        max_y = 0
+        for cell in root_elem.findall('mxCell'):
+            geom = cell.find('mxGeometry')
+            if geom is not None:
+                y = float(geom.get('y', 0))
+                height = float(geom.get('height', 0))
+                max_y = max(max_y, y + height)
+        increment_lane_y_start = max_y + 50
         
-        # Render increment labels on left side (further left to avoid overlap)
-        increment_label_x = 20  # Start position for increment labels
-        epic_start_x = 200  # Start epics after increment labels (150 width + 50 spacing)
-        
+        # Render increment labels
+        increment_label_x = -180  # Move another 100px to the left
         for inc_idx, increment in enumerate(increments, 1):
             increment_name = increment.get('name', f'Increment {inc_idx}')
             increment_y = increment_lane_y_start + (inc_idx - 1) * increment_lane_height
@@ -2342,170 +3817,41 @@ class DrawIORenderer:
                                          width='150', height='40')
             increment_geom.set('as', 'geometry')
         
-        # Now render epics and features using outline logic, but collect stories for increment lanes
-        # Copy the epic/feature rendering from outline mode, but skip story rendering
-        # Then render stories in increment lanes based on story_to_increments mapping
+        # Remove story cells from their current positions
+        for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
+            root_elem.remove(cell)
         
-        # For now, use a simpler approach: call outline rendering, then parse and move stories
-        # Actually, let's render manually to have full control
+        # Render stories in increment lanes
+        # Track story positions per increment to avoid duplicates and handle horizontal positioning
+        story_x_positions = {}  # Maps (inc_idx, story_key) -> current_x_position
         
-        x_pos = epic_start_x  # Start epics after increment labels
-        shown_users = set()
-        feature_story_positions = {}  # Maps story_key -> (feature_x, feature_y, story_index_in_feature)
-        
-        for epic_idx, epic in enumerate(all_epics, 1):
-            features = get_sub_epics(epic)
-            
-            epic_x = x_pos
-            epic_y = self.EPIC_Y
-            epic_width = 0
-            epic_height = 60
-            
-            # Calculate epic width based on features (sized by story count)
-            current_feature_x = epic_x
-            for feature in features:
-                stories = feature.get('stories', [])
-                # Feature width based on number of stories
-                if stories:
-                    feature_width = max(300, len(stories) * self.STORY_SPACING_X + 20)
-                else:
-                    feature_width = 300
-                epic_width += feature_width + self.FEATURE_SPACING_X
-                current_feature_x += feature_width + self.FEATURE_SPACING_X
-            
-            epic_width = max(668, epic_width)
-            
-            # Render epic
-            epic_total_stories = self._calculate_total_stories_for_epic_in_increment(epic)
-            epic_story_count_html = ""
-            if epic_total_stories > 0:
-                epic_story_count_html = self._get_story_count_display_html(epic_total_stories, position='top-right')
-            
-            epic_cell = ET.SubElement(root_elem, 'mxCell', id=f'epic{epic_idx}',
-                                     value=f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{epic['name']}</span>{epic_story_count_html}</div>",
-                                     style='rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;',
-                                     parent='epic-group', vertex='1')
-            epic_geom = ET.SubElement(epic_cell, 'mxGeometry', x=str(epic_x), y=str(epic_y), 
-                                     width=str(epic_width), height=str(epic_height))
-            epic_geom.set('as', 'geometry')
-            
-            # Render features side by side
-            feature_y = epic_y + epic_height  # Features directly below epic
-            current_feature_x = epic_x
-            
-            for feat_idx, feature in enumerate(features, 1):
-                # Count stories for this feature across all increments
-                feature_stories = []
-                for increment in story_graph.get('increments', []):
-                    for inc_epic in increment.get('epics', []):
-                        if inc_epic['name'] == epic['name']:
-                            for inc_feature in get_sub_epics(inc_epic):
-                                if inc_feature['name'] == feature['name']:
-                                    feature_stories.extend(inc_feature.get('stories', []))
-                                    break
-                            break
-                
-                # Calculate feature width based on total story count (across all increments)
-                story_count = len(set(s['name'] for s in feature_stories))  # Unique story names
-                if story_count > 0:
-                    feature_width = max(300, story_count * self.STORY_SPACING_X + 20)
-                else:
-                    feature_width = 300
-                
-                feature_total_stories = self._calculate_total_stories_for_feature_in_increment(feature)
-                feature_story_count_html = ""
-                if feature_total_stories > 0:
-                    feature_story_count_html = self._get_story_count_display_html(feature_total_stories, position='top-right')
-                
-                feature_cell = ET.SubElement(root_elem, 'mxCell',
-                                           id=f'e{epic_idx}f{feat_idx}',
-                                           value=f"<div style=\"position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;\"><span style=\"flex: 1; text-align: center;\">{feature['name']}</span>{feature_story_count_html}</div>",
-                                           style='rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;',
-                                           parent='1', vertex='1')
-                feature_geom = ET.SubElement(feature_cell, 'mxGeometry',
-                                           x=str(current_feature_x), y=str(feature_y),
-                                           width=str(feature_width), height='60')
-                feature_geom.set('as', 'geometry')
-                
-                # Store story positions for increment lane rendering
-                # Use unique stories from increments, positioned horizontally
-                unique_stories = {}
-                for increment in story_graph.get('increments', []):
-                    for inc_epic in increment.get('epics', []):
-                        if inc_epic['name'] == epic['name']:
-                            for inc_feature in get_sub_epics(inc_epic):
-                                if inc_feature['name'] == feature['name']:
-                                    for story in inc_feature.get('stories', []):
-                                        story_name = story['name']
-                                        if story_name not in unique_stories:
-                                            unique_stories[story_name] = story
-                                    break
-                            break
-                
-                # Position stories horizontally based on their sequential_order
-                sorted_stories = sorted(unique_stories.values(), key=lambda s: s.get('sequential_order', 999))
-                
-                # Render users above feature (at the top, aligned with story positions)
-                feature_users_shown = set()
-                for story_idx, story in enumerate(sorted_stories):
-                    story_name = story['name']
-                    story_key = f"{epic['name']}|{feature['name']}|{story_name}"
-                    story_x_in_feature = current_feature_x + story_idx * self.STORY_SPACING_X
-                    feature_story_positions[story_key] = (story_x_in_feature, feature_y, story_idx)
-                    
-                    # Render users above feature (only once per user, aligned with story X position)
-                    story_users = story.get('users', [])
-                    for user in story_users:
-                        if user not in feature_users_shown:
-                            user_label = ET.SubElement(root_elem, 'mxCell',
-                                                      id=f'user_e{epic_idx}f{feat_idx}_{user}',
-                                                      value=user,
-                                                      style='whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;',
-                                                      parent='1', vertex='1')
-                            # Position user below feature (where stories normally are in outline mode)
-                            # Users go where stories would be: feature_y + feature_height + STORY_OFFSET - USER_LABEL_OFFSET
-                            story_normal_y = feature_y + 60 + self.STORY_OFFSET_FROM_FEATURE  # Where story would be
-                            user_y = story_normal_y - self.USER_LABEL_OFFSET  # User above story position
-                            user_geom = ET.SubElement(user_label, 'mxGeometry',
-                                                     x=str(story_x_in_feature),
-                                                     y=str(user_y),
-                                                     width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
-                            user_geom.set('as', 'geometry')
-                            feature_users_shown.add(user)
-                
-                current_feature_x += feature_width + self.FEATURE_SPACING_X
-            
-            x_pos += epic_width + 30
-        
-        # Now render stories in increment lanes
-        for story_key, increment_indices in story_to_increments.items():
-            epic_name, feature_name, story_name = story_key.split('|')
-            
-            # Get story data from increment stories map
-            story_data = increment_stories_map.get(story_key)
-            
-            if not story_data:
-                continue
-            
-            # Get story X position from feature
-            if story_key in feature_story_positions:
-                story_x, feature_y, story_idx = feature_story_positions[story_key]
-            else:
-                continue
-            
-            # Render story in each increment lane it belongs to (users already rendered at top)
+        for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
+            # Render story in each increment lane it belongs to
             for inc_idx in increment_indices:
                 increment_y = increment_lane_y_start + (inc_idx - 1) * increment_lane_height
-                story_y = increment_y + 20  # Small offset from lane top
+                story_y = increment_y + 20
                 
-                # Render story (users are already rendered above features at the top)
+                # Calculate X position - use original story_x for first occurrence, then space horizontally
+                position_key = (inc_idx, story_key)
+                if position_key not in story_x_positions:
+                    story_x_positions[position_key] = story_x
+                else:
+                    # Story already in this increment - position to the right
+                    story_x_positions[position_key] += self.STORY_SPACING_X
+                
+                current_story_x = story_x_positions[position_key]
+                
+                # Create unique ID by including story name to avoid duplicates
+                safe_story_name = story_data['name'].replace(' ', '_').replace('|', '_')
+                story_cell_id = f'inc{inc_idx}_{story_key.replace("|", "_")}_{safe_story_name}'
+                
                 story_cell = ET.SubElement(root_elem, 'mxCell',
-                                           id=f'inc{inc_idx}_{story_key}',
-                                           value=story_name,
+                                           id=story_cell_id,
+                                           value=story_data['name'],
                                            style=self._get_story_style(story_data),
                                            parent='1', vertex='1')
                 story_geom = ET.SubElement(story_cell, 'mxGeometry',
-                                           x=str(story_x), y=str(story_y),
+                                           x=str(current_story_x), y=str(story_y),
                                            width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
                 story_geom.set('as', 'geometry')
         

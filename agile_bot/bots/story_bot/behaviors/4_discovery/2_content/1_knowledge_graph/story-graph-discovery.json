@@ -37,7 +37,7 @@
               ]
             }
           ],
-          "features": [
+          "sub_epics": [
             {
               "name": "",
               "users": [],
@@ -56,7 +56,7 @@
           ]
         }
       ],
-      "features": [
+      "sub_epics": [
         {
           "name": "",
           "users": [],
