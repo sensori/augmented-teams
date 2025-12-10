@@ -1,0 +1,146 @@
+{
+  "description": "If scenarios have tests in stories (Examples tables with multiple test cases), then create parameterized tests using @pytest.mark.parametrize. Each row in the Examples table becomes a test case. Don't write single test methods that only test one example - iterate over all examples from the scenario file.",
+  "scanner": "agile_bot.bots.story_bot.scanners.parameterized_tests_scanner.ParameterizedTestsScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Create parameterized tests for scenarios with Examples tables",
+        "content": [
+          "# Scenario file has Examples table with multiple rows:",
+          "# | rule_file_paths | rule_file_content | expected_scanner_count |",
+          "# | path1, path2 | content1, content2 | 2 |",
+          "# | path3 | content3 | 1 |",
+          "",
+          "@pytest.mark.parametrize(\"rule_file_paths,rule_file_content,expected_scanner_count\", [",
+          "    # Example 1: Multiple scanners",
+          "    (",
+          "        ['path1', 'path2'],",
+          "        [{'scanner': 'Scanner1'}, {'scanner': 'Scanner2'}],",
+          "        2",
+          "    ),",
+          "    # Example 2: Single scanner",
+          "    (",
+          "        ['path3'],",
+          "        [{'scanner': 'Scanner3'}],",
+          "        1",
+          "    ),",
+          "])",
+          "def test_scanner_discovery(self, repo_root, rule_file_paths, rule_file_content, expected_scanner_count):",
+          "    \"\"\"",
+          "    SCENARIO: Scanner discovery extracts metadata",
+          "    Tests all examples from scenario file - parameterized test.",
+          "    \"\"\"",
+          "    # Test implementation uses parameters",
+          "    setup_test_rules(repo_root, rule_file_paths, rule_file_content)",
+          "    scanners = behavior.scanners",
+          "    assert len(scanners) == expected_scanner_count"
+        ]
+      },
+      "dont": {
+        "description": "Don't write single test that only tests one example",
+        "content": [
+          "# DON'T: Only test one example when scenario has multiple",
+          "def test_scanner_discovery(self, repo_root):",
+          "    # WRONG - only testing one example, missing others",
+          "    rule_paths = ['path1', 'path2']",
+          "    rule_contents = [{'scanner': 'Scanner1'}, {'scanner': 'Scanner2'}]",
+          "    setup_test_rules(repo_root, rule_paths, rule_contents)",
+          "    scanners = behavior.scanners",
+          "    assert len(scanners) == 2",
+          "    # Missing: test case for single scanner, empty rules, etc."
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Extract examples from scenario file and parameterize",
+        "content": [
+          "# Read Examples table from scenario file:",
+          "# | violations_data | report_format | expected_violation_count |",
+          "# | [violation1] | JSON | 1 |",
+          "# | [violation1, violation2] | JSON | 2 |",
+          "# | [] | JSON | 0 |",
+          "",
+          "@pytest.mark.parametrize(\"violations_data,report_format,expected_violation_count\", [",
+          "    # Example 1: Single violation",
+          "    ([{'rule_name': 'rule1', 'line_number': 2}], 'JSON', 1),",
+          "    # Example 2: Multiple violations",
+          "    ([{'rule_name': 'rule1'}, {'rule_name': 'rule2'}], 'JSON', 2),",
+          "    # Example 3: No violations",
+          "    ([], 'JSON', 0),",
+          "])",
+          "def test_report_generation(self, violations_data, report_format, expected_violation_count):",
+          "    report = action.generate_report(report_format)",
+          "    assert len(report['violations']) == expected_violation_count"
+        ]
+      },
+      "dont": {
+        "description": "Don't hardcode single example in test",
+        "content": [
+          "# DON'T: Hardcode single example",
+          "def test_report_generation(self):",
+          "    # WRONG - only testing one case",
+          "    violations_data = [{'rule_name': 'rule1', 'line_number': 2}]",
+          "    report = action.generate_report('JSON')",
+          "    assert len(report['violations']) == 1",
+          "    # Missing: empty violations, multiple violations, different formats"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Use descriptive parameter names matching Examples table columns",
+        "content": [
+          "# Examples table columns: rule_file_path, knowledge_graph, expected_has_violations",
+          "",
+          "@pytest.mark.parametrize(\"rule_file_path,rule_file_content,knowledge_graph,expected_has_violations\", [",
+          "    (",
+          "        'path/to/rule.json',",
+          "        {'scanner': 'Scanner1'},",
+          "        {'epics': [{'name': 'Order Management'}]},",
+          "        True",
+          "    ),",
+          "])",
+          "def test_scanners_detect_violations(self, rule_file_path, rule_file_content, knowledge_graph, expected_has_violations):",
+          "    # Parameter names match Examples table columns"
+        ]
+      },
+      "dont": {
+        "description": "Don't use generic parameter names",
+        "content": [
+          "# DON'T: Generic parameter names",
+          "@pytest.mark.parametrize(\"a,b,c,d\", [  # WRONG - not descriptive",
+          "    ('path', {}, {}, True),",
+          "])",
+          "def test_something(self, a, b, c, d):  # WRONG - unclear what parameters are"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Include comments in parametrize decorator explaining each example",
+        "content": [
+          "@pytest.mark.parametrize(\"rule_file_paths,rule_file_content,expected_scanner_count\", [",
+          "    # Example 1: 3 scanners from different behaviors",
+          "    (['path1', 'path2', 'path3'], [content1, content2, content3], 3),",
+          "    # Example 2: 2 scanners from common rules only",
+          "    (['path1', 'path2'], [content1, content2], 2),",
+          "    # Example 3: Single scanner",
+          "    (['path1'], [content1], 1),",
+          "])"
+        ]
+      },
+      "dont": {
+        "description": "Don't omit comments explaining examples",
+        "content": [
+          "# DON'T: No comments explaining examples",
+          "@pytest.mark.parametrize(\"rule_file_paths,rule_file_content,expected_scanner_count\", [",
+          "    (['path1', 'path2'], [content1, content2], 2),  # WRONG - what does this test?",
+          "    (['path1'], [content1], 1),  # WRONG - unclear purpose",
+          "])"
+        ]
+      }
+    }
+  ]
+}
+

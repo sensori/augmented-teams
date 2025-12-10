@@ -1809,6 +1809,13 @@
                     "WHEN BuildKnowledgeAction it's the initial pass of building the knowledge graphTHEN Build Knowledge Action invokes the Validate Rules action to understand if what is generated violates any rules\n(see Validate Knowledge & Content Against Rules)",
                     "WHEN Validate Rules action is finsihed generateing the validation report THEN the BuildKnowledgeAction goes through all of the violations to determine if any corrective action needs to be taken AND the system updates the knowledge graph based on the recommendations.",
                     "WHEN BuildKnowledgeAction Is finished making corrections.\nTHEN BuildKnowledgeAction tells AI to notify the user of what corrections it made as part of presenting the fact that it's done building knowledge."
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Build knowledge forwards to validate action bot and receives enhanced instructions",
+                      "steps": "Given Agent is initialized with agent_name='test_story_bot'\nAnd Project has finished generating knowledge graph\nAnd Behavior is '{behavior_name}'\nAnd Common rules directory exists at 'agile_bot/bots/test_story_bot/rules/'\nAnd Behavior rules directory exists at 'agile_bot/bots/test_story_bot/behaviors/{behavior_number}_{behavior_name}/3_rules/'\nAnd Action is 'build_knowledge'\nAnd Knowledge graph exists at 'agile_bot/bots/test_story_bot/docs/stories/story-graph.json'\nAnd Behavior has validation rules '{validation_rules}'\nAnd Validation rules have code scanners '{code_scanners}'\nAnd Code scanners are stubbed to return '{code_scanner_output}'\nWhen Build knowledge action forwards to validate_action_bot with knowledge graph at 'agile_bot/bots/test_story_bot/docs/stories/story-graph.json'\nThen Validate action bot runs stubbed code scanners '{code_scanners}' against knowledge graph\nAnd Stubbed scanners return '{code_scanner_output}'\nAnd Validation report is generated with '{code_scanner_output}'\nAnd Enhanced instructions are returned to build_knowledge action\nAnd Enhanced instructions contain '{enhanced_instructions}'",
+                      "test_method": "test_build_knowledge_forwards_to_validate_action_bot_and_receives_enhanced_instructions"
+                    }
                   ]
                 }
               ]
@@ -2309,9 +2316,20 @@
                   ],
                   "story_type": "user",
                   "acceptance_criteria": [
-                    "WHEN ValidateRulesAction begins execution THEN System runs all configured scanners on content to validate before AI validation runs",
-                    "WHEN ValidateRulesAction loads validation rules THEN System reads .json files from behavior rules directory AND System identifies scanner configuration entries in .json AND System extracts scanner class names and detection methods from configuration",
-                    "WHEN System discovers scanner class names from rule.json THEN System dynamically imports scanner classes from configured module paths AND System instantiates scanner objects with required configuration AND System validates scanner classes implement required interface methods"
+                    "WHEN scanner discovery is executed for rule files THEN scanners are discovered from rule files containing scanner properties",
+                    "WHEN scanner class path is found in rule file THEN scanner class is located and validated",
+                    "WHEN scanner metadata is extracted THEN metadata includes rule_name, description, and behavior_name",
+                    "WHEN scanners are registered THEN scanners are organized in catalog grouped by behavior_name",
+                    "WHEN rule file is malformed THEN error is logged and valid scanners are still registered",
+                    "WHEN scanner class is not found THEN error is logged and scanner is not registered",
+                    "WHEN rule file is missing scanner property THEN error is logged and scanner is not registered"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Scanner discovery extracts metadata and registers scanners",
+                      "steps": "Given Agent is initialized with agent_name='test_story_bot'\nAnd Project has finished generating knowledge graph\nAnd Behavior is '{behavior_name}'\nAnd Common rules directory exists at 'agile_bot/bots/test_story_bot/rules/'\nAnd Behavior rules directory exists at 'agile_bot/bots/test_story_bot/behaviors/{behavior_number}_{behavior_name}/3_rules/'\nGiven Rule files exist at '{rule_file_paths}'\nAnd Rule files contain '{rule_file_content}'\nWhen Scanner discovery is executed for rule files at '{rule_file_paths}'\nThen Scanners are discovered: '{registered_scanners}'\nAnd Scanner class found status is '{scanner_class_found}'\nAnd Scanner metadata is extracted from rule file with content '{rule_file_content}'\nAnd Scanner metadata is '{scanner_metadata}'\nAnd Scanners '{registered_scanners}' are registered in catalog for behaviors '{behaviors}'\nAnd Catalog structure is '{catalog_structure}'\nAnd Catalog size is '{catalog_size}'",
+                      "test_method": "test_scanner_discovery_extracts_metadata_and_registers_scanners"
+                    }
                   ]
                 },
                 {
@@ -2323,9 +2341,31 @@
                   ],
                   "story_type": "user",
                   "acceptance_criteria": [
-                    "WHEN Scanner configured with regex patterns processes content THEN Scanner applies regex patterns to file content AND Scanner matches patterns against text AND scanner identifies violations AND Scanner records violation location (file path, line number, matched text)",
-                    "WHEN Scanner configured with file structure analysis processes project THEN Scanner analyzes directory structure and file organization AND Scanner checks file naming conventions and required file presence AND Scanner records violation location (file path, missing files, naming violations)",
-                    "WHEN Scanner configured with custom code scanner THEN Scanner runse parse method on content and AND Scanner records violation location (file path, line number, node type, violation description)"
+                    "WHEN scanners are executed against knowledge graph THEN violations are detected at exact line numbers",
+                    "WHEN violations are detected THEN violation details include rule_name, location, violation_message, and severity",
+                    "WHEN multiple scanners execute THEN violations from all scanners are aggregated"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Scanners detect violations in knowledge graph",
+                      "steps": "Given Agent is initialized with agent_name='test_story_bot'\nAnd Project has finished generating knowledge graph\nAnd Behavior is '{behavior_name}'\nAnd Common rules directory exists at 'agile_bot/bots/test_story_bot/rules/'\nAnd Behavior rules directory exists at 'agile_bot/bots/test_story_bot/behaviors/{behavior_number}_{behavior_name}/3_rules/'\nAnd Scanners are discovered and registered for {behavior} and {rule file}:\n  - Common rules: 'agile_bot/bots/test_story_bot/rules/'\n  - Behavior rules: 'agile_bot/bots/test_story_bot/behaviors/{behavior_number}_{behavior_name}/3_rules/'\nAnd Knowledge graph exists at 'agile_bot/bots/test_story_bot/docs/stories/story-graph.json'\nGiven Knowledge graph contains '{knowledge_graph_problems}'\nAnd Rule file is '{rule_file}'\nWhen Scanners are executed against knowledge graph containing '{knowledge_graph_problems}'\nThen Violations are detected at '{expected_violation_line}'\nAnd Violation details are '{expected_violation_details}'\nAnd Report format is '{expected_report_format}'\nAnd Report structure is '{expected_report_structure}'",
+                      "test_method": "test_scanners_detect_violations_in_knowledge_graph"
+                    },
+                    {
+                      "name": "Single scanner execution detects violations",
+                      "steps": "Given Knowledge graph contains '{knowledge_graph_problems}'\nAnd Scanner '{scanner}' is selected for execution\nWhen Single scanner '{scanner}' is executed against knowledge graph containing '{knowledge_graph_problems}'\nThen Violation line is '{expected_violation_line}'\nAnd Violation details are '{expected_violation_details}'",
+                      "test_method": "test_single_scanner_execution_detects_violations"
+                    },
+                    {
+                      "name": "Multiple scanners execute and aggregate violations",
+                      "steps": "Given Scanners are discovered and registered\nAnd Knowledge graph exists at 'agile_bot/bots/test_story_bot/docs/stories/story-graph.json'\nAnd Knowledge graph contains '{knowledge_graph_problems}'\nAnd Multiple scanners '{scanners}' are selected for execution\nWhen Multiple scanners '{scanners}' are executed against knowledge graph containing '{knowledge_graph_problems}'\nThen Violations per scanner are '{expected_violations_per_scanner}'\nAnd Total violations are '{expected_total_violations}'",
+                      "test_method": "test_multiple_scanners_execute_and_aggregate_violations"
+                    },
+                    {
+                      "name": "Scanner execution order and isolation",
+                      "steps": "Given Scanners are discovered and registered\nAnd Knowledge graph exists at 'agile_bot/bots/test_story_bot/docs/stories/story-graph.json'\nAnd Knowledge graph contains '{knowledge_graph_problems}'\nAnd Scanner execution order is '{scanner_execution_order}'\nAnd Scanner failure behavior is '{scanner_failure_behavior}'\nWhen Scanners execute in '{scanner_execution_order}' order against knowledge graph containing '{knowledge_graph_problems}'\nThen Result is '{expected_result}'",
+                      "test_method": "test_scanner_execution_order_and_isolation"
+                    }
                   ]
                 },
                 {
@@ -2349,9 +2389,44 @@
                   ],
                   "story_type": "user",
                   "acceptance_criteria": [
-                    "WHEN All scanners complete execution THEN ValidateRulesAction aggregates violations from all scanner results AND ValidateRulesAction aggregates violations based on file path and line number AND ValidateRulesAction groups violations by scanner type and severity",
-                    "WHEN the ValidateRulesAction has finished collecting and aggregating violations and validations,\nTHEN the ValidateRulesAction then renders that into a Markdown report",
-                    "WHEN ValidateRulesAction generates validation report THEN ValidateRulesAction includes all collected scanner violations with file path alongside AI validatin results AND ValidateRulesAction includes line number and code snippet for each violation AND ValidateRulesAction includes scanner name and violation type for context AND ValidateRulesAction formats violations for easy review in validation report"
+                    "WHEN violation report is generated THEN report is generated in requested format",
+                    "WHEN violations are grouped THEN violations are organized by behavior_name, rule_name, location, or severity",
+                    "WHEN report is written to file THEN file is created at specified output destination"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Violation report generation in different formats",
+                      "steps": "Given Agent is initialized with agent_name='test_story_bot'\nAnd Project has finished generating knowledge graph\nAnd Behavior is '{behavior_name}'\nAnd Common rules directory exists at 'agile_bot/bots/test_story_bot/rules/'\nAnd Behavior rules directory exists at 'agile_bot/bots/test_story_bot/behaviors/{behavior_number}_{behavior_name}/3_rules/'\nAnd Scanners have executed against knowledge graph\nGiven Violations have been detected: '{violations_data}'\nAnd Report format is '{report_format}'\nWhen Violation report is generated with violations '{violations_data}' and format '{report_format}'\nThen Report structure is '{expected_report_structure}'",
+                      "test_method": "test_violation_report_generation_in_different_formats"
+                    },
+                    {
+                      "name": "Violation grouping and organization",
+                      "steps": "Given Violations have been detected: '{violations_data}'\nAnd Violations are from behaviors '{behaviors}'\nWhen Violations are grouped and organized with violations '{violations_data}' from behaviors '{behaviors}'\nThen Grouping is '{expected_grouping}'\nAnd Organization is '{expected_organization}'",
+                      "test_method": "test_violation_grouping_and_organization"
+                    },
+                    {
+                      "name": "Report output and persistence",
+                      "steps": "Given Violations have been detected: '{violations_data}'\nAnd Report format is '{report_format}'\nAnd Output destination is '{output_destination}'\nWhen Report is generated with format '{report_format}' and violations '{violations_data}' and written to '{output_destination}'\nThen Output is '{expected_output}'",
+                      "test_method": "test_report_output_and_persistence"
+                    }
+                  ]
+                },
+                {
+                  "name": "Report Validation and Error Handling",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN ValidateRulesAction receives violations data as array THEN Report is generated successfully with violations including exact line_number and severity",
+                    "WHEN ValidateRulesAction receives violations data that is not an array THEN Error is reported: \"Violations data must be an array\" AND No report is generated",
+                    "WHEN ValidateRulesAction receives violations with missing fields (location, violation_message) THEN Partial report is generated AND Missing fields are handled gracefully AND Report includes available fields including severity",
+                    "WHEN ValidateRulesAction receives violations with null values THEN Report is generated with nulls preserved or replaced with defaults AND Severity is preserved",
+                    "WHEN ValidateRulesAction receives array with 1000+ violations THEN Report is generated AND Large array is handled efficiently AND All violations are included with severity",
+                    "WHEN ValidateRulesAction receives violations data with circular references THEN Error is reported: \"Circular reference detected in violations data\"",
+                    "WHEN ValidateRulesAction receives violations with missing severity THEN Report is generated AND Missing severity is handled gracefully AND Default severity is applied or null is preserved"
                   ]
                 }
               ]
