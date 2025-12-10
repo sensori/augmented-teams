@@ -1,6 +1,6 @@
 {
   "name": "render_discovery_increment_drawio",
-  "description": "Render discovery increment(s) to DrawIO diagram. Supports multiple increments.",
+  "description": "Render discovery increment(s) to DrawIO diagram. CRITICAL: For discovery behavior, render increment 1 (priority 1) by default. The renderer automatically appends increment identifier to filename.",
   "path": "docs/stories",
   "input": "story_graph_increments.json",
   "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",

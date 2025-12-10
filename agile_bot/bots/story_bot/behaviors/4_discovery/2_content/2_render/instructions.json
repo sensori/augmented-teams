@@ -1,0 +1,31 @@
+{
+  "behaviorName": "discovery",
+  "instructions": [
+    "**CRITICAL: Discovery Diagram Filename Requirements:**",
+    "",
+    "When rendering discovery diagrams using render-discovery command:",
+    "",
+    "1. **MANDATORY: Filename MUST include increment identifier**",
+    "   - The renderer automatically modifies the output filename to include increment information",
+    "   - Single increment: Appends increment name (sanitized) or priority number",
+    "     - Example: 'story-map-discovery.drawio' → 'story-map-discovery-Foundation-Create-Mob-and-Basic-Actions.drawio'",
+    "     - Example: 'story-map-discovery.drawio' → 'story-map-discovery-Increment-1.drawio' (if no name)",
+    "   - Multiple increments: Appends priority numbers",
+    "     - Example: 'story-map-discovery.drawio' → 'story-map-discovery-Increments-1-2.drawio'",
+    "",
+    "2. **Filename Sanitization:**",
+    "   - Increment names are sanitized: spaces → '-', special chars removed, alphanumeric + '-' + '_' only",
+    "   - Long names may be truncated if needed (max 200 chars total filename)",
+    "",
+    "3. **When calling render-discovery CLI:**",
+    "   - You may provide a base filename like 'story-map-discovery.drawio'",
+    "   - The renderer will automatically append increment identifier",
+    "   - OR provide full filename with increment info already included (renderer will not duplicate)",
+    "",
+    "4. **Verification:**",
+    "   - After rendering, verify the output filename includes increment identifier",
+    "   - Check the returned 'output_path' in the result to confirm final filename",
+    "",
+    "**This ensures discovery diagrams are uniquely identifiable by increment.**"
+  ]
+}

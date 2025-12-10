@@ -1,6 +1,6 @@
 {
   "name": "render_story_map_discovery_drawio",
-  "description": "Render discovery story map to DrawIO diagram. Includes increment name(s) in filename if rendering specific increments.",
+  "description": "Render discovery story map to DrawIO diagram. CRITICAL: For discovery behavior, render increment 1 (priority 1) by default. Output filename MUST include increment identifier. The renderer automatically appends increment name(s) or priority number(s) to the filename. For single increment: uses increment name (sanitized) or priority number. For multiple increments: uses priority numbers like 'Increments-1-2-3'. Example: 'story-map-discovery.drawio' becomes 'story-map-discovery-Foundation-Create-Mob-and-Basic-Actions.drawio' or 'story-map-discovery-Increment-1.drawio'.",
   "path": "docs/stories",
   "input": "story-graph.json",
   "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",

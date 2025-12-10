@@ -8,56 +8,56 @@
                 <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="0" y="0" width="1" height="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="epic1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Manage Mobs&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;6 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="20" y="120" width="402" height="60" as="geometry"/>
+                <mxCell id="epic1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Manage Mobs&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;9 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="120" width="582" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="e1f1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Create Mob&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;3 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="21" y="195" width="181" height="60" as="geometry"/>
+                <mxCell id="e1f1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Create Mob&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;6 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="21" y="195" width="361" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e1f1s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="32" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e1f2" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Edit Mob&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;3 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="232" y="195" width="190" height="60" as="geometry"/>
+                    <mxGeometry x="412" y="195" width="190" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e1f2s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="234" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="414" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="epic2" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Control Mob Actions&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;8 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="442" y="120" width="544" height="60" as="geometry"/>
+                <mxCell id="epic2" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Control Mob Actions&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;12 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="622" y="120" width="784" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Select Strategy&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;2 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="443" y="195" width="121" height="60" as="geometry"/>
+                    <mxGeometry x="623" y="195" width="121" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e2f1s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="454" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="634" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f2" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Choose Target&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;3 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="594" y="195" width="190" height="60" as="geometry"/>
+                    <mxGeometry x="774" y="195" width="190" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e2f2s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="596" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="776" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="e2f3" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Execute Mob Action&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;3 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="796" y="195" width="190" height="60" as="geometry"/>
+                <mxCell id="e2f3" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Execute Mob Action&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;7 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="976" y="195" width="430" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e2f3s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="798" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="978" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="epic3" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Spawn Mobs&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;3 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="1006" y="120" width="222" height="60" as="geometry"/>
+                    <mxGeometry x="1426" y="120" width="222" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="e3f1" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Spawn From Template&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;2 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="1007" y="195" width="121" height="60" as="geometry"/>
+                    <mxGeometry x="1427" y="195" width="121" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e3f1s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1018" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1438" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e3f2" value="&lt;div style=&quot;position: relative; width: 100%; display: flex; align-items: center; justify-content: center; padding-right: 70px; box-sizing: border-box;&quot;&gt;&lt;span style=&quot;flex: 1; text-align: center;&quot;&gt;Spawn From Actors&lt;/span&gt;&lt;div style=&quot;position: absolute; top: 2px; right: 5px; font-size: 8px; color: rgb(128, 128, 128); white-space: nowrap; z-index: 10;&quot;&gt;1 stories&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
-                    <mxGeometry x="1158" y="195" width="70" height="60" as="geometry"/>
+                    <mxGeometry x="1578" y="195" width="70" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="user_e3f2s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1160" y="285" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1580" y="285" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="increment1" value="Foundation - Create Mob and Basic Actions" style="whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="-180" y="325.0" width="150" height="40" as="geometry"/>
@@ -72,73 +72,94 @@
                     <mxGeometry x="-180" y="625.0" width="150" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_bg_1" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="27.0" y="340.0" width="180.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="27.0" y="340.0" width="360.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc3_bg_1" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="229.0" y="540.0" width="180.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="409.0" y="540.0" width="180.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_bg_1" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="449.0" y="440.0" width="120.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="629.0" y="440.0" width="120.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_bg_2" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="591.0" y="440.0" width="180.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="771.0" y="440.0" width="180.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_bg_2" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="793.0" y="340.0" width="180.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="973.0" y="340.0" width="420.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc4_bg_1" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 2;strokeColor=#FFFFFF;fillColor=#F7F7F7;" parent="1" vertex="1">
-                    <mxGeometry x="1013.0" y="640.0" width="120.0" height="60.0" as="geometry"/>
+                    <mxGeometry x="1433.0" y="640.0" width="120.0" height="60.0" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_Manage Mobs_Create Mob_Select Minion Tokens_Select_Minion_Tokens" value="Select Minion Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="32.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="inc1_Manage Mobs_Create Mob_Group Minions Into Mob_Group_Minions_Into_Mob" value="Group Minions Into Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                <mxCell id="inc1_Manage Mobs_Create Mob_Query Foundry VTT For Selected Tokens_Query_Foundry_VTT_For_Selected_Tokens" value="Query Foundry VTT For Selected Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="92.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="inc1_Manage Mobs_Create Mob_Assign Mob Name_Assign_Mob_Name" value="Assign Mob Name" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                <mxCell id="inc1_Manage Mobs_Create Mob_Group Minions Into Mob_Group_Minions_Into_Mob" value="Group Minions Into Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="152.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
+                <mxCell id="inc1_Manage Mobs_Create Mob_Mob Manager Creates Mob With Selected Tokens_Mob_Manager_Creates_Mob_With_Selected_Tokens" value="Mob Manager Creates Mob With Selected Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="212.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Manage Mobs_Create Mob_Assign Mob Name_Assign_Mob_Name" value="Assign Mob Name" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="272.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Manage Mobs_Create Mob_System Persists Mob Configuration_System_Persists_Mob_Configuration" value="System Persists Mob Configuration" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="332.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
                 <mxCell id="inc3_Manage Mobs_Edit Mob_Select Mob To Edit_Select_Mob_To_Edit" value="Select Mob To Edit" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="234.0" y="545.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="414.0" y="545.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc3_Manage Mobs_Edit Mob_Add Minion To Mob_Add_Minion_To_Mob" value="Add Minion To Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="294.0" y="545.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="474.0" y="545.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc3_Manage Mobs_Edit Mob_Remove Minion From Mob_Remove_Minion_From_Mob" value="Remove Minion From Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="354.0" y="545.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="534.0" y="545.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_Control Mob Actions_Select Strategy_Select Mob_Select_Mob" value="Select Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="454.0" y="445.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="634.0" y="445.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_Control Mob Actions_Select Strategy_Choose Strategy_Choose_Strategy" value="Choose Strategy" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="514.0" y="445.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="694.0" y="445.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_Control Mob Actions_Choose Target_Evaluate Available Targets_Evaluate_Available_Targets" value="Evaluate Available Targets" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="596.0" y="445.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="776.0" y="445.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_Control Mob Actions_Choose Target_Apply Strategy To Select Target_Apply_Strategy_To_Select_Target" value="Apply Strategy To Select Target" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="656.0" y="445.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="836.0" y="445.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc2_Control Mob Actions_Choose Target_Confirm Target Selection_Confirm_Target_Selection" value="Confirm Target Selection" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="716.0" y="445.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="896.0" y="445.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_Control Mob Actions_Execute Mob Action_Select Action Type_Select_Action_Type" value="Select Action Type" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="798.0" y="345.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="978.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Control Mob Actions_Execute Mob Action_System Validates Action Type_System_Validates_Action_Type" value="System Validates Action Type" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1038.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_Control Mob Actions_Execute Mob Action_Execute Action For All Minions_Execute_Action_For_All_Minions" value="Execute Action For All Minions" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="858.0" y="345.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1098.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Control Mob Actions_Execute Mob Action_System Retrieves Mob Minions From Foundry VTT_System_Retrieves_Mob_Minions_From_Foundry_VTT" value="System Retrieves Mob Minions From Foundry VTT" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1158.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Control Mob Actions_Execute Mob Action_System Applies Action To Each Minion Via Foundry VTT API_System_Applies_Action_To_Each_Minion_Via_Foundry_VTT_API" value="System Applies Action To Each Minion Via Foundry VTT API" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1218.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc1_Control Mob Actions_Execute Mob Action_Respect Range Constraints_Respect_Range_Constraints" value="Respect Range Constraints" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="918.0" y="345.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1278.0" y="345.0" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_Control Mob Actions_Execute Mob Action_System Validates Range Constraints Using Foundry Movement System_System_Validates_Range_Constraints_Using_Foundry_Movement_System" value="System Validates Range Constraints Using Foundry Movement System" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1338.0" y="345.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc4_Spawn Mobs_Spawn From Template_Select Mob Template_Select_Mob_Template" value="Select Mob Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1018.0" y="645.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1438.0" y="645.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc4_Spawn Mobs_Spawn From Template_Spawn Mob From Template_Spawn_Mob_From_Template" value="Spawn Mob From Template" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1078.0" y="645.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1498.0" y="645.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="inc4_Spawn Mobs_Spawn From Actors_Spawn Mob From Selected Actors_Spawn_Mob_From_Selected_Actors" value="Spawn Mob From Selected Actors" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1160.0" y="645.0" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="1580.0" y="645.0" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="increment_sep1" value="" style="endArrow=none;dashed=1;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">

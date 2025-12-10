@@ -40,7 +40,7 @@
         {
           "name": "Create Mob",
           "sequential_order": 1,
-          "estimated_stories": 3,
+          "estimated_stories": 6,
           "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
@@ -57,18 +57,39 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Group Minions Into Mob",
+                  "name": "Query Foundry VTT For Selected Tokens",
                   "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
+                },
+                {
+                  "name": "Group Minions Into Mob",
+                  "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
+                  "name": "Mob Manager Creates Mob With Selected Tokens",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
+                },
+                {
                   "name": "Assign Mob Name",
-                  "sequential_order": 3,
+                  "sequential_order": 5,
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user"
+                },
+                {
+                  "name": "System Persists Mob Configuration",
+                  "sequential_order": 6,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
                 }
               ]
             }
@@ -243,7 +264,7 @@
         {
           "name": "Execute Mob Action",
           "sequential_order": 3,
-          "estimated_stories": 3,
+          "estimated_stories": 7,
           "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
@@ -260,18 +281,46 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Execute Action For All Minions",
+                  "name": "System Validates Action Type",
                   "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
+                },
+                {
+                  "name": "Execute Action For All Minions",
+                  "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user"
                 },
                 {
+                  "name": "System Retrieves Mob Minions From Foundry VTT",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
+                },
+                {
+                  "name": "System Applies Action To Each Minion Via Foundry VTT API",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
+                },
+                {
                   "name": "Respect Range Constraints",
-                  "sequential_order": 3,
+                  "sequential_order": 6,
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user"
+                },
+                {
+                  "name": "System Validates Range Constraints Using Foundry Movement System",
+                  "sequential_order": 7,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "system"
                 }
               ]
             }
@@ -400,22 +449,43 @@
               "name": "Create Mob",
               "users": ["Game Master"],
               "sequential_order": 1,
-              "estimated_stories": 3,
+              "estimated_stories": 6,
               "stories": [
                 {
                   "name": "Select Minion Tokens",
                   "users": ["Game Master"],
-                  "sequential_order": 1
+                  "sequential_order": 1,
+                  "story_type": "user"
+                },
+                {
+                  "name": "Query Foundry VTT For Selected Tokens",
+                  "users": [],
+                  "sequential_order": 2,
+                  "story_type": "system"
                 },
                 {
                   "name": "Group Minions Into Mob",
                   "users": ["Game Master"],
-                  "sequential_order": 2
+                  "sequential_order": 3,
+                  "story_type": "user"
+                },
+                {
+                  "name": "Mob Manager Creates Mob With Selected Tokens",
+                  "users": [],
+                  "sequential_order": 4,
+                  "story_type": "system"
                 },
                 {
                   "name": "Assign Mob Name",
                   "users": ["Game Master"],
-                  "sequential_order": 3
+                  "sequential_order": 5,
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Persists Mob Configuration",
+                  "users": [],
+                  "sequential_order": 6,
+                  "story_type": "system"
                 }
               ]
             }
@@ -459,22 +529,49 @@
               "name": "Execute Mob Action",
               "users": ["Game Master"],
               "sequential_order": 3,
-              "estimated_stories": 3,
+              "estimated_stories": 7,
               "stories": [
                 {
                   "name": "Select Action Type",
                   "users": ["Game Master"],
-                  "sequential_order": 1
+                  "sequential_order": 1,
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Validates Action Type",
+                  "users": [],
+                  "sequential_order": 2,
+                  "story_type": "system"
                 },
                 {
                   "name": "Execute Action For All Minions",
                   "users": ["Game Master"],
-                  "sequential_order": 2
+                  "sequential_order": 3,
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Retrieves Mob Minions From Foundry VTT",
+                  "users": [],
+                  "sequential_order": 4,
+                  "story_type": "system"
+                },
+                {
+                  "name": "System Applies Action To Each Minion Via Foundry VTT API",
+                  "users": [],
+                  "sequential_order": 5,
+                  "story_type": "system"
                 },
                 {
                   "name": "Respect Range Constraints",
                   "users": ["Game Master"],
-                  "sequential_order": 3
+                  "sequential_order": 6,
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Validates Range Constraints Using Foundry Movement System",
+                  "users": [],
+                  "sequential_order": 7,
+                  "story_type": "system"
                 }
               ]
             }

@@ -14,8 +14,9 @@
 
     "2. Gather Context - Follow agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json, agile_bot/bots/story_bot/behaviors/5_exploration/guardrails/required_context/instructions.json",
     "3. Decide Planning Criteria - Follow agile_bot/bots/base_bot/base_actions/3_decide_planning_criteria/instructions.json, agile_bot/bots/story_bot/behaviors/5_exploration/guardrails/planning/instructions.json",
-    "4. Build Knowledge - Follow agile_bot/bots/base_bot/base_actions/4_build_knowledge/instructions.json, exploration: build acceptance criteria AND refine domain model based on acceptance criteria details",
+    "4. Build Knowledge - Follow agile_bot/bots/base_bot/base_actions/4_build_knowledge/instructions.json, agile_bot/bots/story_bot/behaviors/5_exploration/2_content/1_knowledge_graph/instructions.json, exploration: build acceptance criteria AND refine domain model based on acceptance criteria details",
     "   - Refine domain model concepts, relationships, and responsibilities based on acceptance criteria exploration",
+    "   - CRITICAL: Add/update Steps and acceptance_criteria ONLY in main epics section (single source of truth), NOT in increments section",
     "5. Render Output - Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json, exploration: render feature documents with AC",
     "6. Validate Rules - Follow agile_bot/bots/base_bot/base_actions/7_validate_rules/instructions.json, exploration: validate AC format and coverage AND domain model refinements",
     "",

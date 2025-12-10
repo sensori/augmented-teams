@@ -333,14 +333,29 @@ def merge_command(args):
 def render_discovery_command(args):
     """
     Render discovery increment(s) DrawIO diagram.
-    
-    Placeholder - implementation to be added.
     """
-    print("Error: render-discovery command not yet implemented", file=sys.stderr)
-    print(f"  Story graph: {args.story_graph}")
-    print(f"  Output: {args.output}")
-    print(f"  Increment names: {args.increment_names}")
-    return 1
+    if args.story_graph:
+        diagram = StoryIODiagram.load_from_story_graph(args.story_graph, None)
+    else:
+        print("Error: Must provide --story-graph", file=sys.stderr)
+        return 1
+    
+    layout_data = None
+    if args.layout:
+        with open(args.layout, 'r', encoding='utf-8') as f:
+            layout_data = json.load(f)
+    
+    increment_names = args.increment_names if args.increment_names else None
+    
+    result = diagram.render_discovery(
+        output_path=args.output,
+        layout_data=layout_data,
+        increment_names=increment_names
+    )
+    print(f"Generated DrawIO diagram: {result['output_path']}")
+    print(f"Epics: {result['summary']['epics']}")
+    print(f"Increments: {result['summary']['increments']}")
+    return 0
 
 
 def sync_discovery_command(args):

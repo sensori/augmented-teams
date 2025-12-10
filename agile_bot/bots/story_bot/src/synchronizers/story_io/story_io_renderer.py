@@ -357,6 +357,146 @@ class DrawIORenderer:
             }
         }
     
+    def render_discovery(self, story_graph: Dict[str, Any],
+                        output_path: Path,
+                        layout_data: Optional[Dict[str, Any]] = None,
+                        increment_names: Optional[list] = None) -> Dict[str, Any]:
+        """
+        Render story graph with discovery increments to DrawIO XML.
+        Similar to render_increments but filters to specific increments by name.
+        
+        Args:
+            story_graph: Story graph dictionary with epics/features/stories/increments
+            output_path: Output path for DrawIO file
+            layout_data: Optional layout data to preserve positions
+            increment_names: Optional list of increment names to filter to (if None, renders all)
+        
+        Returns:
+            Dictionary with output_path and summary
+        """
+        # Normalize layout_data format
+        if layout_data is None:
+            layout_data = {}
+        
+        # Filter increments if increment_names provided
+        filtered_graph = story_graph.copy()
+        if increment_names:
+            all_increments = story_graph.get("increments", [])
+            filtered_increments = [
+                inc for inc in all_increments
+                if inc.get("name") in increment_names
+            ]
+            filtered_graph["increments"] = filtered_increments
+            
+            # CRITICAL: For discovery mode, filter stories to only those in the specified increment(s)
+            # Build set of story keys (epic_name|sub_epic_name|story_name) that belong to filtered increments
+            stories_in_increments = set()
+            for increment in filtered_increments:
+                for epic in increment.get("epics", []):
+                    epic_name = epic.get("name", "")
+                    for sub_epic in epic.get("sub_epics", []):
+                        sub_epic_name = sub_epic.get("name", "")
+                        for story in sub_epic.get("stories", []):
+                            story_name = story.get("name", "")
+                            if story_name:
+                                story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                                stories_in_increments.add(story_key)
+            
+            # Filter stories: show ALL epics and sub_epics, but filter stories to only those in increment(s)
+            import copy
+            filtered_epics = []
+            for epic in story_graph.get("epics", []):
+                epic_name = epic.get("name", "")
+                filtered_epic = copy.deepcopy(epic)
+                filtered_epic["sub_epics"] = []
+                
+                # Include ALL sub_epics
+                for sub_epic in epic.get("sub_epics", []):
+                    sub_epic_name = sub_epic.get("name", "")
+                    filtered_sub_epic = copy.deepcopy(sub_epic)
+                    filtered_sub_epic["story_groups"] = []
+                    
+                    # Filter story_groups: only include stories that are in the increment(s)
+                    for story_group in sub_epic.get("story_groups", []):
+                        filtered_stories = []
+                        for story in story_group.get("stories", []):
+                            story_name = story.get("name", "")
+                            story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                            if story_key in stories_in_increments:
+                                filtered_stories.append(story)
+                        
+                        # Include story_group even if empty (to preserve structure)
+                        filtered_group = copy.deepcopy(story_group)
+                        filtered_group["stories"] = filtered_stories
+                        filtered_sub_epic["story_groups"].append(filtered_group)
+                    
+                    # Always include sub_epic (even if it has no stories after filtering)
+                    filtered_epic["sub_epics"].append(filtered_sub_epic)
+                
+                # Always include epic (even if it has no stories after filtering)
+                filtered_epics.append(filtered_epic)
+            
+            filtered_graph["epics"] = filtered_epics
+        
+        # CRITICAL: Auto-generate filename with increment names/numbers
+        # Discovery diagrams MUST include increment identifier in filename
+        increments_to_render = filtered_graph.get("increments", [])
+        if increments_to_render:
+            # Generate filename suffix from increment names/priorities
+            if len(increments_to_render) == 1:
+                # Single increment: use name or priority number
+                inc = increments_to_render[0]
+                inc_name = inc.get("name", "")
+                inc_priority = inc.get("priority")
+                
+                if inc_name:
+                    # Sanitize increment name for filename
+                    sanitized_name = inc_name.replace(" ", "-").replace("/", "-").replace("\\", "-")
+                    sanitized_name = "".join(c for c in sanitized_name if c.isalnum() or c in ("-", "_"))
+                    # Remove multiple consecutive dashes
+                    while "--" in sanitized_name:
+                        sanitized_name = sanitized_name.replace("--", "-")
+                    # Remove leading/trailing dashes
+                    sanitized_name = sanitized_name.strip("-")
+                    filename_suffix = f"-{sanitized_name}"
+                elif inc_priority:
+                    filename_suffix = f"-Increment-{inc_priority}"
+                else:
+                    filename_suffix = "-Increment-1"
+            else:
+                # Multiple increments: use priority numbers
+                priorities = sorted([inc.get("priority") for inc in increments_to_render if inc.get("priority")])
+                if priorities:
+                    filename_suffix = f"-Increments-{'-'.join(map(str, priorities))}"
+                else:
+                    filename_suffix = "-All-Increments"
+            
+            # Modify output_path to include increment suffix if not already present
+            stem = output_path.stem
+            if filename_suffix and filename_suffix not in stem:
+                # Insert increment suffix before extension
+                new_stem = f"{stem}{filename_suffix}"
+                output_path = output_path.parent / f"{new_stem}{output_path.suffix}"
+        
+        # Ensure output directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Generate diagram with increments (same method, but will handle increment-specific rendering)
+        xml_output = self._generate_diagram(filtered_graph, layout_data, is_increments=True)
+        
+        # Write output
+        output_path.write_text(xml_output, encoding='utf-8')
+        
+        increments_count = len(filtered_graph.get("increments", []))
+        return {
+            "output_path": str(output_path),
+            "summary": {
+                "epics": len(filtered_graph.get("epics", [])),
+                "increments": increments_count,
+                "diagram_generated": True
+            }
+        }
+    
     def _generate_exploration_diagram(self, story_graph: Dict[str, Any], layout_data: Dict[str, Dict[str, float]], root_elem: ET.Element, root: ET.Element) -> str:
         """
         Generate DrawIO XML for exploration mode (acceptance criteria below stories).
@@ -1322,6 +1462,12 @@ class DrawIORenderer:
                     'x': feat_x
                 })
                 
+                # Update epic bounds to include this feature even if it has no stories
+                # This ensures epic width accounts for all features, including those with empty story_groups after filtering
+                if feat_width > 0:
+                    epic_min_x = min(epic_min_x, feat_x)
+                    epic_max_x = max(epic_max_x, feat_x + feat_width)
+                
                 story_idx = 1
                 story_user_x_offset = {}  # Track user X position per story row
                 
@@ -1329,7 +1475,8 @@ class DrawIORenderer:
                 feature_story_groups = feature.get('story_groups', [])
                 nested_sub_epics = feature.get('sub_epics', [])
                 if not feature_story_groups and not nested_sub_epics:
-                    # Skip features without story_groups and without nested sub_epics
+                    # Skip story rendering for features without story_groups and without nested sub_epics
+                    # But we've already updated epic bounds above, so continue to next feature
                     continue
                 
                 # Track actual bottom of feature (including all groups and stories) - initialize BEFORE story groups loop
@@ -2065,6 +2212,17 @@ class DrawIORenderer:
                 
                 # Features always use horizontal layout, so no need to update current_feature_y
             
+            # CRITICAL: After all features are processed, ensure epic_max_x includes ALL features
+            # This is especially important for features with no stories that were skipped during story rendering
+            # Update epic bounds from actual rendered feature geometries
+            for fg in feature_geometries:
+                if fg.get('geom'):
+                    final_feat_x = float(fg['geom'].get('x', 0))
+                    final_feat_width = float(fg['geom'].get('width', 0))
+                    if final_feat_width > 0:
+                        epic_min_x = min(epic_min_x, final_feat_x)
+                        epic_max_x = max(epic_max_x, final_feat_x + final_feat_width)
+            
             # Update epic_max_x to include AC cards if present (features already expand to fit AC)
             # Only update if in exploration mode - in normal mode, features are already constrained to sequential stories
             # Constrain epic_rightmost_ac_x to not exceed the rightmost feature position to prevent nested story AC from expanding epic width
@@ -2084,6 +2242,48 @@ class DrawIORenderer:
                 epic_spacing = 30 if is_exploration else 20
                 x_pos = epic_x + epic_width + epic_spacing
             elif epic_min_x != float('inf') and epic_max_x != -float('inf'):
+                # CRITICAL: Calculate epic width directly from feature geometries to ensure all sub-epics are included
+                # Read feature geometries AFTER they've been finalized (after shrinking/positioning)
+                # This ensures we get the actual rendered positions and widths
+                # Also read directly from XML root to get final rendered positions
+                feature_rights = []
+                
+                # First, try reading from feature_geometries (should have final positions)
+                if feature_geometries:
+                    for fg in feature_geometries:
+                        if fg.get('geom'):
+                            feat_x = float(fg['geom'].get('x', 0))
+                            feat_width = float(fg['geom'].get('width', 0))
+                            if feat_width > 0:
+                                feature_rights.append(feat_x + feat_width)
+                
+                # Also read directly from XML root to catch any features that might have been updated
+                # Find all feature cells (green boxes) that belong to this epic by checking their Y position
+                epic_cell_id = f"epic{epic_idx}"
+                for cell in root_elem.findall('mxCell'):
+                    cell_id = cell.get('id', '')
+                    style = cell.get('style', '')
+                    # Features are green boxes (fillColor=#d5e8d4) that are below the epic
+                    if 'fillColor=#d5e8d4' in style and cell_id.startswith(f'e{epic_idx}f'):
+                        geom = cell.find('mxGeometry')
+                        if geom is not None:
+                            feat_x = float(geom.get('x', 0))
+                            feat_width = float(geom.get('width', 0))
+                            if feat_width > 0:
+                                feature_rights.append(feat_x + feat_width)
+                
+                if feature_rights:
+                    calculated_epic_max_x = max(feature_rights)
+                    # Use calculated bounds, but ensure epic starts at epic_x
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = calculated_epic_max_x - epic_x + epic_padding
+                    actual_epic_x = epic_x
+                else:
+                    # Fallback to epic_max_x calculation
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = epic_max_x - epic_min_x + epic_padding
+                    actual_epic_x = epic_x
+                
                 # In exploration mode, epic should span from epic_x to rightmost AC box + padding
                 # Otherwise, calculate from min/max feature bounds
                 if is_exploration and epic_rightmost_ac_x is not None:
@@ -2095,18 +2295,11 @@ class DrawIORenderer:
                     constrained_ac_x = min(epic_rightmost_ac_x, max_feature_right + 100)  # Allow some AC expansion but cap it
                     # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
                     epic_padding = 30 if epic_idx == 1 else 6
-                    actual_epic_width = constrained_ac_x - epic_x + epic_padding
-                    actual_epic_x = epic_x
-                else:
-                    # Calculate width from actual rendered bounds
-                    # epic_min_x starts at epic_x, epic_max_x tracks rightmost content
-                    # When sub_epics (features) are present, epic width should be exactly the width of its sub-epics (no padding)
-                    # This prevents epics from becoming too wide when "or" connector nested stories extend horizontally
-                    actual_epic_width = epic_max_x - epic_min_x  # No padding - epic should match sub-epic width exactly
-                    actual_epic_x = epic_x  # Keep epic at its original position (first feature aligns to epic, not vice versa)
-                    # Ensure minimum width
-                    if actual_epic_width < 100:
-                        actual_epic_width = 100
+                    actual_epic_width = max(actual_epic_width, constrained_ac_x - epic_x + epic_padding)
+                
+                # Ensure minimum width
+                if actual_epic_width < 100:
+                    actual_epic_width = 100
                 epic_geom.set('width', str(actual_epic_width))
                 estimated_geom = epic_estimate_geoms.get(epic_idx)
                 if estimated_geom is not None:
@@ -3077,6 +3270,12 @@ class DrawIORenderer:
                     'x': feat_x
                 })
                 
+                # Update epic bounds to include this feature even if it has no stories
+                # This ensures epic width accounts for all features, including those with empty story_groups after filtering
+                if feat_width > 0:
+                    epic_min_x = min(epic_min_x, feat_x)
+                    epic_max_x = max(epic_max_x, feat_x + feat_width)
+                
                 story_idx = 1
                 story_user_x_offset = {}  # Track user X position per story row
                 
@@ -3084,7 +3283,8 @@ class DrawIORenderer:
                 feature_story_groups = feature.get('story_groups', [])
                 nested_sub_epics = feature.get('sub_epics', [])
                 if not feature_story_groups and not nested_sub_epics:
-                    # Skip features without story_groups and without nested sub_epics
+                    # Skip story rendering for features without story_groups and without nested sub_epics
+                    # But we've already updated epic bounds above, so continue to next feature
                     continue
                 
                 # Track actual bottom of feature (including all groups and stories) - initialize BEFORE story groups loop
@@ -3820,6 +4020,17 @@ class DrawIORenderer:
                 
                 # Features always use horizontal layout, so no need to update current_feature_y
             
+            # CRITICAL: After all features are processed, ensure epic_max_x includes ALL features
+            # This is especially important for features with no stories that were skipped during story rendering
+            # Update epic bounds from actual rendered feature geometries
+            for fg in feature_geometries:
+                if fg.get('geom'):
+                    final_feat_x = float(fg['geom'].get('x', 0))
+                    final_feat_width = float(fg['geom'].get('width', 0))
+                    if final_feat_width > 0:
+                        epic_min_x = min(epic_min_x, final_feat_x)
+                        epic_max_x = max(epic_max_x, final_feat_x + final_feat_width)
+            
             # Update epic_max_x to include AC cards if present (features already expand to fit AC)
             # Only update if in exploration mode - in normal mode, features are already constrained to sequential stories
             # Constrain epic_rightmost_ac_x to not exceed the rightmost feature position to prevent nested story AC from expanding epic width
@@ -3839,6 +4050,48 @@ class DrawIORenderer:
                 epic_spacing = 30 if is_exploration else 20
                 x_pos = epic_x + epic_width + epic_spacing
             elif epic_min_x != float('inf') and epic_max_x != -float('inf'):
+                # CRITICAL: Calculate epic width directly from feature geometries to ensure all sub-epics are included
+                # Read feature geometries AFTER they've been finalized (after shrinking/positioning)
+                # This ensures we get the actual rendered positions and widths
+                # Also read directly from XML root to get final rendered positions
+                feature_rights = []
+                
+                # First, try reading from feature_geometries (should have final positions)
+                if feature_geometries:
+                    for fg in feature_geometries:
+                        if fg.get('geom'):
+                            feat_x = float(fg['geom'].get('x', 0))
+                            feat_width = float(fg['geom'].get('width', 0))
+                            if feat_width > 0:
+                                feature_rights.append(feat_x + feat_width)
+                
+                # Also read directly from XML root to catch any features that might have been updated
+                # Find all feature cells (green boxes) that belong to this epic by checking their Y position
+                epic_cell_id = f"epic{epic_idx}"
+                for cell in root_elem.findall('mxCell'):
+                    cell_id = cell.get('id', '')
+                    style = cell.get('style', '')
+                    # Features are green boxes (fillColor=#d5e8d4) that are below the epic
+                    if 'fillColor=#d5e8d4' in style and cell_id.startswith(f'e{epic_idx}f'):
+                        geom = cell.find('mxGeometry')
+                        if geom is not None:
+                            feat_x = float(geom.get('x', 0))
+                            feat_width = float(geom.get('width', 0))
+                            if feat_width > 0:
+                                feature_rights.append(feat_x + feat_width)
+                
+                if feature_rights:
+                    calculated_epic_max_x = max(feature_rights)
+                    # Use calculated bounds, but ensure epic starts at epic_x
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = calculated_epic_max_x - epic_x + epic_padding
+                    actual_epic_x = epic_x
+                else:
+                    # Fallback to epic_max_x calculation
+                    epic_padding = 30 if epic_idx == 1 else 6
+                    actual_epic_width = epic_max_x - epic_min_x + epic_padding
+                    actual_epic_x = epic_x
+                
                 # In exploration mode, epic should span from epic_x to rightmost AC box + padding
                 # Otherwise, calculate from min/max feature bounds
                 if is_exploration and epic_rightmost_ac_x is not None:
@@ -3850,18 +4103,11 @@ class DrawIORenderer:
                     constrained_ac_x = min(epic_rightmost_ac_x, max_feature_right + 100)  # Allow some AC expansion but cap it
                     # For first epic (epic_idx == 1): 30px padding, for others: 6px padding
                     epic_padding = 30 if epic_idx == 1 else 6
-                    actual_epic_width = constrained_ac_x - epic_x + epic_padding
-                    actual_epic_x = epic_x
-                else:
-                    # Calculate width from actual rendered bounds
-                    # epic_min_x starts at epic_x, epic_max_x tracks rightmost content
-                    # When sub_epics (features) are present, epic width should be exactly the width of its sub-epics (no padding)
-                    # This prevents epics from becoming too wide when "or" connector nested stories extend horizontally
-                    actual_epic_width = epic_max_x - epic_min_x  # No padding - epic should match sub-epic width exactly
-                    actual_epic_x = epic_x  # Keep epic at its original position (first feature aligns to epic, not vice versa)
-                    # Ensure minimum width
-                    if actual_epic_width < 100:
-                        actual_epic_width = 100
+                    actual_epic_width = max(actual_epic_width, constrained_ac_x - epic_x + epic_padding)
+                
+                # Ensure minimum width
+                if actual_epic_width < 100:
+                    actual_epic_width = 100
                 epic_geom.set('width', str(actual_epic_width))
                 estimated_geom = epic_estimate_geoms.get(epic_idx)
                 if estimated_geom is not None:

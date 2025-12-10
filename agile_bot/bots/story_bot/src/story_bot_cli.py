@@ -70,7 +70,6 @@ def main():
     cli = BaseBotCli(
         bot_name=bot_name,
         bot_config_path=bot_config_path,
-        workspace_root=workspace_directory,
     )
 
     cli.main()

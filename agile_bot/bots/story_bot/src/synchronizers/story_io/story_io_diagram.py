@@ -614,6 +614,51 @@ class StoryIODiagram(StoryIOComponent):
             layout_data=layout_data
         )
     
+    def render_discovery(self, output_path: Optional[Union[str, Path]] = None,
+                        layout_data: Optional[Dict[str, Any]] = None,
+                        increment_names: Optional[list] = None,
+                        story_graph: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Render diagram with discovery increments (filtered by increment names).
+        
+        Args:
+            output_path: Optional path for DrawIO output file
+            layout_data: Optional layout data to preserve positions
+            increment_names: Optional list of increment names to filter to
+            story_graph: Optional story graph dictionary to render directly
+        
+        Returns:
+            Dictionary with output_path and summary
+        """
+        if output_path is None and self._drawio_file:
+            output_path = self._drawio_file.parent / "story-map-discovery.drawio"
+        elif output_path:
+            output_path = Path(output_path)
+        else:
+            raise ValueError("No output path specified and no drawio_file set")
+        
+        # Use provided story_graph or convert diagram to story graph format
+        if story_graph is not None:
+            graph_data = story_graph
+        else:
+            graph_data = self._to_story_graph_format(include_increments=True)
+        
+        # If we have a source JSON file, load it directly to preserve stories in increments
+        if self._source_path and self._source_path.exists():
+            import json
+            with open(self._source_path, 'r', encoding='utf-8') as f:
+                raw_graph_data = json.load(f)
+            # Use raw JSON data which preserves stories in increments' sub_epics
+            graph_data = raw_graph_data
+        
+        # Render using renderer
+        return self._renderer.render_discovery(
+            story_graph=graph_data,
+            output_path=output_path,
+            layout_data=layout_data,
+            increment_names=increment_names
+        )
+    
     @staticmethod
     def render_exploration_from_graph(story_graph: Union[Dict[str, Any], str, Path],
                                      output_path: Union[str, Path],
