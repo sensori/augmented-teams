@@ -1,0 +1,26 @@
+================================================================================
+STORY GRAPH EXTRACTION REPORT
+================================================================================
+
+This report shows what was extracted from the DrawIO file.
+
+SUMMARY
+  Epics: 1
+  Features: 2
+  Stories: 5
+
+================================================================================
+
+EPIC 1: Execute Behavior Actions
+--------------------------------------------------------------------------------
+  Feature 1: Build Knowledge
+    - proactively Validate knowledge against rules (for Bot Behavior)
+    Total stories in this feature: 1
+
+  Feature 2: Validate Knowledge & Content Against Rules
+    - Discovers Scanners (for Bot Behavior)
+    - Run Scanners against Knowledge Graph (for Scanner)
+    - Run AST Scanners against Knowledge Graph (OUT OF SCOPE) (for Scanner)
+    - Reports Violations (for Bot Behavior)
+    Total stories in this feature: 4
+

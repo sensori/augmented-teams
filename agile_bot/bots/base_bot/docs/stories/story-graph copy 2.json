@@ -89,7 +89,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": "or",
               "stories": [
                 {
                   "name": "Generate MCP Bot Server",
@@ -166,6 +165,40 @@
                       "test_method": "test_clear_python_bytecode_cache"
                     }
                   ]
+                },
+                {
+                  "name": "Store Context Files",
+                  "sequential_order": 1.7,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN initialize_project action confirms project area location",
+                    "THEN initialize_project creates {project_area}/docs/context/ folder and {project_area}/docs/stories/ folder",
+                    "WHEN user provides input file via @input.txt or similar",
+                    "THEN initialize_project copies input file to {project_area}/docs/context/input.txt",
+                    "WHEN user provides context in conversation",
+                    "THEN initialize_project saves context to {project_area}/docs/context/initial-context.md or similar",
+                    "WHEN gather_context action stores clarification data",
+                    "THEN gather_context saves to {project_area}/docs/stories/clarification.json (generated file, NOT in context folder)",
+                    "WHEN decide_planning_criteria action stores planning decisions",
+                    "THEN decide_planning_criteria saves to {project_area}/docs/stories/planning.json (generated file, NOT in context folder)",
+                    "WHEN build_knowledge action loads context",
+                    "THEN build_knowledge loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+                    "WHEN render_output action loads context",
+                    "THEN render_output loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+                    "WHEN any action needs context files",
+                    "THEN action references original input from {project_area}/docs/context/ folder and generated files from {project_area}/docs/stories/ folder"
+                  ]
+                },
+                {
+                  "name": "Stores Activity for Initialize Project Action",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
             }
@@ -177,7 +210,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Generate BOT CLI code",
@@ -666,7 +698,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Bot Tool Invocation",
@@ -769,6 +800,13 @@
                       "test_method": "test_action_called_directly_saves_workflow_state"
                     }
                   ]
+                },
+                {
+                  "name": "Save Through MCP",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
             }
@@ -781,7 +819,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Invoke Bot CLI",
@@ -974,6 +1011,1063 @@
                       "test_method": "test_help_extracts_action_descriptions_from_base_actions"
                     }
                   ]
+                },
+                {
+                  "name": "Detect Trigger Words Through Extension",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user",
+                  "test_file": "test_invoke_bot_cli.py",
+                  "test_class": "TestDetectTriggerWordsThroughExtension",
+                  "acceptance_criteria": [
+                    "WHEN Cursor extension detects trigger words in user input",
+                    "THEN Extension identifies trigger patterns from bot configuration",
+                    "AND Extension matches trigger words to corresponding bot behaviors and actions",
+                    "AND Extension provides trigger word context to CLI",
+                    "AND CLI receives trigger word information from extension",
+                    "AND CLI routes to appropriate bot behavior and action based on trigger words",
+                    "AND Bot executes action with trigger word context",
+                    "AND Extension handles multiple trigger word matches gracefully",
+                    "AND Extension provides feedback when no trigger words are detected"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Trigger bot only (no behavior or action specified)",
+                      "steps": "Given user types message containing trigger words \"<trigger_message>\" and bot is at behavior \"<current_behavior>\" and action \"<current_action>\"\\nWhen Cursor extension intercepts user message\\nThen Extension identifies target bot \"<bot_name>\" from trigger patterns\\nAnd Extension translates trigger words to CLI command for bot \"<bot_name>\"\\nAnd Extension executes CLI command\\nAnd CLI routes to bot \"<bot_name>\" using behavior \"<current_behavior>\" and action \"<current_action>\"\\nAnd Bot executes behavior \"<current_behavior>\" action \"<current_action>\"",
+                      "examples": [
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "shape",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "prioritization",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "arrange",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "discovery",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "exploration",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "scenarios",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "examples",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets launch the stories work",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets get back into writing stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "ready to work on stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "time to kick off stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "lets do some stories now",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot"
+                        },
+                        {
+                          "trigger_message": "hey lets get going on some stories",
+                          "bot_name": "story_bot",
+                          "current_behavior": "tests",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Trigger bot and behavior (no action specified)",
+                      "steps": "Given user types message containing trigger words \"<trigger_message>\" for bot and behavior and behavior is at action \"<current_action>\"\\nWhen Cursor extension intercepts user message\\nThen Extension identifies bot \"<bot_name>\" and behavior \"<behavior_name>\" from trigger patterns\\nAnd Extension translates trigger words to CLI command for bot \"<bot_name>\" behavior \"<behavior_name>\"\\nAnd Extension executes CLI command\\nAnd CLI routes to bot \"<bot_name>\" behavior \"<behavior_name>\" using action \"<current_action>\"\\nAnd Bot executes action \"<current_action>\"",
+                      "examples": [
+                        {
+                          "trigger_message": "kick off shaping for a new feature",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "define scope for the new capability",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "map acceptance requirements",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "kick off shaping for a new feature",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "define scope for the new capability",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "map acceptance requirements",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot shape"
+                        },
+                        {
+                          "trigger_message": "rank the backlog for launch",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "set priorities for upcoming features",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "groom the backlog items",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "rank the backlog for launch",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "set priorities for upcoming features",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "groom the backlog items",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot prioritization"
+                        },
+                        {
+                          "trigger_message": "arrange the feature map layout",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "organize epics and features",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "restructure the story map",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "arrange the feature map layout",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "organize epics and features",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "restructure the story map",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot arrange"
+                        },
+                        {
+                          "trigger_message": "start discovery for the new product",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "collect insights for the domain",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "explore user needs",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "start discovery for the new product",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "collect insights for the domain",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "explore user needs",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot discovery"
+                        },
+                        {
+                          "trigger_message": "begin the exploration phase",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "investigate solution options",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "clarify exploration scope",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "begin the exploration phase",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "investigate solution options",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "clarify exploration scope",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot exploration"
+                        },
+                        {
+                          "trigger_message": "draft behavior scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "write gherkin cases",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "outline test scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "draft behavior scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "write gherkin cases",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "outline test scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot scenarios"
+                        },
+                        {
+                          "trigger_message": "prepare usage examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "draft sample flows",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "capture illustrative examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "prepare usage examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "draft sample flows",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "capture illustrative examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot examples"
+                        },
+                        {
+                          "trigger_message": "design test coverage",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "initialize_project",
+                          "cli_command": "story_bot tests"
+                        },
+                        {
+                          "trigger_message": "plan validation cases",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "gather_context",
+                          "cli_command": "story_bot tests"
+                        },
+                        {
+                          "trigger_message": "define acceptance tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "decide_planning_criteria",
+                          "cli_command": "story_bot tests"
+                        },
+                        {
+                          "trigger_message": "design test coverage",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "build_knowledge",
+                          "cli_command": "story_bot tests"
+                        },
+                        {
+                          "trigger_message": "plan validation cases",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "render_output",
+                          "cli_command": "story_bot tests"
+                        },
+                        {
+                          "trigger_message": "define acceptance tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "current_action": "validate_rules",
+                          "cli_command": "story_bot tests"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Trigger bot, behavior, and action explicitly",
+                      "steps": "Given user types message containing trigger words \"<trigger_message>\" specifying bot, behavior, and action\\nWhen Cursor extension intercepts user message\\nThen Extension identifies bot \"<bot_name>\", behavior \"<behavior_name>\", and action \"<action_name>\" from trigger patterns\\nAnd Extension translates trigger words to CLI command for bot \"<bot_name>\" behavior \"<behavior_name>\" action \"<action_name>\"\\nAnd Extension executes CLI command\\nAnd CLI routes to bot \"<bot_name>\" and behavior \"<behavior_name>\" and action \"<action_name>\"\\nAnd Bot executes action \"<action_name>\"",
+                      "examples": [
+                        {
+                          "trigger_message": "set up the project area for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot shape initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot shape gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot shape decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot shape build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot shape render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for shape",
+                          "bot_name": "story_bot",
+                          "behavior_name": "shape",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot shape validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot prioritization initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot prioritization gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot prioritization decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot prioritization build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot prioritization render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for prioritization",
+                          "bot_name": "story_bot",
+                          "behavior_name": "prioritization",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot prioritization validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot arrange initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot arrange gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot arrange decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot arrange build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot arrange render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for arrange",
+                          "bot_name": "story_bot",
+                          "behavior_name": "arrange",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot arrange validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot discovery initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot discovery gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot discovery decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot discovery build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot discovery render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for discovery",
+                          "bot_name": "story_bot",
+                          "behavior_name": "discovery",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot discovery validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot exploration initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot exploration gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot exploration decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot exploration build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot exploration render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for exploration",
+                          "bot_name": "story_bot",
+                          "behavior_name": "exploration",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot exploration validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot scenarios initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot scenarios gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot scenarios decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot scenarios build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot scenarios render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for scenarios",
+                          "bot_name": "story_bot",
+                          "behavior_name": "scenarios",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot scenarios validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot examples initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot examples gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot examples decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot examples build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot examples render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for examples",
+                          "bot_name": "story_bot",
+                          "behavior_name": "examples",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot examples validate_rules"
+                        },
+                        {
+                          "trigger_message": "set up the project area for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "initialize_project",
+                          "cli_command": "story_bot tests initialize_project"
+                        },
+                        {
+                          "trigger_message": "gather context for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "gather_context",
+                          "cli_command": "story_bot tests gather_context"
+                        },
+                        {
+                          "trigger_message": "decide planning criteria for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "decide_planning_criteria",
+                          "cli_command": "story_bot tests decide_planning_criteria"
+                        },
+                        {
+                          "trigger_message": "build the knowledge base for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "build_knowledge",
+                          "cli_command": "story_bot tests build_knowledge"
+                        },
+                        {
+                          "trigger_message": "render outputs for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "render_output",
+                          "cli_command": "story_bot tests render_output"
+                        },
+                        {
+                          "trigger_message": "validate outputs for tests",
+                          "bot_name": "story_bot",
+                          "behavior_name": "tests",
+                          "action_name": "validate_rules",
+                          "cli_command": "story_bot tests validate_rules"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Save Through CLI",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
             }
@@ -1056,7 +2150,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Close Current Action",
@@ -1372,7 +2465,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": "and",
               "stories": [
                 {
                   "name": "Track Activity for Gather Context Action",
@@ -1511,6 +2603,13 @@
                   "users": [
                     "Bot Behavior"
                   ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Load + Inject  Guardrails",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
                   "story_type": "user"
                 }
               ]
@@ -1745,7 +2844,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Inject Knowledge Graph Template and Builder Instructions",
@@ -1764,6 +2862,20 @@
                     "AND template file path exists and is accessible",
                     "WHEN knowledge graph template does not exist",
                     "THEN Action raises FileNotFoundError with appropriate error message"
+                  ]
+                },
+                {
+                  "name": "proactively Validate knowledge against rules",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN BuildKnowledgeAction it's the initial pass of building the knowledge graphTHEN Build Knowledge Action invokes the Validate Rules action to understand if what is generated violates any rules\n(see Validate Knowledge & Content Against Rules)",
+                    "WHEN Validate Rules action is finsihed generateing the validation report THEN the BuildKnowledgeAction goes through all of the violations to determine if any corrective action needs to be taken AND the system updates the knowledge graph based on the recommendations.",
+                    "WHEN BuildKnowledgeAction Is finished making corrections.\nTHEN BuildKnowledgeAction tells AI to notify the user of what corrections it made as part of presenting the fact that it's done building knowledge."
                   ]
                 },
                 {
@@ -1798,18 +2910,18 @@
                   ]
                 },
                 {
-                  "name": "proactively Validate knowledge against rules",
-                  "sequential_order": 1,
-                  "connector": "and",
-                  "users": [
-                    "Bot Behavior"
-                  ],
-                  "story_type": "user",
-                  "acceptance_criteria": [
-                    "WHEN BuildKnowledgeAction it's the initial pass of building the knowledge graphTHEN Build Knowledge Action invokes the Validate Rules action to understand if what is generated violates any rules\n(see Validate Knowledge & Content Against Rules)",
-                    "WHEN Validate Rules action is finsihed generateing the validation report THEN the BuildKnowledgeAction goes through all of the violations to determine if any corrective action needs to be taken AND the system updates the knowledge graph based on the recommendations.",
-                    "WHEN BuildKnowledgeAction Is finished making corrections.\nTHEN BuildKnowledgeAction tells AI to notify the user of what corrections it made as part of presenting the fact that it's done building knowledge."
-                  ]
+                  "name": "Load + Inject Knolwedge Graph",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Knowledge Graph",
+                  "sequential_order": 7,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
             }
@@ -1948,7 +3060,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Track Activity for Render Output Action",
@@ -2096,6 +3207,20 @@
                       "test_method": "test_render_output_includes_synchronizer_execution_instructions_in_base_instructions"
                     }
                   ]
+                },
+                {
+                  "name": "Load+ Inject Content Into Instructions",
+                  "sequential_order": 8,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Content",
+                  "sequential_order": 9,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
                 }
               ]
             }
@@ -2223,7 +3348,6 @@
           "story_groups": [
             {
               "type": "and",
-              "connector": null,
               "stories": [
                 {
                   "name": "Inject Validation Rules for Validate Rules Action",
@@ -2301,6 +3425,133 @@
                   ]
                 },
                 {
+                  "name": "System Discovers Scanners from rule.json",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN ValidateRulesAction loads validation rules THEN System reads rule.json files from behavior rules directory AND System identifies scanner configuration entries in rule.json AND System extracts scanner class names and detection methods from configuration"
+                  ]
+                },
+                {
+                  "name": "System Loads Scanner Classes",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN System discovers scanner class names from rule.json THEN System dynamically imports scanner classes from configured module paths AND System instantiates scanner objects with required configuration AND System validates scanner classes implement required interface methods"
+                  ]
+                },
+                {
+                  "name": "System Runs Scanners After Build Knowledge",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN BuildKnowledgeAction completes execution THEN System triggers code scanners to analyze generated knowledge graph files AND System passes knowledge graph file paths to scanners AND System collects scanner results before proceeding to next action"
+                  ]
+                },
+                {
+                  "name": "System Runs Scanners After Render Output",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN RenderOutputAction completes execution THEN System triggers code scanners to analyze rendered output files AND System passes rendered file paths to scanners AND System collects scanner results before proceeding to validate_rules action"
+                  ]
+                },
+                {
+                  "name": "System Runs Scanners Before AI Validation",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN ValidateRulesAction begins execution THEN System runs all configured scanners on content to validate AND System collects scanner violations before AI validation runs AND System includes scanner violations in validation report alongside AI validation results"
+                  ]
+                },
+                {
+                  "name": "Scanner Detects Violations Using Regex Patterns",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Scanner configured with regex patterns processes content THEN Scanner applies regex patterns to file content AND Scanner matches patterns against text and identifies violations AND Scanner records violation location (file path, line number, matched text)"
+                  ]
+                },
+                {
+                  "name": "Scanner Detects Violations Using AST Parsing",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Scanner configured with AST parsing processes code files THEN Scanner parses code into abstract syntax tree AND Scanner traverses AST nodes to detect structural violations AND Scanner records violation location (file path, line number, node type, violation description)"
+                  ]
+                },
+                {
+                  "name": "Scanner Detects Violations Using File Structure Analysis",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Scanner configured with file structure analysis processes project THEN Scanner analyzes directory structure and file organization AND Scanner checks file naming conventions and required file presence AND Scanner records violation location (file path, missing files, naming violations)"
+                  ]
+                },
+                {
+                  "name": "System Collects Violations from All Scanners",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN All scanners complete execution THEN System aggregates violations from all scanner results AND System deduplicates violations based on file path and line number AND System groups violations by scanner type and severity"
+                  ]
+                },
+                {
+                  "name": "System Reports Violations with Location Context",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN System generates validation report THEN System includes all collected scanner violations with file path AND System includes line number and code snippet for each violation AND System includes scanner name and violation type for context AND System formats violations for easy review in validation report"
+                  ]
+                },
+                {
+                  "name": "Run Diagnostics + inject Results",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
                   "name": "Discovers Scanners",
                   "sequential_order": 1,
                   "connector": "and",
@@ -2352,6 +3603,132 @@
                     "WHEN All scanners complete execution THEN ValidateRulesAction aggregates violations from all scanner results AND ValidateRulesAction aggregates violations based on file path and line number AND ValidateRulesAction groups violations by scanner type and severity",
                     "WHEN the ValidateRulesAction has finished collecting and aggregating violations and validations,\nTHEN the ValidateRulesAction then renders that into a Markdown report",
                     "WHEN ValidateRulesAction generates validation report THEN ValidateRulesAction includes all collected scanner violations with file path alongside AI validatin results AND ValidateRulesAction includes line number and code snippet for each violation AND ValidateRulesAction includes scanner name and violation type for context AND ValidateRulesAction formats violations for easy review in validation report"
+                  ]
+                }
+              ]
+            }
+          ],
+          "sub_epics": [
+            {
+              "name": "Integrate Code Scanners into Validation Workflow",
+              "sequential_order": 1,
+              "sub_epics": [
+                {
+                  "name": "Register and Load Code Scanners",
+                  "sequential_order": 1,
+                  "sub_epics": [],
+                  "stories": [
+                    {
+                      "name": "System Discovers Scanners from rule.json",
+                      "sequential_order": 1,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "System Loads Scanner Classes",
+                      "sequential_order": 2,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    }
+                  ]
+                },
+                {
+                  "name": "Execute Code Scanners",
+                  "sequential_order": 2,
+                  "sub_epics": [],
+                  "stories": [
+                    {
+                      "name": "System Runs Scanners After Build Knowledge",
+                      "sequential_order": 1,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "System Runs Scanners After Render Output",
+                      "sequential_order": 2,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "System Runs Scanners Before AI Validation",
+                      "sequential_order": 3,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    }
+                  ]
+                },
+                {
+                  "name": "Detect Violations",
+                  "sequential_order": 3,
+                  "sub_epics": [],
+                  "stories": [
+                    {
+                      "name": "Scanner Detects Violations Using Regex Patterns",
+                      "sequential_order": 1,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Scanner Detects Violations Using AST Parsing",
+                      "sequential_order": 2,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "Scanner Detects Violations Using File Structure Analysis",
+                      "sequential_order": 3,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    }
+                  ]
+                },
+                {
+                  "name": "Collect and Report Violations",
+                  "sequential_order": 4,
+                  "sub_epics": [],
+                  "stories": [
+                    {
+                      "name": "System Collects Violations from All Scanners",
+                      "sequential_order": 1,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    },
+                    {
+                      "name": "System Reports Violations with Location Context",
+                      "sequential_order": 2,
+                      "connector": "and",
+                      "users": [
+                        "Bot Behavior"
+                      ],
+                      "story_type": "user"
+                    }
                   ]
                 }
               ]
@@ -2801,29 +4178,33 @@
               "name": "Init Project",
               "sequential_order": 1,
               "sub_epics": [],
-              "stories": [],
-              "story_groups": [
+              "stories": [
                 {
-                  "type": "and",
-                  "stories": [
-                    {
-                      "name": "Initialize Project Creates Context Folder",
-                      "sequential_order": 1.5,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Input File Copied To Context Folder",
-                      "sequential_order": 1.6,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    }
+                  "name": "Initialize Project Location",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "test_class": "TestInitializeProjectLocation",
+                  "acceptance_criteria": [
+                    "(AC) WHEN Bot behavior is invoked for the first time (no saved location exists)",
+                    "(AC) THEN Bot detects current directory from context",
+                    "(AC) AND Bot presents location to user for confirmation",
+                    "(AC) AND Bot waits for user to confirm or provide different location",
+                    "(AC) AND Bot saves confirmed location to persistent storage",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory matches saved location",
+                    "(AC) THEN Bot uses saved location without asking for confirmation",
+                    "(AC) AND Bot proceeds directly to next action",
+                    "(AC) WHEN Bot behavior is invoked",
+                    "(AC) AND Saved location exists",
+                    "(AC) AND Current directory is DIFFERENT from saved location",
+                    "(AC) THEN Bot presents new location to user for confirmation",
+                    "(AC) AND Bot asks if user wants to switch to new location",
+                    "(AC) AND Bot saves confirmed location if user approves change"
                   ]
                 }
               ]
@@ -2842,81 +4223,6 @@
                   ],
                   "story_type": "user",
                   "test_class": "TestGetHelpForCommandLineFunctions"
-                }
-              ]
-            },
-            {
-              "name": "Perform Behavior Action",
-              "sequential_order": 3,
-              "sub_epics": [],
-              "story_groups": [
-                {
-                  "type": "and",
-                  "stories": [
-                    {
-                      "name": "Close Current Action",
-                      "sequential_order": 1,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Complete Workflow Integration",
-                      "sequential_order": 2,
-                      "connector": "or",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Provide Behavior Action Instructions",
-                      "sequential_order": 3,
-                      "connector": "and",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Activity Tracker Guard",
-                      "sequential_order": 4,
-                      "connector": "and",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Workflow Guard",
-                      "sequential_order": 5,
-                      "connector": "and",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Activity Tracking Location",
-                      "sequential_order": 6,
-                      "connector": "and",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    },
-                    {
-                      "name": "Find Behavior Folder",
-                      "sequential_order": 7,
-                      "connector": "and",
-                      "users": [
-                        "Bot Behavior"
-                      ],
-                      "story_type": "user"
-                    }
-                  ]
                 }
               ]
             }

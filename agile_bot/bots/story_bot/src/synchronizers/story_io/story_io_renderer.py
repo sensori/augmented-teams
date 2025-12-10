@@ -302,10 +302,10 @@ class DrawIORenderer:
         Acceptance criteria are rendered as wider boxes below stories.
         
         Args:
-            story_graph: Story graph dictionary with epics/features/stories
+            story_graph: Story graph dictionary with epics/features/stories/increments
             output_path: Output path for DrawIO file
             layout_data: Optional layout data to preserve positions
-            scope: Optional scope identifier for filtering stories
+            scope: Optional increment name for filtering stories (e.g., "Code Scanner")
         
         Returns:
             Dictionary with output_path and summary
@@ -314,11 +314,75 @@ class DrawIORenderer:
         if layout_data is None:
             layout_data = {}
         
+        # Filter stories to only those in the specified increment if scope provided
+        filtered_graph = story_graph.copy()
+        if scope:
+            # Find the increment by name
+            all_increments = story_graph.get("increments", [])
+            matching_increment = None
+            for inc in all_increments:
+                if inc.get("name") == scope:
+                    matching_increment = inc
+                    break
+            
+            if matching_increment:
+                # Build set of story keys (epic_name|sub_epic_name|story_name) that belong to the increment
+                stories_in_increment = set()
+                for epic in matching_increment.get("epics", []):
+                    epic_name = epic.get("name", "")
+                    for sub_epic in epic.get("sub_epics", []):
+                        sub_epic_name = sub_epic.get("name", "")
+                        for story_group in sub_epic.get("story_groups", []):
+                            for story in story_group.get("stories", []):
+                                story_name = story.get("name", "")
+                                if story_name:
+                                    story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                                    stories_in_increment.add(story_key)
+                
+                # Filter stories: show ALL epics and sub_epics, but filter stories to only those in increment
+                import copy
+                filtered_epics = []
+                for epic in story_graph.get("epics", []):
+                    epic_name = epic.get("name", "")
+                    filtered_epic = copy.deepcopy(epic)
+                    filtered_epic["sub_epics"] = []
+                    
+                    # Include ALL sub_epics
+                    for sub_epic in epic.get("sub_epics", []):
+                        sub_epic_name = sub_epic.get("name", "")
+                        filtered_sub_epic = copy.deepcopy(sub_epic)
+                        filtered_sub_epic["story_groups"] = []
+                        
+                        # Filter story_groups: only include stories that are in the increment
+                        for story_group in sub_epic.get("story_groups", []):
+                            filtered_stories = []
+                            for story in story_group.get("stories", []):
+                                story_name = story.get("name", "")
+                                story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                                if story_key in stories_in_increment:
+                                    filtered_stories.append(story)
+                            
+                            # Include story_group only if it has stories after filtering
+                            if filtered_stories:
+                                filtered_group = copy.deepcopy(story_group)
+                                filtered_group["stories"] = filtered_stories
+                                filtered_sub_epic["story_groups"].append(filtered_group)
+                        
+                        # Include sub_epic only if it has story_groups after filtering
+                        if filtered_sub_epic["story_groups"]:
+                            filtered_epic["sub_epics"].append(filtered_sub_epic)
+                    
+                    # Include epic only if it has sub_epics after filtering
+                    if filtered_epic["sub_epics"]:
+                        filtered_epics.append(filtered_epic)
+                
+                filtered_graph["epics"] = filtered_epics
+        
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Generate diagram with acceptance criteria (exploration mode)
-        xml_output = self._generate_diagram(story_graph, layout_data, is_increments=False, is_exploration=True)
+        xml_output = self._generate_diagram(filtered_graph, layout_data, is_increments=False, is_exploration=True)
         
         # Write output
         output_path.write_text(xml_output, encoding='utf-8')
@@ -326,7 +390,7 @@ class DrawIORenderer:
         return {
             "output_path": str(output_path),
             "summary": {
-                "epics": len(story_graph.get("epics", [])),
+                "epics": len(filtered_graph.get("epics", [])),
                 "diagram_generated": True
             }
         }

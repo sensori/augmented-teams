@@ -1,0 +1,141 @@
+{
+  "epics": [
+    {
+      "name": "Execute Behavior Actions",
+      "sequential_order": 1.0,
+      "sub_epics": [
+        {
+          "name": "Build Knowledge",
+          "sequential_order": 1.0,
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "proactively Validate knowledge against rules",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    {
+                      "description": "WHEN BuildKnowledgeAction it's the initial pass of building the knowledge graphTHEN Build Knowledge Action invokes the Validate Rules action to understand if what is generated violates any rules\n(see Validate Knowledge & Content Against Rules)",
+                      "sequential_order": 1
+                    },
+                    {
+                      "description": "WHEN Validate Rules action is finsihed generateing the validation report THEN the BuildKnowledgeAction goes through all of the violations to determine if any corrective action needs to be taken AND the system updates the knowledge graph based on the recommendations.",
+                      "sequential_order": 2
+                    },
+                    {
+                      "description": "WHEN BuildKnowledgeAction Is finished making corrections.\nTHEN BuildKnowledgeAction tells AI to notify the user of what corrections it made as part of presenting the fact that it's done building knowledge.",
+                      "sequential_order": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Validate Knowledge & Content Against Rules",
+          "sequential_order": 2.0,
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Discovers Scanners",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    {
+                      "description": "WHEN ValidateRulesAction begins execution THEN System runs all configured scanners on content to validate before AI validation runs",
+                      "sequential_order": 1
+                    },
+                    {
+                      "description": "WHEN ValidateRulesAction loads validation rules THEN System reads .json files from behavior rules directory AND System identifies scanner configuration entries in .json AND System extracts scanner class names and detection methods from configuration",
+                      "sequential_order": 2
+                    },
+                    {
+                      "description": "WHEN System discovers scanner class names from rule.json THEN System dynamically imports scanner classes from configured module paths AND System instantiates scanner objects with required configuration AND System validates scanner classes implement required interface methods",
+                      "sequential_order": 3
+                    }
+                  ]
+                },
+                {
+                  "name": "Run Scanners against Knowledge Graph",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Scanner"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    {
+                      "description": "WHEN Scanner configured with regex patterns processes content THEN Scanner applies regex patterns to file content AND Scanner matches patterns against text AND scanner identifies violations AND Scanner records violation location (file path, line number, matched text)",
+                      "sequential_order": 1
+                    },
+                    {
+                      "description": "WHEN Scanner configured with file structure analysis processes project THEN Scanner analyzes directory structure and file organization AND Scanner checks file naming conventions and required file presence AND Scanner records violation location (file path, missing files, naming violations)",
+                      "sequential_order": 2
+                    },
+                    {
+                      "description": "WHEN Scanner configured with custom code scanner THEN Scanner runse parse method on content and AND Scanner records violation location (file path, line number, node type, violation description)",
+                      "sequential_order": 3
+                    }
+                  ]
+                },
+                {
+                  "name": "Run AST Scanners against Knowledge Graph (OUT OF SCOPE)",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [
+                    "Scanner"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    {
+                      "description": "WHEN Scanner configured with AST parsing processes code files THEN Scanner parses code into abstract syntax tree AND Scanner traverses AST nodes to detect structural violations AND Scanner records violation location (file path, line number, node type, violation description)",
+                      "sequential_order": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "Reports Violations",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    {
+                      "description": "WHEN All scanners complete execution THEN ValidateRulesAction aggregates violations from all scanner results AND ValidateRulesAction aggregates violations based on file path and line number AND ValidateRulesAction groups violations by scanner type and severity",
+                      "sequential_order": 1
+                    },
+                    {
+                      "description": "WHEN the ValidateRulesAction has finished collecting and aggregating violations and validations,\nTHEN the ValidateRulesAction then renders that into a Markdown report",
+                      "sequential_order": 2
+                    },
+                    {
+                      "description": "WHEN ValidateRulesAction generates validation report THEN ValidateRulesAction includes all collected scanner violations with file path alongside AI validatin results AND ValidateRulesAction includes line number and code snippet for each violation AND ValidateRulesAction includes scanner name and violation type for context AND ValidateRulesAction formats violations for easy review in validation report",
+                      "sequential_order": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

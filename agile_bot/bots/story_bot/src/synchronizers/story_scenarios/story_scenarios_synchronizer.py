@@ -19,12 +19,36 @@ def format_acceptance_criteria(ac_list):
     
     formatted = []
     for ac in ac_list:
-        # Split WHEN/THEN/AND clauses
+        # Handle both formats: multi-line (WHEN/THEN/AND on separate lines) and single-line (WHEN...THEN...AND in one string)
         parts = ac.split('\n')
         ac_lines = []
         for part in parts:
             part = part.strip()
-            if part.startswith('WHEN'):
+            if not part:
+                continue
+                
+            # Check if this is a single-line format with WHEN...THEN...AND all together
+            if part.startswith('WHEN') and ' THEN ' in part:
+                # Single-line format: "WHEN ... THEN ... AND ..."
+                when_then_parts = part.split(' THEN ', 1)
+                when_part = when_then_parts[0][4:].strip()  # Remove "WHEN"
+                then_and_part = when_then_parts[1] if len(when_then_parts) > 1 else ""
+                
+                if ac_lines:  # Close previous AC if exists
+                    formatted.append('\n'.join(ac_lines))
+                    ac_lines = []
+                
+                ac_lines.append(f"- **When** {when_part}")
+                
+                # Split THEN and AND clauses
+                if ' AND ' in then_and_part:
+                    then_parts = then_and_part.split(' AND ')
+                    ac_lines.append(f"  **then** {then_parts[0].strip()}")
+                    for and_part in then_parts[1:]:
+                        ac_lines.append(f"  **and** {and_part.strip()}")
+                elif then_and_part:
+                    ac_lines.append(f"  **then** {then_and_part.strip()}")
+            elif part.startswith('WHEN'):
                 if ac_lines:  # Close previous AC if exists
                     formatted.append('\n'.join(ac_lines))
                     ac_lines = []

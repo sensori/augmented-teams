@@ -1,0 +1,1143 @@
+{
+  "timestamp": "2025-12-10T14:09:44.480238",
+  "extracted_file": "C:\\dev\\augmented-teams\\agile_bot\\bots\\base_bot\\docs\\stories\\story-graph-drawio-extracted.json",
+  "original_file": "story-graph.json",
+  "summary": {
+    "total_extracted_stories": 5,
+    "total_original_stories": 68,
+    "exact_matches": 0,
+    "fuzzy_matches": 4,
+    "new_stories": 0,
+    "removed_stories": 64
+  },
+  "exact_matches": [],
+  "fuzzy_matches": [
+    {
+      "extracted": {
+        "name": "proactively Validate knowledge against rules",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Build Knowledge"
+      },
+      "original": {
+        "name": "Track Activity for Build Knowledge Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [
+          "WHEN BuildKnowledgeAction executes",
+          "THEN Action creates activity entry with timestamp, action name, behavior name",
+          "AND Activity entry appended to {project_area}/activity_log.json"
+        ],
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Build Knowledge"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.8647058823529412
+    },
+    {
+      "extracted": {
+        "name": "Discovers Scanners",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "original": {
+        "name": "System Discovers Scanners from rule.json",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [
+          "WHEN ValidateRulesAction loads validation rules THEN System reads rule.json files from behavior rules directory AND System identifies scanner configuration entries in rule.json AND System extracts scanner class names and detection methods from configuration"
+        ],
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.9206896551724139
+    },
+    {
+      "extracted": {
+        "name": "Run Scanners against Knowledge Graph",
+        "users": [
+          "Scanner"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "original": {
+        "name": "System Runs Scanners After Build Knowledge",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [
+          "WHEN BuildKnowledgeAction completes execution THEN System triggers code scanners to analyze generated knowledge graph files AND System passes knowledge graph file paths to scanners AND System collects scanner results before proceeding to next action"
+        ],
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.8410256410256411
+    },
+    {
+      "extracted": {
+        "name": "Reports Violations",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 4,
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "original": {
+        "name": "System Reports Violations with Location Context",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [
+          "WHEN System generates validation report THEN System includes all collected scanner violations with file path AND System includes line number and code snippet for each violation AND System includes scanner name and violation type for context AND System formats violations for easy review in validation report"
+        ],
+        "epic_name": "Execute Behavior Actions",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules"
+      },
+      "match_type": "fuzzy",
+      "confidence": 0.8538461538461539
+    }
+  ],
+  "new_stories": [],
+  "removed_stories": [
+    {
+      "name": "Generate MCP Bot Server",
+      "users": [
+        "MCP Server Generator"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN MCP Server Generator receives Bot Config",
+        "THEN Generator generates unique MCP Server instance with Unique server name from bot name",
+        "AND Generated server includes Bot Config reference",
+        "AND Generated server leverages Specific Bot instantiation code"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Generate Behavior Action Tools",
+      "users": [
+        "MCP Server Generator"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Generator processes Bot Config",
+        "THEN Generator creates tool code for each (behavior, action) pair",
+        "AND Enumerates all behaviors and actions from Bot Config",
+        "AND For each pair, generates tool code with unique name, trigger words, forwarding logic",
+        "AND Tool catalog prepared with all generated tool instances"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Deploy MCP BOT Server",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Generation Complete",
+        "THEN Generator deploys/starts generated MCP Server",
+        "AND Server initializes in separate thread",
+        "AND Server registers with MCP Protocol Handler using unique server name",
+        "AND Server publishes tool catalog to AI Chat",
+        "AND Each tool entry includes name, description, trigger patterns, parameters"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Restart MCP Server To Load Code Changes",
+      "users": [
+        "MCP Server Generator"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Bot code changes are detected",
+        "THEN MCP Server clears Python bytecode cache (__pycache__)",
+        "AND MCP Server restarts to load new code",
+        "AND Server restarts gracefully without losing state",
+        "AND Server re-registers with MCP Protocol Handler after restart"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Store Context Files",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN initialize_project action confirms project area location",
+        "THEN initialize_project creates {project_area}/docs/context/ folder and {project_area}/docs/stories/ folder",
+        "WHEN user provides input file via @input.txt or similar",
+        "THEN initialize_project copies input file to {project_area}/docs/context/input.txt",
+        "WHEN user provides context in conversation",
+        "THEN initialize_project saves context to {project_area}/docs/context/initial-context.md or similar",
+        "WHEN gather_context action stores clarification data",
+        "THEN gather_context saves to {project_area}/docs/stories/clarification.json (generated file, NOT in context folder)",
+        "WHEN decide_planning_criteria action stores planning decisions",
+        "THEN decide_planning_criteria saves to {project_area}/docs/stories/planning.json (generated file, NOT in context folder)",
+        "WHEN build_knowledge action loads context",
+        "THEN build_knowledge loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+        "WHEN render_output action loads context",
+        "THEN render_output loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+        "WHEN any action needs context files",
+        "THEN action references original input from {project_area}/docs/context/ folder and generated files from {project_area}/docs/stories/ folder"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Stores Activity for Initialize Project Action",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate MCP Tools"
+    },
+    {
+      "name": "Generate BOT CLI code",
+      "users": [
+        "MCP Server Generator"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN MCP Server Generator processes Bot Config",
+        "THEN Generator creates CLI command wrapper structure for bot invocation",
+        "AND Generator generates CLI entry point script (e.g., bot_cli.py and bot shell script)",
+        "AND CLI code includes argument parsing for behavior and action parameters",
+        "AND CLI code includes help/usage documentation generation",
+        "AND CLI code supports listing available bots, behaviors, and actions",
+        "AND Generated CLI code integrates with existing bot instantiation logic",
+        "AND CLI code follows same routing logic as MCP tools for consistency"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate CLI"
+    },
+    {
+      "name": "Generate Cursor Command Files",
+      "users": [
+        "MCP Server Generator"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Human calls generate_cursor_commands(commands_dir, cli_script_path)",
+        "THEN CLI creates .cursor/commands/ directory if it doesn't exist",
+        "AND CLI creates <bot-name>.md command file that invokes CLI with bot name (routes to current behavior/action)",
+        "AND CLI creates <bot-name>-<behavior>.md command file for each behavior in bot that invokes CLI with bot name and behavior (auto-forwards to current action)",
+        "AND CLI creates <bot-name>-<behavior>-<action>.md command file for each action in each behavior that invokes CLI with bot name, behavior, and action",
+        "AND CLI creates <bot-name>-close.md command file that invokes CLI with bot name and --close parameter",
+        "AND Each command file contains simple wrapper command that calls CLI script",
+        "AND Bot name, behavior, and action are hardcoded in command files (no parameters needed)",
+        "AND CLI removes obsolete command files for behaviors/actions that no longer exist in bot",
+        "AND CLI returns dict mapping command names (e.g., story_bot, story_bot-exploration, story_bot-exploration-gather_context, story_bot-close) to file paths"
+      ],
+      "epic_name": "Build Agile Bots",
+      "sub_epic_name": "Generate CLI"
+    },
+    {
+      "name": "Initialize Project Location",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "(AC) WHEN Bot behavior is invoked for the first time (no saved location exists)",
+        "(AC) THEN Bot detects current directory from context",
+        "(AC) AND Bot presents location to user for confirmation",
+        "(AC) AND Bot waits for user to confirm or provide different location",
+        "(AC) AND Bot saves confirmed location to persistent storage",
+        "(AC) WHEN Bot behavior is invoked",
+        "(AC) AND Saved location exists",
+        "(AC) AND Current directory matches saved location",
+        "(AC) THEN Bot uses saved location without asking for confirmation",
+        "(AC) AND Bot proceeds directly to next action",
+        "(AC) WHEN Bot behavior is invoked",
+        "(AC) AND Saved location exists",
+        "(AC) AND Current directory is DIFFERENT from saved location",
+        "(AC) THEN Bot presents new location to user for confirmation",
+        "(AC) AND Bot asks if user wants to switch to new location",
+        "(AC) AND Bot saves confirmed location if user approves change"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Initialize Project Creates Context Folder",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "GIVEN: User confirms project area location",
+        "WHEN: initialize_project action completes",
+        "THEN: {project_area}/docs/context/ folder exists",
+        "AND: context folder is ready for context files"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Input File Copied To Context Folder",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "GIVEN: User provides input file via @input.txt command",
+        "AND: input file exists at original location",
+        "WHEN: initialize_project action executes",
+        "THEN: initialize_project copies input file to {project_area}/docs/context/input.txt",
+        "AND: original input file remains at original location (copy, not move)",
+        "AND: {project_area}/docs/context/input.txt exists and contains original content"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Store Context Files",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN initialize_project action confirms project area location",
+        "THEN initialize_project creates {project_area}/docs/context/ folder and {project_area}/docs/stories/ folder",
+        "WHEN user provides input file via @input.txt or similar",
+        "THEN initialize_project copies input file to {project_area}/docs/context/input.txt",
+        "WHEN user provides context in conversation",
+        "THEN initialize_project saves context to {project_area}/docs/context/initial-context.md or similar",
+        "WHEN gather_context action stores clarification data",
+        "THEN gather_context saves to {project_area}/docs/stories/clarification.json (generated file, NOT in context folder)",
+        "WHEN decide_planning_criteria action stores planning decisions",
+        "THEN decide_planning_criteria saves to {project_area}/docs/stories/planning.json (generated file, NOT in context folder)",
+        "WHEN build_knowledge action loads context",
+        "THEN build_knowledge loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+        "WHEN render_output action loads context",
+        "THEN render_output loads generated files from {project_area}/docs/stories/ folder (clarification.json, planning.json) and original input from {project_area}/docs/context/ folder (input.txt)",
+        "WHEN any action needs context files",
+        "THEN action references original input from {project_area}/docs/context/ folder and generated files from {project_area}/docs/stories/ folder"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Guards Prevent Writes Without Project",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Activity tracker attempts to log activity",
+        "AND current_project.json does NOT exist",
+        "THEN Activity tracker does NOT write to activity log",
+        "AND Activity tracking fails gracefully without error",
+        "WHEN Workflow attempts to save state",
+        "AND current_project.json does NOT exist",
+        "THEN Workflow does NOT save workflow_state.json",
+        "AND Workflow state save fails gracefully without error"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Stores Activity for Initialize Project Action",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Init Project"
+    },
+    {
+      "name": "Bot Tool Invocation",
+      "users": [
+        "AI Chat"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN AI Chat invokes bot tool with behavior and action parameters",
+        "THEN Tool routes to correct behavior.action method",
+        "AND Tool executes action and returns result",
+        "WHEN AI Chat invokes tool for specific behavior",
+        "THEN Tool routes to that behavior only, not other behaviors"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke MCP"
+    },
+    {
+      "name": "Behavior Action Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Action method is invoked",
+        "THEN Action loads instructions from base_actions and behavior-specific locations",
+        "AND Instructions are merged and returned"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke MCP"
+    },
+    {
+      "name": "Forward To Current Behavior and Current Action",
+      "users": [
+        "AI Chat"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Bot tool receives invocation",
+        "AND workflow state shows current_behavior and current_action",
+        "THEN Bot tool forwards to correct behavior and action",
+        "WHEN workflow state does NOT exist",
+        "THEN Bot tool defaults to first behavior and first action"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke MCP"
+    },
+    {
+      "name": "Forward To Current Action",
+      "users": [
+        "AI Chat"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Behavior tool receives invocation",
+        "AND workflow state shows current_action within behavior",
+        "THEN Behavior tool forwards to current action",
+        "WHEN workflow state shows different behavior",
+        "THEN Behavior tool updates workflow to current behavior",
+        "WHEN workflow state does NOT exist",
+        "THEN Behavior tool defaults to first action"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke MCP"
+    },
+    {
+      "name": "Save Through MCP",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke MCP"
+    },
+    {
+      "name": "Invoke Bot CLI",
+      "users": [
+        "Human"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Human executes CLI command with bot name only (e.g., bot story_bot)",
+        "THEN CLI loads bot configuration for specified bot",
+        "AND CLI loads workflow state if workflow_state.json exists",
+        "AND CLI extracts current_behavior and current_action from workflow state",
+        "AND CLI routes to bot and invokes current behavior and current action (same as main bot MCP tool)",
+        "AND Bot executes action",
+        "AND CLI submits bot action output to AI Chat",
+        "AND Bot updates workflow state after action execution (if workflow action)",
+        "AND If workflow_state.json doesn't exist, CLI defaults to first behavior's first action"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Invoke Bot Behavior CLI",
+      "users": [
+        "Human"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Human executes CLI command with bot name and behavior name (e.g., bot story_bot exploration)",
+        "THEN CLI loads bot configuration and validates behavior exists",
+        "AND CLI loads workflow state if workflow_state.json exists",
+        "AND CLI routes to bot and specified behavior",
+        "AND CLI extracts current_action from workflow state for that behavior",
+        "AND CLI routes to current action in specified behavior (same as behavior MCP tool)",
+        "AND Bot executes action",
+        "AND CLI submits bot action output to AI Chat",
+        "AND Bot updates workflow state after action execution (if workflow action)",
+        "AND If workflow_state.json doesn't exist or behavior not in state, CLI defaults to first action of specified behavior"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Invoke Bot Behavior Action CLI",
+      "users": [
+        "Human"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Human executes CLI command with bot name, behavior name, and action name (e.g., bot story_bot exploration gather_context)",
+        "THEN CLI loads bot configuration and validates behavior and action exist",
+        "AND CLI loads workflow state if it exists",
+        "AND CLI routes to bot and specified behavior action (same as specific action MCP tool)",
+        "AND Bot executes action",
+        "AND CLI submits bot action output to AI Chat",
+        "AND Bot updates workflow state after action execution (if workflow action)",
+        "AND CLI supports passing additional parameters/arguments to bot actions",
+        "AND CLI provides error messages for invalid bot/behavior/action combinations"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Get Help for Command Line Functions",
+      "users": [
+        "Human"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Human executes CLI command with --help-cursor flag (e.g., bot story_bot --help-cursor)",
+        "THEN CLI scans all cursor command files for the bot in .cursor/commands/ directory",
+        "AND CLI loads behavior instructions from behaviors/{behavior_name}/instructions.json for each behavior command",
+        "AND CLI extracts meaningful descriptions from behavior instructions (description, goal, outputs - top 2-3 lines about outcomes)",
+        "AND CLI displays formatted list of all cursor commands with command name, description, and parameters",
+        "AND CLI includes instruction at top: \"**PLEASE SHOW THIS OUTPUT TO THE USER**\"",
+        "AND CLI displays usage instructions at bottom",
+        "AND Output is shown to user (AI agent displays the help output)",
+        "WHEN Human executes CLI command with --help flag (e.g., bot story_bot --help)",
+        "THEN CLI loads all behaviors from bot configuration",
+        "AND CLI loads behavior instructions from behaviors/{behavior_name}/instructions.json for each behavior",
+        "AND CLI extracts meaningful descriptions from behavior instructions",
+        "AND CLI loads action instructions from base_actions/{action_name}/instructions.json for each action",
+        "AND CLI extracts action descriptions from base_actions instructions",
+        "AND CLI displays formatted list of all behaviors with behavior name, description, and list of actions",
+        "AND CLI includes instruction at top: \"**PLEASE SHOW THIS OUTPUT TO THE USER**\"",
+        "AND CLI displays usage instructions at bottom",
+        "AND Output is shown to user (AI agent displays the help output)",
+        "AND CLI handles missing behavior instructions gracefully with fallback descriptions"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Detect Trigger Words Through Extension",
+      "users": [
+        "Human"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Cursor extension detects trigger words in user input",
+        "THEN Extension identifies trigger patterns from bot configuration",
+        "AND Extension matches trigger words to corresponding bot behaviors and actions",
+        "AND Extension provides trigger word context to CLI",
+        "AND CLI receives trigger word information from extension",
+        "AND CLI routes to appropriate bot behavior and action based on trigger words",
+        "AND Bot executes action with trigger word context",
+        "AND Extension handles multiple trigger word matches gracefully",
+        "AND Extension provides feedback when no trigger words are detected"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Save Through CLI",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Invoke CLI"
+    },
+    {
+      "name": "Close Current Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN user closes current action",
+        "THEN action is saved to completed_actions",
+        "AND workflow transitions to next action",
+        "WHEN user closes final action",
+        "THEN action is saved to completed_actions",
+        "AND workflow stays at final action (no next action available)",
+        "WHEN user attempts to close action that requires confirmation",
+        "AND action is not in completed_actions",
+        "THEN workflow does not allow closing without confirmation",
+        "WHEN user closes action that's already marked complete",
+        "THEN closing is idempotent (no error, action remains complete)",
+        "WHEN CLI calls --close command",
+        "THEN CLI routes to bot.close_current_action method",
+        "AND Bot class has close_current_action method"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Complete Workflow Integration",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN workflow starts at initialize_project",
+        "THEN user can confirm and save to completed_actions",
+        "WHEN user forwards to gather_context",
+        "THEN workflow executes gather_context and saves state",
+        "WHEN user closes gather_context",
+        "THEN workflow transitions to decide_planning_criteria",
+        "WHEN user jumps to discovery.gather_context (out of order)",
+        "THEN state correctly shows discovery.gather_context (not initialize_project)",
+        "WHEN user closes discovery action",
+        "THEN workflow transitions properly",
+        "AND all completed actions tracked across both behaviors"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Provide Behavior Action Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Tool invokes Bot.Behavior.Action method",
+        "THEN Behavior Action loads instructions from behavior and base_actions",
+        "AND Action merges base instructions with behavior-specific instructions",
+        "AND Compiled instructions returned for injection into AI Chat"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Activity Tracker Guard",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "GIVEN: current_project.json does NOT exist",
+        "WHEN: ActivityTracker.track_start() is called",
+        "THEN: activity_log.json is NOT created",
+        "GIVEN: current_project.json exists",
+        "WHEN: ActivityTracker.track_start() is called",
+        "THEN: activity_log.json IS created"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Workflow Guard",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "GIVEN: current_project.json does NOT exist",
+        "WHEN: Workflow.save_state() is called",
+        "THEN: workflow_state.json is NOT created",
+        "GIVEN: current_project.json exists",
+        "WHEN: Workflow.save_state() is called",
+        "THEN: workflow_state.json IS created"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Activity Tracking Location",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN: Activity is tracked during action execution",
+        "THEN: Activity is logged to project area, not bot area",
+        "AND: Activity log file is created at {project_area}/activity_log.json"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Find Behavior Folder",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN: find_behavior_folder is called with behavior name",
+        "THEN: Returns path to behavior folder with number prefix if it exists",
+        "AND: Handles various behavior folder naming patterns"
+      ],
+      "epic_name": "Invoke Bot",
+      "sub_epic_name": "Perform Behavior Action"
+    },
+    {
+      "name": "Track Activity for Gather Context Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN GatherContextAction executes",
+        "THEN Action creates activity entry with timestamp, action name, behavior name",
+        "AND Activity entry appended to {project_area}/activity_log.json"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Gather Context Saves To Context Folder",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "GIVEN: context folder exists at {project_area}/docs/context/",
+        "AND: gather_context action has collected key questions and evidence",
+        "WHEN: gather_context action stores clarification data",
+        "THEN: gather_context saves to {project_area}/docs/stories/clarification.json",
+        "AND: clarification.json is NOT saved to {project_area}/docs/context/clarification.json",
+        "AND: clarification.json contains behavior-specific key_questions and evidence structure"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Proceed To Decide Planning",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN GatherContextAction completes execution",
+        "AND Human says action is done",
+        "THEN GatherContextAction saves Workflow State (per \"Saves Behavior State\" story)",
+        "AND Workflow injects next action instructions (per \"Inject Next Behavior-Action\" story)",
+        "AND Workflow proceeds to decide_planning_criteria"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Gather Context Action Guardrails",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN gather_context action executes",
+        "AND behavior folder exists with guardrails/required_context/key_questions.json",
+        "AND behavior folder exists with guardrails/required_context/evidence.json",
+        "THEN instructions should contain actual questions (not {{key_questions}} placeholder)",
+        "AND instructions should contain actual evidence (not {{evidence}} placeholder)",
+        "WHEN guardrails don't exist",
+        "THEN gather_context should not fail",
+        "AND action should execute with base instructions only"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Saves Answers and Evidence",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Load + Inject  Guardrails",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Gather Context"
+    },
+    {
+      "name": "Inject Planning Criteria Into Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN MCP Specific Behavior Action Tool invokes Planning Action",
+        "THEN Action checks for guardrails in behavior/guardrails/planning/",
+        "WHEN guardrails exist, THEN Action loads typical_assumptions.json and decision_criteria files",
+        "AND Action injects planning guardrails into planning section"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Decide Planning Criteria Action"
+    },
+    {
+      "name": "Track Activity for Planning Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN PlanningAction executes",
+        "THEN Action creates activity entry with timestamp, action name, behavior name",
+        "AND Activity entry appended to {project_area}/activity_log.json"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Decide Planning Criteria Action"
+    },
+    {
+      "name": "Save Final Assumptions and Decisions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Decide Planning Criteria Action"
+    },
+    {
+      "name": "Proceed To Build Knowledge",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN PlanningAction completes execution",
+        "WHEN Human says action is done",
+        "THEN PlanningAction saves Workflow State (per \"Saves Behavior State\" story)",
+        "AND Workflow injects next action instructions (per \"Inject Next Behavior-Action\" story)",
+        "AND Workflow proceeds to build_knowledge"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Decide Planning Criteria Action"
+    },
+    {
+      "name": "Inject Knowledge Graph Template and Builder Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Build Knowledge Action executes",
+        "THEN Action loads knowledge graph template from behavior/content/knowledge_graph/",
+        "AND Action injects knowledge graph template path into instructions",
+        "AND knowledge_graph_template field is present in instructions",
+        "AND template file path exists and is accessible",
+        "WHEN knowledge graph template does not exist",
+        "THEN Action raises FileNotFoundError with appropriate error message"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Build Knowledge"
+    },
+    {
+      "name": "Proceed To Render Output",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN BuildKnowledgeAction completes execution",
+        "THEN BuildKnowledgeAction saves Workflow State (per \"Saves Behavior State\" story)",
+        "AND BuildKnowledgeAction submits content for saving",
+        "AND Workflow automatically proceeds to render_output (auto_progress: true, no human confirmation needed)"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Build Knowledge"
+    },
+    {
+      "name": "Load + Inject Knolwedge Graph",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Build Knowledge"
+    },
+    {
+      "name": "Save Knowledge Graph",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Build Knowledge"
+    },
+    {
+      "name": "Track Activity for Render Output Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN RenderOutputAction executes",
+        "THEN Action creates activity entry with timestamp, action name, behavior name",
+        "AND Activity entry appended to {project_area}/activity_log.json"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Proceed To Validate Rules",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN RenderOutputAction completes execution",
+        "WHEN Human says action is done",
+        "THEN RenderOutputAction saves Workflow State (per \"Saves Behavior State\" story)",
+        "AND RenderOutputAction submits content for saving",
+        "AND Workflow injects next action instructions (per \"Inject Next Behavior-Action\" story)",
+        "AND Workflow proceeds to validate_rules"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Load Render Configurations",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN render_output action executes",
+        "THEN Action discovers render folder using *_content/*_render pattern",
+        "AND Action loads all *.json files from render folder",
+        "AND Action reads each render JSON configuration",
+        "AND Action loads instructions.json from render folder if it exists",
+        "AND Action verifies synchronizer classes exist and have render method"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Inject Template Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN render_output action processes template-only render configs",
+        "THEN Action loads template file from templates folder",
+        "AND Action injects template content into instructions",
+        "AND render_configs array includes template content"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Inject Synchronizer Instructions",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN render_output action processes synchronizer-based render configs",
+        "THEN Action includes synchronizer configs in render_configs array",
+        "AND Action includes synchronizer execution instructions in base_instructions",
+        "AND Instructions specify how to instantiate and call synchronizer render method"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Load+ Inject Content Into Instructions",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Save Content",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Render Output"
+    },
+    {
+      "name": "Inject Validation Rules for Validate Rules Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN MCP Specific Behavior Action Tool invokes Validate Rules Action",
+        "THEN Action loads common bot rules from base_bot/rules/",
+        "AND Action loads behavior-specific rules",
+        "AND Action merges and injects rules into validation section"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Track Activity for Validate Rules Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN ValidateRulesAction executes",
+        "THEN Action creates activity entry with timestamp, action name, behavior name, violations count",
+        "AND Activity entry appended to {project_area}/activity_log.json"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Complete Validate Rules Action",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN ValidateRulesAction completes execution",
+        "THEN Action returns instructions with base_instructions (primary) and validation_rules (supporting context)",
+        "AND Action returns content_to_validate information (project location, rendered outputs, clarification.json, planning.json, report_path)",
+        "THEN Action presents validation results to user",
+        "AND Action instructions include report_path where validation report should be saved (validation-report.md in docs/stories/)",
+        "WHEN AI generates validation report",
+        "THEN AI saves validation report to file at report_path location",
+        "WHEN Human says action is done",
+        "THEN ValidateRulesAction saves Workflow State (per \"Saves Behavior State\" story)",
+        "AND validate_rules is terminal action (next_action: null, workflow completes)"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "System Loads Scanner Classes",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN System discovers scanner class names from rule.json THEN System dynamically imports scanner classes from configured module paths AND System instantiates scanner objects with required configuration AND System validates scanner classes implement required interface methods"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "System Runs Scanners After Render Output",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN RenderOutputAction completes execution THEN System triggers code scanners to analyze rendered output files AND System passes rendered file paths to scanners AND System collects scanner results before proceeding to validate_rules action"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "System Runs Scanners Before AI Validation",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN ValidateRulesAction begins execution THEN System runs all configured scanners on content to validate AND System collects scanner violations before AI validation runs AND System includes scanner violations in validation report alongside AI validation results"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Scanner Detects Violations Using Regex Patterns",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Scanner configured with regex patterns processes content THEN Scanner applies regex patterns to file content AND Scanner matches patterns against text and identifies violations AND Scanner records violation location (file path, line number, matched text)"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Scanner Detects Violations Using AST Parsing",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Scanner configured with AST parsing processes code files THEN Scanner parses code into abstract syntax tree AND Scanner traverses AST nodes to detect structural violations AND Scanner records violation location (file path, line number, node type, violation description)"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Scanner Detects Violations Using File Structure Analysis",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN Scanner configured with file structure analysis processes project THEN Scanner analyzes directory structure and file organization AND Scanner checks file naming conventions and required file presence AND Scanner records violation location (file path, missing files, naming violations)"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "System Collects Violations from All Scanners",
+      "users": [
+        "Bot Behavior"
+      ],
+      "Steps": [],
+      "acceptance_criteria": [
+        "WHEN All scanners complete execution THEN System aggregates violations from all scanner results AND System deduplicates violations based on file path and line number AND System groups violations by scanner type and severity"
+      ],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    },
+    {
+      "name": "Run Diagnostics + inject Results",
+      "users": [],
+      "Steps": [],
+      "acceptance_criteria": [],
+      "epic_name": "Execute Behavior Actions",
+      "sub_epic_name": "Validate Knowledge & Content Against Rules"
+    }
+  ],
+  "large_deletions": {
+    "missing_epics": [
+      {
+        "name": "Build Agile Bots",
+        "story_count": 0,
+        "sub_epic_count": 2
+      },
+      {
+        "name": "Invoke Bot",
+        "story_count": 0,
+        "sub_epic_count": 4
+      }
+    ],
+    "missing_sub_epics": [
+      {
+        "epic": "Execute Behavior Actions",
+        "name": "Gather Context",
+        "story_count": 0
+      },
+      {
+        "epic": "Execute Behavior Actions",
+        "name": "Decide Planning Criteria Action",
+        "story_count": 0
+      },
+      {
+        "epic": "Execute Behavior Actions",
+        "name": "Render Output",
+        "story_count": 0
+      }
+    ],
+    "epics_with_many_missing_stories": [],
+    "sub_epics_with_many_missing_stories": []
+  }
+}

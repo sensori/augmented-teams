@@ -374,7 +374,11 @@ def sync_discovery_command(args):
 
 def render_exploration_command(args):
     """Render exploration acceptance criteria DrawIO diagram."""
+    story_graph_data = None
     if args.story_graph:
+        # Load story graph to pass to render_exploration for proper filtering
+        with open(args.story_graph, 'r', encoding='utf-8') as f:
+            story_graph_data = json.load(f)
         diagram = StoryIODiagram.load_from_story_graph(args.story_graph, None)
     elif args.json:
         diagram = _load_from_json(args.json)
@@ -387,11 +391,16 @@ def render_exploration_command(args):
         with open(args.layout, 'r', encoding='utf-8') as f:
             layout_data = json.load(f)
     
-    result = diagram.render_exploration(output_path=args.output, layout_data=layout_data, scope=args.scope)
+    # Pass story_graph_data to render_exploration so filtering can work properly
+    result = diagram.render_exploration(
+        output_path=args.output, 
+        layout_data=layout_data, 
+        scope=args.scope,
+        story_graph=story_graph_data
+    )
     print(f"Generated DrawIO diagram: {result['output_path']}")
     print(f"Epics: {result['summary']['epics']}")
     return 0
-    return 1
 
 
 def sync_exploration_command(args):
