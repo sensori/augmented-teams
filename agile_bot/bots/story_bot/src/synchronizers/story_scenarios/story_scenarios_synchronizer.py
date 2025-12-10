@@ -19,17 +19,54 @@ def format_acceptance_criteria(ac_list):
     
     formatted = []
     for ac in ac_list:
-        # Clean up (AC) prefix if present
-        ac_text = ac.replace("(AC) ", "").strip()
-        if ac_text.startswith("WHEN") or ac_text.startswith("AND") or ac_text.startswith("THEN"):
-            formatted.append(f"- **{ac_text}**")
-        else:
-            formatted.append(f"- **WHEN** {ac_text}")
+        # Split WHEN/THEN/AND clauses
+        parts = ac.split('\n')
+        ac_lines = []
+        for part in parts:
+            part = part.strip()
+            if part.startswith('WHEN'):
+                if ac_lines:  # Close previous AC if exists
+                    formatted.append('\n'.join(ac_lines))
+                    ac_lines = []
+                ac_lines.append(f"- **When** {part[4:].strip()}")
+            elif part.startswith('THEN'):
+                # Check if there's an AND clause in the same line
+                then_part = part[4:].strip()
+                if ' AND ' in then_part:
+                    then_parts = then_part.split(' AND ')
+                    ac_lines.append(f"  **then** {then_parts[0].strip()}")
+                    for and_part in then_parts[1:]:
+                        ac_lines.append(f"  **and** {and_part.strip()}")
+                else:
+                    ac_lines.append(f"  **then** {then_part}")
+            elif part.startswith('AND'):
+                ac_lines.append(f"  **and** {part[3:].strip()}")
+        if ac_lines:
+            formatted.append('\n'.join(ac_lines))
+    return '\n\n'.join(formatted)
+
+
+def get_common_background(scenarios_list):
+    """Extract common background steps shared across all scenarios"""
+    if not scenarios_list:
+        return None
     
-    return "\n".join(formatted)
+    # Get backgrounds from all scenarios
+    backgrounds = [s.get('background', []) for s in scenarios_list if s.get('background')]
+    if not backgrounds:
+        return None
+    
+    # Find common background (all scenarios have same background)
+    common = backgrounds[0]
+    for bg in backgrounds[1:]:
+        if bg != common:
+            # Not all the same, return None
+            return None
+    
+    return common
 
 
-def format_scenarios(scenarios_list):
+def format_scenarios(scenarios_list, common_background=None):
     """Format scenarios list into markdown"""
     if not scenarios_list:
         return ""
@@ -37,15 +74,37 @@ def format_scenarios(scenarios_list):
     formatted = []
     for scenario in scenarios_list:
         name = scenario.get('name', 'Unnamed Scenario')
-        steps = scenario.get('steps', '')
+        scenario_type = scenario.get('type', 'happy_path')
+        background = scenario.get('background', [])
+        steps = scenario.get('steps', [])
 
         # Normalize steps into multi-line text:
         # - If provided as a list, join with newlines.
         # - If provided as a string that includes literal "\n", convert to real newlines.
         if isinstance(steps, list):
-            steps_text = "\n".join(steps)
+            steps_list = steps
         else:
-            steps_text = str(steps).replace("\\n", "\n")
+            steps_list = str(steps).replace("\\n", "\n").split("\n")
+        
+        # Scenario Steps should NOT include Background steps - Background is automatically applied
+        # Scenario Steps should start with scenario-specific Given steps (if any), then When/Then
+        # Only include scenario-specific background if there's no common background
+        step_lines = []
+        
+        # Check if steps already include background (from story-graph.json)
+        # If common_background exists, Background is at story level and should NOT be in scenario Steps
+        # Only include scenario-specific background if no common background exists
+        if not common_background and background:
+            # No common background, so include scenario-specific background in steps
+            for bg_step in background:
+                step_lines.append(bg_step)
+        
+        # Add scenario-specific steps (these should start with scenario-specific Given if needed)
+        for step in steps_list:
+            if step.strip():
+                step_lines.append(step.strip())
+        
+        steps_text = "\n".join(step_lines)
 
         examples_block = ""
         examples_data = scenario.get('examples')
@@ -74,7 +133,7 @@ def format_scenarios(scenarios_list):
                 )
 
         formatted.append(
-            f"### Scenario: {name}\n\n**Steps:**\n```gherkin\n{steps_text}\n```\n{examples_block}"
+            f"### Scenario: {name} ({scenario_type})\n\n**Steps:**\n```gherkin\n{steps_text}\n```\n{examples_block}"
         )
     
     return "\n\n".join(formatted)
@@ -84,11 +143,12 @@ def build_folder_path_from_graph(epic_name, sub_epic_name, story_graph_data):
     """
     Build folder path dynamically from story graph structure.
     Traverses the graph to find the actual epic and sub_epic names.
+    Uses emoji monikers: 🎯 for Epic, ⚙️ for Feature.
     """
     # Find the epic in the graph
     for epic in story_graph_data.get('epics', []):
         if epic['name'] == epic_name:
-            epic_folder = f"[Epic] {epic_name}"
+            epic_folder = f"🎯 {epic_name}"  # Use emoji moniker
             
             # If sub_epic_name matches the epic itself, it's a top-level epic
             if sub_epic_name == epic_name:
@@ -98,7 +158,7 @@ def build_folder_path_from_graph(epic_name, sub_epic_name, story_graph_data):
             def find_sub_epic(sub_epics, target_name):
                 for sub_epic in sub_epics:
                     if sub_epic['name'] == target_name:
-                        return f"[Sub Epic] {target_name}"
+                        return f"⚙️ {target_name}"  # Use emoji moniker
                     # Recursively check nested sub_epics
                     if 'sub_epics' in sub_epic:
                         result = find_sub_epic(sub_epic['sub_epics'], target_name)
@@ -110,12 +170,12 @@ def build_folder_path_from_graph(epic_name, sub_epic_name, story_graph_data):
             if sub_epic_folder:
                 return epic_folder, sub_epic_folder
             
-            # If not found in sub_epics, use the provided name with sub-epic prefix
-            return epic_folder, f"[Sub Epic] {sub_epic_name}" if sub_epic_name != epic_name else epic_name
+            # If not found in sub_epics, use the provided name with emoji moniker
+            return epic_folder, f"⚙️ {sub_epic_name}" if sub_epic_name != epic_name else epic_name
     
-    # Fallback: use names directly with readable prefixes
-    fallback_epic = f"[Epic] {epic_name}"
-    fallback_sub_epic = f"[Sub Epic] {sub_epic_name}" if sub_epic_name != epic_name else epic_name
+    # Fallback: use names directly with emoji monikers
+    fallback_epic = f"🎯 {epic_name}"
+    fallback_sub_epic = f"⚙️ {sub_epic_name}" if sub_epic_name != epic_name else epic_name
     return fallback_epic, fallback_sub_epic
 
 
@@ -123,7 +183,7 @@ def create_story_content(story, epic_name, sub_epic_name):
     """Create markdown content for a story"""
     story_name = story['name']
     users = story.get('users', [])
-    user_str = ', '.join(users) if users else '[]'
+    user_str = ', '.join(users) if users else 'System'
     story_type = story.get('story_type', 'user')
     sequential_order = story.get('sequential_order', 1)
     
@@ -131,18 +191,23 @@ def create_story_content(story, epic_name, sub_epic_name):
     ac_formatted = format_acceptance_criteria(ac_list)
     
     scenarios_list = story.get('scenarios', [])
-    scenarios_formatted = format_scenarios(scenarios_list)
+    
+    # Get common background from scenarios
+    common_background = get_common_background(scenarios_list)
+    
+    # Format scenarios (pass common_background so scenarios include it in their steps)
+    scenarios_formatted = format_scenarios(scenarios_list, common_background)
     
     # Default description if not provided
-    description = story.get('description', f'{story_name} functionality for the bot system.')
+    description = story.get('description', f'{story_name} functionality for the mob minion system.')
     
     # Default acceptance criteria if not provided
     if not ac_formatted:
-        ac_formatted = "- **WHEN** action executes\n- **THEN** action completes successfully"
+        ac_formatted = "- **When** action executes, **then** action completes successfully"
     
     # Default scenario if not provided
     if not scenarios_formatted:
-        scenarios_formatted = f"""### Scenario: {story_name}
+        scenarios_formatted = f"""### Scenario: {story_name} (happy_path)
 
 **Steps:**
 ```gherkin
@@ -151,17 +216,31 @@ When action executes
 Then action completes successfully
 ```"""
     
+    # Format background section
+    background_section = ""
+    if common_background:
+        bg_formatted = "\n".join(common_background)
+        background_section = f"""## Background
+
+**Common setup steps shared across all scenarios:**
+
+```gherkin
+{bg_formatted}
+```
+
+"""
+    
     sub_epic_line = ""
     if sub_epic_name != epic_name:
-        sub_epic_line = f"**Sub Epic:** {sub_epic_name}\n"
+        sub_epic_line = f"**Feature:** {sub_epic_name}\n"
     
-    content = f"""# [Story] {story_name}
+    content = f"""# 📝 {story_name}
 
-**Navigation:** [Story Map](../../../story-map-outline.drawio) | [Epic Overview](../../../README.md)
+**Navigation:** [📋 Story Map](../../../story-map-outline.drawio) | [⚙️ Feature Overview](../../../../README.md)
 
-**Epic:** {epic_name}  
-{sub_epic_line}**User:** {user_str}  
-**Sequential Order:** {sequential_order}  
+**Epic:** {epic_name}
+{sub_epic_line}**User:** {user_str}
+**Sequential Order:** {sequential_order}
 **Story Type:** {story_type}
 
 ## Story Description
@@ -174,19 +253,9 @@ Then action completes successfully
 
 {ac_formatted}
 
-## Background
-
-**Common setup steps shared across all scenarios:**
-
-```gherkin
-Given system is ready
-And action is executing
-```
-
-## Scenarios
+{background_section}## Scenarios
 
 {scenarios_formatted}
-
 """
     return content
 
@@ -239,7 +308,7 @@ class StoryScenariosSynchronizer:
         """
         input_path = Path(input_path)
         output_dir = Path(output_path)
-        base_dir = output_dir / 'map'
+        base_dir = output_dir / 'map'  # Use 'map' subdirectory
         base_dir.mkdir(parents=True, exist_ok=True)
         
         # Load story graph
@@ -251,8 +320,13 @@ class StoryScenariosSynchronizer:
         if base_dir.exists():
             for root, dirs, files in os.walk(base_dir):
                 for file in files:
-                    if file.endswith('.md') and file.startswith('[Story] '):
-                        name = file[2:].replace('.md', '')
+                    if file.endswith('.md'):
+                        # Handle various formats: [Story] prefix, 📝 emoji, or plain name
+                        name = file.replace('.md', '')
+                        if name.startswith('[Story] '):
+                            name = name[8:]  # Remove '[Story] '
+                        elif name.startswith('📝 '):
+                            name = name[2:]  # Remove '📝 '
                         existing_stories.add(name)
         
         # Extract all stories
@@ -277,8 +351,8 @@ class StoryScenariosSynchronizer:
             story_dir = base_dir / epic_folder / feature_folder
             story_dir.mkdir(parents=True, exist_ok=True)
             
-            # Create file
-            story_file = story_dir / f"[Story] {story_name}.md"
+            # Create file (use 📝 emoji prefix)
+            story_file = story_dir / f"📝 {story_name}.md"
             
             # Generate content
             content = create_story_content(story, story['epic_name'], story['feature_name'])

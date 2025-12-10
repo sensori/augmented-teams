@@ -154,5 +154,44 @@
       "story_scope_definition": "Hierarchical — Go from left to right through every step of system and user interactions, including each alternate option. Start with top-level steps and drill down completely before moving to the next step. Includes entire set of stories for this core increment, including alternate stories and optional stories.",
       "story_granularity": "System inner behavior and inner workings — needed when elaboration of new complex architecture across unknown libraries and components is useful to elaborate. Specifically for engaging with the Foundry VTT API."
     }
+  },
+  "7_tests": {
+    "assumptions_made": {
+      "tests_match_scenarios_exactly": "Tests must match story scenarios exactly - no new steps, no modified step text",
+      "test_methods_match_scenario_names": "Test methods must use exact scenario names from story documents",
+      "assertions_verify_scenarios": "Assertions must verify what the scenarios say they verify",
+      "real_implementations_default": "Tests should use real implementations by default",
+      "mock_only_when_needed": "Only mock when explicitly needed for e2e tests or for uncontrollable external dependencies",
+      "ascii_only": "All test code must use ASCII-only characters (no Unicode) - Windows console compatibility",
+      "call_production_directly": "Tests should call production code directly - let tests fail naturally if code doesn't exist"
+    },
+    "decisions_made": {
+      "test_framework": "pytest with orchestrator pattern (NO feature files)",
+      "test_scope_level": "System level - test full system with external systems mocked out",
+      "mocking_strategy": "Mock external dependencies - mock Foundry VTT API, integrations, external systems",
+      "test_file_structure": "Match story graph exactly - test files named test_<sub_epic_name>.py, classes named Test<ExactStoryName>, methods named test_<scenario_name_snake_case>",
+      "test_location": "tests/ directory mirroring story structure"
+    }
+  },
+  "8_code": {
+    "assumptions_made": {
+      "maintainability_readability": "Focus on maintainability and readability over performance optimizations",
+      "single_responsibility": "Single Responsibility Principle - Each function/class does one thing well",
+      "dependency_injection": "Dependency Injection - Dependencies passed through constructors, not created internally",
+      "immutability_preferred": "Immutability preferred - Minimize mutable state where possible",
+      "explicit_over_implicit": "Explicit over implicit - Make dependencies and behavior explicit",
+      "testability": "Testability - Code should be easy to test in isolation",
+      "language_idioms": "Respect language-specific idioms and patterns",
+      "incorporate_requirements": "When generating code, incorporate requirements from stories, domain maps, and BDD tests"
+    },
+    "decisions_made": {
+      "architecture": "Domain-Driven Design - Services, Aggregates, Context Boundaries, Entities, Value objects, Repositories, Factories, Events, Rules",
+      "dependency_management": "Constructor injection - All dependencies passed through constructors",
+      "error_handling": "Language-specific patterns - Use language idioms (Python exceptions)",
+      "programming_paradigm": "Object-oriented programming - Classes, objects, inheritance, polymorphism, encapsulation",
+      "properties_vs_methods": "Language conventions - Follow language-specific conventions (Python @property)",
+      "code_organization": "Domain layer (core entities: Mob, Minion), Service layer (business logic: MobManager, TokenSelector, MobNameValidator), Integration layer (external systems: FoundryVTTClient), Persistence layer (data storage: MobRepository)",
+      "target_location": "src/mob_minion/ directory structure (Python package)"
+    }
   }
 }

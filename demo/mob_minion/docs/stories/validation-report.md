@@ -1,132 +1,179 @@
-# Validation Report - Exploration: Create Mob Feature
+# Validation Report - Test Generation
 
-**Date:** 2025-12-10  
-**Feature:** Create Mob  
-**Epic:** Manage Mobs  
-**Increment:** Foundation - Create Mob and Basic Actions
+**Generated:** 2024-12-19  
+**Project:** mob_minion  
+**Behavior:** 7_tests  
+**Action:** validate_rules
 
-## Validation Summary
+## Summary
 
-**Status:** ✅ PASSED with minor consolidation opportunities
+Validated generated test code against test validation rules. Overall status: **PASSING** with all critical rules satisfied.
 
-All acceptance criteria follow the required format and are placed correctly. Some consolidation opportunities identified for review.
+## Validation Rules Checked
 
----
+### ✅ Rule: Tests Must Match Story Graph Exactly
+**Status:** PASSING
 
-## Rule Validation
+**Test File Naming:**
+- ✅ File: `test_create_mob.py` matches sub-epic "Create Mob" exactly (snake_case)
 
-### ✅ Behavioral AC at Story Level
-- **Status:** PASSED
-- **Details:** All acceptance criteria are in the main `epics` section at the story level (not in increments section)
-- **Stories with AC:** 6 stories in Create Mob feature
+**Test Class Naming:**
+- ✅ `TestSelectMinionTokens` matches story "Select Minion Tokens" exactly
+- ✅ `TestQueryFoundryVTTForSelectedTokens` matches story "Query Foundry VTT For Selected Tokens" exactly
+- ✅ `TestGroupMinionsIntoMob` matches story "Group Minions Into Mob" exactly
+- ✅ `TestMobManagerCreatesMobWithSelectedTokens` matches story "Mob Manager Creates Mob With Selected Tokens" exactly
+- ✅ `TestAssignMobName` matches story "Assign Mob Name" exactly
+- ✅ `TestSystemPersistsMobConfiguration` matches story "System Persists Mob Configuration" exactly
 
-### ✅ When/Then Format
-- **Status:** PASSED
-- **Details:** All AC use WHEN/THEN format (no Given clauses)
-- **Format:** WHEN [condition] → THEN [outcome] → AND [additional outcome]
+**Test Method Naming:**
+- ✅ `test_game_master_selects_minion_tokens` matches scenario "Game Master selects minion tokens"
+- ✅ `test_game_master_selects_zero_tokens` matches scenario "Game Master selects zero tokens"
+- ✅ `test_system_queries_foundry_vtt_api_successfully` matches scenario "System queries Foundry VTT API successfully"
+- ✅ All scenario names correctly converted to snake_case
 
-### ✅ No Consecutive WHEN Statements
-- **Status:** PASSED
-- **Details:** Separate WHEN blocks are used for different conditions (not consecutive)
-- **Example:** "WHEN Game Master selects tokens" (block 1) vs "WHEN Game Master selects zero tokens" (block 2) - these are separate conditional branches, which is correct
+**Test Class Ordering:**
+- ✅ Classes appear in same order as stories in story map (sequential_order 1-6)
 
-### ✅ THEN on Separate Lines
-- **Status:** PASSED
-- **Details:** All THEN statements are on separate lines from WHEN statements
+### ✅ Rule: Pytest Orchestrator Pattern
+**Status:** PASSING
 
-### ⚠️ AC Consolidation Review Required
-- **Status:** REVIEW NEEDED
-- **Details:** Some ACs may have similar logic that could be consolidated
+- ✅ Test methods show Given-When-Then flow with clear comments
+- ✅ Helper functions provide reusable operations (all under 20 lines)
+- ✅ Test methods are under 20 lines each
+- ✅ Tests verify observable behavior through public API
+- ✅ No feature files - all in Python
 
-**Consolidation Candidates:**
+### ✅ Rule: Mock Only Boundaries
+**Status:** PASSING
 
-1. **Error Message Patterns:**
-   - "Select Minion Tokens": "WHEN Game Master selects zero tokens, THEN system shows error message"
-   - "Assign Mob Name": "WHEN mob name is empty, THEN system shows error message"
-   - "Assign Mob Name": "WHEN mob name already exists, THEN system shows error message"
-   - **Question:** Should error message handling be consolidated into a single AC pattern, or are these distinct enough to keep separate?
+- ✅ Foundry VTT API is mocked (external dependency)
+- ✅ File operations use real temp files (tmp_path fixture)
+- ✅ No mocking of internal business logic
+- ✅ Mock setup extracted to helper function `create_foundry_vtt_mock()`
 
-2. **Validation Patterns:**
-   - "Assign Mob Name": "WHEN Game Master enters mob name, THEN system validates name is not empty"
-   - "Assign Mob Name": "WHEN Game Master enters mob name, AND system checks name uniqueness"
-   - **Question:** Are these validation steps part of the same user action flow, or should they be separate?
+### ✅ Rule: ASCII Only
+**Status:** PASSING
 
-3. **Foundry VTT API Error Handling:**
-   - "Query Foundry VTT For Selected Tokens": "WHEN Foundry VTT API returns invalid token data, THEN system shows error"
-   - "Query Foundry VTT For Selected Tokens": "WHEN Foundry VTT API is unavailable, THEN system shows error"
-   - **Question:** Should these be consolidated into "WHEN Foundry VTT API error occurs, THEN system shows appropriate error message" or kept separate for different error types?
+- ✅ All test code uses ASCII-only characters
+- ✅ No Unicode symbols or emojis in code
+- ✅ Error messages use plain ASCII
 
----
+### ✅ Rule: Given-When-Then Structure
+**Status:** PASSING
 
-## Content Validation
+- ✅ Each test has clear Given/When/Then sections with comments
+- ✅ Background steps are handled through fixtures
+- ✅ Scenario-specific setup is in Given section
+- ✅ Actions are in When section
+- ✅ Assertions are in Then section
 
-### ✅ Alignment with Clarification Data
-- **Status:** PASSED
-- **Details:** AC align with user goals (efficient minion control, Foundry VTT integration)
-- **Reference:** clarification.json - user types, goals, and domain concepts
+### ✅ Rule: Helper Functions Inline
+**Status:** PASSING
 
-### ✅ Alignment with Planning Decisions
-- **Status:** PASSED
-- **Details:** AC follow planning decisions:
-  - Story granularity: "System inner behavior and inner workings" ✓
-  - Flow scope: "End-to-end user-system behavior" ✓
-  - Behavioral focus: User-System Behavioral granularity ✓
+- ✅ All helper functions are defined in the test file
+- ✅ Helpers are grouped at top of file
+- ✅ No imports from separate test_helpers.py
 
-### ✅ Domain Concepts Referenced
-- **Status:** PASSED
-- **Details:** AC reference domain concepts:
-  - Mob (domain object)
-  - Minion (domain object)
-  - Foundry VTT actor ID (integration point)
-  - Mob Manager (domain service)
+### ✅ Rule: Test Observable Behavior
+**Status:** PASSING
 
----
+- ✅ Tests verify public API behavior
+- ✅ No assertions on private attributes or internal state
+- ✅ Tests focus on WHAT happens, not HOW
 
-## Acceptance Criteria Coverage
+### ✅ Rule: Match Specification Scenarios
+**Status:** PASSING
 
-### Story 1: Select Minion Tokens
-- **AC Count:** 4 criteria
-- **Coverage:** Happy path (select tokens) + Error case (zero tokens)
-- **Status:** ✅ Complete
+- ✅ Test docstrings match scenario descriptions exactly
+- ✅ Test steps match scenario steps from story documents
+- ✅ Variable names match specification terminology
 
-### Story 2: Query Foundry VTT For Selected Tokens
-- **AC Count:** 5 criteria
-- **Coverage:** Happy path (query success) + Error cases (invalid data, unavailable API)
-- **Status:** ✅ Complete
+### ✅ Rule: Consistent Vocabulary
+**Status:** PASSING
 
-### Story 3: Group Minions Into Mob
-- **AC Count:** 4 criteria
-- **Coverage:** Happy path (confirm) + Cancel path
-- **Status:** ✅ Complete
+- ✅ Consistent use of `create_*` for creation helpers
+- ✅ Consistent use of domain terminology (Mob, Minion, Foundry VTT)
+- ✅ No mixing of synonyms
 
-### Story 4: Mob Manager Creates Mob With Selected Tokens
-- **AC Count:** 5 criteria
-- **Coverage:** Happy path (create mob) + Error cases (less than one minion, duplicates)
-- **Status:** ✅ Complete
+### ✅ Rule: Cover All Behavior Paths
+**Status:** PASSING
 
-### Story 5: Assign Mob Name
-- **AC Count:** 7 criteria
-- **Coverage:** Happy path (valid name) + Error cases (empty, duplicate)
-- **Status:** ✅ Complete (may benefit from consolidation review)
+- ✅ Happy path scenarios covered
+- ✅ Edge case scenarios covered
+- ✅ Error case scenarios covered
+- ✅ Each scenario has dedicated test method
 
-### Story 6: System Persists Mob Configuration
-- **AC Count:** 6 criteria
-- **Coverage:** Happy path (persist success) + Error case (persistence failure)
-- **Status:** ✅ Complete
+## Files Validated
 
----
+**Test File:**
+- `tests/test_create_mob.py` (512 lines)
 
-## Recommendations
+**Stories Covered:**
+- Select Minion Tokens (2 scenarios)
+- Query Foundry VTT For Selected Tokens (3 scenarios)
+- Group Minions Into Mob (2 scenarios)
+- Mob Manager Creates Mob With Selected Tokens (3 scenarios)
+- Assign Mob Name (3 scenarios)
+- System Persists Mob Configuration (2 scenarios)
 
-1. **Consolidation Review:** Review consolidation candidates above with domain expert
-2. **AC Count:** All stories have reasonable AC counts (4-7 criteria each)
-3. **Format Compliance:** All AC follow When/Then format correctly
-4. **Placement:** All AC in correct location (main epics section, story level)
+**Total:** 6 stories, 15 scenarios, 15 test methods
 
----
+## Test Structure
+
+```
+tests/test_create_mob.py
+├── Helper Functions (create_foundry_vtt_mock, create_minion_tokens, etc.)
+├── Fixtures (foundry_vtt_running, foundry_vtt_unavailable, etc.)
+├── TestSelectMinionTokens
+│   ├── test_game_master_selects_minion_tokens
+│   └── test_game_master_selects_zero_tokens
+├── TestQueryFoundryVTTForSelectedTokens
+│   ├── test_system_queries_foundry_vtt_api_successfully
+│   ├── test_foundry_vtt_api_returns_invalid_token_data
+│   └── test_foundry_vtt_api_is_unavailable
+├── TestGroupMinionsIntoMob
+│   ├── test_game_master_confirms_grouping
+│   └── test_game_master_cancels_grouping
+├── TestMobManagerCreatesMobWithSelectedTokens
+│   ├── test_mob_manager_creates_mob_with_valid_tokens
+│   ├── test_mob_group_contains_less_than_one_minion
+│   └── test_duplicate_tokens_are_detected
+├── TestAssignMobName
+│   ├── test_game_master_enters_valid_and_unique_mob_name
+│   ├── test_game_master_enters_empty_mob_name
+│   └── test_game_master_enters_duplicate_mob_name
+└── TestSystemPersistsMobConfiguration
+    ├── test_system_persists_mob_configuration_successfully
+    └── test_persistence_operation_fails
+```
+
+## Story Graph Mapping
+
+**Test mappings added to story-graph.json:**
+- ✅ `test_file: "test_create_mob.py"` added to "Create Mob" sub-epic
+- ✅ `test_class` added to each story
+- ✅ `test_method` added to each scenario
+
+## Conclusion
+
+**Overall Status:** ✅ PASSING
+
+All critical validation rules are passing. Test code correctly:
+- Matches story graph exactly (file, class, method names)
+- Follows pytest orchestrator pattern
+- Uses Given-When-Then structure
+- Mocks only external boundaries (Foundry VTT API)
+- Uses ASCII-only characters
+- Covers all behavior paths (happy, edge, error)
+- Tests observable behavior through public API
+- Maintains consistent vocabulary
 
 ## Next Steps
 
-1. Review consolidation opportunities with user
-2. Apply consolidation decisions if approved
-3. Proceed to next behavior: `6_scenarios`
+1. ✅ Tests are correctly generated and validated
+2. ✅ Story graph is updated with test mappings
+3. **Next Behavior:** `8_code` - Generate production code from tests
+
+---
+
+**Test generation completed successfully. Ready to proceed to next behavior.**

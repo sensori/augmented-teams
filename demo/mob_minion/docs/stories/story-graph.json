@@ -43,6 +43,7 @@
           "estimated_stories": 6,
           "domain_concepts": [],
           "sub_epics": [],
+          "test_file": "test_create_mob.py",
           "story_groups": [
             {
               "type": "and",
@@ -55,9 +56,39 @@
                   "connector": null,
                   "users": ["Game Master"],
                   "story_type": "user",
+                  "test_class": "TestSelectMinionTokens",
                   "acceptance_criteria": [
                     "WHEN Game Master selects one or more minion tokens in Foundry VTT\nTHEN system highlights selected tokens AND selected tokens are stored in temporary selection state",
                     "WHEN Game Master selects zero tokens\nTHEN system shows error message indicating at least one token must be selected"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects minion tokens",
+                      "type": "happy_path",
+                      "test_method": "test_game_master_selects_minion_tokens",
+                      "background": [
+                        "Given Foundry VTT is running",
+                        "And Game Master has minion tokens available on the scene"
+                      ],
+                      "steps": [
+                        "When Game Master selects one or more minion tokens in Foundry VTT",
+                        "Then system highlights selected tokens",
+                        "And selected tokens are stored in temporary selection state"
+                      ]
+                    },
+                    {
+                      "name": "Game Master selects zero tokens",
+                      "type": "error_case",
+                      "test_method": "test_game_master_selects_zero_tokens",
+                      "background": [
+                        "Given Foundry VTT is running",
+                        "And Game Master has minion tokens available on the scene"
+                      ],
+                      "steps": [
+                        "When Game Master selects zero tokens",
+                        "Then system shows error message indicating at least one token must be selected"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -66,10 +97,52 @@
                   "connector": "and",
                   "users": [],
                   "story_type": "system",
+                  "test_class": "TestQueryFoundryVTTForSelectedTokens",
                   "acceptance_criteria": [
                     "WHEN tokens are selected\nTHEN system queries Foundry VTT API for token actor data AND system retrieves actor ID, name, and position for each selected token",
                     "WHEN Foundry VTT API returns invalid token data\nTHEN system shows error message and excludes invalid tokens from selection",
                     "WHEN Foundry VTT API is unavailable\nTHEN system shows error message indicating connection failure"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "System queries Foundry VTT API successfully",
+                      "type": "happy_path",
+                      "test_method": "test_system_queries_foundry_vtt_api_successfully",
+                      "background": [
+                        "Given tokens are selected",
+                        "And Foundry VTT API is available"
+                      ],
+                      "steps": [
+                        "When system queries Foundry VTT API for token actor data",
+                        "Then system retrieves actor ID, name, and position for each selected token"
+                      ]
+                    },
+                    {
+                      "name": "Foundry VTT API returns invalid token data",
+                      "type": "error_case",
+                      "test_method": "test_foundry_vtt_api_returns_invalid_token_data",
+                      "background": [
+                        "Given tokens are selected",
+                        "And Foundry VTT API is available"
+                      ],
+                      "steps": [
+                        "When Foundry VTT API returns invalid token data",
+                        "Then system shows error message",
+                        "And system excludes invalid tokens from selection"
+                      ]
+                    },
+                    {
+                      "name": "Foundry VTT API is unavailable",
+                      "type": "error_case",
+                      "background": [
+                        "Given tokens are selected",
+                        "And Foundry VTT API is unavailable"
+                      ],
+                      "steps": [
+                        "When system attempts to query Foundry VTT API",
+                        "Then system shows error message indicating connection failure"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -78,9 +151,40 @@
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user",
+                  "test_class": "TestGroupMinionsIntoMob",
                   "acceptance_criteria": [
                     "WHEN Game Master confirms grouping of selected tokens\nTHEN system creates temporary mob group with selected tokens AND mob group displays list of included minion names",
                     "WHEN Game Master cancels grouping\nTHEN system clears selection and returns to token selection state"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master confirms grouping",
+                      "type": "happy_path",
+                      "test_method": "test_game_master_confirms_grouping",
+                      "background": [
+                        "Given tokens are selected",
+                        "And system has retrieved actor data for selected tokens"
+                      ],
+                      "steps": [
+                        "When Game Master confirms grouping of selected tokens",
+                        "Then system creates temporary mob group with selected tokens",
+                        "And mob group displays list of included minion names"
+                      ]
+                    },
+                    {
+                      "name": "Game Master cancels grouping",
+                      "type": "edge_case",
+                      "test_method": "test_game_master_cancels_grouping",
+                      "background": [
+                        "Given tokens are selected",
+                        "And system has retrieved actor data for selected tokens"
+                      ],
+                      "steps": [
+                        "When Game Master cancels grouping",
+                        "Then system clears selection",
+                        "And system returns to token selection state"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -89,10 +193,54 @@
                   "connector": "and",
                   "users": [],
                   "story_type": "system",
+                  "test_class": "TestMobManagerCreatesMobWithSelectedTokens",
                   "acceptance_criteria": [
                     "WHEN temporary mob group is confirmed\nTHEN Mob Manager creates new Mob domain object AND Mob object contains collection of Minion objects from selected tokens AND each Minion object references its Foundry VTT actor ID",
                     "WHEN mob group contains less than one minion\nTHEN system shows error message indicating mob must contain at least one minion",
                     "WHEN duplicate tokens are detected\nTHEN system removes duplicates and shows notification"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Mob Manager creates mob with valid tokens",
+                      "type": "happy_path",
+                      "test_method": "test_mob_manager_creates_mob_with_valid_tokens",
+                      "background": [
+                        "Given temporary mob group is confirmed",
+                        "And mob group contains one or more valid minion tokens"
+                      ],
+                      "steps": [
+                        "When Mob Manager creates new Mob domain object",
+                        "Then Mob object contains collection of Minion objects from selected tokens",
+                        "And each Minion object references its Foundry VTT actor ID"
+                      ]
+                    },
+                    {
+                      "name": "Mob group contains less than one minion",
+                      "type": "error_case",
+                      "test_method": "test_mob_group_contains_less_than_one_minion",
+                      "background": [
+                        "Given temporary mob group is confirmed",
+                        "And mob group contains less than one minion"
+                      ],
+                      "steps": [
+                        "When system attempts to create Mob domain object",
+                        "Then system shows error message indicating mob must contain at least one minion"
+                      ]
+                    },
+                    {
+                      "name": "Duplicate tokens are detected",
+                      "type": "edge_case",
+                      "test_method": "test_duplicate_tokens_are_detected",
+                      "background": [
+                        "Given temporary mob group is confirmed",
+                        "And mob group contains duplicate tokens"
+                      ],
+                      "steps": [
+                        "When Mob Manager creates new Mob domain object",
+                        "Then system removes duplicates",
+                        "And system shows notification"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -101,11 +249,56 @@
                   "connector": "and",
                   "users": ["Game Master"],
                   "story_type": "user",
+                  "test_class": "TestAssignMobName",
                   "acceptance_criteria": [
                     "WHEN Game Master enters mob name\nTHEN system validates name is not empty AND system checks name uniqueness against existing mobs",
                     "WHEN mob name is empty\nTHEN system shows error message requiring non-empty name",
                     "WHEN mob name already exists\nTHEN system shows error message indicating name must be unique",
                     "WHEN mob name is valid and unique\nTHEN system assigns name to Mob object"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master enters valid and unique mob name",
+                      "type": "happy_path",
+                      "test_method": "test_game_master_enters_valid_and_unique_mob_name",
+                      "background": [
+                        "Given Mob domain object is created",
+                        "And Mob object contains collection of Minion objects"
+                      ],
+                      "steps": [
+                        "When Game Master enters mob name",
+                        "Then system validates name is not empty",
+                        "And system checks name uniqueness against existing mobs",
+                        "And system assigns name to Mob object"
+                      ]
+                    },
+                    {
+                      "name": "Game Master enters empty mob name",
+                      "type": "error_case",
+                      "test_method": "test_game_master_enters_empty_mob_name",
+                      "background": [
+                        "Given Mob domain object is created",
+                        "And Mob object contains collection of Minion objects"
+                      ],
+                      "steps": [
+                        "When Game Master enters empty mob name",
+                        "Then system shows error message requiring non-empty name"
+                      ]
+                    },
+                    {
+                      "name": "Game Master enters duplicate mob name",
+                      "type": "error_case",
+                      "test_method": "test_game_master_enters_duplicate_mob_name",
+                      "background": [
+                        "Given Mob domain object is created",
+                        "And Mob object contains collection of Minion objects",
+                        "And existing mob with same name already exists"
+                      ],
+                      "steps": [
+                        "When Game Master enters mob name that already exists",
+                        "Then system shows error message indicating name must be unique"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -114,10 +307,44 @@
                   "connector": "and",
                   "users": [],
                   "story_type": "system",
+                  "test_class": "TestSystemPersistsMobConfiguration",
                   "acceptance_criteria": [
                     "WHEN Mob object is created with valid name and minions\nTHEN system saves Mob configuration to persistent storage AND persisted configuration includes mob name, minion actor IDs, and creation timestamp",
                     "WHEN persistence operation succeeds\nTHEN system shows success message to Game Master AND mob becomes available for selection in future operations",
                     "WHEN persistence operation fails\nTHEN system shows error message and retains mob in memory for retry"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "System persists mob configuration successfully",
+                      "type": "happy_path",
+                      "test_method": "test_system_persists_mob_configuration_successfully",
+                      "background": [
+                        "Given Mob object is created with valid name and minions",
+                        "And persistent storage is available"
+                      ],
+                      "steps": [
+                        "When system saves Mob configuration to persistent storage",
+                        "Then persisted configuration includes mob name",
+                        "And persisted configuration includes minion actor IDs",
+                        "And persisted configuration includes creation timestamp",
+                        "And system shows success message to Game Master",
+                        "And mob becomes available for selection in future operations"
+                      ]
+                    },
+                    {
+                      "name": "Persistence operation fails",
+                      "type": "error_case",
+                      "test_method": "test_persistence_operation_fails",
+                      "background": [
+                        "Given Mob object is created with valid name and minions",
+                        "And persistent storage is unavailable or fails"
+                      ],
+                      "steps": [
+                        "When system attempts to save Mob configuration to persistent storage",
+                        "Then system shows error message",
+                        "And system retains mob in memory for retry"
+                      ]
+                    }
                   ]
                 }
               ]
@@ -141,21 +368,103 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects mob to edit",
+                      "type": "happy_path",
+                      "background": [
+                        "Given one or more mobs exist",
+                        "And mobs are available for selection"
+                      ],
+                      "steps": [
+                        "When Game Master selects mob to edit",
+                        "Then system highlights selected mob",
+                        "And system displays mob details for editing"
+                      ]
+                    },
+                    {
+                      "name": "No mobs exist to edit",
+                      "type": "error_case",
+                      "background": [
+                        "Given no mobs exist"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to select mob to edit",
+                        "Then system shows error message indicating no mobs are available"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Add Minion To Mob",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master adds minion to mob",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob is selected for editing",
+                        "And minion tokens are available on scene"
+                      ],
+                      "steps": [
+                        "When Game Master selects minion token to add",
+                        "Then system adds minion to mob",
+                        "And system updates mob configuration with new minion"
+                      ]
+                    },
+                    {
+                      "name": "Game Master adds duplicate minion",
+                      "type": "edge_case",
+                      "background": [
+                        "Given mob is selected for editing",
+                        "And minion token is already in mob"
+                      ],
+                      "steps": [
+                        "When Game Master selects minion token that is already in mob",
+                        "Then system shows notification that minion is already in mob",
+                        "And system does not add duplicate minion"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Remove Minion From Mob",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master removes minion from mob",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob is selected for editing",
+                        "And mob contains one or more minions"
+                      ],
+                      "steps": [
+                        "When Game Master selects minion to remove from mob",
+                        "Then system removes minion from mob",
+                        "And system updates mob configuration"
+                      ]
+                    },
+                    {
+                      "name": "Game Master attempts to remove last minion",
+                      "type": "error_case",
+                      "background": [
+                        "Given mob is selected for editing",
+                        "And mob contains only one minion"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to remove last minion from mob",
+                        "Then system shows error message indicating mob must contain at least one minion",
+                        "And system does not remove minion"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -240,14 +549,68 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects existing mob",
+                      "type": "happy_path",
+                      "background": [
+                        "Given one or more mobs exist",
+                        "And mobs are available for selection"
+                      ],
+                      "steps": [
+                        "When Game Master selects mob",
+                        "Then system highlights selected mob",
+                        "And selected mob is stored in temporary selection state"
+                      ]
+                    },
+                    {
+                      "name": "No mobs exist",
+                      "type": "error_case",
+                      "background": [
+                        "Given no mobs exist"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to select mob",
+                        "Then system shows error message indicating no mobs are available"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Choose Strategy",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master chooses strategy",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob is selected",
+                        "And available strategies are displayed"
+                      ],
+                      "steps": [
+                        "When Game Master chooses strategy",
+                        "Then system assigns strategy to mob",
+                        "And selected strategy is stored in mob configuration"
+                      ]
+                    },
+                    {
+                      "name": "Game Master cancels strategy selection",
+                      "type": "edge_case",
+                      "background": [
+                        "Given mob is selected",
+                        "And available strategies are displayed"
+                      ],
+                      "steps": [
+                        "When Game Master cancels strategy selection",
+                        "Then system clears strategy selection",
+                        "And system returns to mob selection state"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -270,21 +633,107 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "System evaluates available targets",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob is selected",
+                        "And strategy is assigned to mob",
+                        "And Foundry VTT scene has enemy tokens"
+                      ],
+                      "steps": [
+                        "When system evaluates available targets",
+                        "Then system queries Foundry VTT for enemy tokens",
+                        "And system displays list of available targets"
+                      ]
+                    },
+                    {
+                      "name": "No targets available",
+                      "type": "edge_case",
+                      "background": [
+                        "Given mob is selected",
+                        "And strategy is assigned to mob",
+                        "And Foundry VTT scene has no enemy tokens"
+                      ],
+                      "steps": [
+                        "When system evaluates available targets",
+                        "Then system shows message indicating no targets are available"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Apply Strategy To Select Target",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "System applies strategy to select target",
+                      "type": "happy_path",
+                      "background": [
+                        "Given available targets are evaluated",
+                        "And strategy is assigned to mob"
+                      ],
+                      "steps": [
+                        "When system applies strategy to select target",
+                        "Then system evaluates targets according to strategy rules",
+                        "And system selects target based on strategy",
+                        "And selected target is stored in temporary selection state"
+                      ]
+                    },
+                    {
+                      "name": "Strategy cannot select valid target",
+                      "type": "edge_case",
+                      "background": [
+                        "Given available targets are evaluated",
+                        "And strategy is assigned to mob",
+                        "And no targets meet strategy criteria"
+                      ],
+                      "steps": [
+                        "When system applies strategy to select target",
+                        "Then system shows message indicating no targets meet strategy criteria"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Confirm Target Selection",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master confirms target selection",
+                      "type": "happy_path",
+                      "background": [
+                        "Given target is selected by strategy",
+                        "And target is displayed to Game Master"
+                      ],
+                      "steps": [
+                        "When Game Master confirms target selection",
+                        "Then system stores confirmed target for action execution",
+                        "And system proceeds to action execution"
+                      ]
+                    },
+                    {
+                      "name": "Game Master rejects target selection",
+                      "type": "edge_case",
+                      "background": [
+                        "Given target is selected by strategy",
+                        "And target is displayed to Game Master"
+                      ],
+                      "steps": [
+                        "When Game Master rejects target selection",
+                        "Then system clears target selection",
+                        "And system returns to target evaluation state"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -311,6 +760,33 @@
                   "acceptance_criteria": [
                     "WHEN Game Master selects action type from available actions\nTHEN system displays available action types AND selected action type is stored in temporary action state",
                     "WHEN Game Master selects invalid action type\nTHEN system shows error message indicating action type is not available"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects valid action type",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob is selected",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master selects action type from available actions",
+                        "Then system displays available action types",
+                        "And selected action type is stored in temporary action state"
+                      ]
+                    },
+                    {
+                      "name": "Game Master selects invalid action type",
+                      "type": "error_case",
+                      "background": [
+                        "Given mob is selected",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master selects invalid action type",
+                        "Then system shows error message indicating action type is not available"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -323,6 +799,46 @@
                     "WHEN action type is selected\nTHEN system validates action type is valid for mob AND system checks action type is available in Foundry VTT combat system",
                     "WHEN action type is invalid\nTHEN system shows error message and clears action selection",
                     "WHEN action type is not available in Foundry VTT\nTHEN system shows error message indicating action is not available"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "System validates action type successfully",
+                      "type": "happy_path",
+                      "background": [
+                        "Given action type is selected",
+                        "And Foundry VTT combat system is available"
+                      ],
+                      "steps": [
+                        "When system validates action type",
+                        "Then system validates action type is valid for mob",
+                        "And system checks action type is available in Foundry VTT combat system"
+                      ]
+                    },
+                    {
+                      "name": "Action type is invalid",
+                      "type": "error_case",
+                      "background": [
+                        "Given action type is selected",
+                        "And action type is invalid for mob"
+                      ],
+                      "steps": [
+                        "When system validates action type",
+                        "Then system shows error message",
+                        "And system clears action selection"
+                      ]
+                    },
+                    {
+                      "name": "Action type is not available in Foundry VTT",
+                      "type": "error_case",
+                      "background": [
+                        "Given action type is selected",
+                        "And action type is not available in Foundry VTT combat system"
+                      ],
+                      "steps": [
+                        "When system validates action type",
+                        "Then system shows error message indicating action is not available"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -334,6 +850,34 @@
                   "acceptance_criteria": [
                     "WHEN Game Master confirms action execution\nTHEN system prepares to execute action for all minions in mob AND system displays confirmation message showing action will be applied to all minions",
                     "WHEN Game Master cancels action execution\nTHEN system clears action selection and returns to action type selection state"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master confirms action execution",
+                      "type": "happy_path",
+                      "background": [
+                        "Given action type is selected and validated",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master confirms action execution",
+                        "Then system prepares to execute action for all minions in mob",
+                        "And system displays confirmation message showing action will be applied to all minions"
+                      ]
+                    },
+                    {
+                      "name": "Game Master cancels action execution",
+                      "type": "edge_case",
+                      "background": [
+                        "Given action type is selected and validated",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master cancels action execution",
+                        "Then system clears action selection",
+                        "And system returns to action type selection state"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -346,6 +890,45 @@
                     "WHEN action execution is confirmed\nTHEN system queries Foundry VTT API for all minion tokens in mob AND system retrieves actor ID and position for each minion",
                     "WHEN Foundry VTT API returns invalid minion data\nTHEN system shows error message and excludes invalid minions from action execution",
                     "WHEN Foundry VTT API is unavailable\nTHEN system shows error message indicating connection failure"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "System retrieves minion data successfully",
+                      "type": "happy_path",
+                      "background": [
+                        "Given action execution is confirmed",
+                        "And Foundry VTT API is available"
+                      ],
+                      "steps": [
+                        "When system queries Foundry VTT API for all minion tokens in mob",
+                        "Then system retrieves actor ID and position for each minion"
+                      ]
+                    },
+                    {
+                      "name": "Foundry VTT API returns invalid minion data",
+                      "type": "error_case",
+                      "background": [
+                        "Given action execution is confirmed",
+                        "And Foundry VTT API is available"
+                      ],
+                      "steps": [
+                        "When Foundry VTT API returns invalid minion data",
+                        "Then system shows error message",
+                        "And system excludes invalid minions from action execution"
+                      ]
+                    },
+                    {
+                      "name": "Foundry VTT API is unavailable",
+                      "type": "error_case",
+                      "background": [
+                        "Given action execution is confirmed",
+                        "And Foundry VTT API is unavailable"
+                      ],
+                      "steps": [
+                        "When system attempts to query Foundry VTT API",
+                        "Then system shows error message indicating connection failure"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -358,6 +941,37 @@
                     "WHEN minion data is retrieved\nTHEN system applies selected action to each minion via Foundry VTT combat API AND system tracks action execution status for each minion",
                     "WHEN action application succeeds for minion\nTHEN system marks minion as action executed AND system updates minion state in Foundry VTT",
                     "WHEN action application fails for minion\nTHEN system shows error message for that minion AND system continues with remaining minions"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "System applies action to all minions successfully",
+                      "type": "happy_path",
+                      "background": [
+                        "Given minion data is retrieved",
+                        "And Foundry VTT combat API is available"
+                      ],
+                      "steps": [
+                        "When system applies selected action to each minion via Foundry VTT combat API",
+                        "Then system tracks action execution status for each minion",
+                        "And system marks minion as action executed",
+                        "And system updates minion state in Foundry VTT"
+                      ]
+                    },
+                    {
+                      "name": "Action application fails for one minion",
+                      "type": "error_case",
+                      "background": [
+                        "Given minion data is retrieved",
+                        "And Foundry VTT combat API is available",
+                        "And one minion action application will fail"
+                      ],
+                      "steps": [
+                        "When system applies selected action to each minion via Foundry VTT combat API",
+                        "And action application fails for one minion",
+                        "Then system shows error message for that minion",
+                        "And system continues with remaining minions"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -370,6 +984,36 @@
                     "WHEN Game Master selects target for action\nTHEN system checks target is within range for action type AND system displays range validation status",
                     "WHEN target is out of range\nTHEN system shows error message indicating target is out of range AND system prevents action execution",
                     "WHEN target is within range\nTHEN system allows action execution to proceed"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects target within range",
+                      "type": "happy_path",
+                      "background": [
+                        "Given action type is selected",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master selects target for action",
+                        "Then system checks target is within range for action type",
+                        "And system displays range validation status",
+                        "And system allows action execution to proceed"
+                      ]
+                    },
+                    {
+                      "name": "Game Master selects target out of range",
+                      "type": "error_case",
+                      "background": [
+                        "Given action type is selected",
+                        "And mob has minions available"
+                      ],
+                      "steps": [
+                        "When Game Master selects target for action",
+                        "And target is out of range",
+                        "Then system shows error message indicating target is out of range",
+                        "And system prevents action execution"
+                      ]
+                    }
                   ]
                 },
                 {
@@ -382,6 +1026,37 @@
                     "WHEN target is selected\nTHEN system queries Foundry VTT movement system for range between minion and target AND system compares range to action type range requirements",
                     "WHEN range validation succeeds\nTHEN system confirms action can proceed AND system stores range validation result",
                     "WHEN range validation fails\nTHEN system shows error message indicating range constraint violation AND system prevents action execution"
+                  ],
+                  "scenarios": [
+                    {
+                      "name": "Range validation succeeds",
+                      "type": "happy_path",
+                      "background": [
+                        "Given target is selected",
+                        "And Foundry VTT movement system is available"
+                      ],
+                      "steps": [
+                        "When system queries Foundry VTT movement system for range between minion and target",
+                        "Then system compares range to action type range requirements",
+                        "And system confirms action can proceed",
+                        "And system stores range validation result"
+                      ]
+                    },
+                    {
+                      "name": "Range validation fails",
+                      "type": "error_case",
+                      "background": [
+                        "Given target is selected",
+                        "And Foundry VTT movement system is available",
+                        "And range exceeds action type range requirements"
+                      ],
+                      "steps": [
+                        "When system queries Foundry VTT movement system for range between minion and target",
+                        "And system compares range to action type range requirements",
+                        "Then system shows error message indicating range constraint violation",
+                        "And system prevents action execution"
+                      ]
+                    }
                   ]
                 }
               ]
@@ -428,14 +1103,68 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master selects mob template",
+                      "type": "happy_path",
+                      "background": [
+                        "Given one or more mob templates exist",
+                        "And templates are available for selection"
+                      ],
+                      "steps": [
+                        "When Game Master selects mob template",
+                        "Then system highlights selected template",
+                        "And selected template is stored in temporary selection state"
+                      ]
+                    },
+                    {
+                      "name": "No templates exist",
+                      "type": "error_case",
+                      "background": [
+                        "Given no mob templates exist"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to select mob template",
+                        "Then system shows error message indicating no templates are available"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Spawn Mob From Template",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master spawns mob from template",
+                      "type": "happy_path",
+                      "background": [
+                        "Given mob template is selected",
+                        "And Foundry VTT scene is available"
+                      ],
+                      "steps": [
+                        "When Game Master confirms spawning mob from template",
+                        "Then system creates mob from template configuration",
+                        "And system spawns minion tokens on Foundry VTT scene",
+                        "And system creates Mob domain object with spawned minions"
+                      ]
+                    },
+                    {
+                      "name": "Template spawning fails",
+                      "type": "error_case",
+                      "background": [
+                        "Given mob template is selected",
+                        "And Foundry VTT scene is unavailable or fails"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to spawn mob from template",
+                        "Then system shows error message indicating spawning failed"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -458,7 +1187,34 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Game Master spawns mob from selected actors",
+                      "type": "happy_path",
+                      "background": [
+                        "Given Game Master has selected one or more actor tokens",
+                        "And Foundry VTT scene is available"
+                      ],
+                      "steps": [
+                        "When Game Master confirms spawning mob from selected actors",
+                        "Then system creates mob from selected actors",
+                        "And system creates Mob domain object with selected actors as minions",
+                        "And system groups actors into mob"
+                      ]
+                    },
+                    {
+                      "name": "Game Master selects zero actors",
+                      "type": "error_case",
+                      "background": [
+                        "Given Game Master has selected zero actor tokens"
+                      ],
+                      "steps": [
+                        "When Game Master attempts to spawn mob from selected actors",
+                        "Then system shows error message indicating at least one actor must be selected"
+                      ]
+                    }
+                  ]
                 }
               ]
             }

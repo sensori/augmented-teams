@@ -40,6 +40,47 @@
       "clarification_shape": "clarification.json with user types, goals, and domain concepts from Shape stage",
       "user_requirements": "User provided clarifications: Foundry VTT combat tracker integration, mob leader functionality, follow leader strategy, separated targeting and attacking stories"
     }
+  },
+  "tests": {
+    "key_questions": {
+      "test_framework": "pytest with orchestrator pattern (NO feature files) - matches codebase pattern",
+      "test_scope_level": "System level - test full system with external systems mocked out (Foundry VTT is external)",
+      "mocking_strategy": "Mock external dependencies - mock Foundry VTT API, integrations, external systems",
+      "fixtures_helpers": "Standard pytest fixtures (tmp_path, workspace_root), Foundry VTT API mocks, test data factories for tokens/actors/mobs",
+      "test_file_structure": "Match story graph exactly - test files named test_<sub_epic_name>.py (e.g., test_create_mob.py), classes named Test<ExactStoryName>, methods named test_<scenario_name_snake_case>. Location: tests/ directory mirroring story structure",
+      "test_data_requirements": "Use scenario data from story documents, create Foundry VTT mock data (tokens, actors, scenes), domain model test fixtures (Mob, Minion objects)",
+      "existing_patterns": "Follow pytest orchestrator pattern - test methods show Given-When-Then flow (under 20 lines), helper functions provide reusable operations (under 20 lines), tests verify observable behavior through public API"
+    },
+    "evidence": {
+      "test_framework_pattern": "agile_bot/bots/story_bot/behaviors/7_tests/3_rules/pytest_bdd_orchestrator_pattern.json - pytest with orchestrator pattern, NO feature files",
+      "test_naming_rules": "agile_bot/bots/story_bot/behaviors/7_tests/3_rules/tests_must_match_story_graph_exactly.json - test files match sub-epics, classes match stories, methods match scenarios",
+      "story_scenarios": "Story documents in docs/stories/map/ with Background and Scenarios sections in Gherkin format",
+      "domain_model": "mob-minion-domain-model-description.md with domain concepts (Mob, Minion, Strategy, Action, Range, Target)"
+    }
+  },
+  "code": {
+    "key_questions": {
+      "programming_language": "Python - tests use pytest, Python syntax",
+      "target_file_location": "src/mob_minion/ directory structure (Python package) - Domain: src/mob_minion/domain/ (Mob, Minion entities), Services: src/mob_minion/services/ (MobManager, TokenSelector), Integration: src/mob_minion/integration/ (FoundryVTTClient), Persistence: src/mob_minion/persistence/ (MobRepository)",
+      "main_functions_capabilities": "Token selection and highlighting, Foundry VTT API integration (query tokens), Mob grouping, Mob domain object creation, Mob naming and validation, Mob persistence",
+      "major_domain_objects": "Mob (collection of minions), Minion (individual token/actor), Strategy (behavioral rules), Action (mob actions), Range (distance constraints), Template (predefined configurations)",
+      "programming_paradigm": "Object-oriented programming - tests use classes, domain model uses entities",
+      "code_organization": "Domain-Driven Design layers: Domain layer (core entities: Mob, Minion), Service layer (business logic: MobManager, TokenSelector, MobNameValidator), Integration layer (external systems: FoundryVTTClient), Persistence layer (data storage: MobRepository)",
+      "key_responsibilities": "TokenSelector: Handle token selection, highlighting, validation. FoundryVTTClient: Query Foundry VTT API for token data. MobManager: Create Mob domain objects from tokens. MobNameValidator: Validate mob names (not empty, unique). MobRepository: Persist/load mob configurations",
+      "dependencies": "Foundry VTT API (external, mocked in tests)",
+      "code_patterns": "Domain-Driven Design (DDD), Clean Code principles, explicit dependencies, single responsibility",
+      "available_inputs": "Story documents with scenarios (docs/stories/map/), Domain model description (mob-minion-domain-model-description.md), Test file (tests/test_create_mob.py), Story graph with acceptance criteria (story-graph.json)",
+      "integration_points": "Foundry VTT API (actor/token system, combat system, movement/range system)",
+      "error_handling": "Validate token selection (at least one token), Validate mob creation (at least one minion), Handle Foundry VTT API errors (unavailable, invalid data), Validate mob name (not empty, unique), Handle persistence failures",
+      "performance_constraints": "None specified - handle reasonable numbers of mobs/minions (typical RPG session: 5-20 mobs, 10-100 minions total)",
+      "language_conventions": "PEP 8, type hints, docstrings, explicit dependencies"
+    },
+    "evidence": {
+      "test_file": "tests/test_create_mob.py - shows expected API structure and behavior",
+      "domain_model": "mob-minion-domain-model-description.md - defines domain entities and relationships",
+      "story_documents": "docs/stories/map/ - story documents with scenarios and acceptance criteria",
+      "story_graph": "story-graph.json - structured story map with domain concepts"
+    }
   }
 }
 

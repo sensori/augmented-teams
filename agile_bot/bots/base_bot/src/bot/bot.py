@@ -256,6 +256,48 @@ class Behavior:
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         return self.execute_action('validate_rules', ValidateRulesAction, parameters)
     
+    def does_requested_action_match_current(self, requested_action: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Check if requested action matches current action or expected next action.
+        
+        Args:
+            requested_action: Action name being requested (e.g., 'build_knowledge')
+            
+        Returns:
+            Tuple of (matches: bool, current_action: Optional[str], expected_next: Optional[str])
+            - matches: True if requested action is current or expected next, False otherwise
+            - current_action: Current action name (None if no current action)
+            - expected_next: Expected next action in sequence (None if no next or no state)
+        """
+        # Load workflow state to get current action
+        self.workflow.load_state()
+        
+        current_action = self.workflow.current_state
+        if not current_action:
+            # No current action - allow any action (will start from beginning)
+            return (True, None, None)
+        
+        # Get expected next action from workflow states sequence
+        if current_action not in self.workflow.states:
+            # Current action not in states - allow any
+            return (True, current_action, None)
+        
+        current_index = self.workflow.states.index(current_action)
+        expected_next = self.workflow.states[current_index + 1] if current_index + 1 < len(self.workflow.states) else None
+        
+        # Check if requested matches current OR expected next
+        if requested_action == current_action:
+            # Requested action is the current action - always allow (re-execution)
+            matches = True
+        elif expected_next is None:
+            # No expected next (at end of sequence) - allow any
+            matches = True
+        else:
+            # Check if requested matches expected next
+            matches = (requested_action == expected_next)
+        
+        return (matches, current_action, expected_next)
+    
     def forward_to_current_action(self, parameters: Dict[str, Any] = None) -> BotResult:
         # CRITICAL: Workflow derives its working_dir from the workspace helper.
         # Nothing to set here; proceed to load existing state.

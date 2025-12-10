@@ -461,6 +461,34 @@ class MCPServerGenerator:
             if behavior_obj is None:
                 return {"error": f"Behavior {behavior} not found"}
             
+            # ACTION ORDER ENFORCEMENT: Check if proceeding out of order
+            if action:  # Only check if specific action was requested
+                matches, current_action, expected_next = behavior_obj.does_requested_action_match_current(action)
+                if not matches and expected_next:
+                    # Check if user already confirmed out-of-order execution
+                    if parameters.get('confirm_out_of_order') == True:
+                        # User confirmed - proceed
+                        pass
+                    else:
+                        # Out of order - ask for confirmation
+                        return {
+                            "status": "requires_confirmation",
+                            "message": (
+                                f"**ACTION ORDER CHECK**\n\n"
+                                f"Current action: `{current_action}`\n"
+                                f"Expected next action: `{expected_next}`\n"
+                                f"Requested action: `{action}`\n\n"
+                                f"You are attempting to execute `{action}` out of sequence. "
+                                f"The next action in sequence should be `{expected_next}`.\n\n"
+                                f"**Would you like to proceed with `{action}` anyway?**\n"
+                                f"Reply with confirmation to proceed out of order, or switch to `{expected_next}`."
+                            ),
+                            "current_action": current_action,
+                            "expected_next": expected_next,
+                            "requested_action": action,
+                            "confirmation_required": True
+                        }
+            
             # If action is specified, route to that action, otherwise use current action
             if action:
                 action_method = getattr(behavior_obj, action, None)

@@ -1,4 +1,4 @@
-ck{
+{
   "description": "CRITICAL: Story filenames must match the story name exactly (no actor prefix). Actor information belongs in story description or acceptance criteria, NOT in the filename.",
   "examples": [
     {
