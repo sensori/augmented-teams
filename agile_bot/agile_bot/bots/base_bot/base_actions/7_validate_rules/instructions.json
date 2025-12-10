@@ -1,1 +1,1 @@
-{"instructions": ["Load and review clarification.json and planning.json", "Check Content Data against all rules", "Generate a validation report"]}
+{"instructions": ["Load and review clarification.json and planning.json", "Check Content Data against all rules listed above", "Generate a validation report", "Save the validation report to validation-report.md in docs/stories/"]}

@@ -280,8 +280,12 @@ def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action
     
     from agile_bot.bots.base_bot.src.state.workflow import Workflow
     states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+    # Create all transitions, not just the one we're testing
     transitions = [
-        {'trigger': 'proceed', 'source': source_action, 'dest': dest_action}
+        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
+        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
+        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
     ]
     # No workspace_root parameter
     workflow = Workflow(
@@ -291,7 +295,12 @@ def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action
         states=states,
         transitions=transitions
     )
+    # Set state and save it so load_state() doesn't reset it
     workflow.machine.set_state(source_action)
+    workflow.save_state()
+    # Mark action as completed
+    workflow.save_completed_action(source_action)
+    # Now transition
     workflow.transition_to_next()
     assert workflow.state == dest_action
 

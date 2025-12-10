@@ -1,1 +1,1 @@
-{"name": "decide_planning_criteria", "workflow": true, "order": 3}
+{"name": "decide_planning_criteria", "workflow": true, "order": 3, "next_action": "build_knowledge"}

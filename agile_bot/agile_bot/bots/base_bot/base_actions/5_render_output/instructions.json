@@ -1,1 +1,1 @@
-{"instructions": ["Render story map documents", "Render domain model documents"]}
+{"actionName": "render_output", "instructions": ["Instruction for render_output"]}

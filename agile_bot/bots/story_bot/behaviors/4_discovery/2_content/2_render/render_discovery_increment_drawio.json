@@ -5,7 +5,7 @@
   "input": "story_graph_increments.json",
   "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",
   "renderer_command": "render-discovery",
-  "output": "story-map-discovery-increment-{increment_names}.drawio",
+  "output": "story-map-discovery-{increment_names}.drawio",
   "parameters": {
     "increment_names": "{increment_names}"
   }

@@ -22,6 +22,24 @@
       "existing_system_context": "References to Foundry VTT system and its capabilities (actor/token system, combat system, movement/range system, template system)",
       "user_research": "Input file provides direct user requirements and vision for the system"
     }
+  },
+  "discovery": {
+    "key_questions": {
+      "increment_scope": "Increment 1: Foundation - Create Mob and Basic Actions covers: Epic 1: Manage Mobs (Create Mob feature with 4 stories: Select Minion Tokens, Group Minions Into Mob, Assign Mob Name, Designate Mob Leader; Combat Tracker Integration feature with 1 story: Turn Mob On In Combat Tracker). Epic 2: Control Mob Actions (Execute Mob Action feature with 4 stories: Select Action Type, Target Selection, Attack Execution, Respect Range Constraints; Follow Leader Strategy feature with 1 story: Execute Follow Leader Strategy). This increment establishes core mob creation, combat tracker integration, and basic action execution with leader-based strategy.",
+      "major_workflows": "Three workflows: 1) Mob Creation Workflow: Select individual minion tokens → Group them into a mob → Assign a name → Designate a mob leader. 2) Combat Tracker Integration: Turn mob on in combat tracker → Mobs appear in combat tracker → Actions execute through combat tracker. 3) Action Execution Workflow (Refined): Select action type → Target selection (determine targets) → Attack execution (execute attacks) → Respect range/positioning constraints.",
+      "systems_teams_roles": "User Role: Game Master (GM) - primary user managing minions in Foundry VTT. System Integration: Foundry VTT systems - Actor/Token system (identify and group minions), Combat Tracker system (turn mobs on, track combat state, execute actions), Combat system (execute actions), Movement/Range system (positioning and constraints), Template system (future spawning capability).",
+      "story_groupings_capabilities": "Three capabilities: 1) Create Mob Capability (Epic 1, Feature: Create Mob) - Group minions into coordinated mobs with a leader. 2) Combat Tracker Integration Capability (NEW) - Integrate mobs with Foundry's combat tracker. 3) Execute Mob Action Capability (Epic 2, Feature: Execute Mob Action) - Execute coordinated actions with separate targeting and attacking.",
+      "story_sequence": "Within Create Mob: Select Minion Tokens (1) → Group Minions Into Mob (2) → Assign Mob Name (3) → Designate Mob Leader (4). Combat Tracker Integration: Turn Mob On In Combat Tracker (can happen after mob creation). Within Execute Mob Action: Select Action Type (1) → Target Selection (2) → Attack Execution (3) → Respect Range Constraints (4). Strategy: Follow Leader Strategy (can be applied during action execution). Between Epics: Create Mob must be completed before Execute Mob Action.",
+      "integration_points": "Integration Point 1: Foundry VTT Actor/Token system - selecting and identifying minion tokens. Integration Point 2: Foundry VTT Combat Tracker system - turning mobs on, tracking combat state. Integration Point 3: Foundry VTT Combat system - executing actions through combat tracker. Integration Point 4: Foundry VTT Movement/Range system - validating range constraints and positioning. Transition Point: After mob creation, GM can select any minion in the mob to control the entire mob. Transition Point: Mob leader's actions determine what all other minions do (follow leader strategy).",
+      "dependencies": "Execute Mob Action depends on Create Mob - mob must exist before actions can be executed. Combat Tracker Integration depends on Create Mob - mob must exist before it can be turned on in combat tracker. Follow Leader Strategy depends on Mob Leader designation - leader must be designated before strategy can be applied. Attack Execution depends on Target Selection - targets must be determined before attacks can be executed. Within Create Mob, stories are sequential (must select tokens before grouping, must group before naming, must name before designating leader)."
+    },
+    "evidence": {
+      "story_map": "story-graph.json with epics, features, and stories for Increment 1",
+      "increments_document": "Increment 1 defined with priority 1 in story-graph.json",
+      "domain_model": "mob-minion-domain-model-description.md with domain concepts (Mob, Minion, Strategy, Action, Range, Target)",
+      "clarification_shape": "clarification.json with user types, goals, and domain concepts from Shape stage",
+      "user_requirements": "User provided clarifications: Foundry VTT combat tracker integration, mob leader functionality, follow leader strategy, separated targeting and attacking stories"
+    }
   }
 }
 

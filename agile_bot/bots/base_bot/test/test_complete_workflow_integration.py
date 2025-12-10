@@ -52,7 +52,12 @@ class TestCompleteWorkflowIntegration:
             behavior_dir.mkdir(parents=True, exist_ok=True)
         
         # Create base_actions with next_action transitions
-        base_actions_dir = tmp_path / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        # Use actual repo root so load_workflow_states_and_transitions can find them
+        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+        repo_root = get_python_workspace_root()
+        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        base_actions_dir.mkdir(parents=True, exist_ok=True)
+        
         actions_config = [
             ('gather_context', 2, 'decide_planning_criteria'),
             ('decide_planning_criteria', 3, 'build_knowledge'),
@@ -88,6 +93,8 @@ class TestCompleteWorkflowIntegration:
         # Step 2: Close gather_context
         print("\n=== Step 2: Close gather_context ===")
         bot.shape.workflow.save_completed_action('gather_context')
+        # Reload state to ensure workflow sees the completed action
+        bot.shape.workflow.load_state()
         bot.shape.workflow.transition_to_next()
         assert bot.shape.workflow.current_state == 'decide_planning_criteria'
         assert bot.shape.workflow.is_action_completed('gather_context')

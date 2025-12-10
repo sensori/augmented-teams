@@ -104,6 +104,18 @@ class MCPServerGenerator:
         
         return mcp_server
     
+    def _get_bot_behaviors(self) -> list:
+        """Safely get behaviors list from bot, handling mocks and properties."""
+        bot_behaviors = getattr(self.bot, 'behaviors', [])
+        if not isinstance(bot_behaviors, list):
+            # Handle case where bot.behaviors might be a property or mock
+            bot_config = self.bot.config if hasattr(self.bot, 'config') else None
+            if bot_config and isinstance(bot_config, dict):
+                bot_behaviors = bot_config.get('behaviors', [])
+            else:
+                bot_behaviors = []
+        return bot_behaviors if isinstance(bot_behaviors, list) else []
+    
     def register_all_behavior_action_tools(self, mcp_server: FastMCP):
         bot_config = mcp_server.bot_config
         behaviors = bot_config.get('behaviors', [])
@@ -211,7 +223,7 @@ class MCPServerGenerator:
 
             # Locate an active workflow_state.json from any behavior's workflow file
             state_file = None
-            for behavior in self.bot.behaviors:
+            for behavior in self._get_bot_behaviors():
                 behavior_obj = getattr(self.bot, behavior, None)
                 if behavior_obj is None:
                     continue
@@ -247,9 +259,10 @@ class MCPServerGenerator:
                 # Get behavior object
                 behavior_obj = getattr(self.bot, behavior_name, None)
                 if behavior_obj is None:
+                    bot_behaviors = self._get_bot_behaviors()
                     return {
                         "error": f"Behavior {behavior_name} not found",
-                        "message": f"Available behaviors: {', '.join(self.bot.behaviors)}"
+                        "message": f"Available behaviors: {', '.join(bot_behaviors)}"
                     }
                 
                 # Workflow computes its own working_dir via the workspace helper;
@@ -272,10 +285,12 @@ class MCPServerGenerator:
                 
                 if behavior_complete:
                     # Final action - check for next behavior
-                    current_behavior_index = self.bot.behaviors.index(behavior_name)
-                    if current_behavior_index + 1 < len(self.bot.behaviors):
-                        # Transition to next behavior
-                        next_behavior_name = self.bot.behaviors[current_behavior_index + 1]
+                    bot_behaviors = self._get_bot_behaviors()
+                    if behavior_name in bot_behaviors:
+                        current_behavior_index = bot_behaviors.index(behavior_name)
+                        if current_behavior_index + 1 < len(bot_behaviors):
+                            # Transition to next behavior
+                            next_behavior_name = bot_behaviors[current_behavior_index + 1]
                         
                         # Update workflow state to next behavior, first action
                         next_behavior_obj = getattr(self.bot, next_behavior_name)
@@ -498,7 +513,8 @@ class MCPServerGenerator:
         existing_artifacts = []
         
         if stories_dir.exists():
-            for behavior in self.bot.behaviors:
+            bot_behaviors = self._get_bot_behaviors()
+            for behavior in bot_behaviors:
                 # Check for common artifact patterns per behavior
                 behavior_artifacts = self._check_behavior_artifacts(stories_dir, behavior)
                 if behavior_artifacts:
@@ -509,7 +525,8 @@ class MCPServerGenerator:
         
         # Determine earliest missing stage
         earliest_missing = None
-        for behavior in self.bot.behaviors:
+        bot_behaviors = self._get_bot_behaviors()
+        for behavior in bot_behaviors:
             # Check if this behavior has artifacts
             has_artifacts = any(a['behavior'] == behavior for a in existing_artifacts)
             if not has_artifacts:
@@ -518,7 +535,7 @@ class MCPServerGenerator:
         
         # If no missing stages, suggest the last behavior
         if earliest_missing is None:
-            earliest_missing = self.bot.behaviors[-1] if self.bot.behaviors else None
+            earliest_missing = bot_behaviors[-1] if bot_behaviors else None
         
         # Build suggestion message
         message = f"**ENTRY WORKFLOW - No workflow_state.json found**\n\n"
@@ -534,18 +551,22 @@ class MCPServerGenerator:
         
         message += f"**Suggested starting behavior:** `{earliest_missing}`\n\n"
         message += "**Available behaviors:**\n"
-        for i, behavior in enumerate(self.bot.behaviors, 1):
+        bot_behaviors = self._get_bot_behaviors()
+        for i, behavior in enumerate(bot_behaviors, 1):
             status = "✓" if any(a['behavior'] == behavior for a in existing_artifacts) else " "
             message += f"{i}. [{status}] {behavior}\n"
         
         message += "\n**Please confirm which behavior to start with.**\n"
-        message += f"Reply with the behavior name (e.g., '{earliest_missing}') or number (e.g., '{self.bot.behaviors.index(earliest_missing) + 1}')."
+        if earliest_missing and earliest_missing in bot_behaviors:
+            message += f"Reply with the behavior name (e.g., '{earliest_missing}') or number (e.g., '{bot_behaviors.index(earliest_missing) + 1}')."
+        else:
+            message += f"Reply with the behavior name (e.g., '{earliest_missing}')."
         
         return {
             "status": "requires_confirmation",
             "message": message,
             "suggested_behavior": earliest_missing,
-            "available_behaviors": self.bot.behaviors,
+            "available_behaviors": bot_behaviors,
             "existing_artifacts": existing_artifacts,
             "working_dir": str(working_dir)
         }

@@ -600,10 +600,18 @@ class StoryIODiagram(StoryIOComponent):
             graph_data = self._to_story_graph_format(include_increments=True)
         
         # Render using renderer
+        # Pass raw JSON path so renderer can access features with stories (not transformed sub_epics)
+        raw_json_path = None
+        if isinstance(story_graph, (str, Path)):
+            raw_json_path = Path(story_graph)
+        elif hasattr(self, '_source_path'):
+            raw_json_path = self._source_path
+        
         return self._renderer.render_increments(
             story_graph=graph_data,
             output_path=output_path,
-            layout_data=layout_data
+            layout_data=layout_data,
+            raw_json_path=raw_json_path
         )
     
     @staticmethod
@@ -1150,6 +1158,7 @@ class StoryIODiagram(StoryIOComponent):
             story_graph_file=story_graph_path
         )
         diagram._load_from_story_graph_format(data)
+        diagram._source_path = story_graph_path  # Store source path for raw JSON access
         
         return diagram
     

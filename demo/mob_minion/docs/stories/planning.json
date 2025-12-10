@@ -142,5 +142,17 @@
         ]
       }
     }
+  },
+  "discovery": {
+    "assumptions_made": {
+      "default_granularity": "Default granularity is one Meaningful user/system interaction per story",
+      "granularity_varies": "Story granularity may vary based on technical or functional complexity",
+      "coarse_grained_acceptable": "Coarse-grained stories are acceptable where functionality is easily enabled",
+      "fine_grained_required": "Fine-grained slicing is required where architectural or integration uncertainty is high"
+    },
+    "decisions_made": {
+      "story_scope_definition": "Hierarchical — Go from left to right through every step of system and user interactions, including each alternate option. Start with top-level steps and drill down completely before moving to the next step. Includes entire set of stories for this core increment, including alternate stories and optional stories.",
+      "story_granularity": "System inner behavior and inner workings — needed when elaboration of new complex architecture across unknown libraries and components is useful to elaborate. Specifically for engaging with the Foundry VTT API."
+    }
   }
 }

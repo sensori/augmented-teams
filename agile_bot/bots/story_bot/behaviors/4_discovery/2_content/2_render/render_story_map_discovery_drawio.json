@@ -1,11 +1,14 @@
 {
   "name": "render_story_map_discovery_drawio",
-  "description": "Render discovery story map to DrawIO diagram.",
+  "description": "Render discovery story map to DrawIO diagram. Includes increment name(s) in filename if rendering specific increments.",
   "path": "docs/stories",
   "input": "story-graph.json",
   "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",
   "renderer_command": "render-discovery",
-  "output": "story-map-discovery.drawio"
+  "output": "story-map-discovery-{increment_names}.drawio",
+  "parameters": {
+    "increment_names": "{increment_names}"
+  }
 }
 
 

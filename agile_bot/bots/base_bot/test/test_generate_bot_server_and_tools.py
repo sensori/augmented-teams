@@ -443,7 +443,17 @@ class TestGenerateBehaviorActionTools:
         from agile_bot.bots.base_bot.src.bot.bot import BotResult
         mock_bot = Mock()
         mock_bot.shape.gather_context = Mock(return_value=BotResult('completed', 'shape', 'gather_context', {'result': 'success'}))
+        mock_bot.behaviors = ['shape']  # Set behaviors list
+        mock_bot.config = {'behaviors': ['shape']}  # Set config dict
+        mock_bot.does_requested_behavior_match_current = Mock(return_value=(True, 'shape', None))  # Return tuple
         generator.bot = mock_bot
+        
+        # Create workflow state so entry workflow doesn't trigger
+        workflow_file = workspace_directory / 'workflow_state.json'
+        workflow_file.write_text(json.dumps({
+            'current_behavior': 'story_bot.shape',
+            'current_action': 'story_bot.shape.gather_context'
+        }), encoding='utf-8')
         
         generator.register_all_behavior_action_tools(mcp_server)
         

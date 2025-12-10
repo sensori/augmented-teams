@@ -79,6 +79,8 @@ class Workflow:
         return self.state
     
     def transition_to_next(self):
+        # Reload state to ensure we have latest completed_actions before transitioning
+        self.load_state()
         try:
             self.proceed()  # Trigger transition
             self.save_state()
