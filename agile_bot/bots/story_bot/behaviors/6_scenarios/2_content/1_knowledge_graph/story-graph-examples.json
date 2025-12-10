@@ -1,0 +1,160 @@
+{
+  "_explanation": {
+    "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
+    "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "domain_placement": "domain_concepts: 'local' if relevant to single sub_epic, 'global' if relevant to multiple sub_epics. Place at most specific level (local preferred), but elevate to parent if used by multiple children.",
+    "scenarios": "Each story contains scenarios (happy_path, edge_case, error_case) with background and steps in Gherkin format.",
+    "scenario_outlines": "When decision criteria chooses Scenario Outline, stories may contain scenario_outlines with Examples tables for data-driven testing. Every variable in Steps must have a column in Examples table. Examples table must include both input and output/expected result variables.",
+    "increments_structure": "The 'increments' section is a MINIMAL REFERENCE VIEW. Stories in increments contain ONLY: name, users (optional), sequential_order. All story details (story_type, connector, scenarios, scenario_outlines, Steps, acceptance_criteria, etc.) come from the main 'epics' section. Increments are just a copy of the outline view at the story level to map which stories belong to which increment."
+  },
+  "epics": [
+    {
+      "name": "",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "domain_concepts": [
+        {
+          "name": "",
+          "responsibilities": [
+            {
+              "name": "",
+              "collaborators": []
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "domain_concepts": [
+            {
+              "name": "",
+              "responsibilities": [
+                {
+                  "name": "",
+                  "collaborators": []
+                }
+              ]
+            }
+          ],
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "",
+                      "type": "happy_path|edge_case|error_case",
+                      "background": [
+                        "Given <common_setup_step>",
+                        "And <another_common_setup>"
+                      ],
+                      "steps": [
+                        "Given <scenario_specific_state>",
+                        "And <scenario_specific_setup>",
+                        "When <user_action_or_system_event>",
+                        "Then <expected_outcome>",
+                        "And <another_expected_outcome>"
+                      ]
+                    }
+                  ],
+                  "scenario_outlines": [
+                    {
+                      "name": "",
+                      "type": "happy_path|edge_case|error_case",
+                      "background": [
+                        "Given <common_setup_step>",
+                        "And <another_common_setup>"
+                      ],
+                      "steps": [
+                        "Given <scenario_specific_state> at \"<variable_path>\"",
+                        "And <entity> exists at \"<variable_file_path>\"",
+                        "When <action> with <variable_parameter>=\"<variable_value>\"",
+                        "Then <expected_outcome> equals \"<variable_expected_result>\"",
+                        "And <another_outcome> is \"<variable_result>\""
+                      ],
+                      "examples": {
+                        "columns": ["variable_path", "variable_file_path", "variable_parameter", "variable_value", "variable_expected_result", "variable_result"],
+                        "rows": [
+                          ["value1", "value2", "value3", "value4", "result1", "result2"],
+                          ["value5", "value6", "value7", "value8", "result3", "result4"]
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ],
+  "increments": [
+    {
+      "name": "",
+      "priority": 1,
+      "epics": [
+        {
+          "name": "",
+          "users": [],
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "sub_epics": [
+            {
+              "name": "",
+              "users": [],
+              "sequential_order": 1,
+              "estimated_stories": null,
+              "stories": [
+                {
+                  "name": "",
+                  "users": [],
+                  "sequential_order": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "generated_artifacts": {
+    "story_documents": {
+      "description": "Story documents with scenarios section added",
+      "location": "docs/stories/{epic_name}/{sub_epic_name}/{story_name}.md",
+      "content": [
+        "Story description",
+        "Acceptance criteria",
+        "Background (common setup steps)",
+        "Scenarios (happy path, edge cases, error cases)",
+        "Scenario Outlines with Examples tables (when decision criteria chosen)"
+      ]
+    },
+    "structured_data": {
+      "description": "JSON representation of story graph with scenarios added",
+      "location": "docs/stories/story-graph.json",
+      "content": [
+        "Epic/sub_epic/story_group/story hierarchy",
+        "Scenario definitions with steps",
+        "Scenario Outline definitions with Examples tables (when decision criteria chosen)",
+        "Background steps per story",
+        "Scenario types (happy_path, edge_case, error_case)",
+        "Connectors for story groups and stories"
+      ]
+    }
+  }
+}
+

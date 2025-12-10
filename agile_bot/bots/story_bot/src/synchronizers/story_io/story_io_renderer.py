@@ -194,17 +194,29 @@ class DrawIORenderer:
             
             if step_desc:
                 # Format with When/Then on separate lines
-                # Replace \n with <br> for HTML display
+                # Replace \n with <br> for HTML display (newlines should already be in the string)
                 formatted_desc = step_desc.replace('\n', '<br>')
                 # Add bold tags for When/Then if not already present
-                if '<b>When</b>' not in formatted_desc and '<b>Then</b>' not in formatted_desc:
+                if '<b>When</b>' not in formatted_desc and '<b>Then</b>' not in formatted_desc and '<b>WHEN</b>' not in formatted_desc and '<b>THEN</b>' not in formatted_desc:
                     # Try to add bold tags if the text starts with When/Then
-                    if formatted_desc.startswith('When '):
-                        formatted_desc = formatted_desc.replace('When ', '<b>When</b>&nbsp;', 1)
-                    if '<br>Then ' in formatted_desc:
-                        formatted_desc = formatted_desc.replace('<br>Then ', '<br><b>Then</b> ', 1)
-                    elif formatted_desc.startswith('Then '):
-                        formatted_desc = formatted_desc.replace('Then ', '<b>Then</b> ', 1)
+                    if formatted_desc.startswith('When ') or formatted_desc.startswith('WHEN '):
+                        # Replace WHEN/When with bold tag
+                        if formatted_desc.startswith('WHEN '):
+                            formatted_desc = formatted_desc.replace('WHEN ', '<b>WHEN</b>&nbsp;', 1)
+                        else:
+                            formatted_desc = formatted_desc.replace('When ', '<b>When</b>&nbsp;', 1)
+                        
+                        # Add bold to THEN/Then (should be after <br> if format is correct)
+                        if '<br>Then ' in formatted_desc:
+                            formatted_desc = formatted_desc.replace('<br>Then ', '<br><b>Then</b> ', 1)
+                        elif '<br>THEN ' in formatted_desc:
+                            formatted_desc = formatted_desc.replace('<br>THEN ', '<br><b>THEN</b> ', 1)
+                    elif formatted_desc.startswith('Then ') or formatted_desc.startswith('THEN '):
+                        # Starts with Then/THEN (shouldn't happen, but handle it)
+                        if formatted_desc.startswith('THEN '):
+                            formatted_desc = formatted_desc.replace('THEN ', '<b>THEN</b> ', 1)
+                        else:
+                            formatted_desc = formatted_desc.replace('Then ', '<b>Then</b> ', 1)
                 
                 acceptance_text = f'<div style="font-size: 8px;">{formatted_desc}</div>'
             else:
@@ -546,20 +558,20 @@ class DrawIORenderer:
         for epic_idx, epic in enumerate(story_graph.get('epics', []), 1):
             features = get_sub_epics(epic)
             
-            # Filter features - keep all features, but filter their story groups to only those with AC
+            # Filter features - only keep features that have stories with AC
             filtered_features = []
             for feature in features:
                 story_groups = feature.get('story_groups', [])
-                filtered_feature = feature.copy()
                 if story_groups:
                     filtered_groups = filter_story_groups(story_groups)
-                    filtered_feature['story_groups'] = filtered_groups
-                else:
-                    filtered_feature['story_groups'] = []
-                # Always include the feature (even if no story_groups or no AC)
-                filtered_features.append(filtered_feature)
+                    # Only include feature if it has at least one story group with stories that have AC
+                    if filtered_groups:
+                        filtered_feature = feature.copy()
+                        filtered_feature['story_groups'] = filtered_groups
+                        filtered_features.append(filtered_feature)
+                # If no story_groups, skip this feature (no stories to show)
             
-            # Skip epic if no features at all
+            # Skip epic if no features with stories that have AC
             if not filtered_features:
                 continue
             

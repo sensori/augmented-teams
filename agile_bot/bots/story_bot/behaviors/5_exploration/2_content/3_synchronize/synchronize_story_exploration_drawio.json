@@ -9,11 +9,11 @@
       "description": "Synchronize exploration acceptance criteria from DrawIO and generate merge report",
       "parameters": {
         "drawio_file": "{project_path}/docs/stories/story-map-explored-{scope}.drawio",
-        "output": "{project_path}/docs/stories/story-graph-explored.json",
-        "original": "{project_path}/docs/stories/story-graph-explored.json",
+        "output": "{project_path}/docs/stories/story-graph-drawio-extracted-exploration.json",
+        "original": "{project_path}/docs/stories/story-graph.json",
         "scope": "{scope}",
         "generate_report": true,
-        "report": "{project_path}/docs/stories/story-graph-explored-merge-report.json"
+        "report": "{project_path}/docs/stories/story-graph-drawio-extracted-exploration-merge-report.json"
       }
     }
   ],
@@ -25,7 +25,7 @@
     "4. AI waits for user instructions to proceed with merge based on report",
     "5. Merge preserves Steps and acceptance criteria from original stories where matches are found",
     "6. New acceptance criteria in extracted will have empty arrays",
-    "7. User confirms merge before applying changes to story-graph-explored.json"
+    "7. User confirms merge before applying changes to story-graph.json (the main file used by all behaviors)"
   ]
 }
 

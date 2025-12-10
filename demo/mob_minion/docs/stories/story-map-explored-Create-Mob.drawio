@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<mxfile host="65bd71144e">
+  <diagram id="story-map" name="Story Map">
+    <mxGraphModel dx="2656" dy="1035" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0">
+          <mxGeometry x="0" y="0" width="1652" height="190" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="Manage Mobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="20" y="120" width="1632" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1" value="Create Mob" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="20" y="200" width="1632" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="user_e1f1s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="290" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s1" value="Select Minion Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master selects one or more minion tokens in Foundry VTT&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system highlights selected tokens AND selected tokens are stored in temporary selection state&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master selects zero tokens&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message indicating at least one token must be selected&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s2" value="Query Foundry VTT For Selected Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;tokens are selected&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system queries Foundry VTT API for token actor data AND system retrieves actor ID, name, and position for each selected token&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Foundry VTT API returns invalid token data&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message and excludes invalid tokens from selection&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Foundry VTT API is unavailable&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message indicating connection failure&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s3" value="Group Minions Into Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master confirms grouping of selected tokens&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system creates temporary mob group with selected tokens AND mob group displays list of included minion names&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master cancels grouping&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system clears selection and returns to token selection state&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s4" value="Mob Manager Creates Mob With Selected Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="832" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s4_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;temporary mob group is confirmed&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; Mob Manager creates new Mob domain object AND Mob object contains collection of Minion objects from selected tokens AND each Minion object references its Foundry VTT actor ID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="832" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s4_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob group contains less than one minion&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message indicating mob must contain at least one minion&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="832" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s4_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;duplicate tokens are detected&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system removes duplicates and shows notification&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="832" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s5" value="Assign Mob Name" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1102" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s5_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master enters mob name&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system validates name is not empty AND system checks name uniqueness against existing mobs&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1102" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s5_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob name is empty&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message requiring non-empty name&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1102" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s5_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob name already exists&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message indicating name must be unique&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1102" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s5_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob name is valid and unique&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system assigns name to Mob object&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1102" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s6" value="System Persists Mob Configuration" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1372" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s6_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Mob object is created with valid name and minions&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system saves Mob configuration to persistent storage AND persisted configuration includes mob name, minion actor IDs, and creation timestamp&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1372" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s6_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;persistence operation succeeds&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows success message to Game Master AND mob becomes available for selection in future operations&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1372" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s6_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;persistence operation fails&lt;br&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message and retains mob in memory for retry&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1372" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

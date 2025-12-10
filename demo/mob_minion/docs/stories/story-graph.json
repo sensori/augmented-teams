@@ -54,42 +54,71 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master selects one or more minion tokens in Foundry VTT\nTHEN system highlights selected tokens AND selected tokens are stored in temporary selection state",
+                    "WHEN Game Master selects zero tokens\nTHEN system shows error message indicating at least one token must be selected"
+                  ]
                 },
                 {
                   "name": "Query Foundry VTT For Selected Tokens",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN tokens are selected\nTHEN system queries Foundry VTT API for token actor data AND system retrieves actor ID, name, and position for each selected token",
+                    "WHEN Foundry VTT API returns invalid token data\nTHEN system shows error message and excludes invalid tokens from selection",
+                    "WHEN Foundry VTT API is unavailable\nTHEN system shows error message indicating connection failure"
+                  ]
                 },
                 {
                   "name": "Group Minions Into Mob",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master confirms grouping of selected tokens\nTHEN system creates temporary mob group with selected tokens AND mob group displays list of included minion names",
+                    "WHEN Game Master cancels grouping\nTHEN system clears selection and returns to token selection state"
+                  ]
                 },
                 {
                   "name": "Mob Manager Creates Mob With Selected Tokens",
                   "sequential_order": 4,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN temporary mob group is confirmed\nTHEN Mob Manager creates new Mob domain object AND Mob object contains collection of Minion objects from selected tokens AND each Minion object references its Foundry VTT actor ID",
+                    "WHEN mob group contains less than one minion\nTHEN system shows error message indicating mob must contain at least one minion",
+                    "WHEN duplicate tokens are detected\nTHEN system removes duplicates and shows notification"
+                  ]
                 },
                 {
                   "name": "Assign Mob Name",
                   "sequential_order": 5,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master enters mob name\nTHEN system validates name is not empty AND system checks name uniqueness against existing mobs",
+                    "WHEN mob name is empty\nTHEN system shows error message requiring non-empty name",
+                    "WHEN mob name already exists\nTHEN system shows error message indicating name must be unique",
+                    "WHEN mob name is valid and unique\nTHEN system assigns name to Mob object"
+                  ]
                 },
                 {
                   "name": "System Persists Mob Configuration",
                   "sequential_order": 6,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN Mob object is created with valid name and minions\nTHEN system saves Mob configuration to persistent storage AND persisted configuration includes mob name, minion actor IDs, and creation timestamp",
+                    "WHEN persistence operation succeeds\nTHEN system shows success message to Game Master AND mob becomes available for selection in future operations",
+                    "WHEN persistence operation fails\nTHEN system shows error message and retains mob in memory for retry"
+                  ]
                 }
               ]
             }
@@ -278,49 +307,82 @@
                   "sequential_order": 1,
                   "connector": null,
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master selects action type from available actions\nTHEN system displays available action types AND selected action type is stored in temporary action state",
+                    "WHEN Game Master selects invalid action type\nTHEN system shows error message indicating action type is not available"
+                  ]
                 },
                 {
                   "name": "System Validates Action Type",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN action type is selected\nTHEN system validates action type is valid for mob AND system checks action type is available in Foundry VTT combat system",
+                    "WHEN action type is invalid\nTHEN system shows error message and clears action selection",
+                    "WHEN action type is not available in Foundry VTT\nTHEN system shows error message indicating action is not available"
+                  ]
                 },
                 {
                   "name": "Execute Action For All Minions",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master confirms action execution\nTHEN system prepares to execute action for all minions in mob AND system displays confirmation message showing action will be applied to all minions",
+                    "WHEN Game Master cancels action execution\nTHEN system clears action selection and returns to action type selection state"
+                  ]
                 },
                 {
                   "name": "System Retrieves Mob Minions From Foundry VTT",
                   "sequential_order": 4,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN action execution is confirmed\nTHEN system queries Foundry VTT API for all minion tokens in mob AND system retrieves actor ID and position for each minion",
+                    "WHEN Foundry VTT API returns invalid minion data\nTHEN system shows error message and excludes invalid minions from action execution",
+                    "WHEN Foundry VTT API is unavailable\nTHEN system shows error message indicating connection failure"
+                  ]
                 },
                 {
                   "name": "System Applies Action To Each Minion Via Foundry VTT API",
                   "sequential_order": 5,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN minion data is retrieved\nTHEN system applies selected action to each minion via Foundry VTT combat API AND system tracks action execution status for each minion",
+                    "WHEN action application succeeds for minion\nTHEN system marks minion as action executed AND system updates minion state in Foundry VTT",
+                    "WHEN action application fails for minion\nTHEN system shows error message for that minion AND system continues with remaining minions"
+                  ]
                 },
                 {
                   "name": "Respect Range Constraints",
                   "sequential_order": 6,
                   "connector": "and",
                   "users": ["Game Master"],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "acceptance_criteria": [
+                    "WHEN Game Master selects target for action\nTHEN system checks target is within range for action type AND system displays range validation status",
+                    "WHEN target is out of range\nTHEN system shows error message indicating target is out of range AND system prevents action execution",
+                    "WHEN target is within range\nTHEN system allows action execution to proceed"
+                  ]
                 },
                 {
                   "name": "System Validates Range Constraints Using Foundry Movement System",
                   "sequential_order": 7,
                   "connector": "and",
                   "users": [],
-                  "story_type": "system"
+                  "story_type": "system",
+                  "acceptance_criteria": [
+                    "WHEN target is selected\nTHEN system queries Foundry VTT movement system for range between minion and target AND system compares range to action type range requirements",
+                    "WHEN range validation succeeds\nTHEN system confirms action can proceed AND system stores range validation result",
+                    "WHEN range validation fails\nTHEN system shows error message indicating range constraint violation AND system prevents action execution"
+                  ]
                 }
               ]
             }

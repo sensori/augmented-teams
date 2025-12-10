@@ -1,232 +1,132 @@
-# Validation Report: Mob Minion Story Graph
+# Validation Report - Exploration: Create Mob Feature
 
-**Generated**: 2025-12-09  
-**Story Graph**: `demo/mob_minion/docs/stories/story-graph.json`  
-**Clarification**: `demo/mob_minion/docs/stories/clarification.json`  
-**Planning**: `demo/mob_minion/docs/stories/planning.json`
+**Date:** 2025-12-10  
+**Feature:** Create Mob  
+**Epic:** Manage Mobs  
+**Increment:** Foundation - Create Mob and Basic Actions
 
----
+## Validation Summary
 
-## Summary
+**Status:** ✅ PASSED with minor consolidation opportunities
 
-**Total Violations**: 0  
-**Total Warnings**: 0  
-**Status**: ✅ **PASSED**
-
-The story graph successfully passes all validation rules. The structure follows best practices for story mapping with proper verb-noun naming, appropriate hierarchy sizing, and clear user journey flows.
+All acceptance criteria follow the required format and are placed correctly. Some consolidation opportunities identified for review.
 
 ---
 
-## Validation Results by Rule
+## Rule Validation
 
-### ✅ apply_7_plus_minus_2_hierarchy.json
+### ✅ Behavioral AC at Story Level
+- **Status:** PASSED
+- **Details:** All acceptance criteria are in the main `epics` section at the story level (not in increments section)
+- **Stories with AC:** 6 stories in Create Mob feature
 
-**Status**: PASSED
+### ✅ When/Then Format
+- **Status:** PASSED
+- **Details:** All AC use WHEN/THEN format (no Given clauses)
+- **Format:** WHEN [condition] → THEN [outcome] → AND [additional outcome]
 
-**Epic Count**: 3 epics (within acceptable range of 4-9)
+### ✅ No Consecutive WHEN Statements
+- **Status:** PASSED
+- **Details:** Separate WHEN blocks are used for different conditions (not consecutive)
+- **Example:** "WHEN Game Master selects tokens" (block 1) vs "WHEN Game Master selects zero tokens" (block 2) - these are separate conditional branches, which is correct
 
-**Sub-Epic Counts**:
-- Manage Mobs: 2 sub-epics (acceptable for smaller epics)
-- Control Mob Actions: 3 sub-epics (within range)
-- Spawn Mobs: 2 sub-epics (acceptable for smaller epics)
+### ✅ THEN on Separate Lines
+- **Status:** PASSED
+- **Details:** All THEN statements are on separate lines from WHEN statements
 
-**Story Counts per Sub-Epic**:
-- Create Mob: 3 stories ✓
-- Edit Mob: 3 stories ✓
-- Select Strategy: 2 stories ✓
-- Choose Target: 3 stories ✓
-- Execute Mob Action: 3 stories ✓
-- Spawn From Template: 2 stories ✓
-- Spawn From Actors: 1 story ✓
+### ⚠️ AC Consolidation Review Required
+- **Status:** REVIEW NEEDED
+- **Details:** Some ACs may have similar logic that could be consolidated
 
-All counts are within acceptable ranges. Smaller counts are acceptable for focused sub-epics.
+**Consolidation Candidates:**
 
----
+1. **Error Message Patterns:**
+   - "Select Minion Tokens": "WHEN Game Master selects zero tokens, THEN system shows error message"
+   - "Assign Mob Name": "WHEN mob name is empty, THEN system shows error message"
+   - "Assign Mob Name": "WHEN mob name already exists, THEN system shows error message"
+   - **Question:** Should error message handling be consolidated into a single AC pattern, or are these distinct enough to keep separate?
 
-### ✅ avoid_noun_redundancy.json
+2. **Validation Patterns:**
+   - "Assign Mob Name": "WHEN Game Master enters mob name, THEN system validates name is not empty"
+   - "Assign Mob Name": "WHEN Game Master enters mob name, AND system checks name uniqueness"
+   - **Question:** Are these validation steps part of the same user action flow, or should they be separate?
 
-**Status**: PASSED
-
-No noun redundancy detected. Domain concepts are properly integrated:
-- Mob, Minion, Strategy, Target, Action, Range, Template are distinct concepts
-- No redundant naming patterns (e.g., "Mob Management", "Mob System", "Mob Controller")
-
----
-
-### ✅ avoid_technical_implementation_language.json
-
-**Status**: PASSED
-
-All stories use business/domain language:
-- "Select Minion Tokens" (user action, not technical)
-- "Group Minions Into Mob" (user action, not technical)
-- "Choose Strategy" (user action, not technical)
-- "Execute Action For All Minions" (user outcome, not technical)
-
-No technical implementation language detected (no "implement", "create", "refactor", "query database", etc.).
+3. **Foundry VTT API Error Handling:**
+   - "Query Foundry VTT For Selected Tokens": "WHEN Foundry VTT API returns invalid token data, THEN system shows error"
+   - "Query Foundry VTT For Selected Tokens": "WHEN Foundry VTT API is unavailable, THEN system shows error"
+   - **Question:** Should these be consolidated into "WHEN Foundry VTT API error occurs, THEN system shows appropriate error message" or kept separate for different error types?
 
 ---
 
-### ✅ avoid_technical_stories.json
+## Content Validation
 
-**Status**: PASSED
+### ✅ Alignment with Clarification Data
+- **Status:** PASSED
+- **Details:** AC align with user goals (efficient minion control, Foundry VTT integration)
+- **Reference:** clarification.json - user types, goals, and domain concepts
 
-All stories are user stories (`story_type: "user"`). No technical stories detected. All stories describe user-facing behavior, not implementation tasks.
+### ✅ Alignment with Planning Decisions
+- **Status:** PASSED
+- **Details:** AC follow planning decisions:
+  - Story granularity: "System inner behavior and inner workings" ✓
+  - Flow scope: "End-to-end user-system behavior" ✓
+  - Behavioral focus: User-System Behavioral granularity ✓
 
----
-
-### ✅ balance_fine_grained_testable_stories.json
-
-**Status**: PASSED
-
-All stories represent complete interactions with value:
-- "Select Minion Tokens" → complete user action
-- "Group Minions Into Mob" → complete functional accomplishment
-- "Choose Strategy" → complete user decision
-- "Execute Action For All Minions" → complete mob control action
-
-Stories are appropriately sized and independently valuable.
-
----
-
-### ✅ create_lightweight_precise_docs.json
-
-**Status**: PASSED
-
-Documentation is lightweight and focused on structure:
-- Story map shows hierarchy and flow
-- Domain model describes concepts and relationships
-- No over-elaboration with detailed technical specifications
+### ✅ Domain Concepts Referenced
+- **Status:** PASSED
+- **Details:** AC reference domain concepts:
+  - Mob (domain object)
+  - Minion (domain object)
+  - Foundry VTT actor ID (integration point)
+  - Mob Manager (domain service)
 
 ---
 
-### ✅ enforce_behavioral_journey_flow.json
+## Acceptance Criteria Coverage
 
-**Status**: PASSED
+### Story 1: Select Minion Tokens
+- **AC Count:** 4 criteria
+- **Coverage:** Happy path (select tokens) + Error case (zero tokens)
+- **Status:** ✅ Complete
 
-Stories show clear user journey flow:
+### Story 2: Query Foundry VTT For Selected Tokens
+- **AC Count:** 5 criteria
+- **Coverage:** Happy path (query success) + Error cases (invalid data, unavailable API)
+- **Status:** ✅ Complete
 
-**Manage Mobs Epic**:
-1. Create Mob: Select → Group → Assign Name (logical sequence)
-2. Edit Mob: Select → Add/Remove (logical sequence)
+### Story 3: Group Minions Into Mob
+- **AC Count:** 4 criteria
+- **Coverage:** Happy path (confirm) + Cancel path
+- **Status:** ✅ Complete
 
-**Control Mob Actions Epic**:
-1. Select Strategy: Select Mob → Choose Strategy (logical sequence)
-2. Choose Target: Evaluate → Apply Strategy → Confirm (logical sequence)
-3. Execute Mob Action: Select Action → Execute → Respect Constraints (logical sequence)
+### Story 4: Mob Manager Creates Mob With Selected Tokens
+- **AC Count:** 5 criteria
+- **Coverage:** Happy path (create mob) + Error cases (less than one minion, duplicates)
+- **Status:** ✅ Complete
 
-**Spawn Mobs Epic**:
-1. Spawn From Template: Select Template → Spawn (logical sequence)
-2. Spawn From Actors: Spawn (single action)
+### Story 5: Assign Mob Name
+- **AC Count:** 7 criteria
+- **Coverage:** Happy path (valid name) + Error cases (empty, duplicate)
+- **Status:** ✅ Complete (may benefit from consolidation review)
 
-All stories connect logically and show progression through user workflows.
-
----
-
-### ✅ enforce_functional_accomplishment.json
-
-**Status**: PASSED
-
-All stories represent complete functional accomplishments:
-- "Group Minions Into Mob" → complete mob creation (not just data access)
-- "Execute Action For All Minions" → complete mob control (not just data access)
-- "Spawn Mob From Template" → complete mob spawning (not just data access)
-
-No stories are just data access operations or implementation steps.
-
----
-
-### ✅ enforce_specificity_in_stories.json
-
-**Status**: PASSED
-
-All stories are specific with context:
-- "Select Minion Tokens" → specific action (selecting tokens)
-- "Group Minions Into Mob" → specific outcome (grouping into mob)
-- "Choose Strategy" → specific decision (strategy selection)
-- "Apply Strategy To Select Target" → specific behavior (strategy application)
-
-Stories include what (action), who (Game Master), and outcome (mob creation/control).
-
----
-
-### ✅ establish_spine_vs_optional_enhanced_behavior.json
-
-**Status**: PASSED
-
-All stories are part of the mandatory spine (sequential "and" connectors). No optional/enhanced behaviors identified, which is appropriate for this initial shaping phase. All stories are required for their respective sub-epics to deliver value.
-
----
-
-### ✅ focus_real_actions_on_domain_concepts.json
-
-**Status**: PASSED
-
-All stories describe real actions:
-- Epic names: "Manage Mobs", "Control Mob Actions", "Spawn Mobs" (verb-noun)
-- Sub-epic names: "Create Mob", "Edit Mob", "Select Strategy" (verb-noun)
-- Story names: "Select Minion Tokens", "Group Minions Into Mob" (verb-noun)
-
-**Actor naming compliance**: ✅
-- No actors appear in epic/sub-epic/story names
-- Actors are documented separately in the `users` field
-- All names follow verb-noun format
-
----
-
-### ✅ focus_user_and_system_activities.json
-
-**Status**: PASSED
-
-Stories focus on user activities (Game Master actions):
-- User selects, groups, assigns, chooses, evaluates, executes
-- Stories describe user interactions and system responses
-
-No task-oriented language detected.
-
----
-
-### ✅ use_active_behavioral_language.json
-
-**Status**: PASSED
-
-All names use active behavioral language:
-- Epic: "Manage Mobs" (active verb)
-- Sub-epic: "Create Mob" (active verb)
-- Story: "Select Minion Tokens" (active verb)
-
-**Naming format compliance**: ✅
-- All epic/sub-epic/story names are verb-noun format
-- No actors in names
-- Actors documented separately
-
----
-
-### ✅ Other Rules
-
-**identify_system_stories.json**: N/A - No system stories identified (all are user stories)  
-**maximize_integration_of_related_concepts.json**: PASSED - Related concepts properly grouped  
-**place_domain_concepts_by_relevance.json**: PASSED - Domain concepts placed at appropriate levels  
-**prevent_generic_capabilities.json**: PASSED - All stories describe specific actions  
-**prevent_implementation_details_as_stories.json**: PASSED - No implementation details as stories  
-**size_stories_3_to_12_days.json**: PASSED - Stories are appropriately sized for 3-12 day effort  
-**use_outcome_verbs_not_communication_verbs.json**: PASSED - Stories use outcome verbs
+### Story 6: System Persists Mob Configuration
+- **AC Count:** 6 criteria
+- **Coverage:** Happy path (persist success) + Error case (persistence failure)
+- **Status:** ✅ Complete
 
 ---
 
 ## Recommendations
 
-1. **Consider adding optional behaviors**: As the system evolves, consider identifying optional/enhanced behaviors (e.g., "Customize Strategy", "Save Mob Template") and marking them appropriately.
-
-2. **Story journey context**: Some stories could benefit from more explicit "when/why" context in acceptance criteria (to be added in discovery phase).
-
-3. **Domain concept placement**: Domain concepts are well-placed. Consider if "Strategy" should be elevated to epic level if it becomes more central to multiple epics.
+1. **Consolidation Review:** Review consolidation candidates above with domain expert
+2. **AC Count:** All stories have reasonable AC counts (4-7 criteria each)
+3. **Format Compliance:** All AC follow When/Then format correctly
+4. **Placement:** All AC in correct location (main epics section, story level)
 
 ---
 
 ## Next Steps
 
-The story graph is ready for the next phase: **2_prioritization**
-
-The next behavior in sequence is `2_prioritization`. Would you like to continue with `2_prioritization` or work on a different behavior?
-
+1. Review consolidation opportunities with user
+2. Apply consolidation decisions if approved
+3. Proceed to next behavior: `6_scenarios`
