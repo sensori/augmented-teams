@@ -61,6 +61,16 @@ class TriggerTestSetup:
             (kg_dir / template_filename).write_text(
                 json.dumps(template_content), encoding='utf-8'
             )
+        
+        # Create story graph file in workspace (required for validate_rules action)
+        stories_dir = self.workspace_directory / 'docs' / 'stories'
+        stories_dir.mkdir(parents=True, exist_ok=True)
+        story_graph_file = stories_dir / 'story-graph.json'
+        story_graph_file.write_text(json.dumps({
+            'epics': [],
+            'solution': {'name': 'Test Solution'}
+        }), encoding='utf-8')
+        
         return self
     
     def add_bot_triggers(self, patterns: list):

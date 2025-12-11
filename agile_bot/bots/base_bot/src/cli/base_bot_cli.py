@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Tuple
 from agile_bot.bots.base_bot.src.bot.bot import Bot
+from agile_bot.bots.base_bot.src.state.workspace import get_base_actions_directory, get_bot_directory
 
 
 class BaseBotCli:
@@ -34,7 +35,6 @@ class BaseBotCli:
             self.bot_name = bot_name
             self.bot_config_path = bot_config_path
             # Get bot directory from environment
-            from agile_bot.bots.base_bot.src.state.workspace import get_bot_directory
             self.bot_directory = get_bot_directory()
             self.bot = self._create_bot_instance()
         else:
@@ -146,10 +146,8 @@ class BaseBotCli:
     
     def _get_action_description(self, action_name: str) -> str:
         """Get action description from base_actions instructions."""
-        # Try to load from base_actions
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        # Use centralized workspace utility to get base_actions directory
+        base_actions_dir = get_base_actions_directory(bot_directory=get_bot_directory())
         
         # Check numbered format (e.g., 2_gather_context, 3_decide_planning_criteria)
         action_prefixes = {

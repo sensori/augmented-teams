@@ -26,6 +26,12 @@
         "content": [
           "User submits form, System processes request"
         ]
+      },
+      {
+        "description": "Use base verb forms (infinitive/imperative), not third-person singular",
+        "content": [
+          "Select Multiple Tokens, Group Minions Into Mob, Display Confirmation, Add Tokens To Mob, Remove Tokens From Mob"
+        ]
       }
     ]
   },
@@ -47,6 +53,12 @@
         "description": "Don't use gerund forms",
         "content": [
           "Ordering, Processing Payments, Creating Characters"
+        ]
+      },
+      {
+        "description": "Don't use third-person singular verb forms (selects, groups, displays, adds, removes)",
+        "content": [
+          "Selects Multiple Tokens, Groups Minions Into Mob, Displays Confirmation, Adds Tokens To Mob, Removes Tokens From Mob"
         ]
       }
     ]

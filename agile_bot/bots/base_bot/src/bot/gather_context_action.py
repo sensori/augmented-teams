@@ -44,16 +44,23 @@ class GatherContextAction(BaseAction):
             # Ensure docs/stories folder exists
             stories_folder.mkdir(parents=True, exist_ok=True)
             
-            # Build clarification data structure
-            clarification_data = {
-                self.behavior: {
-                    'key_questions': parameters.get('key_questions_answered', {}),
-                    'evidence': parameters.get('evidence_provided', {})
-                }
+            # Load existing clarification data if it exists
+            clarification_file = stories_folder / 'clarification.json'
+            clarification_data = {}
+            if clarification_file.exists():
+                try:
+                    clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
+                except (json.JSONDecodeError, Exception):
+                    # If file is corrupted or unreadable, start fresh
+                    clarification_data = {}
+            
+            # Merge new clarification data for this behavior
+            clarification_data[self.behavior] = {
+                'key_questions': parameters.get('key_questions_answered', {}),
+                'evidence': parameters.get('evidence_provided', {})
             }
             
             # Save to docs/stories/ (generated file location)
-            clarification_file = stories_folder / 'clarification.json'
             clarification_file.write_text(
                 json.dumps(clarification_data, indent=2),
                 encoding='utf-8'

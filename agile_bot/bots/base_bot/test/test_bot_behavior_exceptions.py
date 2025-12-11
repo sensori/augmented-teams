@@ -26,21 +26,22 @@ def test_bot_raises_exception_when_behavior_not_found(tmp_path):
         'behaviors': ['shape', 'discovery']
     }), encoding='utf-8')
     
-    # Create base_actions structure
-    create_base_actions_structure(bot_directory)
-    
-    # Create bot instance
-    bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_file)
-    
-    # Set up workspace
+    # Set up workspace FIRST (before creating bot)
     workspace_dir = tmp_path / 'workspace'
     workspace_dir.mkdir(parents=True, exist_ok=True)
     bootstrap_env(bot_directory, workspace_dir)
     
+    # Create base_actions structure
+    create_base_actions_structure(bot_directory)
+    
+    # Create bot instance (after environment is bootstrapped)
+    bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_file)
+    
     # When initializing workflow with invalid behavior
     with pytest.raises(ValueError, match="Behavior 'invalid_behavior' not found"):
-        bot.initialize_workflow_state(
-            confirmed_behavior='invalid_behavior',
-            working_dir=workspace_dir
+        bot._initialize_workflow_state(
+            working_dir=workspace_dir,
+            confirmed_behavior='invalid_behavior'
         )
+
 

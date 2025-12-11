@@ -221,3 +221,51 @@ class TestBotExecuteBehavior:
         assert 'behaviors' in result.data
         assert 'shape' in result.data['behaviors']
 
+    def test_execute_behavior_returns_error_for_invalid_action(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Execute behavior returns error for invalid action
+        GIVEN: Bot has behavior 'prioritization' with valid actions: gather_context, decide_planning_criteria, etc.
+        WHEN: Bot.execute_behavior('prioritization', action='start') is called with invalid action 'start'
+        THEN: Returns BotResult with status 'error' and message listing valid actions
+        """
+        # Bootstrap environment
+        bootstrap_env(bot_directory, workspace_directory)
+        
+        # Create base actions structure in bot_directory (no fallback)
+        create_base_instructions(bot_directory)
+        
+        # Create bot config
+        bot_name = 'test_bot'
+        bot_config = create_bot_config_file(bot_directory, bot_name, ['prioritization'])
+        
+        # Create behavior folder
+        behavior_dir = bot_directory / 'behaviors' / 'prioritization'
+        behavior_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create workflow state
+        workflow_file = workspace_directory / 'workflow_state.json'
+        workflow_file.write_text(json.dumps({
+            'current_behavior': f'{bot_name}.prioritization',
+            'current_action': f'{bot_name}.prioritization.gather_context',
+            'completed_actions': []
+        }), encoding='utf-8')
+        
+        # Create bot
+        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
+        
+        # When: Execute behavior with invalid action
+        result = bot.execute_behavior('prioritization', action='start')
+        
+        # Then: Returns error with valid actions listed
+        assert isinstance(result, BotResult)
+        assert result.status == 'error'
+        assert result.behavior == 'prioritization'
+        assert result.action == 'start'
+        assert 'message' in result.data
+        assert 'INVALID ACTION' in result.data['message']
+        assert 'start' in result.data['message']
+        assert 'gather_context' in result.data['message']  # Should list valid actions
+        assert 'valid_actions' in result.data
+        assert 'gather_context' in result.data['valid_actions']
+        assert f'{bot_name}_prioritization_gather_context' in result.data['message']  # Should suggest correct format
+

@@ -52,10 +52,9 @@ class TestCompleteWorkflowIntegration:
             behavior_dir.mkdir(parents=True, exist_ok=True)
         
         # Create base_actions with next_action transitions
-        # Use actual repo root so load_workflow_states_and_transitions can find them
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        # Use centralized utility to get base_actions directory
+        from agile_bot.bots.base_bot.src.state.workspace import get_base_actions_directory
+        base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
         base_actions_dir.mkdir(parents=True, exist_ok=True)
         
         actions_config = [

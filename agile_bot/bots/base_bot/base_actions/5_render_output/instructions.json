@@ -43,6 +43,6 @@
     "follow overall render instructions {{render_instructions}} ",
     "",
     "**MANDATORY: PAUSE FOR HUMAN FEEDBACK**",
-    "When this action is complete, AI MUST pause and wait for human feedback. When human says 'done' or confirms completion, you MUST proceed to the next step: **validate_rules** (call the validate_rules action tool)."
+    "When this action is complete, AI MUST pause and wait for human feedback. render_output is the terminal action for this behavior - there is no automatic next step. After human says 'done' or confirms completion, the workflow is complete for this behavior and will proceed to the next behavior when the user is ready."
   ]
 }

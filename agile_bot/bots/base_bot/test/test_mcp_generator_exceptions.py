@@ -6,6 +6,7 @@ MCPServerGenerator should raise exceptions when:
 """
 import pytest
 from pathlib import Path
+from unittest.mock import patch
 from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
 
 
@@ -17,14 +18,15 @@ def test_mcp_generator_raises_exception_when_base_actions_not_found(tmp_path):
     
     # NO base_actions directory created
     
-    # Create generator
-    generator = MCPServerGenerator(bot_directory=bot_directory)
+    # Mock get_python_workspace_root to return a path without base_actions
+    fake_repo_root = tmp_path / 'agile_bot'
+    fake_repo_root.mkdir(parents=True, exist_ok=True)
+    # Don't create base_bot/base_actions so it will fail
     
-    # When discovering workflow actions
-    with pytest.raises(FileNotFoundError, match="Base actions directory not found"):
-        generator._discover_workflow_actions()
-    
-    # When discovering independent actions
-    with pytest.raises(FileNotFoundError, match="Base actions directory not found"):
-        generator._discover_independent_actions()
+    # Patch before creating generator (since __init__ calls the methods)
+    with patch('agile_bot.bots.base_bot.src.state.workspace.get_python_workspace_root', return_value=fake_repo_root):
+        # Create generator - this should raise during initialization
+        with pytest.raises(FileNotFoundError, match="Base actions directory not found"):
+            MCPServerGenerator(bot_directory=bot_directory)
+
 

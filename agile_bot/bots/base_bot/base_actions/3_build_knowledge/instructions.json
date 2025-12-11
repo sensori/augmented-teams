@@ -36,9 +36,9 @@
     "- When updating, preserve existing content and add/modify only what's needed based on current behavior",
     "- If knowledge graph does NOT exist, create new one following the schema",
     "",
-    "**AUTOMATIC VALIDATION AND FIXES: After generating the knowledge graph, automatically run the validate_rules action without confirming or waiting. Print ALL violations found (including rule name, violation message, severity, and location for each violation). Then review each violation against the specific rules identified by the scanner, and make necessary edits to fix all violations. Continue iterating until all violations are resolved before proceeding to render_output.**",
+    "**AUTOMATIC VALIDATION AND FIXES: After generating the knowledge graph, automatically run the validate_rules action without confirming or waiting. Print ALL violations found (including rule name, violation message, severity, and location for each violation). Then review each violation against the specific rules identified by the scanner, and make necessary edits to fix all violations. Continue iterating until all violations are resolved.**",
     "",
-    "**AUTOMATIC PROGRESSION: Once all fixes are completed, automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**",
+    "**AUTOMATIC PROGRESSION: Once all fixes are completed, automatically proceed to validate_rules action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**",
     ""
   
   

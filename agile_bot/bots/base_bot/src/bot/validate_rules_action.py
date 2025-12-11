@@ -164,18 +164,6 @@ class ValidateRulesAction(BaseAction):
                 logger.warning(f"Failed to write validation report to {report_path}: {e}", exc_info=True)
         
         return result
-            
-            # Write validation report
-            report_path = content_info.get('report_path')
-            if report_path:
-                try:
-                    self._write_validation_report(report_path, instructions, validation_rules, content_info)
-                except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to write validation report to {report_path}: {e}", exc_info=True)
-            
-            return {'instructions': instructions}
     
     def inject_common_bot_rules(self) -> Dict[str, Any]:
         """Load common bot-level rules from base_bot/rules/ directory."""

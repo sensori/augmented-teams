@@ -59,6 +59,52 @@ def get_workspace_directory() -> Path:
     return Path(workspace)
 
 
+def get_base_actions_directory(bot_directory: Path = None) -> Path:
+    """Get base actions directory.
+    
+    Returns path to base_actions folder, checking bot_directory first,
+    then falling back to base_bot's base_actions folder.
+    
+    Args:
+        bot_directory: Optional bot directory to check first for base_actions.
+                      If None, will try to get from BOT_DIRECTORY env var.
+                      If provided and base_actions exists there, returns that.
+    
+    Returns:
+        Path to base_actions directory
+        
+    Raises:
+        FileNotFoundError: If base_actions directory cannot be found
+        RuntimeError: If bot_directory is None and BOT_DIRECTORY env var is not set
+    
+    Example:
+        get_base_actions_directory() ->
+        C:/dev/augmented-teams/agile_bot/bots/base_bot/base_actions
+        
+        get_base_actions_directory(Path('agile_bot/bots/story_bot')) ->
+        Checks agile_bot/bots/story_bot/base_actions first, then falls back
+    """
+    # Try bot_directory first if provided
+    if bot_directory:
+        bot_base_actions_dir = Path(bot_directory) / 'base_actions'
+        if bot_base_actions_dir.exists():
+            return bot_base_actions_dir
+    
+    # Fallback to base_bot if bot doesn't have its own base_actions
+    # get_python_workspace_root() already returns the agile_bot directory,
+    # so we don't need to add 'agile_bot' again
+    repo_root = get_python_workspace_root()
+    base_actions_dir = repo_root / 'bots' / 'base_bot' / 'base_actions'
+    
+    if not base_actions_dir.exists():
+        raise FileNotFoundError(
+            f"Base actions directory not found at {base_actions_dir}. "
+            f"This indicates a configuration error - base_actions directory is required."
+        )
+    
+    return base_actions_dir
+
+
 def get_behavior_folder(bot_name: str, behavior: str) -> Path:
     """Return the path to a behavior folder for a given bot.
 

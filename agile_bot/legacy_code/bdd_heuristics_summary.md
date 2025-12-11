@@ -108,3 +108,14 @@ Should provide:
 - **BDDScaffoldCommand** uses `BDDScaffoldRule` which injects scaffold-specific heuristics
 - **BDDWorkflow** creates phase commands that use `CodeAugmentedCommand` for validation
 
+
+
+
+
+
+
+
+
+
+
+

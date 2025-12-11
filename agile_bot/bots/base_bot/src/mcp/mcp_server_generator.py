@@ -3,7 +3,7 @@ import json
 from fastmcp import FastMCP
 from typing import Dict, Any
 from agile_bot.bots.base_bot.src.utils import read_json_file
-from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root, get_base_actions_directory
 
 
 class MCPServerGenerator:
@@ -34,20 +34,8 @@ class MCPServerGenerator:
         self.independent_actions = self._discover_independent_actions()
     
     def _discover_workflow_actions(self) -> list:
-        base_actions_path = self.bot_directory / 'base_actions'
-        
-        # Fallback to base_bot if bot doesn't have its own base_actions
-        if not base_actions_path.exists():
-            # Use centralized repository root
-            repo_root = get_python_workspace_root()
-            base_actions_path = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-        
-        if not base_actions_path.exists():
-            raise FileNotFoundError(
-                f"Base actions directory not found at {base_actions_path}. "
-                f"Cannot discover workflow actions. "
-                f"This indicates a configuration error - base_actions directory is required."
-            )
+        # Use centralized workspace utility to get base_actions directory
+        base_actions_path = get_base_actions_directory(bot_directory=self.bot_directory)
         
         workflow_actions = []
         for item in base_actions_path.iterdir():
@@ -61,19 +49,8 @@ class MCPServerGenerator:
         return [action for _, action in workflow_actions]
     
     def _discover_independent_actions(self) -> list:
-        base_actions_path = self.bot_directory / 'base_actions'
-        
-        # Fallback to base_bot if bot doesn't have its own base_actions
-        if not base_actions_path.exists():
-            repo_root = get_python_workspace_root()
-            base_actions_path = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-        
-        if not base_actions_path.exists():
-            raise FileNotFoundError(
-                f"Base actions directory not found at {base_actions_path}. "
-                f"Cannot discover independent actions. "
-                f"This indicates a configuration error - base_actions directory is required."
-            )
+        # Use centralized workspace utility to get base_actions directory
+        base_actions_path = get_base_actions_directory(bot_directory=self.bot_directory)
         
         independent_actions = []
         for item in base_actions_path.iterdir():

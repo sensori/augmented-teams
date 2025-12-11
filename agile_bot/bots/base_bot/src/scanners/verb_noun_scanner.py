@@ -53,6 +53,10 @@ class VerbNounScanner(StoryScanner):
         if violation:
             violations.append(violation)
         
+        violation = self._check_third_person_singular(name, node, node_type, rule_obj)
+        if violation:
+            violations.append(violation)
+        
         return violations
     
     def _get_node_type(self, node: StoryNode) -> str:
@@ -128,6 +132,88 @@ class VerbNounScanner(StoryScanner):
             pass
         
         return None
+    
+    def _check_third_person_singular(self, name: str, node: StoryNode, node_type: str, rule_obj: Any) -> Optional[Dict[str, Any]]:
+        """Check for third-person singular verb forms (selects, groups, displays, adds, removes, etc.) and flag them.
+        
+        Third-person singular verbs end in -s/-es and are tagged as VBZ by NLTK.
+        We want base verb forms (imperative/infinitive) instead.
+        """
+        try:
+            tokens, tags = self._get_tokens_and_tags(name)
+            
+            if not tags:
+                return None
+            
+            # Check if first word is third-person singular verb (VBZ tag)
+            if tags[0][1] == "VBZ":
+                first_word = tags[0][0]
+                # Convert to base form (remove -s/-es ending)
+                base_form = self._convert_to_base_form(first_word)
+                
+                location = node.map_location()
+                return Violation(
+                    rule=rule_obj,
+                    violation_message=f'{node_type.capitalize()} name "{name}" uses third-person singular verb form ("{first_word}") - use base verb form instead (e.g., "{base_form} Multiple Tokens" not "{first_word} Multiple Tokens")',
+                    location=location,
+                    severity='error'
+                ).to_dict()
+        
+        except Exception:
+            pass
+        
+        return None
+    
+    def _convert_to_base_form(self, verb: str) -> str:
+        """Convert third-person singular verb to base form.
+        
+        Examples:
+        - "selects" -> "select"
+        - "groups" -> "group"
+        - "displays" -> "display"
+        - "adds" -> "add"
+        - "removes" -> "remove"
+        - "chooses" -> "choose"
+        - "goes" -> "go"
+        - "fixes" -> "fix"
+        """
+        verb_lower = verb.lower()
+        
+        # Handle truly irregular verbs that don't follow regular patterns
+        irregular_map = {
+            "goes": "go",
+            "does": "do",
+            "has": "have",
+            "is": "be",
+            "says": "say",
+        }
+        
+        if verb_lower in irregular_map:
+            base = irregular_map[verb_lower]
+            # Preserve original capitalization
+            if verb[0].isupper():
+                return base.capitalize()
+            return base
+        
+        # Regular verbs: remove -s or -es ending
+        # Handle verbs ending in -ies (e.g., "tries" -> "try", "flies" -> "fly")
+        if verb_lower.endswith("ies") and len(verb_lower) > 3:
+            base = verb_lower[:-3] + "y"
+        # Handle verbs ending in -es (e.g., "fixes" -> "fix", "watches" -> "watch", "goes" -> "go")
+        elif verb_lower.endswith("es") and len(verb_lower) > 2:
+            # Most verbs ending in -es just drop the -es
+            base = verb_lower[:-2]
+        # Handle verbs ending in -s (e.g., "selects" -> "select", "groups" -> "group")
+        elif verb_lower.endswith("s") and len(verb_lower) > 1:
+            base = verb_lower[:-1]
+        else:
+            # Doesn't end in -s/-es, return as-is (shouldn't happen for VBZ verbs)
+            return verb
+        
+        # Preserve original capitalization
+        if verb[0].isupper():
+            return base.capitalize()
+        return base
     
     def _check_noun_verb_noun_pattern(self, name: str, node: StoryNode, node_type: str, rule_obj: Any) -> Optional[Dict[str, Any]]:
         try:

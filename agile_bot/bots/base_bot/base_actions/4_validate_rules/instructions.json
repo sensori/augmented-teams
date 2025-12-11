@@ -49,8 +49,7 @@
     "- Flow validation (end-to-end user-system behavior, one interaction/response) will be handled in discovery phase - DO NOT flag these as violations in shape phase",
     "- In shape phase, focus on: naming format, domain concepts, story structure - NOT detailed flow/context which comes in discovery",
     "",
-    "**MANDATORY: PAUSE FOR HUMAN FEEDBACK**",
-    "When this action is complete, AI MUST pause and wait for human feedback. When human says 'done' or confirms completion, the workflow is complete for this behavior (no automatic next step)."
+    "**AUTOMATIC PROGRESSION: Once validation is complete and all violations are fixed (if any), automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**"
   ],
   "templates": {
     "validation_results": {

@@ -102,11 +102,13 @@ def test_workflow_falls_back_to_completed_actions_when_current_action_missing(bo
     
     # Given workflow_state.json shows:
     #   - current_action: "" (missing or empty)
-    #   - completed_actions: [gather_context]
+    #   - completed_actions: [gather_context, decide_planning_criteria, build_knowledge]
     bot_name = 'story_bot'
     behavior = 'shape'
     completed = [
-        {'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:45:00.000000'}
+        {'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:45:00.000000'},
+        {'action_state': f'{bot_name}.{behavior}.decide_planning_criteria', 'timestamp': '2025-12-04T15:46:00.000000'},
+        {'action_state': f'{bot_name}.{behavior}.build_knowledge', 'timestamp': '2025-12-04T15:47:00.000000'}
     ]
     
     # Bootstrap environment

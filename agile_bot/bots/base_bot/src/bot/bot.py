@@ -5,31 +5,15 @@ import importlib
 from datetime import datetime
  
 from agile_bot.bots.base_bot.src.utils import read_json_file
-from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory, get_base_actions_directory
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 def load_workflow_states_and_transitions(bot_directory: Path) -> Tuple[List[str], List[Dict]]:
-    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-    
-    # Try to find base_actions in bot directory first
-    base_actions_dir = bot_directory / 'base_actions'
-    
-    # Fallback to base_bot if bot doesn't have its own base_actions
-    if not base_actions_dir.exists():
-        # Use centralized repository root
-        repo_root = get_python_workspace_root()
-        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-    
-    # Fail if base_actions directory doesn't exist - don't use hardcoded fallbacks
-    if not base_actions_dir.exists():
-        raise FileNotFoundError(
-            f"Base actions directory not found at {base_actions_dir}. "
-            f"Cannot load workflow states and transitions. "
-            f"This indicates a configuration error - workflow cannot proceed without action configurations."
-        )
+    # Use centralized workspace utility to get base_actions directory
+    base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
     
     # Load workflow actions from action_config.json files
     workflow_actions = []
@@ -762,6 +746,27 @@ class Bot:
         
         # Route to behavior - it handles action order checking
         if action:
+            # FIRST: Validate that the action exists before checking sequence
+            if action not in behavior_obj.workflow.states:
+                valid_actions = ', '.join(behavior_obj.workflow.states)
+                return BotResult(
+                    status='error',
+                    behavior=behavior_name,
+                    action=action,
+                    data={
+                        'message': (
+                            f"**INVALID ACTION**\n\n"
+                            f"Action `{action}` is not valid for behavior `{behavior_name}`.\n\n"
+                            f"Valid actions are: {valid_actions}\n\n"
+                            f"When starting a new behavior, use: `{self.bot_name}_{behavior_name}_gather_context`\n"
+                            f"Example: `{self.bot_name}_{behavior_name}_gather_context`"
+                        ),
+                        'requested_action': action,
+                        'valid_actions': behavior_obj.workflow.states,
+                        'behavior': behavior_name
+                    }
+                )
+            
             # Check if out-of-order navigation requires confirmation
             matches, current_action, expected_next = behavior_obj.does_requested_action_match_current(action)
             if not matches and expected_next:

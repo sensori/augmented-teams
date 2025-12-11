@@ -73,3 +73,14 @@ def test_validate_rules_raises_exception_when_story_graph_invalid_json(tmp_path)
     with pytest.raises((json.JSONDecodeError, ValueError), match=".*"):
         action.do_execute(parameters={})
 
+
+
+
+
+
+
+
+
+
+
+

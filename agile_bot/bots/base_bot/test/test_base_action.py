@@ -62,9 +62,8 @@ class TestInjectNextBehaviorReminder:
         create_bot_config(bot_directory, ['shape', 'prioritization', 'arrange', 'discovery'])
         
         # Given: Base action instructions exist
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
+        from agile_bot.bots.base_bot.src.state.workspace import get_base_actions_directory
+        base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
         validate_rules_dir = base_actions_dir / '5_validate_rules'
         validate_rules_dir.mkdir(parents=True, exist_ok=True)
         
@@ -97,6 +96,15 @@ class TestInjectNextBehaviorReminder:
             }
             action_config_file = action_dir / 'action_config.json'
             action_config_file.write_text(json.dumps(action_config), encoding='utf-8')
+        
+        # Given: Story graph file exists (required for validate_rules)
+        rendered_dir = workspace_directory / 'docs' / 'stories'
+        rendered_dir.mkdir(parents=True, exist_ok=True)
+        story_graph_file = rendered_dir / 'story-graph.json'
+        story_graph_file.write_text(json.dumps({
+            'epics': [],
+            'solution': {'name': 'Test Solution'}
+        }), encoding='utf-8')
         
         # When: Action executes (shape behavior, validate_rules is final)
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
@@ -164,11 +172,12 @@ class TestInjectNextBehaviorReminder:
             'validate_rules', 'render_output'
         ])
         
+        # Given: Create base_actions in bot_directory so get_base_actions_directory returns it (test isolation)
+        bot_base_actions_dir = bot_directory / 'base_actions'
+        bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
+        
         # Given: Base action instructions exist for validate_rules
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-        validate_rules_dir = base_actions_dir / '4_validate_rules'
+        validate_rules_dir = bot_base_actions_dir / '4_validate_rules'
         validate_rules_dir.mkdir(parents=True, exist_ok=True)
         
         base_instructions = {
@@ -179,6 +188,35 @@ class TestInjectNextBehaviorReminder:
         }
         instructions_file = validate_rules_dir / 'instructions.json'
         instructions_file.write_text(json.dumps(base_instructions), encoding='utf-8')
+        
+        # Given: action_config.json files for all workflow actions (so load_workflow_states_and_transitions can find them)
+        # Create action configs for all workflow actions - render_output comes AFTER validate_rules
+        workflow_actions = [
+            ('1_gather_context', 'gather_context', 1),
+            ('2_decide_planning_criteria', 'decide_planning_criteria', 2),
+            ('3_build_knowledge', 'build_knowledge', 3),
+            ('4_validate_rules', 'validate_rules', 4),
+            ('5_render_output', 'render_output', 5)
+        ]
+        for folder_name, action_name, order in workflow_actions:
+            action_dir = bot_base_actions_dir / folder_name
+            action_dir.mkdir(parents=True, exist_ok=True)
+            action_config = {
+                'name': action_name,
+                'workflow': True,
+                'order': order
+            }
+            action_config_file = action_dir / 'action_config.json'
+            action_config_file.write_text(json.dumps(action_config), encoding='utf-8')
+        
+        # Given: Story graph file exists (required for validate_rules)
+        rendered_dir = workspace_directory / 'docs' / 'stories'
+        rendered_dir.mkdir(parents=True, exist_ok=True)
+        story_graph_file = rendered_dir / 'story-graph.json'
+        story_graph_file.write_text(json.dumps({
+            'epics': [],
+            'solution': {'name': 'Test Solution'}
+        }), encoding='utf-8')
         
         # When: validate_rules action executes (not final action)
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction

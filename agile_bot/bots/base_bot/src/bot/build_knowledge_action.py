@@ -1,11 +1,14 @@
 from pathlib import Path
 from typing import Dict, Any
 import json
+import logging
 from agile_bot.bots.base_bot.src.bot.base_action import BaseAction
 from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import find_nested_subfolder, find_behavior_subfolder
 from agile_bot.bots.base_bot.src.utils import read_json_file
 
 # Note: All file reads in this module use UTF-8 encoding for Windows compatibility
+
+logger = logging.getLogger(__name__)
 
 
 class BuildKnowledgeAction(BaseAction):
@@ -15,45 +18,62 @@ class BuildKnowledgeAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute build_knowledge action logic."""
-        # Load and merge base instructions with behavior-specific instructions
-        instructions = self.load_and_merge_instructions()
+        logger.info(f"Starting build_knowledge action for behavior {self.behavior}")
         
-        # Inject knowledge graph template and config
-        kg_data = self.inject_knowledge_graph_template()
-        instructions.update(kg_data)
-        
-        # Inject schema, description, and instructions template variables
-        self.inject_schema_description_instructions(instructions)
-        
-        # Add explicit update instructions if existing file was found
-        if instructions.get('existing_file') and instructions.get('update_mode'):
-            existing_file = instructions['existing_file']
-            config = instructions['knowledge_graph_config']
-            output_path = config.get('path', 'docs/stories')
-            output_filename = config.get('output', 'story-graph.json')
+        try:
+            # Load and merge base instructions with behavior-specific instructions
+            logger.debug("Loading and merging instructions...")
+            instructions = self.load_and_merge_instructions()
+            logger.debug(f"Loaded {len(instructions.get('base_instructions', []))} base instruction lines")
             
-            instructions['update_instructions'] = {
-                'mode': 'update_existing',
-                'message': f"**CRITICAL: Output file '{output_filename}' already exists at '{output_path}/{output_filename}'. You MUST UPDATE this existing file by adding/modifying only the content needed for this behavior. DO NOT create a new file.**",
-                'existing_file_path': existing_file['path'],
-                'preserve_existing': [
-                    'epics' if existing_file.get('has_epics') else None,
-                    'domain_concepts' if existing_file.get('has_domain_concepts') else None,
-                ],
-                'add_or_modify': self._determine_add_or_modify_content()
-            }
-            # Remove None values
-            instructions['update_instructions']['preserve_existing'] = [
-                item for item in instructions['update_instructions']['preserve_existing'] if item is not None
-            ]
+            # Inject knowledge graph template and config
+            logger.debug("Injecting knowledge graph template...")
+            kg_data = self.inject_knowledge_graph_template()
+            instructions.update(kg_data)
+            logger.debug("Knowledge graph template injected")
+            
+            # Inject schema, description, and instructions template variables
+            logger.debug("Injecting schema and description...")
+            self.inject_schema_description_instructions(instructions)
+            logger.debug("Schema and description injected")
+            
+            # Add explicit update instructions if existing file was found
+            if instructions.get('existing_file') and instructions.get('update_mode'):
+                existing_file = instructions['existing_file']
+                config = instructions['knowledge_graph_config']
+                output_path = config.get('path', 'docs/stories')
+                output_filename = config.get('output', 'story-graph.json')
+                
+                instructions['update_instructions'] = {
+                    'mode': 'update_existing',
+                    'message': f"**CRITICAL: Output file '{output_filename}' already exists at '{output_path}/{output_filename}'. You MUST UPDATE this existing file by adding/modifying only the content needed for this behavior. DO NOT create a new file.**",
+                    'existing_file_path': existing_file['path'],
+                    'preserve_existing': [
+                        'epics' if existing_file.get('has_epics') else None,
+                        'domain_concepts' if existing_file.get('has_domain_concepts') else None,
+                    ],
+                    'add_or_modify': self._determine_add_or_modify_content()
+                }
+                # Remove None values
+                instructions['update_instructions']['preserve_existing'] = [
+                    item for item in instructions['update_instructions']['preserve_existing'] if item is not None
+                ]
+                logger.debug("Update instructions added for existing file")
 
-        # Inject all rules (bot-level, behavior-level, and validation rules) into instructions
-        self.inject_rules(instructions)
-        
-        # Update token estimate after all injections
-        instructions['token_estimate'] = self._estimate_tokens(instructions)
-        
-        return {'instructions': instructions}
+            # Inject all rules (bot-level, behavior-level, and validation rules) into instructions
+            logger.debug("Injecting rules (this may take a moment)...")
+            self.inject_rules(instructions)
+            rules_count = len(instructions.get('rules', []))
+            logger.debug(f"Injected {rules_count} rules")
+            
+            # Update token estimate after all injections
+            instructions['token_estimate'] = self._estimate_tokens(instructions)
+            logger.info(f"build_knowledge action completed. Token estimate: {instructions['token_estimate']}")
+            
+            return {'instructions': instructions}
+        except Exception as e:
+            logger.error(f"Error in build_knowledge action: {e}", exc_info=True)
+            raise
     
     def load_and_merge_instructions(self) -> Dict[str, Any]:
         """Load and merge base instructions with behavior-specific instructions."""
@@ -259,6 +279,7 @@ class BuildKnowledgeAction(BaseAction):
         Inject all relevant rules (bot-level, behavior-level, and validation rules) 
         into the instructions, replacing the {{rules}} placeholder.
         """
+        logger.debug("Creating ValidateRulesAction instance...")
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
         
         # Create ValidateRulesAction instance to reuse its rule-loading logic
@@ -269,11 +290,15 @@ class BuildKnowledgeAction(BaseAction):
         )
         
         # Load all rules (common/bot-level + behavior-specific)
+        logger.debug("Loading rules from ValidateRulesAction...")
         rules_data = validate_action.inject_behavior_specific_and_bot_rules()
         all_rules = rules_data.get('validation_rules', [])
+        logger.debug(f"Loaded {len(all_rules)} rules")
         
         # Format rules for insertion into instructions
+        logger.debug("Formatting rules for instructions...")
         rules_text = self._format_rules(all_rules)
+        logger.debug(f"Formatted rules text length: {len(rules_text)} characters")
         
         # Replace {{rules}} placeholder in base_instructions
         # Split rules_text into lines and insert them where {{rules}} appears
@@ -284,12 +309,14 @@ class BuildKnowledgeAction(BaseAction):
                     # Replace the placeholder line with the formatted rules (split into lines)
                     rules_lines = rules_text.split('\n')
                     new_instructions.extend(rules_lines)
+                    logger.debug(f"Replaced {{rules}} placeholder with {len(rules_lines)} lines")
                 else:
                     new_instructions.append(line)
             instructions['base_instructions'] = new_instructions
         
         # Also store rules in the instructions dict for reference
         instructions['rules'] = all_rules
+        logger.debug("Rules injection completed")
     
     def inject_schema_description_instructions(self, instructions: Dict[str, Any]) -> None:
         """
