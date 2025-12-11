@@ -31,6 +31,7 @@ class Workflow:
         self.behavior = behavior
         self.bot_directory = Path(bot_directory)
         self.states = states
+        self.transitions = transitions  # Store transitions for lookup
         self.bot = bot_instance  # Reference to parent Bot instance
         
         # Initialize state machine
@@ -172,12 +173,9 @@ class Workflow:
         
         # Find what comes next after last_completed
         # Look through transitions to find where source=last_completed
-        for transition in self.machine.get_triggers(last_completed):
-            if transition == 'proceed':
-                # Get the next state by simulating proceed
-                current_index = self.states.index(last_completed)
-                if current_index + 1 < len(self.states):
-                    return self.states[current_index + 1]
+        for transition in self.transitions:
+            if transition.get('source') == last_completed and transition.get('trigger') == 'proceed':
+                return transition.get('dest')
         
         # If no transition found or at end, return last completed
         # (workflow will handle being at end)

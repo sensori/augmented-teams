@@ -244,3 +244,132 @@ class TestInjectGuardrailsAsPartOfClarifyRequirements:
             action_obj.inject_questions_and_evidence()
         
         assert 'key_questions.json' in str(exc_info.value) or 'Expecting' in str(exc_info.value)
+
+
+# ============================================================================
+# STORY: Store Clarification Data
+# ============================================================================
+
+class TestStoreClarificationData:
+    """Story: Store Clarification Data - Tests that clarification data is saved to clarification.json."""
+
+    def test_save_clarification_data_when_parameters_provided(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Save clarification data when parameters are provided
+        GIVEN: gather_context action is initialized
+        AND: parameters contain key_questions_answered and evidence_provided
+        WHEN: do_execute is called with these parameters
+        THEN: clarification.json file is created in docs/stories/ folder
+        AND: file contains behavior section with key_questions and evidence
+        """
+        # Bootstrap environment
+        bootstrap_env(bot_directory, workspace_directory)
+        
+        # Given: Action initialized
+        action = GatherContextAction(
+            bot_name='story_bot',
+            behavior='shape',
+            bot_directory=bot_directory
+        )
+        
+        # Given: Parameters with clarification data
+        parameters = {
+            'key_questions_answered': {
+                'user_types': 'Game Masters',
+                'first_action': 'Group tokens into mobs'
+            },
+            'evidence_provided': {
+                'original_input': 'I want to turn minions into mobs',
+                'source_file': 'input.txt'
+            }
+        }
+        
+        # When: Action executes with parameters
+        action.do_execute(parameters)
+        
+        # Then: clarification.json file exists
+        clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
+        assert clarification_file.exists(), "clarification.json should be created"
+        
+        # Then: File contains correct structure
+        clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
+        assert 'shape' in clarification_data
+        assert 'key_questions' in clarification_data['shape']
+        assert 'evidence' in clarification_data['shape']
+        assert clarification_data['shape']['key_questions']['user_types'] == 'Game Masters'
+        assert clarification_data['shape']['evidence']['original_input'] == 'I want to turn minions into mobs'
+
+    def test_preserve_existing_clarification_data_when_saving(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Preserve existing clarification data when saving
+        GIVEN: clarification.json already exists with data for 'discovery' behavior
+        AND: gather_context action is initialized for 'shape' behavior
+        WHEN: do_execute is called with parameters
+        THEN: clarification.json contains both 'discovery' and 'shape' sections
+        AND: existing 'discovery' data is preserved
+        """
+        # Bootstrap environment
+        bootstrap_env(bot_directory, workspace_directory)
+        
+        # Given: Existing clarification.json with discovery data
+        stories_folder = workspace_directory / 'docs' / 'stories'
+        stories_folder.mkdir(parents=True, exist_ok=True)
+        clarification_file = stories_folder / 'clarification.json'
+        existing_data = {
+            'discovery': {
+                'key_questions': {'scope': 'Component level'},
+                'evidence': {'doc': 'requirements.md'}
+            }
+        }
+        clarification_file.write_text(json.dumps(existing_data, indent=2), encoding='utf-8')
+        
+        # Given: Action initialized for shape behavior
+        action = GatherContextAction(
+            bot_name='story_bot',
+            behavior='shape',
+            bot_directory=bot_directory
+        )
+        
+        # Given: Parameters with shape clarification data
+        parameters = {
+            'key_questions_answered': {'user_types': 'Game Masters'},
+            'evidence_provided': {'input': 'input.txt'}
+        }
+        
+        # When: Action executes with parameters
+        action.do_execute(parameters)
+        
+        # Then: Both behaviors' data are preserved
+        clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
+        assert 'discovery' in clarification_data, "Existing discovery data should be preserved"
+        assert 'shape' in clarification_data, "New shape data should be added"
+        assert clarification_data['discovery']['key_questions']['scope'] == 'Component level'
+        assert clarification_data['shape']['key_questions']['user_types'] == 'Game Masters'
+
+    def test_skip_saving_when_no_clarification_parameters_provided(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Skip saving when no clarification parameters are provided
+        GIVEN: gather_context action is initialized
+        AND: parameters do not contain key_questions_answered or evidence_provided
+        WHEN: do_execute is called with empty or unrelated parameters
+        THEN: clarification.json file is not created
+        """
+        # Bootstrap environment
+        bootstrap_env(bot_directory, workspace_directory)
+        
+        # Given: Action initialized
+        action = GatherContextAction(
+            bot_name='story_bot',
+            behavior='shape',
+            bot_directory=bot_directory
+        )
+        
+        # Given: Parameters without clarification data
+        parameters = {'other_data': 'some value'}
+        
+        # When: Action executes with parameters
+        action.do_execute(parameters)
+        
+        # Then: clarification.json file is not created
+        clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
+        assert not clarification_file.exists(), "clarification.json should not be created when no clarification data provided"

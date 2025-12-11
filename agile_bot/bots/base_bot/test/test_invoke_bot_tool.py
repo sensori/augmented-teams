@@ -39,11 +39,11 @@ def create_base_instructions(bot_directory: Path):
     """Helper: Create base instructions for all actions in bot_directory (no fallback)."""
     base_actions_dir = bot_directory / 'base_actions'
     action_prefixes = {
-        'gather_context': '2_gather_context',
-        'decide_planning_criteria': '3_decide_planning_criteria',
-        'validate_rules': '5_validate_rules',
-        'build_knowledge': '6_build_knowledge',
-        'render_output': '7_render_output'
+        'gather_context': '1_gather_context',
+        'decide_planning_criteria': '2_decide_planning_criteria',
+        'build_knowledge': '3_build_knowledge',
+        'render_output': '4_render_output',
+        'validate_rules': '5_validate_rules'
     }
     for action, folder_name in action_prefixes.items():
         action_dir = base_actions_dir / folder_name
@@ -102,11 +102,11 @@ def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior
 def create_base_action_instructions(workspace: Path, action: str) -> Path:
     """Helper: Create base action instructions file with numbered prefix."""
     action_prefixes = {
-        'gather_context': '2_gather_context',
-        'decide_planning_criteria': '3_decide_planning_criteria',
-        'validate_rules': '5_validate_rules',
-        'build_knowledge': '6_build_knowledge',
-        'render_output': '7_render_output'
+        'gather_context': '1_gather_context',
+        'decide_planning_criteria': '2_decide_planning_criteria',
+        'build_knowledge': '3_build_knowledge',
+        'render_output': '4_render_output',
+        'validate_rules': '5_validate_rules'
     }
     
     action_folder = action_prefixes.get(action, action)

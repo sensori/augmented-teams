@@ -81,11 +81,11 @@ class TestInjectNextBehaviorReminder:
         # Given: action_config.json files for workflow actions (so load_workflow_states_and_transitions can find them)
         # Create action configs for all workflow actions
         workflow_actions = [
-            ('2_gather_context', 'gather_context', 2),
-            ('3_decide_planning_criteria', 'decide_planning_criteria', 3),
-            ('5_validate_rules', 'validate_rules', 5),
-            ('6_build_knowledge', 'build_knowledge', 6),
-            ('7_render_output', 'render_output', 7)
+            ('1_gather_context', 'gather_context', 1),
+            ('2_decide_planning_criteria', 'decide_planning_criteria', 2),
+            ('3_build_knowledge', 'build_knowledge', 3),
+            ('4_render_output', 'render_output', 4),
+            ('5_validate_rules', 'validate_rules', 5)
         ]
         for folder_name, action_name, order in workflow_actions:
             action_dir = base_actions_dir / folder_name
@@ -147,9 +147,9 @@ class TestInjectNextBehaviorReminder:
     def test_next_behavior_reminder_not_injected_when_not_final_action(self, bot_directory, workspace_directory):
         """
         SCENARIO: Next behavior reminder is NOT injected when action is not final
-        GIVEN: render_output is NOT the final action (validate_rules comes after)
+        GIVEN: validate_rules is NOT the final action (render_output comes after)
         AND: bot_config.json defines behavior sequence
-        WHEN: render_output action executes
+        WHEN: validate_rules action executes
         THEN: base_instructions do NOT include next behavior reminder
         """
         # Bootstrap environment
@@ -158,31 +158,31 @@ class TestInjectNextBehaviorReminder:
         # Given: bot_config.json with behavior sequence
         create_bot_config(bot_directory, ['shape', 'prioritization', 'arrange'])
         
-        # Given: Workflow states file showing render_output is NOT final
+        # Given: Workflow states file showing validate_rules is NOT final
         create_workflow_states(bot_directory, [
             'gather_context', 'decide_planning_criteria', 'build_knowledge', 
-            'render_output', 'validate_rules'
+            'validate_rules', 'render_output'
         ])
         
-        # Given: Base action instructions exist for render_output
+        # Given: Base action instructions exist for validate_rules
         from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
         repo_root = get_python_workspace_root()
         base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-        render_output_dir = base_actions_dir / '7_render_output'
-        render_output_dir.mkdir(parents=True, exist_ok=True)
+        validate_rules_dir = base_actions_dir / '4_validate_rules'
+        validate_rules_dir.mkdir(parents=True, exist_ok=True)
         
         base_instructions = {
             'instructions': [
-                'Render story map documents',
-                'Render domain model documents'
+                'Validate story graph against rules',
+                'Generate validation report'
             ]
         }
-        instructions_file = render_output_dir / 'instructions.json'
+        instructions_file = validate_rules_dir / 'instructions.json'
         instructions_file.write_text(json.dumps(base_instructions), encoding='utf-8')
         
-        # When: render_output action executes (not final action)
-        from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
-        action = RenderOutputAction(
+        # When: validate_rules action executes (not final action)
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+        action = ValidateRulesAction(
             bot_name='story_bot',
             behavior='shape',
             bot_directory=bot_directory
@@ -202,8 +202,8 @@ class TestInjectNextBehaviorReminder:
         """
         SCENARIO: Next behavior reminder is NOT injected when current behavior is last in sequence
         GIVEN: discovery is the last behavior in bot_config.json
-        AND: validate_rules is the final action
-        WHEN: validate_rules action executes
+        AND: render_output is the final action
+        WHEN: render_output action executes
         THEN: base_instructions do NOT include next behavior reminder
         """
         # Bootstrap environment
@@ -216,28 +216,27 @@ class TestInjectNextBehaviorReminder:
         from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
         repo_root = get_python_workspace_root()
         base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-        validate_rules_dir = base_actions_dir / '5_validate_rules'
-        validate_rules_dir.mkdir(parents=True, exist_ok=True)
+        render_output_dir = base_actions_dir / '5_render_output'
+        render_output_dir.mkdir(parents=True, exist_ok=True)
         
         base_instructions = {
             'instructions': [
-                'Load and review clarification.json and planning.json',
-                'Check Content Data against all rules',
-                'Generate a validation report'
+                'Render story map documents',
+                'Render domain model documents'
             ]
         }
-        instructions_file = validate_rules_dir / 'instructions.json'
+        instructions_file = render_output_dir / 'instructions.json'
         instructions_file.write_text(json.dumps(base_instructions), encoding='utf-8')
         
-        # Given: Workflow states file showing validate_rules is final action
+        # Given: Workflow states file showing render_output is final action
         create_workflow_states(bot_directory, [
             'gather_context', 'decide_planning_criteria', 'build_knowledge', 
-            'render_output', 'validate_rules'
+            'validate_rules', 'render_output'
         ])
         
         # When: Action executes (discovery behavior, last in sequence)
-        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
-        action = ValidateRulesAction(
+        from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
+        action = RenderOutputAction(
             bot_name='story_bot',
             behavior='discovery',
             bot_directory=bot_directory

@@ -136,8 +136,8 @@ class TestTrackActivityForBuildKnowledgeAction:
 class TestProceedToRenderOutput:
     """Story: Proceed To Render Output - Tests transition to render_output action."""
 
-    def test_seamless_transition_from_build_knowledge_to_render_output(self, bot_directory, workspace_directory):
-        verify_workflow_transition(bot_directory, workspace_directory, 'build_knowledge', 'render_output')
+    def test_seamless_transition_from_build_knowledge_to_validate_rules(self, bot_directory, workspace_directory):
+        verify_workflow_transition(bot_directory, workspace_directory, 'build_knowledge', 'validate_rules')
 
     def test_workflow_state_captures_build_knowledge_completion(self, bot_directory, workspace_directory):
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'build_knowledge')
@@ -217,10 +217,10 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         import shutil
         repo_root = Path(__file__).parent.parent.parent.parent.parent
         actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '6_build_knowledge' / 'instructions.json'
+        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
         
         # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '6_build_knowledge'
+        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
         bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
         
         # Copy actual instructions file
@@ -310,10 +310,10 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         import shutil
         repo_root = Path(__file__).parent.parent.parent.parent.parent
         actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '6_build_knowledge' / 'instructions.json'
+        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
         
         # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '6_build_knowledge'
+        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
         bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
         
         # Copy actual instructions file
@@ -380,10 +380,10 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         import shutil
         repo_root = Path(__file__).parent.parent.parent.parent.parent
         actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '6_build_knowledge' / 'instructions.json'
+        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
         
         # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '6_build_knowledge'
+        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
         bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
         
         # Copy actual instructions file with template variables

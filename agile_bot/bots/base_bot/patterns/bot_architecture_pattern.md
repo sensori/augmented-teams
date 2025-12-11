@@ -48,11 +48,11 @@ agile_bot/bots/base_bot/
 │   │   ├── action_config.json       ← Action config (workflow, order, next_action)
 │   │   ├── instructions.json        ← Base instructions for action
 │   │   └── trigger_words.json       ← Trigger patterns
-│   ├── 2_gather_context/
-│   ├── 3_decide_planning_criteria/
-│   ├── 5_validate_rules/
-│   ├── 6_build_knowledge/
-│   └── 7_render_output/
+│   ├── 1_gather_context/
+│   ├── 2_decide_planning_criteria/
+│   ├── 3_build_knowledge/
+│   ├── 4_render_output/
+│   └── 5_validate_rules/
 └── rules/
     └── common_rules.json            ← Common rules for all bots
 ```
@@ -78,19 +78,19 @@ agile_bot/bots/base_bot/
 Loads base instructions from `base_actions/1_initialize_project/instructions.json`. Detects project location and saves to `project_area/project_location.json` for workflow state persistence.
 
 ### gather_context
-Loads base instructions from `base_actions/2_gather_context/instructions.json` and merges with behavior-specific instructions. Loads guardrails from `behaviors/{behavior}/guardrails/required_context/` (key_questions.json, evidence.json) to guide context gathering.
+Loads base instructions from `base_actions/1_gather_context/instructions.json` and merges with behavior-specific instructions. Loads guardrails from `behaviors/{behavior}/guardrails/required_context/` (key_questions.json, evidence.json) to guide context gathering.
 
 ### decide_planning_criteria
-Loads base instructions from `base_actions/3_decide_planning_criteria/instructions.json`. Loads planning guardrails from `behaviors/{behavior}/guardrails/planning/` (typical_assumptions.json, decision_criteria/*.json) to inject planning criteria and assumptions.
+Loads base instructions from `base_actions/2_decide_planning_criteria/instructions.json`. Loads planning guardrails from `behaviors/{behavior}/guardrails/planning/` (typical_assumptions.json, decision_criteria/*.json) to inject planning criteria and assumptions.
+
+### build_knowledge
+Loads base instructions from `base_actions/3_build_knowledge/instructions.json`. Loads knowledge graph template from `behaviors/{behavior}/content/knowledge_graph/*.json` to guide knowledge graph construction.
+
+### render_output
+Loads base instructions from `base_actions/4_render_output/instructions.json`. Loads templates from `behaviors/{behavior}/content/render/templates/` and transformers from `behaviors/{behavior}/content/render/transformers/` to render structured output.
 
 ### validate_rules
 Loads base instructions from `base_actions/5_validate_rules/instructions.json`. Loads common rules from `base_bot/rules/common_rules.json` and behavior-specific rules from `behaviors/{behavior}/rules/*.json` to validate content.
-
-### build_knowledge
-Loads base instructions from `base_actions/6_build_knowledge/instructions.json`. Loads knowledge graph template from `behaviors/{behavior}/content/knowledge_graph/*.json` to guide knowledge graph construction.
-
-### render_output
-Loads base instructions from `base_actions/7_render_output/instructions.json`. Loads templates from `behaviors/{behavior}/content/render/templates/` and transformers from `behaviors/{behavior}/content/render/transformers/` to render structured output.
 
 ---
 
@@ -183,7 +183,7 @@ class GatherContextAction:
     
     def load_and_merge_instructions(self) -> Dict[str, Any]:
         """Load instructions from base_actions and behavior folder."""
-        base_path = workspace_root / 'agile_bot/bots/base_bot/base_actions/2_gather_context/instructions.json'
+        base_path = workspace_root / 'agile_bot/bots/base_bot/base_actions/1_gather_context/instructions.json'
         behavior_path = workspace_root / f'agile_bot/bots/{bot_name}/behaviors/{behavior}/instructions.json'
         ...  # Load, merge, return
     
@@ -213,7 +213,7 @@ bot.shape.gather_context() called
 Creates: GatherContextAction('story_bot', 'shape', workspace)
         ↓
 Action loads instructions from:
-  - base_actions/2_gather_context/instructions.json
+  - base_actions/1_gather_context/instructions.json
   - behaviors/shape/instructions.json
 ```
 

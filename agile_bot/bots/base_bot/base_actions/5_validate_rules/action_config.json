@@ -1,8 +1,8 @@
 {
   "name": "validate_rules",
   "workflow": true,
-  "order": 7,
-  "next_action": null
+  "order": 4,
+  "next_action": "render_output"
 }
 
 

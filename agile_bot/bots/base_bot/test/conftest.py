@@ -69,12 +69,12 @@ def bot_name():
 def standard_workflow_config():
     """Fixture: Standard workflow states and transitions."""
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     return states, transitions
 
@@ -119,11 +119,11 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
     base_actions_dir = bot_directory / 'base_actions'
     
     workflow_actions = [
-        ('2_gather_context', 'gather_context', 2, 'decide_planning_criteria'),
-        ('3_decide_planning_criteria', 'decide_planning_criteria', 3, 'build_knowledge'),
-        ('5_validate_rules', 'validate_rules', 5, 'build_knowledge'),
-        ('6_build_knowledge', 'build_knowledge', 6, 'render_output'),
-        ('7_render_output', 'render_output', 7, 'validate_rules')
+        ('1_gather_context', 'gather_context', 1, 'decide_planning_criteria'),
+        ('2_decide_planning_criteria', 'decide_planning_criteria', 2, 'build_knowledge'),
+        ('3_build_knowledge', 'build_knowledge', 3, 'validate_rules'),
+        ('4_validate_rules', 'validate_rules', 4, 'render_output'),
+        ('5_render_output', 'render_output', 5, None)
     ]
     
     for folder_name, action_name, order, next_action in workflow_actions:

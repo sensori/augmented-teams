@@ -141,7 +141,7 @@ def create_base_instructions(bot_directory: Path):
     """Create base action instructions in bot_directory (no fallback to repo root)."""
     base_actions = bot_directory / 'base_actions'
     for idx, action in enumerate(['gather_context', 'decide_planning_criteria', 
-                                    'build_knowledge', 'render_output', 'validate_rules'], start=2):
+                                    'build_knowledge', 'validate_rules', 'render_output'], start=2):
         action_dir = base_actions / f'{idx}_{action}'
         action_dir.mkdir(parents=True, exist_ok=True)
         instructions_file = action_dir / 'instructions.json'
@@ -152,11 +152,11 @@ def create_base_action_instructions(bot_directory: Path, action: str) -> Path:
     base_actions_dir = bot_directory / 'base_actions'
     
     action_mapping = {
-        'gather_context': '2_gather_context',
-        'decide_planning_criteria': '3_decide_planning_criteria',
-        'validate_rules': '5_validate_rules',
-        'build_knowledge': '6_build_knowledge',
-        'render_output': '7_render_output'
+        'gather_context': '1_gather_context',
+        'decide_planning_criteria': '2_decide_planning_criteria',
+        'build_knowledge': '3_build_knowledge',
+        'render_output': '4_render_output',
+        'validate_rules': '5_validate_rules'
     }
     
     folder_name = action_mapping.get(action, action)
@@ -202,11 +202,11 @@ def create_base_actions_structure(bot_directory: Path):
     """Create base actions directory structure in bot_directory (no fallback)."""
     base_actions_dir = bot_directory / 'base_actions'
     workflow_actions = [
-        ('2_gather_context', 'gather_context'),
-        ('3_decide_planning_criteria', 'decide_planning_criteria'),
-        ('5_validate_rules', 'validate_rules'),
-        ('6_build_knowledge', 'build_knowledge'),
-        ('7_render_output', 'render_output')
+        ('1_gather_context', 'gather_context'),
+        ('2_decide_planning_criteria', 'decide_planning_criteria'),
+        ('3_build_knowledge', 'build_knowledge'),
+        ('4_render_output', 'render_output'),
+        ('5_validate_rules', 'validate_rules')
     ]
     
     for folder_name, action_name in workflow_actions:
@@ -285,13 +285,13 @@ def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action
     bootstrap_env(bot_dir, workspace_dir)
     
     from agile_bot.bots.base_bot.src.state.workflow import Workflow
-    states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+    states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
     # Create all transitions, not just the one we're testing
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     # No workspace_root parameter
     workflow = Workflow(
@@ -322,7 +322,7 @@ def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, a
         bot_name=bot_name,
         behavior=behavior,
         bot_directory=bot_dir,
-        states=['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules'],
+        states=['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output'],
         transitions=[]
     )
     workflow.save_completed_action(action_name)

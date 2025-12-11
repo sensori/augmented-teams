@@ -37,12 +37,12 @@ def create_test_workflow(
     )
     
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     
     workflow = Workflow(

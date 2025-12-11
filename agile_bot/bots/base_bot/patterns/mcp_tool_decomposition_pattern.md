@@ -728,7 +728,6 @@ behaviors/
       1_required_context/
         key_questions.json
   2_prioritization/
-  3_arrange/
 ```
 
 **Finding Folders:**

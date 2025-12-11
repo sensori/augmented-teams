@@ -34,11 +34,11 @@ def create_base_actions_structure(bot_directory: Path):
     
     actions = [
         ('1_initialize_project', 'decide_planning_criteria'),
-        ('2_gather_context', 'decide_planning_criteria'),
-        ('3_decide_planning_criteria', 'build_knowledge'),
-        ('5_validate_rules', 'build_knowledge'),
-        ('6_build_knowledge', 'render_output'),
-        ('7_render_output', 'validate_rules')
+        ('1_gather_context', 'decide_planning_criteria'),
+        ('2_decide_planning_criteria', 'build_knowledge'),
+        ('3_build_knowledge', 'validate_rules'),
+        ('4_validate_rules', 'render_output'),
+        ('5_render_output', None)
     ]
     
     for order_name, next_action in actions:
@@ -59,7 +59,7 @@ def create_base_actions_structure(bot_directory: Path):
 def create_base_instructions(bot_directory: Path):
     """Helper: Create base instructions for all actions in bot_directory (no fallback)."""
     base_actions_dir = bot_directory / 'base_actions'
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
     for action in actions:
         action_dir = base_actions_dir / action
         action_dir.mkdir(parents=True, exist_ok=True)

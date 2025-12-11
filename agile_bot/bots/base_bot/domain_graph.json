@@ -76,11 +76,20 @@
     },
     {
       "concept": "BuildKnowledgeAction",
-      "action_number": 4,
+      "action_number": 3,
       "responsibilities": [
         {"responsibility": "Inject knowledge graph template", "collaborators": ["Behavior", "Content", "Knowledge Graph Spec", "Knowledge Graph"]},
         {"responsibility": "Inject builder instructions", "collaborators": ["Behavior", "Content", "Build Instructions"]},
         {"responsibility": "Save Knowledge graph", "collaborators": ["Behavior", "Content", "Knowledge Graph"]}
+      ]
+    },
+    {
+      "concept": "ValidateRulesAction",
+      "action_number": 4,
+      "responsibilities": [
+        {"responsibility": "Inject common bot rules", "collaborators": ["Base Bot", "Rules", "Common Rules"]},
+        {"responsibility": "Inject behavior specific rules", "collaborators": ["Behavior", "Rules", "Behavior Rules"]},
+        {"responsibility": "Load + inject content for validation", "collaborators": ["Behavior", "Content", "Knowledge Graph", "Rendered Outputs"]}
       ]
     },
     {
@@ -91,15 +100,6 @@
         {"responsibility": "Inject templates", "collaborators": ["Behavior", "Content", "Render Spec", "Template"]},
         {"responsibility": "Inject transformers", "collaborators": ["Behavior", "Content", "Transformer"]},
         {"responsibility": "Load + inject structured content", "collaborators": ["Behavior", "Content", "Knowledge Graph"]}
-      ]
-    },
-    {
-      "concept": "ValidateRulesAction",
-      "action_number": 6,
-      "responsibilities": [
-        {"responsibility": "Inject common bot rules", "collaborators": ["Base Bot", "Rules", "Common Rules"]},
-        {"responsibility": "Inject behavior specific rules", "collaborators": ["Behavior", "Rules", "Behavior Rules"]},
-        {"responsibility": "Load + inject content for validation", "collaborators": ["Behavior", "Content", "Knowledge Graph", "Rendered Outputs"]}
       ]
     },
     {

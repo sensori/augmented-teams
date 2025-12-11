@@ -23,18 +23,13 @@ def load_workflow_states_and_transitions(bot_directory: Path) -> Tuple[List[str]
         repo_root = get_python_workspace_root()
         base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
     
-    # Fallback if path doesn't exist (for tests with temp workspaces)
+    # Fail if base_actions directory doesn't exist - don't use hardcoded fallbacks
     if not base_actions_dir.exists():
-        # Use hardcoded defaults
-        states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 
-                  'render_output', 'validate_rules']
-        transitions = [
-            {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-            {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-            {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-            {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
-        ]
-        return states, transitions
+        raise FileNotFoundError(
+            f"Base actions directory not found at {base_actions_dir}. "
+            f"Cannot load workflow states and transitions. "
+            f"This indicates a configuration error - workflow cannot proceed without action configurations."
+        )
     
     # Load workflow actions from action_config.json files
     workflow_actions = []
@@ -820,10 +815,14 @@ class Bot:
         """Initialize workflow state with confirmed behavior."""
         workflow_state_file = working_dir / 'workflow_state.json'
         
-        # Find actual behavior name
+        # Find actual behavior name - REQUIRED, no fallback
         actual_behavior_name = self.find_behavior_by_name(confirmed_behavior)
         if actual_behavior_name is None:
-            actual_behavior_name = self.behaviors[0]  # Fallback to first behavior
+            raise ValueError(
+                f"Behavior '{confirmed_behavior}' not found in bot '{self.name}'. "
+                f"Available behaviors: {', '.join(self.behaviors)}. "
+                f"Cannot initialize workflow with invalid behavior."
+            )
         
         behavior_obj = getattr(self, actual_behavior_name)
         first_action = behavior_obj.workflow.states[0] if behavior_obj.workflow.states else 'gather_context'

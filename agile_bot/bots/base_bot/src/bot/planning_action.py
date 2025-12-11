@@ -14,6 +14,11 @@ class PlanningAction(BaseAction):
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute decide_planning_criteria action logic."""
         instructions = self.inject_decision_criteria_and_assumptions()
+        
+        # If planning data is provided, save it
+        if parameters and (parameters.get('decisions_made') or parameters.get('assumptions_made')):
+            self.save_planning(parameters)
+        
         return {'instructions': instructions}
     
     def _find_action_folder(self, action_name: str) -> Path:
@@ -68,3 +73,51 @@ class PlanningAction(BaseAction):
         
         return instructions
     
+    def save_planning(self, parameters: Dict[str, Any]):
+        """Save planning data to docs/stories folder (generated file, not original context)."""
+        try:
+            # Use working_dir if set, otherwise skip
+            if not self.working_dir:
+                return
+            
+            # Generated files go to docs/stories/, not context folder
+            docs_folder = self.working_dir / 'docs'
+            stories_folder = docs_folder / 'stories'
+            
+            # Ensure docs/stories folder exists
+            stories_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Load existing planning data if file exists
+            planning_file = stories_folder / 'planning.json'
+            planning_data = {}
+            if planning_file.exists():
+                try:
+                    planning_data = json.loads(planning_file.read_text(encoding='utf-8'))
+                except (json.JSONDecodeError, IOError):
+                    planning_data = {}
+            
+            # Build planning data structure for current behavior
+            if self.behavior not in planning_data:
+                planning_data[self.behavior] = {'decisions_made': {}, 'assumptions_made': []}
+            
+            # Update decisions_made if provided
+            if parameters.get('decisions_made'):
+                planning_data[self.behavior]['decisions_made'].update(parameters.get('decisions_made', {}))
+            
+            # Update assumptions_made if provided (replace, not merge, as it's a list)
+            if parameters.get('assumptions_made'):
+                planning_data[self.behavior]['assumptions_made'] = parameters.get('assumptions_made', [])
+            
+            # Save to docs/stories/ (generated file location)
+            planning_file.write_text(
+                json.dumps(planning_data, indent=2),
+                encoding='utf-8'
+            )
+        except Exception as e:
+            # Log error and fail fast so callers can handle the problem.
+            # Previously this swallowed the error; now we raise a clear exception.
+            import logging
+            logging.exception("Failed to save planning")
+            # Raise a RuntimeError with context, preserving original exception
+            raise RuntimeError(f"Failed to save planning for behavior '{self.behavior}': {e}") from e
+     

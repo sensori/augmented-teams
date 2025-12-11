@@ -109,7 +109,6 @@ function matchBehavior(message, workspaceRoot) {
   const behaviors = [
     "1_shape",
     "2_prioritization", 
-    "3_arrange",
     "4_discovery",
     "5_exploration",
     "6_scenarios",

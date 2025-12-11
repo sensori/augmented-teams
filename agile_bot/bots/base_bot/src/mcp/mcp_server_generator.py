@@ -43,7 +43,11 @@ class MCPServerGenerator:
             base_actions_path = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
         
         if not base_actions_path.exists():
-            return []
+            raise FileNotFoundError(
+                f"Base actions directory not found at {base_actions_path}. "
+                f"Cannot discover workflow actions. "
+                f"This indicates a configuration error - base_actions directory is required."
+            )
         
         workflow_actions = []
         for item in base_actions_path.iterdir():
@@ -65,7 +69,11 @@ class MCPServerGenerator:
             base_actions_path = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
         
         if not base_actions_path.exists():
-            return []
+            raise FileNotFoundError(
+                f"Base actions directory not found at {base_actions_path}. "
+                f"Cannot discover independent actions. "
+                f"This indicates a configuration error - base_actions directory is required."
+            )
         
         independent_actions = []
         for item in base_actions_path.iterdir():

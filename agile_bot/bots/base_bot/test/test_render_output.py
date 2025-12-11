@@ -89,8 +89,8 @@ class TestTrackActivityForRenderOutputAction:
 class TestProceedToValidateRules:
     """Story: Proceed To Validate Rules - Tests transition to validate_rules action."""
 
-    def test_seamless_transition_from_render_output_to_validate_rules(self, bot_directory, workspace_directory):
-        verify_workflow_transition(bot_directory, workspace_directory, 'render_output', 'validate_rules', behavior='discovery')
+    def test_seamless_transition_from_validate_rules_to_render_output(self, bot_directory, workspace_directory):
+        verify_workflow_transition(bot_directory, workspace_directory, 'validate_rules', 'render_output', behavior='discovery')
 
     def test_workflow_state_captures_render_output_completion(self, bot_directory, workspace_directory):
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'render_output')
@@ -144,10 +144,10 @@ class TestInjectRenderInstructionsAndConfigs:
         import shutil
         repo_root = Path(__file__).parent.parent.parent.parent.parent
         actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '7_render_output' / 'instructions.json'
+        actual_instructions_file = actual_base_actions_dir / '4_render_output' / 'instructions.json'
         
         # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '7_render_output'
+        bot_base_actions_dir = bot_directory / 'base_actions' / '4_render_output'
         bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
         
         # Copy actual instructions file with template variables

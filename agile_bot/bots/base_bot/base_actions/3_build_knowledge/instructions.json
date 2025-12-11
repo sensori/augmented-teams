@@ -1,0 +1,47 @@
+{
+  "actionName": "build_knowledge",
+  "instructions": [
+    "**MANDATORY: Before generating any content, you MUST load and review the project's context files:**",
+    "1. Load `{project_area}/docs/stories/clarification.json` - Contains key questions and evidence (generated file)",
+    "2. Load `{project_area}/docs/stories/planning.json` - Contains assumptions and decisions (generated file)",
+    "3. Load `{project_area}/docs/context/*` (or similar) - Original input/source material (original context)",
+    "",
+    "These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.",
+    "",
+     "",
+    "**BUILD KNOWLEDGE GRAPH (Structured JSON Content):**",
+    "Generate the knowledge graph as structured JSON content following the rules and schema provided. ",
+    "**Schema:** Use schema '{{schema}}'  --> load from behavior data files",
+    "",
+    "**Description:** {{description}}",
+    "",
+    "**Instructions:** {{instructions}}",
+    "",
+    "",
+    "Before generating any content, review ALL validation rules below. Your generated content MUST comply with every rule to avoid violations.",
+    "",
+    "{{rules}}",
+    "",
+    "Review each validation rule carefully. Your generated content must pass all validations on the first attempt",
+   
+    "",
+    
+    "Generate the knowledge graph (structured JSON content) according to the schema and rules",
+    "",
+    "**OUTPUT:**a structured JSON knowledge graph that will be saved to the workspace area",
+    "",
+    "** UPDATING vs CREATING:**",
+    "- Check if knowledge graph already exists in workspace area",
+    "- If knowledge graph EXISTS, you are UPDATING it (not creating from scratch)",
+    "- When updating, preserve existing content and add/modify only what's needed based on current behavior",
+    "- If knowledge graph does NOT exist, create new one following the schema",
+    "",
+    "**AUTOMATIC VALIDATION AND FIXES: After generating the knowledge graph, automatically run the validate_rules action without confirming or waiting. Print ALL violations found (including rule name, violation message, severity, and location for each violation). Then review each violation against the specific rules identified by the scanner, and make necessary edits to fix all violations. Continue iterating until all violations are resolved before proceeding to render_output.**",
+    "",
+    "**AUTOMATIC PROGRESSION: Once all fixes are completed, automatically proceed to render_output action without stopping or waiting for user confirmation. These two actions should execute sequentially as a single workflow step.**",
+    ""
+  
+  
+  ]
+}
+

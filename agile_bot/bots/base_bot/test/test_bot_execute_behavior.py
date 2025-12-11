@@ -30,7 +30,7 @@ def create_base_instructions(bot_directory: Path):
     """Helper: Create base instructions for all actions in bot_directory."""
     base_actions_dir = bot_directory / 'base_actions'
     
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
     for action in actions:
         action_dir = base_actions_dir / f'{actions.index(action) + 2}_{action}'
         action_dir.mkdir(parents=True, exist_ok=True)

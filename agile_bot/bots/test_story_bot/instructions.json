@@ -7,12 +7,11 @@
   "behaviors": {
     "1_shape": "Create initial story map outline (epics, features, stories) from user context",
     "2_prioritization": "Organize stories into delivery increments based on value and dependencies",
-    "3_arrange": "Arrange stories within increments and identify execution order",
     "4_discovery": "Elaborate stories with user flows, domain rules, and integration points",
     "5_exploration": "Define acceptance criteria (Given/When/Then) for each story",
-    "6_specification_examples": "Create scenario outlines with examples tables for data-driven testing",
-    "7_specification_scenarios": "Write detailed plain-English scenarios (Given/When/Then) for each story",
-    "8_specification_tests": "Generate executable test code from scenarios"
+    "6_scenarios": "Write detailed plain-English scenarios (Given/When/Then) for each story",
+    "7_tests": "Generate executable test code from scenarios",
+    "8_code": "Review and validate code quality"
   },
   "instructions": [
     "**STORY BOT: Transform user needs into well-structured, testable stories**",
@@ -21,7 +20,7 @@
     "",
     "**ENTRY WORKFLOW:**",
     "1. Check {{project_area}}/docs/stories/ for artifacts",
-    "2. Suggest earliest missing stage (1_shape → 2_prioritization → 3_arrange → 4_discovery → 5_exploration → 6-8_specification*)",
+    "2. Suggest earliest missing stage (1_shape → 2_prioritization → 4_discovery → 5_exploration → 6-8_specification*)",
     "3. WAIT for user to confirm stage",
     "4. Read agile_bot/bots/story_bot/behaviors/[stage]/instructions.json and execute"
   ]

@@ -1,0 +1,7 @@
+{
+  "name": "build_knowledge",
+  "workflow": true,
+  "order": 3,
+  "next_action": "validate_rules"
+}
+

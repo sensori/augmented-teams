@@ -123,51 +123,47 @@ class ValidateRulesAction(BaseAction):
         # Identify content to validate
         content_info = self._identify_content_to_validate()
         
-        # Load story graph to run scanners
-        story_graph = None
+        # Load story graph to run scanners - REQUIRED, no fallback
+        story_graph_path = None
         for output in content_info.get('rendered_outputs', []):
             if 'story-graph.json' in output:
                 story_graph_path = Path(output)
-                if story_graph_path.exists():
-                    try:
-                        story_graph = read_json_file(story_graph_path)
-                        break
-                    except Exception as e:
-                        import logging
-                        logger = logging.getLogger(__name__)
-                        logger.warning(f"Failed to load story graph from {story_graph_path}: {e}")
+                break
         
-        # Run scanners if story graph is available
-        if story_graph:
-            # This method runs scanners and returns instructions with scanner results
-            result = self.injectValidationInstructions(story_graph)
-            
-            # Write validation report with scanner results
-            report_path = content_info.get('report_path')
-            if report_path:
-                try:
-                    instructions = result.get('instructions', {})
-                    validation_rules = instructions.get('validation_rules', [])
-                    self._write_validation_report(report_path, instructions, validation_rules, content_info)
-                except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to write validation report to {report_path}: {e}", exc_info=True)
-            
-            return result
-        else:
-            # Fallback: return instructions without scanner results (no story graph available)
-            rules_data = self.inject_behavior_specific_and_bot_rules()
-            action_instructions = rules_data.get('action_instructions', [])
-            validation_rules = rules_data.get('validation_rules', [])
-            
-            instructions = {
-                'action': 'validate_rules',
-                'behavior': self.behavior,
-                'base_instructions': action_instructions,
-                'validation_rules': validation_rules,
-                'content_to_validate': content_info
-            }
+        if not story_graph_path:
+            raise FileNotFoundError(
+                f"Story graph file (story-graph.json) not found in rendered outputs. "
+                f"Cannot validate rules without story graph. "
+                f"Expected story graph to be created by build_knowledge action before validate_rules."
+            )
+        
+        if not story_graph_path.exists():
+            raise FileNotFoundError(
+                f"Story graph file not found at {story_graph_path}. "
+                f"Cannot validate rules without story graph. "
+                f"Expected story graph to be created by build_knowledge action before validate_rules."
+            )
+        
+        # Load story graph - if file exists, loading MUST succeed
+        # This ensures syntax errors are reported, not hidden
+        story_graph = read_json_file(story_graph_path)
+        
+        # Run scanners with story graph
+        result = self.injectValidationInstructions(story_graph)
+        
+        # Write validation report with scanner results
+        report_path = content_info.get('report_path')
+        if report_path:
+            try:
+                instructions = result.get('instructions', {})
+                validation_rules = instructions.get('validation_rules', [])
+                self._write_validation_report(report_path, instructions, validation_rules, content_info)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to write validation report to {report_path}: {e}", exc_info=True)
+        
+        return result
             
             # Write validation report
             report_path = content_info.get('report_path')

@@ -1,6 +1,0 @@
-{
-  "behaviorName": "arrange",
-  "instructions": [
-    "For the arrange behavior, ensure you have the structured story graph content from prioritization phase. The story graph must exist before creating folder structure."
-  ]
-}

@@ -32,7 +32,7 @@ class TriggerTestSetup:
         self.workspace_directory = workspace_directory
         self.bot_name = bot_name
         self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'tests']
-        self.actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'render_output', 'validate_rules']
+        self.actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
         self.bot_config = None
     
     def setup_bot(self):
@@ -205,11 +205,11 @@ def create_base_action_instructions(workspace: Path, action: str) -> Path:
     """Helper: Create base action instructions file with numbered prefix."""
     action_prefixes = {
         'initialize_workspace': '1_initialize_workspace',
-        'gather_context': '2_gather_context',
-        'decide_planning_criteria': '3_decide_planning_criteria',
-        'validate_rules': '5_validate_rules',
-        'build_knowledge': '6_build_knowledge',
-        'render_output': '7_render_output'
+        'gather_context': '1_gather_context',
+        'decide_planning_criteria': '2_decide_planning_criteria',
+        'build_knowledge': '3_build_knowledge',
+        'render_output': '4_render_output',
+        'validate_rules': '5_validate_rules'
     }
     
     action_folder = action_prefixes.get(action, action)
@@ -242,7 +242,7 @@ def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
     
     # Create base action instructions
     for action in ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
-                   'build_knowledge', 'render_output', 'validate_rules']:
+                   'build_knowledge', 'validate_rules', 'render_output']:
         create_base_action_instructions(workspace_root, action)
     
     return bot_config

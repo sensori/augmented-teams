@@ -153,11 +153,11 @@ class BaseBotCli:
         
         # Check numbered format (e.g., 2_gather_context, 3_decide_planning_criteria)
         action_prefixes = {
-            'gather_context': '2_gather_context',
-            'decide_planning_criteria': '3_decide_planning_criteria',
-            'validate_rules': '5_validate_rules',
-            'build_knowledge': '6_build_knowledge',
-            'render_output': '7_render_output'
+            'gather_context': '1_gather_context',
+            'decide_planning_criteria': '2_decide_planning_criteria',
+            'build_knowledge': '3_build_knowledge',
+            'render_output': '4_render_output',
+            'validate_rules': '5_validate_rules'
         }
         
         action_folder = action_prefixes.get(action_name, action_name)
@@ -321,8 +321,11 @@ class BaseBotCli:
         elif 'continue' in cmd_name or 'help' in cmd_name:
             return 'No parameters'
         
-        # Default fallback
-        return f'Parameter {param_num}'
+        # No fallback - raise exception if we can't infer parameter description
+        raise ValueError(
+            f"Cannot infer parameter description for command '{cmd_name}', parameter {param_num}. "
+            f"This indicates a configuration error - parameter descriptions should be explicit."
+        )
     
     def _get_behavior_actions(self, behavior_obj) -> list:
         excluded_attrs = {'forward_to_current_action', 'dir', 'current_project_file'}

@@ -33,12 +33,12 @@ def create_test_workflow(
     )
     
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     
     return Workflow(
@@ -122,12 +122,12 @@ def test_workflow_falls_back_to_completed_actions_when_current_action_missing(bo
     }), encoding='utf-8')
     
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     
     workflow = Workflow(
@@ -138,8 +138,8 @@ def test_workflow_falls_back_to_completed_actions_when_current_action_missing(bo
         transitions=transitions
     )
     
-    # Then current_state should be decide_planning_criteria (next after last completed)
-    assert workflow.current_state == 'decide_planning_criteria'
+    # Then current_state should be validate_rules (next after last completed: build_knowledge)
+    assert workflow.current_state == 'validate_rules'
 
 
 def test_workflow_starts_at_first_action_when_no_workflow_state_file_exists(bot_directory, workspace_directory):
@@ -156,12 +156,12 @@ def test_workflow_starts_at_first_action_when_no_workflow_state_file_exists(bot_
     
     # When workflow is created
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     
     workflow = Workflow(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory, states=states, transitions=transitions)
@@ -175,7 +175,7 @@ def test_workflow_out_of_order_navigation_removes_completed_actions_after_target
     
     # Given workflow_state.json shows:
     #   - current_action: validate_rules (at the end)
-    #   - completed_actions: [gather_context, decide_planning_criteria, build_knowledge, render_output]
+    #   - completed_actions: [gather_context, decide_planning_criteria, build_knowledge, validate_rules]
     bot_name = 'story_bot'
     behavior = 'shape'
     completed = [
@@ -199,12 +199,12 @@ def test_workflow_out_of_order_navigation_removes_completed_actions_after_target
     
     # Create workflow with states
     states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'render_output', 'validate_rules']
+              'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
         {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
         {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
-        {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
+        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     
     workflow = Workflow(

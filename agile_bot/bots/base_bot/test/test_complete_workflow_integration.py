@@ -61,8 +61,8 @@ class TestCompleteWorkflowIntegration:
         actions_config = [
             ('gather_context', 2, 'decide_planning_criteria'),
             ('decide_planning_criteria', 3, 'build_knowledge'),
-            ('build_knowledge', 4, 'render_output'),
-            ('render_output', 5, 'validate_rules')
+            ('build_knowledge', 4, 'validate_rules'),
+            ('validate_rules', 5, 'render_output')
         ]
         
         for action_name, order, next_action in actions_config:
