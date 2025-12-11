@@ -1,0 +1,22 @@
+{
+  "8_code": {
+    "assumptions_made": {
+      "maintainability_readability": "Focus on maintainability and readability over performance optimizations",
+      "single_responsibility": "Single Responsibility Principle - Each function/class does one thing well",
+      "dependency_injection": "Dependency Injection - Dependencies passed through constructors where it makes sense",
+      "explicit_over_implicit": "Explicit over implicit - Make dependencies and behavior explicit",
+      "testability": "Testability - Code should be easy to test in isolation",
+      "language_idioms": "Respect language-specific idioms and patterns",
+      "tell_dont_ask": "Maximize 'tell don't ask' principle - keep internals of class internal",
+      "encapsulation": "Keep internals of class internal - maximize encapsulation"
+    },
+    "decisions_made": {
+      "architecture": "Simple module structure - Simple rule classes loaded on bot load, contain link to scanners and have property access to data like examples, descriptions, etc. Violations also simple DTO classes",
+      "dependency_management": "Constructor injection where it makes sense - Keep dependencies explicit and minimal",
+      "error_handling": "Exception-based - Use exceptions for error conditions, never swallow exceptions",
+      "programming_paradigm": "Object-oriented programming - Classes, objects, inheritance, polymorphism, encapsulation. Maximize OOP principles",
+      "properties_vs_methods": "Maximize use of properties - Maximize use of properties, keep internals of class internal, maximize 'tell don't ask' principle"
+    }
+  }
+}
+

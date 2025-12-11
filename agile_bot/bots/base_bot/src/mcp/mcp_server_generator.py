@@ -129,6 +129,9 @@ class MCPServerGenerator:
         # Register close current action tool (marks action complete and transitions)
         self.register_close_current_action_tool(mcp_server)
         
+        # Register confirm out-of-order tool (explicit human confirmation for skipping workflow sequence)
+        self.register_confirm_out_of_order_tool(mcp_server)
+        
         # Register restart server tool (terminates processes, clears cache, restarts)
         self.register_restart_server_tool(mcp_server)
         
@@ -137,20 +140,9 @@ class MCPServerGenerator:
             self.register_behavior_tool(mcp_server, behavior)
     
     def _normalize_name_for_tool(self, name: str) -> str:
-        # Strip number prefix (e.g., '1_shape' -> 'shape')
-        if name and name[0].isdigit() and '_' in name:
-            name = name.split('_', 1)[1]
-        
-        # Abbreviate common long words
-        abbreviations = {
-            'specification': 'spec',
-            'decide_planning_criteria': 'decide_planning',
-        }
-        
-        for full, abbrev in abbreviations.items():
-            name = name.replace(full, abbrev)
-        
-        return name
+        """Normalize behavior name using centralized utility."""
+        from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
+        return normalize_behavior_name(name)
     
     def register_bot_tool(self, mcp_server: FastMCP):
         tool_name = 'tool'
@@ -343,6 +335,78 @@ class MCPServerGenerator:
             'description': f'Marks current action complete and transitions to next'
         })
     
+    def register_confirm_out_of_order_tool(self, mcp_server: FastMCP):
+        tool_name = 'confirm_out_of_order'
+        
+        @mcp_server.tool(name=tool_name, description=f'Confirm out-of-order behavior execution for {self.bot_name} - MUST be called explicitly by HUMAN USER, NOT by AI assistant. AI must ask user to call this tool, never call it directly.')
+        async def confirm_out_of_order(behavior: str):
+            """Confirm that user wants to execute a behavior out of sequence.
+            
+            CRITICAL: This tool MUST be called by a HUMAN USER, NOT by the AI assistant.
+            When workflow order check requires confirmation, the AI must ask the user
+            to call this tool explicitly. The AI must never call this tool directly.
+            
+            Args:
+                behavior: The behavior name to confirm execution for (e.g., 'code', 'shape')
+            
+            Returns:
+                dict with status and confirmation details
+            """
+            if self.bot is None:
+                return {"error": "Bot not initialized"}
+            
+            from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+            working_dir = get_workspace_directory()
+            workflow_state_file = working_dir / 'workflow_state.json'
+            
+            if not workflow_state_file.exists():
+                return {
+                    "error": "No workflow state found",
+                    "message": "Cannot confirm out-of-order execution without an active workflow. Start a workflow first."
+                }
+            
+            try:
+                import json
+                from datetime import datetime
+                
+                state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
+                
+                # Normalize behavior name for consistent storage/retrieval using centralized utility
+                from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
+                normalized_behavior = normalize_behavior_name(behavior)
+                
+                # Store confirmation in workflow state (using normalized name)
+                if 'out_of_order_confirmations' not in state_data:
+                    state_data['out_of_order_confirmations'] = {}
+                
+                state_data['out_of_order_confirmations'][normalized_behavior] = {
+                    'confirmed_at': datetime.now().isoformat(),
+                    'confirmed_by': 'human',
+                    'original_behavior': behavior  # Store original for reference
+                }
+                
+                workflow_state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
+                
+                return {
+                    "status": "confirmed",
+                    "behavior": normalized_behavior,
+                    "original_behavior": behavior,
+                    "message": f"Out-of-order execution confirmed for behavior '{normalized_behavior}'. You may now execute this behavior.",
+                    "confirmed_at": state_data['out_of_order_confirmations'][normalized_behavior]['confirmed_at']
+                }
+                
+            except Exception as e:
+                return {
+                    "error": "Failed to confirm out-of-order execution",
+                    "message": str(e)
+                }
+        
+        self.registered_tools.append({
+            'name': tool_name,
+            'type': 'confirm_out_of_order_tool',
+            'description': f'Confirm out-of-order behavior execution (must be called explicitly by human)'
+        })
+    
     def register_restart_server_tool(self, mcp_server: FastMCP):
         tool_name = 'restart_server'
         
@@ -440,12 +504,29 @@ class MCPServerGenerator:
             # WORKFLOW ORDER ENFORCEMENT: Check if proceeding out of order
             matches, current_behavior, expected_next = self.bot.does_requested_behavior_match_current(behavior)
             if not matches and expected_next:
-                # Check if user already confirmed out-of-order execution
-                if parameters.get('confirm_out_of_order') == True:
-                    # User confirmed - proceed
-                    pass
-                else:
-                    # Out of order - ask for confirmation
+                # Check if user has explicitly confirmed out-of-order execution via confirm_out_of_order tool
+                import json
+                state_data = {}
+                if workflow_state_file.exists():
+                    try:
+                        state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
+                    except Exception:
+                        pass
+                
+                confirmations = state_data.get('out_of_order_confirmations', {})
+                # Normalize behavior name to match how confirmations are stored using centralized utility
+                is_confirmed = False
+                if behavior:
+                    try:
+                        from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
+                        normalized_behavior = normalize_behavior_name(behavior)
+                        is_confirmed = normalized_behavior in confirmations
+                    except Exception:
+                        # If normalization fails, fall back to direct comparison
+                        is_confirmed = behavior in confirmations
+                
+                if not is_confirmed:
+                    # Out of order - ask for explicit confirmation via confirm_out_of_order tool
                     return {
                         "status": "requires_confirmation",
                         "message": (
@@ -455,13 +536,14 @@ class MCPServerGenerator:
                             f"Requested behavior: `{behavior}`\n\n"
                             f"You are attempting to execute `{behavior}` out of sequence. "
                             f"The next behavior in sequence should be `{expected_next}`.\n\n"
-                            f"**Would you like to proceed with `{behavior}` anyway?**\n"
-                            f"Reply with confirmation to proceed out of order, or switch to `{expected_next}`."
+                            f"**To proceed, you must explicitly call the `confirm_out_of_order` tool with behavior `{behavior}`.**\n"
+                            f"This confirmation must be sent by a human explicitly."
                         ),
                         "current_behavior": current_behavior,
                         "expected_next": expected_next,
                         "requested_behavior": behavior,
-                        "confirmation_required": True
+                        "confirmation_required": True,
+                        "confirmation_tool": "confirm_out_of_order"
                     }
             
             behavior_obj = getattr(self.bot, behavior, None)
@@ -472,12 +554,24 @@ class MCPServerGenerator:
             if action:  # Only check if specific action was requested
                 matches, current_action, expected_next = behavior_obj.does_requested_action_match_current(action)
                 if not matches and expected_next:
-                    # Check if user already confirmed out-of-order execution
-                    if parameters.get('confirm_out_of_order') == True:
-                        # User confirmed - proceed
-                        pass
-                    else:
-                        # Out of order - ask for confirmation
+                    # Check if user has explicitly confirmed out-of-order execution via confirm_out_of_order tool
+                    import json
+                    state_data = {}
+                    if workflow_state_file.exists():
+                        try:
+                            state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
+                        except Exception:
+                            pass
+                    
+                    confirmations = state_data.get('out_of_order_confirmations', {})
+                    # For action-level confirmation, check if behavior is confirmed (actions inherit behavior confirmation)
+                    # Normalize behavior name to match how confirmations are stored using centralized utility
+                    from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
+                    normalized_behavior = normalize_behavior_name(behavior)
+                    is_confirmed = normalized_behavior in confirmations
+                    
+                    if not is_confirmed:
+                        # Out of order - ask for explicit confirmation via confirm_out_of_order tool
                         return {
                             "status": "requires_confirmation",
                             "message": (
@@ -487,13 +581,15 @@ class MCPServerGenerator:
                                 f"Requested action: `{action}`\n\n"
                                 f"You are attempting to execute `{action}` out of sequence. "
                                 f"The next action in sequence should be `{expected_next}`.\n\n"
-                                f"**Would you like to proceed with `{action}` anyway?**\n"
-                                f"Reply with confirmation to proceed out of order, or switch to `{expected_next}`."
+                                f"**To proceed, you must explicitly call the `confirm_out_of_order` tool with behavior `{behavior}`.**\n"
+                                f"This confirmation must be sent by a human explicitly."
                             ),
                             "current_action": current_action,
                             "expected_next": expected_next,
                             "requested_action": action,
-                            "confirmation_required": True
+                            "requested_behavior": behavior,
+                            "confirmation_required": True,
+                            "confirmation_tool": "confirm_out_of_order"
                         }
             
             # If action is specified, route to that action, otherwise use current action

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Optional
 import json
+import importlib
  
 from agile_bot.bots.base_bot.src.utils import read_json_file
 from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
@@ -151,6 +152,58 @@ class Behavior:
     def folder(self) -> Path:
         """Get behavior's folder path in behaviors directory."""
         return self.bot_directory / 'behaviors' / self.name
+    
+    @property
+    def rules(self) -> List['Rule']:
+        """Get all rules for this behavior (common + behavior-specific).
+        
+        Returns:
+            List of Rule objects, each with 0 or 1 scanner (accessed via rule.scanner).
+        """
+        from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction, Rule
+        action = ValidateRulesAction(
+            bot_name=self.bot_name,
+            behavior=self.name,
+            bot_directory=self.bot_directory
+        )
+        rules_data = action.inject_behavior_specific_and_bot_rules()
+        validation_rules = rules_data.get('validation_rules', [])
+        
+        # Convert rule dicts to Rule objects
+        rule_objects = []
+        for rule_dict in validation_rules:
+            if isinstance(rule_dict, dict):
+                rule_file = rule_dict.get('rule_file', 'unknown.json')
+                rule_content = rule_dict.get('rule_content', rule_dict)
+                
+                # Determine behavior name from rule file path
+                behavior_name = 'common'
+                if '/behaviors/' in rule_file:
+                    parts = rule_file.split('/behaviors/')
+                    if len(parts) > 1:
+                        behavior_part = parts[1].split('/')[0]
+                        if '_' in behavior_part:
+                            behavior_name = behavior_part.split('_', 1)[1]
+                
+                rule_obj = Rule(rule_file, rule_content, behavior_name)
+                rule_objects.append(rule_obj)
+        
+        return rule_objects
+    
+    @property
+    def scanners(self) -> List[type]:
+        """Get all scanners across all rules for this behavior.
+        
+        Returns:
+            List of scanner classes (all scanners from behavior.rules[x].scanner).
+            Wrapper for behavior.rules[x].scanner - collects scanners from all rules.
+        """
+        scanners = []
+        for rule in self.rules:
+            scanner = rule.scanner  # Each rule has 0 or 1 scanner
+            if scanner is not None:
+                scanners.append(scanner)
+        return scanners
     
     @staticmethod
     def find_behavior_folder(bot_directory: Path, bot_name: str, behavior_name: str) -> Path:
@@ -553,7 +606,7 @@ class Bot:
             if requested_matched is None:
                 matches = False
             elif requested_matched == current_behavior_matched:
-                # Requested behavior is the current behavior - always allow
+                # Requested behavior is the current behavior - always allow (re-execution)
                 matches = True
             elif expected_next is None:
                 # No expected next (at end of sequence) - allow
@@ -561,6 +614,15 @@ class Bot:
             else:
                 # Check if requested matches expected next
                 matches = (requested_matched == expected_next)
+            
+            # Log for debugging (can be removed later)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(
+                f"Behavior order check: requested={requested_behavior} ({requested_matched}), "
+                f"current={current_behavior} ({current_behavior_matched}), "
+                f"expected_next={expected_next}, matches={matches}"
+            )
             
             return (matches, current_behavior, expected_next)
             

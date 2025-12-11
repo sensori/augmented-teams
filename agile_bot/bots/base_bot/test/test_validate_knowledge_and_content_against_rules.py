@@ -203,9 +203,6 @@ class TestTrackActivityForValidateRulesAction:
         # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
         
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
-        
         # Given: Activity log initialized
         log_file = create_activity_log_file(workspace_directory)
         
@@ -231,9 +228,6 @@ class TestTrackActivityForValidateRulesAction:
         WHEN: validate_rules action finishes execution
         THEN: Activity logger creates completion entry with outputs and duration
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
-        
         # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
         
@@ -751,20 +745,25 @@ class TestDiscoversScanners:
         # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
         
+        # Given: Create test bot directory structure
+        test_bot_dir = repo_root / 'agile_bot' / 'bots' / 'test_story_bot'
+        test_bot_dir.mkdir(parents=True, exist_ok=True)
+        
         # Given: Create test rule files in filesystem (from Examples table - parameterized)
+        # Files need to be created relative to repo_root as specified in rule_file_paths
         setup_test_rules(repo_root, rule_file_paths, rule_file_content)
         
         # When: ValidateRulesAction loads rules and discovers scanners
         action = ValidateRulesAction(
             bot_name='test_story_bot',
             behavior='shape',
-            bot_directory=repo_root / 'agile_bot' / 'bots' / 'test_story_bot'
+            bot_directory=test_bot_dir
         )
         
         # When: Access scanners via Behavior
         # Behavior.scanners returns all scanners across all rules
         # Each rule has 0 or 1 scanner (accessed via rule.scanner)
-        behavior = Behavior('shape', 'test_story_bot', repo_root / 'agile_bot' / 'bots' / 'test_story_bot')
+        behavior = Behavior('shape', 'test_story_bot', test_bot_dir)
         
         # Access scanners through behavior (all scanners across all rules)
         scanners = behavior.scanners
@@ -1020,9 +1019,9 @@ class TestReportsViolations:
             bot_directory=repo_root / 'agile_bot' / 'bots' / 'test_story_bot'
         )
         
-        # Action should have violations from previous scanner execution
-        # Generate report from those violations
-        report = action.generate_report(report_format)
+        # Generate report with violations from test data (from Examples table)
+        # In real usage, violations would come from scanner execution via injectValidationInstructions()
+        report = action.generate_report(report_format, violations=violations_data)
         
         # Then: Report structure matches expected format
         assert 'violations' in report, "Report should contain violations key"
