@@ -92,8 +92,13 @@ class ActiveLanguageScanner(StoryScanner):
                 doc = nlp(name)
                 tokens = [token for token in doc if not token.is_punct]
                 
-                for token in tokens:
-                    if token.tag_ == 'VBG' and token.pos_ == 'NOUN':
+                for idx, token in enumerate(tokens):
+                    is_last = (idx == len(tokens) - 1)
+                    has_three_or_more_words = (len(tokens) >= 3)
+                    if token.tag_ == 'VBG' and token.pos_ == 'NOUN' and is_last:
+                        # Allow gerund as last word when name has 3 or more words (per user rule)
+                        if has_three_or_more_words:
+                            continue
                         if not any(exclude.lower() in name.lower() for exclude in ["User Story", "Epic", "Feature"]):
                             location = node.map_location()
                             return Violation(
@@ -103,7 +108,10 @@ class ActiveLanguageScanner(StoryScanner):
                                 severity='error'
                             ).to_dict()
                     
-                    if token.tag_ in ['NN', 'NNS'] and any(token.text.endswith(suffix) for suffix in ['ment', 'ance', 'ence']):
+                    if token.tag_ in ['NN', 'NNS'] and any(token.text.endswith(suffix) for suffix in ['ment', 'ance', 'ence']) and is_last:
+                        # Allow abstract-noun suffix as last word when name has 3 or more words (per user rule)
+                        if has_three_or_more_words:
+                            continue
                         if not any(exclude.lower() in name.lower() for exclude in ["User Story", "Epic", "Feature"]):
                             location = node.map_location()
                             return Violation(
@@ -115,13 +123,17 @@ class ActiveLanguageScanner(StoryScanner):
             except Exception:
                 pass
         
+        # Regex fallback: only flag if the last word ends with capability/gerund suffix
         capability_noun_patterns = [
-            r'\b[A-Z]\w+(ing|ment|ance|ence)\b',
-            r'\b[A-Z]\w+\s+[A-Z]\w+(ing|ment|ance|ence)\b',
+            r'\b[A-Z]\w+(ing|ment|ance|ence)\b$',
+            r'.*\s+[A-Z]\w+(ing|ment|ance|ence)\b$',
         ]
         
         for pattern in capability_noun_patterns:
             if re.search(pattern, name):
+                # Allow when the name has 3 or more words (per user rule)
+                if len(name.split()) >= 3:
+                    break
                 if not any(re.search(r'\b' + exclude + r'\b', name, re.IGNORECASE) for exclude in ["User Story", "Epic", "Feature"]):
                     location = node.map_location()
                     return Violation(

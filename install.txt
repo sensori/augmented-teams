@@ -1,0 +1,39 @@
+C:\Users\thoma\AppData\Roaming\Code\User\mcp.json
+
+
+{
+	"servers": {
+		"story-bot": {
+			"command": "python",
+			"args": [
+				"agile_bot/bots/story_bot/src/story_bot_mcp_server.py"
+			],
+			"cwd": "C:\\dev\\augmented-teams",
+			"env": {
+				"AGENT_NAME": "story_bot",
+				"PYTHONPATH": "C:\\dev\\augmented-teams",
+				"WORKING_AREA": "C:\\dev\\augmented-teams\\demo\\mob_minion"
+			}
+		}
+	}
+}
+
+
+or 
+
+
+
+C:\dev\augmented-teams\.vscode\settings.json
+"github.copilot.chat.mcp.servers": {
+    "story_bot": {
+        "command": "python",
+        "args": ["agile_bot/bots/story_bot/src/story_bot_mcp_server.py"],
+        "cwd": "${workspaceFolder}",
+        "env": {
+            "AGENT_NAME": "story_bot",
+            "PYTHONPATH": "${workspaceFolder}",
+            "BOT_DIRECTORY": "${workspaceFolder}/agile_bot/bots/story_bot",
+            "WORKING_AREA": "${workspaceFolder}/demo/mob_minion"
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿{
+{
     "python.defaultInterpreterPath":  "python",
     "python.testing.unittestArgs":  [
                                         "-v",
@@ -18,6 +18,13 @@
     "python.testing.autoTestDiscoverOnSaveEnabled":  true,
     "cursor.ai.autoAcceptFileWrites":  true,
     "cursor.general.autoAcceptFileWrites":  true,
+    "github.copilot.chat.participants": {
+        "story-bot": {
+            "name": "story-bot",
+            "description": "Story Bot - Agile story development assistant",
+            "mcpServers": ["story_bot"]
+        }
+    },
     "github.copilot.chat.mcp.servers":  {
                                             "story_bot":  {
                                                               "command":  "python",
@@ -27,7 +34,9 @@
                                                               "cwd":  "${workspaceFolder}",
                                                               "env":  {
                                                                           "AGENT_NAME":  "story_bot",
-                                                                          "PYTHONPATH":  "${workspaceFolder}"
+                                                                          "PYTHONPATH":  "${workspaceFolder}",
+                                                                          "BOT_DIRECTORY":  "${workspaceFolder}/agile_bot/bots/story_bot",
+                                                                          "WORKING_AREA":  "${workspaceFolder}/demo/mob_minion"
                                                                       }
                                                           }
                                         }
