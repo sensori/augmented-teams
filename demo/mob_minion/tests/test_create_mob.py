@@ -313,3 +313,9 @@ class TestDisplayMobCreationConfirmation:
         verify_mob_discarded(mob, foundry_actor_system)
         assert foundry_actor_system.get_mob(mob.id) is None
 
+
+
+
+
+
+

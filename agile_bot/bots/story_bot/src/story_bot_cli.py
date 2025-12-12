@@ -5,17 +5,17 @@ Story Bot CLI Entry Point
 Command-line interface for story_bot using BaseBotCli.
 
 Usage:
-    story_bot [behavior] [action] [--options]
+    story_bot [--behavior <name>] [--action <name>] [--options]
     story_bot --help          # Show help/usage documentation
     story_bot --list          # List available behaviors
-    story_bot <behavior> --list  # List available actions for behavior
+    story_bot --behavior <name> --list  # List available actions for behavior
     story_bot --close         # Close current action
 
 Examples:
-    story_bot                          # Route to current behavior/action from workflow state
-    story_bot exploration               # Route to exploration behavior, auto-forward to current action
-    story_bot exploration gather_context  # Route directly to exploration.gather_context action
-    story_bot exploration gather_context --increment_file=increment.txt  # With parameters
+    story_bot                                    # Route to current behavior/action from workflow state
+    story_bot --behavior exploration            # Route to exploration behavior, auto-forward to current action
+    story_bot --behavior exploration --action gather_context  # Route directly to exploration.gather_context action
+    story_bot --behavior exploration --action gather_context --increment_file=increment.txt  # With parameters
 """
 from pathlib import Path
 import sys
@@ -66,12 +66,12 @@ def main():
 
     bot_name = 'story_bot'
     bot_config_path = bot_directory / 'config' / 'bot_config.json'
-
+    
     cli = BaseBotCli(
         bot_name=bot_name,
-        bot_config_path=bot_config_path,
+        bot_config_path=bot_config_path
     )
-
+    
     cli.main()
 
 

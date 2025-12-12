@@ -94,6 +94,7 @@
           "name": "Create Mob",
           "sequential_order": 1,
           "estimated_stories": 5,
+          "source_file": "create_mob.js",
           "domain_concepts": [],
           "sub_epics": [],
           "story_groups": [
@@ -110,6 +111,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "TokenSelector",
                   "acceptance_criteria": [
                     "WHEN Game Master selects multiple minion tokens on Foundry canvas",
                     "THEN Foundry Token API returns array of selected token objects",
@@ -120,6 +122,7 @@
                     {
                       "name": "Game Master selects multiple tokens successfully",
                       "type": "happy_path",
+                      "function_name": "selectMultipleTokens",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And minion tokens exist on Foundry canvas"
@@ -166,6 +169,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "MobCreator",
                   "acceptance_criteria": [
                     "WHEN Game Master selects multiple tokens and initiates mob creation",
                     "THEN system creates new Mob entity containing selected tokens",
@@ -176,6 +180,7 @@
                     {
                       "name": "Game Master groups tokens into mob successfully",
                       "type": "happy_path",
+                      "function_name": "groupTokensIntoMob",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And Game Master has selected <token_count> minion tokens",
@@ -213,6 +218,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "MobCreationConfirmation",
                   "acceptance_criteria": [
                     "WHEN Mob is successfully created",
                     "THEN system displays confirmation dialog showing mob name and token count",
@@ -223,6 +229,7 @@
                     {
                       "name": "Game Master confirms mob creation",
                       "type": "happy_path",
+                      "function_name": "displayConfirmation",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And mob entity has been successfully created",
@@ -455,6 +462,7 @@
           "name": "Execute Mob Actions",
           "sequential_order": 4,
           "estimated_stories": 5,
+          "source_file": "execute_mob_actions.js",
           "domain_concepts": [
             {
               "name": "Action",
@@ -499,6 +507,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "MobCommandHandler",
                   "acceptance_criteria": [
                     "WHEN Game Master clicks any token belonging to mob",
                     "THEN system identifies mob associated with clicked token",
@@ -509,6 +518,7 @@
                     {
                       "name": "Game Master clicks mob token to command mob",
                       "type": "happy_path",
+                      "function_name": "identifyMobFromToken",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And mob exists with <token_count> minion tokens",
@@ -558,6 +568,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "TargetSelector",
                   "acceptance_criteria": [
                     "WHEN mob action is initiated",
                     "THEN system uses mob's assigned strategy to determine target",
@@ -568,6 +579,7 @@
                     {
                       "name": "System determines target using assigned strategy",
                       "type": "happy_path",
+                      "function_name": "determineTargetFromStrategy",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And mob exists with assigned strategy",
@@ -625,6 +637,7 @@
                     "Game Master"
                   ],
                   "story_type": "user",
+                  "class_name": "AttackExecutor",
                   "acceptance_criteria": [
                     "WHEN target is determined and attack action is selected",
                     "THEN system executes attack for all minions in mob via Foundry combat system",
@@ -635,6 +648,7 @@
                     {
                       "name": "System executes attack for all minions in mob",
                       "type": "happy_path",
+                      "function_name": "executeAttackAction",
                       "background": [
                         "Given Foundry VTT session is active",
                         "And mob exists with <token_count> minion tokens",

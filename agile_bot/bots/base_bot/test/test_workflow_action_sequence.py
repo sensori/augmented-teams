@@ -250,14 +250,14 @@ class TestBehaviorSpecificWorkflowOrder:
         
         # Given: A behavior with behavior-specific behavior.json file
         bot_name = 'story_bot'
-        behavior = '7_tests'
+        behavior = '7_write_tests'
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         
         # Create behavior-specific behavior.json with reversed order
         # (render_output before validate_rules for code generation behaviors)
         behavior_config = {
-            "behaviorName": "tests",
+            "behaviorName": "write_tests",
             "description": "Test behavior: tests",
             "goal": "Test goal for tests",
             "inputs": "Test inputs",
@@ -324,7 +324,7 @@ class TestBehaviorSpecificWorkflowOrder:
         
         # Given: Behavior folder exists but behavior.json is missing
         bot_name = 'story_bot'
-        behavior = '7_tests'
+        behavior = '7_write_tests'
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         
@@ -349,13 +349,13 @@ class TestBehaviorSpecificWorkflowOrder:
         
         # Given: Behavior with behavior.json file
         bot_name = 'story_bot'
-        behavior = '7_tests'
+        behavior = '7_write_tests'
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         
         # Create behavior-specific behavior.json with reversed order
         behavior_config = {
-            "behaviorName": "tests",
+            "behaviorName": "write_tests",
             "description": "Test behavior: tests",
             "goal": "Test goal for tests",
             "inputs": "Test inputs",
@@ -463,8 +463,8 @@ class TestBehaviorSpecificWorkflowOrder:
         knowledge_behavior_file = knowledge_behavior_dir / 'behavior.json'
         knowledge_behavior_file.write_text(json.dumps(knowledge_behavior_config), encoding='utf-8')
         
-        # And: Code generation behavior (7_tests) with reversed order
-        code_behavior = '7_tests'
+        # And: Code generation behavior (7_write_tests) with reversed order
+        code_behavior = '7_write_tests'
         code_behavior_dir = bot_directory / 'behaviors' / code_behavior
         code_behavior_dir.mkdir(parents=True, exist_ok=True)
         code_actions_workflow = {
@@ -486,7 +486,7 @@ class TestBehaviorSpecificWorkflowOrder:
             ]
         }
         code_behavior_config = {
-            "behaviorName": "tests",
+            "behaviorName": "write_tests",
             "description": "Test behavior: tests",
             "goal": "Test goal for tests",
             "inputs": "Test inputs",

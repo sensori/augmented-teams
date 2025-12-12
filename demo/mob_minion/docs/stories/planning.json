@@ -1,0 +1,27 @@
+{
+  "8_code": {
+    "decisions_made": {
+      "architecture_and_layering": "Simple module structure - Functions and classes organized by feature",
+      "dependency_management": "Constructor injection - All dependencies passed through constructors",
+      "error_handling_strategy": "Language-specific patterns - Use language idioms (Python exceptions, JS promises, etc.)",
+      "programming_paradigm": "Object-oriented programming - Classes, objects, inheritance, polymorphism, encapsulation",
+      "properties_vs_methods": "Language conventions - Follow language-specific conventions (Python @property, C# properties, etc.)"
+    },
+    "assumptions_made": [
+      "Focus on maintainability and readability over performance optimizations",
+      "Single Responsibility Principle - Each function/class does one thing well",
+      "Dependency Injection - Dependencies passed through constructors, not created internally",
+      "Immutability preferred - Minimize mutable state where possible",
+      "Explicit over implicit - Make dependencies and behavior explicit",
+      "Testability - Code should be easy to test in isolation",
+      "Respect language-specific idioms and patterns",
+      "Consider code context when generating or validating",
+      "Provide actionable suggestions for violations or improvements",
+      "Balance between strict adherence and practical constraints",
+      "When generating code, incorporate requirements from stories, domain maps, and BDD tests",
+      "When validating code, infer structure and intent from existing code",
+      "Properties vs methods decision determines how object state and behavior are exposed",
+      "Programming paradigm decision (functional/OOP/hybrid) guides overall code structure and patterns"
+    ]
+  }
+}

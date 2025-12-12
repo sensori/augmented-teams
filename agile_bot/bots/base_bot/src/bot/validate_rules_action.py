@@ -137,22 +137,6 @@ class ValidateRulesAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
-        # Set up file logging for debugging (early, so we can use it throughout)
-        import logging
-        import sys
-        log_file = self.workspace_directory / 'validation_debug.log'
-        debug_logger = logging.getLogger('validate_rules_debug')
-        try:
-            log_file.parent.mkdir(parents=True, exist_ok=True)
-            file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-            file_handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            file_handler.setFormatter(formatter)
-            debug_logger.addHandler(file_handler)
-            debug_logger.setLevel(logging.DEBUG)
-        except Exception as e:
-            pass  # debug_logger still exists, just no file handler
-        
         # Identify content to validate
         content_info = self._identify_content_to_validate()
         
@@ -240,7 +224,7 @@ class ValidateRulesAction(BaseAction):
         if scope_config.get('test_files'):
             test_files_to_scan.extend(scope_config['test_files'])
         
-        # Auto-discover test files if not provided and we're in 7_tests behavior
+        # Auto-discover test files if not provided and we're in 7_write_tests behavior
         if not test_files_to_scan:
             project_location = content_info.get('project_location')
             if project_location:
@@ -270,17 +254,10 @@ class ValidateRulesAction(BaseAction):
         # Find repo root by looking for common markers (starting from workspace and going up)
         repo_root = None
         current = workspace_path.resolve()  # Resolve to absolute path first
-        if debug_logger:
-            debug_logger.debug(f"[PATH RESOLUTION] Starting from workspace_path: {workspace_path}")
-            debug_logger.debug(f"[PATH RESOLUTION] Resolved absolute path: {current}")
         
         for i in range(10):  # Look up to 10 levels up
-            if debug_logger:
-                debug_logger.debug(f"[PATH RESOLUTION] Checking level {i}: {current}")
             if (current / '.git').exists() or (current / 'agile_bot').exists():
                 repo_root = current
-                if debug_logger:
-                    debug_logger.debug(f"[PATH RESOLUTION] Found repo root: {repo_root}")
                 break
             if current.parent == current:  # Reached filesystem root
                 break
@@ -302,32 +279,21 @@ class ValidateRulesAction(BaseAction):
                     repo_root = workspace_path.resolve().parent
             else:
                 repo_root = workspace_path.resolve().parent
-            if debug_logger:
-                debug_logger.debug(f"[PATH RESOLUTION] Using fallback repo root: {repo_root}")
         
         if test_files_to_scan:
             test_file_paths = []
             for tf in test_files_to_scan:
                 test_path = Path(tf)
-                if debug_logger:
-                    debug_logger.debug(f"[PATH RESOLUTION] Processing test file: {test_path}")
                 # If absolute path, use as-is
                 if test_path.is_absolute():
-                    if debug_logger:
-                        debug_logger.debug(f"[PATH RESOLUTION] Path is absolute, using as-is: {test_path}")
                     test_file_paths.append(test_path)
                 else:
                     # Always resolve against repo root (test files are relative to repo root)
                     if repo_root:
                         resolved_path = repo_root / test_path
-                        if debug_logger:
-                            debug_logger.debug(f"[PATH RESOLUTION] Resolved against repo_root {repo_root}: {resolved_path}")
-                            debug_logger.debug(f"[PATH RESOLUTION] Resolved path exists: {resolved_path.exists()}")
                         test_file_paths.append(resolved_path)
                     else:
                         # Fallback: resolve against workspace (shouldn't happen if repo_root detection works)
-                        if debug_logger:
-                            debug_logger.debug(f"[PATH RESOLUTION] No repo_root found, using workspace fallback")
                         resolved_path = self.workspace_directory / test_path
                         test_file_paths.append(resolved_path)
         else:
@@ -610,48 +576,18 @@ class ValidateRulesAction(BaseAction):
         
         Args:
             knowledge_graph: The knowledge graph to validate against
-            test_files: Optional list of test file paths for validation (not persisted in knowledge_graph)
-            code_files: Optional list of code file paths for validation (not persisted in knowledge_graph)
+            test_files: Optional list of test file paths for validation (passed directly to scanners)
+            code_files: Optional list of code file paths for validation (passed directly to scanners)
             
         Returns:
             Dictionary with 'instructions' containing rules with scanner_results
         """
-        # Set up file logging for debugging
-        import logging
-        import sys
-        log_file = self.workspace_directory / 'validation_debug.log'
-        print(f"[DEBUG] Setting up logging to: {log_file}", file=sys.stderr)
-        print(f"[DEBUG] Workspace directory: {self.workspace_directory}", file=sys.stderr)
-        
-        # Ensure log file can be created
-        try:
-            log_file.parent.mkdir(parents=True, exist_ok=True)
-            file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-            file_handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            file_handler.setFormatter(formatter)
-            debug_logger = logging.getLogger('validate_rules_debug')
-            debug_logger.addHandler(file_handler)
-            debug_logger.setLevel(logging.DEBUG)
-            # Also set up loggers for scanner modules
-            for logger_name in ['test_scanner_debug', 'real_implementations_scanner_debug']:
-                scanner_logger = logging.getLogger(logger_name)
-                scanner_logger.addHandler(file_handler)
-                scanner_logger.setLevel(logging.DEBUG)
-            print(f"[DEBUG] Logging setup complete. Log file: {log_file}", file=sys.stderr)
-        except Exception as e:
-            print(f"[DEBUG] Failed to set up logging: {e}", file=sys.stderr)
-            import traceback
-            traceback.print_exc(file=sys.stderr)
-        
         rules_data = self.inject_behavior_specific_and_bot_rules()
         action_instructions = rules_data.get('action_instructions', [])
         validation_rules = rules_data.get('validation_rules', [])
         
         # Process each rule: run scanner if exists, add results
         processed_rules = []
-        import sys
-        print(f"[VALIDATE_RULES] Processing {len(validation_rules)} validation rules", file=sys.stderr)
         for idx, rule_dict in enumerate(validation_rules):
             if isinstance(rule_dict, dict):
                 rule_content = rule_dict.get('rule_content', rule_dict)
@@ -659,10 +595,6 @@ class ValidateRulesAction(BaseAction):
                 
                 # Create Rule object for this rule
                 rule_file = rule_dict.get('rule_file', 'unknown.json')
-                print(f"[VALIDATE_RULES] Rule {idx+1}/{len(validation_rules)}: {rule_file}", file=sys.stderr)
-                print(f"[VALIDATE_RULES]   Has scanner: {scanner_path is not None}", file=sys.stderr)
-                if scanner_path:
-                    print(f"[VALIDATE_RULES]   Scanner path: {scanner_path}", file=sys.stderr)
                 behavior_name = 'common'
                 if '/behaviors/' in rule_file:
                     parts = rule_file.split('/behaviors/')
@@ -682,51 +614,6 @@ class ValidateRulesAction(BaseAction):
                         # Run scanner against knowledge graph
                         try:
                             scanner_instance = scanner_class()
-                            scanner_name = scanner_class.__name__
-                            
-                            # LOG BEFORE SCANNER CALL
-                            import sys
-                            print(f"[BEFORE SCANNER] About to call scanner: {scanner_name}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] Rule file: {rule_file}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] Scanner class: {scanner_class}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] Scanner instance created: {scanner_instance}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] test_files parameter: {test_files}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] test_files type: {type(test_files)}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] test_files is None: {test_files is None}", file=sys.stderr)
-                            if test_files:
-                                print(f"[BEFORE SCANNER] test_files count: {len(test_files)}", file=sys.stderr)
-                                for idx, tf in enumerate(test_files):
-                                    print(f"[BEFORE SCANNER]   test_files[{idx}]: {tf} (type: {type(tf)}, exists: {tf.exists() if hasattr(tf, 'exists') else 'N/A'})", file=sys.stderr)
-                            
-                            debug_logger.debug(f"[LOG validate_rules_action] Calling scanner: {scanner_name}")
-                            debug_logger.debug(f"[LOG validate_rules_action] test_files: {test_files}")
-                            debug_logger.debug(f"[LOG validate_rules_action] test_files type: {type(test_files)}")
-                            debug_logger.debug(f"[LOG validate_rules_action] test_files is None: {test_files is None}")
-                            if test_files:
-                                debug_logger.debug(f"[LOG validate_rules_action] test_files count: {len(test_files)}")
-                                for idx, tf in enumerate(test_files):
-                                    debug_logger.debug(f"[LOG validate_rules_action]   test_files[{idx}]: {tf} (type: {type(tf)}, exists: {tf.exists() if hasattr(tf, 'exists') else 'N/A'})")
-                            
-                            print(f"[BEFORE SCANNER] About to call scanner_instance.scan()", file=sys.stderr)
-                            print(f"[BEFORE SCANNER] Parameters being passed:", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   knowledge_graph type: {type(knowledge_graph)}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   knowledge_graph keys: {list(knowledge_graph.keys()) if isinstance(knowledge_graph, dict) else 'N/A'}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   rule_obj: {rule_obj}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   rule_obj type: {type(rule_obj)}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   test_files: {test_files}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   test_files type: {type(test_files)}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   test_files is None: {test_files is None}", file=sys.stderr)
-                            if test_files:
-                                print(f"[BEFORE SCANNER]   test_files length: {len(test_files)}", file=sys.stderr)
-                                for i, tf in enumerate(test_files):
-                                    print(f"[BEFORE SCANNER]     test_files[{i}]: {tf}", file=sys.stderr)
-                                    print(f"[BEFORE SCANNER]     test_files[{i}] type: {type(tf)}", file=sys.stderr)
-                                    if hasattr(tf, 'exists'):
-                                        print(f"[BEFORE SCANNER]     test_files[{i}] exists: {tf.exists()}", file=sys.stderr)
-                                    if hasattr(tf, '__str__'):
-                                        print(f"[BEFORE SCANNER]     test_files[{i}] str: {str(tf)}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   code_files: {code_files}", file=sys.stderr)
-                            print(f"[BEFORE SCANNER]   code_files type: {type(code_files)}", file=sys.stderr)
                             
                             # Pass test_files and code_files directly to scanners via scan() parameters
                             # Scanners get files from parameters, not from knowledge_graph
@@ -736,9 +623,6 @@ class ValidateRulesAction(BaseAction):
                                 test_files=test_files,
                                 code_files=code_files
                             )
-                            
-                            print(f"[AFTER SCANNER] Scanner {scanner_name} returned {len(violations) if isinstance(violations, list) else 'N/A'} violations", file=sys.stderr)
-                            debug_logger.debug(f"[LOG validate_rules_action] Scanner {scanner_name} returned {len(violations) if isinstance(violations, list) else 'N/A'} violations")
                             violations_list = violations if isinstance(violations, list) else []
                             
                             # Convert violations to dictionaries if they're Violation objects

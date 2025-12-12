@@ -10,7 +10,7 @@
     "",
     "**CRITICAL PURPOSE - WRITE CODE TO MAKE TESTS PASS:**",
     "",
-    "The code behavior is responsible for writing production code that makes all tests pass. Tests have already been created/updated in the tests behavior (7_tests). Your job is to implement the production code that satisfies those tests.",
+    "The code behavior is responsible for writing production code that makes all tests pass. Tests have already been created/updated in the tests behavior (7_write_tests). Your job is to implement the production code that satisfies those tests.",
     "",
     "**MANDATORY STEPS:**",
     "",

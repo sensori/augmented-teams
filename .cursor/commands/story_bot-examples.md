@@ -1,1 +1,0 @@
-python agile_bot/bots/story_bot/src/story_bot_cli.py --behavior examples --action ${1:}

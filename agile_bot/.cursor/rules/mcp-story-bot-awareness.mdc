@@ -76,9 +76,9 @@
 **When user is trying to:** Generate executable test code from scenarios  
 **as indicated by Trigger words:** generate.*test.*code, create.*test.*file, write.*pytest.*tests, implement.*step.*definitions, generate.*acceptance.*tests, create.*bdd.*tests, write.*test.*code, generate.*test.*implementation, create.*test.*cases, implement.*feature.*tests, specification.*tests, test.*code.*generation, bdd.*test.*code
 
-**Then check for:** `story_bot_tests_<action>` tool
+**Then check for:** `story_bot_write_tests_<action>` tool
 
-**Example:** "generate.*test.*code" → use `story_bot_tests_gather_context`
+**Example:** "generate.*test.*code" → use `story_bot_write_tests_gather_context`
 
 
 

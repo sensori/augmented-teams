@@ -1,0 +1,16 @@
+{
+  "rule_id": "helpers_inline_not_shared",
+  "description": "Helper functions must be inline in test file, not in separate shared helper file",
+  "rationale": "Helpers should be as local as possible to the tests using them. Keep helpers in the same test file unless they are truly reusable across multiple sub-epics (in which case they go in conftest.py).",
+  "examples": [
+    {
+      "correct": "# test_gather_context.py\n\n# HELPER FUNCTIONS\ndef create_activity_log_file(workspace: Path) -> Path:\n    \"\"\"Helper: Create activity log file.\"\"\"\n    ...\n\nclass TestTrackActivityForGatherContextAction:\n    def test_track_activity_when_action_starts(self, workspace_root):\n        log_file = create_activity_log_file(workspace_root)\n        ...",
+      "wrong": "# test_helpers.py (separate file)\ndef create_activity_log_file(workspace: Path) -> Path:\n    ...\n\n# test_gather_context.py\nfrom test_helpers import create_activity_log_file\n\nclass TestTrackActivity:\n    def test_something(self):\n        log_file = create_activity_log_file(...)"
+    }
+  ],
+  "validation": {
+    "check": "No imports from test_helpers.py or separate helper modules",
+    "error_message": "Helpers must be inline in test file, not imported from separate test_helpers.py"
+  },
+  "scanner": "agile_bot.bots.base_bot.src.scanners.inline_helpers_scanner.InlineHelpersScanner"
+}

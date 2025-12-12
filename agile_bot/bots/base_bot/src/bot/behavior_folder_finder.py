@@ -40,6 +40,7 @@ def normalize_behavior_name(name: str) -> str:
     abbreviations = {
         'specification': 'spec',
         'decide_planning_criteria': 'decide_planning',
+        'tests': 'write_tests',  # Avoid conflict with pytest "tests"
     }
     
     for full, abbrev in abbreviations.items():

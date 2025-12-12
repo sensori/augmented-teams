@@ -1,0 +1,73 @@
+{
+  "description": "Call production code directly - tests drive production code creation through RED-GREEN-REFACTOR. Let tests fail naturally if code doesn't exist. Don't comment out calls, mock business logic, or fake state. Only mock external boundaries (file I/O, network, APIs) when necessary. Separate business logic from side effects.",
+  "examples": [
+    {
+      "do": {
+        "description": "Call production code directly, let it fail naturally",
+        "content": [
+          "def test_agent_initializes_with_config(self, workspace_root):",
+          "    # Given",
+          "    config = {'name': 'story_bot'}",
+          "    ",
+          "    # When - Call production code directly",
+          "    agent = Agent(agent_name='story_bot', workspace_root=workspace_root)",
+          "    agent.initialize(config)",
+          "    ",
+          "    # Then",
+          "    assert agent.is_initialized",
+          "    # If initialize() doesn't exist, test fails with clear AttributeError"
+        ]
+      },
+      "dont": {
+        "description": "Comment out, mock business logic, or fake state",
+        "content": [
+          "def test_agent_initializes(self):",
+          "    # DON'T: Comment out production code",
+          "    # agent.initialize()  # WRONG - test should fail!",
+          "    ",
+          "    # DON'T: Mock the class you're testing",
+          "    agent = Mock(spec=Agent)  # WRONG - defeats purpose of test",
+          "    ",
+          "    # DON'T: Fake internal state",
+          "    agent._initialized = True  # WRONG - bypasses logic",
+          "    ",
+          "    # DON'T: Mock business logic",
+          "    with patch('agent.validate_config'):  # WRONG - test the logic!",
+          "        pass"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Only mock external boundaries when necessary",
+        "content": [
+          "def test_agent_loads_config_from_file(self, tmp_path):",
+          "    # Use real file I/O with temp directory",
+          "    config_file = tmp_path / 'config.json'",
+          "    config_file.write_text('{\"name\": \"story_bot\"}')",
+          "    ",
+          "    agent = Agent.from_config_file(config_file)",
+          "    assert agent.name == 'story_bot'",
+          "",
+          "# Only mock when external boundary unavailable:",
+          "def test_agent_fetches_remote_config(self):",
+          "    with patch('requests.get') as mock_get:",
+          "        mock_get.return_value.json.return_value = {'name': 'bot'}",
+          "        agent = Agent.from_remote_config('http://api.com/config')",
+          "        assert agent.name == 'bot'"
+        ]
+      },
+      "dont": {
+        "description": "Mock file I/O when you can use real temp files",
+        "content": [
+          "# DON'T: Mock file operations when temp files work",
+          "def test_agent_loads_config(self):",
+          "    with patch('pathlib.Path.read_text') as mock_read:",
+          "        mock_read.return_value = '{\"name\": \"bot\"}'",
+          "        # WRONG - use real temp file instead!"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.real_implementations_scanner.RealImplementationsScanner"
+}

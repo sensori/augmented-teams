@@ -156,11 +156,6 @@ def main():
     
     All subsequent code reads from these environment variables.
     """
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Run {self.bot_name} CLI')
-    args = parser.parse_args()
-
     # Get directories (these now just read from env vars we set above)
     bot_directory = get_bot_directory()
     workspace_directory = get_workspace_directory()
@@ -170,8 +165,7 @@ def main():
     
     cli = BaseBotCli(
         bot_name=bot_name,
-        bot_config_path=bot_config_path,
-        workspace_root=workspace_directory
+        bot_config_path=bot_config_path
     )
     
     cli.main()
@@ -235,11 +229,11 @@ if __name__ == '__main__':
     # Prefer setting WORKING_DIR explicitly for runtime file I/O. If not set,
     # derive a sensible default from the script location.
     if (-not $env:WORKING_DIR) {{
-        $env:WORKING_DIR = (Resolve-Path "$SCRIPT_DIR\..\..\..").Path
+        $env:WORKING_DIR = (Resolve-Path "$SCRIPT_DIR\\..\\..\\..").Path
     }}
 
     # Run Python CLI script (it resolves WORKING_AREA itself)
-    python "$SCRIPT_DIR\src\{self.bot_name}_cli.py" $args
+    python "$SCRIPT_DIR\\src\\{self.bot_name}_cli.py" $args
     '''
         
         script_file.write_text(script_content, encoding='utf-8')
@@ -270,14 +264,21 @@ if __name__ == '__main__':
         Returns:
             Dict mapping command names to cursor command file paths
         """
+        import os
         from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+        
+        # Set environment variables before creating BaseBotCli
+        bot_directory = self.workspace_root / self.bot_location
+        os.environ['BOT_DIRECTORY'] = str(bot_directory)
+        # Set a temporary WORKING_AREA if not already set
+        if 'WORKING_AREA' not in os.environ:
+            os.environ['WORKING_AREA'] = str(self.workspace_root)
         
         # Create BaseBotCli instance to use its generate_cursor_commands method
         bot_config_path = self.workspace_root / self.bot_location / 'config' / 'bot_config.json'
         cli = BaseBotCli(
             bot_name=self.bot_name,
-            bot_config_path=bot_config_path,
-            workspace_root=self.workspace_root
+            bot_config_path=bot_config_path
         )
         
         # Generate cursor commands in .cursor/commands directory

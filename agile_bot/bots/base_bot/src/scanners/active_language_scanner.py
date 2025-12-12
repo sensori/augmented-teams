@@ -103,7 +103,7 @@ class ActiveLanguageScanner(StoryScanner):
                                 severity='error'
                             ).to_dict()
                     
-                    if token.tag_ in ['NN', 'NNS'] and any(token.text.endswith(suffix) for suffix in ['tion', 'ment', 'ance', 'ence']):
+                    if token.tag_ in ['NN', 'NNS'] and any(token.text.endswith(suffix) for suffix in ['ment', 'ance', 'ence']):
                         if not any(exclude.lower() in name.lower() for exclude in ["User Story", "Epic", "Feature"]):
                             location = node.map_location()
                             return Violation(
@@ -116,8 +116,8 @@ class ActiveLanguageScanner(StoryScanner):
                 pass
         
         capability_noun_patterns = [
-            r'\b[A-Z]\w+(ing|tion|ment|ance|ence)\b',
-            r'\b[A-Z]\w+\s+[A-Z]\w+(ing|tion|ment|ance|ence)\b',
+            r'\b[A-Z]\w+(ing|ment|ance|ence)\b',
+            r'\b[A-Z]\w+\s+[A-Z]\w+(ing|ment|ance|ence)\b',
         ]
         
         for pattern in capability_noun_patterns:

@@ -1,0 +1,1 @@
+python agile_bot/bots/story_bot/src/story_bot_cli.py --behavior 6_scenarios --action ${1:}${2:+ }${2:}

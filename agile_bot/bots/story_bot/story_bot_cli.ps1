@@ -1,12 +1,14 @@
 # Story Bot CLI Wrapper (PowerShell)
 
-# Get script directory
-$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+    # Get script directory
+    $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Set WORKING_DIR environment variable rather than forcing a "workspace_root".
-# Tools/invokers should set WORKING_DIR explicitly. If not set, default to
-# repository root derived from the script location (development fallback).
-$env:WORKING_DIR = $env:WORKING_DIR -or (Resolve-Path "$SCRIPT_DIR\..\..\..").Path
+    # Prefer setting WORKING_DIR explicitly for runtime file I/O. If not set,
+    # derive a sensible default from the script location.
+    if (-not $env:WORKING_DIR) {
+        $env:WORKING_DIR = (Resolve-Path "$SCRIPT_DIR\..\..\..").Path
+    }
 
-# Run Python CLI script with all arguments passed through
-python "$SCRIPT_DIR\src\story_bot_cli.py" $args
+    # Run Python CLI script (it resolves WORKING_AREA itself)
+    python "$SCRIPT_DIR\src\story_bot_cli.py" $args
+    

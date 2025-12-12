@@ -1,0 +1,94 @@
+{
+  "description": "Use exact variable names from specification scenarios. When specification mentions specific variables (agent_name, workspace_root, config_path), use those exact names in tests and production code. Consistency in naming makes tests match specification exactly.",
+  "examples": [
+    {
+      "do": {
+        "description": "Exact variable names matching specification",
+        "content": [
+          "# Specification mentions: agent_name='story_bot', workspace_root, config_path",
+          "",
+          "# Test uses exact names from specification",
+          "def test_agent_initializes_with_config(self, workspace_root):",
+          "    # Given",
+          "    agent_name = 'story_bot'  # Exact name from spec",
+          "    config_path = workspace_root / 'config.json'  # Exact name from spec",
+          "    ",
+          "    # When",
+          "    agent = Agent(agent_name=agent_name, workspace_root=workspace_root)",
+          "    agent.initialize(config_path)",
+          "    ",
+          "    # Then",
+          "    assert agent.config_path == config_path  # Exact property name from spec",
+          "",
+          "# Production code uses same names",
+          "class Agent:",
+          "    def __init__(self, agent_name: str, workspace_root: Path):",
+          "        self.agent_name = agent_name  # Exact name from spec",
+          "        self.workspace_root = workspace_root  # Exact name from spec",
+          "        self.config_path = None  # Exact name from spec"
+        ]
+      },
+      "dont": {
+        "description": "Different variable names than specification",
+        "content": [
+          "# DON'T: Use different names than specification",
+          "# Specification says: agent_name, workspace_root, config_path",
+          "",
+          "def test_agent_init(self, tmp_path):",
+          "    # WRONG: Different names than specification",
+          "    name = 'story_bot'  # Should be: agent_name",
+          "    root = tmp_path  # Should be: workspace_root",
+          "    cfg_path = root / 'config.json'  # Should be: config_path",
+          "    ",
+          "    agent = Agent(name=name, root=root)  # WRONG",
+          "    agent.initialize(cfg_path)  # WRONG",
+          "",
+          "# DON'T: Production code with different names",
+          "class Agent:",
+          "    def __init__(self, name: str, root: Path):  # WRONG",
+          "        self.name = name  # Should be: agent_name",
+          "        self.root = root  # Should be: workspace_root",
+          "        self.cfg = None  # Should be: config_path"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Consistent naming across test and production",
+        "content": [
+          "# Specification: Agent loads domain_graph from domain_graph_path",
+          "",
+          "# Test uses exact specification terminology",
+          "def test_agent_loads_domain_graph(self, workspace_root):",
+          "    domain_graph_path = workspace_root / 'domain_graph.json'",
+          "    agent = Agent('bot', workspace_root)",
+          "    agent.load_domain_graph(domain_graph_path)",
+          "    assert agent.domain_graph is not None",
+          "",
+          "# Production code matches specification exactly",
+          "class Agent:",
+          "    def load_domain_graph(self, domain_graph_path: Path):",
+          "        self.domain_graph = json.loads(domain_graph_path.read_text())"
+        ]
+      },
+      "dont": {
+        "description": "Inconsistent naming causes confusion",
+        "content": [
+          "# DON'T: Mix different terms for same concept",
+          "# Specification says: domain_graph_path, domain_graph",
+          "",
+          "def test_agent_loads_graph(self, workspace_root):",
+          "    graph_file = workspace_root / 'graph.json'  # WRONG: not 'domain_graph_path'",
+          "    agent = Agent('bot', workspace_root)",
+          "    agent.load_domain_graph(graph_file)",
+          "    assert agent.graph is not None  # WRONG: should be 'domain_graph'",
+          "",
+          "class Agent:",
+          "    def load_domain_graph(self, path: Path):  # WRONG: vague 'path'",
+          "        self.graph = json.loads(path.read_text())  # WRONG: not 'domain_graph'"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.exact_variable_names_scanner.ExactVariableNamesScanner"
+}

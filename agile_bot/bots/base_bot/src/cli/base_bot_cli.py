@@ -428,20 +428,58 @@ class BaseBotCli:
         Handles:
         - Named parameters: --key=value
         - File paths: detected automatically (including Cursor @file references)
+        - test_files and code_files parameters (supports comma-separated or space-separated)
         - Any additional context passed as positional arguments
         """
         params = {}
+        i = 0
         
-        for arg in unknown_args:
+        while i < len(unknown_args):
+            arg = unknown_args[i]
             if not arg:
+                i += 1
                 continue
+                
             if '=' in arg:
                 # Named parameter: --key=value or key=value
                 key, value = arg.split('=', 1)
-                params[key.lstrip('--')] = value
+                key = key.lstrip('--')
+                
+                # Handle test_files and code_files - convert comma-separated to list
+                if key in ['test_files', 'code_files']:
+                    if ',' in value:
+                        # Comma-separated: --test_files=file1.py,file2.py
+                        params[key] = [f.strip() for f in value.split(',')]
+                    else:
+                        # Single file: --test_files=file1.py
+                        params[key] = value
+                else:
+                    params[key] = value
+                i += 1
+                    
+            elif arg in ['--test_files', '--code_files']:
+                # Handle --test_files file1.py file2.py format
+                key = arg.lstrip('--')
+                file_list = []
+                i += 1
+                # Collect all file paths that follow the flag
+                while i < len(unknown_args) and BaseBotCli._looks_like_file_path(unknown_args[i]):
+                    file_path = unknown_args[i].lstrip('@')
+                    file_list.append(file_path)
+                    i += 1
+                
+                if file_list:
+                    params[key] = file_list if len(file_list) > 1 else file_list[0]
+                else:
+                    # No files found after flag, skip
+                    i -= 1
+                    i += 1
+                    
             elif arg.startswith('--'):
                 # Flag argument (handled by argparse)
+                i += 1
                 continue
+                
             elif BaseBotCli._looks_like_file_path(arg):
                 # Looks like a file path
                 # If it starts with @, it's a Cursor file reference - remove the @
@@ -458,6 +496,7 @@ class BaseBotCli:
                             params['context_files'] = [params['context_files'], file_path]
                         else:
                             params['context_files'].append(file_path)
+                i += 1
             else:
                 # Other context - could be action name or other parameter
                 # If it looks like it might be an action (lowercase, underscores), check if we should treat as action
@@ -470,6 +509,7 @@ class BaseBotCli:
                         params['context'] = [params['context'], arg]
                     else:
                         params['context'].append(arg)
+                i += 1
         
         return params
     

@@ -2,7 +2,7 @@
 Validate Code Files Action
 
 Extends ValidateRulesAction to validate generated code files
-(test files for 7_tests behavior, source files for 8_code behavior).
+(test files for 7_write_tests behavior, source files for 8_code behavior).
 Files must be passed as parameters - no auto-discovery.
 """
 from pathlib import Path

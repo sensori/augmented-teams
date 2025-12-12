@@ -16,3 +16,9 @@ def foundry_vtt_core():
     core.session.is_active = True
     return core
 
+
+
+
+
+
+

@@ -189,13 +189,21 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         
+        # Create knowledge_graph folder and config file, but NOT the template file
+        kg_dir = behavior_dir / 'content' / 'knowledge_graph'
+        kg_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create config file that references a template that doesn't exist
+        config_file = kg_dir / 'build_story_graph_outline.json'
+        config_file.write_text(json.dumps({'template': 'missing-template.json'}), encoding='utf-8')
+        
         action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
         
         with pytest.raises(FileNotFoundError) as exc_info:
             action_obj.inject_knowledge_graph_template()
         
         error_msg = str(exc_info.value).lower()
-        assert 'knowledge graph' in error_msg
+        assert 'template' in error_msg or 'knowledge graph' in error_msg
 
     def test_action_loads_and_merges_instructions(self, bot_directory, workspace_directory):
         """

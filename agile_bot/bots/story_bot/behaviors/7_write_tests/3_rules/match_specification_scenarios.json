@@ -1,0 +1,72 @@
+{
+  "description": "CRITICAL: Test docstrings and assertions must match specification scenarios exactly. Test names and docstrings describe the behavior from specification. Assertions verify exactly what the scenario states - no more, no less. Use exact variable names and terminology from specification.",
+  "examples": [
+    {
+      "do": {
+        "description": "Test matches specification scenario exactly",
+        "content": [
+          "# Specification scenario:",
+          "# GIVEN: Base agent configuration exists",
+          "# WHEN: Agent is initialized with agent_name='story_bot'",
+          "# THEN: Agent sets up base agent configuration path at agents/base/agent.json",
+          "",
+          "def test_agent_initializes_with_base_config(self, workspace_root):",
+          "    \"\"\"",
+          "    SCENARIO: Agent initializes with base configuration",
+          "    GIVEN: Base agent configuration exists",
+          "    WHEN: Agent is initialized with agent_name='story_bot'",
+          "    THEN: Agent sets up configuration path at agents/base/agent.json",
+          "    \"\"\"",
+          "    # Given",
+          "    create_base_config(workspace_root)",
+          "    ",
+          "    # When",
+          "    agent = Agent(agent_name='story_bot', workspace_root=workspace_root)",
+          "    ",
+          "    # Then - verify EXACTLY what scenario states",
+          "    expected_path = workspace_root / \"agents\" / \"base\" / \"agent.json\"",
+          "    assert agent.config_path == expected_path"
+        ]
+      },
+      "dont": {
+        "description": "Test doesn't match specification",
+        "content": [
+          "# DON'T: Different terminology or missing context",
+          "def test_agent_init(self):",
+          "    \"\"\"Test agent.\"\"\"  # WRONG - vague, doesn't match spec",
+          "    agent = Agent('story_bot')",
+          "    assert agent.initialized  # WRONG - not in specification",
+          "",
+          "# DON'T: Assert things not in specification",
+          "def test_agent_initializes(self):",
+          "    # ...",
+          "    assert agent._internal_flag == True  # WRONG - internal detail",
+          "    assert agent.validate.called  # WRONG - implementation detail"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Use exact variable names from specification",
+        "content": [
+          "# Specification: agent_name='story_bot', workspace_root='/test/workspace'",
+          "",
+          "def test_with_exact_names(self):",
+          "    agent_name = 'story_bot'  # Exact name from spec",
+          "    workspace_root = Path('/test/workspace')  # Exact name from spec",
+          "    agent = Agent(agent_name=agent_name, workspace_root=workspace_root)"
+        ]
+      },
+      "dont": {
+        "description": "Different variable names than specification",
+        "content": [
+          "# DON'T: Use different names",
+          "def test_with_wrong_names(self):",
+          "    name = 'story_bot'  # WRONG - spec says 'agent_name'",
+          "    root = Path('/test')  # WRONG - spec says 'workspace_root'"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.specification_match_scanner.SpecificationMatchScanner"
+}

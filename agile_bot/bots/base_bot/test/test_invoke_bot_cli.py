@@ -31,7 +31,7 @@ class TriggerTestSetup:
         self.bot_directory = bot_directory
         self.workspace_directory = workspace_directory
         self.bot_name = bot_name
-        self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'tests']
+        self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'write_tests']
         self.actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
         self.bot_config = None
     
@@ -376,7 +376,7 @@ class TestDetectTriggerWordsThroughExtension:
             'exploration': 'begin the exploration phase',
             'scenarios': 'draft behavior scenarios',
             'examples': 'prepare usage examples',
-            'tests': 'design test coverage'
+            'write_tests': 'design test coverage'
         }
         
         setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_behavior_triggers(

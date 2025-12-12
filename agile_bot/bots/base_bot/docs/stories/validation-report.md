@@ -2,7 +2,7 @@
 
 **Generated:** 2025-12-10  
 **File Validated:** `agile_bot/bots/base_bot/test/test_validate_knowledge_and_content_against_rules.py`  
-**Rules Applied:** Tests Behavior Validation Rules (7_tests)
+**Rules Applied:** Tests Behavior Validation Rules (7_write_tests)
 
 ---
 

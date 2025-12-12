@@ -117,3 +117,9 @@ An **Actor** represents game entity data in Foundry VTT. Actors contain the game
 - Clarification data capturing user types, goals, and domain concepts
 - Story graph defining epics, sub-epics, and stories for mob management functionality
 
+
+
+
+
+
+
