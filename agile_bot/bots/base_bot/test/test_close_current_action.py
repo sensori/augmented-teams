@@ -14,6 +14,7 @@ from pathlib import Path
 from agile_bot.bots.base_bot.src.state.workflow import Workflow
 from agile_bot.bots.base_bot.src.bot.bot import Bot
 from conftest import bootstrap_env, create_workflow_state_file, create_bot_config_file
+from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
 
 
 # ============================================================================
@@ -181,9 +182,8 @@ class TestCloseCurrentAction:
         bot_name = 'story_bot'
         config_path = create_bot_config_file(bot_directory, bot_name, ['shape'])
         
-        # Create behavior folder
-        behavior_dir = bot_directory / 'behaviors' / 'shape'
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with behavior.json (REQUIRED)
+        create_actions_workflow_json(bot_directory, 'shape')
         
         bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_path)
         

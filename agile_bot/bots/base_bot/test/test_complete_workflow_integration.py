@@ -46,10 +46,34 @@ class TestCompleteWorkflowIntegration:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         config_path.write_text(json.dumps(config), encoding='utf-8')
         
-        # Create behavior folders
+        # Create behavior folders with behavior.json (REQUIRED)
         for behavior in ['shape', 'discovery']:
             behavior_dir = bot_directory / 'behaviors' / behavior
             behavior_dir.mkdir(parents=True, exist_ok=True)
+            behavior_config = {
+                "behaviorName": behavior,
+                "description": f"Test behavior: {behavior}",
+                "goal": f"Test goal for {behavior}",
+                "inputs": "Test inputs",
+                "outputs": "Test outputs",
+                "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+                "instructions": [f"Test instructions for {behavior}."],
+                "actions_workflow": {
+                    "actions": [
+                        {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
+                        {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
+                        {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
+                        {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                        {"name": "render_output", "order": 5}
+                    ]
+                },
+                "trigger_words": {
+                    "description": f"Trigger words for {behavior}",
+                    "patterns": [f"test.*{behavior}"],
+                    "priority": 10
+                }
+            }
+            (behavior_dir / 'behavior.json').write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
         
         # Create base_actions with next_action transitions
         # Use centralized utility to get base_actions directory

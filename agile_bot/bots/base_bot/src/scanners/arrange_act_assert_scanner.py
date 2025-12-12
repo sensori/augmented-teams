@@ -34,11 +34,11 @@ class ArrangeActAssertScanner(TestScanner):
         return violations
     
     def _check_aaa_structure(self, test_node: ast.FunctionDef, content: str, file_path: Path, rule_obj: Any) -> Optional[Dict[str, Any]]:
-        """Check if test follows AAA structure."""
+        """Check if test follows AAA structure AND has actual code."""
         # Get test function source
         test_lines = content.split('\n')
         start_line = test_node.lineno - 1
-        end_line = test_node.end_lineno if hasattr(test_node, 'end_lineno') else start_line + 20
+        end_line = test_node.end_lineno if hasattr(test_node, 'end_lineno') else start_line + 50
         
         test_body_lines = test_lines[start_line:end_line]
         test_body = '\n'.join(test_body_lines)
@@ -48,6 +48,25 @@ class ArrangeActAssertScanner(TestScanner):
         has_when = any('# When' in line or '# Act' in line for line in test_body_lines)
         has_then = any('# Then' in line or '# Assert' in line for line in test_body_lines)
         
+        # Check if there's actual code (not just comments and pass)
+        has_actual_code = False
+        if test_node.body:
+            for stmt in test_node.body:
+                if isinstance(stmt, ast.Pass):
+                    continue
+                elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, (ast.Constant, ast.Str)):
+                    # Skip docstrings
+                    continue
+                else:
+                    # Check for actual executable statements
+                    for node in ast.walk(stmt):
+                        if isinstance(node, (ast.Call, ast.Assign, ast.Assert, ast.Return, ast.Raise)):
+                            has_actual_code = True
+                            break
+                    if has_actual_code:
+                        break
+        
+        # Violation if missing AAA structure
         if not (has_given and has_when and has_then):
             line_number = test_node.lineno if hasattr(test_node, 'lineno') else None
             return Violation(
@@ -55,7 +74,18 @@ class ArrangeActAssertScanner(TestScanner):
                 violation_message=f'Test "{test_node.name}" does not follow Arrange-Act-Assert structure - add # Given/When/Then or # Arrange/Act/Assert comments',
                 location=str(file_path),
                 line_number=line_number,
-                severity='warning'
+                severity='error'
+            ).to_dict()
+        
+        # Violation if has AAA comments but no actual code
+        if not has_actual_code:
+            line_number = test_node.lineno if hasattr(test_node, 'lineno') else None
+            return Violation(
+                rule=rule_obj,
+                violation_message=f'Test "{test_node.name}" has AAA comments but no actual code - tests must call production code, not just contain comments and pass statements',
+                location=str(file_path),
+                line_number=line_number,
+                severity='error'
             ).to_dict()
         
         return None

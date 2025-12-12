@@ -1,0 +1,104 @@
+{
+  "behaviorName": "prioritization",
+  "description": "Organize stories into delivery increments based on business value, dependencies, and risk",
+  "goal": "Prioritize stories into increments for iterative delivery",
+  "inputs": "story-graph.json (shaped story map), business priorities, dependencies",
+  "outputs": "story-graph.json (with increments), story-map-increments.drawio, story-map-increments.md",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+    "",
+    "Perform each instruction action as specified in base_actions, tweaked for the prioritization behavior.",
+    "",
+    "**Action Sequence:**",
+    "**NOTE: Action order and action-specific instructions are determined by the actions_workflow section below. Always check that section for the correct sequence and instructions.**",
+    "",
+    "**Workflow Control:**",
+    "- **STOP for human feedback** when told to stop or when action requires user input",
+    "- **CONTINUE to next action** when told to proceed",
+    "- **STOP when complete** when all actions are finished"
+  ],
+  "actions_workflow": {
+    "actions": [
+      {
+        "name": "gather_context",
+        "order": 1,
+        "next_action": "decide_planning_criteria",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/1_gather_context/instructions.json, agile_bot/bots/story_bot/behaviors/2_prioritization/guardrails/required_context/instructions.json"
+        ]
+      },
+      {
+        "name": "decide_planning_criteria",
+        "order": 2,
+        "next_action": "build_knowledge",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/2_decide_planning_criteria/instructions.json, agile_bot/bots/story_bot/behaviors/2_prioritization/guardrails/planning/instructions.json"
+        ]
+      },
+      {
+        "name": "build_knowledge",
+        "order": 3,
+        "next_action": "validate_rules",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/3_build_knowledge/instructions.json, prioritization: build increment backlog",
+          "**When building increments, consider repeating stories where introducing similar behavior but with additional qualities mentioned in decision criteria for thin slicing spine.**",
+          "**Use adjective + Noun + Verb pattern for story names: <Adjective> <Noun> <Verb> (e.g., 'Manually Create Billing Report' vs 'Automatically Create Billing Report').**",
+          "**Name increments after the quality improvements they add (e.g., 'Automated Payment Processing', 'Dynamic Shipping Calculation', 'Admin Interface for Orders').**"
+        ]
+      },
+      {
+        "name": "validate_rules",
+        "order": 4,
+        "next_action": "render_output",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/4_validate_rules/instructions.json, prioritization: validate vertical slices"
+        ]
+      },
+      {
+        "name": "render_output",
+        "order": 5,
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json, prioritization: render increment backlog"
+        ]
+      }
+    ]
+  },
+  "trigger_words": {
+    "description": "Behavior-level trigger words - specific to prioritization/thin slicing behavior",
+    "patterns": [
+      "start.*prioritization",
+      "let.*s.*prioritize",
+      "begin.*prioritization",
+      "do.*prioritization",
+      "prioritization",
+      "prioritize",
+      "rank.*epics",
+      "value.*based.*order",
+      "decide.*what.*first",
+      "slice.*",
+      "group.*by.*value",
+      "group.*by.*risk",
+      "group.*by.*assumption",
+      "define.*thin.*slice",
+      "organize.*map",
+      "plan.*mvp.*delivery",
+      "choose.*mvp",
+      "decide.*initial.*release",
+      "pick.*first.*slice",
+      "stack.*by.*impact",
+      "delivery.*sequence",
+      "delivery.*order",
+      "assumption.*driven.*planning",
+      "cost.*of.*delay",
+      "delivery.*strategy",
+      "validate.*risk.*first",
+      "learn.*fast.*slice",
+      "test.*value.*proposition",
+      "explore.*release.*path"
+    ],
+    "priority": 9
+  }
+}
+
+

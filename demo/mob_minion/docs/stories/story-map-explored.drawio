@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+<mxfile host="65bd71144e">
+  <diagram id="story-map" name="Story Map">
+    <mxGraphModel dx="2656" dy="1035" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="epic-group" value="" style="group" parent="1" vertex="1" connectable="0">
+          <mxGeometry x="0" y="0" width="1674" height="190" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="Manage Mobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="20" y="120" width="1654" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1" value="Create Mob" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="20" y="200" width="822" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="user_e1f1s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="290" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s1" value="Select Multiple Tokens" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master selects multiple minion tokens on Foundry canvas&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; Foundry Token API returns array of selected token objects&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master selects zero tokens&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s1_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system shows error message indicating at least one token must be selected&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="22" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s2" value="Group Tokens Into Mob" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master selects multiple tokens and initiates mob creation&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system creates new Mob entity containing selected tokens&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Mob is created&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s2_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; all tokens in mob are linked to mob entity via Foundry Token API&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="292" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f1s3" value="Display Mob Creation Confirmation" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Mob is successfully created&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system displays confirmation dialog showing mob name and token count&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master confirms mob creation&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f1s3_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; mob is persisted in Foundry actor system&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="562" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f2" value="Execute Mob Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="852" y="200" width="822" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="user_e1f2s1_Game Master" value="Game Master" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="290" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f2s1" value="Click Mob Token To Command" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s1_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;Game Master clicks any token belonging to mob&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s1_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system identifies mob associated with clicked token&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s1_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob is identified&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s1_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system prepares to execute action for all minions in mob&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="854" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f2s2" value="Determine Target From Strategy" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1124" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s2_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;mob action is initiated&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1124" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s2_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system uses mob's assigned strategy to determine target&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1124" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s2_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;target is determined&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1124" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s2_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system selects appropriate enemy based on strategy rules using Foundry combat system&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1124" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1f2s3" value="Execute Attack Action" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1394" y="350" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s3_0" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;target is determined and attack action is selected&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1394" y="410" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s3_1" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; system executes attack for all minions in mob via Foundry combat system&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1394" y="480" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s3_2" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;WHEN&lt;/b&gt;&amp;nbsp;attack is executed&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1394" y="550" width="250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ac_e1f2s3_3" value="&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;THEN&lt;/b&gt; all minions perform attack action against selected target&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="1394" y="620" width="250" height="60" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

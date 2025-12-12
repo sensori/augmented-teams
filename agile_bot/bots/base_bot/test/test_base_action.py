@@ -8,7 +8,8 @@ import pytest
 from pathlib import Path
 import json
 from agile_bot.bots.base_bot.test.test_helpers import (
-    bootstrap_env, read_activity_log, create_activity_log_file, create_workflow_state
+    bootstrap_env, read_activity_log, create_activity_log_file, create_workflow_state,
+    create_actions_workflow_json
 )
 
 # ============================================================================
@@ -60,6 +61,19 @@ class TestInjectNextBehaviorReminder:
         
         # Given: bot_config.json with behavior sequence
         create_bot_config(bot_directory, ['shape', 'prioritization', 'arrange', 'discovery'])
+        
+        # Given: behavior.json with validate_rules as final action
+        create_actions_workflow_json(
+            bot_directory=bot_directory,
+            behavior_name='shape',
+            actions=[
+                {'name': 'gather_context', 'order': 1, 'next_action': 'decide_planning_criteria'},
+                {'name': 'decide_planning_criteria', 'order': 2, 'next_action': 'build_knowledge'},
+                {'name': 'build_knowledge', 'order': 3, 'next_action': 'render_output'},
+                {'name': 'render_output', 'order': 4, 'next_action': 'validate_rules'},
+                {'name': 'validate_rules', 'order': 5}
+            ]
+        )
         
         # Given: Base action instructions exist
         from agile_bot.bots.base_bot.src.state.workspace import get_base_actions_directory

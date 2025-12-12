@@ -649,22 +649,38 @@ class MCPServerGenerator:
         except FileNotFoundError:
             return []
         
-        # Determine trigger words path
+        # Load from behavior.json (new format)
+        behavior_file = behavior_folder / 'behavior.json'
+        if behavior_file.exists():
+            try:
+                behavior_data = read_json_file(behavior_file)
+                if action:
+                    # Action-level trigger words - still check action folder for now
+                    trigger_path = behavior_folder / action / 'trigger_words.json'
+                    if trigger_path.exists():
+                        trigger_data = read_json_file(trigger_path)
+                        return trigger_data.get('patterns', [])
+                else:
+                    # Behavior-level trigger words from behavior.json
+                    trigger_words = behavior_data.get('trigger_words', {})
+                    return trigger_words.get('patterns', [])
+            except Exception:
+                pass
+        
+        # Fallback to old format for backward compatibility
         if action:
-            # Action-level trigger words
             trigger_path = behavior_folder / action / 'trigger_words.json'
         else:
-            # Behavior-level trigger words
             trigger_path = behavior_folder / 'trigger_words.json'
         
-        if not trigger_path.exists():
-            return []
+        if trigger_path.exists():
+            try:
+                trigger_data = read_json_file(trigger_path)
+                return trigger_data.get('patterns', [])
+            except Exception:
+                pass
         
-        try:
-            trigger_data = read_json_file(trigger_path)
-            return trigger_data.get('patterns', [])
-        except Exception:
-            return []
+        return []
     
     def generate_bot_config_file(self, behaviors: list) -> Path:
         config_dir = self.bot_directory / 'config'
@@ -826,27 +842,40 @@ if __name__ == '__main__':
         bot_config = read_json_file(self.config_path)
         behaviors = bot_config.get('behaviors', [])
         
-        # Load instructions.json for goal and behavior descriptions
+        # Load bot-level instructions.json for goal and description
         instructions_path = self.bot_directory / 'instructions.json'
         bot_goal = ''
         bot_description = ''
-        behavior_descriptions = {}
         
         if instructions_path.exists():
             instructions = read_json_file(instructions_path)
             bot_goal = instructions.get('goal', '')
             bot_description = instructions.get('description', '')
-            behavior_descriptions = instructions.get('behaviors', {})
         
-        # Collect trigger words from all behaviors
+        # Collect trigger words and descriptions from all behaviors (from behavior.json)
         behavior_trigger_words = {}
+        behavior_descriptions = {}
         for behavior in behaviors:
-            trigger_words = self._load_trigger_words_from_behavior_folder(
-                behavior=behavior,
-                action=None  # Get behavior-level trigger words
-            )
-            if trigger_words:
-                behavior_trigger_words[behavior] = trigger_words
+            # Load from behavior.json (new format)
+            from agile_bot.bots.base_bot.src.bot.bot import Behavior
+            try:
+                behavior_folder = Behavior.find_behavior_folder(
+                    self.bot_directory,
+                    self.bot_name,
+                    behavior
+                )
+                behavior_file = behavior_folder / 'behavior.json'
+                if behavior_file.exists():
+                    behavior_data = read_json_file(behavior_file)
+                    behavior_descriptions[behavior] = behavior_data.get('description', '')
+                    trigger_words = self._load_trigger_words_from_behavior_folder(
+                        behavior=behavior,
+                        action=None  # Get behavior-level trigger words
+                    )
+                    if trigger_words:
+                        behavior_trigger_words[behavior] = trigger_words
+            except FileNotFoundError:
+                pass
         
         # Build behavior sections (one section per behavior)
         behavior_sections = []
@@ -854,11 +883,10 @@ if __name__ == '__main__':
             behavior_display_name = behavior.replace('_', ' ').title()
             trigger_words = behavior_trigger_words.get(behavior, [])
             
-            # Get behavior description from instructions.json
-            # Handle numbered keys (1_shape) and non-numbered keys (shape)
+            # Get behavior description from behavior.json (already loaded above)
             behavior_desc = behavior_descriptions.get(behavior, '')
-            if not behavior_desc and behavior in behaviors:
-                # Try with number prefix
+            if not behavior_desc:
+                # Try with number prefix lookup
                 for key in behavior_descriptions.keys():
                     if key.endswith(behavior) or key.endswith(f'_{behavior}'):
                         behavior_desc = behavior_descriptions[key]

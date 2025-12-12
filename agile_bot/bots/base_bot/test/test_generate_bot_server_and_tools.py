@@ -320,6 +320,11 @@ class TestGenerateBehaviorActionTools:
         create_base_actions_structure(bot_dir)
         config_file = create_bot_config(workspace_root, bot_name, behaviors)
         
+        # Create behavior.json files for all behaviors (REQUIRED after refactor)
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        for behavior in behaviors:
+            create_actions_workflow_json(bot_dir, behavior)
+        
         # Bootstrap environment before importing/creating generator
         workspace_directory = workspace_root / 'workspace'
         workspace_directory.mkdir(parents=True, exist_ok=True)
@@ -352,20 +357,28 @@ class TestGenerateBehaviorActionTools:
         WHEN: Generator creates behavior tool
         THEN: Behavior tool is registered with trigger patterns in description
         """
-        # Given: Trigger words file exists at behavior level
+        # Given: Trigger words in behavior.json (new format)
         bot_name = 'test_bot'
         behavior = 'shape'
         patterns = ['shape.*story', 'start.*mapping', 'story.*discovery']
         
         config_file = create_bot_config(workspace_root, bot_name, [behavior])
-        # Create trigger words at behavior level (not action level)
-        behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
-        trigger_file = behavior_dir / 'trigger_words.json'
-        trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
+        # Create behavior.json file with custom trigger words (REQUIRED after refactor)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        create_actions_workflow_json(bot_dir, behavior)
+        # Update behavior.json with custom trigger words (code reads from behavior.json now)
+        behavior_dir = bot_dir / 'behaviors' / behavior
+        behavior_file = behavior_dir / 'behavior.json'
+        behavior_data = json.loads(behavior_file.read_text())
+        behavior_data['trigger_words'] = {
+            'description': f'Trigger words for {behavior}',
+            'patterns': patterns,
+            'priority': 10
+        }
+        behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
         
         # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
         workspace_directory = workspace_root / 'workspace'
         workspace_directory.mkdir(parents=True, exist_ok=True)
         bootstrap_env(bot_dir, workspace_directory)
@@ -390,14 +403,23 @@ class TestGenerateBehaviorActionTools:
         WHEN: Generator creates behavior tool
         THEN: Behavior tool registered without trigger patterns
         """
-        # Given: No trigger words file exists at behavior level
+        # Given: Behavior exists but no trigger words in behavior.json
         bot_name = 'test_bot'
         behavior = 'shape'
         
         config_file = create_bot_config(workspace_root, bot_name, [behavior])
+        # Create behavior.json file without trigger words (REQUIRED after refactor)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        create_actions_workflow_json(bot_dir, behavior)
+        # Remove trigger_words from behavior.json to test missing trigger words
+        behavior_dir = bot_dir / 'behaviors' / behavior
+        behavior_file = behavior_dir / 'behavior.json'
+        behavior_data = json.loads(behavior_file.read_text())
+        behavior_data.pop('trigger_words', None)
+        behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
         
         # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
         workspace_directory = workspace_root / 'workspace'
         workspace_directory.mkdir(parents=True, exist_ok=True)
         bootstrap_env(bot_dir, workspace_directory)
@@ -441,9 +463,9 @@ class TestGenerateBehaviorActionTools:
         # Create base instructions (needed for action execution)
         create_base_instructions(bot_dir)
         
-        # Create behavior folder
-        behavior_dir = bot_dir / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with behavior.json (REQUIRED)
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        create_actions_workflow_json(bot_dir, behavior)
         
         # When: Call REAL MCPServerGenerator to register behavior tool
         from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
@@ -495,8 +517,13 @@ class TestDeployMCPBotServer:
         config_file = create_bot_config(workspace_root, bot_name, behaviors)
         create_base_server_template(workspace_root)
         
-        # Bootstrap environment before importing/creating deployer
+        # Create behavior.json files for all behaviors (REQUIRED after refactor)
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        for behavior in behaviors:
+            create_actions_workflow_json(bot_dir, behavior)
+        
+        # Bootstrap environment before importing/creating deployer
         workspace_directory = workspace_root / 'workspace'
         workspace_directory.mkdir(parents=True, exist_ok=True)
         bootstrap_env(bot_dir, workspace_directory)
@@ -529,6 +556,10 @@ class TestDeployMCPBotServer:
         patterns = ['shape.*story', 'start.*mapping']
         
         config_file = create_bot_config(workspace_root, bot_name, [behavior])
+        # Create behavior.json file (REQUIRED after refactor)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        create_actions_workflow_json(bot_dir, behavior)
         # Create trigger words at behavior level (not action level)
         behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
@@ -536,7 +567,6 @@ class TestDeployMCPBotServer:
         trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
         
         # Bootstrap environment before importing/creating deployer
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
         workspace_directory = workspace_root / 'workspace'
         workspace_directory.mkdir(parents=True, exist_ok=True)
         bootstrap_env(bot_dir, workspace_directory)
@@ -654,21 +684,37 @@ class TestGenerateCursorAwarenessFiles:
             'behaviors': behaviors
         }), encoding='utf-8')
         
-        # Create trigger_words.json for shape behavior
+        # Create behavior.json files for behaviors (REQUIRED after refactor)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        
+        # Create behavior.json files with trigger words (new format - trigger words in behavior.json)
         shape_behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
         shape_behavior_dir.mkdir(parents=True, exist_ok=True)
-        shape_trigger_file = shape_behavior_dir / 'trigger_words.json'
-        shape_trigger_file.write_text(json.dumps({
-            'patterns': ['shape story', 'define story outline', 'create story map']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '1_shape')
+        # Update behavior.json with trigger words (code reads from behavior.json now)
+        shape_behavior_file = shape_behavior_dir / 'behavior.json'
+        shape_behavior_data = json.loads(shape_behavior_file.read_text())
+        shape_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for shape',
+            'patterns': ['shape story', 'define story outline', 'create story map'],
+            'priority': 10
+        }
+        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
         
-        # Create trigger_words.json for discovery behavior
+        # Create behavior.json for discovery behavior with trigger words
         discovery_behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
         discovery_behavior_dir.mkdir(parents=True, exist_ok=True)
-        discovery_trigger_file = discovery_behavior_dir / 'trigger_words.json'
-        discovery_trigger_file.write_text(json.dumps({
-            'patterns': ['discover stories', 'break down stories', 'enumerate stories']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '4_discovery')
+        # Update behavior.json with trigger words
+        discovery_behavior_file = discovery_behavior_dir / 'behavior.json'
+        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
+        discovery_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for discovery',
+            'patterns': ['discover stories', 'break down stories', 'enumerate stories'],
+            'priority': 10
+        }
+        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
         
         # Bootstrap environment before importing/creating generator
         bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
@@ -755,18 +801,37 @@ class TestGenerateCursorAwarenessFiles:
             }
         }), encoding='utf-8')
         
-        # Create trigger words
+        # Create behavior.json files with descriptions and trigger words (new format)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        
         shape_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
         shape_dir.mkdir(parents=True, exist_ok=True)
-        (shape_dir / 'trigger_words.json').write_text(json.dumps({
-            'patterns': ['shape story', 'create story map']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '1_shape')
+        # Update behavior.json with description and trigger words
+        shape_behavior_file = shape_dir / 'behavior.json'
+        shape_behavior_data = json.loads(shape_behavior_file.read_text())
+        shape_behavior_data['description'] = 'Create initial story map outline from user context'
+        shape_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for shape',
+            'patterns': ['shape story', 'create story map'],
+            'priority': 10
+        }
+        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
         
         discovery_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
         discovery_dir.mkdir(parents=True, exist_ok=True)
-        (discovery_dir / 'trigger_words.json').write_text(json.dumps({
-            'patterns': ['discover stories', 'elaborate stories']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '4_discovery')
+        # Update behavior.json with description and trigger words
+        discovery_behavior_file = discovery_dir / 'behavior.json'
+        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
+        discovery_behavior_data['description'] = 'Elaborate stories with user flows and domain rules'
+        discovery_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for discovery',
+            'patterns': ['discover stories', 'elaborate stories'],
+            'priority': 10
+        }
+        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
         
         # When: Generate awareness files
         from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
@@ -815,19 +880,36 @@ class TestGenerateCursorAwarenessFiles:
             'behaviors': ['shape', 'discovery']
         }), encoding='utf-8')
         
-        # Create trigger words for shape
+        # Create behavior.json files with trigger words (new format)
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        
         shape_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
         shape_dir.mkdir(parents=True, exist_ok=True)
-        (shape_dir / 'trigger_words.json').write_text(json.dumps({
-            'patterns': ['shape story', 'define outline']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '1_shape')
+        # Update behavior.json with trigger words
+        shape_behavior_file = shape_dir / 'behavior.json'
+        shape_behavior_data = json.loads(shape_behavior_file.read_text())
+        shape_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for shape',
+            'patterns': ['shape story', 'define outline'],
+            'priority': 10
+        }
+        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
         
-        # Create trigger words for discovery
+        # Create behavior.json for discovery with trigger words
         discovery_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
         discovery_dir.mkdir(parents=True, exist_ok=True)
-        (discovery_dir / 'trigger_words.json').write_text(json.dumps({
-            'patterns': ['discover stories', 'enumerate stories']
-        }), encoding='utf-8')
+        create_actions_workflow_json(bot_dir, '4_discovery')
+        # Update behavior.json with trigger words
+        discovery_behavior_file = discovery_dir / 'behavior.json'
+        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
+        discovery_behavior_data['trigger_words'] = {
+            'description': 'Trigger words for discovery',
+            'patterns': ['discover stories', 'enumerate stories'],
+            'priority': 10
+        }
+        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
         
         # When: Generate awareness files
         from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator

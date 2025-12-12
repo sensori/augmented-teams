@@ -19,7 +19,13 @@ class VerticalSliceScanner(StoryScanner):
         # It needs to check increment structure
         return violations
     
-    def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
+    def scan(
+        self, 
+        knowledge_graph: Dict[str, Any], 
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
         """Scan increments for vertical slice violations."""
         violations = []
         

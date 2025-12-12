@@ -7,6 +7,23 @@ from agile_bot.bots.base_bot.src.scanners.scanner import Scanner
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
 
 
+class ScannerExecutionError(Exception):
+    """Exception raised when a scanner crashes during execution.
+    
+    Provides context about which scanner/rule failed so the error can be reported
+    back to the user with full details.
+    """
+    def __init__(self, rule_file: str, scanner_path: str, original_error: Exception):
+        self.rule_file = rule_file
+        self.scanner_path = scanner_path
+        self.original_error = original_error
+        message = (
+            f"Scanner execution failed for rule '{rule_file}' "
+            f"(scanner: {scanner_path}): {original_error}"
+        )
+        super().__init__(message)
+
+
 class Rule:
     """Represents a validation rule with optional scanner.
     
@@ -120,6 +137,22 @@ class ValidateRulesAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
+        # Set up file logging for debugging (early, so we can use it throughout)
+        import logging
+        import sys
+        log_file = self.workspace_directory / 'validation_debug.log'
+        debug_logger = logging.getLogger('validate_rules_debug')
+        try:
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+            file_handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            file_handler.setFormatter(formatter)
+            debug_logger.addHandler(file_handler)
+            debug_logger.setLevel(logging.DEBUG)
+        except Exception as e:
+            pass  # debug_logger still exists, just no file handler
+        
         # Identify content to validate
         content_info = self._identify_content_to_validate()
         
@@ -148,8 +181,179 @@ class ValidateRulesAction(BaseAction):
         # This ensures syntax errors are reported, not hidden
         story_graph = read_json_file(story_graph_path)
         
-        # Run scanners with story graph
-        result = self.injectValidationInstructions(story_graph)
+        # Extract scope from parameters and add to story_graph for scanners
+        scope_config = {}
+        if parameters:
+            # Support explicit story names list
+            if 'story_names' in parameters:
+                scope_config['story_names'] = parameters['story_names']
+            
+            # Support multiple increment priorities
+            if 'increment_priorities' in parameters:
+                scope_config['increment_priorities'] = parameters['increment_priorities']
+            
+            # Support multiple epic names
+            if 'epic_names' in parameters:
+                scope_config['epic_names'] = parameters['epic_names']
+            
+            # Support test_file as scope parameter (one-off validation, not persisted)
+            if 'test_file' in parameters:
+                test_file_path = parameters['test_file']
+                if test_file_path:
+                    # Convert to Path if string
+                    if isinstance(test_file_path, str):
+                        test_file_path = Path(test_file_path)
+                    scope_config['test_file'] = str(test_file_path)
+            
+            # Support test_files (plural) as scope parameter - list of test files to validate
+            if 'test_files' in parameters:
+                test_files_list = parameters['test_files']
+                if test_files_list:
+                    # Ensure it's a list
+                    if not isinstance(test_files_list, list):
+                        test_files_list = [test_files_list]
+                    # Convert all to strings and store in scope
+                    scope_config['test_files'] = [str(Path(tf)) if isinstance(tf, str) else str(tf) for tf in test_files_list]
+            
+            # Support code_files as scope parameter - list of code files to validate (for CodeScanner)
+            if 'code_files' in parameters:
+                code_files_list = parameters['code_files']
+                if code_files_list:
+                    # Ensure it's a list
+                    if not isinstance(code_files_list, list):
+                        code_files_list = [code_files_list]
+                    # Convert all to strings and store in scope
+                    scope_config['code_files'] = [str(Path(cf)) if isinstance(cf, str) else str(cf) for cf in code_files_list]
+            
+            # Support 'all' flag
+            if parameters.get('validate_all') is True:
+                scope_config['all'] = True
+        
+        # Add scope to story_graph (scanners will read this)
+        if scope_config:
+            story_graph['_validation_scope'] = scope_config
+        
+        # Extract test files from scope for TestScanner (one-off, add to temporary copy only)
+        test_files_to_scan = []
+        if scope_config.get('test_file'):
+            test_files_to_scan.append(scope_config['test_file'])
+        if scope_config.get('test_files'):
+            test_files_to_scan.extend(scope_config['test_files'])
+        
+        # Auto-discover test files if not provided and we're in 7_tests behavior
+        if not test_files_to_scan:
+            project_location = content_info.get('project_location')
+            if project_location:
+                project_path = Path(project_location)
+                # Look for test directories
+                test_dirs = [project_path / 'test', project_path / 'tests']
+                for test_dir in test_dirs:
+                    if test_dir.exists() and test_dir.is_dir():
+                        # Find all test_*.py files
+                        discovered_tests = list(test_dir.glob('test_*.py'))
+                        if discovered_tests:
+                            test_files_to_scan.extend([str(tf) for tf in discovered_tests])
+                            break
+        
+        # Extract code files from scope for CodeScanner (one-off, add to temporary copy only)
+        code_files_to_scan = []
+        if scope_config.get('code_files'):
+            code_files_to_scan.extend(scope_config['code_files'])
+        
+        # Convert to Path objects for processing, resolving relative paths
+        # Test file paths are typically relative to repo root (e.g., demo/mob_minion/test/file.py)
+        # Workspace is typically a subdirectory (e.g., demo/mob_minion)
+        # So we need to resolve against repo root, not workspace root
+        project_location = content_info.get('project_location')
+        workspace_path = Path(project_location) if project_location else self.workspace_directory
+        
+        # Find repo root by looking for common markers (starting from workspace and going up)
+        repo_root = None
+        current = workspace_path.resolve()  # Resolve to absolute path first
+        if debug_logger:
+            debug_logger.debug(f"[PATH RESOLUTION] Starting from workspace_path: {workspace_path}")
+            debug_logger.debug(f"[PATH RESOLUTION] Resolved absolute path: {current}")
+        
+        for i in range(10):  # Look up to 10 levels up
+            if debug_logger:
+                debug_logger.debug(f"[PATH RESOLUTION] Checking level {i}: {current}")
+            if (current / '.git').exists() or (current / 'agile_bot').exists():
+                repo_root = current
+                if debug_logger:
+                    debug_logger.debug(f"[PATH RESOLUTION] Found repo root: {repo_root}")
+                break
+            if current.parent == current:  # Reached filesystem root
+                break
+            current = current.parent
+        
+        # Fallback: use workspace's absolute path parent if we're in a demo subdirectory
+        if not repo_root:
+            # If workspace path ends with something like 'demo/mob_minion', 
+            # and test file path starts with 'demo/mob_minion/test/...',
+            # then repo root should be the parent of the 'demo' directory
+            workspace_str = str(workspace_path.resolve())
+            if 'demo' in workspace_str:
+                # Find where 'demo' appears and use that as a hint
+                parts = workspace_path.resolve().parts
+                if 'demo' in parts:
+                    demo_idx = parts.index('demo')
+                    repo_root = Path(*parts[:demo_idx]) if demo_idx > 0 else workspace_path.resolve().parent
+                else:
+                    repo_root = workspace_path.resolve().parent
+            else:
+                repo_root = workspace_path.resolve().parent
+            if debug_logger:
+                debug_logger.debug(f"[PATH RESOLUTION] Using fallback repo root: {repo_root}")
+        
+        if test_files_to_scan:
+            test_file_paths = []
+            for tf in test_files_to_scan:
+                test_path = Path(tf)
+                if debug_logger:
+                    debug_logger.debug(f"[PATH RESOLUTION] Processing test file: {test_path}")
+                # If absolute path, use as-is
+                if test_path.is_absolute():
+                    if debug_logger:
+                        debug_logger.debug(f"[PATH RESOLUTION] Path is absolute, using as-is: {test_path}")
+                    test_file_paths.append(test_path)
+                else:
+                    # Always resolve against repo root (test files are relative to repo root)
+                    if repo_root:
+                        resolved_path = repo_root / test_path
+                        if debug_logger:
+                            debug_logger.debug(f"[PATH RESOLUTION] Resolved against repo_root {repo_root}: {resolved_path}")
+                            debug_logger.debug(f"[PATH RESOLUTION] Resolved path exists: {resolved_path.exists()}")
+                        test_file_paths.append(resolved_path)
+                    else:
+                        # Fallback: resolve against workspace (shouldn't happen if repo_root detection works)
+                        if debug_logger:
+                            debug_logger.debug(f"[PATH RESOLUTION] No repo_root found, using workspace fallback")
+                        resolved_path = self.workspace_directory / test_path
+                        test_file_paths.append(resolved_path)
+        else:
+            test_file_paths = None
+        
+        if code_files_to_scan:
+            code_file_paths = []
+            for cf in code_files_to_scan:
+                code_path = Path(cf)
+                # If absolute path, use as-is
+                if code_path.is_absolute():
+                    code_file_paths.append(code_path)
+                else:
+                    # Always resolve against repo root (code files are relative to repo root)
+                    if repo_root:
+                        resolved_path = repo_root / code_path
+                        code_file_paths.append(resolved_path)
+                    else:
+                        # Fallback: resolve against workspace
+                        resolved_path = self.workspace_directory / code_path
+                        code_file_paths.append(resolved_path)
+        else:
+            code_file_paths = None
+        
+        # Run scanners with story graph and optional test/code files (one-off, not persisted)
+        result = self.injectValidationInstructions(story_graph, test_files=test_file_paths, code_files=code_file_paths)
         
         # Write validation report with scanner results
         report_path = content_info.get('report_path')
@@ -288,13 +492,18 @@ class ValidateRulesAction(BaseAction):
                 self.bot_name,
                 self.behavior
             )
-            # Try to find config that specifies docs_path
-            config_file = behavior_folder / 'instructions.json'
-            if config_file.exists():
-                config_data = read_json_file(config_file)
-                docs_path = config_data.get('docs_path', 'docs/stories')
+            # Try to find config that specifies docs_path from behavior.json (new format)
+            behavior_file = behavior_folder / 'behavior.json'
+            docs_path = 'docs/stories'
+            if behavior_file.exists():
+                behavior_data = read_json_file(behavior_file)
+                docs_path = behavior_data.get('docs_path', 'docs/stories')
             else:
-                docs_path = 'docs/stories'
+                # Fallback to old format for backward compatibility
+                config_file = behavior_folder / 'instructions.json'
+                if config_file.exists():
+                    config_data = read_json_file(config_file)
+                    docs_path = config_data.get('docs_path', 'docs/stories')
         except FileNotFoundError:
             docs_path = 'docs/stories'
         
@@ -393,7 +602,7 @@ class ValidateRulesAction(BaseAction):
         except Exception as e:
             return None, f"Error loading scanner {scanner_module_path}: {e}"
     
-    def injectValidationInstructions(self, knowledge_graph: Dict[str, Any]) -> Dict[str, Any]:
+    def injectValidationInstructions(self, knowledge_graph: Dict[str, Any], test_files: Optional[List[Path]] = None, code_files: Optional[List[Path]] = None) -> Dict[str, Any]:
         """Inject validation instructions with scanner results.
         
         For each rule: inject rule, run scanner (if exists), add results to rule.
@@ -401,23 +610,59 @@ class ValidateRulesAction(BaseAction):
         
         Args:
             knowledge_graph: The knowledge graph to validate against
+            test_files: Optional list of test file paths for validation (not persisted in knowledge_graph)
+            code_files: Optional list of code file paths for validation (not persisted in knowledge_graph)
             
         Returns:
             Dictionary with 'instructions' containing rules with scanner_results
         """
+        # Set up file logging for debugging
+        import logging
+        import sys
+        log_file = self.workspace_directory / 'validation_debug.log'
+        print(f"[DEBUG] Setting up logging to: {log_file}", file=sys.stderr)
+        print(f"[DEBUG] Workspace directory: {self.workspace_directory}", file=sys.stderr)
+        
+        # Ensure log file can be created
+        try:
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+            file_handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            file_handler.setFormatter(formatter)
+            debug_logger = logging.getLogger('validate_rules_debug')
+            debug_logger.addHandler(file_handler)
+            debug_logger.setLevel(logging.DEBUG)
+            # Also set up loggers for scanner modules
+            for logger_name in ['test_scanner_debug', 'real_implementations_scanner_debug']:
+                scanner_logger = logging.getLogger(logger_name)
+                scanner_logger.addHandler(file_handler)
+                scanner_logger.setLevel(logging.DEBUG)
+            print(f"[DEBUG] Logging setup complete. Log file: {log_file}", file=sys.stderr)
+        except Exception as e:
+            print(f"[DEBUG] Failed to set up logging: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+        
         rules_data = self.inject_behavior_specific_and_bot_rules()
         action_instructions = rules_data.get('action_instructions', [])
         validation_rules = rules_data.get('validation_rules', [])
         
         # Process each rule: run scanner if exists, add results
         processed_rules = []
-        for rule_dict in validation_rules:
+        import sys
+        print(f"[VALIDATE_RULES] Processing {len(validation_rules)} validation rules", file=sys.stderr)
+        for idx, rule_dict in enumerate(validation_rules):
             if isinstance(rule_dict, dict):
                 rule_content = rule_dict.get('rule_content', rule_dict)
                 scanner_path = rule_content.get('scanner')
                 
                 # Create Rule object for this rule
                 rule_file = rule_dict.get('rule_file', 'unknown.json')
+                print(f"[VALIDATE_RULES] Rule {idx+1}/{len(validation_rules)}: {rule_file}", file=sys.stderr)
+                print(f"[VALIDATE_RULES]   Has scanner: {scanner_path is not None}", file=sys.stderr)
+                if scanner_path:
+                    print(f"[VALIDATE_RULES]   Scanner path: {scanner_path}", file=sys.stderr)
                 behavior_name = 'common'
                 if '/behaviors/' in rule_file:
                     parts = rule_file.split('/behaviors/')
@@ -437,9 +682,63 @@ class ValidateRulesAction(BaseAction):
                         # Run scanner against knowledge graph
                         try:
                             scanner_instance = scanner_class()
-                            # Pass Rule object to scanner via scan method context
-                            # Scanner can access rule_obj through closure or we pass it separately
-                            violations = scanner_instance.scan(knowledge_graph, rule_obj=rule_obj)
+                            scanner_name = scanner_class.__name__
+                            
+                            # LOG BEFORE SCANNER CALL
+                            import sys
+                            print(f"[BEFORE SCANNER] About to call scanner: {scanner_name}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] Rule file: {rule_file}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] Scanner class: {scanner_class}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] Scanner instance created: {scanner_instance}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] test_files parameter: {test_files}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] test_files type: {type(test_files)}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] test_files is None: {test_files is None}", file=sys.stderr)
+                            if test_files:
+                                print(f"[BEFORE SCANNER] test_files count: {len(test_files)}", file=sys.stderr)
+                                for idx, tf in enumerate(test_files):
+                                    print(f"[BEFORE SCANNER]   test_files[{idx}]: {tf} (type: {type(tf)}, exists: {tf.exists() if hasattr(tf, 'exists') else 'N/A'})", file=sys.stderr)
+                            
+                            debug_logger.debug(f"[LOG validate_rules_action] Calling scanner: {scanner_name}")
+                            debug_logger.debug(f"[LOG validate_rules_action] test_files: {test_files}")
+                            debug_logger.debug(f"[LOG validate_rules_action] test_files type: {type(test_files)}")
+                            debug_logger.debug(f"[LOG validate_rules_action] test_files is None: {test_files is None}")
+                            if test_files:
+                                debug_logger.debug(f"[LOG validate_rules_action] test_files count: {len(test_files)}")
+                                for idx, tf in enumerate(test_files):
+                                    debug_logger.debug(f"[LOG validate_rules_action]   test_files[{idx}]: {tf} (type: {type(tf)}, exists: {tf.exists() if hasattr(tf, 'exists') else 'N/A'})")
+                            
+                            print(f"[BEFORE SCANNER] About to call scanner_instance.scan()", file=sys.stderr)
+                            print(f"[BEFORE SCANNER] Parameters being passed:", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   knowledge_graph type: {type(knowledge_graph)}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   knowledge_graph keys: {list(knowledge_graph.keys()) if isinstance(knowledge_graph, dict) else 'N/A'}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   rule_obj: {rule_obj}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   rule_obj type: {type(rule_obj)}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   test_files: {test_files}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   test_files type: {type(test_files)}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   test_files is None: {test_files is None}", file=sys.stderr)
+                            if test_files:
+                                print(f"[BEFORE SCANNER]   test_files length: {len(test_files)}", file=sys.stderr)
+                                for i, tf in enumerate(test_files):
+                                    print(f"[BEFORE SCANNER]     test_files[{i}]: {tf}", file=sys.stderr)
+                                    print(f"[BEFORE SCANNER]     test_files[{i}] type: {type(tf)}", file=sys.stderr)
+                                    if hasattr(tf, 'exists'):
+                                        print(f"[BEFORE SCANNER]     test_files[{i}] exists: {tf.exists()}", file=sys.stderr)
+                                    if hasattr(tf, '__str__'):
+                                        print(f"[BEFORE SCANNER]     test_files[{i}] str: {str(tf)}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   code_files: {code_files}", file=sys.stderr)
+                            print(f"[BEFORE SCANNER]   code_files type: {type(code_files)}", file=sys.stderr)
+                            
+                            # Pass test_files and code_files directly to scanners via scan() parameters
+                            # Scanners get files from parameters, not from knowledge_graph
+                            violations = scanner_instance.scan(
+                                knowledge_graph, 
+                                rule_obj=rule_obj,
+                                test_files=test_files,
+                                code_files=code_files
+                            )
+                            
+                            print(f"[AFTER SCANNER] Scanner {scanner_name} returned {len(violations) if isinstance(violations, list) else 'N/A'} violations", file=sys.stderr)
+                            debug_logger.debug(f"[LOG validate_rules_action] Scanner {scanner_name} returned {len(violations) if isinstance(violations, list) else 'N/A'} violations")
                             violations_list = violations if isinstance(violations, list) else []
                             
                             # Convert violations to dictionaries if they're Violation objects
@@ -465,20 +764,16 @@ class ValidateRulesAction(BaseAction):
                                 'violations': violations_dicts
                             }
                         except Exception as e:
-                            # Store error but log it - don't swallow exceptions silently
-                            # Per planning: "Exception-based, don't swallow"
+                            # Log the error for debugging
                             import logging
                             logger = logging.getLogger(__name__)
                             logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
                             
-                            rule_result['scanner_results'] = {
-                                'violations': [],
-                                'error': f"Scanner execution failed: {e}"
-                            }
-                            # Continue processing other rules - don't fail entire validation
-                            import logging
-                            logger = logging.getLogger(__name__)
-                            logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
+                            # Raise exception with context - don't swallow scanner crashes
+                            # User needs to know when scanners fail so they can fix the issue
+                            rule_file = rule_dict.get('rule_file', 'unknown')
+                            scanner_path = rule_content.get('scanner', 'unknown')
+                            raise ScannerExecutionError(rule_file, scanner_path, e) from e
                     else:
                         rule_result['scanner_results'] = {
                             'violations': [],

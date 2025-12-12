@@ -18,7 +18,7 @@ from conftest import (
     create_workflow_state_file,
     create_base_actions_structure
 )
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_actions_workflow_json
 
 # ============================================================================
 # HELPER CLASSES
@@ -42,11 +42,14 @@ class TriggerTestSetup:
         self.bot_config = setup_bot_for_testing(
             workspace_root, self.bot_name, self.behaviors
         )
-        # Ensure behavior folders exist
+        # Ensure behavior folders exist with behavior.json files
         behaviors_dir = workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'behaviors'
+        bot_dir = workspace_root / 'agile_bot' / 'bots' / self.bot_name
         for behavior in self.behaviors:
             behavior_dir = behaviors_dir / behavior
             behavior_dir.mkdir(parents=True, exist_ok=True)
+            # Create behavior.json file (required after refactor)
+            create_actions_workflow_json(bot_dir, behavior)
             # Create knowledge graph folder for build_knowledge action
             kg_dir = behavior_dir / 'content' / 'knowledge_graph'
             kg_dir.mkdir(parents=True, exist_ok=True)
@@ -267,13 +270,28 @@ def create_bot_trigger_words(workspace: Path, bot_name: str, patterns: list) -> 
     return trigger_file
 
 def create_behavior_trigger_words(workspace: Path, bot_name: str, behavior: str, patterns: list) -> Path:
-    """Helper: Create behavior-level trigger words file."""
-    behavior_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior
+    """Helper: Create behavior-level trigger words in behavior.json (new format)."""
+    bot_dir = workspace / 'agile_bot' / 'bots' / bot_name
+    # Create or update behavior.json file with trigger words (REQUIRED after refactor)
+    behavior_dir = bot_dir / 'behaviors' / behavior
     behavior_dir.mkdir(parents=True, exist_ok=True)
-    trigger_file = behavior_dir / 'trigger_words.json'
-    trigger_data = {'patterns': patterns}
-    trigger_file.write_text(json.dumps(trigger_data), encoding='utf-8')
-    return trigger_file
+    behavior_file = behavior_dir / 'behavior.json'
+    
+    # Load existing behavior.json or create new one
+    if behavior_file.exists():
+        behavior_data = json.loads(behavior_file.read_text())
+    else:
+        create_actions_workflow_json(bot_dir, behavior)
+        behavior_data = json.loads(behavior_file.read_text())
+    
+    # Update trigger_words in behavior.json (router reads from behavior.json now)
+    behavior_data['trigger_words'] = {
+        'description': f'Trigger words for {behavior}',
+        'patterns': patterns,
+        'priority': 10
+    }
+    behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+    return behavior_file
 
 def create_action_trigger_words(workspace: Path, bot_name: str, behavior: str, action: str, patterns: list) -> Path:
     """Helper: Create action-level trigger words file."""

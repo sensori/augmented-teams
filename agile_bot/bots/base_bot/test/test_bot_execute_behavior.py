@@ -11,7 +11,7 @@ import pytest
 import json
 from pathlib import Path
 from agile_bot.bots.base_bot.src.bot.bot import Bot, BotResult
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_actions_workflow_json
 
 
 def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> Path:
@@ -25,6 +25,41 @@ def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> P
     )
     return config_file
 
+
+def create_actions_workflow_json(bot_directory: Path, behavior_name: str) -> Path:
+    """Helper: Create behavior.json for a behavior (REQUIRED)."""
+    behavior_dir = bot_directory / 'behaviors' / behavior_name
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_config = {
+        "behaviorName": behavior_name.split('_')[-1] if '_' in behavior_name and behavior_name[0].isdigit() else behavior_name,
+        "description": f"Test behavior: {behavior_name}",
+        "goal": f"Test goal for {behavior_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "instructions": [
+            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+            "",
+            f"Test instructions for {behavior_name}."
+        ],
+        "actions_workflow": {
+            "actions": [
+                {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
+                {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
+                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
+                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                {"name": "render_output", "order": 5}
+            ]
+        },
+        "trigger_words": {
+            "description": f"Trigger words for {behavior_name}",
+            "patterns": [f"test.*{behavior_name}"],
+            "priority": 10
+        }
+    }
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    return behavior_file
 
 def create_base_instructions(bot_directory: Path):
     """Helper: Create base instructions for all actions in bot_directory."""
@@ -74,9 +109,8 @@ class TestBotExecuteBehavior:
         bot_name = 'test_bot'
         bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
         
-        # Create behavior folder
-        behavior_dir = bot_directory / 'behaviors' / 'shape'
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with actions-workflow.json (REQUIRED)
+        create_actions_workflow_json(bot_directory, 'shape')
         
         # Create workflow state
         workflow_file = workspace_directory / 'workflow_state.json'
@@ -115,9 +149,8 @@ class TestBotExecuteBehavior:
         bot_name = 'test_bot'
         bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
         
-        # Create behavior folder
-        behavior_dir = bot_directory / 'behaviors' / 'shape'
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with actions-workflow.json (REQUIRED)
+        create_actions_workflow_json(bot_directory, 'shape')
         
         # Create workflow state with current_action
         workflow_file = workspace_directory / 'workflow_state.json'
@@ -156,10 +189,9 @@ class TestBotExecuteBehavior:
         bot_name = 'test_bot'
         bot_config = create_bot_config_file(bot_directory, bot_name, ['shape', 'prioritization', 'discovery'])
         
-        # Create behavior folders
+        # Create behavior folders with behavior.json files (REQUIRED)
         for behavior in ['shape', 'prioritization', 'discovery']:
-            behavior_dir = bot_directory / 'behaviors' / behavior
-            behavior_dir.mkdir(parents=True, exist_ok=True)
+            create_actions_workflow_json(bot_directory, behavior)
         
         # Create workflow state showing current behavior is 'prioritization' (middle of sequence)
         # Shape is before prioritization, so going back to shape should require confirmation
@@ -201,9 +233,8 @@ class TestBotExecuteBehavior:
         bot_name = 'test_bot'
         bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
         
-        # Create behavior folder
-        behavior_dir = bot_directory / 'behaviors' / 'shape'
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with behavior.json (REQUIRED)
+        create_actions_workflow_json(bot_directory, 'shape')
         
         # Verify no workflow state exists
         workflow_file = workspace_directory / 'workflow_state.json'
@@ -238,9 +269,8 @@ class TestBotExecuteBehavior:
         bot_name = 'test_bot'
         bot_config = create_bot_config_file(bot_directory, bot_name, ['prioritization'])
         
-        # Create behavior folder
-        behavior_dir = bot_directory / 'behaviors' / 'prioritization'
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        # Create behavior folder with actions-workflow.json (REQUIRED)
+        create_actions_workflow_json(bot_directory, 'prioritization')
         
         # Create workflow state
         workflow_file = workspace_directory / 'workflow_state.json'

@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from typing import List, Dict, Any, Optional
-from pathlib import Path
+from pathlib import Path  # Needed at runtime for Path operations
 from .scanner import Scanner
 from .violation import Violation
 
@@ -14,12 +14,20 @@ class CodeScanner(Scanner):
     Each scanner implements scan_code_file() to check a single file.
     """
     
-    def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
+    def scan(
+        self, 
+        knowledge_graph: Dict[str, Any], 
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
         """Scan code files for rule violations.
         
         Args:
-            knowledge_graph: Not used for code scanners (code scanners work on files)
+            knowledge_graph: Story graph structure
             rule_obj: Rule object reference (for creating Violations)
+            test_files: Not used by CodeScanner (for TestScanner)
+            code_files: List of code file paths to scan (from parameters, not knowledge_graph)
             
         Returns:
             List of violation dictionaries
@@ -29,9 +37,13 @@ class CodeScanner(Scanner):
         
         violations = []
         
-        # Code scanners need to find code files to scan
-        # This will be provided via content_to_validate or workspace context
-        # For now, return empty list - subclasses should override scan() to find files
+        # Scan code files if provided via parameters
+        if code_files:
+            for code_file_path in code_files:
+                if code_file_path.exists():
+                    file_violations = self.scan_code_file(code_file_path, rule_obj)
+                    violations.extend(file_violations if isinstance(file_violations, list) else [])
+        
         return violations
     
     @abstractmethod

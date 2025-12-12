@@ -6,7 +6,13 @@ from agile_bot.bots.base_bot.src.scanners.violation import Violation
 
 class SpineOptionalScanner(StoryScanner):
     
-    def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
+    def scan(
+        self, 
+        knowledge_graph: Dict[str, Any], 
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
         if not rule_obj:
             raise ValueError("rule_obj parameter is required for SpineOptionalScanner")
         

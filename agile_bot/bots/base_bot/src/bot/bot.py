@@ -11,31 +11,53 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def load_workflow_states_and_transitions(bot_directory: Path) -> Tuple[List[str], List[Dict]]:
-    # Use centralized workspace utility to get base_actions directory
-    base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
+def load_workflow_states_and_transitions(bot_directory: Path, behavior_name: str) -> Tuple[List[str], List[Dict]]:
+    """Load workflow states and transitions from behavior.json file.
     
-    # Load workflow actions from action_config.json files
-    workflow_actions = []
-    for action_folder in base_actions_dir.iterdir():
-        if not action_folder.is_dir():
-            continue
+    Args:
+        bot_directory: Directory where bot code lives
+        behavior_name: REQUIRED behavior name. Each behavior MUST have its own behavior.json file.
+    
+    Returns:
+        Tuple of (states list, transitions list)
+    
+    Raises:
+        FileNotFoundError: If behavior.json is missing for the behavior
+        ValueError: If actions_workflow.actions array is empty or missing
+        RuntimeError: If file cannot be loaded or parsed
+    """
+    if not behavior_name:
+        raise ValueError(
+            "behavior_name is REQUIRED. Every behavior must have its own behavior.json file. "
+            "No fallback to base workflow exists."
+        )
+    
+    # Find behavior folder and load behavior.json (REQUIRED, no fallback)
+    behavior_folder = Behavior.find_behavior_folder(bot_directory, '', behavior_name)
+    behavior_file = behavior_folder / 'behavior.json'
+    
+    if not behavior_file.exists():
+        raise FileNotFoundError(
+            f"behavior.json is REQUIRED for behavior '{behavior_name}' but not found at: {behavior_file}\n"
+            f"Every behavior must define its own workflow. Create {behavior_file} with an 'actions_workflow' section containing an 'actions' array."
+        )
+    
+    # Load from behavior-specific behavior.json (REQUIRED)
+    try:
+        behavior_config = read_json_file(behavior_file)
+        actions_workflow = behavior_config.get('actions_workflow', {})
+        workflow_actions = actions_workflow.get('actions', [])
         
-        action_config_file = action_folder / 'action_config.json'
-        if not action_config_file.exists():
-            continue
-        
-        try:
-            config_data = read_json_file(action_config_file)
-            if config_data.get('workflow', False):
-                workflow_actions.append({
-                    'name': config_data.get('name', action_folder.name),
-                    'order': config_data.get('order', 999),
-                    'next_action': config_data.get('next_action')
-                })
-        except Exception as e:
-            logger.warning(f'Failed to load action config from {action_config_file}: {e}')
-            continue
+        if not workflow_actions:
+            raise ValueError(
+                f"behavior.json for behavior '{behavior_name}' is missing 'actions_workflow.actions' array. "
+                f"File: {behavior_file}"
+            )
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to load behavior.json for behavior '{behavior_name}': {e}\n"
+            f"File: {behavior_file}"
+        ) from e
     
     # Sort by order
     workflow_actions.sort(key=lambda x: x['order'])
@@ -46,11 +68,12 @@ def load_workflow_states_and_transitions(bot_directory: Path) -> Tuple[List[str]
     # Build transitions list
     transitions = []
     for action in workflow_actions:
-        if action['next_action']:
+        next_action = action.get('next_action')
+        if next_action:
             transitions.append({
                 'trigger': 'proceed',
                 'source': action['name'],
-                'dest': action['next_action']
+                'dest': next_action
             })
     
     return states, transitions
@@ -88,8 +111,8 @@ class Behavior:
         self.bot_directory = Path(bot_directory)
         self.bot = bot_instance  # Reference to parent Bot instance
         
-        # Load workflow configuration
-        states, transitions = load_workflow_states_and_transitions(self.bot_directory)
+        # Load workflow configuration (behavior-specific if available)
+        states, transitions = load_workflow_states_and_transitions(self.bot_directory, behavior_name=self.name)
         
         # Initialize workflow (contains state machine)
         from agile_bot.bots.base_bot.src.state.workflow import Workflow
@@ -285,9 +308,49 @@ class Behavior:
         from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
         return self.execute_action('render_output', RenderOutputAction, parameters)
     
+    def _get_action_class(self, action_name: str, default_action_class):
+        """Get action class for a given action, checking for custom override in actions-workflow.json.
+        
+        Args:
+            action_name: Name of the action (e.g., 'validate_rules')
+            default_action_class: Default action class to use if no override is found
+        
+        Returns:
+            Action class to use (either custom override or default)
+        """
+        try:
+            # Check behavior-specific behavior.json (at behavior root)
+            behavior_folder = self.find_behavior_folder(self.bot_directory, self.bot_name, self.name)
+            behavior_file = behavior_folder / 'behavior.json'
+            
+            if behavior_file.exists():
+                behavior_config = read_json_file(behavior_file)
+                actions_workflow = behavior_config.get('actions_workflow', {})
+                actions = actions_workflow.get('actions', [])
+                
+                # Find the action with matching name
+                for action_config in actions:
+                    if action_config.get('name') == action_name:
+                        # Check for custom action_class override
+                        action_class_path = action_config.get('action_class')
+                        if action_class_path:
+                            # Load custom action class
+                            module_path, class_name = action_class_path.rsplit('.', 1)
+                            module = importlib.import_module(module_path)
+                            custom_action_class = getattr(module, class_name)
+                            return custom_action_class
+        except (FileNotFoundError, Exception) as e:
+            # Behavior folder doesn't exist or error loading, use default
+            logger.debug(f'Could not load custom action class for {action_name}: {e}')
+        
+        # No custom override found, use default
+        return default_action_class
+    
     def validate_rules(self, parameters: Dict[str, Any] = None) -> BotResult:
         from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
-        return self.execute_action('validate_rules', ValidateRulesAction, parameters)
+        # Check for custom action class override
+        action_class = self._get_action_class('validate_rules', ValidateRulesAction)
+        return self.execute_action('validate_rules', action_class, parameters)
     
     def does_requested_action_match_current(self, requested_action: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """

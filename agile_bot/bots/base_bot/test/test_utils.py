@@ -26,9 +26,42 @@ def bot_directory(tmp_path):
 # ============================================================================
 
 def create_behavior_folder(bot_dir: Path, folder_name: str) -> Path:
-    """Helper: Create behavior folder in bot directory."""
+    """Helper: Create behavior folder in bot directory with behavior.json."""
     behavior_folder = bot_dir / 'behaviors' / folder_name
     behavior_folder.mkdir(parents=True, exist_ok=True)
+    
+    # Create behavior.json file (required)
+    import json
+    behavior_config = {
+        "behaviorName": folder_name.split('_')[-1] if '_' in folder_name and folder_name[0].isdigit() else folder_name,
+        "description": f"Test behavior: {folder_name}",
+        "goal": f"Test goal for {folder_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "instructions": [
+            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+            "",
+            f"Test instructions for {folder_name}."
+        ],
+        "actions_workflow": {
+            "actions": [
+                {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
+                {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
+                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
+                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                {"name": "render_output", "order": 5}
+            ]
+        },
+        "trigger_words": {
+            "description": f"Trigger words for {folder_name}",
+            "patterns": [f"test.*{folder_name}"],
+            "priority": 10
+        }
+    }
+    behavior_file = behavior_folder / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
     return behavior_folder
 
 

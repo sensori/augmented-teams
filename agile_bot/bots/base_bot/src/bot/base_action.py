@@ -116,7 +116,7 @@ class BaseAction:
         """Check if this is the final action in the behavior's workflow."""
         try:
             from agile_bot.bots.base_bot.src.bot.bot import load_workflow_states_and_transitions
-            states, _ = load_workflow_states_and_transitions(self.bot_directory)
+            states, _ = load_workflow_states_and_transitions(self.bot_directory, self.behavior)
             if states and self.action_name == states[-1]:
                 return True
         except Exception as e:

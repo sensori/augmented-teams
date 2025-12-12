@@ -1,12 +1,18 @@
 from abc import abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from agile_bot.bots.base_bot.src.scanners.scanner import Scanner
 from .story_map import StoryMap, StoryNode, StoryGroup
 
 
 class StoryScanner(Scanner):
     
-    def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
+    def scan(
+        self, 
+        knowledge_graph: Dict[str, Any], 
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
         if not rule_obj:
             raise ValueError("rule_obj parameter is required for StoryScanner")
         

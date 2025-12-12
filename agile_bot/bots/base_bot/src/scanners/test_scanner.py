@@ -1,46 +1,52 @@
-"""Base TestScanner class for validating test files and story graph mapping."""
+"""Base TestScanner class for validating test files."""
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
-from .story_scanner import StoryScanner
+from .scanner import Scanner
 from .violation import Violation
 
+if TYPE_CHECKING:
+    from pathlib import Path as PathType
 
-class TestScanner(StoryScanner):
+
+class TestScanner(Scanner):
     """Base class for test validation scanners.
     
-    TestScanners extend StoryScanner to validate story graph structure,
-    but also scan test code files to verify test-story mapping.
+    TestScanners scan test code files to verify test quality and test-story mapping.
     
     Test scanners validate:
-    1. Story graph structure (via StoryScanner)
-    2. Test code files (test classes match stories, methods match scenarios)
-    3. Test code quality (via code scanning)
+    1. Test code files (test classes match stories, methods match scenarios)
+    2. Test code quality (via code scanning)
+    
+    Note: TestScanner does NOT scan story nodes - it only scans test files.
     """
     
-    def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
-        """Scan story graph and test files for violations.
+    def scan(
+        self, 
+        knowledge_graph: Dict[str, Any], 
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
+        """Scan test files for violations.
         
         Args:
-            knowledge_graph: Story graph structure + test file paths
+            knowledge_graph: Story graph structure
             rule_obj: Rule object reference
+            test_files: List of test file paths to scan (from parameters, not knowledge_graph)
+            code_files: Not used by TestScanner (for CodeScanner)
             
         Returns:
-            List of violation dictionaries from both story graph and test code
+            List of violation dictionaries from test code scanning
         """
         violations = []
         
-        # First, scan story graph (via parent StoryScanner)
-        story_violations = super().scan(knowledge_graph, rule_obj)
-        violations.extend(story_violations)
-        
-        # Then, scan test files if provided
-        test_files = knowledge_graph.get('test_files', [])
-        for test_file_path in test_files:
-            test_path = Path(test_file_path)
-            if test_path.exists():
-                code_violations = self.scan_test_file(test_path, rule_obj, knowledge_graph)
-                violations.extend(code_violations)
+        # Scan test files if provided via parameters
+        if test_files:
+            for test_file_path in test_files:
+                if test_file_path.exists():
+                    code_violations = self.scan_test_file(test_file_path, rule_obj, knowledge_graph)
+                    violations.extend(code_violations)
         
         return violations
     

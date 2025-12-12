@@ -38,9 +38,41 @@ def create_agent_json(bot_directory: Path, working_area: str) -> Path:
 
 
 def create_behavior_folder(bot_directory: Path, behavior_name: str):
-    """Helper: Create behavior folder structure."""
+    """Helper: Create behavior folder structure with behavior.json."""
     behavior_dir = bot_directory / 'behaviors' / behavior_name
     behavior_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create behavior.json file (required)
+    behavior_config = {
+        "behaviorName": behavior_name.split('_')[-1] if '_' in behavior_name and behavior_name[0].isdigit() else behavior_name,
+        "description": f"Test behavior: {behavior_name}",
+        "goal": f"Test goal for {behavior_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "instructions": [
+            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+            "",
+            f"Test instructions for {behavior_name}."
+        ],
+        "actions_workflow": {
+            "actions": [
+                {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
+                {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
+                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
+                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                {"name": "render_output", "order": 5}
+            ]
+        },
+        "trigger_words": {
+            "description": f"Trigger words for {behavior_name}",
+            "patterns": [f"test.*{behavior_name}"],
+            "priority": 10
+        }
+    }
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
     return behavior_dir
 
 
@@ -368,6 +400,7 @@ class TestBootstrapWorkspace:
         
         # And: Bot configuration exists
         config_path = create_bot_config(bot_directory, 'test_bot', ['shape'])
+        create_behavior_folder(bot_directory, 'shape')
         
         # When: Bot is instantiated
         bot = Bot('test_bot', bot_directory, config_path)
@@ -428,6 +461,7 @@ class TestBootstrapWorkspace:
         
         # And: Config exists in bot directory
         config_path = create_bot_config(bot_directory, 'test_bot', ['shape'])
+        create_behavior_folder(bot_directory, 'shape')
         
         # When: Bot loads configuration
         bot = Bot('test_bot', bot_directory, config_path)

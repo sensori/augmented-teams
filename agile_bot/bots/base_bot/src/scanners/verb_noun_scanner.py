@@ -5,6 +5,7 @@ from agile_bot.bots.base_bot.src.scanners.violation import Violation
 
 import nltk
 from nltk import pos_tag, word_tokenize
+from nltk.corpus import wordnet as wn
 
 # Download required NLTK data if not already present
 try:
@@ -16,6 +17,11 @@ try:
     nltk.data.find('taggers/averaged_perceptron_tagger_eng')
 except LookupError:
     nltk.download('averaged_perceptron_tagger_eng', quiet=True)
+
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet', quiet=True)
 
 
 class VerbNounScanner(StoryScanner):
@@ -93,6 +99,29 @@ class VerbNounScanner(StoryScanner):
         """Check if NLTK tag is a proper noun."""
         proper_noun_tags = ['NNP', 'NNPS']
         return tag in proper_noun_tags
+    
+    def _can_be_verb(self, word: str) -> bool:
+        """Check if a word can be a verb using WordNet.
+        
+        Uses NLTK's WordNet to check if the word has verb senses.
+        This is more reliable than maintaining a hardcoded list of verbs.
+        """
+        try:
+            word_lower = word.lower()
+            # Check if word has verb senses in WordNet
+            synsets = wn.synsets(word_lower, pos=wn.VERB)
+            if synsets:
+                return True
+            
+            # Also check all synsets - sometimes verbs are stored without explicit pos filter
+            for synset in wn.synsets(word_lower):
+                if 'v' in synset.pos():
+                    return True
+            
+            return False
+        except Exception:
+            # If WordNet lookup fails, return False
+            return False
     
     def _check_verb_noun_order(self, name: str, node: StoryNode, node_type: str, rule_obj: Any) -> Optional[Dict[str, Any]]:
         try:
@@ -253,24 +282,18 @@ class VerbNounScanner(StoryScanner):
             if len(tags) < 2:
                 return None
             
-            first_word = tags[0][0].lower()
+            first_word = tags[0][0]
+            first_word_lower = first_word.lower()
             first_tag = tags[0][1]
             second_tag = tags[1][1]
             
-            # Common imperative verbs that NLTK might mis-tag as NOUN
-            imperative_verbs = ['manage', 'place', 'create', 'process', 'validate', 'execute', 'select',
-                               'group', 'assign', 'designate', 'query', 'spawn', 'control', 'edit',
-                               'choose', 'determine', 'initiate', 'move', 'add', 'remove', 'update',
-                               'delete', 'save', 'load', 'render', 'sync', 'search', 'apply',
-                               'respect', 'retrieve', 'persist', 'expose', 'provide', 'show', 'enable',
-                               'allow', 'maintain', 'store', 'track', 'contain', 'visualize']
-            
-            # If first word is a known imperative verb, it's verb-noun format (correct) - don't flag
-            if first_word in imperative_verbs:
+            # If NLTK tags first word as verb, trust it - don't flag
+            if self._is_verb(first_tag):
                 return None
             
-            # If first word is a verb (even if NLTK tagged it as NOUN), it's verb-noun format (correct) - don't flag
-            if self._is_verb(first_tag):
+            # If WordNet says first word can be a verb, trust it - don't flag
+            # This handles cases where NLTK mis-tags capitalized verbs as proper nouns
+            if self._can_be_verb(first_word_lower):
                 return None
             
             # Flag if first word is NOUN/PROPN and second is VERB (noun-verb pattern)
@@ -310,60 +333,21 @@ class VerbNounScanner(StoryScanner):
         return None
     
     def _check_noun_only(self, name: str, node: StoryNode, node_type: str, rule_obj: Any) -> Optional[Dict[str, Any]]:
-        # Common imperative verbs that NLTK might mis-tag as NOUN
-        imperative_verbs = ['manage', 'place', 'create', 'process', 'validate', 'execute', 'select',
-                           'group', 'assign', 'designate', 'query', 'spawn', 'control', 'edit',
-                           'choose', 'determine', 'initiate', 'move', 'add', 'remove', 'update',
-                           'delete', 'save', 'load', 'render', 'sync', 'search', 'apply',
-                           'respect', 'retrieve', 'persist', 'expose', 'provide', 'show', 'enable',
-                           'allow', 'maintain', 'store', 'track', 'contain', 'visualize']
-        
-        # Quick check: if name starts with an imperative verb (case-insensitive), allow it
-        # This avoids NLTK tokenization issues with acronyms, proper nouns, etc.
-        # Do this BEFORE any try/except to ensure it always runs
-        if name:
-            name_lower = name.lower().strip()
-            words = name_lower.split()
-            if words and words[0] in imperative_verbs:
-                return None  # Starts with imperative verb, allow it
-        
+        """Check if name appears to be noun-only (no verb)."""
         try:
             tokens, tags = self._get_tokens_and_tags(name)
             
             if not tags:
                 return None
             
-            # Whitelist of known good verb-noun names that NLTK might mis-tag
-            # These are explicitly allowed to avoid false positives
-            whitelist = [
-                "Manage Mobs",  # Manage is imperative verb, Mobs is noun
-                "Manage Orders",
-                "Manage Users",
-                "Control Actions",
-                "Control Mobs",
-                "Query Foundry VTT For Selected Tokens",  # Query is imperative verb, NLTK may mis-tag due to acronyms
-                "Group Minions Into Mob",  # Group is imperative verb, NLTK may mis-tag
-                "Assign Mob Name",  # Assign is imperative verb, NLTK may mis-tag
-                "Mob Manager Creates Mob With Selected Tokens",  # Has actor prefix but "Creates" is a verb
-            ]
-            
-            # Check if name is in whitelist (case-insensitive)
-            if name in whitelist or any(name.lower() == w.lower() for w in whitelist):
-                return None
-            
-            # Check if first word is a known imperative verb (even if NLTK tagged it as NOUN)
-            # This is a backup check in case the pre-tokenization check didn't catch it
-            if tokens and tokens[0].lower() in imperative_verbs:
-                return None
-            
-            # Check if any tag is a verb
+            # Check if any tag is a verb (trust NLTK)
             has_verb = any(self._is_verb(tag[1]) for tag in tags)
             
-            # If NLTK didn't find a verb, check if first word is an imperative verb
+            # If NLTK didn't find a verb, check if first word can be a verb using WordNet
             # (NLTK often tags capitalized verbs as proper nouns NNP)
             if not has_verb and tokens:
                 first_word_lower = tokens[0].lower()
-                if first_word_lower in imperative_verbs:
+                if self._can_be_verb(first_word_lower):
                     has_verb = True
             
             if not has_verb:
@@ -375,10 +359,9 @@ class VerbNounScanner(StoryScanner):
                     severity='error'
                 ).to_dict()
         
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"NLTK POS tagging failed for '{name}': {e}")
+        except Exception:
+            # NLTK POS tagging failed - return None to avoid false positives
+            pass
         
         return None
 

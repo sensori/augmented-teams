@@ -277,11 +277,19 @@ class TriggerRouter:
                 continue
             
             behavior_name = self._extract_behavior_name(behavior_dir.name)
-            trigger_file = behavior_dir / 'trigger_words.json'
+            behavior_file = behavior_dir / 'behavior.json'
             
-            patterns = self._load_patterns_from_file(trigger_file)
-            if patterns:
-                behavior_triggers[behavior_name] = patterns
+            # Load from behavior.json (new format)
+            if behavior_file.exists():
+                try:
+                    content = behavior_file.read_text(encoding='utf-8')
+                    behavior_data = json.loads(content)
+                    trigger_words = behavior_data.get('trigger_words', {})
+                    patterns = trigger_words.get('patterns', [])
+                    if patterns:
+                        behavior_triggers[behavior_name] = patterns
+                except Exception:
+                    pass
         
         return behavior_triggers
     

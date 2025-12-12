@@ -65,6 +65,29 @@ function getCurrentWorkflowState(workspaceRoot) {
 
 // Load trigger words for a specific behavior
 function getBehaviorTriggerWords(workspaceRoot, behaviorName) {
+  // Try behavior.json first (new format)
+  const behaviorPath = path.join(
+    workspaceRoot, 
+    "agile_bot", 
+    "bots", 
+    "story_bot", 
+    "behaviors", 
+    behaviorName, 
+    "behavior.json"
+  );
+  
+  try {
+    const content = fs.readFileSync(behaviorPath, "utf8");
+    const behaviorData = JSON.parse(content);
+    const triggerWords = behaviorData.trigger_words || {};
+    if (triggerWords.patterns && triggerWords.patterns.length > 0) {
+      return triggerWords.patterns;
+    }
+  } catch (err) {
+    // Fall through to old format
+  }
+  
+  // Fallback to old format for backward compatibility
   const triggerPath = path.join(
     workspaceRoot, 
     "agile_bot", 

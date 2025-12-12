@@ -38,7 +38,7 @@ class BuildKnowledgeAction(BaseAction):
             logger.debug("Schema and description injected")
             
             # Add explicit update instructions if existing file was found
-            if instructions.get('existing_file') and instructions.get('update_mode'):
+            if instructions.get('existing_file') and instructions.get('update_mode') and instructions.get('knowledge_graph_config'):
                 existing_file = instructions['existing_file']
                 config = instructions['knowledge_graph_config']
                 output_path = config.get('path', 'docs/stories')
@@ -170,10 +170,10 @@ class BuildKnowledgeAction(BaseAction):
         # Find content/knowledge_graph folder (handles numbered prefixes)
         kg_dir = find_nested_subfolder(behavior_folder, 'content', 'knowledge_graph')
         
+        # If knowledge graph folder doesn't exist, return empty dict (optional for some behaviors)
         if not kg_dir:
-            raise FileNotFoundError(
-                f'Knowledge graph folder not found under {behavior_folder}'
-            )
+            logger.debug(f'Knowledge graph folder not found under {behavior_folder} - skipping template injection (optional for this behavior)')
+            return {}
         
         # Find config files (e.g., build_story_graph_outline.json)
         config_files = list(kg_dir.glob('*.json'))
@@ -404,7 +404,22 @@ class BuildKnowledgeAction(BaseAction):
                 self.behavior
             )
             
-            # Load behavior-level instructions.json
+            # Load behavior-level instructions from behavior.json (new format)
+            behavior_file = behavior_folder / 'behavior.json'
+            if behavior_file.exists():
+                behavior_data = read_json_file(behavior_file)
+                description = behavior_data.get('description', '')
+                goal = behavior_data.get('goal', '')
+                
+                parts = []
+                if description:
+                    parts.append(description)
+                if goal:
+                    parts.append(f"Goal: {goal}")
+                
+                return ' '.join(parts) if parts else ''
+            
+            # Fallback to old format for backward compatibility
             behavior_instructions_file = behavior_folder / 'instructions.json'
             if behavior_instructions_file.exists():
                 behavior_data = read_json_file(behavior_instructions_file)

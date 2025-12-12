@@ -1,0 +1,41 @@
+## Increment 1: Create and Command Mobs
+
+(E) Manage Mobs
+    (E) Create Mob
+        (S) Game Master --> Select Multiple Tokens
+        (S) Game Master --> Group Tokens Into Mob
+        (S) Game Master --> Display Mob Creation Confirmation
+    (E) Execute Mob Actions
+        (S) Game Master --> Click Mob Token To Command
+        (S) Game Master --> Determine Target From Strategy
+        (S) Game Master --> Execute Attack Action
+
+
+## Increment 2: Strategy Selection
+
+(E) Manage Mobs
+    (E) Select Strategy
+        (S) Game Master --> Display Available Strategies
+        (S) Game Master --> Assign Strategy To Mob
+        (S) Game Master --> Select Attack Most Powerful Target Strategy
+        (S) Game Master --> Select Attack Weakest Target Strategy
+        (S) Game Master --> Select Defend Leader Strategy
+        (S) Game Master --> Select Attack Most Damaged Person Strategy
+
+
+## Increment 3: Mob Editing
+
+(E) Manage Mobs
+    (E) Edit Mob
+        (S) Game Master --> Add Tokens To Mob
+        (S) Game Master --> Remove Tokens From Mob
+
+
+## Increment 4: Mob Templates
+
+(E) Manage Mobs
+    (E) Spawn Mob From Template
+        (S) Game Master --> Select Mob Template
+        (S) Game Master --> Spawn Mob From Actors
+        (S) Game Master --> Configure Spawned Mob
+

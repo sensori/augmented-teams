@@ -139,7 +139,7 @@ class TestInjectRenderInstructionsAndConfigs:
         bot_name = 'test_bot'
         behavior = 'shape'
         
-        # Create base instructions with template variables (copy from actual base_actions)
+        # Create base instructions with template variables (copy from actual base_actions or create if missing)
         from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
         import shutil
         repo_root = Path(__file__).parent.parent.parent.parent.parent
@@ -150,9 +150,20 @@ class TestInjectRenderInstructionsAndConfigs:
         bot_base_actions_dir = bot_directory / 'base_actions' / '4_render_output'
         bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
         
-        # Copy actual instructions file with template variables
+        # Copy actual instructions file with template variables (or create if missing)
         bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
+        if actual_instructions_file.exists():
+            shutil.copy2(actual_instructions_file, bot_instructions_file)
+        else:
+            # Create test instructions file with template variables if actual file doesn't exist
+            bot_instructions_file.write_text(json.dumps({
+                'actionName': 'render_output',
+                'instructions': [
+                    'Render outputs using render configs',
+                    '{{render_configs}}',
+                    '{{render_instructions}}'
+                ]
+            }), encoding='utf-8')
         
         # Create behavior-specific render instructions
         behavior_dir = bot_directory / 'behaviors' / behavior

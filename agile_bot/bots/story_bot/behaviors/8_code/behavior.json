@@ -1,0 +1,69 @@
+{
+  "behaviorName": "code",
+  "description": "Review and validate code quality",
+  "goal": "Ensure code meets quality standards and follows best practices",
+  "inputs": "Generated source code files",
+  "outputs": "Code quality validation reports",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+    "",
+    "Perform each instruction action as specified in base_actions, tweaked for the code behavior.",
+    "",
+    "**Action Sequence:**",
+    "**NOTE: Action order and action-specific instructions are determined by the actions_workflow section below. Always check that section for the correct sequence and instructions.**",
+    "",
+    "**Workflow Control:**",
+    "- **STOP for human feedback** when told to stop or when action requires user input",
+    "- **CONTINUE to next action** when told to proceed",
+    "- **STOP when complete** when all actions are finished"
+  ],
+  "actions_workflow": {
+    "actions": [
+      {
+        "name": "build_knowledge",
+        "order": 3,
+        "next_action": "render_output",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/3_build_knowledge/instructions.json"
+        ]
+      },
+      {
+        "name": "render_output",
+        "order": 4,
+        "next_action": "validate_rules",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json"
+        ]
+      },
+      {
+        "name": "validate_rules",
+        "order": 5,
+        "action_class": "agile_bot.bots.story_bot.src.bot.validate_code_files_action.ValidateCodeFilesAction",
+        "instructions": [
+          "Follow agile_bot/bots/base_bot/base_actions/4_validate_rules/instructions.json, code: validate source code quality"
+        ]
+      }
+    ]
+  },
+  "trigger_words": {
+    "description": "Agent-level trigger words - general terms that indicate when to use the clean code bot",
+    "patterns": [
+      "analyze.*code.*quality",
+      "check.*clean.*code",
+      "review.*code.*violations",
+      "validate.*code.*quality",
+      "code.*review",
+      "clean.*code.*analysis",
+      "identify.*violations",
+      "code.*quality.*check",
+      "review.*for.*violations",
+      "analyze.*code",
+      "clean.*code",
+      "code.*quality"
+    ],
+    "priority": 5
+  }
+}
+
+

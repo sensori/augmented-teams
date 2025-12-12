@@ -259,8 +259,37 @@ class BaseBotCli:
             else:
                 return behavior_name.replace('_', ' ').title()
         
-        # Try to load behavior instructions
+        # Try to load behavior instructions from behavior.json (new format)
         # First try direct name
+        behavior_file_path = (
+            self.bot_directory / 'behaviors' / behavior_name / 'behavior.json'
+        )
+        
+        # Also check numbered behavior folders (e.g., 1_shape, 2_prioritization)
+        if not behavior_file_path.exists():
+            # Try numbered format - check all numbered folders
+            behaviors_dir = self.bot_directory / 'behaviors'
+            if behaviors_dir.exists():
+                for folder in behaviors_dir.iterdir():
+                    if folder.is_dir():
+                        # Check if folder name ends with behavior_name (e.g., "1_shape" ends with "shape")
+                        folder_name = folder.name
+                        if folder_name.endswith(f'_{behavior_name}') or folder_name == behavior_name:
+                            potential_path = folder / 'behavior.json'
+                            if potential_path.exists():
+                                behavior_file_path = potential_path
+                                break
+        
+        if behavior_file_path.exists():
+            try:
+                behavior_data = read_json_file(behavior_file_path)
+                instructions = behavior_data.get('instructions', [])
+                if instructions:
+                    return '\n'.join(instructions) if isinstance(instructions, list) else str(instructions)
+            except Exception:
+                pass
+        
+        # Fallback to old format for backward compatibility
         behavior_instructions_path = (
             self.bot_directory / 'behaviors' / behavior_name / 'instructions.json'
         )
