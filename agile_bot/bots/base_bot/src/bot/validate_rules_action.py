@@ -1,10 +1,13 @@
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import importlib
+import logging
 from agile_bot.bots.base_bot.src.utils import read_json_file
 from agile_bot.bots.base_bot.src.bot.base_action import BaseAction
 from agile_bot.bots.base_bot.src.scanners.scanner import Scanner
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
+
+logger = logging.getLogger(__name__)
 
 
 class ScannerExecutionError(Exception):
@@ -137,40 +140,52 @@ class ValidateRulesAction(BaseAction):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
-        # Identify content to validate
-        content_info = self._identify_content_to_validate()
-        
-        # Load story graph to run scanners - REQUIRED, no fallback
-        story_graph_path = None
-        for output in content_info.get('rendered_outputs', []):
-            if 'story-graph.json' in output:
-                story_graph_path = Path(output)
-                break
-        
-        if not story_graph_path:
-            raise FileNotFoundError(
-                f"Story graph file (story-graph.json) not found in rendered outputs. "
-                f"Cannot validate rules without story graph. "
-                f"Expected story graph to be created by build_knowledge action before validate_rules."
-            )
-        
-        if not story_graph_path.exists():
-            raise FileNotFoundError(
-                f"Story graph file not found at {story_graph_path}. "
-                f"Cannot validate rules without story graph. "
-                f"Expected story graph to be created by build_knowledge action before validate_rules."
-            )
-        
-        # Load story graph - if file exists, loading MUST succeed
-        # This ensures syntax errors are reported, not hidden
-        story_graph = read_json_file(story_graph_path)
-        
-        # Extract scope from parameters and add to story_graph for scanners
-        scope_config = {}
-        if parameters:
-            # Support explicit story names list
-            if 'story_names' in parameters:
-                scope_config['story_names'] = parameters['story_names']
+        logger.info("=== validate_rules action START ===")
+        logger.info(f"Parameters: {parameters}")
+        try:
+            # Identify content to validate
+            logger.info("Step 1: Identifying content to validate...")
+            content_info = self._identify_content_to_validate()
+            logger.info(f"Content info identified: {list(content_info.keys())}")
+            
+            # Load story graph to run scanners - REQUIRED, no fallback
+            logger.info("Step 2: Loading story graph...")
+            story_graph_path = None
+            for output in content_info.get('rendered_outputs', []):
+                if 'story-graph.json' in output:
+                    story_graph_path = Path(output)
+                    break
+            
+            if not story_graph_path:
+                logger.error("Story graph not found in rendered outputs")
+                raise FileNotFoundError(
+                    f"Story graph file (story-graph.json) not found in rendered outputs. "
+                    f"Cannot validate rules without story graph. "
+                    f"Expected story graph to be created by build_knowledge action before validate_rules."
+                )
+            
+            logger.info(f"Story graph path: {story_graph_path}")
+            if not story_graph_path.exists():
+                logger.error(f"Story graph file does not exist at {story_graph_path}")
+                raise FileNotFoundError(
+                    f"Story graph file not found at {story_graph_path}. "
+                    f"Cannot validate rules without story graph. "
+                    f"Expected story graph to be created by build_knowledge action before validate_rules."
+                )
+            
+            # Load story graph - if file exists, loading MUST succeed
+            # This ensures syntax errors are reported, not hidden
+            logger.info("Step 3: Reading story graph JSON file...")
+            story_graph = read_json_file(story_graph_path)
+            logger.info("Story graph loaded successfully")
+            
+            # Extract scope from parameters and add to story_graph for scanners
+            logger.info("Step 4: Processing parameters and scope config...")
+            scope_config = {}
+            if parameters:
+                # Support explicit story names list
+                if 'story_names' in parameters:
+                    scope_config['story_names'] = parameters['story_names']
             
             # Support multiple increment priorities
             if 'increment_priorities' in parameters:
@@ -191,13 +206,16 @@ class ValidateRulesAction(BaseAction):
             
             # Support test_files (plural) as scope parameter - list of test files to validate
             if 'test_files' in parameters:
+                logger.info(f"Processing test_files parameter: {parameters['test_files']}")
                 test_files_list = parameters['test_files']
                 if test_files_list:
                     # Ensure it's a list
                     if not isinstance(test_files_list, list):
                         test_files_list = [test_files_list]
-                    # Convert all to strings and store in scope
-                    scope_config['test_files'] = [str(Path(tf)) if isinstance(tf, str) else str(tf) for tf in test_files_list]
+                    # Convert all to strings and normalize to forward slashes to avoid escape sequence issues
+                    logger.info(f"Converting {len(test_files_list)} test files to normalized paths...")
+                    scope_config['test_files'] = [str(Path(tf)).replace('\\', '/') if isinstance(tf, str) else str(Path(tf)).replace('\\', '/') for tf in test_files_list]
+                    logger.info(f"Normalized test_files: {scope_config['test_files']}")
             
             # Support code_files as scope parameter - list of code files to validate (for CodeScanner)
             if 'code_files' in parameters:
@@ -206,134 +224,163 @@ class ValidateRulesAction(BaseAction):
                     # Ensure it's a list
                     if not isinstance(code_files_list, list):
                         code_files_list = [code_files_list]
-                    # Convert all to strings and store in scope
-                    scope_config['code_files'] = [str(Path(cf)) if isinstance(cf, str) else str(cf) for cf in code_files_list]
+                    # Convert all to strings and normalize to forward slashes to avoid escape sequence issues
+                    scope_config['code_files'] = [str(Path(cf)).replace('\\', '/') if isinstance(cf, str) else str(Path(cf)).replace('\\', '/') for cf in code_files_list]
             
             # Support 'all' flag
             if parameters.get('validate_all') is True:
                 scope_config['all'] = True
-        
-        # Add scope to story_graph (scanners will read this)
-        if scope_config:
-            story_graph['_validation_scope'] = scope_config
-        
-        # Extract test files from scope for TestScanner (one-off, add to temporary copy only)
-        test_files_to_scan = []
-        if scope_config.get('test_file'):
-            test_files_to_scan.append(scope_config['test_file'])
-        if scope_config.get('test_files'):
-            test_files_to_scan.extend(scope_config['test_files'])
-        
-        # Auto-discover test files if not provided and we're in 7_write_tests behavior
-        if not test_files_to_scan:
+            
+            # Add scope to story_graph (scanners will read this)
+            if scope_config:
+                story_graph['_validation_scope'] = scope_config
+            
+            # Extract test files from scope for TestScanner (one-off, add to temporary copy only)
+            test_files_to_scan = []
+            if scope_config.get('test_file'):
+                test_files_to_scan.append(scope_config['test_file'])
+            if scope_config.get('test_files'):
+                test_files_to_scan.extend(scope_config['test_files'])
+            
+            # Auto-discover test files if not provided and we're in 7_write_tests behavior
+            if not test_files_to_scan:
+                project_location = content_info.get('project_location')
+                if project_location:
+                    project_path = Path(project_location)
+                    # Look for test directories
+                    test_dirs = [project_path / 'test', project_path / 'tests']
+                    for test_dir in test_dirs:
+                        if test_dir.exists() and test_dir.is_dir():
+                            # Find all test_*.py files
+                            discovered_tests = list(test_dir.glob('test_*.py'))
+                            if discovered_tests:
+                                test_files_to_scan.extend([str(tf) for tf in discovered_tests])
+                                break
+            
+            # Extract code files from scope for CodeScanner (one-off, add to temporary copy only)
+            code_files_to_scan = []
+            if scope_config.get('code_files'):
+                code_files_to_scan.extend(scope_config['code_files'])
+            
+            # Convert to Path objects for processing, resolving relative paths
+            # Test file paths are typically relative to repo root (e.g., demo/mob_minion/test/file.py)
+            # Workspace is typically a subdirectory (e.g., demo/mob_minion)
+            # So we need to resolve against repo root, not workspace root
             project_location = content_info.get('project_location')
-            if project_location:
-                project_path = Path(project_location)
-                # Look for test directories
-                test_dirs = [project_path / 'test', project_path / 'tests']
-                for test_dir in test_dirs:
-                    if test_dir.exists() and test_dir.is_dir():
-                        # Find all test_*.py files
-                        discovered_tests = list(test_dir.glob('test_*.py'))
-                        if discovered_tests:
-                            test_files_to_scan.extend([str(tf) for tf in discovered_tests])
-                            break
-        
-        # Extract code files from scope for CodeScanner (one-off, add to temporary copy only)
-        code_files_to_scan = []
-        if scope_config.get('code_files'):
-            code_files_to_scan.extend(scope_config['code_files'])
-        
-        # Convert to Path objects for processing, resolving relative paths
-        # Test file paths are typically relative to repo root (e.g., demo/mob_minion/test/file.py)
-        # Workspace is typically a subdirectory (e.g., demo/mob_minion)
-        # So we need to resolve against repo root, not workspace root
-        project_location = content_info.get('project_location')
-        workspace_path = Path(project_location) if project_location else self.workspace_directory
-        
-        # Find repo root by looking for common markers (starting from workspace and going up)
-        repo_root = None
-        current = workspace_path.resolve()  # Resolve to absolute path first
-        
-        for i in range(10):  # Look up to 10 levels up
-            if (current / '.git').exists() or (current / 'agile_bot').exists():
-                repo_root = current
-                break
-            if current.parent == current:  # Reached filesystem root
-                break
-            current = current.parent
-        
-        # Fallback: use workspace's absolute path parent if we're in a demo subdirectory
-        if not repo_root:
-            # If workspace path ends with something like 'demo/mob_minion', 
-            # and test file path starts with 'demo/mob_minion/test/...',
-            # then repo root should be the parent of the 'demo' directory
-            workspace_str = str(workspace_path.resolve())
-            if 'demo' in workspace_str:
-                # Find where 'demo' appears and use that as a hint
-                parts = workspace_path.resolve().parts
-                if 'demo' in parts:
-                    demo_idx = parts.index('demo')
-                    repo_root = Path(*parts[:demo_idx]) if demo_idx > 0 else workspace_path.resolve().parent
+            workspace_path = Path(project_location) if project_location else self.workspace_directory
+            
+            # Find repo root by looking for common markers (starting from workspace and going up)
+            repo_root = None
+            current = workspace_path.resolve()  # Resolve to absolute path first
+            
+            for i in range(10):  # Look up to 10 levels up
+                if (current / '.git').exists() or (current / 'agile_bot').exists():
+                    repo_root = current
+                    break
+                if current.parent == current:  # Reached filesystem root
+                    break
+                current = current.parent
+            
+            # Fallback: use workspace's absolute path parent if we're in a demo subdirectory
+            if not repo_root:
+                # If workspace path ends with something like 'demo/mob_minion', 
+                # and test file path starts with 'demo/mob_minion/test/...',
+                # then repo root should be the parent of the 'demo' directory
+                workspace_str = str(workspace_path.resolve())
+                if 'demo' in workspace_str:
+                    # Find where 'demo' appears and use that as a hint
+                    parts = workspace_path.resolve().parts
+                    if 'demo' in parts:
+                        demo_idx = parts.index('demo')
+                        repo_root = Path(*parts[:demo_idx]) if demo_idx > 0 else workspace_path.resolve().parent
+                    else:
+                        repo_root = workspace_path.resolve().parent
                 else:
                     repo_root = workspace_path.resolve().parent
-            else:
-                repo_root = workspace_path.resolve().parent
-        
-        if test_files_to_scan:
+            
             test_file_paths = []
-            for tf in test_files_to_scan:
-                test_path = Path(tf)
-                # If absolute path, use as-is
-                if test_path.is_absolute():
-                    test_file_paths.append(test_path)
-                else:
-                    # Always resolve against repo root (test files are relative to repo root)
-                    if repo_root:
-                        resolved_path = repo_root / test_path
-                        test_file_paths.append(resolved_path)
+            if test_files_to_scan:
+                for tf in test_files_to_scan:
+                    test_path = Path(tf)
+                    # If absolute path, use as-is
+                    if test_path.is_absolute():
+                        test_file_paths.append(test_path)
                     else:
-                        # Fallback: resolve against workspace (shouldn't happen if repo_root detection works)
-                        resolved_path = self.workspace_directory / test_path
-                        test_file_paths.append(resolved_path)
-        else:
-            test_file_paths = None
-        
-        if code_files_to_scan:
+                        # Always resolve against repo root (test files are relative to repo root)
+                        if repo_root:
+                            resolved_path = repo_root / test_path
+                            test_file_paths.append(resolved_path)
+                        else:
+                            # Fallback: resolve against workspace (shouldn't happen if repo_root detection works)
+                            resolved_path = self.workspace_directory / test_path
+                            test_file_paths.append(resolved_path)
+            
             code_file_paths = []
-            for cf in code_files_to_scan:
-                code_path = Path(cf)
-                # If absolute path, use as-is
-                if code_path.is_absolute():
-                    code_file_paths.append(code_path)
-                else:
-                    # Always resolve against repo root (code files are relative to repo root)
-                    if repo_root:
-                        resolved_path = repo_root / code_path
-                        code_file_paths.append(resolved_path)
+            if code_files_to_scan:
+                for cf in code_files_to_scan:
+                    code_path = Path(cf)
+                    # If absolute path, use as-is
+                    if code_path.is_absolute():
+                        code_file_paths.append(code_path)
                     else:
-                        # Fallback: resolve against workspace
-                        resolved_path = self.workspace_directory / code_path
-                        code_file_paths.append(resolved_path)
-        else:
-            code_file_paths = None
+                        # Always resolve against repo root (code files are relative to repo root)
+                        if repo_root:
+                            resolved_path = repo_root / code_path
+                            code_file_paths.append(resolved_path)
+                        else:
+                            # Fallback: resolve against workspace
+                            resolved_path = self.workspace_directory / code_path
+                            code_file_paths.append(resolved_path)
         
-        # Run scanners with story graph and optional test/code files (one-off, not persisted)
-        result = self.injectValidationInstructions(story_graph, test_files=test_file_paths, code_files=code_file_paths)
-        
-        # Write validation report with scanner results
-        report_path = content_info.get('report_path')
-        if report_path:
-            try:
+            # Run scanners with story graph and optional test/code files (one-off, not persisted)
+            logger.info("Step 5: Running scanners via injectValidationInstructions...")
+            logger.info(f"Test files to scan: {test_file_paths}")
+            logger.info(f"Code files to scan: {code_file_paths}")
+            result = self.injectValidationInstructions(story_graph, test_files=test_file_paths, code_files=code_file_paths)
+            logger.info("Scanners completed successfully")
+            
+            # Write validation report with scanner results
+            logger.info("Step 6: Preparing to write validation report...")
+            report_path = content_info.get('report_path')
+            logger.info(f"Report path: {report_path}")
+            if report_path:
+                logger.info("Step 7: Extracting instructions and validation rules from result...")
                 instructions = result.get('instructions', {})
                 validation_rules = instructions.get('validation_rules', [])
+                logger.info(f"Found {len(validation_rules)} validation rules")
+                
+                # Add test files and code files to content_info for report
+                if test_file_paths:
+                    content_info['test_files_scanned'] = [str(tf) for tf in test_file_paths]
+                if code_file_paths:
+                    content_info['code_files_scanned'] = [str(cf) for cf in code_file_paths]
+                
+                logger.info("Step 8: Calling _write_validation_report...")
+                logger.info(f"Report path: {report_path}")
+                logger.info(f"Instructions keys: {list(instructions.keys())}")
+                logger.info(f"Content info keys: {list(content_info.keys())}")
                 self._write_validation_report(report_path, instructions, validation_rules, content_info)
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f"Failed to write validation report to {report_path}: {e}", exc_info=True)
-        
-        return result
+                logger.info("Report written successfully")
+            else:
+                logger.warning("No report_path in content_info, skipping report writing")
+            
+            logger.info("=== validate_rules action COMPLETE ===")
+            return result
+        except Exception as e:
+            # Log error with full context to help debug regex errors
+            import traceback
+            logger.error("=== ERROR in validate_rules action ===")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Error message: {e}")
+            logger.error(f"Parameters: {parameters}")
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            # Re-raise with full context
+            error_msg = (
+                f"Error in validate_rules action: {e}\n"
+                f"Parameters: {parameters}\n"
+                f"Traceback:\n{traceback.format_exc()}"
+            )
+            raise RuntimeError(error_msg) from e
     
     def inject_common_bot_rules(self) -> Dict[str, Any]:
         """Load common bot-level rules from base_bot/rules/ directory."""
@@ -441,7 +488,8 @@ class ValidateRulesAction(BaseAction):
     
     def _identify_content_to_validate(self) -> Dict[str, Any]:
         """Identify what content needs to be validated from the project."""
-        project_dir = self.working_dir
+        # Use workspace_directory property which gets path from workspace tool/environment
+        project_dir = self.workspace_directory
         content_info = {
             'project_location': str(project_dir),
             'rendered_outputs': [],
@@ -473,6 +521,7 @@ class ValidateRulesAction(BaseAction):
         except FileNotFoundError:
             docs_path = 'docs/stories'
         
+        # Build docs directory path relative to workspace directory
         docs_dir = project_dir / docs_path
         
         # Find clarification.json and planning.json
@@ -484,7 +533,7 @@ class ValidateRulesAction(BaseAction):
         if planning_file.exists():
             content_info['planning_file'] = str(planning_file)
         
-        # Set validation report path (where AI should save the report)
+        # Set validation report path using workspace directory (where AI should save the report)
         report_file = docs_dir / 'validation-report.md'
         content_info['report_path'] = str(report_file)
         
@@ -701,118 +750,389 @@ class ValidateRulesAction(BaseAction):
             validation_rules: List of validation rules
             content_info: Content information including project location, rendered outputs, etc.
         """
-        from datetime import datetime
+        logger.info("=== _write_validation_report START ===")
+        logger.info(f"Report path: {report_path}")
+        logger.info(f"Number of validation rules: {len(validation_rules)}")
+        logger.info(f"Content info keys: {list(content_info.keys())}")
         
-        report_file = Path(report_path)
-        report_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Generate report content
-        lines = []
-        lines.append(f"# Validation Report - {self.behavior.replace('_', ' ').title()}")
-        lines.append("")
-        lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        lines.append(f"**Project:** {Path(content_info.get('project_location', '')).name}")
-        lines.append(f"**Behavior:** {self.behavior}")
-        lines.append(f"**Action:** validate_rules")
-        lines.append("")
-        lines.append("## Summary")
-        lines.append("")
-        
-        # Count rules
-        total_rules = len(validation_rules)
-        lines.append(f"Validated story map and domain model against **{total_rules} validation rules**.")
-        lines.append("")
-        
-        # List content validated
-        lines.append("## Content Validated")
-        lines.append("")
-        if content_info.get('clarification_file'):
-            lines.append(f"- **Clarification:** `{Path(content_info['clarification_file']).name}`")
-        if content_info.get('planning_file'):
-            lines.append(f"- **Planning:** `{Path(content_info['planning_file']).name}`")
-        if content_info.get('rendered_outputs'):
-            lines.append("- **Rendered Outputs:**")
-            for output in content_info['rendered_outputs']:
-                lines.append(f"  - `{Path(output).name}`")
-        lines.append("")
-        
-        # List validation rules checked
-        lines.append("## Validation Rules Checked")
-        lines.append("")
-        for rule_dict in validation_rules[:20]:  # Show first 20 rules
-            rule_file = rule_dict.get('rule_file', 'unknown')
-            rule_content = rule_dict.get('rule_content', rule_dict)
-            description = rule_content.get('description', 'No description')
-            rule_name = Path(rule_file).stem if rule_file else 'unknown'
-            lines.append(f"### Rule: {rule_name.replace('_', ' ').title()}")
-            lines.append(f"**Description:** {description}")
-            lines.append("")
-        
-        if total_rules > 20:
-            lines.append(f"*... and {total_rules - 20} more rules*")
-            lines.append("")
-        
-        # Violations summary
-        lines.append("## Violations Found")
-        lines.append("")
-        
-        total_violations = 0
-        violations_by_rule = {}
-        
-        for rule_dict in validation_rules:
-            rule_file = rule_dict.get('rule_file', 'unknown')
-            scanner_results = rule_dict.get('scanner_results', {})
-            violations = scanner_results.get('violations', [])
+        try:
+            from datetime import datetime
             
-            if violations:
+            logger.info("Step 1: Creating report file path object...")
+            report_file = Path(report_path)
+            logger.info(f"Report file path object created: {report_file}")
+            
+            logger.info("Step 2: Creating parent directories...")
+            report_file.parent.mkdir(parents=True, exist_ok=True)
+            logger.info("Parent directories created")
+            
+            # Generate report content
+            logger.info("Step 3: Generating report content...")
+            lines = []
+            logger.info("Step 3a: Adding header...")
+            lines.append(f"# Validation Report - {self.behavior.replace('_', ' ').title()}")
+            lines.append("")
+            logger.info("Step 3b: Adding metadata...")
+            lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            lines.append(f"**Project:** {Path(content_info.get('project_location', '')).name}")
+            lines.append(f"**Behavior:** {self.behavior}")
+            lines.append(f"**Action:** validate_rules")
+            lines.append("")
+            logger.info("Step 3c: Adding summary section...")
+            lines.append("## Summary")
+            lines.append("")
+            
+            # Count rules
+            total_rules = len(validation_rules)
+            lines.append(f"Validated story map and domain model against **{total_rules} validation rules**.")
+            lines.append("")
+            
+            # List content validated
+            lines.append("## Content Validated")
+            lines.append("")
+            if content_info.get('clarification_file'):
+                lines.append(f"- **Clarification:** `{Path(content_info['clarification_file']).name}`")
+            if content_info.get('planning_file'):
+                lines.append(f"- **Planning:** `{Path(content_info['planning_file']).name}`")
+            if content_info.get('rendered_outputs'):
+                lines.append("- **Rendered Outputs:**")
+                for output in content_info['rendered_outputs']:
+                    lines.append(f"  - `{Path(output).name}`")
+            
+            # Add test files section if any were scanned
+            test_files_scanned = content_info.get('test_files_scanned', [])
+            logger.info(f"Test files scanned from content_info: {len(test_files_scanned) if test_files_scanned else 0} files")
+            if test_files_scanned:
+                lines.append("- **Test Files Scanned:**")
+                # Sort for consistent output
+                for test_file_str in sorted(test_files_scanned):
+                    test_path = Path(test_file_str)
+                    # Show relative path if possible, otherwise just filename
+                    try:
+                        if test_path.is_absolute() and self.workspace_directory:
+                            rel_path = test_path.relative_to(self.workspace_directory)
+                            lines.append(f"  - `{rel_path}`")
+                        else:
+                            # Try to resolve and show relative to workspace
+                            if self.workspace_directory and not test_path.is_absolute():
+                                try:
+                                    resolved = (self.workspace_directory / test_path).resolve()
+                                    rel_path = resolved.relative_to(self.workspace_directory)
+                                    lines.append(f"  - `{rel_path}`")
+                                except (ValueError, AttributeError):
+                                    lines.append(f"  - `{test_path.name}`")
+                            else:
+                                lines.append(f"  - `{test_path.name}`")
+                    except (ValueError, AttributeError) as e:
+                        logger.warning(f"Could not create relative path for {test_file_str}: {e}")
+                        lines.append(f"  - `{test_path.name}`")
+                lines.append(f"  - **Total:** {len(test_files_scanned)} test file(s)")
+            
+            # Add code files section if any were scanned
+            code_files_scanned = content_info.get('code_files_scanned', [])
+            logger.info(f"Code files scanned from content_info: {len(code_files_scanned) if code_files_scanned else 0} files")
+            if code_files_scanned:
+                lines.append("- **Code Files Scanned:**")
+                # Sort for consistent output
+                for code_file_str in sorted(code_files_scanned):
+                    code_path = Path(code_file_str)
+                    # Show relative path if possible, otherwise just filename
+                    try:
+                        if code_path.is_absolute() and self.workspace_directory:
+                            rel_path = code_path.relative_to(self.workspace_directory)
+                            lines.append(f"  - `{rel_path}`")
+                        else:
+                            # Try to resolve and show relative to workspace
+                            if self.workspace_directory and not code_path.is_absolute():
+                                try:
+                                    resolved = (self.workspace_directory / code_path).resolve()
+                                    rel_path = resolved.relative_to(self.workspace_directory)
+                                    lines.append(f"  - `{rel_path}`")
+                                except (ValueError, AttributeError):
+                                    lines.append(f"  - `{code_path.name}`")
+                            else:
+                                lines.append(f"  - `{code_path.name}`")
+                    except (ValueError, AttributeError) as e:
+                        logger.warning(f"Could not create relative path for {code_file_str}: {e}")
+                        lines.append(f"  - `{code_path.name}`")
+                lines.append(f"  - **Total:** {len(code_files_scanned)} code file(s)")
+            
+            lines.append("")
+            
+            # List validation rules checked
+            lines.append("## Validation Rules Checked")
+            lines.append("")
+            for rule_dict in validation_rules[:20]:  # Show first 20 rules
+                rule_file = rule_dict.get('rule_file', 'unknown')
+                rule_content = rule_dict.get('rule_content', rule_dict)
+                description = rule_content.get('description', 'No description')
                 rule_name = Path(rule_file).stem if rule_file else 'unknown'
-                violations_by_rule[rule_name] = violations
-                total_violations += len(violations)
-        
-        if total_violations == 0:
-            lines.append("✅ **No violations found.** All rules passed validation.")
-            lines.append("")
-        else:
-            lines.append(f"**Total Violations:** {total_violations}")
+                lines.append(f"### Rule: {rule_name.replace('_', ' ').title()}")
+                lines.append(f"**Description:** {description}")
+                lines.append("")
+            
+            if total_rules > 20:
+                lines.append(f"*... and {total_rules - 20} more rules*")
+                lines.append("")
+            
+            # Violations summary
+            lines.append("## Violations Found")
             lines.append("")
             
-            # Group violations by rule
-            for rule_name, violations in violations_by_rule.items():
-                lines.append(f"### {rule_name.replace('_', ' ').title()}: {len(violations)} violation(s)")
+            total_violations = 0
+            violations_by_rule = {}
+            
+            for rule_dict in validation_rules:
+                rule_file = rule_dict.get('rule_file', 'unknown')
+                scanner_results = rule_dict.get('scanner_results', {})
+                violations = scanner_results.get('violations', [])
+                
+                if violations:
+                    rule_name = Path(rule_file).stem if rule_file else 'unknown'
+                    violations_by_rule[rule_name] = violations
+                    total_violations += len(violations)
+            
+            if total_violations == 0:
+                lines.append("✅ **No violations found.** All rules passed validation.")
+                lines.append("")
+            else:
+                lines.append(f"**Total Violations:** {total_violations}")
                 lines.append("")
                 
-                # Show all violations (no truncation)
-                for violation in violations:
-                    location = violation.get('location', 'unknown')
-                    message = violation.get('violation_message', 'No message')
-                    severity = violation.get('severity', 'error')
-                    severity_icon = '🔴' if severity == 'error' else '🟡' if severity == 'warning' else '🔵'
-                    lines.append(f"- {severity_icon} **{severity.upper()}** - `{location}`: {message}")
-                
-                lines.append("")
-        
-        # Instructions summary
-        lines.append("## Validation Instructions")
-        lines.append("")
-        base_instructions = instructions.get('base_instructions', [])
-        if base_instructions:
-            lines.append("The following validation steps were performed:")
+                # Group violations by rule
+                for rule_name, violations in violations_by_rule.items():
+                    lines.append(f"### {rule_name.replace('_', ' ').title()}: {len(violations)} violation(s)")
+                    lines.append("")
+                    
+                    # Show all violations (no truncation)
+                    for violation in violations:
+                        location = violation.get('location', 'unknown')
+                        message = violation.get('violation_message', 'No message')
+                        severity = violation.get('severity', 'error')
+                        line_number = violation.get('line_number')
+                        severity_icon = '🔴' if severity == 'error' else '🟡' if severity == 'warning' else '🔵'
+                        
+                        # Create hyperlink if location is a file path
+                        location_link = self._create_file_link(location, line_number)
+                        
+                        # Extract test class and method from message if present
+                        test_info = self._extract_test_info(message, location, line_number)
+                        
+                        if test_info:
+                            # Include clickable links to test class and method
+                            lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {test_info}")
+                        else:
+                            lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {message}")
+                    
+                    lines.append("")
+            
+            # Instructions summary
+            lines.append("## Validation Instructions")
             lines.append("")
-            for i, instruction in enumerate(base_instructions[:10], 1):  # Show first 10 instructions
-                lines.append(f"{i}. {instruction}")
-            if len(base_instructions) > 10:
-                lines.append(f"*... and {len(base_instructions) - 10} more instructions*")
-        lines.append("")
+            base_instructions = instructions.get('base_instructions', [])
+            if base_instructions:
+                lines.append("The following validation steps were performed:")
+                lines.append("")
+                for i, instruction in enumerate(base_instructions[:10], 1):  # Show first 10 instructions
+                    lines.append(f"{i}. {instruction}")
+                if len(base_instructions) > 10:
+                    lines.append(f"*... and {len(base_instructions) - 10} more instructions*")
+            lines.append("")
+            
+            # Report path reminder
+            lines.append("## Report Location")
+            lines.append("")
+            lines.append(f"This report was automatically generated and saved to:")
+            lines.append(f"`{report_path}`")
+            lines.append("")
+            
+            # Write file
+            logger.info("Step 4: Writing report to file...")
+            logger.info(f"Report file path: {report_file}")
+            logger.info(f"Number of lines to write: {len(lines)}")
+            report_file.write_text('\n'.join(lines), encoding='utf-8')
+            logger.info("Report file written successfully")
+            logger.info("=== _write_validation_report COMPLETE ===")
+        except Exception as e:
+            import traceback
+            logger.error("=== ERROR in _write_validation_report ===")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Error message: {e}")
+            logger.error(f"Report path: {report_path}")
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            raise
+    
+    def _create_file_link(self, location: str, line_number: Optional[int] = None) -> str:
+        """Create a clickable file link for the validation report using VS Code URIs.
         
-        # Report path reminder
-        lines.append("## Report Location")
-        lines.append("")
-        lines.append(f"This report was automatically generated and saved to:")
-        lines.append(f"`{report_path}`")
-        lines.append("")
+        Args:
+            location: File path (can be absolute or relative)
+            line_number: Optional line number to link to
+            
+        Returns:
+            Markdown link string with VS Code URI
+        """
+        if location == 'unknown' or not location:
+            return f"`{location}`"
         
-        # Write file
-        report_file.write_text('\n'.join(lines), encoding='utf-8')
+        try:
+            # Convert to Path to normalize
+            file_path = Path(location)
+            
+            # Check if it's an absolute path (Windows paths start with drive letter or \\)
+            is_absolute = file_path.is_absolute() or (len(location) > 1 and location[1] == ':') or location.startswith('\\\\')
+            
+            # Get VS Code URI using the helper method
+            file_uri = self._get_file_uri(location, line_number)
+            
+            if is_absolute:
+                # Use filename for display, VS Code URI in link
+                try:
+                    resolved_path = file_path.resolve() if file_path.exists() else file_path
+                    display_name = resolved_path.name
+                except Exception:
+                    display_name = file_path.name
+                return f"[`{display_name}`]({file_uri})"
+            else:
+                # Relative path - use relative path for display
+                return f"[`{location}`]({file_uri})"
+        except Exception:
+            # Fallback: use VS Code URI helper
+            try:
+                file_uri = self._get_file_uri(location, line_number)
+                return f"[`{Path(location).name if location else location}`]({file_uri})"
+            except Exception:
+                # Final fallback: just show the location as-is
+                if line_number:
+                    return f"`{location}:{line_number}`"
+                return f"`{location}`"
+    
+    def _extract_test_info(self, message: str, location: str, line_number: Optional[int] = None) -> Optional[str]:
+        """Extract test class and method information from violation message and create links.
+        
+        Args:
+            message: Violation message that may contain test names
+            location: File path
+            line_number: Line number where violation occurs
+            
+        Returns:
+            Formatted message with clickable links to test class/method, or None if no test info found
+        """
+        import re
+        
+        # Try to extract test method name from various patterns:
+        # - 'Test "test_method_name"'
+        # - 'test method "test_method_name"'
+        # - 'Test method "test_method_name"'
+        # - Test "test_method_name" appears to...
+        test_method_patterns = [
+            r'Test\s+method\s+["\']([^"\']+)["\']',
+            r'Test\s+["\']([^"\']+)["\']',
+            r'test\s+method\s+["\']([^"\']+)["\']',
+        ]
+        
+        # Try to extract test class name
+        test_class_patterns = [
+            r'Test\s+class\s+["\']([^"\']+)["\']',
+            r'class\s+["\']([^"\']+)["\']',
+        ]
+        
+        test_method_match = None
+        for pattern in test_method_patterns:
+            test_method_match = re.search(pattern, message, re.IGNORECASE)
+            if test_method_match:
+                break
+        
+        test_class_match = None
+        for pattern in test_class_patterns:
+            test_class_match = re.search(pattern, message, re.IGNORECASE)
+            if test_class_match:
+                break
+        
+        if not test_method_match and not test_class_match:
+            return None
+        
+        # Get file URI for linking
+        file_uri = self._get_file_uri(location, line_number)
+        
+        # Replace the original test reference in message with linked version
+        # IMPORTANT: Use string replacement instead of regex to avoid escape sequence issues with Windows paths
+        try:
+            if test_method_match:
+                test_method_name = test_method_match.group(1)
+                # Use simple string replacement to avoid regex escape sequence parsing issues
+                replacement = f'Test method [{test_method_name}]({file_uri})'
+                # Replace all variations using string replace (safer than regex for paths with backslashes)
+                message = message.replace(f'Test method "{test_method_name}"', replacement)
+                message = message.replace(f"Test method '{test_method_name}'", replacement)
+                message = message.replace(f'Test "{test_method_name}"', replacement)
+                message = message.replace(f"Test '{test_method_name}'", replacement)
+                message = message.replace(f'test method "{test_method_name}"', replacement)
+                message = message.replace(f"test method '{test_method_name}'", replacement)
+            
+            if test_class_match:
+                test_class_name = test_class_match.group(1)
+                # Use simple string replacement to avoid regex escape sequence parsing issues
+                replacement = f'Test class [{test_class_name}]({file_uri})'
+                message = message.replace(f'Test class "{test_class_name}"', replacement)
+                message = message.replace(f"Test class '{test_class_name}'", replacement)
+                message = message.replace(f'class "{test_class_name}"', replacement)
+                message = message.replace(f"class '{test_class_name}'", replacement)
+        except Exception as e:
+            # If replacement fails, log and return original message
+            logger.warning(f"Failed to create test info links: {e}, returning original message")
+            return None
+        
+        return message
+    
+    def _get_file_uri(self, location: str, line_number: Optional[int] = None) -> str:
+        """Get VS Code-compatible file URI for markdown links.
+        
+        Args:
+            location: File path
+            line_number: Optional line number
+            
+        Returns:
+            VS Code URI format: vscode://file/C:/path/to/file.py:123
+        """
+        try:
+            file_path = Path(location)
+            if file_path.is_absolute():
+                resolved_path = file_path.resolve() if file_path.exists() else file_path
+            else:
+                # Try to resolve relative to workspace
+                workspace_path = self.workspace_directory
+                if workspace_path:
+                    resolved_path = (workspace_path / file_path).resolve()
+                else:
+                    # Fallback: use location as-is
+                    resolved_path = Path(location)
+            
+            # Convert to VS Code URI format: vscode://file/C:/path/to/file.py:123
+            # Use forward slashes and ensure drive letter is uppercase
+            file_str = str(resolved_path).replace('\\', '/')
+            # Ensure drive letter is uppercase (C: not c:)
+            if len(file_str) >= 2 and file_str[1] == ':':
+                file_str = file_str[0].upper() + ':' + file_str[2:]
+            
+            # Build VS Code URI
+            vscode_uri = f"vscode://file/{file_str}"
+            
+            # Add line number with colon (VS Code format uses colon, not #L)
+            if line_number:
+                vscode_uri = f"{vscode_uri}:{line_number}"
+            
+            return vscode_uri
+        except Exception:
+            # Fallback - try to construct VS Code URI from location as-is
+            file_str = location.replace('\\', '/')
+            # Ensure drive letter is uppercase
+            if len(file_str) >= 2 and file_str[1] == ':':
+                file_str = file_str[0].upper() + ':' + file_str[2:]
+            vscode_uri = f"vscode://file/{file_str}"
+            if line_number:
+                vscode_uri = f"{vscode_uri}:{line_number}"
+            return vscode_uri
     
     def generate_report(self, report_format: str = 'JSON', violations: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """Generate violation report in specified format.

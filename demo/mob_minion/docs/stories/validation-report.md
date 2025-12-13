@@ -1,6 +1,6 @@
 # Validation Report - 8 Code
 
-**Generated:** 2025-12-12 01:50:35
+**Generated:** 2025-12-13 13:04:43
 **Project:** mob_minion
 **Behavior:** 8_code
 **Action:** validate_rules
@@ -84,7 +84,7 @@ Validated story map and domain model against **41 validation rules**.
 
 ## Violations Found
 
-**Total Violations:** 29
+**Total Violations:** 93
 
 ### Map Sequential Spine Vs Optional Paths: 7 violation(s)
 
@@ -121,6 +121,100 @@ Validated story map and domain model against **41 validation rules**.
 - 🟡 **WARNING** - `epics[0].sub_epics[4].story_groups[0].stories[1].acceptance_criteria`: Story "Spawn Mob From Actors" has 4 4 acceptance criteria (should be 5-9)
 - 🟡 **WARNING** - `epics[0].sub_epics[4].story_groups[0].stories[2].acceptance_criteria`: Story "Configure Spawned Mob" has 4 4 acceptance criteria (should be 5-9)
 
+### Keep Classes Single Responsibility: 1 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774): Function "test_rules_file_includes_bot_goal_and_behavior_descriptions" appears to have multiple responsibilities - split into separate functions
+
+### Keep Classes Small Compact: 1 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L662): Class "TestGenerateCursorAwarenessFiles" is 334 lines - should be under 300 lines (extract related methods into separate classes)
+
+### Keep Functions Single Responsibility: 1 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774): Function "test_rules_file_includes_bot_goal_and_behavior_descriptions" appears to have multiple responsibilities - split into separate functions
+
+### Keep Functions Small Focused: 20 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L31): Function "create_base_actions_structure" is 27 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L108): Function "generator" is 22 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L134): Function "test_generator_creates_bot_tool_for_test_bot" is 31 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L170): Function "test_generator_creates_behavior_tools_for_test_bot_with_4_behaviors" is 31 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L206): Function "test_generator_creates_mcp_server_for_test_bot" is 36 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L244): Function "test_generator_fails_when_bot_config_missing" is 26 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L273): Function "test_generator_fails_when_bot_config_malformed" is 29 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L309): Function "test_generator_creates_tools_for_test_bot_with_4_behaviors" is 40 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L353): Function "test_generator_loads_trigger_words_from_behavior_folder" is 45 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L399): Function "test_generator_handles_missing_trigger_words" is 39 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L507): Function "test_generator_deploys_server_successfully" is 38 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L546): Function "test_server_publishes_tool_catalog_with_metadata" is 51 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L598): Function "test_generator_fails_when_protocol_handler_not_running" is 31 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L630): Function "test_server_handles_initialization_failure" is 30 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L665): Function "test_generator_creates_workspace_rules_file_with_trigger_patterns" is 108 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774): Function "test_rules_file_includes_bot_goal_and_behavior_descriptions" is 91 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L866): Function "test_rules_file_maps_trigger_patterns_to_tool_naming_conventions" is 76 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L943): Function "test_generator_handles_file_write_errors_gracefully_creates_directory" is 23 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L967): Function "test_generator_handles_file_write_errors_with_clear_error_message" is 29 lines - should be under 20 lines (extract complex logic to helper functions)
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L1001): Function "test_full_awareness_generation_workflow" is 22 lines - should be under 20 lines (extract complex logic to helper functions)
+
+### Maintain Abstraction Levels: 6 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L309): Function "test_generator_creates_tools_for_test_bot_with_4_behaviors" mixes high-level operations with low-level details - extract low-level details to separate functions
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L399): Function "test_generator_handles_missing_trigger_words" mixes high-level operations with low-level details - extract low-level details to separate functions
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L598): Function "test_generator_fails_when_protocol_handler_not_running" mixes high-level operations with low-level details - extract low-level details to separate functions
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L630): Function "test_server_handles_initialization_failure" mixes high-level operations with low-level details - extract low-level details to separate functions
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L943): Function "test_generator_handles_file_write_errors_gracefully_creates_directory" mixes high-level operations with low-level details - extract low-level details to separate functions
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L967): Function "test_generator_handles_file_write_errors_with_clear_error_message" mixes high-level operations with low-level details - extract low-level details to separate functions
+
+### Maintain Vertical Density: 4 violation(s)
+
+- 🔵 **INFO** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L546): Function "test_server_publishes_tool_catalog_with_metadata" is 51 lines - consider improving vertical density by declaring variables near usage
+- 🔵 **INFO** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L665): Function "test_generator_creates_workspace_rules_file_with_trigger_patterns" is 108 lines - consider improving vertical density by declaring variables near usage
+- 🔵 **INFO** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774): Function "test_rules_file_includes_bot_goal_and_behavior_descriptions" is 91 lines - consider improving vertical density by declaring variables near usage
+- 🔵 **INFO** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L866): Function "test_rules_file_maps_trigger_patterns_to_tool_naming_conventions" is 76 lines - consider improving vertical density by declaring variables near usage
+
+### Minimize Mutable State: 1 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L419): Line 419 mutates state - prefer immutable data structures (create new objects instead of mutating)
+
+### Provide Meaningful Context: 8 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L377): Line 377 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L621): Line 621 uses numbered variable "9999" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L701): Line 701 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L715): Line 715 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L818): Line 818 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L832): Line 832 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L896): Line 896 uses numbered variable "10" - use meaningful descriptive name
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L910): Line 910 uses numbered variable "10" - use meaningful descriptive name
+
+### Test One Concept Per Test: 1 violation(s)
+
+- 🟡 **WARNING** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774): Test method [test_rules_file_includes_bot_goal_and_behavior_descriptions](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L774) appears to test multiple concepts - split into separate tests, one concept per test
+
+### Use Intention Revealing Names: 21 violation(s)
+
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L495): Variable "result" uses generic name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L589): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L393): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L434): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L487): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L589): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L593): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L393): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L434): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L487): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L593): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L347): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L348): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L589): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L498): Variable "result" uses generic name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L593): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L347): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L348): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L393): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L434): Variable "t" uses single-letter name - use intention-revealing name
+- 🔴 **ERROR** - [`test_generate_bot_server_and_tools.py`](file:///C:/dev/augmented-teams/agile_bot/bots/base_bot/test/test_generate_bot_server_and_tools.py#L487): Variable "t" uses single-letter name - use intention-revealing name
+
 ## Validation Instructions
 
 The following validation steps were performed:
@@ -135,7 +229,7 @@ The following validation steps were performed:
 8. - **Original input:** `{project_area}/docs/context/input.txt` and other original context files
 9. 
 10. These files contain critical requirements, decisions, and context that MUST be checked against during validation.
-*... and 219 more instructions*
+*... and 229 more instructions*
 
 ## Report Location
 

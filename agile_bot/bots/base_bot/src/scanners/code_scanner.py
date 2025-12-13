@@ -26,8 +26,8 @@ class CodeScanner(Scanner):
         Args:
             knowledge_graph: Story graph structure
             rule_obj: Rule object reference (for creating Violations)
-            test_files: Not used by CodeScanner (for TestScanner)
-            code_files: List of code file paths to scan (from parameters, not knowledge_graph)
+            test_files: List of file paths to scan
+            code_files: List of file paths to scan
             
         Returns:
             List of violation dictionaries
@@ -37,12 +37,18 @@ class CodeScanner(Scanner):
         
         violations = []
         
-        # Scan code files if provided via parameters
+        # Combine all files to scan - no distinction between test_files and code_files
+        all_files = []
         if code_files:
-            for code_file_path in code_files:
-                if code_file_path.exists():
-                    file_violations = self.scan_code_file(code_file_path, rule_obj)
-                    violations.extend(file_violations if isinstance(file_violations, list) else [])
+            all_files.extend(code_files)
+        if test_files:
+            all_files.extend(test_files)
+        
+        # Scan all files that were passed in
+        for file_path in all_files:
+            if file_path.exists():
+                file_violations = self.scan_code_file(file_path, rule_obj)
+                violations.extend(file_violations if isinstance(file_violations, list) else [])
         
         return violations
     

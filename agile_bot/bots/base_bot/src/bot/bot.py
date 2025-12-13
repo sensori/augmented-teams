@@ -352,6 +352,20 @@ class Behavior:
         action_class = self._get_action_class('validate_rules', ValidateRulesAction)
         return self.execute_action('validate_rules', action_class, parameters)
     
+    def test_validate(self, parameters: Dict[str, Any] = None) -> BotResult:
+        """Execute test validation action - automatically runs TestScanner instances."""
+        from agile_bot.bots.base_bot.src.bot.test_validate_action import TestValidateAction
+        # Check for custom action class override
+        action_class = self._get_action_class('test_validate', TestValidateAction)
+        return self.execute_action('test_validate', action_class, parameters)
+    
+    def code_quality(self, parameters: Dict[str, Any] = None) -> BotResult:
+        """Execute code quality action - automatically runs CodeScanner instances."""
+        from agile_bot.bots.base_bot.src.bot.code_quality_action import CodeQualityAction
+        # Check for custom action class override
+        action_class = self._get_action_class('code_quality', CodeQualityAction)
+        return self.execute_action('code_quality', action_class, parameters)
+    
     def does_requested_action_match_current(self, requested_action: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """
         Check if requested action matches current action or expected next action.
