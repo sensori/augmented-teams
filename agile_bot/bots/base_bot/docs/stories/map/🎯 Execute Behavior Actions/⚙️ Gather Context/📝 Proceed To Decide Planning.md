@@ -48,20 +48,6 @@ And Workflow transitions seamlessly to next action
 ```
 
 
-### Scenario: User must confirm before transition (happy_path)
-
-**Steps:**
-```gherkin
-Given gather_context action is complete
-And Human has NOT yet confirmed completion
-When gather_context action waits for human feedback
-Then Action does NOT save workflow state as completed
-And Action does NOT inject next action instructions
-And Action does NOT proceed to decide_planning_criteria
-And AI waits for human to say "done" before transitioning
-```
-
-
 ### Scenario: Workflow state captures gather_context completion (happy_path)
 
 **Steps:**

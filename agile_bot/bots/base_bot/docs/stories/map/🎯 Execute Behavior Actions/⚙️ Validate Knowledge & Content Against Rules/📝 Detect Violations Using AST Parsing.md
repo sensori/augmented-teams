@@ -1,4 +1,4 @@
-# 📝 Scanner Detects Violations Using AST Parsing
+# 📝 Detect Violations Using AST Parsing
 
 **Navigation:** [📋 Story Map](../../../story-map-outline.drawio) | [⚙️ Feature Overview](../../../../README.md)
 
@@ -10,7 +10,7 @@
 
 ## Story Description
 
-Scanner Detects Violations Using AST Parsing functionality for the mob minion system.
+Detect Violations Using AST Parsing functionality for the mob minion system.
 
 ## Acceptance Criteria
 
@@ -20,7 +20,7 @@ Scanner Detects Violations Using AST Parsing functionality for the mob minion sy
 
 ## Scenarios
 
-### Scenario: Scanner Detects Violations Using AST Parsing (happy_path)
+### Scenario: Detect Violations Using AST Parsing (happy_path)
 
 **Steps:**
 ```gherkin
@@ -28,3 +28,4 @@ Given system is ready
 When action executes
 Then action completes successfully
 ```
+

@@ -1,6 +1,23 @@
-﻿import json
+"""
+Common Test Helpers - Used Across Multiple Epics
+
+This file contains helper functions that are used across MULTIPLE epics and sub-epics.
+These are truly common/shared utilities, not sub-epic-specific helpers.
+
+NOTE: This file does not follow the test_<sub_epic_name>.py naming convention because
+it contains common helpers spanning multiple epics. Sub-epic-specific helpers should
+be placed in test_<sub_epic_name>_helpers.py files.
+
+For sub-epic-specific helpers, see:
+- test_generate_mcp_tools.py (Generate MCP Tools sub-epic - helpers merged into main file)
+- test_generate_cli.py (Generate CLI sub-epic - helpers merged into main file)
+- test_perform_behavior_action.py (Perform Behavior Action sub-epic - helpers merged into main file)
+"""
+import json
 import os
 from pathlib import Path
+import pytest
+from agile_bot.bots.base_bot.src.bot.bot import Behavior
 
 
 # ============================================================================
@@ -119,6 +136,10 @@ def create_common_rules(repo_root: Path, rules: list) -> Path:
     rules_file.write_text(json.dumps({'rules': rules}), encoding='utf-8')
     return rules_file
 
+# ============================================================================
+# BASE INSTRUCTIONS HELPERS - Epic-level helpers for Invoke Bot epic
+# ============================================================================
+
 def create_base_instructions(bot_directory: Path):
     """Create base action instructions in bot_directory (no fallback to repo root)."""
     base_actions = bot_directory / 'base_actions'
@@ -128,6 +149,7 @@ def create_base_instructions(bot_directory: Path):
         action_dir.mkdir(parents=True, exist_ok=True)
         instructions_file = action_dir / 'instructions.json'
         instructions_file.write_text(json.dumps({'instructions': [f'{action} base instructions']}), encoding='utf-8')
+
 
 def create_base_action_instructions(bot_directory: Path, action: str) -> Path:
     """Create base action instructions for specific action in bot_directory (no fallback)."""
@@ -155,6 +177,7 @@ def create_base_action_instructions(bot_directory: Path, action: str) -> Path:
     )
     return instructions_file
 
+
 def create_behavior_folder(bot_dir: Path, folder_name: str) -> Path:
     """Create behavior folder in bot directory."""
     behavior_dir = get_behavior_dir(bot_dir, folder_name)
@@ -172,41 +195,133 @@ def create_behavior_action_instructions(bot_dir: Path, behavior: str, action: st
     }), encoding='utf-8')
     return instructions_file
 
-def create_trigger_words_file(bot_dir: Path, behavior: str, action: str, patterns: list) -> Path:
-    """Create trigger words file for behavior action."""
-    trigger_dir = get_behavior_dir(bot_dir, behavior) / action
-    trigger_dir.mkdir(parents=True, exist_ok=True)
-    trigger_file = trigger_dir / 'trigger_words.json'
-    trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
-    return trigger_file
+# Removed duplicate create_trigger_words_file - use test_generate_mcp_tools.create_trigger_words_file instead
 
-# Removed create_actions_workflow_json - moved to test_build_agile_bots_helpers.py (epic-level)
-# Import when needed: from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+def create_actions_workflow_json(bot_directory: Path, behavior_name: str, actions: list = None) -> Path:
+    """Given step: Behavior exists with actions workflow.
+    
+    Creates behavior.json file for a behavior (new format).
+    
+    Used across multiple epics:
+    - Generate MCP Tools (Build Agile Bots epic)
+    - Generate CLI (Build Agile Bots epic)
+    - Invoke Bot (Invoke Bot epic)
+    - Execute Behavior Actions (Execute Behavior Actions epic)
+    - Validate Rules (Execute Behavior Actions epic)
+    
+    
+    """
+    import json
+    behavior_dir = bot_directory / 'behaviors' / behavior_name
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    
+    if actions is None:
+        # Standard workflow order - new format with instructions array per action
+        actions = [
+            {
+                "name": "gather_context",
+                "order": 1,
+                "next_action": "decide_planning_criteria",
+                "instructions": [
+                    f"Follow agile_bot/bots/base_bot/base_actions/1_gather_context/instructions.json",
+                    f"Test instructions for gather_context in {behavior_name}"
+                ]
+            },
+            {
+                "name": "decide_planning_criteria",
+                "order": 2,
+                "next_action": "build_knowledge",
+                "instructions": [
+                    f"Follow agile_bot/bots/base_bot/base_actions/2_decide_planning_criteria/instructions.json",
+                    f"Test instructions for decide_planning_criteria in {behavior_name}"
+                ]
+            },
+            {
+                "name": "build_knowledge",
+                "order": 3,
+                "next_action": "validate_rules",
+                "instructions": [
+                    f"Follow agile_bot/bots/base_bot/base_actions/3_build_knowledge/instructions.json",
+                    f"Test instructions for build_knowledge in {behavior_name}"
+                ]
+            },
+            {
+                "name": "validate_rules",
+                "order": 4,
+                "next_action": "render_output",
+                "instructions": [
+                    f"Follow agile_bot/bots/base_bot/base_actions/4_validate_rules/instructions.json",
+                    f"Test instructions for validate_rules in {behavior_name}"
+                ]
+            },
+            {
+                "name": "render_output",
+                "order": 5,
+                "instructions": [
+                    f"Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json",
+                    f"Test instructions for render_output in {behavior_name}"
+                ]
+            }
+        ]
+    
+    # Create behavior.json with all sections
+    behavior_config = {
+        "behaviorName": behavior_name.split('_')[-1] if '_' in behavior_name and behavior_name[0].isdigit() else behavior_name,
+        "description": f"Test behavior: {behavior_name}",
+        "goal": f"Test goal for {behavior_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "instructions": [
+            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+            "",
+            f"Test instructions for {behavior_name}."
+        ],
+        "actions_workflow": {
+            "actions": actions
+        },
+        "trigger_words": {
+            "description": f"Trigger words for {behavior_name}",
+            "patterns": [f"test.*{behavior_name}"],
+            "priority": 10
+        }
+    }
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    return behavior_file
 
 def create_base_actions_structure(bot_directory: Path):
     """Create base actions directory structure in bot_directory (no fallback).
     
-    NOTE: This is deprecated. Behaviors should use actions-workflow.json instead.
-    This function is kept for backward compatibility with tests that haven't been updated yet.
+    Creates base_actions directory with action_config.json files.
+    
+    NOTE: This is kept for backward compatibility. New tests should use actions-workflow.json instead.
     """
     base_actions_dir = bot_directory / 'base_actions'
-    workflow_actions = [
-        ('1_gather_context', 'gather_context'),
-        ('2_decide_planning_criteria', 'decide_planning_criteria'),
-        ('3_build_knowledge', 'build_knowledge'),
-        ('4_render_output', 'render_output'),
-        ('5_validate_rules', 'validate_rules')
+    
+    actions = [
+        ('1_initialize_project', 'decide_planning_criteria'),
+        ('1_gather_context', 'decide_planning_criteria'),
+        ('2_decide_planning_criteria', 'build_knowledge'),
+        ('3_build_knowledge', 'validate_rules'),
+        ('4_validate_rules', 'render_output'),
+        ('5_render_output', None)
     ]
     
-    for folder_name, action_name in workflow_actions:
-        action_dir = base_actions_dir / folder_name
+    for order_name, next_action in actions:
+        action_dir = base_actions_dir / order_name
         action_dir.mkdir(parents=True, exist_ok=True)
         
-        action_config = {
-            'action_name': action_name,
-            'workflow_type': 'sequential'
+        # Create action_config.json
+        config = {
+            'name': order_name.split('_', 1)[1],
+            'workflow': True,
+            'order': int(order_name.split('_')[0])
         }
-        (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
+        if next_action:
+            config['next_action'] = next_action
+        
+        (action_dir / 'action_config.json').write_text(json.dumps(config), encoding='utf-8')
     
 
 def read_activity_log(workspace_dir: Path) -> list:
@@ -219,110 +334,12 @@ def read_activity_log(workspace_dir: Path) -> list:
     with TinyDB(log_file) as db:
         return db.all()
 
-def verify_action_tracks_start(bot_dir: Path, workspace_dir: Path, action_class, action_name: str, 
-                               bot_name: str = 'story_bot', behavior: str = 'exploration'):
-    """Helper: Verify that action tracks start in activity log."""
-    # Bootstrap environment
-    bootstrap_env(bot_dir, workspace_dir)
-    create_activity_log_file(workspace_dir)
-    
-    # Create action (no workspace_root parameter)
-    action = action_class(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir
-    )
-    action.track_activity_on_start()
-    
-    log_data = read_activity_log(workspace_dir)
-    assert any(
-        e['action_state'] == f'{bot_name}.{behavior}.{action_name}'
-        for e in log_data
-    )
-
-def verify_action_tracks_completion(bot_dir: Path, workspace_dir: Path, action_class, action_name: str, 
-                                   bot_name: str = 'story_bot', behavior: str = 'exploration', 
-                                   outputs: dict = None, duration: int = None):
-    """Helper: Verify that action tracks completion in activity log."""
-    # Bootstrap environment
-    bootstrap_env(bot_dir, workspace_dir)
-    create_activity_log_file(workspace_dir)
-    
-    # Create action (no workspace_root parameter)
-    action = action_class(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir
-    )
-    action.track_activity_on_completion(
-        outputs=outputs or {},
-        duration=duration
-    )
-    
-    log_data = read_activity_log(workspace_dir)
-    completion_entry = next((e for e in log_data if 'outputs' in e or 'duration' in e), None)
-    assert completion_entry is not None
-    if outputs:
-        assert completion_entry.get('outputs') == outputs
-    if duration:
-        assert completion_entry.get('duration') == duration
-
-def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action: str, dest_action: str, 
-                              bot_name: str = 'story_bot', behavior: str = 'exploration'):
-    """Helper: Verify workflow transitions from source to dest action."""
-    # Bootstrap environment
-    bootstrap_env(bot_dir, workspace_dir)
-    
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
-    states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
-    # Create all transitions, not just the one we're testing
-    transitions = [
-        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
-        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
-    ]
-    # No workspace_root parameter
-    workflow = Workflow(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir,
-        states=states,
-        transitions=transitions
-    )
-    # Set state and save it so load_state() doesn't reset it
-    workflow.machine.set_state(source_action)
-    workflow.save_state()
-    # Mark action as completed
-    workflow.save_completed_action(source_action)
-    # Now transition
-    workflow.transition_to_next()
-    assert workflow.state == dest_action
-
-def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, action_name: str, 
-                                          bot_name: str = 'story_bot', behavior: str = 'exploration'):
-    """Helper: Verify workflow saves completed action to state file."""
-    # Bootstrap environment
-    bootstrap_env(bot_dir, workspace_dir)
-    
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
-    # No workspace_root parameter
-    workflow = Workflow(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir,
-        states=['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output'],
-        transitions=[]
-    )
-    workflow.save_completed_action(action_name)
-    
-    # Workflow state is in workspace directory
-    state_file = get_workflow_state_path(workspace_dir)
-    state_data = json.loads(state_file.read_text(encoding='utf-8'))
-    assert any(
-        action_name in entry.get('action_state', '')
-        for entry in state_data.get('completed_actions', [])
-    )
+# Removed verify_action_tracks_start, verify_action_tracks_completion, verify_workflow_transition, 
+# verify_workflow_saves_completed_action, then_workflow_current_state_is, then_completed_actions_include,
+# _create_validate_rules_action, _create_gather_context_action, _create_action_with_provided_class,
+# _create_action_with_default_class, given_environment_bootstrapped_and_action_initialized
+# - These are epic-level helpers for "Execute Behavior Actions" epic, moved to test_execute_behavior_actions.py
+# Import from: from agile_bot.bots.base_bot.test.test_execute_behavior_actions import ...
 
 # ============================================================================
 # COMMON GIVEN/WHEN/THEN HELPERS - Used across multiple test files
@@ -331,39 +348,30 @@ def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, a
 def given_bot_name_and_behavior_setup(bot_name: str = 'story_bot', behavior: str = 'shape'):
     """Given: Bot name and behavior setup.
     
-    Used across multiple test files. Consolidate here to avoid duplication.
     """
     return bot_name, behavior
 
+# ============================================================================
+# BOT INSTANCE HELPERS - Epic-level helpers for Invoke Bot epic
+# ============================================================================
+
 def given_bot_instance_created(bot_name: str, bot_directory: Path, config_path: Path):
-    """Given: Bot instance created.
-    
-    Used across multiple test files. Consolidate here to avoid duplication.
-    """
+    """Given: Bot instance created."""
     from agile_bot.bots.base_bot.src.bot.bot import Bot
     return Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_path)
 
-def then_completed_actions_include(workflow_file: Path, expected_action_states: list):
-    """Then: Completed actions include expected action states.
-    
-    Used across multiple test files. Consolidate here to avoid duplication.
-    """
-    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
-    completed_states = [entry.get('action_state') for entry in state_data.get('completed_actions', [])]
-    for expected_state in expected_action_states:
-        assert expected_state in completed_states, f"Expected {expected_state} in completed_actions"
 
-def then_workflow_current_state_is(workflow, expected_state: str):
-    """Then: Workflow current state is expected.
-    
-    Used across multiple test files. Consolidate here to avoid duplication.
-    """
-    assert workflow.current_state == expected_state or workflow.state == expected_state
+def when_bot_is_created(bot_name: str, bot_directory: Path, config_path: Path):
+    """When: Bot is created."""
+    from agile_bot.bots.base_bot.src.bot.bot import Bot
+    return Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_path)
+
+
+# Removed then_completed_actions_include, then_workflow_current_state_is - moved to test_execute_behavior_actions.py
 
 def then_activity_logged_with_action_state(log_file_or_workspace: Path, expected_action_state: str):
     """Then: Activity logged with expected action_state.
     
-    Used across multiple test files. Consolidate here to avoid duplication.
     Accepts either log_file Path or workspace_directory Path.
     """
     from tinydb import TinyDB
@@ -381,7 +389,6 @@ def then_activity_logged_with_action_state(log_file_or_workspace: Path, expected
 def then_completion_entry_logged_with_outputs(log_file_or_workspace: Path, expected_outputs: dict = None, expected_duration: int = None):
     """Then: Completion entry logged with outputs and duration.
     
-    Used across multiple test files. Consolidate here to avoid duplication.
     Accepts either log_file Path or workspace_directory Path.
     """
     from tinydb import TinyDB
@@ -400,3 +407,232 @@ def then_completion_entry_logged_with_outputs(log_file_or_workspace: Path, expec
             assert completion_entry['outputs'] == expected_outputs
         if expected_duration is not None:
             assert completion_entry['duration'] == expected_duration
+
+# ============================================================================
+# CONSOLIDATED GIVEN/WHEN/THEN HELPERS - Previously duplicated across files
+# ============================================================================
+
+# Removed given_test_bot_directory_created, given_story_graph_file_created - moved to test_build_knowledge.py (helpers merged into main file)
+# Removed when_action_executes_with_parameters - merged into test_decide_planning_criteria_action.py
+
+
+def given_environment_bootstrapped_and_activity_log_initialized(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped and activity log initialized."""
+    bootstrap_env(bot_directory, workspace_directory)
+    log_file = create_activity_log_file(workspace_directory)
+    return log_file
+
+
+# Removed _create_validate_rules_action, _create_gather_context_action, _create_action_with_provided_class,
+# _create_action_with_default_class, given_environment_bootstrapped_and_action_initialized
+# - moved to test_execute_behavior_actions.py
+
+
+# Removed given_base_actions_structure_created - merged into test_invoke_mcp.py
+
+# Removed all workflow helpers (lines 412-695) - merged into test_perform_behavior_action.py
+# These are specific to Perform Behavior Action sub-epic
+
+# ============================================================================
+# CLI/ROUTER HELPERS - Consolidates duplicates from test_invoke_bot_cli.py
+# and test_invoke_cli.py
+# ============================================================================
+
+def then_route_matches_expected(route, expected_bot: str, expected_behavior: str, expected_action: str, expected_type: str):
+    """Then: Route matches expected values."""
+    assert route is not None, "Route should not be None"
+    assert route['bot_name'] == expected_bot
+    assert route['behavior_name'] == expected_behavior
+    assert route['action_name'] == expected_action
+    assert route['match_type'] == expected_type
+
+
+def then_cli_result_matches_expected(result, expected_behavior: str, expected_action: str):
+    """Then: CLI result matches expected values."""
+    assert result['status'] == 'success'
+    assert result['behavior'] == expected_behavior
+    assert result['action'] == expected_action
+
+
+# ============================================================================
+# TEST CLASSES - Tests for utility functions (merged from test_utils.py)
+# ============================================================================
+
+@pytest.fixture
+def bot_directory(tmp_path):
+    """Fixture: Temporary bot directory."""
+    bot_dir = tmp_path / 'agile_bot' / 'bots' / 'test_bot'
+    bot_dir.mkdir(parents=True)
+    return bot_dir
+
+
+def create_behavior_folder_with_json(bot_dir: Path, folder_name: str) -> Path:
+    """Helper: Create behavior folder in bot directory with behavior.json.
+    
+    Uses create_behavior_folder from test_helpers and adds behavior.json creation.
+    """
+    behavior_folder = create_behavior_folder(bot_dir, folder_name)
+    
+    # Create behavior.json file (required for TestFindBehaviorFolder tests)
+    behavior_config = {
+        "behaviorName": folder_name.split('_')[-1] if '_' in folder_name and folder_name[0].isdigit() else folder_name,
+        "description": f"Test behavior: {folder_name}",
+        "goal": f"Test goal for {folder_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "instructions": [
+            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
+            "",
+            f"Test instructions for {folder_name}."
+        ],
+        "actions_workflow": {
+            "actions": [
+                {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
+                {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
+                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
+                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                {"name": "render_output", "order": 5}
+            ]
+        },
+        "trigger_words": {
+            "description": f"Trigger words for {folder_name}",
+            "patterns": [f"test.*{folder_name}"],
+            "priority": 10
+        }
+    }
+    behavior_file = behavior_folder / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
+    return behavior_folder
+
+
+class TestFindBehaviorFolder:
+    """Tests for find_behavior_folder utility function."""
+
+    def test_finds_behavior_folder_with_number_prefix(self, bot_directory):
+        """
+        SCENARIO: Find behavior folder with number prefix
+        GIVEN: Behavior folder exists with number prefix (8_tests)
+        WHEN: find_behavior_folder is called with behavior name without prefix (tests)
+        THEN: Returns path to numbered folder (8_tests)
+        """
+        # Given: Create numbered behavior folder
+        bot_name = 'test_bot'
+        folder_name = '8_tests'
+        behavior_name = 'tests'
+        
+        behavior_folder = create_behavior_folder_with_json(bot_directory, folder_name)
+        
+        # When: Find folder using behavior name (without number)
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, behavior_name)
+        
+        # Then: Returns numbered folder
+        assert found_folder == behavior_folder
+        assert found_folder.name == '8_tests'
+
+    def test_finds_shape_folder_with_number_prefix(self, bot_directory):
+        """
+        SCENARIO: Find shape folder with number prefix
+        GIVEN: Behavior folder exists with number prefix (1_shape)
+        WHEN: find_behavior_folder is called with behavior name (shape)
+        THEN: Returns path to numbered folder (1_shape)
+        """
+        # Given: Create numbered behavior folder
+        bot_name = 'story_bot'
+        behavior_folder = create_behavior_folder(bot_directory, '1_shape')
+        
+        # When: Find folder using behavior name
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'shape')
+        
+        # Then: Returns numbered folder
+        assert found_folder == behavior_folder
+        assert found_folder.name == '1_shape'
+
+    def test_finds_exploration_folder_with_number_prefix(self, bot_directory):
+        """
+        SCENARIO: Find exploration folder with number prefix
+        GIVEN: Behavior folder exists with number prefix (5_exploration)
+        WHEN: find_behavior_folder is called with behavior name (exploration)
+        THEN: Returns path to numbered folder (5_exploration)
+        """
+        # Given
+        bot_name = 'story_bot'
+        behavior_folder = create_behavior_folder(bot_directory, '5_exploration')
+        
+        # When
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'exploration')
+        
+        # Then
+        assert found_folder == behavior_folder
+        assert found_folder.name == '5_exploration'
+
+    def test_raises_error_when_behavior_folder_not_found(self, bot_directory):
+        """
+        SCENARIO: Raises error when behavior folder doesn't exist
+        GIVEN: Behavior folder does not exist
+        WHEN: find_behavior_folder is called
+        THEN: Raises FileNotFoundError with clear message
+        """
+        # Given: No behavior folder exists
+        bot_name = 'test_bot'
+        behavior_name = 'nonexistent'
+        
+        # When: Finding behavior folder
+        # Then: FileNotFoundError is raised (verified by pytest.raises)
+        with pytest.raises(FileNotFoundError, match='Behavior folder not found'):
+            Behavior.find_behavior_folder(bot_directory, bot_name, behavior_name)
+
+    def test_handles_prioritization_folder_with_prefix(self, bot_directory):
+        """
+        SCENARIO: Handles Prioritization Folder With Prefix
+        GIVEN: Behavior folder exists as 2_prioritization
+        WHEN: find_behavior_folder is called with behavior name (prioritization)
+        THEN: Returns path to 2_prioritization
+        """
+        # Given
+        bot_name = 'story_bot'
+        behavior_folder = create_behavior_folder(bot_directory, '2_prioritization')
+        
+        # When
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'prioritization')
+        
+        # Then
+        assert found_folder == behavior_folder
+        assert found_folder.name == '2_prioritization'
+
+    def test_handles_scenarios_folder_with_prefix(self, bot_directory):
+        """
+        SCENARIO: Handles Scenarios Folder With Prefix
+        GIVEN: Behavior folder exists as 6_scenarios
+        WHEN: find_behavior_folder is called with behavior name (scenarios)
+        THEN: Returns path to 6_scenarios
+        """
+        # Given
+        bot_name = 'story_bot'
+        behavior_folder = create_behavior_folder(bot_directory, '6_scenarios')
+        
+        # When
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'scenarios')
+        
+        # Then
+        assert found_folder == behavior_folder
+        assert found_folder.name == '6_scenarios'
+
+    def test_handles_examples_folder_with_prefix(self, bot_directory):
+        """
+        SCENARIO: Handles Examples Folder With Prefix
+        GIVEN: Behavior folder exists as 7_examples
+        WHEN: find_behavior_folder is called with behavior name (examples)
+        THEN: Returns path to 7_examples
+        """
+        # Given
+        bot_name = 'story_bot'
+        behavior_folder = create_behavior_folder(bot_directory, '7_examples')
+        
+        # When
+        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'examples')
+        
+        # Then
+        assert found_folder == behavior_folder
+        assert found_folder.name == '7_examples'

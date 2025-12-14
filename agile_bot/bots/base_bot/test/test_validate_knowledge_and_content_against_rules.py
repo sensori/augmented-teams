@@ -19,8 +19,22 @@ from unittest.mock import patch
 from typing import Dict, List, Any, Optional, Set
 from conftest import create_workflow_state_file
 from agile_bot.bots.base_bot.test.test_helpers import (
+    given_environment_bootstrapped_and_activity_log_initialized,
     bootstrap_env, read_activity_log, create_activity_log_file, given_bot_name_and_behavior_setup,
     then_activity_logged_with_action_state, then_completion_entry_logged_with_outputs
+)
+from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
+    given_environment_bootstrapped_and_action_initialized
+)
+from agile_bot.bots.base_bot.test.test_build_knowledge import (
+    given_test_bot_directory_created,
+    given_story_graph_file_created
+)
+from agile_bot.bots.base_bot.test.test_decide_planning_criteria_action import (
+    when_action_executes_with_parameters
+)
+from agile_bot.bots.base_bot.test.test_invoke_mcp import (
+    given_base_actions_structure_created
 )
 from agile_bot.bots.base_bot.src.bot.bot import Behavior
 from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction, Rule
@@ -35,6 +49,19 @@ from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
 # Removed duplicate create_workflow_state_local - use conftest.create_workflow_state_file instead
 # Removed duplicate then_activity_logged_with_action_state - use test_helpers.then_activity_logged_with_action_state instead
 # Removed duplicate then_completion_entry_logged_with_outputs - use test_helpers.then_completion_entry_logged_with_outputs instead
+
+def given_spy_test_scanner_that_records_knowledge_graph():
+    """Given: Spy TestScanner that records knowledge_graph."""
+    received_knowledge_graphs = []
+    
+    class SpyTestScanner(TestScanner):
+        def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
+            """Spy that records knowledge_graph and checks for test_files."""
+            received_knowledge_graphs.append(knowledge_graph.copy())  # Store a copy
+            # Return empty violations for this test
+            return []
+    
+    return received_knowledge_graphs, SpyTestScanner
 
 def given_validate_rules_action_initialized(bot_directory: Path, bot_name: str = 'story_bot', behavior: str = 'exploration'):
     """Given: ValidateRulesAction initialized."""
@@ -179,6 +206,24 @@ def then_scanners_discovered_with_expected_count_and_valid_structure(behavior: B
         )
 
 
+def _validate_rule_structure(rule: dict):
+    """Helper: Validate individual rule structure."""
+    assert isinstance(rule, dict), f"Rule should be a dict, got: {type(rule)}"
+    assert 'rule_content' in rule, f"Rule must contain 'rule_content' key: {rule}"
+    rule_content = rule['rule_content']
+    assert 'scanner' in rule_content, f"Rule content must contain 'scanner' key: {rule_content}"
+    scanner_path = rule_content['scanner']
+    assert scanner_path is not None, f"Rule should have a scanner attached: {rule.get('rule_file', 'unknown')}"
+    assert 'scanner_results' in rule, f"Rule must contain 'scanner_results' key: {rule}"
+    scanner_results = rule['scanner_results']
+    assert 'violations' in scanner_results, f"Scanner results must contain 'violations' key: {scanner_results}"
+    violations = scanner_results['violations']
+    assert isinstance(violations, list), "Scanner results should contain violations list"
+    for violation in violations:
+        assert validate_violation_structure(violation, ['rule', 'line_number', 'location', 'violation_message', 'severity']), (
+            f"Violation missing required fields: {violation}"
+        )
+
 def then_validation_rules_have_expected_structure(instructions: dict):
     """Then: Validation rules have expected structure."""
     assert 'validation_rules' in instructions, "Instructions must contain 'validation_rules' key"
@@ -186,21 +231,7 @@ def then_validation_rules_have_expected_structure(instructions: dict):
     assert len(validation_rules) > 0, "Instructions should contain validation rules"
     
     for rule in validation_rules:
-        assert isinstance(rule, dict), f"Rule should be a dict, got: {type(rule)}"
-        assert 'rule_content' in rule, f"Rule must contain 'rule_content' key: {rule}"
-        rule_content = rule['rule_content']
-        assert 'scanner' in rule_content, f"Rule content must contain 'scanner' key: {rule_content}"
-        scanner_path = rule_content['scanner']
-        assert scanner_path is not None, f"Rule should have a scanner attached: {rule.get('rule_file', 'unknown')}"
-        assert 'scanner_results' in rule, f"Rule must contain 'scanner_results' key: {rule}"
-        scanner_results = rule['scanner_results']
-        assert 'violations' in scanner_results, f"Scanner results must contain 'violations' key: {scanner_results}"
-        violations = scanner_results['violations']
-        assert isinstance(violations, list), "Scanner results should contain violations list"
-        for violation in violations:
-            assert validate_violation_structure(violation, ['rule', 'line_number', 'location', 'violation_message', 'severity']), (
-                f"Violation missing required fields: {violation}"
-            )
+        _validate_rule_structure(rule)
     
     assert 'base_instructions' in instructions, "Instructions must contain 'base_instructions' key"
     base_instructions = instructions['base_instructions']
@@ -254,13 +285,6 @@ def then_violations_detected_in_test_file(all_violations: list, test_file: Path)
     )
 
 
-def given_story_graph_file_created(workspace_directory: Path, story_graph: dict):
-    """Given: Story graph file created."""
-    docs_stories_dir = workspace_directory / 'docs' / 'stories'
-    docs_stories_dir.mkdir(parents=True, exist_ok=True)
-    story_graph_path = docs_stories_dir / 'story-graph.json'
-    story_graph_path.write_text(json.dumps(story_graph, indent=2), encoding='utf-8')
-    return story_graph_path
 
 
 def given_test_file_created_with_content(workspace_directory: Path, filename: str, content: str):
@@ -339,16 +363,11 @@ def then_scanner_detects_violations_with_expected_message(violations: list, scan
         )
 
 
-def given_test_bot_directory_created(repo_root: Path, bot_name: str = 'test_story_bot'):
-    """Given: Test bot directory created."""
-    test_bot_dir = repo_root / 'agile_bot' / 'bots' / bot_name
-    test_bot_dir.mkdir(parents=True, exist_ok=True)
-    return test_bot_dir
 
 
 def given_behavior_created_for_test_bot(test_bot_dir: Path, behavior_name: str, bot_name: str):
     """Given: Behavior created for test bot."""
-    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     create_actions_workflow_json(test_bot_dir, f'1_{behavior_name}')
     return Behavior(behavior_name, bot_name, test_bot_dir)
 
@@ -375,83 +394,91 @@ def when_scanner_instance_created(scanner_class):
     return scanner_class()
 
 
-def when_test_scanner_scans_files(scanner_instance: TestScanner, bad_example: dict, rule_obj: Rule):
-    """When: Test scanner scans files."""
-    violations = []
-    # TestScanner can use either test_files or code_files (for test files)
+def _extract_test_files_from_bad_example(bad_example: dict):
+    """Helper: Extract test files list from bad_example."""
     test_files_to_scan = []
     if bad_example:
         if 'test_files' in bad_example:
             test_files_to_scan.extend(bad_example['test_files'])
         elif 'code_files' in bad_example:
-            # For TestScanner, code_files are actually test files
             test_files_to_scan.extend(bad_example['code_files'])
+    return test_files_to_scan
+
+def _extract_knowledge_graph_from_bad_example(bad_example: dict):
+    """Helper: Extract knowledge graph from bad_example."""
+    if 'knowledge_graph' in bad_example:
+        return bad_example['knowledge_graph']
+    kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']}
+    return kg if 'epics' in kg else {}
+
+def _scan_files_via_scan_method(scanner_instance: TestScanner, bad_example: dict, rule_obj: Rule):
+    """Helper: Try scanning via scan() method."""
+    test_files_list = None
+    code_files_list = None
+    if 'test_files' in bad_example:
+        test_files_list = [Path(tf) for tf in bad_example['test_files']]
+    elif 'code_files' in bad_example:
+        test_files_list = [Path(cf) for cf in bad_example['code_files']]
+    if 'code_files' in bad_example:
+        code_files_list = [Path(cf) for cf in bad_example['code_files']]
+    kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']}
+    return scanner_instance.scan(kg, rule_obj, test_files=test_files_list, code_files=code_files_list)
+
+def when_test_scanner_scans_files(scanner_instance: TestScanner, bad_example: dict, rule_obj: Rule):
+    """When: Test scanner scans files."""
+    violations = []
+    test_files_to_scan = _extract_test_files_from_bad_example(bad_example)
     
     for test_file_path in test_files_to_scan:
         file_path = Path(test_file_path)
         if file_path.exists():
-            # TestScanner needs knowledge_graph - use provided one or extract from bad_example
             assert bad_example is not None, "bad_example must be provided for test scanners"
-            if 'knowledge_graph' in bad_example:
-                kg = bad_example['knowledge_graph']
-            else:
-                # If bad_example has epics structure, use it as knowledge_graph
-                # Otherwise use empty dict (some test scanners don't need knowledge_graph)
-                kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']}
-                if 'epics' not in kg:
-                    kg = {}
+            kg = _extract_knowledge_graph_from_bad_example(bad_example)
             file_violations = scanner_instance.scan_test_file(file_path, rule_obj, kg)
             violations.extend(file_violations)
     
-    # Also try scanning via scan() method if it's implemented
     if not violations and bad_example:
         try:
-            # Extract test_files and code_files from bad_example and pass as separate parameters
-            # For TestScanner, convert code_files to test_files if test_files not present
-            test_files_list = None
-            code_files_list = None
-            if 'test_files' in bad_example:
-                test_files_list = [Path(tf) for tf in bad_example['test_files']]
-            elif 'code_files' in bad_example:
-                # TestScanner can use code_files as test_files
-                test_files_list = [Path(cf) for cf in bad_example['code_files']]
-            if 'code_files' in bad_example:
-                code_files_list = [Path(cf) for cf in bad_example['code_files']]
-            # Create knowledge_graph without test_files/code_files (they're passed separately)
-            kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']}
-            violations = scanner_instance.scan(kg, rule_obj, test_files=test_files_list, code_files=code_files_list)
+            violations = _scan_files_via_scan_method(scanner_instance, bad_example, rule_obj)
         except Exception:
             pass
     
     return violations
 
 
-def when_code_scanner_scans_files(scanner_instance: CodeScanner, bad_example: dict, rule_obj: Rule):
-    """When: Code scanner scans files."""
+def _scan_code_file(scanner_instance: CodeScanner, file_path: Path, rule_obj: Rule):
+    """Helper: Scan a single code file."""
+    return scanner_instance.scan_code_file(file_path, rule_obj)
+
+def _scan_code_files_from_example(scanner_instance: CodeScanner, bad_example: dict, rule_obj: Rule):
+    """Helper: Scan code files from bad_example."""
     violations = []
     if bad_example and 'code_files' in bad_example:
         for code_file_path in bad_example['code_files']:
             file_path = Path(code_file_path)
             if file_path.exists():
-                file_violations = scanner_instance.scan_code_file(file_path, rule_obj)
+                file_violations = _scan_code_file(scanner_instance, file_path, rule_obj)
                 violations.extend(file_violations)
-    
-    # Also try scanning via scan() method if it's implemented
+    return violations
+
+def _try_fallback_scan_method(scanner_instance: CodeScanner, bad_example: dict, rule_obj: Rule):
+    """Helper: Try scanning via scan() method as fallback."""
+    try:
+        code_files_list = None
+        if bad_example and 'code_files' in bad_example:
+            code_files_list = [Path(cf) for cf in bad_example['code_files']]
+        elif bad_example and 'test_files' in bad_example:
+            code_files_list = [Path(tf) for tf in bad_example['test_files']]
+        kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']} if bad_example else {}
+        return scanner_instance.scan(kg, rule_obj, code_files=code_files_list)
+    except Exception:
+        return []
+
+def when_code_scanner_scans_files(scanner_instance: CodeScanner, bad_example: dict, rule_obj: Rule):
+    """When: Code scanner scans files."""
+    violations = _scan_code_files_from_example(scanner_instance, bad_example, rule_obj)
     if not violations:
-        try:
-            # Extract code_files from bad_example and pass as separate parameter
-            code_files_list = None
-            if bad_example and 'code_files' in bad_example:
-                code_files_list = [Path(cf) for cf in bad_example['code_files']]
-            elif bad_example and 'test_files' in bad_example:
-                # Fallback: use test_files if code_files not provided (for backward compatibility in tests)
-                code_files_list = [Path(tf) for tf in bad_example['test_files']]
-            # Create knowledge_graph without code_files (they're passed separately)
-            kg = {k: v for k, v in bad_example.items() if k not in ['test_files', 'code_files']} if bad_example else {}
-            violations = scanner_instance.scan(kg, rule_obj, code_files=code_files_list)
-        except Exception:
-            pass
-    
+        violations = _try_fallback_scan_method(scanner_instance, bad_example, rule_obj)
     return violations
 
 
@@ -746,6 +773,160 @@ def when_add_scope_to_story_graph_if_provided(story_graph_path: Path, story_grap
         when_add_scope_to_story_graph_file(story_graph_path, story_graph, scope_config)
 
 
+def _create_test_file_for_class_based_scanner(test_file: Path):
+    """Helper: Create test file for class-based scanner."""
+    test_file.write_text('''class TestGenTools:
+    """Abbreviated class name - should be TestGenerateBotTools"""
+    def test_creates_tool(self):
+        pass
+''', encoding='utf-8')
+    return {
+        'epics': [{'name': 'Places Order', 'sub_epics': [{'name': 'Validates Payment', 'story_groups': [{'stories': [{'name': 'Generate Bot Tools'}]}]}]}],
+        'test_files': [str(test_file)]
+    }
+
+def _create_test_file_for_test_quality_scanner(test_file: Path):
+    """Helper: Create test file for test quality scanner."""
+    test_file.write_text('''def test_1():
+    global user
+    user = create_user()
+    assert process(user) == True
+
+def test_2():
+    assert user.name == 'John'
+''', encoding='utf-8')
+    return {'code_files': [str(test_file)]}
+
+def _create_test_file_for_specification_match_scanner(test_file: Path):
+    """Helper: Create test file for specification match scanner."""
+    test_file.write_text('''def test_agent_init(self):
+    """Test agent."""
+    agent = Agent('story_bot')
+    assert agent.initialized
+
+def test_process_order(self):
+    order = create_order()
+    result = process(order)
+    assert result
+''', encoding='utf-8')
+    return {'code_files': [str(test_file)]}
+
+def _create_test_files_for_test_scanners(test_file: Path, scanner_class_path: str):
+    """Helper: Create test files for test scanners."""
+    if 'class_based' in scanner_class_path.lower():
+        return _create_test_file_for_class_based_scanner(test_file)
+    elif 'test_quality' in scanner_class_path.lower():
+        return _create_test_file_for_test_quality_scanner(test_file)
+    elif 'specification_match' in scanner_class_path.lower():
+        return _create_test_file_for_specification_match_scanner(test_file)
+    return None
+
+def _create_code_file_for_scanner_type(test_file: Path, scanner_class_path: str):
+    """Helper: Create code file for specific scanner type."""
+    scanner_lower = scanner_class_path.lower()
+    scanner_file_contents = {
+        'useless_comments': '''def get_name(self):
+    """Get the name.
+    
+    
+    """
+    return self.name
+
+# Load state from file
+def load_state(self):
+    return self.state
+''',
+        'intention_revealing': '''def process(data):
+    temp = data
+    return temp
+''',
+        'separate_concerns': '''def calculate_total(items):
+    total = sum(items)
+    print(f"Total: {total}")
+    save_to_database(total)
+    return total
+''',
+        'simplify_control_flow': '''def process(data):
+    if data:
+        if data.items:
+            if data.items.length > 0:
+                if data.items[0].valid:
+                    return process_item(data.items[0])
+''',
+        'complete_refactoring': '''# Old way
+# def old_process(data):
+#     return data.process()
+
+def new_process(data):
+    return data.process()
+''',
+        'meaningful_context': '''def process():
+    if status == 200:
+        return data
+    data1 = get_data()
+    return data1
+''',
+        'minimize_mutable': '''def process(items):
+    items.push(new_item)
+    counter++
+    return items
+''',
+        'vertical_density': None,  # Special case - generated dynamically
+        'abstraction_levels': '''def process_order(order):
+    validate_order(order)
+    sql = 'SELECT * FROM orders WHERE id = ?'
+    db.query(sql, [order.id])
+    return order
+''',
+        'encapsulation': '''class Order:
+    def process(self):
+        return self.customer.get_order().get_items().add(item)
+
+''',
+        'exception_classification': '''class DatabaseConnectionException(Exception):
+    pass
+class DatabaseQueryException(Exception):
+    pass
+''',
+        'error_handling_isolation': '''def process_order(order):
+    try:
+        validate_order(order)
+        save_order(order)
+    except:
+        log_error()
+''',
+        'third_party_isolation': '''from requests import get
+from boto3 import client
+
+def process_order(order):
+    response = get('https://api.example.com/orders')
+    s3 = client('s3')
+    s3.upload_file('order.json', 'bucket', 'key')
+''',
+        'open_closed': '''def process_payment(payment):
+    if payment.type == 'credit':
+        process_credit(payment)
+    elif payment.type == 'paypal':
+        process_paypal(payment)
+    elif payment.kind == 'debit':
+        process_debit(payment)
+'''
+    }
+    
+    for key, content in scanner_file_contents.items():
+        if key in scanner_lower:
+            if content is None:  # vertical_density
+                long_function = 'def process_items(items):\n'
+                for i in range(50):
+                    long_function += f'    # Line {i}\n'
+                long_function += '    item_total = calculate_total(items)\n'
+                long_function += '    return item_total\n'
+                test_file.write_text(long_function, encoding='utf-8')
+            else:
+                test_file.write_text(content, encoding='utf-8')
+            return {'code_files': [str(test_file)]}
+    return None
+
 def given_test_file_for_scanner_type(workspace_directory: Path, scanner_class_path: str, behavior: str):
     """Given: Test file for scanner type."""
     test_file = workspace_directory / 'test_code.py'
@@ -756,175 +937,13 @@ def given_test_file_for_scanner_type(workspace_directory: Path, scanner_class_pa
     if 'tests' in behavior:
         test_file = workspace_directory / 'test_place_order.py'
         test_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        if 'class_based' in scanner_class_path.lower():
-            test_file.write_text('''class TestGenTools:
-    """Abbreviated class name - should be TestGenerateBotTools"""
-    def test_creates_tool(self):
-        pass
-''', encoding='utf-8')
-            bad_example = {
-                'epics': [{'name': 'Places Order', 'sub_epics': [{'name': 'Validates Payment', 'story_groups': [{'stories': [{'name': 'Generate Bot Tools'}]}]}]}],
-                'test_files': [str(test_file)]
-            }
-        elif 'test_quality' in scanner_class_path.lower():
-            test_file.write_text('''def test_1():
-    global user
-    user = create_user()
-    assert process(user) == True
-
-def test_2():
-    assert user.name == 'John'
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'specification_match' in scanner_class_path.lower():
-            test_file.write_text('''def test_agent_init(self):
-    """Test agent."""
-    agent = Agent('story_bot')
-    assert agent.initialized
-
-def test_process_order(self):
-    order = create_order()
-    result = process(order)
-    assert result
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
+        bad_example = _create_test_files_for_test_scanners(test_file, scanner_class_path)
     
     # For code scanners, create a test Python file with violations
     if bad_example is None and 'code' in behavior:
         test_file = workspace_directory / 'test_code.py'
         test_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        if 'useless_comments' in scanner_class_path.lower():
-            test_file.write_text('''def get_name(self):
-    """Get the name.
-    
-    Returns:
-        str: The name
-    """
-    return self.name
-
-# Load state from file
-def load_state(self):
-    return self.state
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'intention_revealing' in scanner_class_path.lower():
-            test_file.write_text('''def process(data):
-    temp = data
-    return temp
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'separate_concerns' in scanner_class_path.lower():
-            test_file.write_text('''def calculate_total(items):
-    total = sum(items)
-    print(f"Total: {total}")
-    save_to_database(total)
-    return total
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'simplify_control_flow' in scanner_class_path.lower():
-            test_file.write_text('''def process(data):
-    if data:
-        if data.items:
-            if data.items.length > 0:
-                if data.items[0].valid:
-                    return process_item(data.items[0])
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'complete_refactoring' in scanner_class_path.lower():
-            test_file.write_text('''# Old way
-# def old_process(data):
-#     return data.process()
-
-def new_process(data):
-    return data.process()
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'meaningful_context' in scanner_class_path.lower():
-            test_file.write_text('''def process():
-    if status == 200:
-        return data
-    data1 = get_data()
-    return data1
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'minimize_mutable' in scanner_class_path.lower():
-            test_file.write_text('''def process(items):
-    items.push(new_item)
-    counter++
-    return items
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'vertical_density' in scanner_class_path.lower():
-            long_function = 'def process_items(items):\n'
-            for i in range(50):
-                long_function += f'    # Line {i}\n'
-            long_function += '    item_total = calculate_total(items)\n'
-            long_function += '    return item_total\n'
-            test_file.write_text(long_function, encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'abstraction_levels' in scanner_class_path.lower():
-            test_file.write_text('''def process_order(order):
-    validate_order(order)
-    sql = 'SELECT * FROM orders WHERE id = ?'
-    db.query(sql, [order.id])
-    return order
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'encapsulation' in scanner_class_path.lower():
-            test_file.write_text('''class Order:
-    def process(self):
-        return self.customer.get_order().get_items().add(item)
-
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'exception_classification' in scanner_class_path.lower():
-            test_file.write_text('''class DatabaseConnectionException(Exception):
-    pass
-class DatabaseQueryException(Exception):
-    pass
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'error_handling_isolation' in scanner_class_path.lower():
-            test_file.write_text('''def process_order(order):
-    try:
-        validate_order(order)
-        save_order(order)
-    except:
-        log_error()
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'third_party_isolation' in scanner_class_path.lower():
-            test_file.write_text('''from requests import get
-from boto3 import client
-
-def process_order(order):
-    response = get('https://api.example.com/orders')
-    s3 = client('s3')
-    s3.upload_file('order.json', 'bucket', 'key')
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'open_closed' in scanner_class_path.lower():
-            test_file.write_text('''def process_payment(payment):
-    if payment.type == 'credit':
-        process_credit(payment)
-    elif payment.type == 'paypal':
-        process_paypal(payment)
-    elif payment.kind == 'debit':
-        process_debit(payment)
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
-        elif 'test_quality' in scanner_class_path.lower():
-            test_file.write_text('''def test_1():
-    global user
-    user = create_user()
-    assert process(user) == True
-
-def test_2():
-    assert user.name == 'John'
-''', encoding='utf-8')
-            bad_example = {'code_files': [str(test_file)]}
+        bad_example = _create_code_file_for_scanner_type(test_file, scanner_class_path)
     
     return test_file, bad_example
 
@@ -968,15 +987,6 @@ def when_action_executes_and_returns_result(action: ValidateRulesAction):
     return action.do_execute(parameters={})
 
 
-def when_action_executes_with_parameters(action: ValidateRulesAction, parameters: dict):
-    """When: Action executes with parameters."""
-    return action.do_execute(parameters)
-
-
-def given_base_actions_structure_created(bot_directory: Path):
-    """Given: Base actions structure created."""
-    from agile_bot.bots.base_bot.test.test_helpers import create_base_actions_structure
-    create_base_actions_structure(bot_directory)
 
 
 def when_action_executes_and_raises_file_not_found_error(action: ValidateRulesAction):
@@ -991,16 +1001,6 @@ def when_action_executes_and_raises_json_error(action: ValidateRulesAction):
         action.do_execute(parameters={})
 
 
-def given_environment_bootstrapped_and_activity_log_initialized(bot_directory: Path, workspace_directory: Path):
-    """Given: Environment bootstrapped and activity log initialized."""
-    bootstrap_env(bot_directory, workspace_directory)
-    return create_activity_log_file(workspace_directory)
-
-
-def given_environment_bootstrapped_and_action_initialized(bot_directory: Path, workspace_directory: Path, bot_name: str, behavior: str):
-    """Given: Environment bootstrapped and action initialized."""
-    bootstrap_env(bot_directory, workspace_directory)
-    return given_validate_rules_action_initialized(bot_directory, bot_name, behavior)
 
 
 def when_extract_test_case_data(test_case: dict):
@@ -1530,13 +1530,13 @@ def then_content_to_validate_has_workspace_location(instructions: dict, workspac
         f"Expected 'content_to_validate' in instructions, but got keys: {instructions.keys()}"
     )
     content_info = instructions['content_to_validate']
-    assert 'workspace_location' in content_info or 'project_location' in content_info, (
-        "content_to_validate should contain workspace_location or project_location"
+    # Explicitly check for project_location (implementation always uses project_location)
+    assert 'project_location' in content_info, (
+        "content_to_validate should contain project_location"
     )
-    location_key = 'workspace_location' if 'workspace_location' in content_info else 'project_location'
-    location_value = content_info[location_key]
-    assert str(workspace_directory) in str(location_value), (
-        f"{location_key} should point to the workspace directory"
+    project_location_value = content_info['project_location']
+    assert str(workspace_directory) in str(project_location_value), (
+        f"project_location should point to the workspace directory, got: {project_location_value}"
     )
     assert 'rendered_outputs' in content_info, (
         "content_to_validate should contain rendered_outputs list"
@@ -1798,7 +1798,7 @@ def given_story_graph_with_content(workspace_directory: Path, story_graph_conten
 
 def given_behavior_json_created(bot_directory: Path, behavior: str, actions: list):
     """Given: Behavior.json file created."""
-    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     create_actions_workflow_json(
         bot_directory=bot_directory,
         behavior_name=behavior,
@@ -1812,13 +1812,8 @@ def then_story_graph_not_modified_with_test_files(story_graph_path: Path):
     assert 'test_files' not in reloaded_graph, "test_files should not be persisted to knowledge graph file (one-off validation)"
 
 
-def create_validation_rules(bot_dir: Path, behavior: str, rules: list) -> Path:
-    """Helper: Create validation rules file in bot directory."""
-    rules_dir = bot_dir / 'behaviors' / behavior / 'rules'
-    rules_dir.mkdir(parents=True, exist_ok=True)
-    rules_file = rules_dir / 'validation_rules.json'
-    rules_file.write_text(json.dumps({'rules': rules}), encoding='utf-8')
-    return rules_file
+# Removed duplicate - imported from test_helpers
+from agile_bot.bots.base_bot.test.test_helpers import create_validation_rules
 
 # ============================================================================
 # SCANNER AND RULE LOADING HELPERS
@@ -1847,6 +1842,14 @@ def load_existing_rule_file(repo_root: Path, rule_path: str) -> Optional[Dict[st
             return None
     return None
 
+def _validate_scanner_class(scanner_class, scanner_module_path: str):
+    """Helper: Validate scanner class structure."""
+    if not isinstance(scanner_class, type):
+        return None, f"Scanner path does not point to a class: {scanner_module_path}"
+    if not hasattr(scanner_class, 'scan'):
+        return None, f"Scanner class missing required 'scan' method: {scanner_module_path}"
+    return scanner_class, None
+
 def load_scanner_class(scanner_module_path: str):
     """
     Helper: Load an existing scanner class from the codebase.
@@ -1858,22 +1861,7 @@ def load_scanner_class(scanner_module_path: str):
         module_path, class_name = scanner_module_path.rsplit('.', 1)
         module = importlib.import_module(module_path)
         scanner_class = getattr(module, class_name)
-        
-        # Validate that scanner_class is actually a class (not content/data)
-        if not isinstance(scanner_class, type):
-            return None, f"Scanner path does not point to a class: {scanner_module_path}"
-        
-        # Validate that scanner_class inherits from Scanner base class
-        # Note: When Scanner base class is implemented, uncomment this validation
-        # from agile_bot.bots.base_bot.src.scanners.scanner import Scanner
-        # if not issubclass(scanner_class, Scanner):
-        #     return None, f"Scanner class does not inherit from Scanner base class: {scanner_module_path}"
-        
-        # Validate that scanner_class has required methods (scan method)
-        if not hasattr(scanner_class, 'scan'):
-            return None, f"Scanner class missing required 'scan' method: {scanner_module_path}"
-        
-        return scanner_class, None
+        return _validate_scanner_class(scanner_class, scanner_module_path)
     except ImportError as e:
         return None, f"Scanner class import failure: ModuleNotFoundError: No module named '{module_path}'"
     except AttributeError as e:
@@ -1889,13 +1877,7 @@ def setup_test_rules(repo_root: Path, rule_paths: List[str], rule_contents: List
     
     Files are created under repo_root (which uses tmp_path fixture) so they auto-cleanup.
     
-    Args:
-        repo_root: Repository root directory (should be tmp_path-based fixture)
-        rule_paths: List of rule file paths relative to repo_root
-        rule_contents: List of rule content dictionaries (from Examples tables)
     
-    Returns:
-        List of created rule file paths (will be auto-cleaned up via tmp_path)
     """
     created_files = []
     for rule_path, rule_content in zip(rule_paths, rule_contents):
@@ -2056,7 +2038,7 @@ class TestTrackActivityForValidateRulesAction:
 
     def test_activity_log_maintains_chronological_order(self, bot_directory, workspace_directory):
         """
-        SCENARIO: Activity log maintains chronological order
+        SCENARIO: Activity Log Maintains Chronological Order
         GIVEN: activity log contains 10 previous action entries
         WHEN: validate_rules entry is appended
         THEN: New entry appears at end of log in chronological order
@@ -2099,10 +2081,10 @@ class TestInvokeCompleteValidationWorkflow:
         action = given_validate_rules_action_initialized(bot_directory, 'story_bot', 'exploration')
         
         # When: Action finalizes with no next action
-        result = when_action_finalizes_and_transitions(action, next_action=None)
+        action_result = when_action_finalizes_and_transitions(action, next_action=None)
         
         # Then: No next action (terminal)
-        then_no_next_action_in_result(result)
+        then_no_next_action_in_result(action_result)
 
     def test_validate_rules_does_not_inject_next_action_instructions(self, bot_directory, workspace_directory):
         """
@@ -2199,6 +2181,24 @@ class TestInvokeCompleteValidationWorkflow:
         # Then: Behavior workflow is complete
         then_behavior_workflow_is_complete(is_complete)
 
+    def _verify_action_setup_and_execution(self, bot_directory, workspace_directory):
+        """Helper: Set up action and execute, returning action and result."""
+        instructions_file = given_base_action_instructions_and_behavior_rule_setup(bot_directory, workspace_directory)
+        action = given_validate_rules_action_initialized(bot_directory, 'story_bot', 'shape')
+        then_action_finds_instructions_file(action, instructions_file)
+        rules_data = when_action_injects_behavior_specific_and_bot_rules(action)
+        then_rules_data_has_valid_action_instructions(rules_data)
+        return action, when_action_executes_and_returns_result(action)
+    
+    def _verify_instructions_structure(self, action_result, workspace_directory):
+        """Helper: Verify instructions structure contains required fields."""
+        instructions = then_result_contains_instructions(action_result)
+        base_instructions_list = then_base_instructions_are_valid_list(instructions)
+        then_base_instructions_contain_clarification_reference(base_instructions_list)
+        then_validation_rules_are_valid_list(instructions)
+        content_info = then_content_to_validate_has_workspace_location(instructions, workspace_directory)
+        return instructions, content_info
+    
     def test_validate_rules_returns_instructions_with_rules_as_context(self, bot_directory, workspace_directory):
         """
         SCENARIO: validate_rules returns instructions with rules as supporting context
@@ -2207,38 +2207,9 @@ class TestInvokeCompleteValidationWorkflow:
         THEN: Return value contains base_instructions (primary) and validation_rules (context)
         AND: Return value contains content_to_validate information
         """
-        # Given: Base action instructions exist
-        instructions_file = given_base_action_instructions_and_behavior_rule_setup(bot_directory, workspace_directory)
-        
-        # When: Action executes
-        action = given_validate_rules_action_initialized(bot_directory, 'story_bot', 'shape')
-        
-        # Verify action can find the instructions file
-        then_action_finds_instructions_file(action, instructions_file)
-        
-        # Debug: Check what inject_behavior_specific_and_bot_rules returns
-        rules_data = when_action_injects_behavior_specific_and_bot_rules(action)
-        action_instructions_from_method = then_rules_data_has_valid_action_instructions(rules_data)
-        
-        result = when_action_executes_and_returns_result(action)
-        
-        # Then: Return value has instructions structure
-        instructions = then_result_contains_instructions(result)
-        
-        # Then: base_instructions are primary (list of instruction strings)
-        base_instructions_list = then_base_instructions_are_valid_list(instructions)
-        then_base_instructions_contain_clarification_reference(base_instructions_list)
-        
-        # Then: validation_rules are supporting context (not primary)
-        validation_rules = then_validation_rules_are_valid_list(instructions)
-        
-        # Then: content_to_validate provides workspace information
-        content_info = then_content_to_validate_has_workspace_location(instructions, workspace_directory)
-        
-        # Then: Action and behavior are specified
+        action, action_result = self._verify_action_setup_and_execution(bot_directory, workspace_directory)
+        instructions, content_info = self._verify_instructions_structure(action_result, workspace_directory)
         then_instructions_specify_action_and_behavior(instructions, 'validate_rules', 'shape')
-        
-        # Then: report_path is provided for saving validation report
         then_report_path_is_valid(content_info, workspace_directory)
 
     def test_validate_rules_provides_report_path_for_saving_validation_report(self, bot_directory, workspace_directory):
@@ -2259,6 +2230,7 @@ class TestInvokeCompleteValidationWorkflow:
         action, result = given_environment_and_action_for_report_path_test(bot_directory, workspace_directory)
         docs_dir = given_docs_stories_directory_exists(workspace_directory)
         
+        # When: Action identifies content to validate
         # Then: report_path is included in content_to_validate
         instructions = then_result_contains_instructions_with_content_to_validate(result)
         content_info = instructions['content_to_validate']
@@ -2414,10 +2386,12 @@ class TestHandleValidateRulesExceptions:
         WHEN: validate_rules action executes
         THEN: FileNotFoundError is raised with appropriate message
         """
+        # Given: Story graph file doesn't exist
         # Bootstrap environment
         action = given_environment_setup_for_file_not_found_test(bot_directory, workspace_directory)
         
-        # When executing without story graph
+        # When: Validate rules action executes
+        # Then: FileNotFoundError is raised (verified by when_action_executes_and_raises_file_not_found_error)
         when_action_executes_and_raises_file_not_found_error(action)
 
     def test_validate_rules_raises_exception_when_story_graph_invalid_json(self, bot_directory, workspace_directory, tmp_path):
@@ -2427,10 +2401,12 @@ class TestHandleValidateRulesExceptions:
         WHEN: validate_rules action executes
         THEN: JSONDecodeError or ValueError is raised
         """
+        # Given: Story graph file exists but contains invalid JSON
         # Bootstrap environment
         action, story_graph_file = given_environment_setup_for_invalid_json_test(bot_directory, workspace_directory)
         
-        # When executing with invalid JSON
+        # When: Validate rules action executes
+        # Then: JSONDecodeError or ValueError is raised (verified by when_action_executes_and_raises_json_error)
         when_action_executes_and_raises_json_error(action)
 
 
@@ -2731,19 +2707,18 @@ class TestValidateRulesAccordingToScope:
         return story_names
 
     @staticmethod
-    def get_expected_story_names_for_scope(scope_config: Dict[str, Any], story_graph: Dict[str, Any]) -> Set[str]:
-        """Calculate expected story names in scope based on scope configuration."""
-        expected_names = set()
-        
-        # Handle story_names
+    def _handle_story_names_scope(scope_config: Dict[str, Any], expected_names: Set[str]):
+        """Helper: Handle story_names scope configuration."""
         if 'story_names' in scope_config:
             story_names = scope_config['story_names']
             if isinstance(story_names, list):
                 expected_names.update(story_names)
             elif isinstance(story_names, str):
                 expected_names.add(story_names)
-        
-        # Handle increment_priorities
+    
+    @staticmethod
+    def _handle_increment_priorities_scope(scope_config: Dict[str, Any], story_graph: Dict[str, Any], expected_names: Set[str]):
+        """Helper: Handle increment_priorities scope configuration."""
         if 'increment_priorities' in scope_config:
             priorities = scope_config['increment_priorities']
             if not isinstance(priorities, list):
@@ -2756,8 +2731,10 @@ class TestValidateRulesAccordingToScope:
                         inc_priority = priority_map.get(inc_priority.upper(), 999)
                     if inc_priority == priority:
                         TestValidateRulesAccordingToScope._extract_story_names_from_increment(increment, expected_names)
-        
-        # Handle epic_names
+    
+    @staticmethod
+    def _handle_epic_names_scope(scope_config: Dict[str, Any], story_graph: Dict[str, Any], expected_names: Set[str]):
+        """Helper: Handle epic_names scope configuration."""
         if 'epic_names' in scope_config:
             epic_names_list = scope_config['epic_names']
             if not isinstance(epic_names_list, list):
@@ -2766,11 +2743,16 @@ class TestValidateRulesAccordingToScope:
                 for epic in story_graph.get('epics', []):
                     if epic.get('name') == epic_name:
                         TestValidateRulesAccordingToScope._extract_story_names_from_epic(epic, expected_names)
-        
-        # If no scope specified, return None (means validate all)
+    
+    @staticmethod
+    def get_expected_story_names_for_scope(scope_config: Dict[str, Any], story_graph: Dict[str, Any]) -> Set[str]:
+        """Calculate expected story names in scope based on scope configuration."""
+        expected_names = set()
+        TestValidateRulesAccordingToScope._handle_story_names_scope(scope_config, expected_names)
+        TestValidateRulesAccordingToScope._handle_increment_priorities_scope(scope_config, story_graph, expected_names)
+        TestValidateRulesAccordingToScope._handle_epic_names_scope(scope_config, story_graph, expected_names)
         if not expected_names and not scope_config.get('validate_all'):
             return None
-        
         return expected_names
 
     @staticmethod
@@ -3078,9 +3060,11 @@ class TestValidateRulesAccordingToScope:
 
     def test_validate_rules_scope_extraction(self, bot_directory, workspace_directory):
         """Test that scope extraction functions work correctly."""
+        # Given: Comprehensive story graph
         story_graph = self.create_comprehensive_story_graph()
         
-        # Test increment 1 extraction
+        # When: Test scope extraction with increment priorities
+        # Then: Scope extraction functions work correctly (verified by when_test_scope_extraction_with_increment_priorities)
         when_test_scope_extraction_with_increment_priorities(story_graph, self.get_expected_story_names_for_scope)
         
         # Test epic extraction
@@ -3102,9 +3086,12 @@ class TestValidateRulesAccordingToScope:
         AND: Violations are detected in the test file
         AND: test_file is not added to the knowledge graph (one-off validation)
         """
+        # Given: Test file exists with violations and rule with TestScanner exists
         # Bootstrap environment
         story_graph, story_graph_path, test_file = given_test_file_scope_setup_with_rule(bot_directory, workspace_directory)
         action = given_validate_rules_action_initialized(bot_directory, 'test_bot', 'write_tests')
+        # When: Validate rules is called with test_file scope parameter
+        # Then: TestScanner instances scan the test file and violations are detected (verified by when_execute_test_file_scope_validation)
         when_execute_test_file_scope_validation(action, test_file, story_graph_path)
 
     def test_validate_rules_with_test_files_scope_parameter(self, bot_directory, workspace_directory):
@@ -3117,9 +3104,12 @@ class TestValidateRulesAccordingToScope:
         AND: Violations are detected in all test files
         AND: test_files are passed through scope parameters correctly
         """
+        # Given: Multiple test files exist with violations and rule with TestScanner exists
         # Bootstrap environment
         story_graph, story_graph_path, test_file1, test_file2 = given_multiple_test_files_scope_setup_with_rule(bot_directory, workspace_directory)
         action = given_validate_rules_action_initialized(bot_directory, 'test_bot', 'write_tests')
+        # When: Validate rules is called with test_files scope parameter
+        # Then: TestScanner instances scan all test files and violations are detected (verified by when_execute_multiple_test_files_scope_validation)
         when_execute_multiple_test_files_scope_validation(action, test_file1, test_file2, story_graph_path)
 
     def test_validate_rules_verifies_test_files_passed_to_scanner(self, bot_directory, workspace_directory):
@@ -3131,20 +3121,15 @@ class TestValidateRulesAccordingToScope:
         THEN: TestScanner receives knowledge_graph with test_files populated
         AND: test_files contains the test file from scope parameter
         """
+        # Given: Test file exists and spy TestScanner that records knowledge_graph
         # Bootstrap environment
         story_graph, story_graph_path, test_file, rule_file, action = given_test_file_scope_verification_complete_setup(bot_directory, workspace_directory)
         
         # Create a spy TestScanner that records what knowledge_graph it receives
-        received_knowledge_graphs = []
+        received_knowledge_graphs, SpyTestScanner = given_spy_test_scanner_that_records_knowledge_graph()
         
-        class SpyTestScanner(TestScanner):
-            def scan(self, knowledge_graph: Dict[str, Any], rule_obj: Any = None) -> List[Dict[str, Any]]:
-                """Spy that records knowledge_graph and checks for test_files."""
-                received_knowledge_graphs.append(knowledge_graph.copy())  # Store a copy
-                # Return empty violations for this test
-                return []
-        
-        # Execute validation with test_file scope parameter and verify
+        # When: Validate rules is called with test_file scope parameter
+        # Then: TestScanner receives knowledge_graph with test_files populated (verified by when_execute_test_file_scope_verification)
         when_execute_test_file_scope_verification(action, test_file, story_graph)
         
         # The successful completion of injectValidationInstructions with test_files parameter
@@ -3155,8 +3140,8 @@ class TestValidateRulesAccordingToScope:
 # STORY: Reports Violations
 # ============================================================================
 
-class TestGenerateViolationReport:
-    """Story: Generate Violation Report - Tests violation report generation."""
+class TestReportsViolations:
+    """Story: Reports Violations - Tests violation report generation."""
 
     @pytest.mark.parametrize("violations_data,report_format,expected_violation_count", [
         # Example 1: Single violation, JSON format
@@ -3466,12 +3451,13 @@ class TestRunAllScanners:
         Tests all scanners with real examples - parameterized test.
         """
         # Bootstrap environment
+        # Given: Scanner class path, behavior, bad example, and expected violation message
         scanner_class, rule_obj = when_setup_scanner_test_environment(bot_directory, workspace_directory, scanner_class_path, behavior)
         
         # For test/code scanners, create a test file with violations if needed
         test_file, bad_example = when_create_test_file_if_needed_for_scanner(workspace_directory, scanner_class_path, behavior, bad_example)
         
-        # Execute scanner
+        # When: Scanner is executed against bad example
         scanner_instance = when_scanner_instance_created(scanner_class)
         violations = when_execute_scanner_based_on_type(scanner_instance, bad_example, rule_obj)
         
@@ -3495,10 +3481,10 @@ class TestRunScannersAgainstTestCode:
         given_environment_bootstrapped_with_story_graph(bot_directory, workspace_directory)
         
         # When: ValidateCodeFilesAction receives test files via parameters
-        result = when_execute_validate_code_files_action_with_test_files(bot_name, behavior, bot_directory, [test_file1, test_file2])
+        validation_result = when_execute_validate_code_files_action_with_test_files(bot_name, behavior, bot_directory, [test_file1, test_file2])
         
         # Then: Test files should be validated
-        then_result_has_violations_or_instructions(result, "ValidateCodeFilesAction should return results when test files are provided")
+        then_result_has_violations_or_instructions(validation_result, "ValidateCodeFilesAction should return results when test files are provided")
     
     def test_validate_code_files_action_validates_each_file_from_parameters(self, bot_directory, workspace_directory):
         """Scenario: ValidateCodeFilesAction validates each file provided via test_files parameter"""
@@ -3508,10 +3494,10 @@ class TestRunScannersAgainstTestCode:
         test_file = given_test_file_and_naming_rule_with_rule_id_setup(bot_directory, workspace_directory, behavior)
         
         # When: ValidateCodeFilesAction validates the test file via do_execute()
-        result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
+        validation_result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
         
         # Then: Validation should have been performed on the test file
-        then_result_has_violations_or_report(result, "ValidateCodeFilesAction should return violations or report")
+        then_result_has_violations_or_report(validation_result, "ValidateCodeFilesAction should return violations or report")
     
     def test_validate_code_files_action_merges_violations_from_knowledge_graph_and_files(self, bot_directory, workspace_directory):
         """Scenario: ValidateCodeFilesAction merges violations from knowledge graph validation and code file validation"""
@@ -3521,10 +3507,10 @@ class TestRunScannersAgainstTestCode:
         test_file = given_story_graph_test_file_and_rules_setup(bot_directory, workspace_directory, behavior)
         
         # When: ValidateCodeFilesAction is executed via do_execute()
-        result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
+        validation_result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
         
         # Then: Both validations should produce merged results
-        then_result_has_violations_from_knowledge_graph(result)
+        then_result_has_violations_from_knowledge_graph(validation_result)
     
     def test_validate_code_files_action_works_for_tests_behavior(self, bot_directory, workspace_directory):
         """Scenario: ValidateCodeFilesAction works for 7_write_tests behavior (test files)"""
@@ -3535,10 +3521,10 @@ class TestRunScannersAgainstTestCode:
         given_environment_bootstrapped_with_story_graph(bot_directory, workspace_directory)
         
         # When: ValidateCodeFilesAction is executed for 7_write_tests behavior via do_execute()
-        result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
+        validation_result = when_execute_validate_code_files_action_with_single_test_file(bot_name, behavior, bot_directory, test_file)
         
         # Then: Test files should be validated for 7_write_tests behavior
-        then_result_has_violations_or_instructions(result, "ValidateCodeFilesAction should return results for 7_write_tests behavior")
+        then_result_has_violations_or_instructions(validation_result, "ValidateCodeFilesAction should return results for 7_write_tests behavior")
 
 
 # ============================================================================
@@ -3557,10 +3543,10 @@ class TestRunScannersAgainstCode:
         given_environment_bootstrapped_with_story_graph(bot_directory, workspace_directory)
         
         # When: ValidateCodeFilesAction receives code files via parameters
-        result = when_execute_validate_code_files_action_with_code_files(bot_name, behavior, bot_directory, [source_file1, source_file2])
+        validation_result = when_execute_validate_code_files_action_with_code_files(bot_name, behavior, bot_directory, [source_file1, source_file2])
         
         # Then: Code files should be validated
-        then_result_has_violations_or_instructions(result, "ValidateCodeFilesAction should return results when code files are provided")
+        then_result_has_violations_or_instructions(validation_result, "ValidateCodeFilesAction should return results when code files are provided")
     
     def test_validate_code_files_action_works_for_code_behavior(self, bot_directory, workspace_directory):
         """Scenario: ValidateCodeFilesAction works for 8_code behavior (source files)"""
@@ -3571,10 +3557,10 @@ class TestRunScannersAgainstCode:
         given_environment_bootstrapped_with_story_graph(bot_directory, workspace_directory)
         
         # When: ValidateCodeFilesAction is executed for 8_code behavior via do_execute()
-        result = when_execute_validate_code_files_action_with_code_files(bot_name, behavior, bot_directory, [source_file])
+        validation_result = when_execute_validate_code_files_action_with_code_files(bot_name, behavior, bot_directory, [source_file])
         
         # Then: Source files should be validated for 8_code behavior
-        then_result_has_violations_or_instructions(result, "ValidateCodeFilesAction should return results for 8_code behavior")
+        then_result_has_violations_or_instructions(validation_result, "ValidateCodeFilesAction should return results for 8_code behavior")
     
     def test_validate_code_files_action_returns_early_when_no_files_provided(self, bot_directory, workspace_directory):
         """Scenario: ValidateCodeFilesAction returns knowledge graph results when no files provided"""
@@ -3586,8 +3572,8 @@ class TestRunScannersAgainstCode:
         # When: ValidateCodeFilesAction is executed without test_files or code_files parameters
         action = when_validate_code_files_action_created(bot_name, behavior, bot_directory)
         parameters = when_create_empty_parameters()
-        result = when_validate_code_files_action_executes(action, parameters)
+        validation_result = when_validate_code_files_action_executes(action, parameters)
         
         # Then: Should return knowledge graph validation results only
-        then_result_contains_instructions_key(result)
+        then_result_contains_instructions_key(validation_result)
 

@@ -40,50 +40,162 @@ class BadCommentsScanner(CodeScanner):
         return violations
     
     def _check_commented_code(self, lines: List[str], file_path: Path, rule_obj: Any) -> List[Dict[str, Any]]:
-        """Check for commented-out code blocks."""
+        """Check for commented-out code blocks.
+        
+        Only flags actual commented-out code, not comments that mention code keywords.
+        Looks for actual executable code syntax patterns.
+        """
         violations = []
         commented_block_start = None
         
         for line_num, line in enumerate(lines, 1):
             stripped = line.strip()
             
-            # Check for commented-out function/class definitions
+            # Check for commented lines
             if stripped.startswith('//') or stripped.startswith('#'):
                 comment_content = stripped[2:].strip()
                 
-                # Check for function/class definitions in comments
-                if re.search(r'\b(function|def|class|const|let|var)\s+\w+', comment_content):
+                # Only flag if this looks like actual executable code, not just a comment mentioning code
+                if self._is_actual_commented_code(comment_content, lines, line_num):
                     if commented_block_start is None:
                         commented_block_start = line_num
-                elif commented_block_start and (stripped.startswith('//') or stripped.startswith('#')):
-                    # Continue commented block
-                    pass
+                elif commented_block_start:
+                    # Continue commented block if previous line was commented code
+                    prev_comment = lines[line_num - 2].strip() if line_num > 1 else ""
+                    if (prev_comment.startswith('//') or prev_comment.startswith('#')) and \
+                       self._is_actual_commented_code(prev_comment[2:].strip(), lines, line_num - 1):
+                        # Continue block
+                        pass
+                    else:
+                        # End of commented block
+                        if commented_block_start:
+                            violation = Violation(
+                                rule=rule_obj,
+                                violation_message=f'Line {commented_block_start} has commented-out code - call production code directly, even if API doesn\'t exist yet',
+                                location=str(file_path),
+                                line_number=commented_block_start,
+                                severity='warning'
+                            ).to_dict()
+                            violations.append(violation)
+                            commented_block_start = None
                 else:
-                    # End of commented block
-                    if commented_block_start:
-                        violation = Violation(
-                            rule=rule_obj,
-                            violation_message=f'Commented-out code block found (lines {commented_block_start}-{line_num-1}) - delete it, code is in git history',
-                            location=str(file_path),
-                            line_number=commented_block_start,
-                            severity='error'
-                        ).to_dict()
-                        violations.append(violation)
-                        commented_block_start = None
+                    # Not commented code, reset
+                    commented_block_start = None
             else:
                 # Not a comment line - end any commented block
                 if commented_block_start:
                     violation = Violation(
                         rule=rule_obj,
-                        violation_message=f'Commented-out code block found (lines {commented_block_start}-{line_num-1}) - delete it, code is in git history',
+                        violation_message=f'Line {commented_block_start} has commented-out code - call production code directly, even if API doesn\'t exist yet',
                         location=str(file_path),
                         line_number=commented_block_start,
-                        severity='error'
+                        severity='warning'
                     ).to_dict()
                     violations.append(violation)
                     commented_block_start = None
         
+        # Check for any remaining commented block at end of file
+        if commented_block_start:
+            violation = Violation(
+                rule=rule_obj,
+                violation_message=f'Line {commented_block_start} has commented-out code - call production code directly, even if API doesn\'t exist yet',
+                location=str(file_path),
+                line_number=commented_block_start,
+                severity='warning'
+            ).to_dict()
+            violations.append(violation)
+        
         return violations
+    
+    def _is_actual_commented_code(self, comment_content: str, lines: List[str], line_num: int) -> bool:
+        """Check if comment content is actual executable code, not just a comment about code.
+        
+        Returns True only if the comment contains actual code syntax patterns AND
+        there's no production code immediately following it (which would indicate it's explanatory).
+        """
+        if not comment_content:
+            return False
+        
+        # Check if there's production code immediately after this comment (within 2 lines)
+        # If so, this is likely an explanatory comment, not commented-out code
+        for i in range(1, min(3, len(lines) - line_num + 1)):
+            if line_num + i - 1 < len(lines):
+                next_line = lines[line_num + i - 1].strip()
+                # Skip empty lines and comment lines
+                if next_line and not next_line.startswith('//') and not next_line.startswith('#'):
+                    # Check for actual code patterns (not just whitespace or docstrings)
+                    if re.search(r'\b(def|class|if|for|while|return|import|from|=\s*[^=]|\(|\[|\{)\b', next_line):
+                        # There's production code right after - this comment is explanatory
+                        return False
+        
+        # Patterns that indicate actual executable code (not just mentions of code concepts)
+        # These must be strict - looking for actual code syntax, not just keywords
+        code_patterns = [
+            # Variable assignments with actual assignment operator (not ==)
+            r'^\s*\w+\s*=\s*[^=]',  # var = value (but not ==)
+            r'\w+\s*\+=\s*',         # += operator
+            r'\w+\s*-=\s*',          # -= operator
+            r'\w+\s*\*=\s*',         # *= operator
+            r'\w+\s*/=\s*',          # /= operator
+            
+            # Function/class definitions with proper syntax (must have opening paren or colon)
+            r'\b(def|function|class|const|let|var)\s+\w+\s*[\(:]',  # def func( or class X:
+            
+            # Function calls with parentheses and arguments
+            r'\w+\s*\([^)]+\)',      # function_call(args) - must have args
+            r'\w+\.\w+\s*\(',        # obj.method(
+            
+            # Control flow with proper syntax and conditions
+            r'\bif\s+[^:]+:',        # if condition: (Python)
+            r'\bif\s*\([^)]+\)',     # if (condition) (JS/C)
+            r'\bfor\s+[^:]+:',       # for item in items: (Python)
+            r'\bfor\s*\([^)]+\)',    # for (init; condition; inc) (JS/C)
+            r'\bwhile\s+[^:]+:',     # while condition: (Python)
+            r'\bwhile\s*\([^)]+\)',  # while (condition) (JS/C)
+            
+            # Return statements with values
+            r'\breturn\s+[^;]+;',    # return value; (with semicolon)
+            r'\breturn\s+[^#\n]+$',  # return value (end of line, Python)
+            
+            # Array/object literals with content
+            r'\[[^\]]+\]',           # [array with items]
+            r'\{[^}]+\}',            # {object with props}
+            
+            # Operators and expressions (must have actual operators)
+            r'[+\-*/%]=\s*\w',       # +=, -=, etc.
+            r'\w+\s*[+\-*/%]\s*\w',  # arithmetic operations
+            r'\w+\s*(==|!=|<=|>=|<|>)\s*\w',  # comparisons
+            
+            # Method chaining (multiple dots)
+            r'\w+\.\w+\.\w+',        # obj.method.chain
+            
+            # Import/require statements
+            r'^\s*(import|from|require)\s+',
+        ]
+        
+        # Check if comment matches actual code patterns
+        for pattern in code_patterns:
+            if re.search(pattern, comment_content):
+                # Additional check: exclude comments that are clearly explanatory text
+                # These patterns suggest explanatory comments, not actual code
+                explanatory_patterns = [
+                    r'^\s*(case|return|tuple|is|are|will|should|does|do|use|create|set|get)\s+\w+',
+                    r'^\s*\w+\s+(case|is|are|will|should|does|do)',
+                    r'^\s*#\s*(Default|Likely|Use|Create|Set|Get|Ensure|Check)',
+                ]
+                
+                is_explanatory = False
+                for exp_pattern in explanatory_patterns:
+                    if re.search(exp_pattern, comment_content, re.IGNORECASE):
+                        # Might be explanatory - only flag if it has clear code syntax
+                        if not re.search(r'[=\(\)\[\]\{\}\+\-\*/%;]', comment_content):
+                            is_explanatory = True
+                            break
+                
+                if not is_explanatory:
+                    return True
+        
+        return False
     
     def _check_html_in_comments(self, lines: List[str], file_path: Path, rule_obj: Any) -> List[Dict[str, Any]]:
         """Check for HTML markup in comments."""

@@ -1,5 +1,5 @@
 {
-  "description": "CRITICAL: Test docstrings and assertions must match specification scenarios exactly. Test names and docstrings describe the behavior from specification. Assertions verify exactly what the scenario states - no more, no less. Use exact variable names and terminology from specification.",
+  "description": "CRITICAL: Test variables, test methods, test assertiosn etc must match specification scenarios . Test names and steps describe the behavior from specification. Assertions verify exactly what the scenario states - no more, no less. Use exact variable names and terminology from specification.",
   "examples": [
     {
       "do": {

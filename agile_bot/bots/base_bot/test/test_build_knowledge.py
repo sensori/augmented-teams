@@ -15,22 +15,68 @@ from agile_bot.bots.base_bot.src.scanners.story_map import (
 )
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
-    verify_action_tracks_start,
-    verify_action_tracks_completion,
-    verify_workflow_transition,
-    verify_workflow_saves_completed_action,
     create_knowledge_graph_template,
     get_bot_dir
 )
-
+from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
+    verify_action_tracks_start,
+    verify_action_tracks_completion,
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action
+)
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
+# ============================================================================
+# STORY GRAPH HELPERS
+# ============================================================================
+
+def given_story_graph_file_created(docs_dir_or_workspace: Path, story_graph: dict):
+    """Given: Story graph file created."""
+    # Check if it's a docs/stories directory (name ends with 'stories' or is named 'stories')
+    if docs_dir_or_workspace.name == 'stories' or str(docs_dir_or_workspace).endswith('stories'):
+        # It's a docs/stories directory - write directly
+        story_graph_path = docs_dir_or_workspace / "story-graph.json"
+        story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
+    else:
+        # It's a workspace directory - create docs/stories subdirectory
+        docs_stories_dir = docs_dir_or_workspace / 'docs' / 'stories'
+        docs_stories_dir.mkdir(parents=True, exist_ok=True)
+        story_graph_path = docs_stories_dir / 'story-graph.json'
+        story_graph_path.write_text(json.dumps(story_graph, indent=2), encoding='utf-8')
+    return story_graph_path
+
+
+# ============================================================================
+# BOT DIRECTORY HELPERS
+# ============================================================================
+
+def given_test_bot_directory_created(repo_root_or_tmp_path, bot_name: str = 'test_story_bot'):
+    """Given: Test bot directory created."""
+    # Handle both tmp_path (Path) and repo_root (Path) cases
+    if hasattr(repo_root_or_tmp_path, 'mkdir') and not (repo_root_or_tmp_path / 'agile_bot').exists():
+        # It's tmp_path - create simple bot directory
+        bot_directory = repo_root_or_tmp_path / "test_bot"
+        bot_directory.mkdir()
+        return bot_directory
+    else:
+        # It's repo_root - create full path structure
+        test_bot_dir = repo_root_or_tmp_path / 'agile_bot' / 'bots' / bot_name
+        test_bot_dir.mkdir(parents=True, exist_ok=True)
+        return test_bot_dir
+
 def when_story_map_from_bot_called_without_story_graph(bot):
     """When: StoryMap.from_bot called without story graph."""
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        StoryMap.from_bot(bot)
+
+
+def then_story_map_raises_file_not_found_error(bot):
+    """Then: Story map raises FileNotFoundError."""
     import pytest
     with pytest.raises(FileNotFoundError):
         StoryMap.from_bot(bot)
@@ -169,11 +215,17 @@ class TestTrackActivityForBuildKnowledgeAction:
     """Story: Track Activity for Build Knowledge Action - Tests activity tracking for build_knowledge."""
 
     def test_track_activity_when_build_knowledge_action_starts(self, bot_directory, workspace_directory):
+        # Given: Bot directory and workspace directory are set up
+        # When: Build knowledge action starts
+        # Then: Activity is tracked (verified by verify_action_tracks_start)
         verify_action_tracks_start(bot_directory, workspace_directory, BuildKnowledgeAction, 'build_knowledge')
 
     def test_track_activity_when_build_knowledge_action_completes(self, bot_directory, workspace_directory):
+        # Given: Build knowledge outputs and duration
         outputs = given_build_knowledge_outputs()
         duration = given_build_knowledge_duration()
+        # When: Build knowledge action completes
+        # Then: Activity is tracked with outputs and duration (verified by verify_action_tracks_completion)
         verify_action_tracks_completion(bot_directory, workspace_directory, BuildKnowledgeAction, 'build_knowledge', outputs=outputs, duration=duration)
 
 
@@ -185,9 +237,21 @@ class TestProceedToRenderOutput:
     """Story: Proceed To Render Output - Tests transition to render_output action."""
 
     def test_seamless_transition_from_build_knowledge_to_validate_rules(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Seamless Transition From Build Knowledge To Validate Rules
+        """
+        # Given: Bot directory and workspace directory are set up
+        # When: Build knowledge action completes
+        # Then: Workflow transitions to validate_rules (verified by verify_workflow_transition)
         verify_workflow_transition(bot_directory, workspace_directory, 'build_knowledge', 'validate_rules')
 
     def test_workflow_state_captures_build_knowledge_completion(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Workflow State Captures Build Knowledge Completion
+        """
+        # Given: Bot directory and workspace directory are set up
+        # When: Build knowledge action completes
+        # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'build_knowledge')
 
 
@@ -433,13 +497,6 @@ def then_scenario_outline_map_location_correct(scenario_outline):
     assert scenario_outline.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].scenario_outlines[0].name"
 
 
-def given_test_bot_directory_created(tmp_path):
-    """Given: Test bot directory created."""
-    bot_directory = tmp_path / "test_bot"
-    bot_directory.mkdir()
-    return bot_directory
-
-
 def given_docs_directory_created(bot_directory):
     """Given: Docs directory created."""
     docs_dir = bot_directory / "docs" / "stories"
@@ -459,13 +516,6 @@ def given_test_story_graph():
             }
         ]
     }
-
-
-def given_story_graph_file_created(docs_dir, story_graph):
-    """Given: Story graph file created."""
-    story_graph_path = docs_dir / "story-graph.json"
-    story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
-    return story_graph_path
 
 
 def when_story_map_created_from_bot(bot):
@@ -619,6 +669,36 @@ def given_validation_rule_for_verb_noun_format(bot_directory: Path) -> Path:
         'description': 'Stories must use verb-noun format',
         'examples': ['Create user account', 'Update profile']
     })
+
+
+def given_template_variables_test_setup(bot_directory: Path, workspace_directory: Path) -> tuple:
+    """Given: Complete setup for template variables test.
+    
+    Sets up all prerequisites for testing template variable replacement:
+    - Test variables (bot_name, behavior, action)
+    - Environment bootstrap
+    - Base instructions
+    - Knowledge graph directory structure
+    - Behavior-specific instructions
+    - Behavior main instructions
+    - Knowledge graph config and template
+    - Knowledge graph template with schema
+    - Validation rules
+    
+    
+    """
+    bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+    bootstrap_env(bot_directory, workspace_directory)
+    
+    given_base_instructions_copied_to_bot_directory(bot_directory, action)
+    kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
+    given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
+    given_behavior_main_instructions_created(bot_directory, behavior, 'Shape the story map', 'Create initial story structure')
+    given_knowledge_graph_config_and_template_created(kg_dir)
+    given_knowledge_graph_template_with_schema_created(kg_dir)
+    given_validation_rule_for_verb_noun_format(bot_directory)
+    
+    return bot_name, behavior, action, kg_dir
 
 
 def given_test_variables_for_prioritization() -> tuple[str, str]:
@@ -819,6 +899,9 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
     """Story: Inject Knowledge Graph Template for Build Knowledge - Tests template injection."""
 
     def test_action_injects_knowledge_graph_template(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action Injects Knowledge Graph Template
+        """
         bot_name, behavior = given_test_variables_for_exploration()
         template_name = 'story-graph-explored-outline.json'
         
@@ -831,6 +914,9 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         then_instructions_contain_template_path(instructions, template_name)
 
     def test_action_raises_error_when_template_missing(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action Raises Error When Template Missing
+        """
         bot_name, behavior = given_test_variables_for_exploration()
         
         kg_dir = given_environment_and_knowledge_graph_setup(bot_directory, workspace_directory, behavior)
@@ -842,7 +928,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 
     def test_action_loads_and_merges_instructions(self, bot_directory, workspace_directory):
         """
-        SCENARIO: Action loads and merges instructions for shape build_knowledge
+        SCENARIO: Action Loads And Merges Instructions
         GIVEN: Base and behavior-specific instructions exist
         WHEN: Action method is invoked
         THEN: Instructions are loaded from both locations and merged
@@ -859,7 +945,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 
     def test_action_uses_base_instructions_when_behavior_instructions_missing(self, bot_directory, workspace_directory):
         """
-        SCENARIO: Action uses base instructions when behavior-specific instructions are missing
+        SCENARIO: Action Uses Base Instructions When Behavior Instructions Missing
         GIVEN: Base instructions exist but behavior-specific instructions do not
         WHEN: Action method is invoked
         THEN: Only base instructions are returned (no behavior_instructions key)
@@ -873,21 +959,12 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 
     def test_all_template_variables_are_replaced_in_instructions(self, bot_directory, workspace_directory):
         """
-        SCENARIO: All template variables are replaced in final instructions
+        SCENARIO: All Template Variables Are Replaced In Instructions
         GIVEN: Base instructions with {{rules}}, {{schema}}, {{description}}, {{instructions}} placeholders
         WHEN: Action loads and merges instructions with all injections
         THEN: All template variables are replaced with actual content
         """
-        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
-        bootstrap_env(bot_directory, workspace_directory)
-        
-        given_base_instructions_copied_to_bot_directory(bot_directory, action)
-        kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
-        given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
-        given_behavior_main_instructions_created(bot_directory, behavior, 'Shape the story map', 'Create initial story structure')
-        given_knowledge_graph_config_and_template_created(kg_dir)
-        given_knowledge_graph_template_with_schema_created(kg_dir)
-        given_validation_rule_for_verb_noun_format(bot_directory)
+        bot_name, behavior, action, kg_dir = given_template_variables_test_setup(bot_directory, workspace_directory)
         
         action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
         instructions = when_build_knowledge_action_loads_and_injects_all_instructions(action_obj)
@@ -945,94 +1022,199 @@ class TestLoadStoryGraphIntoMemory:
         return MockBot(bot_directory)
     
     def test_story_map_loads_epics(self, story_map):
+        """
+        SCENARIO: Story Map Loads Epics
+        """
+        # Given: Story map is loaded
+        # When: Epics are retrieved from story map
         epics = when_story_map_epics_retrieved(story_map)
+        # Then: Epics contain single build knowledge epic
         then_epics_contain_single_build_knowledge_epic(epics)
     
     def test_epic_has_sub_epics(self, story_map):
+        """
+        SCENARIO: Epic Has Sub Epics
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
         epic = then_epics_contain_single_build_knowledge_epic(epics)
+        # When: Epic children are retrieved
         children = when_epic_children_retrieved(epic)
+        # Then: Children contain single sub epic
         then_children_contain_single_sub_epic(children)
     
     def test_sub_epic_has_story_groups(self, story_map):
+        """
+        SCENARIO: Sub Epic Has Story Groups
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
         epic = then_epics_contain_single_build_knowledge_epic(epics)
         sub_epic = epic.children[0]
+        # When: Sub epic children are retrieved
         children = when_sub_epic_children_retrieved(sub_epic)
+        # Then: Children contain single story group
         then_children_contain_single_story_group(children)
     
     def test_story_group_has_stories(self, story_map):
+        """
+        SCENARIO: Story Group Has Stories
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
         epic = then_epics_contain_single_build_knowledge_epic(epics)
         sub_epic, story_group = when_sub_epic_and_story_group_retrieved(epic)
+        # When: Story group stories are retrieved
         stories = when_story_group_stories_retrieved(story_group)
+        # Then: Stories contain single story
         then_stories_contain_single_story(stories)
     
     def test_story_has_properties(self, story_map):
+        """
+        SCENARIO: Story Has Properties
+        """
+        # Given: Story map is loaded
+        # When: Story is retrieved from path
         story = when_story_retrieved_from_path(story_map)
+        # Then: Story has expected properties
         then_story_has_expected_properties(story)
     
     def test_story_has_scenarios(self, story_map):
+        """
+        SCENARIO: Story Has Scenarios
+        """
+        # Given: Story map is loaded
         story = when_story_retrieved_from_path(story_map)
+        # When: Story scenarios are retrieved
         scenarios = when_story_scenarios_retrieved(story)
+        # Then: Scenarios contain expected scenarios
         then_scenarios_contain_expected_scenarios(scenarios)
     
     def test_scenario_has_properties(self, story_map):
+        """
+        SCENARIO: Scenario Has Properties
+        """
+        # Given: Story map is loaded
         story = when_story_retrieved_from_path(story_map)
+        # When: Scenario is retrieved from story
         scenario = when_scenario_retrieved_from_story(story)
+        # Then: Scenario has expected properties
         then_scenario_has_expected_properties(scenario)
     
     def test_scenario_default_test_method(self, story_map):
+        """
+        SCENARIO: Scenario Default Test Method
+        """
+        # Given: Story map is loaded
         story = when_story_retrieved_from_path(story_map)
+        # When: Scenario is retrieved from story
         scenario = when_scenario_retrieved_from_story(story)
+        # Then: Scenario has default test method
         assert scenario.default_test_method == "test_story_graph_file_exists"
     
     def test_story_has_scenario_outlines(self, story_map):
+        """
+        SCENARIO: Story Has Scenario Outlines
+        """
+        # Given: Story map is loaded
         story = when_story_retrieved_from_path(story_map)
+        # When: Story scenario outlines are retrieved
         scenario_outlines = when_story_scenario_outlines_retrieved(story)
+        # Then: Scenario outlines contain expected outline
         then_scenario_outlines_contain_expected_outline(scenario_outlines)
     
     def test_scenario_outline_has_examples(self, story_map):
+        """
+        SCENARIO: Scenario Outline Has Examples
+        """
+        # Given: Story map is loaded
         story = when_story_retrieved_from_path(story_map)
+        # When: Scenario outline is retrieved from story
         scenario_outline = when_scenario_outline_retrieved_from_story(story)
+        # Then: Scenario outline has expected examples
         then_scenario_outline_has_expected_examples(scenario_outline)
     
     def test_story_default_test_class(self, story_map):
+        """
+        SCENARIO: Story Default Test Class
+        """
+        # Given: Story map is loaded
+        # When: Story is retrieved from path
         story = when_story_retrieved_from_path(story_map)
+        # Then: Story has default test class
         assert story.default_test_class == "TestLoadStoryGraphIntoMemory"
     
     def test_story_map_walk_traverses_all_nodes(self, story_map):
+        """
+        SCENARIO: Story Map Walk Traverses All Nodes
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
         epic = when_first_epic_retrieved(epics)
+        # When: Story map is walked
         nodes = when_story_map_walked(story_map, epic)
+        # Then: Nodes match expected structure
         then_nodes_match_expected_structure(nodes)
     
     def test_map_location_for_epic(self, story_map):
+        """
+        SCENARIO: Map Location For Epic
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
+        # When: First epic is retrieved
         epic = when_first_epic_retrieved(epics)
+        # Then: Epic map location is correct
         then_epic_map_location_correct(epic)
     
     def test_map_location_for_sub_epic(self, story_map):
+        """
+        SCENARIO: Map Location For Sub Epic
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
+        # When: Sub epic is retrieved from epics
         sub_epic = when_sub_epic_retrieved_from_epics(epics)
+        # Then: Sub epic map location is correct
         then_sub_epic_map_location_correct(sub_epic)
     
     def test_map_location_for_story(self, story_map):
+        """
+        SCENARIO: Map Location For Story
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
+        # When: Story is retrieved from epics
         story = when_story_retrieved_from_epics(epics)
+        # Then: Story map location is correct
         then_story_map_location_correct(story)
     
     def test_scenario_map_location(self, story_map):
+        """
+        SCENARIO: Scenario Map Location
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
+        # When: Scenario is retrieved from epics
         scenario = when_scenario_retrieved_from_epics(epics)
+        # Then: Scenario map location is correct
         then_scenario_map_location_correct(scenario)
     
     def test_scenario_outline_map_location(self, story_map):
+        """
+        SCENARIO: Scenario Outline Map Location
+        """
+        # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
+        # When: Scenario outline is retrieved from epics
         scenario_outline = when_scenario_outline_retrieved_from_epics(epics)
+        # Then: Scenario outline map location is correct
         then_scenario_outline_map_location_correct(scenario_outline)
     
     def test_from_bot_loads_story_graph(self, tmp_path):
+        """
+        SCENARIO: From Bot Loads Story Graph
+        """
         bot_directory = given_test_bot_directory_created(tmp_path)
         docs_dir = given_docs_directory_created(bot_directory)
         story_graph = given_test_story_graph()
@@ -1041,13 +1223,25 @@ class TestLoadStoryGraphIntoMemory:
         then_story_map_contains_test_epic(story_map)
     
     def test_from_bot_with_path(self, tmp_path):
+        """
+        SCENARIO: From Bot With Path
+        """
+        # Given: Bot directory, docs directory, and story graph file are created
         bot_directory = given_test_bot_directory_created(tmp_path)
         docs_dir = given_docs_directory_created(bot_directory)
         story_graph = given_test_story_graph()
         story_graph_path = given_story_graph_file_created(docs_dir, story_graph)
+        # When: Story map is created from bot
         story_map = StoryMap.from_bot(bot_directory)
+        # Then: Story map contains test epic
         then_story_map_contains_test_epic(story_map)
     
     def test_from_bot_raises_when_file_not_found(self, tmp_path):
+        """
+        SCENARIO: From Bot Raises When File Not Found
+        """
+        # Given: Bot directory is created
         bot_directory = given_test_bot_directory_created(tmp_path)
+        # When: Mock bot is created and story map is accessed
+        # Then: FileNotFoundError is raised (verified by when_mock_bot_created_then_story_map_raises_file_not_found_error)
         when_mock_bot_created_then_story_map_raises_file_not_found_error(self, bot_directory)

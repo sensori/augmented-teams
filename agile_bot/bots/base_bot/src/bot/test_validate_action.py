@@ -244,7 +244,6 @@ class TestValidateAction(ValidateRulesAction):
                                 # PASS 2: Cross-file scanning (if files provided)
                                 if test_files and hasattr(scanner_instance, 'scan_cross_file'):
                                     violations_cross_file = scanner_instance.scan_cross_file(
-                                        knowledge_graph,
                                         rule_obj=rule_obj,
                                         test_files=test_files,
                                         code_files=None

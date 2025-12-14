@@ -21,3 +21,4 @@ print(f'Generated: {result["output_path"]}')
 print(f'Epics: {result["summary"]["epics"]}')
 print(f'Increments: {result["summary"]["increments"]}')
 print(f'Stories: {result["summary"]["stories"]}')
+

@@ -47,7 +47,6 @@ class Scanner(ABC):
     
     def scan_cross_file(
         self,
-        knowledge_graph: Dict[str, Any],
         rule_obj: Any = None,
         test_files: Optional[List['Path']] = None,
         code_files: Optional[List['Path']] = None
@@ -62,7 +61,6 @@ class Scanner(ABC):
         cross-file scanning.
         
         Args:
-            knowledge_graph: The knowledge graph to validate
             rule_obj: Optional Rule object reference
             test_files: List of all test file paths to analyze together
             code_files: List of all code file paths to analyze together

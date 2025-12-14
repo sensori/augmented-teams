@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="story-map" name="Story Map">
-        <mxGraphModel dx="5068" dy="703" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="5283" dy="719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="3000" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -50,13 +50,13 @@
                     <mxGeometry x="570" y="399" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f1s4" value="Store Context Files" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#437070;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3161.26" y="1640" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3110.0000000000005" y="1150" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f1s5" value="Guards Prevent Writes Without Project" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="630" y="399" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f1s6" value="Stores Activity for Initialize Project Action" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#437070;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3106.2599999999998" y="1639" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3110" y="1097" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="e2f2" value="&lt;div style=&quot;display: flex; align-items: center; justify-content: center; width: 100%;&quot;&gt;Invoke MCP&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="715" y="180" width="140" height="60" as="geometry"/>
@@ -274,9 +274,6 @@
                 <mxCell id="32" value="Add Domain Criteria" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="1480" y="527" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="36" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Alternate Workflows&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
-                    <mxGeometry x="-3244.13" y="951" width="48" height="48" as="geometry"/>
-                </mxCell>
                 <mxCell id="38" value="Other Behaviors" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
                     <mxGeometry x="-3246.5" y="1338" width="48" height="48" as="geometry"/>
                 </mxCell>
@@ -320,7 +317,7 @@
                     <mxGeometry x="-3424.63" y="1336" width="170" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="61" value="&lt;font&gt;More dynamic edit-render flows, Better injection of framwork while going in any directin, scoped runs ass well&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontColor=#080808;fontSize=8;align=left;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
-                    <mxGeometry x="-3430" y="940" width="170" height="50" as="geometry"/>
+                    <mxGeometry x="-3424.63" y="1060" width="170" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="64" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Real Time Story Synch&amp;nbsp;&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
                     <mxGeometry x="-3246" y="1408" width="48" height="48" as="geometry"/>
@@ -332,100 +329,76 @@
                     <mxGeometry x="-2279.9999999999995" y="353" width="170" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="68" value="Spike Behavior&amp;nbsp;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2979.87" y="1056" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2760" y="1159" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="70" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Misc&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
                     <mxGeometry x="-3246.63" y="1497" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="71" value="SIngle Story Workflow n" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3005.12" y="950.9999999999999" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2590" y="1159" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="72" value="Fix Bug" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3118.12" y="951.9999999999999" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2590" y="1097" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="73" value="Exploration Run" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3060.62" y="951.9999999999999" width="50" height="50" as="geometry"/>
+                <mxCell id="73" value="reverse eng Docs" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2115" y="1399.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="74" value="TDD Run" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2948.62" y="950.9999999999999" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2115" y="1339.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="75" value="Deploy Behavfior" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3145.94" y="1344" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="76" value="New Rules Approach" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3250" y="1556" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2920" y="1100" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="77" value="&lt;font&gt;Rules are tagged across multui0le dimensins plus vecto more dynamic behavior that can flex to unique uneen circumstances&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontColor=#080808;fontSize=8;align=left;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
                     <mxGeometry x="-3430" y="1556" width="170" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="78" value="&amp;nbsp;Build New Bot From Context&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3165.39" y="1493.9999999999998" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3035.68" y="1159.9999999999998" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="79" value="Drag and Drop a folder of rules, triggers, etc into a bot" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3106.26" y="1495" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3035.6800000000003" y="1214" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="80" value="Merge Scenarios and Examples" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="1805.5" y="527" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="81" value="Code Behavior" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2891.87" y="1056" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="82" value="Ensure Context Traceability Linking" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="1313.9999999999998" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="83" value="Better Present of Rendered Content" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="1374" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-1612" y="1128" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="84" value="Mural Integration" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3045.26" y="1493.9999999999995" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3035.6800000000003" y="1099.9999999999995" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="85" value="Revamped Code Principles" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3029.87" y="1055.9999999999998" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2760" y="1215.9999999999998" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="86" value="Architecture Templates" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2936.37" y="1055.9999999999998" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="87" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;inject principls eg alays simplest code, least bespoke code, dont dsuppor tlegavcy&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
-                    <mxGeometry x="-3168" y="1049.9999999999998" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-2760" y="1101.9999999999998" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="89" value="Code Behavior" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
                     <mxGeometry x="-3250" y="1056" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="90" value="VS Code 1 click install" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="999" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2670" y="1336" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="91" value="Template Sprucing (eg Links)" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="860" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2130" y="1019.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="92" value="Verbose / Echo Mode" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="930" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="94" value="Create Test Entire Run" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2149.9999999999995" y="1130" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2130" y="1079.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="95" value="Refine Prompts, Guidance, Rules" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2149.9999999999995" y="802" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="96" value="Automated Test Entire Run CLI" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="1198" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="97" value="Automated Test Entire Run MCP" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2150" y="1258" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="99" value="&lt;font style=&quot;font-size: 6px;&quot;&gt;Staging Environment&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
-                    <mxGeometry x="-3238.13" y="889" width="48" height="48" as="geometry"/>
+                    <mxGeometry x="-2129.9999999999995" y="959.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="100" value="Local LLM" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3055.3199999999997" y="889" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3032.93" y="1299.5" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="101" value="Install Scripts" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2995.8199999999997" y="890" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-3032.93" y="1360.5" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="102" value="Scoped, / Nested runs" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2891.87" y="950.9999999999999" width="50" height="50" as="geometry"/>
+                <mxCell id="102" value="Scoped, /&amp;nbsp; runs" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2115" y="1222.44" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="103" value="skipp guardrails if they are set , or non default actions" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2836.87" y="951.9999999999999" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2590" y="1216" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="104" value="" style="endArrow=none;dashed=1;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;fontStyle=1" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -438,9 +411,6 @@
                 </mxCell>
                 <mxCell id="106" value="Detect Trigger Words Using VSCODE extension" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="-1865.0000000000002" y="840" width="50" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="107" value="Test&amp;nbsp; Run Againts Multiple Models" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-2149.9999999999995" y="1070" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="110" value="Jeff" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1;" parent="1" vertex="1">
                     <mxGeometry x="-2982.93" y="550" width="47.25" height="20" as="geometry"/>
@@ -503,7 +473,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="122" value="&lt;span style=&quot;font-size: 12px;&quot;&gt;User Testing Behavior&lt;/span&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-3093.94" y="1344" width="50" height="50" as="geometry"/>
+                    <mxGeometry x="-2920" y="1164" width="50" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="123" value="" style="endArrow=none;dashed=1;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;fontStyle=1" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -559,11 +529,89 @@
                 <mxCell id="136" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Automatic invocation on trigger words&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#635528;fillColor=#fff2cc;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="-1863.9999999999998" y="782" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="137" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Code Scanner&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#000000;fillColor=#fff2cc;strokeWidth=1;perimeterSpacing=1;" vertex="1" parent="1">
+                <mxCell id="137" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Code Scanner&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#000000;fillColor=#fff2cc;strokeWidth=1;perimeterSpacing=1;" parent="1" vertex="1">
                     <mxGeometry x="-1610" y="1008.0000000000001" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="138" value="Workflow Per Behavior" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#000000;fillColor=#fff2cc;strokeWidth=1;perimeterSpacing=1;" vertex="1" parent="1">
+                <mxCell id="138" value="Workflow Per Behavior" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#000000;fillColor=#fff2cc;strokeWidth=1;perimeterSpacing=1;" parent="1" vertex="1">
                     <mxGeometry x="-1610" y="1070" width="48" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="139" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;Alternate Workflows&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#f8f7f7;" parent="1" vertex="1">
+                    <mxGeometry x="-2450" y="903" width="48" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="140" value="Alternate Workflows" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2590" y="1040" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="141" value="Create Test Entire Run" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2669.9999999999995" y="1159" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="142" value="Automated Test Entire Run CLI" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2670" y="1216" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="143" value="Automated Test Entire Run MCP" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2670" y="1276" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="144" value="Test&amp;nbsp; Run Againts Multiple Models" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2669.9999999999995" y="1102" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="145" value="test and deploy" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2669.9999999999995" y="1042" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="148" value="Refactor" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2522" y="1042" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="149" value="Ensure Context Traceability Linking" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2520" y="1099" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="150" value="Better Presentation of Rendered Content" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2520" y="1159" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="153" value="Code behavior" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2759.9999999999995" y="1042" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="154" value="Simpler Config / Gen" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2130" y="1157.44" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="155" value="Templates" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2859.9999999999995" y="1042" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="156" value="Story Sync" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2369.9999999999995" y="1038" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="157" value="Other Behaviors" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2929.9999999999995" y="1040" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="158" value="New Rules Approach" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2985.6799999999994" y="1040" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="159" value="Other" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-3045.8199999999993" y="1040" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="160" value="Load / Store All Data" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-3129.9999999999995" y="1040" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="162" value="Multiple&amp;nbsp; Workflows" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="-2115" y="1277.44" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="163" value="simplify action names and behaviors (for cli)" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-2134.9999999999995" y="900.5699999999999" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="164" value="Refactoring All Tests" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-1994.9999999999995" y="780" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="165" value="Scan All Test Files" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-1734.9999999999995" y="770" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="166" value="Optimize Test Scanners" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-1994.9999999999995" y="840" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="167" value="Optimize Code Scanners" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-2134.9999999999995" y="828" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="168" value="Scan All Code Files" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-1869.9999999999995" y="903" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="169" value="Refactor All Code Code" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-2134.9999999999995" y="770" width="50" height="50" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

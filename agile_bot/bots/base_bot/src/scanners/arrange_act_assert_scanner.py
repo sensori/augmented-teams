@@ -44,9 +44,38 @@ class ArrangeActAssertScanner(TestScanner):
         test_body = '\n'.join(test_body_lines)
         
         # Check for AAA comments/sections
-        has_given = any('# Given' in line or '# Arrange' in line for line in test_body_lines)
-        has_when = any('# When' in line or '# Act' in line for line in test_body_lines)
-        has_then = any('# Then' in line or '# Assert' in line for line in test_body_lines)
+        has_given_comment = any('# Given' in line or '# Arrange' in line for line in test_body_lines)
+        has_when_comment = any('# When' in line or '# Act' in line for line in test_body_lines)
+        has_then_comment = any('# Then' in line or '# Assert' in line for line in test_body_lines)
+        
+        # Check for AAA method names (given_*, when_*, then_*)
+        has_given_method = False
+        has_when_method = False
+        has_then_method = False
+        
+        # Walk AST to find function calls
+        for node in ast.walk(test_node):
+            if isinstance(node, ast.Call):
+                # Get function name from call
+                func_name = None
+                if isinstance(node.func, ast.Name):
+                    func_name = node.func.id
+                elif isinstance(node.func, ast.Attribute):
+                    # Handle method calls like obj.given_something()
+                    func_name = node.func.attr
+                
+                if func_name:
+                    if func_name.startswith('given_'):
+                        has_given_method = True
+                    elif func_name.startswith('when_'):
+                        has_when_method = True
+                    elif func_name.startswith('then_'):
+                        has_then_method = True
+        
+        # Combine comment and method checks
+        has_given = has_given_comment or has_given_method
+        has_when = has_when_comment or has_when_method
+        has_then = has_then_comment or has_then_method
         
         # Check if there's actual code (not just comments and pass)
         has_actual_code = False
@@ -71,7 +100,7 @@ class ArrangeActAssertScanner(TestScanner):
             line_number = test_node.lineno if hasattr(test_node, 'lineno') else None
             return Violation(
                 rule=rule_obj,
-                violation_message=f'Test "{test_node.name}" does not follow Arrange-Act-Assert structure - add # Given/When/Then or # Arrange/Act/Assert comments',
+                violation_message=f'Test "{test_node.name}" does not follow Arrange-Act-Assert structure - add # Given/When/Then comments or use given_*/when_*/then_* method names',
                 location=str(file_path),
                 line_number=line_number,
                 severity='error'

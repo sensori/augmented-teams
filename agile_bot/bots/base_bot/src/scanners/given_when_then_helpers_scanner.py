@@ -242,6 +242,10 @@ class GivenWhenThenHelpersScanner(TestScanner):
         # Get docstring line range to skip
         docstring_range = self._get_docstring_line_range(test_node)
         
+        # Track if we're in a multi-line function call and parenthesis balance
+        in_multiline_call = False
+        paren_balance = 0
+        
         # Parse lines in the test body
         for i, line in enumerate(test_body_lines):
             # Calculate actual line number (test_body_lines starts from def line)
@@ -255,6 +259,8 @@ class GivenWhenThenHelpersScanner(TestScanner):
                     blocks.append((current_block_start, line_num - 1, current_block_lines))
                     current_block_start = None
                     current_block_lines = []
+                in_multiline_call = False
+                paren_balance = 0
                 continue
             
             # Skip empty lines, comments, decorators
@@ -266,22 +272,39 @@ class GivenWhenThenHelpersScanner(TestScanner):
                     blocks.append((current_block_start, line_num - 1, current_block_lines))
                     current_block_start = None
                     current_block_lines = []
+                # Empty lines don't break multi-line calls
+                if in_multiline_call:
+                    continue
+                in_multiline_call = False
+                paren_balance = 0
                 continue
             
-            # Check if this line is a helper function call
-            is_helper_call = self._is_helper_function_call(stripped, helper_functions, tree)
+            # Check if this line starts a helper function call
+            is_helper_call_start = self._is_helper_function_call(stripped, helper_functions, tree)
             
-            if is_helper_call:
+            if is_helper_call_start:
+                # Start of a helper call - calculate initial paren balance
+                paren_balance = stripped.count('(') - stripped.count(')')
+                # Mark as multi-line if paren balance > 0
+                in_multiline_call = paren_balance > 0
                 # End current block if exists
                 if current_block_start is not None:
                     blocks.append((current_block_start, line_num - 1, current_block_lines))
                     current_block_start = None
                     current_block_lines = []
+            elif in_multiline_call:
+                # Continuation of multi-line helper call - update paren balance and skip this line
+                paren_balance += stripped.count('(') - stripped.count(')')
+                if paren_balance == 0:
+                    # End of multi-line call
+                    in_multiline_call = False
+                continue
             else:
                 # This is inline code - add to current block or start new one
                 if current_block_start is None:
                     current_block_start = line_num
                 current_block_lines.append(stripped)
+                paren_balance = 0
         
         # Don't forget the last block
         if current_block_start is not None:
@@ -301,6 +324,16 @@ class GivenWhenThenHelpersScanner(TestScanner):
         # Also check for method calls on self (class helper methods)
         if re.search(r'self\.(given_|when_|then_)\w+\s*\(', line):
             return True
+        
+        # Check for helper function patterns even if not in helper_functions set
+        # This handles imported helpers that might not be detected
+        helper_patterns = [
+            r'\b(given_|when_|then_|verify_|create_|setup_|bootstrap_)\w+\s*\(',
+            r'self\.(given_|when_|then_|verify_|create_|setup_)\w+\s*\(',
+        ]
+        for pattern in helper_patterns:
+            if re.search(pattern, line, re.IGNORECASE):
+                return True
         
         return False
     
@@ -350,7 +383,6 @@ class GivenWhenThenHelpersScanner(TestScanner):
     
     def scan_cross_file(
         self,
-        knowledge_graph: Dict[str, Any],
         rule_obj: Any = None,
         test_files: Optional[List[Path]] = None,
         code_files: Optional[List[Path]] = None
@@ -359,16 +391,17 @@ class GivenWhenThenHelpersScanner(TestScanner):
         
         Detects:
         1. Duplicate helper functions across files (should be consolidated)
-        2. Helper functions used across multiple files that should be moved to a higher level
+        
+        NOTE: Only reports ERRORS for duplicate definitions. Does NOT generate warnings
+        about functions used in multiple files - that's not a problem.
         
         Args:
-            knowledge_graph: Story graph structure
             rule_obj: Rule object reference
             test_files: List of all test file paths to analyze together
             code_files: Not used by TestScanner
             
         Returns:
-            List of violation dictionaries for cross-file issues
+            List of violation dictionaries for cross-file issues (only duplicates)
         """
         violations = []
         
@@ -394,7 +427,7 @@ class GivenWhenThenHelpersScanner(TestScanner):
                     line_number
                 ))
         
-        # Check 1: Duplicate helper functions across files
+        # Check: Duplicate helper functions across files (ONLY - no usage warnings)
         for func_name, definitions in helper_definitions.items():
             if len(definitions) > 1:
                 # Same helper function defined in multiple files - should be consolidated
@@ -412,42 +445,8 @@ class GivenWhenThenHelpersScanner(TestScanner):
                 ).to_dict()
                 violations.append(violation)
         
-        # Check 2: Helper functions used across multiple files should be at higher level
-        # Reuse existing method to find helper calls
-        helper_usage = {}  # func_name -> set of files that use it
-        
-        for test_file_path, content, tree in parsed_files:
-            # Reuse existing method to get helper calls
-            helper_calls = self._get_helper_calls_in_file(tree, content)
-            
-            for func_name in helper_calls:
-                if func_name not in helper_usage:
-                    helper_usage[func_name] = set()
-                helper_usage[func_name].add(str(test_file_path))
-        
-        # Report violations for helpers used across multiple files but defined in a single file
-        for func_name, usage_files in helper_usage.items():
-            if len(usage_files) > 1 and func_name in helper_definitions:
-                # Helper is used in multiple files
-                definition_files = {f for f, _ in helper_definitions[func_name]}
-                
-                # If defined in only one file but used in multiple, check if it should be moved up
-                if len(definition_files) == 1:
-                    def_file = list(definition_files)[0]
-                    # Helper is used across files but defined in one - should be moved to higher level
-                    violation = Violation(
-                        rule=rule_obj,
-                        violation_message=(
-                            f'Helper function "{func_name}" is used in {len(usage_files)} files '
-                            f'but defined in only one file ({Path(def_file).name}). '
-                            f'Consider moving to a higher-level helper file (sub-epic, epic, or global) '
-                            f'based on reuse scope. Used in: {", ".join([Path(f).name for f in usage_files])}'
-                        ),
-                        location=def_file,
-                        line_number=helper_definitions[func_name][0][1],
-                        severity='warning'
-                    ).to_dict()
-                    violations.append(violation)
+        # DO NOT generate warnings about functions used in multiple files - that's fine
+        # Functions can be used across multiple files without being a problem
         
         return violations
 

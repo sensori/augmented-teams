@@ -96,7 +96,6 @@ class TestAgentInitialization:
 19. **`production_code_single_responsibility.json`** - Each function does ONE thing
 20. **`production_code_explicit_dependencies.json`** - Constructor injection
 21. **`production_code_small_functions.json`** - Functions under 20 lines
-22. **`production_code_api_design.json`** - Auto-init, ask-don't-tell, properties over methods (BDD Rule 11)
 
 ### Utility Rules
 
@@ -121,8 +120,7 @@ These rules incorporate principles mined from:
 6. **Helper Extraction (BDD Rules 8.3 & 4)** → `helper_extraction_and_reuse.json`
 7. **Mock Only Boundaries (BDD Rule 8.2)** → `mock_only_boundaries.json`
 8. **Natural Test Failures (BDD Rule 8.4)** → `call_production_code_directly.json`
-9. **Object API Design (BDD Rule 11)** → `production_code_api_design.json`
-10. **ASCII Only (BDD Rule 10)** → `use_ascii_only.json`
+9. **ASCII Only (BDD Rule 10)** → `use_ascii_only.json`
 
 ## Key Principles
 

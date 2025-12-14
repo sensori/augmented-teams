@@ -9,12 +9,8 @@ class StorySizingScanner(StoryScanner):
     def scan_story_node(self, node: StoryNode, rule_obj: Any) -> List[Dict[str, Any]]:
         violations = []
         
-        if isinstance(node, Epic):
-            violation = self._check_epic_sub_epic_count(node, rule_obj)
-            if violation:
-                violations.append(violation)
-        
-        elif isinstance(node, SubEpic):
+        # Only check sub-epics for story count (not epics)
+        if isinstance(node, SubEpic):
             violation = self._check_sub_epic_story_count(node, rule_obj)
             if violation:
                 violations.append(violation)
@@ -26,44 +22,25 @@ class StorySizingScanner(StoryScanner):
         
         return violations
     
-    def _check_epic_sub_epic_count(self, epic: Epic, rule_obj: Any) -> Optional[Dict[str, Any]]:
-        sub_epics = epic.data.get('sub_epics', [])
-        story_groups = epic.data.get('story_groups', [])
-        total_children = len(sub_epics) + len(story_groups)
-        
-        if total_children == 0:
-            return None
-        
-        count = total_children
-        severity, message = self._get_size_violation(count, 'sub-epics/story groups')
-        
-        if severity:
-            location = epic.map_location()
-            return Violation(
-                rule=rule_obj,
-                violation_message=f'Epic "{epic.name}" has {count} {message}',
-                location=location,
-                severity=severity
-            ).to_dict()
-        
-        return None
-    
     def _check_sub_epic_story_count(self, sub_epic: SubEpic, rule_obj: Any) -> Optional[Dict[str, Any]]:
-        nested_sub_epics = sub_epic.data.get('sub_epics', [])
         story_groups = sub_epic.data.get('story_groups', [])
         
+        # Only check sub-epics that have story groups
+        if not story_groups:
+            return None
+        
+        # Count total stories across all story groups
         total_stories = 0
         for story_group in story_groups:
             stories = story_group.get('stories', [])
             total_stories += len(stories)
         
-        total_children = len(nested_sub_epics) + total_stories
-        
-        if total_children == 0:
+        # Only check if there are actual stories
+        if total_stories == 0:
             return None
         
-        count = total_children
-        severity, message = self._get_size_violation(count, 'nested sub-epics/stories')
+        count = total_stories
+        severity, message = self._get_size_violation(count, 'stories')
         
         if severity:
             location = sub_epic.map_location()
@@ -97,12 +74,12 @@ class StorySizingScanner(StoryScanner):
         return None
     
     def _get_size_violation(self, count: int, item_type: str) -> tuple[Optional[str], str]:
-        if 5 <= count <= 9:
+        if 4 <= count <= 10:
             return None, f'{count} {item_type} (perfect)'
-        elif count == 4 or count == 10:
-            return 'warning', f'{count} {item_type} (should be 5-9)'
+        elif count == 3 or count == 11:
+            return 'warning', f'{count} {item_type} (should be 4-10)'
         elif count <= 2 or count >= 12:
-            return 'error', f'{count} {item_type} (should be 5-9)'
+            return 'error', f'{count} {item_type} (should be 4-10)'
         else:
-            return 'warning', f'{count} {item_type} (should be 5-9)'
+            return 'warning', f'{count} {item_type} (should be 4-10)'
 

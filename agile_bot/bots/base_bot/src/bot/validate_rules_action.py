@@ -727,7 +727,6 @@ class ValidateRulesAction(BaseAction):
                             if is_test_or_code_scanner and (test_files or code_files) and hasattr(scanner_instance, 'scan_cross_file'):
                                 logger.info(f"Running cross-file scan for rule: {rule_file}")
                                 violations_cross_file = scanner_instance.scan_cross_file(
-                                    knowledge_graph,
                                     rule_obj=rule_obj,
                                     test_files=test_files,
                                     code_files=code_files

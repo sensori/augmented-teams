@@ -47,7 +47,6 @@ from agile_bot.bots.base_bot.src.scanners.no_fallbacks_scanner import NoFallback
 from agile_bot.bots.base_bot.src.scanners.consistent_vocabulary_scanner import ConsistentVocabularyScanner
 from agile_bot.bots.base_bot.src.scanners.one_concept_per_test_scanner import OneConceptPerTestScanner
 from agile_bot.bots.base_bot.src.scanners.descriptive_function_names_scanner import DescriptiveFunctionNamesScanner
-from agile_bot.bots.base_bot.src.scanners.inline_helpers_scanner import InlineHelpersScanner
 from agile_bot.bots.base_bot.src.scanners.exception_handling_scanner import ExceptionHandlingScanner
 from agile_bot.bots.base_bot.src.scanners.swallowed_exceptions_scanner import SwallowedExceptionsScanner
 from agile_bot.bots.base_bot.src.scanners.observable_behavior_scanner import ObservableBehaviorScanner
@@ -131,7 +130,6 @@ __all__ = [
     'ConsistentVocabularyScanner',
     'OneConceptPerTestScanner',
     'DescriptiveFunctionNamesScanner',
-    'InlineHelpersScanner',
     'ExceptionHandlingScanner',
     'SwallowedExceptionsScanner',
     'ObservableBehaviorScanner',

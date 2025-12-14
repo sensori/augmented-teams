@@ -1,9 +1,11 @@
 """
-Decide Planning Criteria Tests
+Decide Planning Criteria Action Tests
 
-Tests for all stories in the 'Decide Planning Criteria' sub-epic:
+Tests for all stories in the 'Decide Planning Criteria Action' sub-epic:
 - Track Activity for Planning Action
 - Proceed To Build Knowledge
+- Inject Planning Criteria Into Instructions
+- Save Final Assumptions and Decisions
 """
 import pytest
 from pathlib import Path
@@ -11,15 +13,24 @@ import json
 from agile_bot.bots.base_bot.src.bot.planning_action import PlanningAction
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
-    verify_action_tracks_start,
-    verify_action_tracks_completion,
-    verify_workflow_transition,
-    verify_workflow_saves_completed_action,
     create_planning_guardrails,
     given_bot_name_and_behavior_setup
 )
-
+from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
+    verify_action_tracks_start,
+    verify_action_tracks_completion,
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action
+)
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
+
+# ============================================================================
+# HELPER FUNCTIONS - Sub-Epic Level (Used across multiple test classes)
+# ============================================================================
+
+def when_action_executes_with_parameters(action, parameters: dict):
+    """When: Action executes with parameters."""
+    return action.do_execute(parameters)
 
 # ============================================================================
 # GIVEN/WHEN/THEN HELPER FUNCTIONS
@@ -89,9 +100,6 @@ def when_action_injects_decision_criteria_and_assumptions(action: PlanningAction
     """When step: Action injects decision criteria and assumptions."""
     return action.inject_decision_criteria_and_assumptions()
 
-def when_action_executes_with_parameters(action: PlanningAction, parameters: dict):
-    """When step: Action executes with parameters."""
-    action.do_execute(parameters)
 
 def then_instructions_contain_decision_criteria_and_assumptions(instructions: dict, expected_assumptions: list):
     """Then step: Instructions contain decision criteria and assumptions."""
@@ -124,14 +132,6 @@ def then_planning_data_contains_shape_drill_down(planning_data: dict, expected_d
     """Then: Planning data contains shape drill down."""
     assert planning_data['shape']['decisions_made']['drill_down'] == expected_drill_down
 
-def then_planning_data_contains_discovery_scope(planning_data: dict, expected_scope: str):
-    """Then: Planning data contains discovery scope."""
-    assert planning_data['discovery']['decisions_made']['scope'] == expected_scope
-
-def then_planning_data_contains_shape_drill_down(planning_data: dict, expected_drill_down: str):
-    """Then: Planning data contains shape drill down."""
-    assert planning_data['shape']['decisions_made']['drill_down'] == expected_drill_down
-
 def then_planning_json_contains_behavior_data(planning_file: Path, behavior: str, expected_decisions: dict = None, expected_assumptions: list = None):
     """Then step: planning.json contains behavior data."""
     planning_data = json.loads(planning_file.read_text(encoding='utf-8'))
@@ -152,6 +152,50 @@ def then_planning_json_preserves_existing_behaviors(planning_file: Path, existin
         assert behavior in planning_data, f"Existing {behavior} data should be preserved"
     return planning_data
 
+
+def given_environment_bootstrapped_with_planning_guardrails(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped with planning guardrails."""
+    bootstrap_env(bot_directory, workspace_directory)
+    bot_name, behavior = given_bot_name_and_behavior_setup()
+    assumptions, criteria = given_planning_assumptions_and_criteria()
+    given_planning_guardrails_exist(bot_directory, behavior, assumptions, criteria)
+    action_obj = given_planning_action_is_initialized(bot_directory, bot_name, behavior)
+    return bot_name, behavior, assumptions, action_obj
+
+
+def given_environment_bootstrapped_and_planning_action_initialized(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped and planning action initialized."""
+    bootstrap_env(bot_directory, workspace_directory)
+    bot_name, behavior = given_bot_name_and_behavior_setup()
+    action_obj = given_planning_action_is_initialized(bot_directory, bot_name, behavior)
+    return bot_name, behavior, action_obj
+
+
+def given_environment_action_and_planning_parameters(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment, action and planning parameters."""
+    bootstrap_env(bot_directory, workspace_directory)
+    action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = given_planning_parameters_with_decisions_and_assumptions()
+    return action, parameters
+
+
+def given_environment_with_existing_planning_and_action(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment with existing planning and action."""
+    bootstrap_env(bot_directory, workspace_directory)
+    discovery_decisions, discovery_assumptions = given_discovery_planning_decisions_and_assumptions()
+    planning_file = given_planning_json_exists_with_data(workspace_directory, 'discovery', discovery_decisions, discovery_assumptions)
+    action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = given_planning_parameters_for_shape_behavior()
+    return planning_file, action, parameters
+
+
+def given_environment_action_and_empty_planning_parameters(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment, action and empty planning parameters."""
+    bootstrap_env(bot_directory, workspace_directory)
+    action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = {'other_data': 'some value'}
+    return action, parameters
+
 # ============================================================================
 # STORY: Track Activity for Planning Action
 # ============================================================================
@@ -160,9 +204,15 @@ class TestTrackActivityForPlanningAction:
     """Story: Track Activity for Planning Action - Tests activity tracking for decide_planning_criteria."""
 
     def test_track_activity_when_planning_action_starts(self, bot_directory, workspace_directory):
+        # Given: Bot directory and workspace directory are set up
+        # When: Planning action starts
+        # Then: Activity is tracked (verified by verify_action_tracks_start)
         verify_action_tracks_start(bot_directory, workspace_directory, PlanningAction, 'decide_planning_criteria')
 
     def test_track_activity_when_planning_action_completes(self, bot_directory, workspace_directory):
+        # Given: Bot directory and workspace directory are set up
+        # When: Planning action completes with outputs and duration
+        # Then: Activity is tracked (verified by verify_action_tracks_completion)
         verify_action_tracks_completion(
             bot_directory,
             workspace_directory, 
@@ -181,9 +231,15 @@ class TestProceedToBuildKnowledge:
     """Story: Proceed To Build Knowledge - Tests transition to build_knowledge action."""
 
     def test_seamless_transition_from_planning_to_build_knowledge(self, bot_directory, workspace_directory):
+        # Given: Bot directory and workspace directory are set up
+        # When: Planning action completes
+        # Then: Workflow transitions to build_knowledge (verified by verify_workflow_transition)
         verify_workflow_transition(bot_directory, workspace_directory, 'decide_planning_criteria', 'build_knowledge')
 
     def test_workflow_state_captures_planning_completion(self, bot_directory, workspace_directory):
+        # Given: Bot directory and workspace directory are set up
+        # When: Planning action completes
+        # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'decide_planning_criteria', behavior='discovery')
 
 
@@ -195,12 +251,11 @@ class TestInjectPlanningCriteriaIntoInstructions:
     """Story: Inject Planning Criteria Into Instructions - Tests planning criteria injection."""
 
     def test_action_injects_decision_criteria_and_assumptions(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action Injects Decision Criteria And Assumptions
+        """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name, behavior = given_bot_name_and_behavior_setup()
-        assumptions, criteria = given_planning_assumptions_and_criteria()
-        given_planning_guardrails_exist(bot_directory, behavior, assumptions, criteria)
-        action_obj = given_planning_action_is_initialized(bot_directory, bot_name, behavior)
+        bot_name, behavior, assumptions, action_obj = given_environment_bootstrapped_with_planning_guardrails(bot_directory, workspace_directory)
         
         # When: Action injects decision criteria and assumptions
         instructions = when_action_injects_decision_criteria_and_assumptions(action_obj)
@@ -209,10 +264,11 @@ class TestInjectPlanningCriteriaIntoInstructions:
         then_instructions_contain_decision_criteria_and_assumptions(instructions, assumptions)
 
     def test_action_uses_base_planning_when_guardrails_missing(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action Uses Base Planning When Guardrails Missing
+        """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name, behavior = given_bot_name_and_behavior_setup()
-        action_obj = given_planning_action_is_initialized(bot_directory, bot_name, behavior)
+        bot_name, behavior, action_obj = given_environment_bootstrapped_and_planning_action_initialized(bot_directory, workspace_directory)
         
         # When: Action injects decision criteria and assumptions
         instructions = when_action_injects_decision_criteria_and_assumptions(action_obj)
@@ -238,9 +294,7 @@ class TestStorePlanningData:
         AND: file contains behavior section with decisions_made and assumptions_made
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        parameters = given_planning_parameters_with_decisions_and_assumptions()
+        action, parameters = given_environment_action_and_planning_parameters(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_parameters(action, parameters)
@@ -260,11 +314,7 @@ class TestStorePlanningData:
         AND: existing 'discovery' data is preserved
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        discovery_decisions, discovery_assumptions = given_discovery_planning_decisions_and_assumptions()
-        planning_file = given_planning_json_exists_with_data(workspace_directory, 'discovery', discovery_decisions, discovery_assumptions)
-        action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        parameters = given_planning_parameters_for_shape_behavior()
+        planning_file, action, parameters = given_environment_with_existing_planning_and_action(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_parameters(action, parameters)
@@ -283,11 +333,7 @@ class TestStorePlanningData:
         THEN: planning.json file is not created
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Action initialized
-        action = given_planning_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        # And: Parameters without planning data
-        parameters = {'other_data': 'some value'}
+        action, parameters = given_environment_action_and_empty_planning_parameters(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_parameters(action, parameters)

@@ -8,7 +8,7 @@
         {
           "name": "Generate MCP Tools",
           "sequential_order": 1,
-          "estimated_stories": 4,
+          "estimated_stories": 7,
           "sub_epics": [],
           "story_groups": [
             {
@@ -16,28 +16,215 @@
               "connector": null,
               "stories": [
                 {
-                  "name": "Generate MCP Bot Server",
+                  "name": "Generate Bot Tools",
                   "sequential_order": 1,
                   "connector": "or",
                   "users": [
                     "MCP Server Generator"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator Creates Bot Tool For Test Bot",
+                      "type": "happy_path",
+                      "test_method": "test_generator_creates_bot_tool_for_test_bot",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator processes Bot Config",
+                        "Then Generator creates 1 bot tool instance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Generate Behavior Tools",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator Creates Behavior Tools For Test Bot With 4 Behaviors",
+                      "type": "happy_path",
+                      "test_method": "test_generator_creates_behavior_tools_for_test_bot_with_4_behaviors",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator processes Bot Config",
+                        "Then Generator creates 4 behavior tool instances"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Generate MCP Bot Server",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator Creates MCP Server For Test Bot",
+                      "type": "happy_path",
+                      "test_method": "test_generator_creates_mcp_server_for_test_bot",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And A bot that has been initialized with that config file",
+                        "When MCP Server Generator receives Bot Config",
+                        "Then Generator creates MCP Server instance with unique server name"
+                      ]
+                    },
+                    {
+                      "name": "Generator fails when Bot Config is missing",
+                      "type": "happy_path",
+                      "test_method": "test_generator_fails_when_bot_config_missing",
+                      "background": [],
+                      "steps": [
+                        "Given A bot directory exists",
+                        "And Bot Config does NOT exist",
+                        "When MCP Server Generator attempts to receive Bot Config",
+                        "Then Generator raises FileNotFoundError and does not create MCP Server instance"
+                      ]
+                    },
+                    {
+                      "name": "Generator fails when Bot Config is malformed",
+                      "type": "happy_path",
+                      "test_method": "test_generator_fails_when_bot_config_malformed",
+                      "background": [],
+                      "steps": [
+                        "Given A bot directory exists",
+                        "And Bot Config file exists with invalid JSON syntax",
+                        "When MCP Server Generator attempts to receive Bot Config",
+                        "Then Generator raises JSONDecodeError and does not create MCP Server instance"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Generate Behavior Action Tools",
-                  "sequential_order": 2,
+                  "sequential_order": 4,
                   "connector": "or",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator Creates Tools For Test Bot With 4 Behaviors",
+                      "type": "happy_path",
+                      "test_method": "test_generator_creates_tools_for_test_bot_with_4_behaviors",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Base actions structure exists",
+                        "And Behavior workflow files exist for all behaviors",
+                        "When Generator processes Bot Config",
+                        "Then Generator creates bot tool and 4 behavior tools"
+                      ]
+                    },
+                    {
+                      "name": "Generator loads trigger words from behavior folder",
+                      "type": "happy_path",
+                      "test_method": "test_generator_loads_trigger_words_from_behavior_folder",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behavior has trigger words configured",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator creates behavior tool",
+                        "Then Behavior tool is registered with trigger patterns in description"
+                      ]
+                    },
+                    {
+                      "name": "Generator handles missing trigger words file",
+                      "type": "happy_path",
+                      "test_method": "test_generator_handles_missing_trigger_words",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behavior does not have trigger words configured",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator creates behavior tool",
+                        "Then Behavior tool registered without trigger patterns"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Deploy MCP Bot Server",
-                  "sequential_order": 3,
+                  "sequential_order": 5,
                   "connector": "or",
                   "users": [],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator Deploys Server Successfully",
+                      "type": "happy_path",
+                      "test_method": "test_generator_deploys_server_successfully",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behavior workflow files exist for all behaviors",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator deploys MCP Server",
+                        "Then Server initializes and publishes tool catalog"
+                      ]
+                    },
+                    {
+                      "name": "Server Publishes Tool Catalog With Metadata",
+                      "type": "happy_path",
+                      "test_method": "test_server_publishes_tool_catalog_with_metadata",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behavior has trigger words configured",
+                        "And A bot that has been initialized with that config file",
+                        "When Server publishes catalog",
+                        "Then Catalog entry includes all metadata"
+                      ]
+                    },
+                    {
+                      "name": "Generator Fails When Protocol Handler Not Running",
+                      "type": "error_case",
+                      "test_method": "test_generator_fails_when_protocol_handler_not_running",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And A bot that has been initialized with that config file",
+                        "And MCP Protocol Handler is not running",
+                        "When Generator attempts to deploy",
+                        "Then Raises ConnectionError"
+                      ]
+                    },
+                    {
+                      "name": "Server Handles Initialization Failure",
+                      "type": "error_case",
+                      "test_method": "test_server_handles_initialization_failure",
+                      "background": [],
+                      "steps": [
+                        "Given A bot directory exists",
+                        "And Bot Config does NOT exist",
+                        "When Server thread starts",
+                        "Then Logs error and does not register"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Handle MCP Generator Exceptions",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
                   "story_type": "user"
                 }
               ]
@@ -51,7 +238,32 @@
                   "sequential_order": 1,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Clear Python bytecode cache removes all __pycache__ directories and .pyc files",
+                      "type": "happy_path",
+                      "test_method": "test_clear_python_bytecode_cache",
+                      "background": [],
+                      "steps": [
+                        "Given __pycache__ directories exist with .pyc files",
+                        "When clear_python_cache is called",
+                        "Then All __pycache__ directories are removed",
+                        "And All .pyc files are deleted"
+                      ]
+                    },
+                    {
+                      "name": "Find MCP Server Processes",
+                      "type": "happy_path",
+                      "test_method": "test_find_mcp_server_processes",
+                      "background": [],
+                      "steps": [
+                        "Given MCP server processes may or may not be running",
+                        "When Finding MCP server processes",
+                        "Then Function returns valid processes list (may be empty if no servers running)"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -60,7 +272,7 @@
         {
           "name": "Generate CLI",
           "sequential_order": 2,
-          "estimated_stories": 2,
+          "estimated_stories": 3,
           "sub_epics": [],
           "story_groups": [
             {
@@ -82,6 +294,94 @@
                   "connector": "and",
                   "users": [],
                   "story_type": "user"
+                },
+                {
+                  "name": "Generate Cursor Awareness Files",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Generator creates workspace rules file with trigger patterns",
+                      "type": "happy_path",
+                      "test_method": "test_generator_creates_workspace_rules_file_with_trigger_patterns",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behaviors have trigger words configured",
+                        "And A bot that has been initialized with that config file",
+                        "When Generator runs generate_awareness_files() method",
+                        "Then Generator creates file with bot-specific filename: mcp-test-bot-awareness.mdc",
+                        "And Filename includes bot name with hyphens",
+                        "And Generated rules file includes ACTUAL trigger words from bot",
+                        "And File includes bot name from config"
+                      ]
+                    },
+                    {
+                      "name": "Rules file includes bot goal and behavior descriptions",
+                      "type": "happy_path",
+                      "test_method": "test_rules_file_includes_bot_goal_and_behavior_descriptions",
+                      "background": [],
+                      "steps": [
+                        "Given Bot has instructions.json with goal and behavior descriptions",
+                        "When Generator creates .cursor/rules/mcp-<bot-name>-awareness.mdc file",
+                        "Then File includes bot's goal from instructions.json",
+                        "And Critical rule mentions bot's goal: \"When user is trying to [goal], check MCP tools FIRST\"",
+                        "And Each behavior section includes \"When user is trying to [behavior description]\""
+                      ]
+                    },
+                    {
+                      "name": "Rules file maps trigger patterns to tool naming conventions",
+                      "type": "happy_path",
+                      "test_method": "test_rules_file_maps_trigger_patterns_to_tool_naming_conventions",
+                      "background": [],
+                      "steps": [
+                        "Given A bot configuration file with a working directory and behaviors",
+                        "And Behaviors have trigger words configured",
+                        "And A bot that has been initialized with that config file",
+                        "When File is written to .cursor/rules/mcp-test-bot-awareness.mdc",
+                        "Then Each behavior section includes tool pattern with ACTUAL bot name",
+                        "And Tool patterns appear in behavior sections (not flat list)"
+                      ]
+                    },
+                    {
+                      "name": "Generator handles file write errors gracefully creates directory",
+                      "type": "error_case",
+                      "test_method": "test_generator_handles_file_write_errors_gracefully_creates_directory",
+                      "background": [],
+                      "steps": [
+                        "Given MCP Server Generator attempts to create awareness files",
+                        "When .cursor/rules/ directory does not exist",
+                        "Then Generator creates directory before writing file",
+                        "And File write succeeds with bot-specific filename"
+                      ]
+                    },
+                    {
+                      "name": "Generator handles file write errors with clear error message",
+                      "type": "error_case",
+                      "test_method": "test_generator_handles_file_write_errors_with_clear_error_message",
+                      "background": [],
+                      "steps": [
+                        "Given .cursor/rules/ directory is write-protected",
+                        "When Generator attempts to write file",
+                        "Then Generator raises clear error message indicating permission issue",
+                        "And Error includes bot-specific path attempted"
+                      ]
+                    },
+                    {
+                      "name": "Full awareness generation workflow",
+                      "type": "happy_path",
+                      "test_method": "test_full_awareness_generation_workflow",
+                      "background": [],
+                      "steps": [
+                        "Given MCP Server Generator initialized",
+                        "When generate_awareness_files() called",
+                        "Then Bot-specific rules file is created",
+                        "And Rules file has all required sections"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -111,22 +411,6 @@
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
-                },
-                {
-                  "name": "Stores Activity for Initialize Project Action",
-                  "sequential_order": 2,
-                  "connector": "or",
-                  "users": [],
-                  "story_type": "user"
-                },
-                {
-                  "name": "Initialize Project Location",
-                  "sequential_order": 3,
-                  "connector": "or",
-                  "users": [
-                    "Bot Behavior"
-                  ],
-                  "story_type": "user"
                 }
               ]
             }
@@ -149,7 +433,31 @@
                   "users": [
                     "AI Chat"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Tool Invokes Behavior Action When Called",
+                      "type": "happy_path",
+                      "test_method": "test_tool_invokes_behavior_action_when_called",
+                      "background": [],
+                      "steps": [
+                        "Given Bot has behavior 'shape' with action 'gather_context'",
+                        "When AI Chat invokes tool with parameters",
+                        "Then Tool routes to test_bot.Shape.GatherContext() method"
+                      ]
+                    },
+                    {
+                      "name": "Tool Routes To Correct Behavior Action Method",
+                      "type": "happy_path",
+                      "test_method": "test_tool_routes_to_correct_behavior_action_method",
+                      "background": [],
+                      "steps": [
+                        "Given Bot has multiple behaviors with build_knowledge action",
+                        "When AI Chat invokes 'test_bot_exploration_build_knowledge'",
+                        "Then Tool routes to test_bot.Exploration.BuildKnowledge() not other behaviors"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Load And Merge Behavior Action Instructions",
@@ -158,21 +466,109 @@
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Action Loads And Merges Instructions",
+                      "type": "happy_path",
+                      "test_method": "test_action_loads_and_merges_instructions",
+                      "background": [],
+                      "steps": [
+                        "Given Base and behavior-specific instructions exist",
+                        "When Action method is invoked",
+                        "Then Instructions are loaded from both locations and merged"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Forward To Current Behavior and Current Action",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Bot tool forwards to current behavior and current action",
+                      "type": "happy_path",
+                      "test_method": "test_bot_tool_forwards_to_current_behavior_and_current_action",
+                      "background": [],
+                      "steps": [
+                        "Given workflow state shows current_behavior='discovery', current_action='build_knowledge'",
+                        "When Bot tool receives invocation",
+                        "Then Bot tool forwards to correct behavior and action"
+                      ]
+                    },
+                    {
+                      "name": "Bot tool defaults to first behavior and first action when state missing",
+                      "type": "edge_case",
+                      "test_method": "test_bot_tool_defaults_to_first_behavior_and_first_action_when_state_missing",
+                      "background": [],
+                      "steps": [
+                        "Given workflow state does NOT exist",
+                        "When Bot tool receives invocation",
+                        "Then Bot tool defaults to first behavior and first action"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Forward To Current Action",
                   "sequential_order": 4,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Behavior tool forwards to current action within behavior",
+                      "type": "happy_path",
+                      "test_method": "test_behavior_tool_forwards_to_current_action_within_behavior",
+                      "background": [],
+                      "steps": [
+                        "Given a behavior tool for 'discovery' behavior",
+                        "And workflow state shows current_action='build_knowledge'",
+                        "When Behavior tool receives invocation",
+                        "Then Behavior tool forwards to build_knowledge action"
+                      ]
+                    },
+                    {
+                      "name": "Behavior tool sets workflow to current behavior when state shows different behavior",
+                      "type": "happy_path",
+                      "test_method": "test_behavior_tool_sets_workflow_to_current_behavior_when_state_shows_different_behavior",
+                      "background": [],
+                      "steps": [
+                        "Given a behavior tool for 'exploration' behavior",
+                        "And workflow state shows current_behavior='discovery'",
+                        "When Behavior tool receives invocation",
+                        "Then workflow state updated to current_behavior='exploration'"
+                      ]
+                    },
+                    {
+                      "name": "Behavior tool defaults to first action when state missing",
+                      "type": "edge_case",
+                      "test_method": "test_behavior_tool_defaults_to_first_action_when_state_missing",
+                      "background": [],
+                      "steps": [
+                        "Given a behavior tool for 'shape' behavior",
+                        "And workflow state does NOT exist",
+                        "When Behavior tool receives invocation",
+                        "Then Behavior tool defaults to first action"
+                      ]
+                    },
+                    {
+                      "name": "Action called directly saves workflow state",
+                      "type": "happy_path",
+                      "test_method": "test_action_called_directly_saves_workflow_state",
+                      "background": [],
+                      "steps": [
+                        "Given Bot is initialized with WORKING_AREA set",
+                        "And No workflow state exists yet",
+                        "When Action is called directly (e.g., bot.shape.gather_context())",
+                        "Then workflow_state.json is created with current_behavior and current_action",
+                        "And This ensures state is saved whether action is called via forward or directly"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Save Through MCP",
@@ -230,7 +626,64 @@
                   "sequential_order": 5,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Trigger bot only (no behavior or action specified)",
+                      "type": "happy_path",
+                      "test_method": "test_trigger_bot_only_no_behavior_or_action_specified",
+                      "background": [],
+                      "steps": [
+                        "Given user types message containing trigger words",
+                        "And bot is at specific behavior and action from workflow state",
+                        "When Extension intercepts user message",
+                        "Then Extension identifies target bot from trigger patterns",
+                        "And Extension routes to bot using current behavior and action from state",
+                        "And CLI executes current behavior and action"
+                      ]
+                    },
+                    {
+                      "name": "Trigger bot and behavior (no action specified)",
+                      "type": "happy_path",
+                      "test_method": "test_trigger_bot_and_behavior_no_action_specified",
+                      "background": [],
+                      "steps": [
+                        "Given user types message containing behavior-specific trigger words",
+                        "And behavior is at specific action from workflow state",
+                        "When Extension intercepts user message",
+                        "Then Extension identifies bot and behavior from trigger patterns",
+                        "And Extension routes to behavior using current action from state",
+                        "And CLI executes behavior with current action"
+                      ]
+                    },
+                    {
+                      "name": "Trigger bot, behavior, and action explicitly",
+                      "type": "happy_path",
+                      "test_method": "test_trigger_bot_behavior_and_action_explicitly",
+                      "background": [],
+                      "steps": [
+                        "Given user types message containing action-specific trigger words",
+                        "When Extension intercepts user message",
+                        "Then Extension identifies bot, behavior, and action from trigger patterns",
+                        "And Extension routes directly to specified action",
+                        "And CLI executes specified action"
+                      ]
+                    },
+                    {
+                      "name": "Trigger close current action",
+                      "type": "happy_path",
+                      "test_method": "test_trigger_close_current_action",
+                      "background": [],
+                      "steps": [
+                        "Given user types message containing close trigger words",
+                        "And bot is at specific behavior and action from workflow state",
+                        "When Extension intercepts user message",
+                        "Then Extension identifies close action from trigger patterns",
+                        "And Extension routes to close_current_action",
+                        "And CLI closes current action and advances workflow"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Save Through CLI",
@@ -260,21 +713,192 @@
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Close current action and transition to next",
+                      "type": "happy_path",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close action when already at final action",
+                      "type": "happy_path",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close final action and transition to next behavior",
+                      "type": "happy_path",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close action that requires confirmation but wasn't confirmed",
+                      "type": "happy_path",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close Current Action Marks Complete And Transitions",
+                      "type": "happy_path",
+                      "test_method": "test_close_current_action_marks_complete_and_transitions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Bot Class Has Close Current Action Method",
+                      "type": "happy_path",
+                      "test_method": "test_bot_class_has_close_current_action_method",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close Action At Final Action Stays At Final",
+                      "type": "happy_path",
+                      "test_method": "test_close_action_at_final_action_stays_at_final",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close Final Action Transitions To Next Behavior",
+                      "type": "happy_path",
+                      "test_method": "test_close_final_action_transitions_to_next_behavior",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close Action Saves To Completed Actions List",
+                      "type": "happy_path",
+                      "test_method": "test_close_action_saves_to_completed_actions_list",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Close Handles Action Already Completed Gracefully",
+                      "type": "happy_path",
+                      "test_method": "test_close_handles_action_already_completed_gracefully",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
-                  "name": "Complete Workflow Integration",
+                  "name": "Invoke Behavior Actions In Workflow Order",
                   "sequential_order": 2,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Complete Workflow End To End",
+                      "type": "happy_path",
+                      "test_method": "test_complete_workflow_end_to_end",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
                   "name": "Find Behavior Folder",
                   "sequential_order": 3,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Find behavior folder with number prefix",
+                      "type": "happy_path",
+                      "test_method": "test_finds_behavior_folder_with_number_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists with number prefix (8_tests)",
+                        "When find_behavior_folder is called with behavior name without prefix (tests)",
+                        "Then Returns path to numbered folder (8_tests)"
+                      ]
+                    },
+                    {
+                      "name": "Find behavior folder with number prefix",
+                      "type": "happy_path",
+                      "test_method": "test_finds_behavior_folder_with_number_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists with number prefix (8_tests)",
+                        "When find_behavior_folder is called with behavior name without prefix (tests)",
+                        "Then Returns path to numbered folder (8_tests)"
+                      ]
+                    },
+                    {
+                      "name": "Raises error when behavior folder doesn't exist",
+                      "type": "error_case",
+                      "test_method": "test_raises_error_when_behavior_folder_not_found",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder does not exist",
+                        "When find_behavior_folder is called",
+                        "Then Raises FileNotFoundError with clear message"
+                      ]
+                    },
+                    {
+                      "name": "Handles Prioritization Folder With Prefix",
+                      "type": "edge_case",
+                      "test_method": "test_handles_prioritization_folder_with_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists as 2_prioritization",
+                        "When find_behavior_folder is called with behavior name (prioritization)",
+                        "Then Returns path to 2_prioritization"
+                      ]
+                    },
+                    {
+                      "name": "Handles Scenarios Folder With Prefix",
+                      "type": "edge_case",
+                      "test_method": "test_handles_scenarios_folder_with_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists as 6_scenarios",
+                        "When find_behavior_folder is called with behavior name (scenarios)",
+                        "Then Returns path to 6_scenarios"
+                      ]
+                    },
+                    {
+                      "name": "Handles Examples Folder With Prefix",
+                      "type": "edge_case",
+                      "test_method": "test_handles_examples_folder_with_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists as 7_examples",
+                        "When find_behavior_folder is called with behavior name (examples)",
+                        "Then Returns path to 7_examples"
+                      ]
+                    },
+                    {
+                      "name": "Find shape folder with number prefix",
+                      "type": "happy_path",
+                      "test_method": "test_finds_shape_folder_with_number_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists with number prefix (1_shape)",
+                        "When find_behavior_folder is called with behavior name (shape)",
+                        "Then Returns path to numbered folder (1_shape)"
+                      ]
+                    },
+                    {
+                      "name": "Find exploration folder with number prefix",
+                      "type": "happy_path",
+                      "test_method": "test_finds_exploration_folder_with_number_prefix",
+                      "background": [],
+                      "steps": [
+                        "Given Behavior folder exists with number prefix (5_exploration)",
+                        "When find_behavior_folder is called with behavior name (exploration)",
+                        "Then Returns path to numbered folder (5_exploration)"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -303,14 +927,82 @@
                   "sequential_order": 1,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Track activity when gather_context action starts",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_gather_context_action_starts",
+                      "background": [],
+                      "steps": [
+                        "Given behavior is 'discovery' and action is 'gather_context'",
+                        "When gather_context action starts execution",
+                        "Then Activity logger creates entry with timestamp and action_state"
+                      ]
+                    },
+                    {
+                      "name": "Track activity when gather_context action completes",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_gather_context_action_completes",
+                      "background": [],
+                      "steps": [
+                        "Given gather_context action started",
+                        "When gather_context action finishes execution",
+                        "Then Activity logger creates completion entry with outputs and duration"
+                      ]
+                    },
+                    {
+                      "name": "Track multiple gather_context invocations across behaviors",
+                      "type": "happy_path",
+                      "test_method": "test_track_multiple_gather_context_invocations_across_behaviors",
+                      "background": [],
+                      "steps": [
+                        "Given activity log contains entries for shape and discovery",
+                        "When both entries are present",
+                        "Then activity log distinguishes same action in different behaviors using full path"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "name": "Proceed To Decide Planning",
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Seamless transition from gather_context to decide_planning_criteria",
+                      "type": "happy_path",
+                      "test_method": "test_seamless_transition_from_gather_context_to_decide_planning_criteria",
+                      "background": [],
+                      "steps": [
+                        "Given gather_context action is complete",
+                        "When workflow transitions",
+                        "Then Workflow proceeds to decide_planning_criteria"
+                      ]
+                    },
+                    {
+                      "name": "Workflow state captures gather_context completion",
+                      "type": "happy_path",
+                      "test_method": "test_workflow_state_captures_gather_context_completion",
+                      "background": [],
+                      "steps": [
+                        "Given gather_context action completes"
+                      ]
+                    },
+                    {
+                      "name": "Workflow resumes at decide_planning_criteria after interruption",
+                      "type": "happy_path",
+                      "test_method": "test_workflow_resumes_at_decide_planning_criteria_after_interruption",
+                      "background": [],
+                      "steps": [
+                        "Given gather_context is completed and chat was interrupted",
+                        "When user reopens chat and invokes bot tool",
+                        "Then Workflow auto-forwards to decide_planning_criteria action"
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -339,17 +1031,8 @@
               "connector": null,
               "stories": [
                 {
-                  "name": "Gather Context Action Guardrails",
-                  "sequential_order": 1,
-                  "connector": "and",
-                  "users": [
-                    "Bot Behavior"
-                  ],
-                  "story_type": "user"
-                },
-                {
                   "name": "Saves Answers and Evidence",
-                  "sequential_order": 2,
+                  "sequential_order": 1,
                   "connector": "and",
                   "users": [],
                   "story_type": "user"
@@ -375,21 +1058,123 @@
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Action Injects Decision Criteria And Assumptions",
+                      "type": "happy_path",
+                      "test_method": "test_action_injects_decision_criteria_and_assumptions",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Action Uses Base Planning When Guardrails Missing",
+                      "type": "edge_case",
+                      "test_method": "test_action_uses_base_planning_when_guardrails_missing",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
                   "name": "Track Activity for Planning Action",
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Track Activity When Planning Action Starts",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_planning_action_starts",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Track Activity When Planning Action Completes",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_planning_action_completes",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
                   "name": "Proceed To Build Knowledge",
                   "sequential_order": 3,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Action Injects Knowledge Graph Template",
+                      "type": "happy_path",
+                      "test_method": "test_action_injects_knowledge_graph_template",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Action Raises Error When Template Missing",
+                      "type": "error_case",
+                      "test_method": "test_action_raises_error_when_template_missing",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Action Loads And Merges Instructions",
+                      "type": "happy_path",
+                      "test_method": "test_action_loads_and_merges_instructions",
+                      "background": [],
+                      "steps": [
+                        "Given Base and behavior-specific instructions exist",
+                        "When Action method is invoked",
+                        "Then Instructions are loaded from both locations and merged"
+                      ]
+                    },
+                    {
+                      "name": "Action Uses Base Instructions When Behavior Instructions Missing",
+                      "type": "edge_case",
+                      "test_method": "test_action_uses_base_instructions_when_behavior_instructions_missing",
+                      "background": [],
+                      "steps": [
+                        "Given Base instructions exist but behavior-specific instructions do not",
+                        "When Action method is invoked",
+                        "Then Only base instructions are returned (no behavior_instructions key)"
+                      ]
+                    },
+                    {
+                      "name": "All Template Variables Are Replaced In Instructions",
+                      "type": "happy_path",
+                      "test_method": "test_all_template_variables_are_replaced_in_instructions",
+                      "background": [],
+                      "steps": [
+                        "Given Base instructions with {{rules}}, {{schema}}, {{description}}, {{instructions}} placeholders",
+                        "When Action loads and merges instructions with all injections",
+                        "Then All template variables are replaced with actual content"
+                      ]
+                    },
+                    {
+                      "name": "Behavior Updates Existing Story Graph Json",
+                      "type": "happy_path",
+                      "test_method": "test_behavior_updates_existing_story_graph_json",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Seamless Transition From Planning To Build Knowledge",
+                      "type": "happy_path",
+                      "test_method": "test_seamless_transition_from_planning_to_build_knowledge",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Workflow State Captures Planning Completion",
+                      "type": "happy_path",
+                      "test_method": "test_workflow_state_captures_planning_completion",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
                   "name": "Save Final Assumptions and Decisions",
@@ -405,7 +1190,7 @@
         {
           "name": "Build Knowledge",
           "sequential_order": 3,
-          "estimated_stories": 5,
+          "estimated_stories": 6,
           "sub_epics": [],
           "story_groups": [
             {
@@ -413,16 +1198,158 @@
               "connector": null,
               "stories": [
                 {
-                  "name": "Inject Knowledge Graph Template and Builder Instructions",
+                  "name": "Load Story Graph Into Memory",
                   "sequential_order": 1,
                   "connector": "or",
                   "users": [
                     "Bot Behavior"
                   ],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Story Map Loads Epics",
+                      "type": "happy_path",
+                      "test_method": "test_story_map_loads_epics",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Epic Has Sub Epics",
+                      "type": "happy_path",
+                      "test_method": "test_epic_has_sub_epics",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Sub Epic Has Story Groups",
+                      "type": "happy_path",
+                      "test_method": "test_sub_epic_has_story_groups",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Group Has Stories",
+                      "type": "happy_path",
+                      "test_method": "test_story_group_has_stories",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Has Properties",
+                      "type": "happy_path",
+                      "test_method": "test_story_has_properties",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Has Scenarios",
+                      "type": "happy_path",
+                      "test_method": "test_story_has_scenarios",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Scenario Has Properties",
+                      "type": "happy_path",
+                      "test_method": "test_scenario_has_properties",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Scenario Default Test Method",
+                      "type": "happy_path",
+                      "test_method": "test_scenario_default_test_method",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Has Scenario Outlines",
+                      "type": "happy_path",
+                      "test_method": "test_story_has_scenario_outlines",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Scenario Outline Has Examples",
+                      "type": "happy_path",
+                      "test_method": "test_scenario_outline_has_examples",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Default Test Class",
+                      "type": "happy_path",
+                      "test_method": "test_story_default_test_class",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Story Map Walk Traverses All Nodes",
+                      "type": "happy_path",
+                      "test_method": "test_story_map_walk_traverses_all_nodes",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Map Location For Epic",
+                      "type": "happy_path",
+                      "test_method": "test_map_location_for_epic",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Map Location For Sub Epic",
+                      "type": "happy_path",
+                      "test_method": "test_map_location_for_sub_epic",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Map Location For Story",
+                      "type": "happy_path",
+                      "test_method": "test_map_location_for_story",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Scenario Map Location",
+                      "type": "happy_path",
+                      "test_method": "test_scenario_map_location",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Scenario Outline Map Location",
+                      "type": "happy_path",
+                      "test_method": "test_scenario_outline_map_location",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "From Bot Loads Story Graph",
+                      "type": "happy_path",
+                      "test_method": "test_from_bot_loads_story_graph",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "From Bot With Path",
+                      "type": "happy_path",
+                      "test_method": "test_from_bot_with_path",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "From Bot Raises When File Not Found",
+                      "type": "happy_path",
+                      "test_method": "test_from_bot_raises_when_file_not_found",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 },
                 {
-                  "name": "Track Activity for Build Knowledge Action",
+                  "name": "Inject Knowledge Graph Template and Builder Instructions",
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [
@@ -431,11 +1358,74 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "Proceed To Render Output",
+                  "name": "Track Activity for Build Knowledge Action",
                   "sequential_order": 3,
                   "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Track Activity When Build Knowledge Action Starts",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_build_knowledge_action_starts",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Track Activity When Build Knowledge Action Completes",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_build_knowledge_action_completes",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Proceed To Render Output",
+                  "sequential_order": 4,
+                  "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Seamless Transition From Build Knowledge To Validate Rules",
+                      "type": "happy_path",
+                      "test_method": "test_seamless_transition_from_build_knowledge_to_validate_rules",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Workflow State Captures Build Knowledge Completion",
+                      "type": "happy_path",
+                      "test_method": "test_workflow_state_captures_build_knowledge_completion",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "All template variables are replaced in final instructions",
+                      "type": "happy_path",
+                      "test_method": "test_all_template_variables_are_replaced_in_instructions",
+                      "background": [],
+                      "steps": [
+                        "Given Base instructions with {{render_configs}} and {{render_instructions}} placeholders",
+                        "When Action loads and merges instructions with all injections",
+                        "Then All template variables are replaced with actual content"
+                      ]
+                    },
+                    {
+                      "name": "Formatted render_configs includes all fields referenced in instructions",
+                      "type": "happy_path",
+                      "test_method": "test_render_configs_format_includes_all_fields",
+                      "background": [],
+                      "steps": [
+                        "Given Render configs with instructions, synchronizer, template, input, output fields",
+                        "When Configs are formatted for injection",
+                        "Then All fields are present in formatted output"
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -485,7 +1475,41 @@
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Track Activity When Render Output Action Starts",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_render_output_action_starts",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Activity Log Creates File If Not Exists",
+                      "type": "happy_path",
+                      "test_method": "test_activity_log_creates_file_if_not_exists",
+                      "background": [],
+                      "steps": [
+                        "Given workspace directory exists but no activity log",
+                        "When Action tracks activity",
+                        "Then Activity log file is created automatically"
+                      ]
+                    },
+                    {
+                      "name": "Track Activity When Render Output Action Completes",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_render_output_action_completes",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Track Multiple Render Output Invocations Across Behaviors",
+                      "type": "happy_path",
+                      "test_method": "test_track_multiple_render_output_invocations_across_behaviors",
+                      "background": [],
+                      "steps": []
+                    }
+                  ]
                 }
               ]
             },
@@ -518,7 +1542,34 @@
                   "sequential_order": 1,
                   "connector": "and",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Seamless Transition From Validate Rules To Render Output",
+                      "type": "happy_path",
+                      "test_method": "test_seamless_transition_from_validate_rules_to_render_output",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Workflow State Captures Render Output Completion",
+                      "type": "happy_path",
+                      "test_method": "test_workflow_state_captures_render_output_completion",
+                      "background": [],
+                      "steps": []
+                    },
+                    {
+                      "name": "Render Output Action Executes Successfully",
+                      "type": "happy_path",
+                      "test_method": "test_render_output_action_executes_successfully",
+                      "background": [],
+                      "steps": [
+                        "Given render_output action is initialized",
+                        "When Action is executed",
+                        "Then Action completes without errors"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -539,7 +1590,53 @@
                   "sequential_order": 1,
                   "connector": "or",
                   "users": [],
-                  "story_type": "user"
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Track activity when validate_rules action starts",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_validate_rules_action_starts",
+                      "background": [],
+                      "steps": [
+                        "Given behavior is 'exploration' and action is 'validate_rules'",
+                        "When validate_rules action starts execution",
+                        "Then Activity logger creates entry with timestamp and action_state"
+                      ]
+                    },
+                    {
+                      "name": "Activity Log Maintains Chronological Order",
+                      "type": "happy_path",
+                      "test_method": "test_activity_log_maintains_chronological_order",
+                      "background": [],
+                      "steps": [
+                        "Given activity log contains 10 previous action entries",
+                        "When validate_rules entry is appended",
+                        "Then New entry appears at end of log in chronological order"
+                      ]
+                    },
+                    {
+                      "name": "Track activity when validate_rules action completes",
+                      "type": "happy_path",
+                      "test_method": "test_track_activity_when_validate_rules_action_completes",
+                      "background": [],
+                      "steps": [
+                        "Given validate_rules action started at timestamp",
+                        "When validate_rules action finishes execution",
+                        "Then Activity logger creates completion entry with outputs and duration"
+                      ]
+                    },
+                    {
+                      "name": "Track multiple validate_rules invocations across behaviors",
+                      "type": "happy_path",
+                      "test_method": "test_track_multiple_validate_rules_invocations_across_behaviors",
+                      "background": [],
+                      "steps": [
+                        "Given activity log contains entries for shape and exploration validate_rules",
+                        "When both entries are present",
+                        "Then activity log distinguishes same action in different behaviors"
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -557,7 +1654,7 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "System Discovers Scanners",
+                  "name": "Discover Scanners",
                   "sequential_order": 2,
                   "connector": "or",
                   "users": [
@@ -566,64 +1663,85 @@
                   "story_type": "user"
                 },
                 {
-                  "name": "System Runs Scanners After Build Knowledge",
+                  "name": "Run Scanners After Build Knowledge",
                   "sequential_order": 3,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Scanner Detects Violations Using Regex Patterns",
+                  "name": "Detect Violations Using Regex Patterns",
                   "sequential_order": 4,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "System Collects Violations from All Scanners",
+                  "name": "Collect Violations from All Scanners",
                   "sequential_order": 5,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "System Loads Scanner Classes",
+                  "name": "Load Scanner Classes",
                   "sequential_order": 6,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "System Runs Scanners After Render Output",
+                  "name": "Run Scanners After Render Output",
                   "sequential_order": 7,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Scanner Detects Violations Using AST Parsing",
+                  "name": "Detect Violations Using AST Parsing",
                   "sequential_order": 8,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "System Reports Violations with Location Context",
+                  "name": "Report Violations with Location Context",
                   "sequential_order": 9,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "System Runs Scanners Before AI Validation",
+                  "name": "Reports Violations",
                   "sequential_order": 10,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user",
+                  "scenarios": [
+                    {
+                      "name": "Violation report generation in different formats",
+                      "type": "happy_path",
+                      "test_method": "test_violation_report_generation_in_different_formats",
+                      "background": [],
+                      "steps": [
+                        "Given Violations have been detected",
+                        "And Report format is specified",
+                        "When Violation report is generated",
+                        "Then Report structure matches expected format"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Run Scanners Before AI Validation",
+                  "sequential_order": 11,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
                 },
                 {
-                  "name": "Scanner Detects Violations Using File Structure Analysis",
-                  "sequential_order": 11,
+                  "name": "Detect Violations Using File Structure Analysis",
+                  "sequential_order": 12,
                   "connector": "or",
                   "users": [],
                   "story_type": "user"
@@ -655,23 +1773,37 @@
       "priority": 1,
       "stories": [
         {
-          "name": "Generate MCP Bot Server",
+          "name": "Generate Bot Tools",
           "users": [
             "MCP Server Generator"
           ],
           "sequential_order": 1
         },
         {
-          "name": "Generate Behavior Action Tools",
+          "name": "Generate Behavior Tools",
           "users": [
-            "Bot Behavior"
+            "MCP Server Generator"
           ],
           "sequential_order": 2
         },
         {
+          "name": "Generate MCP Bot Server",
+          "users": [
+            "MCP Server Generator"
+          ],
+          "sequential_order": 3
+        },
+        {
+          "name": "Generate Behavior Action Tools",
+          "users": [
+            "Bot Behavior"
+          ],
+          "sequential_order": 4
+        },
+        {
           "name": "Deploy MCP Bot Server",
           "users": [],
-          "sequential_order": 3
+          "sequential_order": 5
         },
         {
           "name": "Inject Validation Rules for Validate Rules Action",
@@ -703,13 +1835,6 @@
       "name": "Workflow",
       "priority": 2,
       "stories": [
-        {
-          "name": "Initialize Project Location",
-          "users": [
-            "Bot Behavior"
-          ],
-          "sequential_order": 1
-        },
         {
           "name": "Invoke Bot Tool",
           "users": [
@@ -755,57 +1880,64 @@
           "sequential_order": 9
         },
         {
-          "name": "Inject Knowledge Graph Template and Builder Instructions",
+          "name": "Load Story Graph Into Memory",
           "users": [
             "Bot Behavior"
           ],
           "sequential_order": 10
         },
         {
-          "name": "Track Activity for Build Knowledge Action",
+          "name": "Inject Knowledge Graph Template and Builder Instructions",
           "users": [
             "Bot Behavior"
           ],
           "sequential_order": 11
         },
         {
+          "name": "Track Activity for Build Knowledge Action",
+          "users": [
+            "Bot Behavior"
+          ],
+          "sequential_order": 12
+        },
+        {
           "name": "Proceed To Render Output",
           "users": [],
-          "sequential_order": 12
+          "sequential_order": 13
         },
         {
           "name": "Proceed To Validate Rules",
           "users": [],
-          "sequential_order": 13
+          "sequential_order": 14
         },
         {
           "name": "Load Render Configurations",
           "users": [
             "Bot Behavior"
           ],
-          "sequential_order": 14
+          "sequential_order": 15
         },
         {
           "name": "Track Activity for Render Output Action",
           "users": [],
-          "sequential_order": 15
+          "sequential_order": 16
         },
         {
           "name": "Track Activity for Validate Rules Action",
           "users": [],
-          "sequential_order": 16
+          "sequential_order": 17
         },
         {
           "name": "Close Current Action",
           "users": [
             "Bot Behavior"
           ],
-          "sequential_order": 17
+          "sequential_order": 18
         },
         {
-          "name": "Complete Workflow Integration",
+          "name": "Invoke Behavior Actions In Workflow Order",
           "users": [],
-          "sequential_order": 18
+          "sequential_order": 19
         }
       ]
     },
@@ -813,13 +1945,6 @@
       "name": "Save Content",
       "priority": 3,
       "stories": [
-        {
-          "name": "Gather Context Action Guardrails",
-          "users": [
-            "Bot Behavior"
-          ],
-          "sequential_order": 1
-        },
         {
           "name": "Saves Answers and Evidence",
           "users": [],
@@ -844,31 +1969,36 @@
           "sequential_order": 2
         },
         {
+          "name": "Generate Cursor Awareness Files",
+          "users": [],
+          "sequential_order": 3
+        },
+        {
           "name": "Invoke Bot CLI",
           "users": [
             "Human"
           ],
-          "sequential_order": 3
+          "sequential_order": 4
         },
         {
           "name": "Invoke Bot Behavior CLI",
           "users": [],
-          "sequential_order": 4
+          "sequential_order": 5
         },
         {
           "name": "Invoke Bot Behavior Action CLI",
           "users": [],
-          "sequential_order": 5
+          "sequential_order": 6
         },
         {
           "name": "Get Help for Command Line Functions",
           "users": [],
-          "sequential_order": 6
+          "sequential_order": 7
         },
         {
           "name": "Detect Trigger Words Through Extension",
           "users": [],
-          "sequential_order": 7
+          "sequential_order": 8
         }
       ]
     },
@@ -887,11 +2017,6 @@
             "Bot Behavior"
           ],
           "sequential_order": 1
-        },
-        {
-          "name": "Stores Activity for Initialize Project Action",
-          "users": [],
-          "sequential_order": 2
         },
         {
           "name": "Save Through MCP",
@@ -950,54 +2075,54 @@
       "priority": 7,
       "stories": [
         {
-          "name": "System Discovers Scanners",
+          "name": "Discover Scanners",
           "users": [
             "Bot Behavior"
           ],
           "sequential_order": 1
         },
         {
-          "name": "System Runs Scanners After Build Knowledge",
+          "name": "Run Scanners After Build Knowledge",
           "users": [],
           "sequential_order": 2
         },
         {
-          "name": "Scanner Detects Violations Using Regex Patterns",
+          "name": "Detect Violations Using Regex Patterns",
           "users": [],
           "sequential_order": 3
         },
         {
-          "name": "System Collects Violations from All Scanners",
+          "name": "Collect Violations from All Scanners",
           "users": [],
           "sequential_order": 4
         },
         {
-          "name": "System Loads Scanner Classes",
+          "name": "Load Scanner Classes",
           "users": [],
           "sequential_order": 5
         },
         {
-          "name": "System Runs Scanners After Render Output",
+          "name": "Run Scanners After Render Output",
           "users": [],
           "sequential_order": 6
         },
         {
-          "name": "Scanner Detects Violations Using AST Parsing",
+          "name": "Detect Violations Using AST Parsing",
           "users": [],
           "sequential_order": 7
         },
         {
-          "name": "System Reports Violations with Location Context",
+          "name": "Report Violations with Location Context",
           "users": [],
           "sequential_order": 8
         },
         {
-          "name": "System Runs Scanners Before AI Validation",
+          "name": "Run Scanners Before AI Validation",
           "users": [],
           "sequential_order": 9
         },
         {
-          "name": "Scanner Detects Violations Using File Structure Analysis",
+          "name": "Detect Violations Using File Structure Analysis",
           "users": [],
           "sequential_order": 10
         }

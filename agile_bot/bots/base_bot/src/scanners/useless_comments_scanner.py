@@ -81,6 +81,10 @@ class UselessCommentsScanner(CodeScanner):
             if not line_stripped.startswith('#'):
                 continue
             
+            # Check if comment is actually useful (explains WHY, not WHAT)
+            if self._is_useful_comment(line_stripped, lines, line_num):
+                continue
+            
             # Check against useless patterns
             for pattern in useless_patterns:
                 if re.search(pattern, line_stripped, re.IGNORECASE):
@@ -95,6 +99,43 @@ class UselessCommentsScanner(CodeScanner):
                     break
         
         return violations
+    
+    def _is_useful_comment(self, comment_line: str, lines: List[str], line_num: int) -> bool:
+        """Check if comment is actually useful (explains WHY, not WHAT).
+        
+        Useful comments explain:
+        - Business rules or domain logic
+        - Non-obvious algorithms
+        - Warnings or gotchas
+        - Legal notices or licensing
+        - TODO/FIXME with context
+        """
+        comment_lower = comment_line.lower()
+        
+        # Check for useful comment patterns
+        useful_patterns = [
+            r'(because|since|due to|as|when|if|unless)',  # Explains reason
+            r'(warning|caution|note|important|critical)',  # Warnings/notes
+            r'(todo|fixme|hack|workaround)',  # TODO/FIXME with context
+            r'(license|copyright|legal)',  # Legal notices
+            r'(algorithm|complex|non-obvious)',  # Complex logic explanation
+            r'(business rule|domain|requirement)',  # Business logic
+        ]
+        
+        for pattern in useful_patterns:
+            if re.search(pattern, comment_lower):
+                return True
+        
+        # Check if comment explains something non-obvious in the following code
+        # (e.g., "Skip test files" before a conditional)
+        if line_num < len(lines):
+            next_line = lines[line_num].strip() if line_num < len(lines) else ""
+            # If comment is followed by non-obvious code (if/for/while with complex condition), it might be useful
+            if re.search(r'\b(if|for|while|with)\s+[^:]+:', next_line):
+                # Comment might be explaining the condition
+                return True
+        
+        return False
     
     def _is_useless_docstring(self, docstring: str, content: str, docstring_start: int) -> bool:
         """Check if docstring is useless (just repeats function/class name)."""

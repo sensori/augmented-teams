@@ -15,11 +15,16 @@ from agile_bot.bots.base_bot.test.test_helpers import (
     create_activity_log_file,
     read_activity_log,
     create_guardrails_files,
-    verify_workflow_transition,
-    verify_workflow_saves_completed_action,
     given_bot_name_and_behavior_setup,
     then_activity_logged_with_action_state,
-    then_completion_entry_logged_with_outputs
+    then_completion_entry_logged_with_outputs,
+    given_environment_bootstrapped_and_activity_log_initialized
+)
+from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
+    verify_workflow_transition,
+    verify_workflow_saves_completed_action,
+    given_environment_bootstrapped_and_action_initialized,
+    then_workflow_current_state_is
 )
 
 def verify_activity_logged(log_file: Path, action_state: str):
@@ -154,6 +159,81 @@ def then_clarification_data_contains_discovery_scope(clarification_data: dict, e
 def then_clarification_data_contains_shape_user_types(clarification_data: dict, expected_user_types: str):
     """Then: Clarification data contains shape user types."""
     assert clarification_data['shape']['key_questions']['user_types'] == expected_user_types
+
+
+
+
+def given_environment_bootstrapped_and_action_initialized_for_discovery(bot_directory: Path):
+    """Given: Environment bootstrapped and action initialized for discovery."""
+    action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'discovery')
+    return action
+
+
+def given_action_outputs_and_duration():
+    """Given: Action outputs and duration."""
+    outputs = given_action_outputs_with_counts()
+    duration = given_action_duration()
+    return outputs, duration
+
+
+def given_environment_bootstrapped_for_workflow_resume(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped for workflow resume."""
+    bootstrap_env(bot_directory, workspace_directory)
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'discovery')
+    completed_actions = given_completed_action_entry_for_behavior(bot_name, behavior, 'gather_context')
+    state_file = given_workflow_state_file_with_completed_action(workspace_directory, bot_name, behavior, 'gather_context', completed_actions)
+    return bot_name, behavior, state_file
+
+
+def then_workflow_current_state_is_decide_planning(workflow):
+    """Then: Workflow current state is decide_planning_criteria."""
+    assert workflow.current_state == 'decide_planning_criteria'
+
+
+def given_environment_bootstrapped_with_guardrails(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped with guardrails."""
+    bootstrap_env(bot_directory, workspace_directory)
+    bot_name, behavior = given_bot_name_and_behavior_setup()
+    questions, evidence = given_questions_and_evidence_for_guardrails()
+    create_guardrails_files(bot_directory, behavior, questions, evidence)
+    return bot_name, behavior, questions, evidence
+
+
+
+
+def given_environment_bootstrapped_with_malformed_guardrails(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped with malformed guardrails."""
+    bootstrap_env(bot_directory, workspace_directory)
+    bot_name, behavior = given_bot_name_and_behavior_setup()
+    given_malformed_guardrails_json_exists(bot_directory, behavior)
+    action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
+    return bot_name, behavior, action_obj
+
+
+def given_environment_action_and_parameters_for_clarification(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment, action and parameters for clarification."""
+    bootstrap_env(bot_directory, workspace_directory)
+    action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = given_clarification_parameters_with_questions_and_evidence()
+    return action, parameters
+
+
+def given_environment_with_existing_clarification_and_action(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment with existing clarification and action."""
+    bootstrap_env(bot_directory, workspace_directory)
+    discovery_key_questions, discovery_evidence = given_discovery_key_questions_and_evidence()
+    clarification_file = given_clarification_json_exists_with_data(workspace_directory, 'discovery', discovery_key_questions, discovery_evidence)
+    action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = given_clarification_parameters_for_shape_behavior()
+    return clarification_file, action, parameters
+
+
+def given_environment_action_and_empty_parameters(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment, action and empty parameters."""
+    bootstrap_env(bot_directory, workspace_directory)
+    action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+    parameters = {'other_data': 'some value'}
+    return action, parameters
 
 def given_gather_context_action_is_initialized(bot_directory: Path, bot_name: str, behavior: str):
     """Given step: GatherContextAction is initialized."""
@@ -312,11 +392,9 @@ class TestTrackActivityForGatherContextAction:
         THEN: Activity logger creates entry with timestamp and action_state
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Activity log initialized
-        log_file = create_activity_log_file(workspace_directory)
+        log_file = given_environment_bootstrapped_and_activity_log_initialized(bot_directory, workspace_directory)
         # And: GatherContextAction is initialized
-        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'discovery')
+        action = given_environment_bootstrapped_and_action_initialized_for_discovery(bot_directory)
         
         # When: Action starts and logs activity
         when_action_tracks_activity_on_start(action)
@@ -332,18 +410,15 @@ class TestTrackActivityForGatherContextAction:
         THEN: Activity logger creates completion entry with outputs and duration
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Activity log with start entry
-        log_file = create_activity_log_file(workspace_directory)
+        log_file = given_environment_bootstrapped_and_activity_log_initialized(bot_directory, workspace_directory)
         # And: GatherContextAction is initialized
-        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'discovery')
+        action = given_environment_bootstrapped_and_action_initialized_for_discovery(bot_directory)
         
         # When: Action completes
         when_action_tracks_activity_on_completion(action)
         
         # Then: Completion entry logged with outputs and duration
-        outputs = given_action_outputs_with_counts()
-        duration = given_action_duration()
+        outputs, duration = given_action_outputs_and_duration()
         then_completion_entry_logged_with_outputs(log_file, outputs, duration)
 
     def test_track_multiple_gather_context_invocations_across_behaviors(self, workspace_directory):
@@ -379,6 +454,9 @@ class TestProceedToDecidePlanning:
         WHEN: workflow transitions
         THEN: Workflow proceeds to decide_planning_criteria
         """
+        # Given: Bot directory and workspace directory are set up
+        # When: Gather context action completes
+        # Then: Workflow transitions to decide_planning_criteria (verified by verify_workflow_transition)
         verify_workflow_transition(bot_directory, workspace_directory, 'gather_context', 'decide_planning_criteria')
 
     def test_workflow_state_captures_gather_context_completion(self, bot_directory, workspace_directory):
@@ -388,6 +466,9 @@ class TestProceedToDecidePlanning:
         WHEN: Workflow saves completed action
         THEN: workflow state updated with timestamp and completed_actions
         """
+        # Given: Bot directory and workspace directory are set up
+        # When: Gather context action completes
+        # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'gather_context')
 
     def test_workflow_resumes_at_decide_planning_criteria_after_interruption(self, bot_directory, workspace_directory):
@@ -398,12 +479,7 @@ class TestProceedToDecidePlanning:
         THEN: Workflow auto-forwards to decide_planning_criteria action
         """
         # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Workflow state with completed gather_context and current_action pointing to it
-        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'discovery')
-        completed_actions = given_completed_action_entry_for_behavior(bot_name, behavior, 'gather_context')
-        state_file = given_workflow_state_file_with_completed_action(workspace_directory, bot_name, behavior, 'gather_context', completed_actions)
+        bot_name, behavior, state_file = given_environment_bootstrapped_for_workflow_resume(bot_directory, workspace_directory)
         
         # When: Workflow loads and determines next action
         workflow = given_workflow_with_states_and_transitions(bot_directory, bot_name, behavior)
@@ -412,7 +488,7 @@ class TestProceedToDecidePlanning:
         # If current_action is completed, workflow should transition to next
         when_workflow_transitions_if_action_completed(workflow, 'gather_context')
         
-        assert workflow.current_state == 'decide_planning_criteria'
+        then_workflow_current_state_is_decide_planning(workflow)
 
 
 # ============================================================================
@@ -424,11 +500,7 @@ class TestInjectGuardrailsAsPartOfClarifyRequirements:
 
     def test_action_injects_questions_and_evidence(self, bot_directory, workspace_directory):
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name, behavior = given_bot_name_and_behavior_setup()
-        questions, evidence = given_questions_and_evidence_for_guardrails()
-        # And: Guardrails files exist
-        create_guardrails_files(bot_directory, behavior, questions, evidence)
+        bot_name, behavior, questions, evidence = given_environment_bootstrapped_with_guardrails(bot_directory, workspace_directory)
         # And: GatherContextAction is initialized
         action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
         
@@ -440,10 +512,7 @@ class TestInjectGuardrailsAsPartOfClarifyRequirements:
 
     def test_action_uses_base_instructions_when_guardrails_missing(self, bot_directory, workspace_directory):
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name, behavior = given_bot_name_and_behavior_setup()
-        # And: GatherContextAction is initialized (no guardrails)
-        action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
+        bot_name, behavior, action_obj = given_environment_bootstrapped_and_action_initialized(bot_directory, workspace_directory)
         
         # When: Action injects questions and evidence
         instructions = when_action_injects_questions_and_evidence(action_obj)
@@ -453,12 +522,7 @@ class TestInjectGuardrailsAsPartOfClarifyRequirements:
 
     def test_action_handles_malformed_guardrails_json(self, bot_directory, workspace_directory):
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name, behavior = given_bot_name_and_behavior_setup()
-        # And: Malformed guardrails JSON exists
-        given_malformed_guardrails_json_exists(bot_directory, behavior)
-        # And: GatherContextAction is initialized
-        action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
+        bot_name, behavior, action_obj = given_environment_bootstrapped_with_malformed_guardrails(bot_directory, workspace_directory)
         
         # When: Action injects questions and evidence
         # Then: JSONDecodeError is raised with expected message
@@ -483,11 +547,7 @@ class TestStoreClarificationData:
         AND: file contains behavior section with key_questions and evidence
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Action initialized
-        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        # And: Parameters with clarification data
-        parameters = given_clarification_parameters_with_questions_and_evidence()
+        action, parameters = given_environment_action_and_parameters_for_clarification(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_clarification_parameters(action, parameters)
@@ -512,14 +572,7 @@ class TestStoreClarificationData:
         AND: existing 'discovery' data is preserved
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Existing clarification.json with discovery data
-        discovery_key_questions, discovery_evidence = given_discovery_key_questions_and_evidence()
-        clarification_file = given_clarification_json_exists_with_data(workspace_directory, 'discovery', discovery_key_questions, discovery_evidence)
-        # And: Action initialized for shape behavior
-        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        # And: Parameters with shape clarification data
-        parameters = given_clarification_parameters_for_shape_behavior()
+        clarification_file, action, parameters = given_environment_with_existing_clarification_and_action(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_clarification_parameters(action, parameters)
@@ -538,11 +591,7 @@ class TestStoreClarificationData:
         THEN: clarification.json file is not created
         """
         # Given: Environment is bootstrapped
-        bootstrap_env(bot_directory, workspace_directory)
-        # And: Action initialized
-        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
-        # And: Parameters without clarification data
-        parameters = {'other_data': 'some value'}
+        action, parameters = given_environment_action_and_empty_parameters(bot_directory, workspace_directory)
         
         # When: Action executes with parameters
         when_action_executes_with_clarification_parameters(action, parameters)

@@ -1,11 +1,13 @@
 """
-Invoke Bot CLI Tests
+Invoke CLI Tests
 
-Tests for CLI increment stories:
+Tests for all stories in the 'Invoke CLI' sub-epic:
 - Invoke Bot CLI
 - Invoke Bot Behavior CLI  
 - Invoke Bot Behavior Action CLI
+- Get Help for Command Line Functions
 - Detect Trigger Words Through Extension
+- Save Through CLI
 
 Tests use BaseBotCli pattern from cli_invocation_pattern.md.
 CLI routes to bot, bot executes. Tests verify CLI routing and bot execution.
@@ -18,8 +20,14 @@ from conftest import (
     create_workflow_state_file,
     create_base_actions_structure
 )
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_behavior_action_instructions, create_base_action_instructions
-from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+from agile_bot.bots.base_bot.test.test_helpers import (
+    bootstrap_env, create_behavior_action_instructions,
+    then_route_matches_expected, then_cli_result_matches_expected
+)
+from agile_bot.bots.base_bot.test.test_helpers import (
+    create_base_action_instructions
+)
+from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
 
 # ============================================================================
 # HELPER CLASSES
@@ -38,35 +46,38 @@ class TriggerTestSetup:
     
     def setup_bot(self):
         """Set up bot with all behaviors and actions."""
-        # workspace_root is bot_directory's parent.parent.parent (tmp_path)
         workspace_root = self.bot_directory.parent.parent.parent
-        self.bot_config = setup_bot_for_testing(
-            workspace_root, self.bot_name, self.behaviors
-        )
-        # Ensure behavior folders exist with behavior.json files
+        self.bot_config = setup_bot_for_testing(workspace_root, self.bot_name, self.behaviors)
+        self._setup_behavior_folders_and_knowledge_graphs(workspace_root)
+        self._create_story_graph_file()
+        return self
+    
+    def _setup_behavior_folders_and_knowledge_graphs(self, workspace_root: Path):
+        """Set up behavior folders with behavior.json files and knowledge graph configs."""
         behaviors_dir = workspace_root / 'agile_bot' / 'bots' / self.bot_name / 'behaviors'
         bot_dir = workspace_root / 'agile_bot' / 'bots' / self.bot_name
         for behavior in self.behaviors:
             behavior_dir = behaviors_dir / behavior
             behavior_dir.mkdir(parents=True, exist_ok=True)
-            # Create behavior.json file (required after refactor)
             create_actions_workflow_json(bot_dir, behavior)
-            # Create knowledge graph folder for build_knowledge action
-            kg_dir = behavior_dir / 'content' / 'knowledge_graph'
-            kg_dir.mkdir(parents=True, exist_ok=True)
-            # Create a dummy config file with template field pointing to a template file
-            template_filename = 'test_template.json'
-            kg_config = {'template': template_filename}
-            (kg_dir / 'build_story_graph_outline.json').write_text(
-                json.dumps(kg_config), encoding='utf-8'
-            )
-            # Create the actual template file (JSON format)
-            template_content = {'instructions': ['Test knowledge graph template']}
-            (kg_dir / template_filename).write_text(
-                json.dumps(template_content), encoding='utf-8'
-            )
-        
-        # Create story graph file in workspace (required for validate_rules action)
+            self._create_knowledge_graph_config(behavior_dir)
+    
+    def _create_knowledge_graph_config(self, behavior_dir: Path):
+        """Create knowledge graph folder and config files for a behavior."""
+        kg_dir = behavior_dir / 'content' / 'knowledge_graph'
+        kg_dir.mkdir(parents=True, exist_ok=True)
+        template_filename = 'test_template.json'
+        kg_config = {'template': template_filename}
+        (kg_dir / 'build_story_graph_outline.json').write_text(
+            json.dumps(kg_config), encoding='utf-8'
+        )
+        template_content = {'instructions': ['Test knowledge graph template']}
+        (kg_dir / template_filename).write_text(
+            json.dumps(template_content), encoding='utf-8'
+        )
+    
+    def _create_story_graph_file(self):
+        """Create story graph file in workspace for validate_rules action."""
         stories_dir = self.workspace_directory / 'docs' / 'stories'
         stories_dir.mkdir(parents=True, exist_ok=True)
         story_graph_file = stories_dir / 'story-graph.json'
@@ -74,8 +85,6 @@ class TriggerTestSetup:
             'epics': [],
             'solution': {'name': 'Test Solution'}
         }), encoding='utf-8')
-        
-        return self
     
     def add_bot_triggers(self, patterns: list):
         """Add bot-level trigger words."""
@@ -87,8 +96,7 @@ class TriggerTestSetup:
     def add_behavior_triggers(self, behavior_patterns: dict):
         """Add behavior-level trigger words.
         
-        Args:
-            behavior_patterns: Dict mapping behavior -> trigger patterns list
+        
         """
         # workspace_root is bot_directory's parent.parent.parent (tmp_path)
         workspace_root = self.bot_directory.parent.parent.parent
@@ -106,8 +114,7 @@ class TriggerTestSetup:
     def add_all_action_triggers(self, template: str):
         """Add action triggers for all behavior/action combinations using template.
         
-        Args:
-            template: Template string with {behavior} and {action} placeholders
+        
         """
         for behavior in self.behaviors:
             for action in self.actions:
@@ -138,35 +145,23 @@ class TriggerRouterTestHelper:
         self.router = None
         self.cli = None
     
-    def match_and_execute(self, trigger_message: str, current_behavior: str = None, current_action: str = None):
-        """Match trigger and execute via CLI.
-        
-        Creates fresh router and CLI instances for each call to avoid state leakage.
-        
-        Returns:
-            Tuple of (route, cli_result)
-        """
+    def _create_router_and_match(self, trigger_message: str, current_behavior: str = None, current_action: str = None):
+        """Helper: Create router and match trigger."""
         from agile_bot.bots.base_bot.src.cli.trigger_router import TriggerRouter
-        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
-        
-        # Create fresh instances to avoid state leakage between test iterations
-        # TriggerRouter needs workspace_root - use workspace_directory's parent (tmp_path)
         workspace_root = self.workspace_directory.parent
         router = TriggerRouter(workspace_root=workspace_root, bot_name=self.bot_name)
-        route = router.match_trigger(
+        return router.match_trigger(
             message=trigger_message,
             current_behavior=current_behavior,
             current_action=current_action
         )
-        
-        if route is None:
-            return None, None
-        
-        # Bootstrap environment before creating CLI (needs BOT_DIRECTORY)
+    
+    def _create_cli_and_execute(self, route: dict, trigger_message: str):
+        """Helper: Create CLI instance and execute route."""
+        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
         from agile_bot.bots.base_bot.test.conftest import bootstrap_env
-        bootstrap_env(self.bot_directory, self.workspace_directory)
         
-        # Create fresh CLI instance for each execution
+        bootstrap_env(self.bot_directory, self.workspace_directory)
         cli = BaseBotCli(
             bot_name=self.bot_name,
             bot_config_path=self.bot_config
@@ -181,21 +176,29 @@ class TriggerRouterTestHelper:
                 context=trigger_message
             )
         
+        return result
+    
+    def match_and_execute(self, trigger_message: str, current_behavior: str = None, current_action: str = None):
+        """Match trigger and execute via CLI.
+        
+        Creates fresh router and CLI instances for each call to avoid state leakage.
+        
+        
+        """
+        route = self._create_router_and_match(trigger_message, current_behavior, current_action)
+        if route is None:
+            return None, None
+        
+        result = self._create_cli_and_execute(route, trigger_message)
         return route, result
     
     def assert_route(self, route, expected_bot: str, expected_behavior: str, expected_action: str, expected_type: str):
         """Assert route matches expected values."""
-        assert route is not None, "Route should not be None"
-        assert route['bot_name'] == expected_bot
-        assert route['behavior_name'] == expected_behavior
-        assert route['action_name'] == expected_action
-        assert route['match_type'] == expected_type
+        then_route_matches_expected(route, expected_bot, expected_behavior, expected_action, expected_type)
     
     def assert_cli_result(self, result, expected_behavior: str, expected_action: str):
         """Assert CLI result matches expected values."""
-        assert result['status'] == 'success'
-        assert result['behavior'] == expected_behavior
-        assert result['action'] == expected_action
+        then_cli_result_matches_expected(result, expected_behavior, expected_action)
 
 
 # ============================================================================
@@ -204,6 +207,8 @@ class TriggerRouterTestHelper:
 
 # Removed create_behavior_action_instructions - use test_helpers.create_behavior_action_instructions instead
 # Removed create_base_action_instructions - use test_helpers.create_base_action_instructions instead
+# Consolidated helper functions from test_invoke_bot_cli.py
+
 def create_base_action_instructions_duplicate_removed(workspace: Path, action: str) -> Path:
     """Helper: Create base action instructions file with numbered prefix."""
     action_prefixes = {
@@ -225,30 +230,6 @@ def create_base_action_instructions_duplicate_removed(workspace: Path, action: s
     }
     instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
     return instructions_file
-
-def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
-    """Helper: Set up complete bot structure for testing.
-    
-    Args:
-        workspace_root: Root workspace directory (tmp_path)
-        bot_name: Name of the bot
-        behaviors: List of behavior names
-    """
-    # Construct bot directory path
-    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-    
-    # Create bot config
-    bot_config = create_bot_config_file(bot_dir, bot_name, behaviors)
-    
-    # Create base actions structure in bot_directory (no fallback)
-    create_base_actions_structure(bot_dir)
-    
-    # Create base action instructions
-    for action in ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
-                   'build_knowledge', 'validate_rules', 'render_output']:
-        create_base_action_instructions(workspace_root, action)
-    
-    return bot_config
 
 def create_bot_trigger_words(workspace: Path, bot_name: str, patterns: list) -> Path:
     """Helper: Create bot-level trigger words file."""
@@ -292,6 +273,186 @@ def create_action_trigger_words(workspace: Path, bot_name: str, behavior: str, a
     trigger_file.write_text(json.dumps(trigger_data), encoding='utf-8')
     return trigger_file
 
+def when_execute_trigger_for_all_behaviors_and_actions(setup, helper, trigger_message, current_behavior=None, current_action=None):
+    """When: Execute trigger for all behaviors and actions."""
+    for behavior in setup.behaviors:
+        for action in setup.actions:
+            if current_behavior is None:
+                test_behavior = behavior
+            else:
+                test_behavior = current_behavior
+            if current_action is None:
+                test_action = action
+            else:
+                test_action = current_action
+            setup.create_workflow_state(test_behavior, test_action)
+            
+            route, result = helper.match_and_execute(
+                trigger_message,
+                current_behavior=test_behavior,
+                current_action=test_action
+            )
+            
+            yield behavior, action, route, result
+
+def then_verify_route_and_result_for_bot_only(setup, helper, behavior, action, route, result, trigger_message):
+    """Then: Verify route and result for bot-only trigger."""
+    helper.assert_route(route, setup.bot_name, behavior, action, 'bot_only')
+    expected_action = 'gather_context' if action == 'initialize_workspace' else action
+    helper.assert_cli_result(result, behavior, expected_action)
+
+def then_verify_route_and_result_for_bot_and_behavior(setup, helper, behavior, action, route, result, trigger_message):
+    """Then: Verify route and result for bot and behavior trigger."""
+    helper.assert_route(route, setup.bot_name, behavior, action, 'bot_and_behavior')
+    expected_action = 'gather_context' if action == 'initialize_workspace' else action
+    helper.assert_cli_result(result, behavior, expected_action)
+
+def then_verify_route_and_result_for_explicit_action(setup, helper, behavior, action, route, result):
+    """Then: Verify route and result for explicit action trigger."""
+    helper.assert_route(route, setup.bot_name, behavior, action, 'bot_behavior_action')
+    expected_action = 'gather_context' if action == 'initialize_workspace' else action
+    helper.assert_cli_result(result, behavior, expected_action)
+
+def then_verify_close_trigger_route_and_result(setup, route, result):
+    """Then: Verify close trigger route and result."""
+    assert route is not None, f"Failed for {setup.bot_name}"
+    assert route['bot_name'] == setup.bot_name
+    assert route['action_name'] == 'close_current_action'
+    assert route['match_type'] == 'close'
+    assert result['status'] == 'success'
+
+def when_setup_action_triggers_for_all_behaviors(setup, action_trigger_templates: dict):
+    """When: Setup action triggers for all behaviors."""
+    for behavior in setup.behaviors:
+        for action, template in action_trigger_templates.items():
+            trigger = template.format(behavior=behavior)
+            setup.add_action_triggers(behavior, action, [trigger])
+
+def given_trigger_router_helper_and_message(setup, trigger_message: str):
+    """Given step: Create trigger router helper and set trigger message."""
+    helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
+    return helper, trigger_message
+
+def when_test_all_behavior_action_combinations(setup, helper, trigger_message, verify_func, current_behavior=None, current_action=None):
+    """When step: Test all behavior/action combinations."""
+    for behavior in (setup.behaviors if current_behavior is None else [current_behavior]):
+        for action in (setup.actions if current_action is None else [current_action]):
+            setup.create_workflow_state(behavior, action)
+            route, result = helper.match_and_execute(
+                trigger_message,
+                current_behavior=behavior,
+                current_action=action
+            )
+            verify_func(setup, helper, behavior, action, route, result, trigger_message)
+
+def given_standard_behavior_triggers_dict():
+    """Given: Standard behavior triggers dictionary."""
+    return {
+        'shape': 'kick off shaping for a new feature',
+        'prioritization': 'rank the backlog for launch',
+        'arrange': 'arrange the feature map layout',
+        'discovery': 'start discovery for the new product',
+        'exploration': 'begin the exploration phase',
+        'scenarios': 'draft behavior scenarios',
+        'examples': 'prepare usage examples',
+        'write_tests': 'design test coverage'
+    }
+
+def given_bot_setup_with_behavior_triggers(bot_directory: Path, workspace_directory: Path, behavior_triggers: dict):
+    """Given: Bot setup with behavior triggers."""
+    return TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_behavior_triggers(
+        {behavior: [trigger] for behavior, trigger in behavior_triggers.items()}
+    )
+
+def given_action_trigger_templates_dict():
+    """Given: Action trigger templates dictionary."""
+    return {
+        'initialize_workspace': 'set up the workspace area for {behavior}',
+        'gather_context': 'gather context for {behavior}',
+        'decide_planning_criteria': 'decide planning criteria for {behavior}',
+        'build_knowledge': 'build the knowledge base for {behavior}',
+        'render_output': 'render outputs for {behavior}',
+        'validate_rules': 'validate outputs for {behavior}'
+    }
+
+def given_bot_setup_with_action_triggers(bot_directory: Path, workspace_directory: Path, action_trigger_templates: dict):
+    """Given: Bot setup with action triggers."""
+    return TriggerTestSetup(bot_directory, workspace_directory).setup_bot()
+
+def when_cli_created_with_mock_bot(mock_bot):
+    """When: CLI created with mock bot."""
+    from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+    return BaseBotCli(bot=mock_bot)
+
+def given_behavior_triggers_dictionary():
+    """Given step: Create behavior triggers dictionary."""
+    return {
+        'shape': 'kick off shaping for a new feature',
+        'prioritization': 'rank the backlog for launch',
+        'arrange': 'organize the stories',
+        'discovery': 'discover the user flows',
+        'exploration': 'explore the domain',
+        'scenarios': 'write the scenarios',
+        'examples': 'create examples',
+        'write_tests': 'write the tests'
+    }
+
+def when_test_all_behaviors_with_triggers(setup, helper, behavior_triggers: dict, verify_func):
+    """When step: Test all behaviors with their triggers."""
+    for behavior, trigger_message in behavior_triggers.items():
+        for current_action in setup.actions:
+            setup.create_workflow_state(behavior, current_action)
+            route, result = helper.match_and_execute(
+                trigger_message,
+                current_behavior=behavior,
+                current_action=current_action
+            )
+            verify_func(setup, helper, behavior, current_action, route, result, trigger_message)
+
+def given_action_trigger_templates_dictionary():
+    """Given step: Create action trigger templates dictionary."""
+    return {
+        'initialize_workspace': 'set up the workspace area for {behavior}',
+        'gather_context': 'gather context for {behavior}',
+        'decide_planning_criteria': 'decide planning criteria for {behavior}',
+        'build_knowledge': 'build knowledge for {behavior}',
+        'validate_rules': 'validate rules for {behavior}',
+        'render_output': 'render output for {behavior}'
+    }
+
+def when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_templates: dict, verify_func):
+    """When step: Test all behaviors with action trigger templates."""
+    for behavior in setup.behaviors:
+        for action, template in action_trigger_templates.items():
+            trigger_message = template.format(behavior=behavior)
+            route, result = helper.match_and_execute(
+                trigger_message,
+                current_behavior=None,  # Not needed for explicit triggers
+                current_action=None
+            )
+            verify_func(setup, helper, behavior, action, route, result)
+
+def _create_base_action_instructions(workspace_root: Path):
+    """Helper: Create base action instructions."""
+    actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
+               'build_knowledge', 'validate_rules', 'render_output']
+    for action in actions:
+        create_base_action_instructions(workspace_root, action)
+
+def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
+    """Helper: Set up complete bot structure for testing.
+    
+    
+    """
+    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+    bot_config = create_bot_config_file(bot_dir, bot_name, behaviors)
+    create_base_actions_structure(bot_dir)
+    _create_base_action_instructions(workspace_root)
+    return bot_config
+
+# Removed then_route_matches_expected and then_cli_result_matches_expected - imported from test_helpers
+# Removed duplicate helper functions - imported from test_invoke_bot_cli.py above
+
 # ============================================================================
 # FIXTURES
 # ============================================================================
@@ -326,26 +487,11 @@ class TestDetectTriggerWordsThroughExtension:
             'ready to work on stories'
         ])
         
-        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
-        trigger_message = 'lets work on stories'
+        # Given: Trigger router helper and message
+        helper, trigger_message = given_trigger_router_helper_and_message(setup, 'lets work on stories')
         
-        # Act & Assert: Test all behavior/action combinations
-        for current_behavior in setup.behaviors:
-            for current_action in setup.actions:
-                setup.create_workflow_state(current_behavior, current_action)
-                
-                route, result = helper.match_and_execute(
-                    trigger_message,
-                    current_behavior=current_behavior,
-                    current_action=current_action
-                )
-                
-                # Verify route is correct
-                helper.assert_route(route, setup.bot_name, current_behavior, current_action, 'bot_only')
-                
-                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
-                expected_action = 'gather_context' if current_action == 'initialize_workspace' else current_action
-                helper.assert_cli_result(result, current_behavior, expected_action)
+        # When: Test all behavior/action combinations
+        when_test_all_behavior_action_combinations(setup, helper, trigger_message, then_verify_route_and_result_for_bot_only)
 
     def test_trigger_bot_and_behavior_no_action_specified(self, bot_directory, workspace_directory):
         """
@@ -358,40 +504,14 @@ class TestDetectTriggerWordsThroughExtension:
         AND: CLI executes behavior with current action
         """
         # Arrange: Set up bot with behavior-level triggers
-        behavior_triggers = {
-            'shape': 'kick off shaping for a new feature',
-            'prioritization': 'rank the backlog for launch',
-            'arrange': 'arrange the feature map layout',
-            'discovery': 'start discovery for the new product',
-            'exploration': 'begin the exploration phase',
-            'scenarios': 'draft behavior scenarios',
-            'examples': 'prepare usage examples',
-            'write_tests': 'design test coverage'
-        }
+        behavior_triggers = given_standard_behavior_triggers_dict()
+        setup = given_bot_setup_with_behavior_triggers(bot_directory, workspace_directory, behavior_triggers)
         
-        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot().add_behavior_triggers(
-            {behavior: [trigger] for behavior, trigger in behavior_triggers.items()}
-        )
+        # Given: Trigger router helper
+        helper, _ = given_trigger_router_helper_and_message(setup, '')
         
-        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
-        
-        # Act & Assert: Test all behavior/action combinations
-        for behavior, trigger_message in behavior_triggers.items():
-            for current_action in setup.actions:
-                setup.create_workflow_state(behavior, current_action)
-                
-                route, result = helper.match_and_execute(
-                    trigger_message,
-                    current_behavior=behavior,
-                    current_action=current_action
-                )
-                
-                # Verify route is correct
-                helper.assert_route(route, setup.bot_name, behavior, current_action, 'bot_and_behavior')
-                
-                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
-                expected_action = 'gather_context' if current_action == 'initialize_workspace' else current_action
-                helper.assert_cli_result(result, behavior, expected_action)
+        # When: Test all behaviors with triggers
+        when_test_all_behaviors_with_triggers(setup, helper, behavior_triggers, then_verify_route_and_result_for_bot_and_behavior)
 
     def test_trigger_bot_behavior_and_action_explicitly(self, bot_directory, workspace_directory):
         """
@@ -403,41 +523,16 @@ class TestDetectTriggerWordsThroughExtension:
         AND: CLI executes specified action
         """
         # Arrange: Set up bot with action-level triggers for all combinations
-        action_trigger_templates = {
-            'initialize_workspace': 'set up the workspace area for {behavior}',
-            'gather_context': 'gather context for {behavior}',
-            'decide_planning_criteria': 'decide planning criteria for {behavior}',
-            'build_knowledge': 'build the knowledge base for {behavior}',
-            'render_output': 'render outputs for {behavior}',
-            'validate_rules': 'validate outputs for {behavior}'
-        }
+        action_trigger_templates = given_action_trigger_templates_dict()
+        setup = given_bot_setup_with_action_triggers(bot_directory, workspace_directory, action_trigger_templates)
         
-        setup = TriggerTestSetup(bot_directory, workspace_directory).setup_bot()
+        when_setup_action_triggers_for_all_behaviors(setup, action_trigger_templates)
         
-        for behavior in setup.behaviors:
-            for action, template in action_trigger_templates.items():
-                trigger = template.format(behavior=behavior)
-                setup.add_action_triggers(behavior, action, [trigger])
+        # Given: Trigger router helper
+        helper, _ = given_trigger_router_helper_and_message(setup, '')
         
-        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
-        
-        # Act & Assert: Test all behavior/action combinations
-        for behavior in setup.behaviors:
-            for action, template in action_trigger_templates.items():
-                trigger_message = template.format(behavior=behavior)
-                
-                route, result = helper.match_and_execute(
-                    trigger_message,
-                    current_behavior=None,  # Not needed for explicit triggers
-                    current_action=None
-                )
-                
-                # Verify route is correct
-                helper.assert_route(route, setup.bot_name, behavior, action, 'bot_behavior_action')
-                
-                # Verify CLI executed - note initialize_workspace auto-advances to gather_context
-                expected_action = 'gather_context' if action == 'initialize_workspace' else action
-                helper.assert_cli_result(result, behavior, expected_action)
+        # When: Test all behaviors with action templates
+        when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_templates, then_verify_route_and_result_for_explicit_action)
     
     def test_trigger_close_current_action(self, bot_directory, workspace_directory):
         """
@@ -456,23 +551,190 @@ class TestDetectTriggerWordsThroughExtension:
             'continue to next action'
         ])
         
-        helper = TriggerRouterTestHelper(setup.bot_directory, setup.workspace_directory, setup.bot_name, setup.bot_config)
-        trigger_message = 'done with this step'
+        # Given: Trigger router helper and message
+        helper, trigger_message = given_trigger_router_helper_and_message(setup, 'done with this step')
         
-        # Act & Assert: Test close for all behavior/action combinations
-        for current_behavior in setup.behaviors:
-            for current_action in setup.actions:
-                setup.create_workflow_state(current_behavior, current_action)
-                
-                route, result = helper.match_and_execute(
-                    trigger_message,
-                    current_behavior=current_behavior,
-                    current_action=current_action
-                )
-                
-                # Verify close trigger
-                assert route is not None, f"Failed for {current_behavior}.{current_action}"
-                assert route['bot_name'] == setup.bot_name
-                assert route['action_name'] == 'close_current_action'
-                assert route['match_type'] == 'close'
-                assert result['status'] == 'success'
+        # When: Test all behavior/action combinations for close trigger
+        def verify_close(setup, helper, behavior, action, route, result, trigger_message):
+            then_verify_close_trigger_route_and_result(setup, route, result)
+        when_test_all_behavior_action_combinations(setup, helper, trigger_message, verify_close)
+
+
+# ============================================================================
+# EXCEPTION HANDLING TESTS
+# ============================================================================
+
+def given_mock_bot_created(tmp_path: Path, bot_name: str = 'test_bot'):
+    """Given: Mock bot created."""
+    from unittest.mock import Mock
+    mock_bot = Mock()
+    mock_bot.name = bot_name
+    mock_bot.bot_directory = tmp_path / bot_name
+    return mock_bot
+
+
+def when_cli_infers_parameter_description_for_unknown_command(cli):
+    """When: CLI infers parameter description for unknown command."""
+    from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
+    return cli._infer_parameter_description(
+        cmd_name='unknown_command_xyz',
+        param_num='1',
+        cmd_content=''
+    )
+
+
+class TestCLIExceptions:
+    """Tests for CLI exception handling - no fallbacks."""
+
+    def test_cli_raises_exception_when_parameter_description_cannot_be_inferred(self, tmp_path):
+        """
+        SCENARIO: CLI raises exception when parameter description cannot be inferred
+        GIVEN: Mock bot is created
+        WHEN: CLI is created with mock bot
+        AND: Inferring parameter description for unknown command
+        THEN: ValueError is raised
+        """
+        # Given: Mock bot is created
+        mock_bot = given_mock_bot_created(tmp_path)
+        
+        # When: CLI is created with mock bot
+        cli = when_cli_created_with_mock_bot(mock_bot)
+        
+        # When: Inferring parameter description for unknown command
+        # Then: ValueError is raised (verified by pytest.raises)
+        with pytest.raises(ValueError, match="Cannot infer parameter description"):
+            when_cli_infers_parameter_description_for_unknown_command(cli)
+
+
+# ============================================================================
+# ROUTER EXCEPTION HANDLING TESTS
+# ============================================================================
+
+def given_router_created(workspace_root: Path):
+    """Given step: Router created with workspace root."""
+    from agile_bot.bots.base_bot.src.state.router import Router
+    return Router(workspace_root=workspace_root)
+
+
+def given_state_file_does_not_exist(workspace_root: Path) -> Path:
+    """Given step: State file does not exist."""
+    state_file = workspace_root / 'workflow_state.json'
+    assert not state_file.exists()
+    return state_file
+
+
+def given_state_file_with_no_completed_actions(workspace_root: Path) -> Path:
+    """Given step: State file with no completed actions."""
+    import json
+    state_file = workspace_root / 'workflow_state.json'
+    state_file.write_text(json.dumps({
+        'current_behavior': 'story_bot.shape',
+        'current_action': 'story_bot.shape.gather_context',
+        'completed_actions': [],
+        'timestamp': '2025-12-04T16:00:00.000000'
+    }), encoding='utf-8')
+    return state_file
+
+
+def given_state_file_with_unknown_action(workspace_root: Path) -> Path:
+    """Given step: State file with unknown action."""
+    import json
+    state_file = workspace_root / 'workflow_state.json'
+    state_file.write_text(json.dumps({
+        'current_behavior': 'story_bot.shape',
+        'current_action': 'story_bot.shape.unknown_action',
+        'completed_actions': [
+            {'action_state': 'story_bot.shape.unknown_action', 'timestamp': '2025-12-04T16:00:00.000000'}
+        ],
+        'timestamp': '2025-12-04T16:00:00.000000'
+    }), encoding='utf-8')
+    return state_file
+
+
+def when_determining_next_action_from_state(router, state_file: Path):
+    """When step: Determining next action from state."""
+    with pytest.raises(Exception) as exc_info:
+        router.determine_next_action_from_state(state_file)
+    return exc_info
+
+
+def then_file_not_found_error_raised(exc_info):
+    """Then step: FileNotFoundError is raised."""
+    assert exc_info.type == FileNotFoundError
+    assert "Workflow state file not found" in str(exc_info.value)
+
+
+def then_value_error_raised_for_no_completed_actions(exc_info):
+    """Then step: ValueError is raised for no completed actions."""
+    assert exc_info.type == ValueError
+    assert "no completed actions" in str(exc_info.value)
+
+
+def then_value_error_raised_for_unknown_action(exc_info):
+    """Then step: ValueError is raised for unknown action."""
+    assert exc_info.type == ValueError
+    assert "Unknown last action" in str(exc_info.value)
+
+
+class TestRouterExceptions:
+    """Tests for Router exception handling - no fallbacks."""
+
+    def test_router_raises_exception_when_state_file_does_not_exist(self, tmp_path):
+        """
+        SCENARIO: Router raises exception when state file does not exist
+        GIVEN: Router created with workspace root
+        AND: State file does not exist
+        WHEN: Determining next action from state
+        THEN: FileNotFoundError is raised
+        """
+        # Given: Router created with workspace root
+        router = given_router_created(tmp_path)
+        
+        # And: State file does not exist
+        state_file = given_state_file_does_not_exist(tmp_path)
+        
+        # When: Determining next action from state
+        exc_info = when_determining_next_action_from_state(router, state_file)
+        
+        # Then: FileNotFoundError is raised
+        then_file_not_found_error_raised(exc_info)
+
+    def test_router_raises_exception_when_no_completed_actions(self, tmp_path):
+        """
+        SCENARIO: Router raises exception when no completed actions
+        GIVEN: Router created with workspace root
+        AND: State file with no completed actions
+        WHEN: Determining next action from state
+        THEN: ValueError is raised
+        """
+        # Given: Router created with workspace root
+        router = given_router_created(tmp_path)
+        
+        # And: State file with no completed actions
+        state_file = given_state_file_with_no_completed_actions(tmp_path)
+        
+        # When: Determining next action from state
+        exc_info = when_determining_next_action_from_state(router, state_file)
+        
+        # Then: ValueError is raised
+        then_value_error_raised_for_no_completed_actions(exc_info)
+
+    def test_router_raises_exception_when_unknown_action(self, tmp_path):
+        """
+        SCENARIO: Router raises exception when unknown action
+        GIVEN: Router created with workspace root
+        AND: State file with unknown action
+        WHEN: Determining next action from state
+        THEN: ValueError is raised
+        """
+        # Given: Router created with workspace root
+        router = given_router_created(tmp_path)
+        
+        # And: State file with unknown action
+        state_file = given_state_file_with_unknown_action(tmp_path)
+        
+        # When: Determining next action from state
+        exc_info = when_determining_next_action_from_state(router, state_file)
+        
+        # Then: ValueError is raised
+        then_value_error_raised_for_unknown_action(exc_info)

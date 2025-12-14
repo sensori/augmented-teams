@@ -101,17 +101,6 @@ with patch.object(Agent, 'validate_config'):  # Internal logic
 ```
 
 ---
-
-#### 5. `production_code_api_design.json`
-**Source:** BDD Rules 11.1-11.4 (Object-Oriented API Design)
-
-**Key Principles Extracted:**
-- **Automatic Initialization (11.1)**: Objects initialize completely in constructor
-- **Ask Don't Tell (11.2)**: Objects manage their own state
-- **Properties Over Methods (11.3)**: Use properties for state access
-- **Simple Direct Verbs (11.4)**: build(), save(), validate() not buildCompleteSystem()
-
-**Examples:**
 ```python
 # ✅ Automatic initialization
 class Agent:
@@ -236,7 +225,6 @@ def test_scenario_2(self):
 | BDD Rule 4 | `helper_extraction_and_reuse.json` | Balance shared/local context |
 | BDD Rule 8.4 | `call_production_code_directly.json` | Natural test failures |
 | BDD Rule 10 | `use_ascii_only.json` | ASCII only (Windows) |
-| BDD Rule 11.1-11.4 | `production_code_api_design.json` | API design principles |
 | BDD Rule 11.7 | `test_observable_behavior.json` | Observable behavior |
 | Clean Code 2.2 | `consistent_vocabulary.json` | One word per concept |
 | Clean Code 2.3 | `production_code_small_functions.json` | Magic numbers to constants |

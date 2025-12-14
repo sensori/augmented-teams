@@ -283,7 +283,9 @@ class VerbNounScanner(StoryScanner):
                 return None
             
             first_word = tags[0][0]
-            first_word_lower = first_word.lower()
+            # Strip punctuation from first word (e.g., "Load+" -> "Load")
+            first_word_clean = ''.join(c for c in first_word if c.isalnum())
+            first_word_lower = first_word_clean.lower()
             first_tag = tags[0][1]
             second_tag = tags[1][1]
             
@@ -294,6 +296,30 @@ class VerbNounScanner(StoryScanner):
             # If WordNet says first word can be a verb, trust it - don't flag
             # This handles cases where NLTK mis-tags capitalized verbs as proper nouns
             if self._can_be_verb(first_word_lower):
+                return None
+            
+            # Check common verb abbreviations and short forms that WordNet might not recognize
+            common_verb_abbreviations = {
+                'init': True,  # Initialize
+                'load': True,  # Load
+                'save': True,  # Save
+                'run': True,   # Run
+                'get': True,   # Get
+                'set': True,   # Set
+                'add': True,   # Add
+                'del': True,   # Delete
+                'rm': True,    # Remove
+                'mv': True,    # Move
+                'cp': True,    # Copy
+                'mk': True,    # Make
+                'rmv': True,   # Remove
+                'upd': True,   # Update
+                'gen': True,   # Generate
+                'inv': True,   # Invoke
+                'exec': True,  # Execute
+                'proc': True,  # Process
+            }
+            if first_word_lower in common_verb_abbreviations:
                 return None
             
             # Flag if first word is NOUN/PROPN and second is VERB (noun-verb pattern)
@@ -346,8 +372,91 @@ class VerbNounScanner(StoryScanner):
             # If NLTK didn't find a verb, check if first word can be a verb using WordNet
             # (NLTK often tags capitalized verbs as proper nouns NNP)
             if not has_verb and tokens:
-                first_word_lower = tokens[0].lower()
+                # Strip punctuation from first word (e.g., "Load+" -> "Load")
+                first_word_clean = ''.join(c for c in tokens[0] if c.isalnum())
+                first_word_lower = first_word_clean.lower()
                 if self._can_be_verb(first_word_lower):
+                    has_verb = True
+                
+                # Check common verb abbreviations and short forms that WordNet might not recognize
+                if not has_verb:
+                    common_verb_abbreviations = {
+                        'init': True,  # Initialize
+                        'load': True,  # Load
+                        'save': True,  # Save
+                        'run': True,   # Run
+                        'get': True,   # Get
+                        'set': True,   # Set
+                        'add': True,   # Add
+                        'del': True,   # Delete
+                        'rm': True,    # Remove
+                        'mv': True,    # Move
+                        'cp': True,    # Copy
+                        'mk': True,    # Make
+                        'rmv': True,   # Remove
+                        'upd': True,   # Update
+                        'del': True,   # Delete
+                        'gen': True,   # Generate
+                        'inv': True,   # Invoke
+                        'exec': True,  # Execute
+                        'proc': True,  # Process
+                    }
+                    if first_word_lower in common_verb_abbreviations:
+                        has_verb = True
+            
+            # If still no verb found, check if first word looks like a verb
+            # (handles cases where NLTK tags verbs as nouns due to capitalization)
+            if not has_verb and tokens:
+                # Strip punctuation from first word (e.g., "Load+" -> "Load")
+                first_word_clean = ''.join(c for c in tokens[0] if c.isalnum())
+                first_word_lower = first_word_clean.lower()
+                
+                # Check if it's a common action verb that might be mis-tagged
+                # These are verbs that are commonly used in imperative/infinitive form
+                common_action_verbs = {
+                    'load', 'save', 'run', 'get', 'set', 'add', 'remove', 'delete',
+                    'move', 'copy', 'make', 'create', 'update', 'generate', 'invoke',
+                    'execute', 'process', 'init', 'initialize', 'build', 'render',
+                    'validate', 'check', 'verify', 'test', 'deploy', 'install',
+                    'configure', 'setup', 'start', 'stop', 'restart', 'close',
+                    'open', 'read', 'write', 'edit', 'modify', 'change', 'replace',
+                    'insert', 'append', 'prepend', 'merge', 'split', 'join', 'combine',
+                    'separate', 'filter', 'sort', 'search', 'find', 'locate', 'discover',
+                    'detect', 'identify', 'recognize', 'parse', 'analyze', 'evaluate',
+                    'assess', 'measure', 'calculate', 'compute', 'transform', 'convert',
+                    'translate', 'map', 'route', 'forward', 'redirect', 'send', 'receive',
+                    'transmit', 'deliver', 'dispatch', 'submit', 'publish', 'broadcast',
+                    'notify', 'alert', 'warn', 'inform', 'report', 'log', 'record',
+                    'track', 'monitor', 'observe', 'watch', 'listen', 'collect', 'gather',
+                    'accumulate', 'aggregate', 'summarize', 'extract', 'retrieve', 'fetch',
+                    'pull', 'push', 'sync', 'synchronize', 'refresh', 'reload', 'reload',
+                    'restore', 'recover', 'backup', 'restore', 'export', 'import',
+                    'upload', 'download', 'transfer', 'migrate', 'upgrade', 'downgrade',
+                    'install', 'uninstall', 'deploy', 'rollback', 'revert', 'undo', 'redo',
+                    'cancel', 'abort', 'terminate', 'kill', 'destroy', 'remove', 'delete',
+                    'clear', 'reset', 'initialize', 'init', 'setup', 'configure', 'prepare',
+                    'arrange', 'organize', 'structure', 'format', 'style', 'design', 'plan',
+                    'schedule', 'queue', 'prioritize', 'order', 'rank', 'sort', 'group',
+                    'categorize', 'classify', 'tag', 'label', 'mark', 'flag', 'assign',
+                    'allocate', 'distribute', 'share', 'grant', 'revoke', 'permit', 'deny',
+                    'allow', 'block', 'restrict', 'limit', 'constrain', 'enforce', 'apply',
+                    'implement', 'execute', 'perform', 'carry', 'out', 'complete', 'finish',
+                    'end', 'conclude', 'finalize', 'close', 'terminate', 'abandon', 'drop',
+                    'discard', 'ignore', 'skip', 'omit', 'exclude', 'include', 'add', 'append',
+                    'insert', 'prepend', 'attach', 'link', 'connect', 'join', 'merge', 'combine',
+                    'unite', 'unify', 'integrate', 'incorporate', 'embed', 'nest', 'wrap',
+                    'unwrap', 'extract', 'isolate', 'separate', 'divide', 'split', 'partition',
+                    'segment', 'slice', 'chunk', 'batch', 'group', 'cluster', 'aggregate',
+                    'collect', 'gather', 'accumulate', 'assemble', 'compile', 'build', 'construct',
+                    'create', 'generate', 'produce', 'manufacture', 'fabricate', 'make', 'form',
+                    'shape', 'mold', 'sculpt', 'carve', 'cut', 'trim', 'prune', 'trim', 'shave',
+                    'polish', 'refine', 'improve', 'enhance', 'optimize', 'tune', 'adjust',
+                    'modify', 'alter', 'change', 'transform', 'convert', 'translate', 'transpose',
+                    'rotate', 'flip', 'reverse', 'invert', 'mirror', 'reflect', 'project',
+                    'cast', 'throw', 'send', 'emit', 'broadcast', 'transmit', 'deliver', 'dispatch',
+                    'forward', 'route', 'redirect', 'reroute', 'reroute', 'reroute', 'reroute',
+                }
+                if first_word_lower in common_action_verbs:
                     has_verb = True
             
             if not has_verb:

@@ -66,9 +66,84 @@ class CodeScanner(Scanner):
         """
         pass
     
+    def _extract_domain_terms(self, knowledge_graph: Dict[str, Any]) -> set:
+        """Extract domain language terms from story graph, epics, and stories.
+        
+        This method copies the exact approach from BusinessReadableTestNamesScanner._extract_domain_language.
+        If a term appears in the story graph, it's part of the domain language and should be accepted.
+        """
+        domain_terms = set()
+        
+        # Add common domain terms that are legitimate in this codebase context
+        # These are domain concepts, not technical jargon
+        common_domain_terms = {
+            'json', 'data', 'param', 'params', 'parameter', 'parameters',
+            'var', 'vars', 'variable', 'variables',
+            'method', 'methods', 'class', 'classes', 'call', 'calls',
+            'config', 'configuration', 'configurations',
+            'agent', 'bot', 'workflow', 'story', 'epic', 'scenario', 'action',
+            'behavior', 'rule', 'rules', 'validation', 'validate', 'scanner',
+            'file', 'files', 'directory', 'directories', 'path', 'paths',
+            'state', 'states', 'tool', 'tools', 'server', 'catalog', 'metadata'
+        }
+        domain_terms.update(common_domain_terms)
+        
+        if not knowledge_graph:
+            return domain_terms
+        
+        # Extract from epics
+        epics = knowledge_graph.get('epics', [])
+        for epic in epics:
+            if isinstance(epic, dict):
+                # Epic name
+                epic_name = epic.get('name', '')
+                if epic_name:
+                    domain_terms.update(self._extract_words_from_text(epic_name))
+                
+                # Sub-epics
+                sub_epics = epic.get('sub_epics', [])
+                for sub_epic in sub_epics:
+                    if isinstance(sub_epic, dict):
+                        sub_epic_name = sub_epic.get('name', '')
+                        if sub_epic_name:
+                            domain_terms.update(self._extract_words_from_text(sub_epic_name))
+                        
+                        # Stories
+                        story_groups = sub_epic.get('story_groups', [])
+                        for story_group in story_groups:
+                            if isinstance(story_group, dict):
+                                stories = story_group.get('stories', [])
+                                for story in stories:
+                                    if isinstance(story, dict):
+                                        story_name = story.get('name', '')
+                                        if story_name:
+                                            domain_terms.update(self._extract_words_from_text(story_name))
+                                        
+                                        # Acceptance criteria
+                                        acceptance_criteria = story.get('acceptance_criteria', [])
+                                        for ac in acceptance_criteria:
+                                            if isinstance(ac, dict):
+                                                ac_text = ac.get('criterion', '')
+                                                if ac_text:
+                                                    domain_terms.update(self._extract_words_from_text(ac_text))
+        
+        return domain_terms
+    
+    def _extract_words_from_text(self, text: str) -> set:
+        """Extract individual words from text, converting to lowercase.
+        
+        This method copies the exact approach from BusinessReadableTestNamesScanner._extract_words_from_text.
+        """
+        if not text:
+            return set()
+        
+        import re
+        # Split on spaces, underscores, hyphens, and other separators
+        words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+        return set(words)
+    
     def scan_cross_file(
         self,
-        knowledge_graph: Dict[str, Any],
         rule_obj: Any = None,
         test_files: Optional[List[Path]] = None,
         code_files: Optional[List[Path]] = None
@@ -80,7 +155,6 @@ class CodeScanner(Scanner):
         architectural violations).
         
         Args:
-            knowledge_graph: Story graph structure
             rule_obj: Rule object reference
             test_files: List of test file paths to analyze together
             code_files: List of code file paths to analyze together

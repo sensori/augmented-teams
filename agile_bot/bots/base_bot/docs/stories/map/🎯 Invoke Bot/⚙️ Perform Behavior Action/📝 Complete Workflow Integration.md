@@ -1,4 +1,4 @@
-# 📝 Complete Workflow Integration
+# 📝 Invoke Behavior Actions In Workflow Order
 
 **Navigation:** [📋 Story Map](../../../story-map-outline.drawio) | [⚙️ Feature Overview](../../../../README.md)
 
@@ -10,7 +10,7 @@
 
 ## Story Description
 
-Complete Workflow Integration functionality for the mob minion system.
+Invoke Behavior Actions In Workflow Order functionality for the mob minion system.
 
 ## Acceptance Criteria
 

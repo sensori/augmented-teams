@@ -34,6 +34,13 @@ def workspace_directory(tmp_path):
     workspace_dir.mkdir(parents=True)
     return workspace_dir
 
+@pytest.fixture
+def workspace_root(tmp_path):
+    """Fixture: Temporary workspace directory."""
+    workspace = tmp_path / 'workspace'
+    workspace.mkdir()
+    return workspace
+
 @pytest.fixture(autouse=True)
 def clean_env():
     """Fixture: Clean environment variables before and after each test."""
@@ -97,17 +104,7 @@ def create_bot_config_file(
 ) -> Path:
     """Factory: Create bot config file in bot directory.
     
-    Args:
-        bot_dir: Bot directory path. If workspace_root is provided and bot_dir is relative,
-                 bot_dir will be resolved relative to workspace_root/agile_bot/bots/bot_name.
-                 Otherwise, bot_dir should be absolute or relative to current working directory.
-        bot_name: Bot name
-        behaviors: List of behavior names
-        workspace_root: Optional workspace root. If provided and bot_dir doesn't contain 'agile_bot',
-                       constructs path as workspace_root/agile_bot/bots/bot_name/config
     
-    Returns:
-        Path to created bot_config.json file
     """
     # Handle workspace_root pattern: workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
     if workspace_root and 'agile_bot' not in str(bot_dir):
@@ -133,20 +130,7 @@ def create_workflow_state_file(
 ) -> Path:
     """Factory: Create workflow_state.json in workspace directory.
     
-    Args:
-        workspace_dir: Workspace directory where workflow_state.json will be created
-        bot_name: Bot name
-        behavior: Behavior name
-        current_action: Current action name
-        completed_actions: Optional list of completed actions
-        action_format: Format for current_action field:
-            - "full": bot_name.behavior.action (default)
-            - "short": action only (no prefix)
-            - "behavior_action": behavior.action (no bot_name prefix)
-        timestamp: Optional timestamp string. If None, uses default timestamp.
     
-    Returns:
-        Path to created workflow_state.json file
     """
     # Format current_action based on action_format
     if action_format == "full":
@@ -209,12 +193,7 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
 def given_bot_name_and_behaviors_setup(bot_name: str = 'story_bot', behaviors: list = None):
     """Given: Bot name and behaviors setup.
     
-    Args:
-        bot_name: Bot name (default: 'story_bot')
-        behaviors: List of behavior names (default: ['shape', 'discovery'])
     
-    Returns:
-        Tuple of (bot_name, behaviors)
     """
     if behaviors is None:
         behaviors = ['shape', 'discovery']
@@ -223,12 +202,7 @@ def given_bot_name_and_behaviors_setup(bot_name: str = 'story_bot', behaviors: l
 def given_bot_name_and_behavior_setup(bot_name: str = 'story_bot', behavior: str = 'shape'):
     """Given: Bot name and behavior setup.
     
-    Args:
-        bot_name: Bot name (default: 'story_bot')
-        behavior: Behavior name (default: 'shape')
     
-    Returns:
-        Tuple of (bot_name, behavior)
     """
     return bot_name, behavior
 
@@ -243,18 +217,7 @@ def create_test_workflow(
 ) -> Tuple:
     """Factory: Create workflow with specified state for testing.
     
-    Args:
-        bot_dir: Bot directory path
-        workspace_dir: Workspace directory path
-        bot_name: Bot name
-        behavior: Behavior name
-        current_action: Current action name
-        completed_actions: Optional list of completed actions
-        return_workflow_file: If True, returns (Workflow, Path). If False, returns Workflow only.
     
-    Returns:
-        If return_workflow_file is True: Tuple of (Workflow, Path to workflow_state.json)
-        If return_workflow_file is False: Workflow instance
     """
     from agile_bot.bots.base_bot.src.state.workflow import Workflow
     
@@ -291,12 +254,7 @@ def create_test_workflow(
 def create_base_action_instructions(action_name: str, instructions: list = None) -> dict:
     """Factory: Create base action instructions dictionary.
     
-    Args:
-        action_name: Action name
-        instructions: Optional list of instruction strings. If None, uses default.
     
-    Returns:
-        Dictionary with 'instructions' key containing list of instruction strings
     """
     if instructions is None:
         instructions = [f'{action_name} base instructions']

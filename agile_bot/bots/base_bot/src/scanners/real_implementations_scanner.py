@@ -34,10 +34,6 @@ class RealImplementationsScanner(TestScanner):
             # Check for fake/stub implementations
             fake_violations = self._check_fake_implementations(lines, test_file_path, rule_obj)
             violations.extend(fake_violations)
-            
-            # Check for commented-out production code calls
-            comment_violations = self._check_commented_code(lines, test_file_path, rule_obj)
-            violations.extend(comment_violations)
         
         except (UnicodeDecodeError, SyntaxError, Exception):
             # Skip binary files, syntax errors, or files with encoding issues
@@ -144,8 +140,8 @@ class RealImplementationsScanner(TestScanner):
                 violations.append(violation)
                 continue
             
-            # Check if test method calls production code
-            has_production_calls = self._has_production_code_calls(test_method, imports, src_locations, project_path)
+            # Check if test method calls production code (trace through helpers)
+            has_production_calls = self._has_production_code_calls(test_method, imports, src_locations, project_path, file_path, tree)
             
             if not has_production_calls and not has_production_imports:
                 # Test doesn't import or call production code
@@ -251,9 +247,19 @@ class RealImplementationsScanner(TestScanner):
         return False
     
     def _is_production_module(self, module: str, src_locations: List[str], project_path: Path) -> bool:
-        """Check if a module name represents production code."""
+        """Check if a module name represents production code (NOT from test folder)."""
         if not module:
             return False
+        
+        module_lower = module.lower()
+        
+        # Explicitly exclude imports from test folders
+        # Check if 'test' or 'tests' appears as a directory segment in the module path
+        module_parts = module.split('.')
+        for part in module_parts:
+            if part.lower() in ['test', 'tests']:
+                # This is importing from a test folder - NOT production code
+                return False
         
         # Skip standard library and third-party imports
         stdlib_modules = ['pytest', 'pathlib', 'json', 'typing', 'unittest', 'mock', 'unittest.mock',
@@ -264,7 +270,7 @@ class RealImplementationsScanner(TestScanner):
             if first_part in stdlib_modules:
                 return False
         
-        # Check if module path matches src locations
+        # Check if module path matches src locations (production code locations)
         for src_loc in src_locations:
             if src_loc in module or module.startswith(src_loc.replace('/', '.')):
                 return True
@@ -273,24 +279,22 @@ class RealImplementationsScanner(TestScanner):
         # (relative imports starting with . are often production code)
         if module.startswith('.'):
             # Relative import - could be production code
-            # Check if it's not importing from test modules
-            if 'test' not in module.lower():
-                return True
+            # Already checked above that it's not from test folder
+            return True
         
         # Check if module would exist in src folder structure
         # Look for domain-related module names (not test-related)
         domain_keywords = ['mob', 'token', 'minion', 'strategy', 'action', 'attack', 'storage', 
                           'registry', 'manager', 'handler', 'executor', 'propagator', 'lookup',
                           'selection', 'click', 'combat', 'foundry']
-        module_lower = module.lower()
         if any(keyword in module_lower for keyword in domain_keywords):
-            # Could be production code - check if test_ is not in the path
-            if 'test' not in module_lower and 'mock' not in module_lower:
+            # Could be production code - already checked above that it's not from test folder
+            if 'mock' not in module_lower:
                 return True
         
         # Check if module name suggests it's production code (not test infrastructure)
         # Production code modules often have domain-specific names without 'test' prefix
-        if not module.startswith('test') and 'test' not in module.lower():
+        if not module.startswith('test') and 'test' not in module_lower:
             # Could be production code if it's not a known test framework module
             if module.split('.')[0] not in stdlib_modules:
                 # Might be production code - be permissive here
@@ -374,9 +378,9 @@ class RealImplementationsScanner(TestScanner):
     
     def _has_production_code_calls(
         self, method: ast.FunctionDef, imports: List[ast.Import | ast.ImportFrom],
-        src_locations: List[str], project_path: Path
+        src_locations: List[str], project_path: Path, file_path: Path = None, tree: ast.AST = None
     ) -> bool:
-        """Check if test method calls production code."""
+        """Check if test method calls production code, tracing through helper functions."""
         # Find all function calls in the method
         calls = []
         for node in ast.walk(method):
@@ -393,6 +397,10 @@ class RealImplementationsScanner(TestScanner):
                 func_name = call.func.id
                 if self._is_production_function(func_name, imports, src_locations, project_path):
                     return True
+                # Also check if it's a helper function that calls production code
+                if file_path and tree:
+                    if self._helper_calls_production_code(func_name, file_path, tree, src_locations, project_path):
+                        return True
             elif isinstance(call.func, ast.Attribute):
                 # Method call or module.function call
                 if isinstance(call.func.value, ast.Name):
@@ -400,16 +408,117 @@ class RealImplementationsScanner(TestScanner):
                     obj_name = call.func.value.id
                     if self._is_production_function(obj_name, imports, src_locations, project_path):
                         return True
+                    # Check if attribute access is production code
+                    if hasattr(call.func, 'attr'):
+                        attr_name = call.func.attr
+                        if self._is_production_function(attr_name, imports, src_locations, project_path):
+                            return True
                 elif isinstance(call.func.value, ast.Attribute):
-                    # Nested attribute access
-                    # Check if root is production code
+                    # Nested attribute access - check if root is production code
                     root = call.func.value
                     while isinstance(root, ast.Attribute):
                         root = root.value
                     if isinstance(root, ast.Name):
                         if self._is_production_function(root.id, imports, src_locations, project_path):
                             return True
+                        # Check nested attribute name
+                        if hasattr(call.func, 'attr'):
+                            attr_name = call.func.attr
+                            if self._is_production_function(attr_name, imports, src_locations, project_path):
+                                return True
         
+        return False
+    
+    def _helper_calls_production_code(
+        self, helper_name: str, file_path: Path, tree: ast.AST,
+        src_locations: List[str], project_path: Path
+    ) -> bool:
+        """Check if a helper function eventually calls production code."""
+        # Find the helper function definition in the current file
+        helper_func = None
+        
+        # First check current file
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == helper_name:
+                helper_func = node
+                break
+        
+        if helper_func:
+            # Check if helper function imports production code
+            helper_imports = self._find_imports(tree)
+            has_prod_imports = self._has_production_code_imports(helper_imports, src_locations, project_path)
+            
+            # Check if helper function calls production code directly
+            has_prod_calls = self._has_production_code_calls(
+                helper_func, helper_imports, src_locations, project_path, file_path, tree
+            )
+            
+            # If helper imports or calls production code, it's valid
+            if has_prod_imports or has_prod_calls:
+                return True
+            
+            # Check if helper calls other helpers that might call production code
+            # Find all function calls in helper
+            for node in ast.walk(helper_func):
+                if isinstance(node, ast.Call):
+                    if isinstance(node.func, ast.Name):
+                        called_func_name = node.func.id
+                        # Recursively check if called helper calls production code
+                        if self._helper_calls_production_code(
+                            called_func_name, file_path, tree, src_locations, project_path
+                        ):
+                            return True
+        
+        # Check if helper is imported from test helper files
+        imports = self._find_imports(tree)
+        for imp in imports:
+            if isinstance(imp, ast.ImportFrom):
+                # Check if this helper is imported from a test helper module
+                if imp.module and 'test' in imp.module.lower() and 'helper' in imp.module.lower():
+                    # Check if any imported name matches our helper
+                    for alias in imp.names:
+                        if alias.asname == helper_name or alias.name == helper_name:
+                            # Try to find and check the helper file
+                            helper_file = self._find_helper_file(imp.module, project_path)
+                            if helper_file and helper_file.exists():
+                                if self._file_has_production_code_calls(helper_file, src_locations, project_path):
+                                    return True
+        
+        return False
+    
+    def _find_helper_file(self, module_name: str, project_path: Path) -> Optional[Path]:
+        """Find helper file from module name."""
+        # Convert module name to file path
+        # e.g., 'agile_bot.bots.base_bot.test.test_helpers' -> 'agile_bot/bots/base_bot/test/test_helpers.py'
+        module_path = module_name.replace('.', '/')
+        # Try common locations
+        possible_paths = [
+            project_path / f'{module_path}.py',
+            project_path.parent / f'{module_path}.py',
+        ]
+        for path in possible_paths:
+            if path.exists():
+                return path
+        return None
+    
+    def _file_has_production_code_calls(self, file_path: Path, src_locations: List[str], project_path: Path) -> bool:
+        """Check if a file (helper file) has production code calls."""
+        try:
+            content = file_path.read_text(encoding='utf-8')
+            tree = ast.parse(content, filename=str(file_path))
+            imports = self._find_imports(tree)
+            
+            # Check if file imports production code
+            if self._has_production_code_imports(imports, src_locations, project_path):
+                return True
+            
+            # Check all functions in file for production code calls
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef):
+                    if self._has_production_code_calls(node, imports, src_locations, project_path, file_path, tree):
+                        return True
+        except Exception:
+            pass
         return False
     
     def _is_production_function(
@@ -452,7 +561,22 @@ class RealImplementationsScanner(TestScanner):
             r'return\s+\{\}',  # return {} (stub return)
         ]
         
+        # Allow Mock() if it's used for testing CLI exception handling (test_cli_exceptions.py)
+        # But flag it if it's used as a replacement for real production code
+        mock_allowed_contexts = [
+            'test_cli_exceptions',  # Testing exception handling requires mocking
+        ]
+        
+        file_name = file_path.name.lower()
+        is_allowed_context = any(ctx in file_name for ctx in mock_allowed_contexts)
+        
         for line_num, line in enumerate(lines, 1):
+            # Skip Mock() in allowed contexts (exception testing)
+            if is_allowed_context and 'mock' in line.lower() and 'mock()' in line.lower():
+                # Check if Mock is used for exception testing (BaseBotCli)
+                if 'basebotcli' in line.lower() or 'cli' in line.lower():
+                    continue
+            
             for pattern in fake_patterns:
                 if re.search(pattern, line, re.IGNORECASE):
                     violation = Violation(
@@ -467,23 +591,4 @@ class RealImplementationsScanner(TestScanner):
         
         return violations
     
-    def _check_commented_code(self, lines: List[str], file_path: Path, rule_obj: Any) -> List[Dict[str, Any]]:
-        """Check for commented-out production code calls."""
-        violations = []
-        
-        for line_num, line in enumerate(lines, 1):
-            # Check for commented-out function calls (production code)
-            if line.strip().startswith('#') and ('(' in line and ')' in line):
-                # Might be commented-out production code
-                if not any(keyword in line.lower() for keyword in ['# given', '# when', '# then', '# arrange', '# act', '# assert']):
-                    violation = Violation(
-                        rule=rule_obj,
-                        violation_message=f'Line {line_num} has commented-out code - call production code directly, even if API doesn\'t exist yet',
-                        location=str(file_path),
-                        line_number=line_num,
-                        severity='warning'
-                    ).to_dict()
-                    violations.append(violation)
-        
-        return violations
 

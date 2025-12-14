@@ -34,7 +34,7 @@ graph TB
     end
 
     subgraph ScannerSubEpic["Integrate Code Scanners into Validation Workflow"]
-        S1["Register and Load Code Scanners<br/>- System Discovers Scanners<br/>- System Loads Scanner Classes"]
+        S1["Register and Load Code Scanners<br/>- Discover Scanners<br/>- Load Scanner Classes"]
         S2["Execute Code Scanners<br/>- Runs After Build Knowledge<br/>- Runs After Render Output<br/>- Runs Before AI Validation"]
         S3["Detect Violations<br/>- Regex Patterns<br/>- AST Parsing<br/>- File Structure Analysis"]
         S4["Collect and Report Violations<br/>- Collects from All Scanners<br/>- Reports with Location Context"]
@@ -112,20 +112,20 @@ graph TB
 **Stories included:**
 - **Execute Behavior Actions → Validate Knowledge & Content Against Rules → Integrate Code Scanners into Validation Workflow:**
   - **Register and Load Code Scanners:**
-    - System Discovers Scanners from rule.json
-    - System Loads Scanner Classes
+    - Discover Scanners from rule.json
+    - Load Scanner Classes
   
   - **Execute Code Scanners:**
-    - System Runs Scanners After Build Knowledge
-    - System Runs Scanners After Render Output
-    - System Runs Scanners Before AI Validation
+    - Run Scanners After Build Knowledge
+    - Run Scanners After Render Output
+    - Run Scanners Before AI Validation
   
   - **Detect Violations:**
-    - Scanner Detects Violations Using Regex Patterns
-    - Scanner Detects Violations Using AST Parsing
-    - Scanner Detects Violations Using File Structure Analysis
+    - Detect Violations Using Regex Patterns
+    - Detect Violations Using AST Parsing
+    - Detect Violations Using File Structure Analysis
   
   - **Collect and Report Violations:**
-    - System Collects Violations from All Scanners
-    - System Reports Violations with Location Context
+    - Collect Violations from All Scanners
+    - Report Violations with Location Context
 

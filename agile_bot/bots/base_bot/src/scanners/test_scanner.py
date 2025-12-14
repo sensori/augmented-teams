@@ -67,7 +67,6 @@ class TestScanner(Scanner):
     
     def scan_cross_file(
         self,
-        knowledge_graph: Dict[str, Any],
         rule_obj: Any = None,
         test_files: Optional[List[Path]] = None,
         code_files: Optional[List[Path]] = None
@@ -79,7 +78,6 @@ class TestScanner(Scanner):
         placement, inconsistent naming patterns).
         
         Args:
-            knowledge_graph: Story graph structure
             rule_obj: Rule object reference
             test_files: List of all test file paths to analyze together
             code_files: Not used by TestScanner (for CodeScanner)
