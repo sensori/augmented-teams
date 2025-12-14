@@ -26,6 +26,16 @@ from agile_bot.bots.base_bot.test.test_helpers import (
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def when_story_map_from_bot_called_without_story_graph(bot):
+    """When: StoryMap.from_bot called without story graph."""
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        StoryMap.from_bot(bot)
+
+# ============================================================================
 # FIXTURES
 # ============================================================================
 
@@ -109,6 +119,49 @@ def story_map(simple_story_graph):
 
 
 # ============================================================================
+# GIVEN/WHEN/THEN HELPER FUNCTIONS
+# ============================================================================
+
+def given_build_knowledge_outputs():
+    """Given: Build knowledge action outputs."""
+    return {'knowledge_items_count': 12, 'file_path': 'knowledge.json'}
+
+def given_build_knowledge_duration():
+    """Given: Build knowledge action duration."""
+    return 420
+
+def given_base_and_behavior_instructions_setup(bot_directory, workspace_directory, bot_name, behavior, action):
+    """Given: Base and behavior-specific instructions setup."""
+    bootstrap_env(bot_directory, workspace_directory)
+    given_base_instructions_copied_to_bot_directory(bot_directory, action)
+    kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
+    given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
+    given_knowledge_graph_config_and_template_created(kg_dir)
+    return kg_dir
+
+def given_base_instructions_only_setup(bot_directory, workspace_directory, bot_dir, behavior, action):
+    """Given: Base instructions only setup (no behavior-specific instructions)."""
+    bootstrap_env(bot_directory, workspace_directory)
+    given_base_instructions_copied_to_bot_directory(bot_dir, action)
+    kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+    given_knowledge_graph_config_and_template_created(kg_dir)
+    return kg_dir
+
+def given_base_instructions_text_extracted(instructions):
+    """Given: Base instructions text extracted from instructions dict."""
+    return '\n'.join(instructions.get('base_instructions', []))
+
+def when_story_map_created_from_mock_bot(test_instance, bot_directory):
+    """When: Story map created from mock bot."""
+    bot = test_instance._create_mock_bot(bot_directory)
+    return when_story_map_created_from_bot(bot)
+
+def when_mock_bot_created_then_story_map_raises_file_not_found_error(test_instance, bot_directory):
+    """When: Mock bot created, then story map raises file not found error."""
+    bot = test_instance._create_mock_bot(bot_directory)
+    then_story_map_raises_file_not_found_error(bot)
+
+# ============================================================================
 # STORY: Track Activity for Build Knowledge Action
 # ============================================================================
 
@@ -119,14 +172,9 @@ class TestTrackActivityForBuildKnowledgeAction:
         verify_action_tracks_start(bot_directory, workspace_directory, BuildKnowledgeAction, 'build_knowledge')
 
     def test_track_activity_when_build_knowledge_action_completes(self, bot_directory, workspace_directory):
-        verify_action_tracks_completion(
-            bot_directory,
-            workspace_directory,
-            BuildKnowledgeAction,
-            'build_knowledge',
-            outputs={'knowledge_items_count': 12, 'file_path': 'knowledge.json'},
-            duration=420
-        )
+        outputs = given_build_knowledge_outputs()
+        duration = given_build_knowledge_duration()
+        verify_action_tracks_completion(bot_directory, workspace_directory, BuildKnowledgeAction, 'build_knowledge', outputs=outputs, duration=duration)
 
 
 # ============================================================================
@@ -144,6 +192,626 @@ class TestProceedToRenderOutput:
 
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def given_knowledge_graph_directory_created(bot_directory: Path, behavior: str) -> Path:
+    """Given: Knowledge graph directory created."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    kg_dir = behavior_dir / 'content' / 'knowledge_graph'
+    kg_dir.mkdir(parents=True, exist_ok=True)
+    return kg_dir
+
+
+def given_knowledge_graph_config_file_created(kg_dir: Path, template_name: str) -> Path:
+    """Given: Knowledge graph config file created."""
+    config_file = kg_dir / 'build_story_graph_outline.json'
+    config_file.write_text(json.dumps({'template': template_name}), encoding='utf-8')
+    return config_file
+
+
+def given_knowledge_graph_template_file_created(kg_dir: Path, template_name: str, template_content: dict = None) -> Path:
+    """Given: Knowledge graph template file created."""
+    if template_content is None:
+        template_content = {'template': 'knowledge_graph', 'structure': {}}
+    template_file = kg_dir / template_name
+    template_file.write_text(json.dumps(template_content), encoding='utf-8')
+    return template_file
+
+
+def given_knowledge_graph_setup_complete(bot_directory: Path, behavior: str, template_name: str):
+    """Given: Knowledge graph setup complete."""
+    kg_dir = given_knowledge_graph_directory_created(bot_directory, behavior)
+    given_knowledge_graph_config_file_created(kg_dir, template_name)
+    given_knowledge_graph_template_file_created(kg_dir, template_name)
+    return kg_dir
+
+
+def when_build_knowledge_action_injects_template(bot_name: str, behavior: str, bot_directory: Path):
+    """When: BuildKnowledgeAction injects template."""
+    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
+    instructions = action_obj.inject_knowledge_graph_template()
+    return action_obj, instructions
+
+
+def then_instructions_contain_template_path(instructions: dict, template_name: str):
+    """Then: Instructions contain template path."""
+    assert 'knowledge_graph_template' in instructions
+    assert 'template_path' in instructions
+    assert template_name in instructions['template_path']
+    assert Path(instructions['template_path']).exists()
+
+
+def when_build_knowledge_action_injects_template_raises_error(bot_name: str, behavior: str, bot_directory: Path):
+    """When: BuildKnowledgeAction injects template raises error."""
+    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
+    with pytest.raises(FileNotFoundError) as exc_info:
+        action_obj.inject_knowledge_graph_template()
+    return exc_info
+
+
+def then_error_mentions_template_or_knowledge_graph(exc_info):
+    """Then: Error mentions template or knowledge graph."""
+    error_msg = str(exc_info.value).lower()
+    assert 'template' in error_msg or 'knowledge graph' in error_msg
+
+
+def given_base_instructions_copied_to_bot_directory(bot_directory: Path, action_name: str) -> Path:
+    """Given: Base instructions copied to bot directory."""
+    from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
+    import shutil
+    repo_root = Path(__file__).parent.parent.parent.parent.parent
+    actual_base_actions_dir = get_base_actions_dir(repo_root)
+    actual_instructions_file = actual_base_actions_dir / f'3_{action_name}' / 'instructions.json'
+    
+    bot_base_actions_dir = bot_directory / 'base_actions' / f'3_{action_name}'
+    bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
+    bot_instructions_file = bot_base_actions_dir / 'instructions.json'
+    shutil.copy2(actual_instructions_file, bot_instructions_file)
+    return bot_instructions_file
+
+
+def given_behavior_specific_instructions_created(bot_directory: Path, behavior: str, action: str, kg_dir: Path) -> Path:
+    """Given: Behavior-specific instructions created."""
+    behavior_instructions_file = kg_dir / 'instructions.json'
+    behavior_instructions_file.write_text(
+        json.dumps({
+            'behaviorName': behavior,
+            'instructions': [f'{behavior}.{action} specific instructions']
+        }),
+        encoding='utf-8'
+    )
+    return behavior_instructions_file
+
+
+def given_knowledge_graph_config_and_template_created(kg_dir: Path) -> tuple:
+    """Given: Knowledge graph config and template created."""
+    config_file = kg_dir / 'build_story_graph_outline.json'
+    config_file.write_text(
+        json.dumps({
+            'name': 'build_story_graph_outline',
+            'path': 'docs/stories/',
+            'template': 'story-graph-outline.json',
+            'output': 'story-graph.json'
+        }),
+        encoding='utf-8'
+    )
+    
+    template_file = kg_dir / 'story-graph-outline.json'
+    template_file.write_text(
+        json.dumps({
+            '_explanation': {},
+            'epics': []
+        }),
+        encoding='utf-8'
+    )
+    return config_file, template_file
+
+
+def when_build_knowledge_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
+    """When: BuildKnowledgeAction loads and merges instructions."""
+    action_obj = BuildKnowledgeAction(
+        bot_name=bot_name,
+        behavior=behavior,
+        bot_directory=bot_directory
+    )
+    merged_instructions = action_obj.load_and_merge_instructions()
+    return action_obj, merged_instructions
+
+
+def then_instructions_merged_from_both_sources(merged_instructions: dict, behavior: str, action: str):
+    """Then: Instructions merged from both sources."""
+    assert 'base_instructions' in merged_instructions
+    assert 'behavior_instructions' in merged_instructions
+    assert merged_instructions['action'] == action
+    assert merged_instructions['behavior'] == behavior
+
+
+def then_base_instructions_present(merged_instructions: dict):
+    """Then: Base instructions present."""
+    base_instructions_list = merged_instructions['base_instructions']
+    assert isinstance(base_instructions_list, list)
+    assert len(base_instructions_list) > 0
+    base_instructions_text = ' '.join(base_instructions_list).lower()
+    assert 'build knowledge graph' in base_instructions_text or 'knowledge graph' in base_instructions_text
+
+
+def then_behavior_instructions_present(merged_instructions: dict):
+    """Then: Behavior instructions present."""
+    behavior_instructions_list = merged_instructions['behavior_instructions']
+    assert isinstance(behavior_instructions_list, list)
+    assert len(behavior_instructions_list) > 0
+
+
+def then_behavior_instructions_contain_action(merged_instructions: dict, behavior: str, action: str):
+    """Then: Behavior instructions contain action."""
+    behavior_instructions_list = merged_instructions['behavior_instructions']
+    assert f'{behavior}.{action}' in ' '.join(behavior_instructions_list).lower()
+
+
+def when_sub_epic_and_story_group_retrieved(epic):
+    """When: Sub epic and story group retrieved."""
+    sub_epic = epic.children[0]
+    story_group = sub_epic.children[0]
+    return sub_epic, story_group
+
+
+def when_first_epic_retrieved(epics):
+    """When: First epic retrieved."""
+    return epics[0]
+
+
+def when_story_map_walked(story_map, epic):
+    """When: Story map walked."""
+    return list(story_map.walk(epic))
+
+
+def then_nodes_match_expected_structure(nodes):
+    """Then: Nodes match expected structure."""
+    assert len(nodes) == 4
+    assert isinstance(nodes[0], Epic)
+    assert nodes[0].name == "Build Knowledge"
+    assert isinstance(nodes[1], SubEpic)
+    assert nodes[1].name == "Load Story Graph"
+    assert isinstance(nodes[2], StoryGroup)
+    assert isinstance(nodes[3], Story)
+    assert nodes[3].name == "Load Story Graph Into Memory"
+
+
+def then_epic_map_location_correct(epic):
+    """Then: Epic map location correct."""
+    assert epic.map_location() == "epics[0].name"
+    assert epic.map_location('sequential_order') == "epics[0].sequential_order"
+
+
+def when_sub_epic_retrieved_from_epics(epics):
+    """When: Sub epic retrieved from epics."""
+    return epics[0].children[0]
+
+
+def then_sub_epic_map_location_correct(sub_epic):
+    """Then: Sub epic map location correct."""
+    assert sub_epic.map_location() == "epics[0].sub_epics[0].name"
+
+
+def when_story_retrieved_from_epics(epics):
+    """When: Story retrieved from epics."""
+    return epics[0].children[0].children[0].children[0]
+
+
+def then_story_map_location_correct(story):
+    """Then: Story map location correct."""
+    assert story.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].name"
+    assert story.map_location('sizing') == "epics[0].sub_epics[0].story_groups[0].stories[0].sizing"
+
+
+def then_config_path_matches_expected(instructions, expected_path):
+    """Then: Config path matches expected."""
+    config = instructions['knowledge_graph_config']
+    assert config['path'] == expected_path
+
+
+def when_scenario_retrieved_from_epics(epics):
+    """When: Scenario retrieved from epics."""
+    story = epics[0].children[0].children[0].children[0]
+    return story.scenarios[0]
+
+
+def then_scenario_map_location_correct(scenario):
+    """Then: Scenario map location correct."""
+    assert scenario.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].scenarios[0].name"
+
+
+def when_scenario_outline_retrieved_from_epics(epics):
+    """When: Scenario outline retrieved from epics."""
+    story = epics[0].children[0].children[0].children[0]
+    return story.scenario_outlines[0]
+
+
+def then_scenario_outline_map_location_correct(scenario_outline):
+    """Then: Scenario outline map location correct."""
+    assert scenario_outline.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].scenario_outlines[0].name"
+
+
+def given_test_bot_directory_created(tmp_path):
+    """Given: Test bot directory created."""
+    bot_directory = tmp_path / "test_bot"
+    bot_directory.mkdir()
+    return bot_directory
+
+
+def given_docs_directory_created(bot_directory):
+    """Given: Docs directory created."""
+    docs_dir = bot_directory / "docs" / "stories"
+    docs_dir.mkdir(parents=True)
+    return docs_dir
+
+
+def given_test_story_graph():
+    """Given: Test story graph."""
+    return {
+        "epics": [
+            {
+                "name": "Test Epic",
+                "sequential_order": 1,
+                "sub_epics": [],
+                "story_groups": []
+            }
+        ]
+    }
+
+
+def given_story_graph_file_created(docs_dir, story_graph):
+    """Given: Story graph file created."""
+    story_graph_path = docs_dir / "story-graph.json"
+    story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
+    return story_graph_path
+
+
+def when_story_map_created_from_bot(bot):
+    """When: Story map created from bot."""
+    return StoryMap.from_bot(bot)
+
+
+def then_story_map_contains_test_epic(story_map):
+    """Then: Story map contains test epic."""
+    assert len(story_map.epics()) == 1
+    assert story_map.epics()[0].name == "Test Epic"
+
+
+def given_behavior_main_instructions_created(bot_directory: Path, behavior: str, description: str, goal: str):
+    """Given: Behavior main instructions.json created."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_main_instructions_file = behavior_dir / 'instructions.json'
+    behavior_main_instructions_file.write_text(
+        json.dumps({
+            'description': description,
+            'goal': goal
+        }),
+        encoding='utf-8'
+    )
+    return behavior_main_instructions_file
+
+
+def given_knowledge_graph_template_with_schema_created(kg_dir: Path):
+    """Given: Knowledge graph template with schema created."""
+    template_file = kg_dir / 'story-graph-outline.json'
+    template_content = {
+        '_explanation': {
+            'epics': 'Top-level features',
+            'sub_epics': 'Feature breakdowns'
+        },
+        'epics': []
+    }
+    template_file.write_text(json.dumps(template_content), encoding='utf-8')
+    return template_file
+
+
+def given_validation_rules_created(bot_directory: Path, rule_name: str, rule_content: dict):
+    """Given: Validation rules created."""
+    validation_rules_dir = bot_directory / 'validation_rules'
+    validation_rules_dir.mkdir(parents=True, exist_ok=True)
+    rule_file = validation_rules_dir / f'{rule_name}.json'
+    rule_file.write_text(json.dumps(rule_content), encoding='utf-8')
+    return rule_file
+
+
+def when_build_knowledge_action_loads_and_injects_all_instructions(action_obj: BuildKnowledgeAction):
+    """When: BuildKnowledgeAction loads and injects all instructions."""
+    instructions = action_obj.load_and_merge_instructions()
+    kg_data = action_obj.inject_knowledge_graph_template()
+    instructions.update(kg_data)
+    action_obj.inject_schema_description_instructions(instructions)
+    action_obj.inject_rules(instructions)
+    return instructions
+
+
+def then_all_template_variables_replaced(base_instructions_text: str):
+    """Then: All template variables replaced."""
+    assert '{{rules}}' not in base_instructions_text
+    assert 'verb-noun format' in base_instructions_text or 'verb-noun-format' in base_instructions_text
+    assert '{{schema}}' not in base_instructions_text
+    assert 'epics' in base_instructions_text or 'Top-level features' in base_instructions_text
+    assert '{{description}}' not in base_instructions_text
+    assert 'Shape the story map' in base_instructions_text or 'Create initial story structure' in base_instructions_text
+    assert '{{instructions}}' not in base_instructions_text
+    assert 'Use verb-noun format' in base_instructions_text or 'Follow INVEST principles' in base_instructions_text
+
+
+def given_existing_story_graph_created(workspace_directory: Path, story_graph_content: dict):
+    """Given: Existing story graph created."""
+    stories_dir = workspace_directory / 'docs' / 'stories'
+    stories_dir.mkdir(parents=True, exist_ok=True)
+    story_graph_path = stories_dir / 'story-graph.json'
+    story_graph_path.write_text(json.dumps(story_graph_content, indent=2), encoding='utf-8')
+    return story_graph_path
+
+
+def given_knowledge_graph_config_for_increments_created(kg_dir: Path, config_data: dict):
+    """Given: Knowledge graph config for increments created."""
+    config_file = kg_dir / 'build_story_graph_increments.json'
+    config_file.write_text(json.dumps(config_data), encoding='utf-8')
+    return config_file
+
+
+def given_knowledge_graph_template_for_increments_created(kg_dir: Path, template_content: dict):
+    """Given: Knowledge graph template for increments created."""
+    template_file = kg_dir / 'story_graph_increments.json'
+    template_file.write_text(json.dumps(template_content), encoding='utf-8')
+    return template_file
+
+
+def when_build_knowledge_action_injects_template_for_increments(bot_name: str, behavior: str, bot_directory: Path):
+    """When: BuildKnowledgeAction injects template for increments."""
+    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
+    instructions = action_obj.inject_knowledge_graph_template()
+    return action_obj, instructions
+
+
+def then_instructions_indicate_updating_existing_file(instructions: dict, expected_output: str):
+    """Then: Instructions indicate updating existing file."""
+    assert 'knowledge_graph_config' in instructions
+    assert instructions['knowledge_graph_config']['output'] == expected_output
+    assert 'template_path' in instructions
+
+
+def given_test_variables_for_exploration() -> tuple[str, str]:
+    """Given: Test variables for exploration behavior."""
+    bot_name = 'story_bot'
+    behavior = 'exploration'
+    return bot_name, behavior
+
+
+def given_test_variables_for_shape_build_knowledge() -> tuple[str, str, str]:
+    """Given: Test variables for shape build_knowledge."""
+    bot_name = 'test_bot'
+    behavior = 'shape'
+    action = 'build_knowledge'
+    return bot_name, behavior, action
+
+
+def given_knowledge_graph_directory_structure_created(bot_directory: Path, behavior: str) -> Path:
+    """Given: Knowledge graph directory structure created."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    kg_dir = behavior_dir / '2_content' / '1_knowledge_graph'
+    kg_dir.mkdir(parents=True, exist_ok=True)
+    return kg_dir
+
+
+def given_environment_and_knowledge_graph_setup(bot_directory: Path, workspace_directory: Path, behavior: str) -> Path:
+    """Given: Environment and knowledge graph setup."""
+    bootstrap_env(bot_directory, workspace_directory)
+    return given_knowledge_graph_directory_structure_created(bot_directory, behavior)
+
+
+def then_base_instructions_only_present(merged_instructions: dict, behavior: str, action: str):
+    """Then: Base instructions only present (no behavior instructions)."""
+    assert 'base_instructions' in merged_instructions
+    assert 'behavior_instructions' not in merged_instructions
+    assert merged_instructions['action'] == action
+    assert merged_instructions['behavior'] == behavior
+
+
+def given_validation_rule_for_verb_noun_format(bot_directory: Path) -> Path:
+    """Given: Validation rule for verb-noun format."""
+    return given_validation_rules_created(bot_directory, 'verb-noun-format', {
+        'name': 'verb-noun-format',
+        'description': 'Stories must use verb-noun format',
+        'examples': ['Create user account', 'Update profile']
+    })
+
+
+def given_test_variables_for_prioritization() -> tuple[str, str]:
+    """Given: Test variables for prioritization behavior."""
+    bot_name = 'story_bot'
+    behavior = 'prioritization'
+    return bot_name, behavior
+
+
+def given_existing_story_graph_with_mob_epic() -> dict:
+    """Given: Existing story graph with mob epic."""
+    return {
+        "epics": [
+            {
+                "name": "Manage Mobs",
+                "sequential_order": 1,
+                "estimated_stories": 6,
+                "domain_concepts": [
+                    {
+                        "name": "Mob",
+                        "responsibilities": [
+                            {
+                                "name": "Groups minions together for coordinated action",
+                                "collaborators": ["Minion"]
+                            }
+                        ]
+                    }
+                ],
+                "sub_epics": []
+            }
+        ]
+    }
+
+
+def given_knowledge_graph_directory_for_prioritization(bot_directory: Path, behavior: str) -> Path:
+    """Given: Knowledge graph directory for prioritization."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    kg_dir = behavior_dir / 'content' / '1_knowledge_graph'
+    kg_dir.mkdir(parents=True, exist_ok=True)
+    return kg_dir
+
+
+def given_knowledge_graph_config_for_story_graph_increments(kg_dir: Path) -> Path:
+    """Given: Knowledge graph config for story graph increments."""
+    return given_knowledge_graph_config_for_increments_created(kg_dir, {
+        "name": "build_story_graph_outline",
+        "path": "docs/stories",
+        "template": "story_graph_increments.json",
+        "output": "story-graph.json"
+    })
+
+
+def given_knowledge_graph_template_for_increments(kg_dir: Path) -> Path:
+    """Given: Knowledge graph template for increments."""
+    return given_knowledge_graph_template_for_increments_created(kg_dir, {
+        "_explanation": {},
+        "epics": [],
+        "increments": []
+    })
+
+
+def then_story_graph_updated_with_increments(instructions: dict, story_graph_path: Path):
+    """Then: Story graph updated with increments."""
+    assert story_graph_path.exists()
+    config = instructions['knowledge_graph_config']
+    assert config['output'] == 'story-graph.json'
+    assert 'template_path' in instructions
+
+
+def when_story_map_epics_retrieved(story_map):
+    """When: Story map epics retrieved."""
+    return story_map.epics()
+
+
+def then_epics_contain_single_build_knowledge_epic(epics):
+    """Then: Epics contain single Build Knowledge epic."""
+    assert len(epics) == 1
+    assert isinstance(epics[0], Epic)
+    assert epics[0].name == "Build Knowledge"
+    return epics[0]
+
+
+def when_epic_children_retrieved(epic):
+    """When: Epic children retrieved."""
+    return epic.children
+
+
+def then_children_contain_single_sub_epic(children, expected_name: str = "Load Story Graph"):
+    """Then: Children contain single sub epic."""
+    assert len(children) == 1
+    assert isinstance(children[0], SubEpic)
+    assert children[0].name == expected_name
+    return children[0]
+
+
+def when_sub_epic_children_retrieved(sub_epic):
+    """When: Sub epic children retrieved."""
+    return sub_epic.children
+
+
+def then_children_contain_single_story_group(children):
+    """Then: Children contain single story group."""
+    assert len(children) == 1
+    assert isinstance(children[0], StoryGroup)
+    return children[0]
+
+
+def when_story_group_stories_retrieved(story_group):
+    """When: Story group stories retrieved."""
+    return story_group.children
+
+
+def then_stories_contain_single_story(stories, expected_name: str = "Load Story Graph Into Memory"):
+    """Then: Stories contain single story."""
+    assert len(stories) == 1
+    assert isinstance(stories[0], Story)
+    assert stories[0].name == expected_name
+    return stories[0]
+
+
+def when_story_retrieved_from_path(story_map):
+    """When: Story retrieved from path."""
+    return story_map.epics()[0].children[0].children[0].children[0]
+
+
+def then_story_has_expected_properties(story):
+    """Then: Story has expected properties."""
+    assert story.name == "Load Story Graph Into Memory"
+    assert story.users == ["Story Bot"]
+    assert story.story_type == "user"
+    assert story.sizing == "5 days"
+    assert story.sequential_order == 1
+    assert story.connector is None
+
+
+def when_story_scenarios_retrieved(story):
+    """When: Story scenarios retrieved."""
+    return story.scenarios
+
+
+def then_scenarios_contain_expected_scenarios(scenarios):
+    """Then: Scenarios contain expected scenarios."""
+    assert len(scenarios) == 2
+    assert isinstance(scenarios[0], Scenario)
+    assert scenarios[0].name == "Story graph file exists"
+    assert scenarios[0].type == "happy_path"
+    assert scenarios[1].name == "Story graph file missing"
+    assert scenarios[1].type == "error_case"
+
+
+def when_scenario_retrieved_from_story(story):
+    """When: Scenario retrieved from story."""
+    return story.scenarios[0]
+
+
+def then_scenario_has_expected_properties(scenario):
+    """Then: Scenario has expected properties."""
+    assert scenario.name == "Story graph file exists"
+    assert scenario.type == "happy_path"
+    assert len(scenario.background) == 1
+    assert scenario.background[0] == "Given story graph file exists"
+    assert len(scenario.steps) == 2
+    assert scenario.steps[0] == "When story graph is loaded"
+    assert scenario.steps[1] == "Then story map is created with epics"
+
+
+def when_story_scenario_outlines_retrieved(story):
+    """When: Story scenario outlines retrieved."""
+    return story.scenario_outlines
+
+
+def then_scenario_outlines_contain_expected_outline(scenario_outlines):
+    """Then: Scenario outlines contain expected outline."""
+    assert len(scenario_outlines) == 1
+    assert isinstance(scenario_outlines[0], ScenarioOutline)
+    assert scenario_outlines[0].name == "Load story graph with different formats"
+
+
+def when_scenario_outline_retrieved_from_story(story):
+    """When: Scenario outline retrieved from story."""
+    return story.scenario_outlines[0]
+
+
+def then_scenario_outline_has_expected_examples(scenario_outline):
+    """Then: Scenario outline has expected examples."""
+    assert len(scenario_outline.examples_columns) == 2
+    assert scenario_outline.examples_columns == ["file_path", "expected_epics"]
+    assert len(scenario_outline.examples_rows) == 2
+    assert scenario_outline.examples_rows[0] == ["story-graph.json", "2"]
+    assert scenario_outline.examples_rows[1] == ["story-graph-v2.json", "3"]
+
+
+# ============================================================================
 # STORY: Inject Knowledge Graph Template for Build Knowledge
 # ============================================================================
 
@@ -151,59 +819,26 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
     """Story: Inject Knowledge Graph Template for Build Knowledge - Tests template injection."""
 
     def test_action_injects_knowledge_graph_template(self, bot_directory, workspace_directory):
-        bot_name = 'story_bot'  # Match fixture
-        behavior = 'exploration'
+        bot_name, behavior = given_test_variables_for_exploration()
         template_name = 'story-graph-explored-outline.json'
         
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        kg_dir = given_environment_and_knowledge_graph_setup(bot_directory, workspace_directory, behavior)
+        given_knowledge_graph_config_file_created(kg_dir, template_name)
+        given_knowledge_graph_template_file_created(kg_dir, template_name)
         
-        # Create knowledge graph directory structure
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        kg_dir = behavior_dir / 'content' / 'knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
+        action_obj, instructions = when_build_knowledge_action_injects_template(bot_name, behavior, bot_directory)
         
-        # Create config file that references the template
-        config_file = kg_dir / 'build_story_graph_outline.json'
-        config_file.write_text(json.dumps({'template': template_name}), encoding='utf-8')
-        
-        # Create the actual template file
-        template_file = kg_dir / template_name
-        template_file.write_text(json.dumps({'template': 'knowledge_graph', 'structure': {}}), encoding='utf-8')
-        
-        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        instructions = action_obj.inject_knowledge_graph_template()
-        
-        assert 'knowledge_graph_template' in instructions
-        assert 'template_path' in instructions
-        assert template_name in instructions['template_path']
-        assert Path(instructions['template_path']).exists()
+        then_instructions_contain_template_path(instructions, template_name)
 
     def test_action_raises_error_when_template_missing(self, bot_directory, workspace_directory):
-        bot_name = 'story_bot'  # Match fixture
-        behavior = 'exploration'
+        bot_name, behavior = given_test_variables_for_exploration()
         
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        kg_dir = given_environment_and_knowledge_graph_setup(bot_directory, workspace_directory, behavior)
+        given_knowledge_graph_config_file_created(kg_dir, 'missing-template.json')
         
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
+        exc_info = when_build_knowledge_action_injects_template_raises_error(bot_name, behavior, bot_directory)
         
-        # Create knowledge_graph folder and config file, but NOT the template file
-        kg_dir = behavior_dir / 'content' / 'knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create config file that references a template that doesn't exist
-        config_file = kg_dir / 'build_story_graph_outline.json'
-        config_file.write_text(json.dumps({'template': 'missing-template.json'}), encoding='utf-8')
-        
-        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        
-        with pytest.raises(FileNotFoundError) as exc_info:
-            action_obj.inject_knowledge_graph_template()
-        
-        error_msg = str(exc_info.value).lower()
-        assert 'template' in error_msg or 'knowledge graph' in error_msg
+        then_error_mentions_template_or_knowledge_graph(exc_info)
 
     def test_action_loads_and_merges_instructions(self, bot_directory, workspace_directory):
         """
@@ -212,92 +847,15 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         WHEN: Action method is invoked
         THEN: Instructions are loaded from both locations and merged
         """
-        # Bootstrap
-        bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+        given_base_and_behavior_instructions_setup(bot_directory, workspace_directory, bot_name, behavior, action)
         
-        # Given: Both instruction files exist
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        action = 'build_knowledge'
+        action_obj, merged_instructions = when_build_knowledge_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
-        # Use actual base instructions (copy from base_bot/base_actions)
-        from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
-        import shutil
-        repo_root = Path(__file__).parent.parent.parent.parent.parent
-        actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
-        
-        # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
-        bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy actual instructions file
-        bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
-        
-        # Create behavior-specific instructions in correct location
-        # For build_knowledge, behavior-specific instructions are in:
-        # behaviors/{behavior}/2_content/1_knowledge_graph/instructions.json
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        kg_dir = behavior_dir / '2_content' / '1_knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
-        
-        behavior_instructions_file = kg_dir / 'instructions.json'
-        behavior_instructions_file.write_text(
-            json.dumps({
-                'behaviorName': behavior,
-                'instructions': [f'{behavior}.{action} specific instructions']
-            }),
-            encoding='utf-8'
-        )
-        
-        # Also create knowledge graph config and template (required for build_knowledge)
-        config_file = kg_dir / 'build_story_graph_outline.json'
-        config_file.write_text(
-            json.dumps({
-                'name': 'build_story_graph_outline',
-                'path': 'docs/stories/',
-                'template': 'story-graph-outline.json',
-                'output': 'story-graph.json'
-            }),
-            encoding='utf-8'
-        )
-        
-        template_file = kg_dir / 'story-graph-outline.json'
-        template_file.write_text(
-            json.dumps({
-                '_explanation': {},
-                'epics': []
-            }),
-            encoding='utf-8'
-        )
-        
-        # When: Call REAL BuildKnowledgeAction API
-        action_obj = BuildKnowledgeAction(
-            bot_name=bot_name,
-            behavior=behavior,
-            bot_directory=bot_directory
-        )
-        merged_instructions = action_obj.load_and_merge_instructions()
-        
-        # Then: Instructions merged from both sources
-        assert 'base_instructions' in merged_instructions
-        assert 'behavior_instructions' in merged_instructions
-        assert merged_instructions['action'] == action
-        assert merged_instructions['behavior'] == behavior
-        
-        # Verify base instructions are present
-        base_instructions_list = merged_instructions['base_instructions']
-        assert isinstance(base_instructions_list, list)
-        assert len(base_instructions_list) > 0
-        base_instructions_text = ' '.join(base_instructions_list).lower()
-        assert 'build knowledge graph' in base_instructions_text or 'knowledge graph' in base_instructions_text
-        
-        # Verify behavior-specific instructions are present
-        behavior_instructions_list = merged_instructions['behavior_instructions']
-        assert isinstance(behavior_instructions_list, list)
-        assert len(behavior_instructions_list) > 0
-        assert f'{behavior}.{action}' in ' '.join(behavior_instructions_list).lower()
+        then_instructions_merged_from_both_sources(merged_instructions, behavior, action)
+        then_base_instructions_present(merged_instructions)
+        then_behavior_instructions_present(merged_instructions)
+        then_behavior_instructions_contain_action(merged_instructions, behavior, action)
 
     def test_action_uses_base_instructions_when_behavior_instructions_missing(self, bot_directory, workspace_directory):
         """
@@ -306,68 +864,12 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         WHEN: Action method is invoked
         THEN: Only base instructions are returned (no behavior_instructions key)
         """
-        # Bootstrap
-        bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+        given_base_instructions_only_setup(bot_directory, workspace_directory, bot_directory, behavior, action)
         
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        action = 'build_knowledge'
+        action_obj, merged_instructions = when_build_knowledge_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
-        # Use actual base instructions (copy from base_bot/base_actions)
-        from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
-        import shutil
-        repo_root = Path(__file__).parent.parent.parent.parent.parent
-        actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
-        
-        # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
-        bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy actual instructions file
-        bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
-        
-        # Create knowledge graph config and template (required for build_knowledge)
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        kg_dir = behavior_dir / '2_content' / '1_knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
-        
-        config_file = kg_dir / 'build_story_graph_outline.json'
-        config_file.write_text(
-            json.dumps({
-                'name': 'build_story_graph_outline',
-                'path': 'docs/stories/',
-                'template': 'story-graph-outline.json',
-                'output': 'story-graph.json'
-            }),
-            encoding='utf-8'
-        )
-        
-        template_file = kg_dir / 'story-graph-outline.json'
-        template_file.write_text(
-            json.dumps({
-                '_explanation': {},
-                'epics': []
-            }),
-            encoding='utf-8'
-        )
-        
-        # Do NOT create behavior-specific instructions file
-        
-        # When: Call BuildKnowledgeAction API
-        action_obj = BuildKnowledgeAction(
-            bot_name=bot_name,
-            behavior=behavior,
-            bot_directory=bot_directory
-        )
-        merged_instructions = action_obj.load_and_merge_instructions()
-        
-        # Then: Only base instructions are present
-        assert 'base_instructions' in merged_instructions
-        assert 'behavior_instructions' not in merged_instructions
-        assert merged_instructions['action'] == action
-        assert merged_instructions['behavior'] == behavior
+        then_base_instructions_only_present(merged_instructions, behavior, action)
 
     def test_all_template_variables_are_replaced_in_instructions(self, bot_directory, workspace_directory):
         """
@@ -376,120 +878,22 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         WHEN: Action loads and merges instructions with all injections
         THEN: All template variables are replaced with actual content
         """
-        # Bootstrap
+        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
         bootstrap_env(bot_directory, workspace_directory)
         
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        action = 'build_knowledge'
+        given_base_instructions_copied_to_bot_directory(bot_directory, action)
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
+        given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
+        given_behavior_main_instructions_created(bot_directory, behavior, 'Shape the story map', 'Create initial story structure')
+        given_knowledge_graph_config_and_template_created(kg_dir)
+        given_knowledge_graph_template_with_schema_created(kg_dir)
+        given_validation_rule_for_verb_noun_format(bot_directory)
         
-        # Create base instructions with template variables (copy from actual base_actions)
-        from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
-        import shutil
-        repo_root = Path(__file__).parent.parent.parent.parent.parent
-        actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '3_build_knowledge' / 'instructions.json'
+        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
+        instructions = when_build_knowledge_action_loads_and_injects_all_instructions(action_obj)
         
-        # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '3_build_knowledge'
-        bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy actual instructions file with template variables
-        bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
-        
-        # Create behavior-specific instructions
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        kg_dir = behavior_dir / '2_content' / '1_knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
-        
-        behavior_instructions_file = kg_dir / 'instructions.json'
-        behavior_instructions_file.write_text(
-            json.dumps({
-                'behaviorName': behavior,
-                'instructions': ['Use verb-noun format', 'Follow INVEST principles']
-            }),
-            encoding='utf-8'
-        )
-        
-        # Create behavior instructions.json with description and goal
-        behavior_instructions_dir = behavior_dir
-        behavior_main_instructions_file = behavior_instructions_dir / 'instructions.json'
-        behavior_main_instructions_file.write_text(
-            json.dumps({
-                'description': 'Shape the story map',
-                'goal': 'Create initial story structure'
-            }),
-            encoding='utf-8'
-        )
-        
-        # Create knowledge graph config and template with schema
-        config_file = kg_dir / 'build_story_graph_outline.json'
-        config_file.write_text(
-            json.dumps({
-                'name': 'build_story_graph_outline',
-                'path': 'docs/stories/',
-                'template': 'story-graph-outline.json',
-                'output': 'story-graph.json'
-            }),
-            encoding='utf-8'
-        )
-        
-        template_file = kg_dir / 'story-graph-outline.json'
-        template_content = {
-            '_explanation': {
-                'epics': 'Top-level features',
-                'sub_epics': 'Feature breakdowns'
-            },
-            'epics': []
-        }
-        template_file.write_text(json.dumps(template_content), encoding='utf-8')
-        
-        # Create validation rules
-        validation_rules_dir = bot_directory / 'validation_rules'
-        validation_rules_dir.mkdir(parents=True, exist_ok=True)
-        verb_noun_rule = validation_rules_dir / 'verb-noun-format.json'
-        verb_noun_rule.write_text(
-            json.dumps({
-                'name': 'verb-noun-format',
-                'description': 'Stories must use verb-noun format',
-                'examples': ['Create user account', 'Update profile']
-            }),
-            encoding='utf-8'
-        )
-        
-        # When: Call BuildKnowledgeAction and get final instructions
-        action_obj = BuildKnowledgeAction(
-            bot_name=bot_name,
-            behavior=behavior,
-            bot_directory=bot_directory
-        )
-        
-        # Execute the full instruction loading and injection process
-        instructions = action_obj.load_and_merge_instructions()
-        kg_data = action_obj.inject_knowledge_graph_template()
-        instructions.update(kg_data)
-        action_obj.inject_schema_description_instructions(instructions)
-        action_obj.inject_rules(instructions)
-        
-        # Then: All template variables should be replaced
-        base_instructions_text = '\n'.join(instructions.get('base_instructions', []))
-        
-        # Verify {{rules}} is replaced (should not appear as placeholder)
-        assert '{{rules}}' not in base_instructions_text
-        assert 'verb-noun format' in base_instructions_text or 'verb-noun-format' in base_instructions_text
-        
-        # Verify {{schema}} is replaced
-        assert '{{schema}}' not in base_instructions_text
-        assert 'epics' in base_instructions_text or 'Top-level features' in base_instructions_text
-        
-        # Verify {{description}} is replaced
-        assert '{{description}}' not in base_instructions_text
-        assert 'Shape the story map' in base_instructions_text or 'Create initial story structure' in base_instructions_text
-        
-        # Verify {{instructions}} is replaced
-        assert '{{instructions}}' not in base_instructions_text
-        assert 'Use verb-noun format' in base_instructions_text or 'Follow INVEST principles' in base_instructions_text
+        base_instructions_text = given_base_instructions_text_extracted(instructions)
+        then_all_template_variables_replaced(base_instructions_text)
 
 
 # ============================================================================
@@ -499,91 +903,26 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 class TestUpdateExistingKnowledgeGraph:
     """Story: Update Existing Knowledge Graph - Tests that build_knowledge updates existing story-graph.json instead of creating a new file."""
 
-    def test_prioritization_updates_existing_story_graph_json(self, bot_directory, workspace_directory):
+    def test_behavior_updates_existing_story_graph_json(self, bot_directory, workspace_directory):
         """
         Test that prioritization behavior updates existing story-graph.json by adding increments array,
         rather than creating a separate story-graph-increments.json file.
         """
-        bot_name = 'story_bot'
-        behavior = 'prioritization'
-        
-        # Bootstrap environment
+        bot_name, behavior = given_test_variables_for_prioritization()
         bootstrap_env(bot_directory, workspace_directory)
         
-        # Create existing story-graph.json with epics (from shape behavior)
-        stories_dir = workspace_directory / 'docs' / 'stories'
-        stories_dir.mkdir(parents=True, exist_ok=True)
+        existing_story_graph = given_existing_story_graph_with_mob_epic()
+        story_graph_path = given_existing_story_graph_created(workspace_directory, existing_story_graph)
         
-        existing_story_graph = {
-            "epics": [
-                {
-                    "name": "Manage Mobs",
-                    "sequential_order": 1,
-                    "estimated_stories": 6,
-                    "domain_concepts": [
-                        {
-                            "name": "Mob",
-                            "responsibilities": [
-                                {
-                                    "name": "Groups minions together for coordinated action",
-                                    "collaborators": ["Minion"]
-                                }
-                            ]
-                        }
-                    ],
-                    "sub_epics": []
-                }
-            ]
-        }
+        kg_dir = given_knowledge_graph_directory_for_prioritization(bot_directory, behavior)
+        given_knowledge_graph_config_for_story_graph_increments(kg_dir)
+        given_knowledge_graph_template_for_increments(kg_dir)
         
-        story_graph_path = stories_dir / 'story-graph.json'
-        story_graph_path.write_text(json.dumps(existing_story_graph, indent=2), encoding='utf-8')
+        action_obj, instructions = when_build_knowledge_action_injects_template_for_increments(bot_name, behavior, bot_directory)
         
-        # Create knowledge graph config for prioritization
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        kg_dir = behavior_dir / 'content' / '1_knowledge_graph'
-        kg_dir.mkdir(parents=True, exist_ok=True)
-        
-        config_file = kg_dir / 'build_story_graph_increments.json'
-        config_data = {
-            "name": "build_story_graph_outline",
-            "path": "docs/stories",
-            "template": "story_graph_increments.json",
-            "output": "story-graph.json"
-        }
-        config_file.write_text(json.dumps(config_data), encoding='utf-8')
-        
-        # Create template file
-        template_file = kg_dir / 'story_graph_increments.json'
-        template_content = {
-            "_explanation": {},
-            "epics": [],
-            "increments": []
-        }
-        template_file.write_text(json.dumps(template_content), encoding='utf-8')
-        
-        # Create action and get instructions
-        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        instructions = action_obj.inject_knowledge_graph_template()
-        
-        # Verify instructions include update guidance
-        assert 'knowledge_graph_config' in instructions
-        assert instructions['knowledge_graph_config']['output'] == 'story-graph.json'
-        
-        # Verify that instructions should indicate updating existing file
-        # The instructions should guide the LLM to load existing story-graph.json and add increments
-        assert 'template_path' in instructions
-        
-        # Verify existing file still exists and wasn't replaced
-        assert story_graph_path.exists()
-        
-        # Verify that the config specifies the same output file (not a new file)
-        config = instructions['knowledge_graph_config']
-        assert config['output'] == 'story-graph.json'
-        assert config['path'] == 'docs/stories'
-        
-        # The actual update logic should be in the instructions passed to LLM
-        # This test verifies the action provides the correct guidance
+        then_instructions_indicate_updating_existing_file(instructions, 'story-graph.json')
+        then_story_graph_updated_with_increments(instructions, story_graph_path)
+        then_config_path_matches_expected(instructions, 'docs/stories')
 
 
 # ============================================================================
@@ -593,221 +932,122 @@ class TestUpdateExistingKnowledgeGraph:
 class TestLoadStoryGraphIntoMemory:
     """Story: Load Story Graph Into Memory - Tests loading story graph and creating StoryMap object model."""
     
+    @staticmethod
+    def _create_mock_bot(bot_directory: Path):
+        """Helper: Create MockBot instance for testing StoryMap.from_bot().
+        
+        Used by: test_from_bot_loads_story_graph, test_from_bot_raises_when_file_not_found
+        """
+        class MockBot:
+            def __init__(self, bot_directory):
+                self.bot_directory = bot_directory
+        
+        return MockBot(bot_directory)
+    
     def test_story_map_loads_epics(self, story_map):
-        epics = story_map.epics()
-        assert len(epics) == 1
-        assert isinstance(epics[0], Epic)
-        assert epics[0].name == "Build Knowledge"
+        epics = when_story_map_epics_retrieved(story_map)
+        then_epics_contain_single_build_knowledge_epic(epics)
     
     def test_epic_has_sub_epics(self, story_map):
-        epics = story_map.epics()
-        epic = epics[0]
-        children = epic.children
-        
-        assert len(children) == 1
-        assert isinstance(children[0], SubEpic)
-        assert children[0].name == "Load Story Graph"
+        epics = when_story_map_epics_retrieved(story_map)
+        epic = then_epics_contain_single_build_knowledge_epic(epics)
+        children = when_epic_children_retrieved(epic)
+        then_children_contain_single_sub_epic(children)
     
     def test_sub_epic_has_story_groups(self, story_map):
-        epics = story_map.epics()
-        epic = epics[0]
+        epics = when_story_map_epics_retrieved(story_map)
+        epic = then_epics_contain_single_build_knowledge_epic(epics)
         sub_epic = epic.children[0]
-        children = sub_epic.children
-        
-        assert len(children) == 1
-        assert isinstance(children[0], StoryGroup)
+        children = when_sub_epic_children_retrieved(sub_epic)
+        then_children_contain_single_story_group(children)
     
     def test_story_group_has_stories(self, story_map):
-        epics = story_map.epics()
-        epic = epics[0]
-        sub_epic = epic.children[0]
-        story_group = sub_epic.children[0]
-        stories = story_group.children
-        
-        assert len(stories) == 1
-        assert isinstance(stories[0], Story)
-        assert stories[0].name == "Load Story Graph Into Memory"
+        epics = when_story_map_epics_retrieved(story_map)
+        epic = then_epics_contain_single_build_knowledge_epic(epics)
+        sub_epic, story_group = when_sub_epic_and_story_group_retrieved(epic)
+        stories = when_story_group_stories_retrieved(story_group)
+        then_stories_contain_single_story(stories)
     
     def test_story_has_properties(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        
-        assert story.name == "Load Story Graph Into Memory"
-        assert story.users == ["Story Bot"]
-        assert story.story_type == "user"
-        assert story.sizing == "5 days"
-        assert story.sequential_order == 1
-        assert story.connector is None
+        story = when_story_retrieved_from_path(story_map)
+        then_story_has_expected_properties(story)
     
     def test_story_has_scenarios(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenarios = story.scenarios
-        
-        assert len(scenarios) == 2
-        assert isinstance(scenarios[0], Scenario)
-        assert scenarios[0].name == "Story graph file exists"
-        assert scenarios[0].type == "happy_path"
-        assert scenarios[1].name == "Story graph file missing"
-        assert scenarios[1].type == "error_case"
+        story = when_story_retrieved_from_path(story_map)
+        scenarios = when_story_scenarios_retrieved(story)
+        then_scenarios_contain_expected_scenarios(scenarios)
     
     def test_scenario_has_properties(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario = story.scenarios[0]
-        
-        assert scenario.name == "Story graph file exists"
-        assert scenario.type == "happy_path"
-        assert len(scenario.background) == 1
-        assert len(scenario.steps) == 2
-        assert scenario.background[0] == "Given story graph file exists"
-        assert scenario.steps[0] == "When story graph is loaded"
+        story = when_story_retrieved_from_path(story_map)
+        scenario = when_scenario_retrieved_from_story(story)
+        then_scenario_has_expected_properties(scenario)
     
     def test_scenario_default_test_method(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario = story.scenarios[0]
-        
+        story = when_story_retrieved_from_path(story_map)
+        scenario = when_scenario_retrieved_from_story(story)
         assert scenario.default_test_method == "test_story_graph_file_exists"
     
     def test_story_has_scenario_outlines(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario_outlines = story.scenario_outlines
-        
-        assert len(scenario_outlines) == 1
-        assert isinstance(scenario_outlines[0], ScenarioOutline)
-        assert scenario_outlines[0].name == "Load story graph with different formats"
+        story = when_story_retrieved_from_path(story_map)
+        scenario_outlines = when_story_scenario_outlines_retrieved(story)
+        then_scenario_outlines_contain_expected_outline(scenario_outlines)
     
     def test_scenario_outline_has_examples(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario_outline = story.scenario_outlines[0]
-        
-        assert len(scenario_outline.examples_columns) == 2
-        assert scenario_outline.examples_columns == ["file_path", "expected_epics"]
-        assert len(scenario_outline.examples_rows) == 2
-        assert scenario_outline.examples_rows[0] == ["story-graph.json", "2"]
+        story = when_story_retrieved_from_path(story_map)
+        scenario_outline = when_scenario_outline_retrieved_from_story(story)
+        then_scenario_outline_has_expected_examples(scenario_outline)
     
     def test_story_default_test_class(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        
+        story = when_story_retrieved_from_path(story_map)
         assert story.default_test_class == "TestLoadStoryGraphIntoMemory"
     
     def test_story_map_walk_traverses_all_nodes(self, story_map):
-        epics = story_map.epics()
-        epic = epics[0]
-        
-        nodes = list(story_map.walk(epic))
-        
-        assert len(nodes) == 4
-        assert isinstance(nodes[0], Epic)
-        assert nodes[0].name == "Build Knowledge"
-        assert isinstance(nodes[1], SubEpic)
-        assert nodes[1].name == "Load Story Graph"
-        assert isinstance(nodes[2], StoryGroup)
-        assert isinstance(nodes[3], Story)
-        assert nodes[3].name == "Load Story Graph Into Memory"
+        epics = when_story_map_epics_retrieved(story_map)
+        epic = when_first_epic_retrieved(epics)
+        nodes = when_story_map_walked(story_map, epic)
+        then_nodes_match_expected_structure(nodes)
     
     def test_map_location_for_epic(self, story_map):
-        epics = story_map.epics()
-        epic = epics[0]
-        
-        assert epic.map_location() == "epics[0].name"
-        assert epic.map_location('sequential_order') == "epics[0].sequential_order"
+        epics = when_story_map_epics_retrieved(story_map)
+        epic = when_first_epic_retrieved(epics)
+        then_epic_map_location_correct(epic)
     
     def test_map_location_for_sub_epic(self, story_map):
-        epics = story_map.epics()
-        sub_epic = epics[0].children[0]
-        
-        assert sub_epic.map_location() == "epics[0].sub_epics[0].name"
+        epics = when_story_map_epics_retrieved(story_map)
+        sub_epic = when_sub_epic_retrieved_from_epics(epics)
+        then_sub_epic_map_location_correct(sub_epic)
     
     def test_map_location_for_story(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        
-        assert story.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].name"
-        assert story.map_location('sizing') == "epics[0].sub_epics[0].story_groups[0].stories[0].sizing"
+        epics = when_story_map_epics_retrieved(story_map)
+        story = when_story_retrieved_from_epics(epics)
+        then_story_map_location_correct(story)
     
     def test_scenario_map_location(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario = story.scenarios[0]
-        
-        assert scenario.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].scenarios[0].name"
+        epics = when_story_map_epics_retrieved(story_map)
+        scenario = when_scenario_retrieved_from_epics(epics)
+        then_scenario_map_location_correct(scenario)
     
     def test_scenario_outline_map_location(self, story_map):
-        epics = story_map.epics()
-        story = epics[0].children[0].children[0].children[0]
-        scenario_outline = story.scenario_outlines[0]
-        
-        assert scenario_outline.map_location() == "epics[0].sub_epics[0].story_groups[0].stories[0].scenario_outlines[0].name"
+        epics = when_story_map_epics_retrieved(story_map)
+        scenario_outline = when_scenario_outline_retrieved_from_epics(epics)
+        then_scenario_outline_map_location_correct(scenario_outline)
     
     def test_from_bot_loads_story_graph(self, tmp_path):
-        bot_directory = tmp_path / "test_bot"
-        bot_directory.mkdir()
-        docs_dir = bot_directory / "docs" / "stories"
-        docs_dir.mkdir(parents=True)
-        
-        story_graph = {
-            "epics": [
-                {
-                    "name": "Test Epic",
-                    "sequential_order": 1,
-                    "sub_epics": [],
-                    "story_groups": []
-                }
-            ]
-        }
-        
-        story_graph_path = docs_dir / "story-graph.json"
-        story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
-        
-        class MockBot:
-            def __init__(self, bot_directory):
-                self.bot_directory = bot_directory
-        
-        bot = MockBot(bot_directory)
-        story_map = StoryMap.from_bot(bot)
-        
-        assert len(story_map.epics()) == 1
-        assert story_map.epics()[0].name == "Test Epic"
+        bot_directory = given_test_bot_directory_created(tmp_path)
+        docs_dir = given_docs_directory_created(bot_directory)
+        story_graph = given_test_story_graph()
+        story_graph_path = given_story_graph_file_created(docs_dir, story_graph)
+        story_map = when_story_map_created_from_mock_bot(self, bot_directory)
+        then_story_map_contains_test_epic(story_map)
     
     def test_from_bot_with_path(self, tmp_path):
-        bot_directory = tmp_path / "test_bot"
-        bot_directory.mkdir()
-        docs_dir = bot_directory / "docs" / "stories"
-        docs_dir.mkdir(parents=True)
-        
-        story_graph = {
-            "epics": [
-                {
-                    "name": "Test Epic",
-                    "sequential_order": 1,
-                    "sub_epics": [],
-                    "story_groups": []
-                }
-            ]
-        }
-        
-        story_graph_path = docs_dir / "story-graph.json"
-        story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
-        
+        bot_directory = given_test_bot_directory_created(tmp_path)
+        docs_dir = given_docs_directory_created(bot_directory)
+        story_graph = given_test_story_graph()
+        story_graph_path = given_story_graph_file_created(docs_dir, story_graph)
         story_map = StoryMap.from_bot(bot_directory)
-        
-        assert len(story_map.epics()) == 1
-        assert story_map.epics()[0].name == "Test Epic"
+        then_story_map_contains_test_epic(story_map)
     
     def test_from_bot_raises_when_file_not_found(self, tmp_path):
-        bot_directory = tmp_path / "test_bot"
-        bot_directory.mkdir()
-        
-        class MockBot:
-            def __init__(self, bot_directory):
-                self.bot_directory = bot_directory
-        
-        bot = MockBot(bot_directory)
-        
-        with pytest.raises(FileNotFoundError):
-            StoryMap.from_bot(bot)
+        bot_directory = given_test_bot_directory_created(tmp_path)
+        when_mock_bot_created_then_story_map_raises_file_not_found_error(self, bot_directory)

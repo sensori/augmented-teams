@@ -636,7 +636,9 @@ class ValidateRulesAction(BaseAction):
         validation_rules = rules_data.get('validation_rules', [])
         
         # Process each rule: run scanner if exists, add results
+        # TWO-PASS SYSTEM: First pass (file-by-file), then second pass (cross-file)
         processed_rules = []
+        
         for idx, rule_dict in enumerate(validation_rules):
             if isinstance(rule_dict, dict):
                 rule_content = rule_dict.get('rule_content', rule_dict)
@@ -655,63 +657,122 @@ class ValidateRulesAction(BaseAction):
                 rule_obj = Rule(rule_file, rule_content, behavior_name)
                 
                 rule_result = dict(rule_dict)  # Copy rule
-                rule_result['scanner_results'] = {}
+                
+                # Check scanner type to determine format
+                from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
+                from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
                 
                 if scanner_path:
                     scanner_class, error_msg = self._load_scanner_class(scanner_path)
+                    is_test_or_code_scanner = (
+                        scanner_class and (
+                            issubclass(scanner_class, TestScanner) or 
+                            issubclass(scanner_class, CodeScanner)
+                        )
+                    )
+                else:
+                    scanner_class = None
+                    error_msg = None
+                    is_test_or_code_scanner = False
+                
+                # Use two-pass format only for TestScanner and CodeScanner
+                if is_test_or_code_scanner:
+                    rule_result['scanner_results'] = {
+                        'file_by_file': {'violations': []},
+                        'cross_file': {'violations': []}
+                    }
+                else:
+                    # Old format for StoryScanner and other scanners
+                    rule_result['scanner_results'] = {}
+                
+                if scanner_path:
                     if scanner_class:
-                        # Run scanner against knowledge graph
                         try:
                             scanner_instance = scanner_class()
                             
-                            # Pass test_files and code_files directly to scanners via scan() parameters
-                            # Scanners get files from parameters, not from knowledge_graph
-                            violations = scanner_instance.scan(
+                            # PASS 1: File-by-file scanning (current behavior)
+                            logger.info(f"Running file-by-file scan for rule: {rule_file}")
+                            violations_file_by_file = scanner_instance.scan(
                                 knowledge_graph, 
                                 rule_obj=rule_obj,
                                 test_files=test_files,
                                 code_files=code_files
                             )
-                            violations_list = violations if isinstance(violations, list) else []
+                            violations_list_file = violations_file_by_file if isinstance(violations_file_by_file, list) else []
                             
-                            # Convert violations to dictionaries if they're Violation objects
-                            violations_dicts = []
-                            
-                            for violation in violations_list:
+                            # Convert violations to dictionaries
+                            violations_dicts_file = []
+                            for violation in violations_list_file:
                                 if isinstance(violation, Violation):
-                                    # Violation already has Rule object reference
                                     violation_dict = violation.to_dict()
-                                    violations_dicts.append(violation_dict)
+                                    violations_dicts_file.append(violation_dict)
                                 elif isinstance(violation, dict):
-                                    # Dict violation - ensure it has rule name
                                     if 'rule' not in violation:
                                         violation['rule'] = rule_obj.name
                                     if 'rule_file' not in violation:
                                         violation['rule_file'] = rule_obj.rule_file
-                                    violations_dicts.append(violation)
+                                    violations_dicts_file.append(violation)
                             
-                            # Store violations in action instance for report generation
-                            self._violations.extend(violations_dicts)
+                            # Store violations based on scanner type
+                            self._violations.extend(violations_dicts_file)
                             
-                            rule_result['scanner_results'] = {
-                                'violations': violations_dicts
-                            }
+                            if is_test_or_code_scanner:
+                                # Two-pass format
+                                rule_result['scanner_results']['file_by_file']['violations'] = violations_dicts_file
+                            else:
+                                # Old format (for StoryScanner and others)
+                                rule_result['scanner_results']['violations'] = violations_dicts_file
+                            
+                            # PASS 2: Cross-file scanning (ONLY for TestScanner and CodeScanner)
+                            if is_test_or_code_scanner and (test_files or code_files) and hasattr(scanner_instance, 'scan_cross_file'):
+                                logger.info(f"Running cross-file scan for rule: {rule_file}")
+                                violations_cross_file = scanner_instance.scan_cross_file(
+                                    knowledge_graph,
+                                    rule_obj=rule_obj,
+                                    test_files=test_files,
+                                    code_files=code_files
+                                )
+                                violations_list_cross = violations_cross_file if isinstance(violations_cross_file, list) else []
+                                
+                                # Convert violations to dictionaries
+                                violations_dicts_cross = []
+                                for violation in violations_list_cross:
+                                    if isinstance(violation, Violation):
+                                        violation_dict = violation.to_dict()
+                                        violations_dicts_cross.append(violation_dict)
+                                    elif isinstance(violation, dict):
+                                        if 'rule' not in violation:
+                                            violation['rule'] = rule_obj.name
+                                        if 'rule_file' not in violation:
+                                            violation['rule_file'] = rule_obj.rule_file
+                                        # Mark as cross-file violation
+                                        violation['_pass'] = 'cross_file'
+                                        violations_dicts_cross.append(violation)
+                                
+                                # Store cross-file violations separately
+                                self._violations.extend(violations_dicts_cross)
+                                rule_result['scanner_results']['cross_file']['violations'] = violations_dicts_cross
+                            
                         except Exception as e:
                             # Log the error for debugging
-                            import logging
-                            logger = logging.getLogger(__name__)
                             logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
                             
                             # Raise exception with context - don't swallow scanner crashes
-                            # User needs to know when scanners fail so they can fix the issue
                             rule_file = rule_dict.get('rule_file', 'unknown')
                             scanner_path = rule_content.get('scanner', 'unknown')
                             raise ScannerExecutionError(rule_file, scanner_path, e) from e
                     else:
-                        rule_result['scanner_results'] = {
-                            'violations': [],
-                            'error': error_msg
-                        }
+                        # Error loading scanner - use appropriate format
+                        if is_test_or_code_scanner:
+                            rule_result['scanner_results'] = {
+                                'file_by_file': {'violations': [], 'error': error_msg},
+                                'cross_file': {'violations': []}
+                            }
+                        else:
+                            rule_result['scanner_results'] = {
+                                'violations': [],
+                                'error': error_msg
+                            }
                 
                 processed_rules.append(rule_result)
         
@@ -719,9 +780,14 @@ class ValidateRulesAction(BaseAction):
         violation_summary = []
         for rule in processed_rules:
             scanner_results = rule.get('scanner_results', {})
-            violations = scanner_results.get('violations', [])
-            if violations:
-                violation_summary.append(f"Rule {rule.get('rule_file', 'unknown')}: {len(violations)} violations")
+            file_by_file = scanner_results.get('file_by_file', {}).get('violations', [])
+            cross_file = scanner_results.get('cross_file', {}).get('violations', [])
+            total_violations = len(file_by_file) + len(cross_file)
+            if total_violations > 0:
+                violation_summary.append(
+                    f"Rule {rule.get('rule_file', 'unknown')}: "
+                    f"{len(file_by_file)} file-by-file, {len(cross_file)} cross-file violations"
+                )
         
         if violation_summary:
             edit_instructions = [
@@ -875,56 +941,106 @@ class ValidateRulesAction(BaseAction):
                 lines.append(f"*... and {total_rules - 20} more rules*")
                 lines.append("")
             
-            # Violations summary
+            # Violations summary - TWO-PASS SYSTEM
             lines.append("## Violations Found")
             lines.append("")
             
-            total_violations = 0
-            violations_by_rule = {}
+            # Separate violations by pass type
+            file_by_file_violations_by_rule = {}
+            cross_file_violations_by_rule = {}
+            total_file_by_file = 0
+            total_cross_file = 0
             
             for rule_dict in validation_rules:
                 rule_file = rule_dict.get('rule_file', 'unknown')
                 scanner_results = rule_dict.get('scanner_results', {})
-                violations = scanner_results.get('violations', [])
+                rule_name = Path(rule_file).stem if rule_file else 'unknown'
                 
-                if violations:
-                    rule_name = Path(rule_file).stem if rule_file else 'unknown'
-                    violations_by_rule[rule_name] = violations
-                    total_violations += len(violations)
+                # Handle both old format (backward compatibility) and new two-pass format
+                if 'file_by_file' in scanner_results or 'cross_file' in scanner_results:
+                    # New two-pass format
+                    file_by_file_violations = scanner_results.get('file_by_file', {}).get('violations', [])
+                    cross_file_violations = scanner_results.get('cross_file', {}).get('violations', [])
+                    
+                    if file_by_file_violations:
+                        file_by_file_violations_by_rule[rule_name] = file_by_file_violations
+                        total_file_by_file += len(file_by_file_violations)
+                    if cross_file_violations:
+                        cross_file_violations_by_rule[rule_name] = cross_file_violations
+                        total_cross_file += len(cross_file_violations)
+                else:
+                    # Old format (backward compatibility) - treat as file-by-file
+                    violations = scanner_results.get('violations', [])
+                    if violations:
+                        file_by_file_violations_by_rule[rule_name] = violations
+                        total_file_by_file += len(violations)
+            
+            total_violations = total_file_by_file + total_cross_file
             
             if total_violations == 0:
                 lines.append("✅ **No violations found.** All rules passed validation.")
                 lines.append("")
             else:
                 lines.append(f"**Total Violations:** {total_violations}")
+                lines.append(f"- **File-by-File Violations:** {total_file_by_file}")
+                lines.append(f"- **Cross-File Violations:** {total_cross_file}")
                 lines.append("")
                 
-                # Group violations by rule
-                for rule_name, violations in violations_by_rule.items():
-                    lines.append(f"### {rule_name.replace('_', ' ').title()}: {len(violations)} violation(s)")
+                # PASS 1: File-by-File Violations
+                if file_by_file_violations_by_rule:
+                    lines.append("### File-by-File Violations (Pass 1)")
+                    lines.append("")
+                    lines.append("These violations were detected by scanning each file individually.")
                     lines.append("")
                     
-                    # Show all violations (no truncation)
-                    for violation in violations:
-                        location = violation.get('location', 'unknown')
-                        message = violation.get('violation_message', 'No message')
-                        severity = violation.get('severity', 'error')
-                        line_number = violation.get('line_number')
-                        severity_icon = '🔴' if severity == 'error' else '🟡' if severity == 'warning' else '🔵'
+                    for rule_name, violations in file_by_file_violations_by_rule.items():
+                        lines.append(f"#### {rule_name.replace('_', ' ').title()}: {len(violations)} violation(s)")
+                        lines.append("")
                         
-                        # Create hyperlink if location is a file path
-                        location_link = self._create_file_link(location, line_number)
+                        for violation in violations:
+                            location = violation.get('location', 'unknown')
+                            message = violation.get('violation_message', 'No message')
+                            severity = violation.get('severity', 'error')
+                            line_number = violation.get('line_number')
+                            severity_icon = '🔴' if severity == 'error' else '🟡' if severity == 'warning' else '🔵'
+                            
+                            location_link = self._create_file_link(location, line_number)
+                            test_info = self._extract_test_info(message, location, line_number)
+                            
+                            if test_info:
+                                lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {test_info}")
+                            else:
+                                lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {message}")
                         
-                        # Extract test class and method from message if present
-                        test_info = self._extract_test_info(message, location, line_number)
-                        
-                        if test_info:
-                            # Include clickable links to test class and method
-                            lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {test_info}")
-                        else:
-                            lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {message}")
-                    
+                        lines.append("")
+                
+                # PASS 2: Cross-File Violations
+                if cross_file_violations_by_rule:
+                    lines.append("### Cross-File Violations (Pass 2)")
                     lines.append("")
+                    lines.append("These violations were detected by analyzing all files together to find patterns that span multiple files.")
+                    lines.append("")
+                    
+                    for rule_name, violations in cross_file_violations_by_rule.items():
+                        lines.append(f"#### {rule_name.replace('_', ' ').title()}: {len(violations)} violation(s)")
+                        lines.append("")
+                        
+                        for violation in violations:
+                            location = violation.get('location', 'unknown')
+                            message = violation.get('violation_message', 'No message')
+                            severity = violation.get('severity', 'error')
+                            line_number = violation.get('line_number')
+                            severity_icon = '🔴' if severity == 'error' else '🟡' if severity == 'warning' else '🔵'
+                            
+                            location_link = self._create_file_link(location, line_number)
+                            test_info = self._extract_test_info(message, location, line_number)
+                            
+                            if test_info:
+                                lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {test_info}")
+                            else:
+                                lines.append(f"- {severity_icon} **{severity.upper()}** - {location_link}: {message}")
+                        
+                        lines.append("")
             
             # Instructions summary
             lines.append("## Validation Instructions")

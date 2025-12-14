@@ -51,12 +51,8 @@ def create_agent_json(bot_dir: Path, workspace_dir: Path) -> Path:
     agent_json.write_text(json.dumps({'WORKING_AREA': str(workspace_dir)}), encoding='utf-8')
     return agent_json
 
-def create_bot_config(bot_dir: Path, bot_name: str, behaviors: list) -> Path:
-    """Create bot configuration file."""
-    config_path = get_bot_config_path(bot_dir)
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(json.dumps({'name': bot_name, 'behaviors': behaviors}), encoding='utf-8')
-    return config_path
+# Removed duplicate create_bot_config - use conftest.create_bot_config_file instead
+# Import conftest functions when needed: from conftest import create_bot_config_file
 
 def create_activity_log_file(workspace_dir: Path) -> Path:
     """Create activity log file in workspace directory."""
@@ -65,22 +61,8 @@ def create_activity_log_file(workspace_dir: Path) -> Path:
     log_file.write_text(json.dumps({'_default': {}}), encoding='utf-8')
     return log_file
 
-def create_workflow_state(workspace_dir: Path, bot_name: str, current_behavior: str = None, 
-                         current_action: str = None, completed_actions: list = None) -> Path:
-    """Create workflow state file in workspace directory."""
-    state_file = get_workflow_state_path(workspace_dir)
-    state_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    state_data = {}
-    if current_behavior:
-        state_data['current_behavior'] = current_behavior
-    if current_action:
-        state_data['current_action'] = current_action
-    if completed_actions:
-        state_data['completed_actions'] = completed_actions
-    
-    state_file.write_text(json.dumps(state_data), encoding='utf-8')
-    return state_file
+# Removed duplicate create_workflow_state - use conftest.create_workflow_state_file instead
+# Import conftest functions when needed: from conftest import create_workflow_state_file
 
 def create_guardrails_files(bot_dir: Path, behavior: str, questions: list, evidence: list) -> tuple:
     """Create guardrails files in behavior folder."""
@@ -198,94 +180,8 @@ def create_trigger_words_file(bot_dir: Path, behavior: str, action: str, pattern
     trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
     return trigger_file
 
-def create_actions_workflow_json(bot_directory: Path, behavior_name: str, actions: list = None) -> Path:
-    """Create behavior.json file for a behavior (new format).
-    
-    Args:
-        bot_directory: Bot directory
-        behavior_name: Behavior name (e.g., 'shape', '1_shape')
-        actions: Optional list of action configs. If None, uses standard workflow.
-    
-    Returns:
-        Path to created behavior.json file
-    """
-    behavior_dir = bot_directory / 'behaviors' / behavior_name
-    behavior_dir.mkdir(parents=True, exist_ok=True)
-    
-    if actions is None:
-        # Standard workflow order - new format with instructions array per action
-        actions = [
-            {
-                "name": "gather_context",
-                "order": 1,
-                "next_action": "decide_planning_criteria",
-                "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/1_gather_context/instructions.json",
-                    f"Test instructions for gather_context in {behavior_name}"
-                ]
-            },
-            {
-                "name": "decide_planning_criteria",
-                "order": 2,
-                "next_action": "build_knowledge",
-                "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/2_decide_planning_criteria/instructions.json",
-                    f"Test instructions for decide_planning_criteria in {behavior_name}"
-                ]
-            },
-            {
-                "name": "build_knowledge",
-                "order": 3,
-                "next_action": "validate_rules",
-                "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/3_build_knowledge/instructions.json",
-                    f"Test instructions for build_knowledge in {behavior_name}"
-                ]
-            },
-            {
-                "name": "validate_rules",
-                "order": 4,
-                "next_action": "render_output",
-                "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/4_validate_rules/instructions.json",
-                    f"Test instructions for validate_rules in {behavior_name}"
-                ]
-            },
-            {
-                "name": "render_output",
-                "order": 5,
-                "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json",
-                    f"Test instructions for render_output in {behavior_name}"
-                ]
-            }
-        ]
-    
-    # Create behavior.json with all sections
-    behavior_config = {
-        "behaviorName": behavior_name.split('_')[-1] if '_' in behavior_name and behavior_name[0].isdigit() else behavior_name,
-        "description": f"Test behavior: {behavior_name}",
-        "goal": f"Test goal for {behavior_name}",
-        "inputs": "Test inputs",
-        "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
-        "instructions": [
-            f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
-            "",
-            f"Test instructions for {behavior_name}."
-        ],
-        "actions_workflow": {
-            "actions": actions
-        },
-        "trigger_words": {
-            "description": f"Trigger words for {behavior_name}",
-            "patterns": [f"test.*{behavior_name}"],
-            "priority": 10
-        }
-    }
-    behavior_file = behavior_dir / 'behavior.json'
-    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
-    return behavior_file
+# Removed create_actions_workflow_json - moved to test_build_agile_bots_helpers.py (epic-level)
+# Import when needed: from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
 
 def create_base_actions_structure(bot_directory: Path):
     """Create base actions directory structure in bot_directory (no fallback).
@@ -427,3 +323,80 @@ def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, a
         action_name in entry.get('action_state', '')
         for entry in state_data.get('completed_actions', [])
     )
+
+# ============================================================================
+# COMMON GIVEN/WHEN/THEN HELPERS - Used across multiple test files
+# ============================================================================
+
+def given_bot_name_and_behavior_setup(bot_name: str = 'story_bot', behavior: str = 'shape'):
+    """Given: Bot name and behavior setup.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    """
+    return bot_name, behavior
+
+def given_bot_instance_created(bot_name: str, bot_directory: Path, config_path: Path):
+    """Given: Bot instance created.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    """
+    from agile_bot.bots.base_bot.src.bot.bot import Bot
+    return Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=config_path)
+
+def then_completed_actions_include(workflow_file: Path, expected_action_states: list):
+    """Then: Completed actions include expected action states.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    """
+    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
+    completed_states = [entry.get('action_state') for entry in state_data.get('completed_actions', [])]
+    for expected_state in expected_action_states:
+        assert expected_state in completed_states, f"Expected {expected_state} in completed_actions"
+
+def then_workflow_current_state_is(workflow, expected_state: str):
+    """Then: Workflow current state is expected.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    """
+    assert workflow.current_state == expected_state or workflow.state == expected_state
+
+def then_activity_logged_with_action_state(log_file_or_workspace: Path, expected_action_state: str):
+    """Then: Activity logged with expected action_state.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    Accepts either log_file Path or workspace_directory Path.
+    """
+    from tinydb import TinyDB
+    if (log_file_or_workspace / 'activity_log.json').exists():
+        # It's a workspace directory
+        log_file = log_file_or_workspace / 'activity_log.json'
+    else:
+        # It's already a log file
+        log_file = log_file_or_workspace
+    
+    with TinyDB(log_file) as db:
+        entries = db.all()
+        assert any(entry.get('action_state') == expected_action_state for entry in entries)
+
+def then_completion_entry_logged_with_outputs(log_file_or_workspace: Path, expected_outputs: dict = None, expected_duration: int = None):
+    """Then: Completion entry logged with outputs and duration.
+    
+    Used across multiple test files. Consolidate here to avoid duplication.
+    Accepts either log_file Path or workspace_directory Path.
+    """
+    from tinydb import TinyDB
+    if (log_file_or_workspace / 'activity_log.json').exists():
+        # It's a workspace directory
+        log_file = log_file_or_workspace / 'activity_log.json'
+    else:
+        # It's already a log file
+        log_file = log_file_or_workspace
+    
+    with TinyDB(log_file) as db:
+        entries = db.all()
+        completion_entry = next((e for e in entries if 'outputs' in e), None)
+        assert completion_entry is not None
+        if expected_outputs is not None:
+            assert completion_entry['outputs'] == expected_outputs
+        if expected_duration is not None:
+            assert completion_entry['duration'] == expected_duration

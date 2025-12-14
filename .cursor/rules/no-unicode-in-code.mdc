@@ -1,0 +1,53 @@
+# No Unicode in Code
+
+## Rule
+**NEVER use Unicode characters (including emojis, special symbols, checkmarks, etc.) in any code files.**
+
+## Scope
+This rule applies to:
+- Python scripts
+- Configuration files
+- Test files
+- Any executable code
+- Print statements
+- Comments
+- String literals
+
+## Allowed
+- Standard ASCII characters only (letters, numbers, basic punctuation)
+- Standard ASCII symbols: `!@#$%^&*()_+-=[]{}|;:'",.<>?/~`
+
+## Prohibited
+- Unicode checkmarks: ✓ ✗ ✘
+- Unicode arrows: → ← ↑ ↓
+- Emojis: 😀 ✅ ❌ ⚠️ 📋 etc.
+- Special Unicode symbols: • ▪ ▫ etc.
+- Any non-ASCII characters
+
+## Examples
+
+### ❌ BAD
+```python
+print("✓ PASS: Test passed")
+print("✗ FAIL: Test failed")
+print("⚠️ Warning: Issue found")
+status = "✅ Complete"
+```
+
+### ✅ GOOD
+```python
+print("[PASS] Test passed")
+print("[FAIL] Test failed")
+print("[WARNING] Issue found")
+status = "[COMPLETE]"
+```
+
+## Rationale
+Unicode characters can cause encoding errors in Windows environments, especially with cp1252 encoding. Using ASCII-only characters ensures code runs reliably across all platforms and environments.
+
+## Enforcement
+When writing or modifying code:
+1. Replace Unicode checkmarks with `[PASS]` / `[FAIL]` / `[OK]` / `[ERROR]`
+2. Replace emojis with descriptive text in brackets
+3. Use ASCII-only symbols for visual indicators
+4. Test that code runs without UnicodeEncodeError exceptions

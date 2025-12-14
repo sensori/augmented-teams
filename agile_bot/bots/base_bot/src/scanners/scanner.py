@@ -22,7 +22,9 @@ class Scanner(ABC):
         test_files: Optional[List['Path']] = None,
         code_files: Optional[List['Path']] = None
     ) -> List[Dict[str, Any]]:
-        """Scan knowledge graph for rule violations.
+        """Scan knowledge graph for rule violations (file-by-file pass).
+        
+        This is the first pass where each file is scanned individually.
         
         Args:
             knowledge_graph: The knowledge graph to validate (typically story-graph.json structure)
@@ -42,4 +44,31 @@ class Scanner(ABC):
             Exception: If scanner execution fails (exceptions should not be swallowed)
         """
         pass
+    
+    def scan_cross_file(
+        self,
+        knowledge_graph: Dict[str, Any],
+        rule_obj: Any = None,
+        test_files: Optional[List['Path']] = None,
+        code_files: Optional[List['Path']] = None
+    ) -> List[Dict[str, Any]]:
+        """Scan across all files for cross-file violations (second pass).
+        
+        This is the second pass where all files are analyzed together to detect
+        patterns that span multiple files (e.g., duplication, inconsistent naming,
+        helper functions that should be moved to different scope levels).
+        
+        Default implementation returns empty list. Override in subclasses to enable
+        cross-file scanning.
+        
+        Args:
+            knowledge_graph: The knowledge graph to validate
+            rule_obj: Optional Rule object reference
+            test_files: List of all test file paths to analyze together
+            code_files: List of all code file paths to analyze together
+            
+        Returns:
+            List of violation dictionaries or Violation objects for cross-file issues
+        """
+        return []
 

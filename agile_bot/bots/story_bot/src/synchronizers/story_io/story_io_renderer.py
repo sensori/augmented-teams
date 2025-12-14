@@ -106,6 +106,30 @@ class DrawIORenderer:
         return 0
     
     @staticmethod
+    def _find_story_path(story_name: str, epics: List[Dict[str, Any]]) -> tuple:
+        """
+        Find the epic and sub_epic path for a story by name.
+        Returns (epic_name, sub_epic_name) or (None, None) if not found.
+        """
+        def get_sub_epics(epic):
+            return epic.get('sub_epics', []) or epic.get('features', [])
+        
+        for epic in epics:
+            epic_name = epic.get('name', '')
+            for sub_epic in get_sub_epics(epic):
+                sub_epic_name = sub_epic.get('name', '')
+                # Check story_groups
+                for story_group in sub_epic.get('story_groups', []):
+                    for story in story_group.get('stories', []):
+                        if story.get('name') == story_name:
+                            return (epic_name, sub_epic_name)
+                # Check direct stories
+                for story in sub_epic.get('stories', []):
+                    if story.get('name') == story_name:
+                        return (epic_name, sub_epic_name)
+        return (None, None)
+    
+    @staticmethod
     def _traverse_all_stories(story: Dict[str, Any], collected: List[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Simple algorithm to collect a story (no nested stories - stories are flat).
@@ -327,17 +351,17 @@ class DrawIORenderer:
             
             if matching_increment:
                 # Build set of story keys (epic_name|sub_epic_name|story_name) that belong to the increment
+                # Increments now have flat stories array (no nested epics/sub_epics)
                 stories_in_increment = set()
-                for epic in matching_increment.get("epics", []):
-                    epic_name = epic.get("name", "")
-                    for sub_epic in epic.get("sub_epics", []):
-                        sub_epic_name = sub_epic.get("name", "")
-                        for story_group in sub_epic.get("story_groups", []):
-                            for story in story_group.get("stories", []):
-                                story_name = story.get("name", "")
-                                if story_name:
-                                    story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
-                                    stories_in_increment.add(story_key)
+                all_epics_for_lookup = story_graph.get("epics", [])
+                for story in matching_increment.get("stories", []):
+                    story_name = story.get("name", "")
+                    if story_name:
+                        # Find epic/sub_epic path for this story
+                        epic_name, sub_epic_name = self._find_story_path(story_name, all_epics_for_lookup)
+                        if epic_name and sub_epic_name:
+                            story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                            stories_in_increment.add(story_key)
                 
                 # Filter stories: show ALL epics and sub_epics, but filter stories to only those in increment
                 import copy
@@ -466,17 +490,18 @@ class DrawIORenderer:
             
             # CRITICAL: For discovery mode, filter stories to only those in the specified increment(s)
             # Build set of story keys (epic_name|sub_epic_name|story_name) that belong to filtered increments
+            # Increments now have flat stories array (no nested epics/sub_epics)
             stories_in_increments = set()
+            all_epics_for_lookup = filtered_graph.get("epics", [])
             for increment in filtered_increments:
-                for epic in increment.get("epics", []):
-                    epic_name = epic.get("name", "")
-                    for sub_epic in epic.get("sub_epics", []):
-                        sub_epic_name = sub_epic.get("name", "")
-                        for story in sub_epic.get("stories", []):
-                            story_name = story.get("name", "")
-                            if story_name:
-                                story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
-                                stories_in_increments.add(story_key)
+                for story in increment.get("stories", []):
+                    story_name = story.get("name", "")
+                    if story_name:
+                        # Find epic/sub_epic path for this story
+                        epic_name, sub_epic_name = self._find_story_path(story_name, all_epics_for_lookup)
+                        if epic_name and sub_epic_name:
+                            story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                            stories_in_increments.add(story_key)
             
             # Filter stories: show ALL epics and sub_epics, but filter stories to only those in increment(s)
             import copy
@@ -2506,37 +2531,48 @@ class DrawIORenderer:
             increment_stories_map = {}  # Maps story_key -> story_data
             
             # Build story-to-increment mapping from increments data
+            # Increments now have flat stories array (no nested epics/sub_epics)
+            all_epics_for_lookup = story_graph.get('epics', [])
             for inc_idx, increment in enumerate(story_graph.get('increments', []), 1):
-                for epic in increment.get('epics', []):
-                    epic_name = epic['name']
-                    # In increments, sub_epics contain stories directly
-                    features = epic.get('sub_epics', [])
-                    
-                    for feature in features:
-                        feature_name = feature['name']
-                        
-                        # Handle both 'stories' and 'story_groups' formats
-                        stories_list = []
-                        if 'stories' in feature:
-                            stories_list = feature['stories']
-                        elif 'story_groups' in feature:
-                            for group in feature['story_groups']:
-                                stories_list.extend(group.get('stories', []))
-                        
-                        for story in stories_list:
-                            story_name = story['name']
-                            story_key = f"{epic_name}|{feature_name}|{story_name}"
-                            if story_key not in story_to_increments:
-                                story_to_increments[story_key] = []
-                            story_to_increments[story_key].append(inc_idx)
-                            if story_key not in increment_stories_map:
-                                increment_stories_map[story_key] = story
+                # Process flat stories array
+                for story in increment.get('stories', []):
+                    story_name = story.get('name', '') if isinstance(story, dict) else story
+                    if not story_name:
+                        continue
+                    # Find epic/sub_epic path for this story
+                    epic_name, sub_epic_name = self._find_story_path(story_name, all_epics_for_lookup)
+                    if epic_name and sub_epic_name:
+                        # Story exists in epics - use full path
+                        story_key = f"{epic_name}|{sub_epic_name}|{story_name}"
+                    else:
+                        # Story doesn't exist in epics - try to find by name match in rendered cells
+                        # Use story name only as key (will match by name in cell value)
+                        story_key = f"|{story_name}"  # Empty epic/sub_epic, match by name only
+                    if story_key not in story_to_increments:
+                        story_to_increments[story_key] = []
+                    story_to_increments[story_key].append(inc_idx)
+                    if story_key not in increment_stories_map:
+                        increment_stories_map[story_key] = story if isinstance(story, dict) else {'name': story_name}
             
             # Find all story cells rendered by outline code and map them to increments
-            story_cells_to_move = []  # List of (cell, story_x, story_data, increment_indices, story_key)
+            # In priority mode (is_increments), track which stories come from "or" groups
+            story_cells_to_move = []  # List of (cell, story_x, story_data, increment_indices, story_key, group_connector)
             
             # Get all epics and features to build mapping from cell IDs to story keys
             all_epics = story_graph.get('epics', [])
+            
+            # Build mapping of story keys to their group connector type (for flattening "or" groups)
+            story_to_group_connector = {}  # Maps story_key -> connector type ('or', 'and', None)
+            for epic in all_epics:
+                features = get_sub_epics(epic)
+                for feature in features:
+                    story_groups = feature.get('story_groups', [])
+                    for group in story_groups:
+                        group_connector = group.get('connector')
+                        for story in group.get('stories', []):
+                            story_name = story.get('name', '')
+                            story_key = f"{epic['name']}|{feature['name']}|{story_name}"
+                            story_to_group_connector[story_key] = group_connector
             
             # Find all story cells rendered by outline code and map them to increments
             for cell in root_elem.findall('mxCell'):
@@ -2561,16 +2597,34 @@ class DrawIORenderer:
                                         if 1 <= feat_idx <= len(features):
                                             feature = features[feat_idx - 1]
                                             story_name = cell.get('value', '')
+                                            # Build story_key using exact epic/feature names from epics
                                             story_key = f"{epic['name']}|{feature['name']}|{story_name}"
                                             
                                             # Check if this story is in any increment
+                                            # Try multiple key formats to handle naming variations
+                                            matched_key = None
+                                            if story_key in story_to_increments:
+                                                matched_key = story_key
+                                            else:
+                                                # Try name-only match (for stories that don't have epic/sub_epic path)
+                                                name_only_key = f"|{story_name}"
+                                                if name_only_key in story_to_increments:
+                                                    matched_key = name_only_key
+                                            
+                                            if not matched_key:
+                                                # Not in any increment
+                                                continue
+                                            
+                                            story_key = matched_key
                                             if story_key in story_to_increments:
                                                 geom = cell.find('mxGeometry')
                                                 if geom is not None:
                                                     story_x = float(geom.get('x', 0))
                                                     story_data = increment_stories_map.get(story_key)
                                                     increment_indices = story_to_increments[story_key]
-                                                    story_cells_to_move.append((cell, story_x, story_data, increment_indices, story_key))
+                                                    # Get group connector type (for flattening "or" groups in priority mode)
+                                                    group_connector = story_to_group_connector.get(story_key)
+                                                    story_cells_to_move.append((cell, story_x, story_data, increment_indices, story_key, group_connector))
                             except (ValueError, IndexError):
                                 # Skip if parsing fails
                                 continue
@@ -2578,15 +2632,23 @@ class DrawIORenderer:
             # Calculate increment lane positions
             increments = story_graph.get('increments', [])
             increment_lane_height = 100
-            # Find bottom of all content to place increment lanes below
+            # Find bottom of outline content (epics/features/stories) to place increment lanes right after
             max_y = 0
             for cell in root_elem.findall('mxCell'):
-                geom = cell.find('mxGeometry')
-                if geom is not None:
-                    y = float(geom.get('y', 0))
-                    height = float(geom.get('height', 0))
-                    max_y = max(max_y, y + height)
-            increment_lane_y_start = max_y + 50 - 125  # Move up 125 pixels
+                cell_id = cell.get('id', '')
+                # Only count outline content (epics, features, stories), not increment lanes
+                if cell_id and (cell_id.startswith('epic') or cell_id.startswith('e') or cell_id.startswith('user_')):
+                    geom = cell.find('mxGeometry')
+                    if geom is not None:
+                        y = float(geom.get('y', 0))
+                        height = float(geom.get('height', 0))
+                        max_y = max(max_y, y + height)
+            # Position increments right after outline content (around y=400-500 based on copy file)
+            # If max_y is very high, use a fixed position like the copy file (340)
+            if max_y > 1000:
+                increment_lane_y_start = 340  # Match copy file positioning
+            else:
+                increment_lane_y_start = max(max_y + 50, 340)  # At least 340
             
             # Render increment labels
             increment_label_x = -180  # Move another 100px to the left
@@ -2609,7 +2671,7 @@ class DrawIORenderer:
             
             # Build mapping of story keys to their original story cells for reference
             story_key_to_original_cell = {}
-            for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
+            for cell, story_x, story_data, increment_indices, story_key, group_connector in story_cells_to_move:
                 story_key_to_original_cell[story_key] = cell
             
             # Note: User cells are NOT moved - they stay in their original positions above the stories
@@ -2633,7 +2695,7 @@ class DrawIORenderer:
                         
                         # Check which stories are inside this background rectangle
                         stories_in_bg = []
-                        for orig_cell, orig_x, orig_data, orig_indices, orig_key in story_cells_to_move:
+                        for orig_cell, orig_x, orig_data, orig_indices, orig_key, orig_connector in story_cells_to_move:
                             orig_geom = orig_cell.find('mxGeometry')
                             if orig_geom is not None:
                                 story_x_orig = float(orig_geom.get('x', 0))
@@ -2651,7 +2713,7 @@ class DrawIORenderer:
             
             # Remove story cells and background rectangles from their current positions
             # Note: User cells are NOT removed - they stay in their original positions
-            for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
+            for cell, story_x, story_data, increment_indices, story_key, group_connector in story_cells_to_move:
                 root_elem.remove(cell)
             for cell, stories_in_bg, bg_bounds in bg_rects_to_move:
                 root_elem.remove(cell)
@@ -2661,20 +2723,95 @@ class DrawIORenderer:
             story_x_positions = {}  # Maps (inc_idx, story_key) -> current_x_position
             story_y_positions = {}  # Maps (inc_idx, story_key) -> current_y_position
             
-            for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
-                # Calculate position for story in each increment lane it belongs to
-                for inc_idx in increment_indices:
-                    increment_y = increment_lane_y_start + (inc_idx - 1) * increment_lane_height
-                    story_y = increment_y + 20
-                    
-                    # Calculate X position - use original story_x for first occurrence, then space horizontally
-                    position_key = (inc_idx, story_key)
-                    if position_key not in story_x_positions:
-                        story_x_positions[position_key] = story_x
-                        story_y_positions[position_key] = story_y
+            # Build mapping of (epic_name, feature_name) -> feature x position from rendered cells
+            # This ensures stories align to the same column across all increments
+            feature_x_positions = {}  # Maps (epic_name, feature_name) -> feature_x
+            all_epics = story_graph.get('epics', [])
+            for cell in root_elem.findall('mxCell'):
+                cell_id = cell.get('id', '')
+                # Feature cells have pattern: e{epic}f{feature} (no 's' for story)
+                if cell_id and cell_id.startswith('e') and 'f' in cell_id and 's' not in cell_id and not cell_id.startswith('user_'):
+                    try:
+                        parts = cell_id[1:].split('f')
+                        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                            epic_idx = int(parts[0])
+                            feat_idx = int(parts[1])
+                            if 1 <= epic_idx <= len(all_epics):
+                                epic = all_epics[epic_idx - 1]
+                                features = get_sub_epics(epic)
+                                if 1 <= feat_idx <= len(features):
+                                    feature = features[feat_idx - 1]
+                                    epic_name = epic.get('name', '')
+                                    feature_name = feature.get('name', '')
+                                    geom = cell.find('mxGeometry')
+                                    if geom is not None:
+                                        feature_x = float(geom.get('x', 0))
+                                        key = (epic_name, feature_name)
+                                        feature_x_positions[key] = feature_x
+                    except (ValueError, IndexError):
+                        pass
+            
+            # Fallback: Build mapping of (epic_name, feature_name) -> leftmost story x position from outline
+            # Use this if feature x position not found
+            feature_story_x_base = {}  # Maps (epic_name, feature_name) -> leftmost_story_x
+            for cell, story_x, story_data, increment_indices, story_key, group_connector in story_cells_to_move:
+                # Parse epic and feature from story_key
+                parts = story_key.split('|')
+                if len(parts) >= 3:
+                    epic_name = parts[0]
+                    feature_name = parts[1]
+                    key = (epic_name, feature_name)
+                    if key not in feature_story_x_base:
+                        feature_story_x_base[key] = story_x
                     else:
-                        # Story already in this increment - position to the right
-                        story_x_positions[position_key] += self.STORY_SPACING_X
+                        # Keep the leftmost (minimum) x position
+                        feature_story_x_base[key] = min(feature_story_x_base[key], story_x)
+            
+            # In priority mode (is_increments), flatten "or" groups: place ALL stories side-by-side horizontally
+            # Group stories by (epic, feature) and increment to handle "or" groups
+            stories_by_epic_feature_inc = {}  # Maps (epic_name, feature_name, inc_idx) -> list of (story_key, story_x, group_connector)
+            
+            for cell, story_x, story_data, increment_indices, story_key, group_connector in story_cells_to_move:
+                # Parse epic and feature from story_key
+                parts = story_key.split('|')
+                if len(parts) >= 3:
+                    epic_name = parts[0]
+                    feature_name = parts[1]
+                    for inc_idx in increment_indices:
+                        key = (epic_name, feature_name, inc_idx)
+                        if key not in stories_by_epic_feature_inc:
+                            stories_by_epic_feature_inc[key] = []
+                        stories_by_epic_feature_inc[key].append((story_key, story_x, group_connector))
+            
+            # Position stories: flatten "or" groups to horizontal layout - ALL stories side-by-side
+            # Align stories to their feature column using feature x position
+            for (epic_name, feature_name, inc_idx), story_list in stories_by_epic_feature_inc.items():
+                increment_y = increment_lane_y_start + (inc_idx - 1) * increment_lane_height
+                story_y = increment_y + 20
+                
+                # Get base x position from feature column (aligns stories to feature)
+                feature_key = (epic_name, feature_name)
+                feature_x = feature_x_positions.get(feature_key)
+                if feature_x is not None:
+                    # Use feature x position + offset (same as outline: feat_x + 2)
+                    base_x = feature_x + 2
+                else:
+                    # Fallback: use leftmost story x position from outline
+                    base_x = feature_story_x_base.get(feature_key)
+                    if base_x is None:
+                        # Last resort: use leftmost story x position from this increment
+                        base_x = min(story_x for _, story_x, _ in story_list)
+                
+                # Sort stories by original x position to maintain left-to-right order
+                story_list_sorted = sorted(story_list, key=lambda x: (x[1], x[0]))  # Sort by x, then by story_key for consistency
+                
+                # Place ALL stories side-by-side horizontally, aligned to feature column
+                # Use base_x as the starting position (preserves column alignment)
+                for idx, (story_key, story_x, group_connector) in enumerate(story_list_sorted):
+                    position_key = (inc_idx, story_key)
+                    # Place stories horizontally starting from base_x
+                    story_x_positions[position_key] = base_x + idx * self.STORY_SPACING_X
+                    story_y_positions[position_key] = story_y
             
             # Render background rectangles FIRST (so they appear behind stories)
             bg_rect_counter = {}  # Track unique IDs per increment
@@ -2732,10 +2869,20 @@ class DrawIORenderer:
                         bg_geom.set('as', 'geometry')
             
             # Render stories AFTER background rectangles (so they appear on top)
-            for cell, story_x, story_data, increment_indices, story_key in story_cells_to_move:
+            # Track rendered stories to avoid duplicates
+            rendered_stories = set()  # Set of (inc_idx, story_key) tuples
+            story_cell_geometries = {}  # Maps (inc_idx, story_key) -> geometry element for later updates
+            
+            for cell, story_x, story_data, increment_indices, story_key, group_connector in story_cells_to_move:
                 # Render story in each increment lane it belongs to
                 for inc_idx in increment_indices:
                     position_key = (inc_idx, story_key)
+                    
+                    # Skip if already rendered (avoid duplicates)
+                    if position_key in rendered_stories:
+                        continue
+                    rendered_stories.add(position_key)
+                    
                     current_story_x = story_x_positions[position_key]
                     current_story_y = story_y_positions[position_key]
                     
@@ -2752,6 +2899,7 @@ class DrawIORenderer:
                                                x=str(current_story_x), y=str(current_story_y),
                                                width=str(self.STORY_WIDTH), height=str(self.STORY_HEIGHT))
                     story_geom.set('as', 'geometry')
+                    story_cell_geometries[position_key] = story_geom
             
             # Note: User cells are NOT moved - they stay in their original positions above the stories
             
@@ -2772,6 +2920,340 @@ class DrawIORenderer:
                 separator_point2 = ET.SubElement(separator_geom, 'mxPoint',
                                                x='4000', y=str(separator_y))
                 separator_point2.set('as', 'targetPoint')
+            
+            # Recalculate epic and feature widths to span across all increments
+            # Find rightmost story position across all increments for each epic/feature
+            epic_feature_max_x = {}  # Maps (epic_name, feature_name) -> max_x across all increments
+            
+            for (inc_idx, story_key), story_x in story_x_positions.items():
+                parts = story_key.split('|')
+                if len(parts) >= 3:
+                    epic_name = parts[0]
+                    feature_name = parts[1]
+                    key = (epic_name, feature_name)
+                    story_right = story_x + self.STORY_WIDTH
+                    if key not in epic_feature_max_x:
+                        epic_feature_max_x[key] = story_right
+                    else:
+                        epic_feature_max_x[key] = max(epic_feature_max_x[key], story_right)
+            
+            # First pass: Calculate updated feature widths (without repositioning)
+            feature_widths = {}  # Maps (epic_idx, feat_idx) -> new_width
+            feature_cells = {}  # Maps (epic_idx, feat_idx) -> (cell, geom, epic_name, feature_name)
+            
+            for cell in root_elem.findall('mxCell'):
+                cell_id = cell.get('id', '')
+                if cell_id and cell_id.startswith('e') and 'f' in cell_id and 's' not in cell_id:
+                    # This is a feature cell
+                    try:
+                        parts = cell_id[1:].split('f')
+                        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                            epic_idx = int(parts[0])
+                            feat_idx = int(parts[1])
+                            if 1 <= epic_idx <= len(all_epics):
+                                epic = all_epics[epic_idx - 1]
+                                features = get_sub_epics(epic)
+                                if 1 <= feat_idx <= len(features):
+                                    feature = features[feat_idx - 1]
+                                    key = (epic['name'], feature['name'])
+                                    geom = cell.find('mxGeometry')
+                                    if geom is not None:
+                                        feat_x = float(geom.get('x', 0))
+                                        current_width = float(geom.get('width', 0))
+                                        
+                                        if key in epic_feature_max_x:
+                                            # Calculate feature width to span to rightmost story across all increments
+                                            max_x = epic_feature_max_x[key]
+                                            feature_padding = 30 if epic_idx == 1 else 6
+                                            new_width = max_x - feat_x + feature_padding
+                                            # Ensure minimum width is maintained
+                                            min_width = max(100, current_width)  # Keep at least current width or 100px
+                                            new_width = max(new_width, min_width)
+                                        else:
+                                            # Feature has no stories in increments - maintain minimum width
+                                            new_width = max(100, current_width)
+                                        
+                                        feature_widths[(epic_idx, feat_idx)] = new_width
+                                        feature_cells[(epic_idx, feat_idx)] = (cell, geom, epic, feature)
+                    except (ValueError, IndexError):
+                        pass
+            
+            # Second pass: Reposition features sequentially ACROSS ALL EPICS to prevent overlap
+            # Get the leftmost epic's x position as starting point
+            first_epic_x = None
+            for epic_idx, epic in enumerate(all_epics, 1):
+                epic_cell_id = f'epic{epic_idx}'
+                for cell in root_elem.findall('mxCell'):
+                    if cell.get('id') == epic_cell_id:
+                        epic_geom = cell.find('mxGeometry')
+                        if epic_geom is not None:
+                            epic_x = float(epic_geom.get('x', 0))
+                            if first_epic_x is None or epic_x < first_epic_x:
+                                first_epic_x = epic_x
+                            break
+
+            if first_epic_x is None:
+                first_epic_x = 20  # Fallback
+
+            # Position ALL features sequentially across all epics
+            current_x = first_epic_x + 10  # Start 10px from leftmost epic left edge
+            feature_spacing = 10  # Spacing between features
+
+            for epic_idx, epic in enumerate(all_epics, 1):
+                features = get_sub_epics(epic)
+                for feat_idx, feature in enumerate(features, 1):
+                    key = (epic_idx, feat_idx)
+                    if key in feature_cells and key in feature_widths:
+                        cell, geom, epic_obj, feature_obj = feature_cells[key]
+                        new_width = feature_widths[key]
+
+                        # Update position and width
+                        geom.set('x', str(current_x))
+                        geom.set('width', str(new_width))
+                        
+                        # Move to next feature position
+                        current_x = current_x + new_width + feature_spacing
+            
+            # Update user/actor cell positions to be directly below their features
+            # Collect all users per feature (deduplicate by user name)
+            users_by_feature = {}  # Maps (epic_idx, feat_idx) -> dict of user_name -> user_cell
+            for cell in root_elem.findall('mxCell'):
+                cell_id = cell.get('id', '')
+                if cell_id and cell_id.startswith('user_e') and 'f' in cell_id:
+                    # Parse user cell ID: user_e{epic_idx}f{feat_idx}s{story_idx}_{user}
+                    try:
+                        # Format: user_e1f1s1_MCP Server Generator
+                        # Split on '_' to get ['user', 'e1f1s1', 'MCP', 'Server', 'Generator']
+                        parts = cell_id.split('_')
+                        if len(parts) >= 3:
+                            # parts[0] = 'user', parts[1] = 'e1f1s1', parts[2:] = ['MCP', 'Server', 'Generator']
+                            epic_feat_story = parts[1]  # e1f1s1
+                            user_name = '_'.join(parts[2:])  # MCP Server Generator
+                            
+                            # Extract epic_idx and feat_idx from e1f1s1
+                            if epic_feat_story.startswith('e') and 'f' in epic_feat_story:
+                                # Remove 'e' prefix to get 1f1s1
+                                epic_feat_story = epic_feat_story[1:]
+                                # Split on 'f' to get ['1', '1s1']
+                                epic_feat_parts = epic_feat_story.split('f')
+                                if len(epic_feat_parts) >= 2:
+                                    epic_part = epic_feat_parts[0]  # '1'
+                                    # Extract feat_idx before 's'
+                                    feat_part = epic_feat_parts[1].split('s')[0]  # '1'
+                                    
+                                    if epic_part.isdigit() and feat_part.isdigit():
+                                        epic_idx = int(epic_part)
+                                        feat_idx = int(feat_part)
+                                        key = (epic_idx, feat_idx)
+                                        if key not in users_by_feature:
+                                            users_by_feature[key] = {}
+                                        # Only keep one cell per user name (deduplicate)
+                                        if user_name not in users_by_feature[key]:
+                                            users_by_feature[key][user_name] = cell
+                    except (ValueError, IndexError):
+                        pass
+            
+            # Position users directly below their features
+            for (epic_idx, feat_idx), user_dict in users_by_feature.items():
+                key = (epic_idx, feat_idx)
+                if key in feature_cells:
+                    cell_feat, geom_feat, _, _ = feature_cells[key]
+                    feat_x = float(geom_feat.get('x', 0))
+                    feat_y = float(geom_feat.get('y', 0))
+                    feat_height = float(geom_feat.get('height', 60))
+                    
+                    # Position users directly below feature
+                    user_y = feat_y + feat_height + 10  # 10px gap below feature
+                    user_x_start = feat_x + 2  # Align with feature content (same as stories)
+                    
+                    # Position users horizontally, one after another (sorted by name for consistency)
+                    user_list = sorted(user_dict.items())
+                    for idx, (user_name, user_cell) in enumerate(user_list):
+                        user_geom = user_cell.find('mxGeometry')
+                        if user_geom is not None:
+                            user_x = user_x_start + idx * self.STORY_SPACING_X
+                            user_geom.set('x', str(user_x))
+                            user_geom.set('y', str(user_y))
+            
+            # Update story positions to align with repositioned features
+            # Build mapping of (epic_name, feature_name) -> new feature x position
+            updated_feature_x_positions = {}  # Maps (epic_name, feature_name) -> new_feat_x
+            for (epic_idx, feat_idx), (cell, geom, epic, feature) in feature_cells.items():
+                feat_x = float(geom.get('x', 0))
+                key = (epic['name'], feature['name'])
+                updated_feature_x_positions[key] = feat_x
+            
+            # Reposition all stories to align with updated feature positions
+            for (inc_idx, story_key), old_story_x in list(story_x_positions.items()):
+                parts = story_key.split('|')
+                if len(parts) >= 3:
+                    epic_name = parts[0]
+                    feature_name = parts[1]
+                    feature_key = (epic_name, feature_name)
+                    
+                    if feature_key in updated_feature_x_positions:
+                        new_feat_x = updated_feature_x_positions[feature_key]
+                        # Stories should start at feature_x + 2
+                        new_base_x = new_feat_x + 2
+                        
+                        # Find all stories for this feature/increment to recalculate positions
+                        stories_for_feature_inc = [
+                            (sk, sx) for (iidx, sk), sx in story_x_positions.items()
+                            if iidx == inc_idx and sk.split('|')[0] == epic_name and sk.split('|')[1] == feature_name
+                        ]
+                        
+                        # Sort by original position to maintain order
+                        stories_for_feature_inc.sort(key=lambda x: x[1])
+                        
+                        # Reposition stories starting from new_base_x
+                        for idx, (sk, _) in enumerate(stories_for_feature_inc):
+                            story_pos_key = (inc_idx, sk)
+                            new_story_x = new_base_x + idx * self.STORY_SPACING_X
+                            story_x_positions[story_pos_key] = new_story_x
+            
+            # Update rendered story cell positions to match updated story_x_positions
+            for (inc_idx, story_key), new_story_x in story_x_positions.items():
+                position_key = (inc_idx, story_key)
+                if position_key in story_cell_geometries:
+                    story_cell_geometries[position_key].set('x', str(new_story_x))
+            
+            # Update background rectangles to align with repositioned features
+            # Map stories to their features
+            story_to_feature_key = {}  # Maps story_key -> (epic_idx, feat_idx)
+            for (inc_idx, story_key), story_x in story_x_positions.items():
+                if story_key not in story_to_feature_key:
+                    parts = story_key.split('|')
+                    if len(parts) >= 3:
+                        epic_name = parts[0]
+                        feature_name = parts[1]
+                        # Find matching feature
+                        for epic_idx, epic in enumerate(all_epics, 1):
+                            if epic['name'] == epic_name:
+                                features = get_sub_epics(epic)
+                                for feat_idx, feature in enumerate(features, 1):
+                                    if feature['name'] == feature_name:
+                                        story_to_feature_key[story_key] = (epic_idx, feat_idx)
+                                        break
+                                break
+            
+            # Group backgrounds by (epic_idx, feat_idx, inc_idx) to merge duplicates
+            bg_by_feature_inc = {}  # Maps (epic_idx, feat_idx, inc_idx) -> list of (cell, geom)
+            
+            # First pass: Map backgrounds to features
+            for cell in root_elem.findall('mxCell'):
+                cell_id = cell.get('id', '')
+                if cell_id and 'inc' in cell_id and '_bg_' in cell_id:
+                    geom = cell.find('mxGeometry')
+                    if geom is None:
+                        continue
+                    
+                    bg_x = float(geom.get('x', 0))
+                    bg_y = float(geom.get('y', 0))
+                    bg_width = float(geom.get('width', 0))
+                    bg_right = bg_x + bg_width
+                    
+                    # Extract increment index from cell ID
+                    parts = cell_id.split('_')
+                    if len(parts) >= 2 and parts[0].startswith('inc'):
+                        bg_inc_idx = int(parts[0][3:])
+                        
+                        # Find stories that fall within this background's bounds
+                        stories_in_bg = []
+                        for (inc_idx, story_key), story_x in story_x_positions.items():
+                            if inc_idx == bg_inc_idx:
+                                story_y = story_y_positions.get((inc_idx, story_key), 0)
+                                # Check if story is within background bounds (with tolerance)
+                                if (bg_x - 10 <= story_x <= bg_right + 10 and 
+                                    bg_y - 10 <= story_y <= bg_y + 70):  # Within Y range of background
+                                    stories_in_bg.append(story_key)
+                        
+                        # Determine feature from stories in this background
+                        if stories_in_bg:
+                            # Get feature from first story (all stories in a bg should be from same feature)
+                            first_story = stories_in_bg[0]
+                            if first_story in story_to_feature_key:
+                                epic_idx, feat_idx = story_to_feature_key[first_story]
+                                key = (epic_idx, feat_idx, bg_inc_idx)
+                                if key not in bg_by_feature_inc:
+                                    bg_by_feature_inc[key] = []
+                                bg_by_feature_inc[key].append((cell, geom))
+            
+            # Second pass: Update or remove duplicate backgrounds
+            for (epic_idx, feat_idx, inc_idx), bg_cells in bg_by_feature_inc.items():
+                key = (epic_idx, feat_idx)
+                if key in feature_cells and key in feature_widths:
+                    cell_feat, geom_feat, _, _ = feature_cells[key]
+                    feat_x = float(geom_feat.get('x', 0))
+                    feat_width = feature_widths[key]
+                    
+                    # Keep only the first background, remove duplicates
+                    for idx, (bg_cell, bg_geom) in enumerate(bg_cells):
+                        if idx == 0:
+                            # Update first background to match feature
+                            bg_geom.set('x', str(feat_x))
+                            bg_geom.set('width', str(feat_width))
+                        else:
+                            # Remove duplicate backgrounds
+                            root_elem.remove(bg_cell)
+            
+            # Update epic positions and widths based on repositioned features
+            # Calculate epic bounds first
+            epic_bounds = {}  # Maps epic_idx -> (min_x, max_x)
+            
+            for epic_idx, epic in enumerate(all_epics, 1):
+                features = get_sub_epics(epic)
+                epic_min_x = None
+                epic_max_x = 0
+                
+                for feat_idx, feature in enumerate(features, 1):
+                    key = (epic_idx, feat_idx)
+                    if key in feature_cells and key in feature_widths:
+                        cell_feat, geom_feat, _, _ = feature_cells[key]
+                        feat_x = float(geom_feat.get('x', 0))
+                        feat_width = feature_widths[key]
+                        if epic_min_x is None or feat_x < epic_min_x:
+                            epic_min_x = feat_x
+                        epic_max_x = max(epic_max_x, feat_x + feat_width)
+                
+                if epic_min_x is not None and epic_max_x > 0:
+                    epic_bounds[epic_idx] = (epic_min_x, epic_max_x)
+            
+            # Position epics sequentially to prevent overlap
+            epic_padding_left = 10  # Padding before first feature
+            epic_padding_right = 30  # Padding after last feature
+            epic_spacing = 10  # Spacing between epics
+            
+            current_x = None
+            epic_updates = {}  # Maps epic_idx -> (new_x, new_width)
+            
+            for epic_idx in sorted(epic_bounds.keys()):
+                epic_min_x, epic_max_x = epic_bounds[epic_idx]
+                
+                if current_x is None:
+                    # First epic starts before its first feature
+                    new_epic_x = epic_min_x - epic_padding_left
+                else:
+                    # Subsequent epics start after previous epic ends
+                    new_epic_x = max(current_x + epic_spacing, epic_min_x - epic_padding_left)
+                
+                new_epic_width = epic_max_x - new_epic_x + epic_padding_right
+                epic_updates[epic_idx] = (new_epic_x, new_epic_width)
+                current_x = new_epic_x + new_epic_width
+            
+            # Apply epic updates
+            for cell in root_elem.findall('mxCell'):
+                cell_id = cell.get('id', '')
+                if cell_id and cell_id.startswith('epic') and cell_id != 'epic-group':
+                    try:
+                        epic_idx = int(cell_id[4:]) if len(cell_id) > 4 else 1
+                        if epic_idx in epic_updates:
+                            new_epic_x, new_epic_width = epic_updates[epic_idx]
+                            geom = cell.find('mxGeometry')
+                            if geom is not None:
+                                geom.set('x', str(new_epic_x))
+                                geom.set('width', str(new_epic_width))
+                    except (ValueError, IndexError):
+                        pass
         
         rough_string = ET.tostring(root, encoding='unicode')
         reparsed = minidom.parseString(rough_string)

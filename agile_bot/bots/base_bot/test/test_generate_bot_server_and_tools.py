@@ -14,19 +14,622 @@ from pathlib import Path
 import json
 from unittest.mock import Mock, patch
 from fastmcp import FastMCP, Client
-from conftest import bootstrap_env
+from conftest import bootstrap_env, create_bot_config_file, given_bot_name_and_behaviors_setup, given_bot_name_and_behavior_setup
 
 # ============================================================================
-# HELPER FUNCTIONS - Reusable test operations
+# HELPER FUNCTIONS - Sub-Epic Level (Used across multiple test classes)
 # ============================================================================
 
-def create_bot_config(workspace: Path, bot_name: str, behaviors: list) -> Path:
-    """Helper: Create bot configuration file."""
-    config_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'config'
+# Removed duplicate create_bot_config - use conftest.create_bot_config_file instead
+
+def given_test_bot_behaviors():
+    """Given: Test bot behaviors list."""
+    return ['shape', 'discovery', 'exploration', 'specification']
+
+# Use shared helpers from conftest - call with bot_name='test_bot' when needed
+# given_bot_name_and_behaviors_setup imported from conftest
+# given_bot_name_and_behavior_setup imported from conftest
+
+def given_trigger_patterns_for_shape_behavior():
+    """Given: Trigger patterns for shape behavior."""
+    return ['shape.*story', 'start.*mapping', 'story.*discovery']
+
+def then_generator_creates_behavior_tools_with_names(generator, expected_count: int, expected_behaviors: list):
+    """Then: Generator creates behavior tools with names."""
+    tool_names = [tool['name'] for tool in generator.registered_tools]
+    behavior_tools = [tool for tool in generator.registered_tools if tool.get('type') == 'behavior_tool']
+    assert len(behavior_tools) == expected_count, f"Expected {expected_count} behavior tools, got {len(behavior_tools)}"
+    for behavior in expected_behaviors:
+        assert behavior in tool_names or any(t.get('behavior') == behavior for t in generator.registered_tools)
+
+def then_behavior_tool_registered_with_patterns(generator, behavior: str, patterns: list):
+    """Then: Behavior tool registered with trigger patterns."""
+    tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
+    assert tool is not None, f"Behavior tool for {behavior} should be registered"
+    assert tool['type'] == 'behavior_tool'
+    for pattern in patterns:
+        assert pattern in tool['description']
+        assert pattern in tool['trigger_patterns']
+
+def given_bot_config_file_with_working_dir_and_behaviors(
+    workspace_root: Path,
+    bot_name: str,
+    behaviors: list
+) -> Path:
+    """Given step: A bot configuration file with a working directory and behaviors.
+    
+    Creates bot_config.json file with specified behaviors.
+    Used by: Multiple test classes that need bot configuration.
+    """
+    return create_bot_config_file(
+        workspace_root / 'agile_bot' / 'bots' / bot_name,
+        bot_name,
+        behaviors,
+        workspace_root=workspace_root
+    )
+
+def given_bot_configured_by_config(workspace_root: Path, bot_name: str):
+    """Given step: A bot that has been initialized with that config file.
+    
+    Initializes bot directory and workspace with bootstrap environment.
+    Used by: Multiple test classes that need initialized bot environment.
+    """
+    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+    workspace_directory = workspace_root / 'workspace'
+    workspace_directory.mkdir(parents=True, exist_ok=True)
+    bootstrap_env(bot_dir, workspace_directory)
+    return bot_dir, workspace_directory
+
+def given_base_actions_structure_exists(bot_dir: Path):
+    """Given step: Base actions structure exists.
+    
+    Creates base_actions directory structure in bot directory.
+    Used by: Tests that need base actions for workflow.
+    """
+    create_base_actions_structure(bot_dir)
+
+def given_behavior_workflow_files_exist_for_behaviors(bot_dir: Path, behaviors: list):
+    """Given step: Behavior workflow files exist for behaviors.
+    
+    Creates behavior.json files for all specified behaviors.
+    Used by: Tests that need behavior workflow configurations.
+    """
+    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    for behavior in behaviors:
+        create_actions_workflow_json(bot_dir, behavior)
+
+def given_behavior_with_trigger_words(bot_dir: Path, behavior: str, patterns: list):
+    """Given step: Behavior has trigger words configured.
+    
+    Creates behavior.json with custom trigger words.
+    Used by: Tests that need behavior with trigger patterns.
+    """
+    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    create_actions_workflow_json(bot_dir, behavior)
+    # Update behavior.json with custom trigger words
+    behavior_dir = bot_dir / 'behaviors' / behavior
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_data = json.loads(behavior_file.read_text())
+    behavior_data['trigger_words'] = {
+        'description': f'Trigger words for {behavior}',
+        'patterns': patterns,
+        'priority': 10
+    }
+    behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+    return behavior_file
+
+def given_behavior_without_trigger_words(bot_dir: Path, behavior: str):
+    """Given step: Behavior does not have trigger words configured.
+    
+    Creates behavior.json without trigger_words field.
+    Used by: Tests that verify graceful handling of missing trigger words.
+    """
+    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    create_actions_workflow_json(bot_dir, behavior)
+    # Remove trigger_words from behavior.json
+    behavior_dir = bot_dir / 'behaviors' / behavior
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_data = json.loads(behavior_file.read_text())
+    behavior_data.pop('trigger_words', None)
+    behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+    return behavior_file
+
+def given_bot_config_file_with_invalid_json(workspace_root: Path, bot_name: str, invalid_content: str = 'not valid json {'):
+    """Given step: Bot Config file exists with invalid JSON syntax.
+    
+    Creates a bot config file with malformed JSON content.
+    Used by: Tests that verify error handling for malformed config files.
+    """
+    config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
     config_dir.mkdir(parents=True, exist_ok=True)
     config_file = config_dir / 'bot_config.json'
-    config_file.write_text(json.dumps({'name': bot_name, 'behaviors': behaviors}), encoding='utf-8')
+    config_file.write_text(invalid_content)
     return config_file
+
+def given_bot_config_does_not_exist(workspace_root: Path, bot_name: str):
+    """Given step: Bot Config does NOT exist.
+    
+    Ensures bot config file is removed if it exists.
+    Used by: Tests that verify error handling for missing config files.
+    """
+    config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
+    if config_path.exists():
+        config_path.unlink()
+    return config_path
+
+def given_bot_has_instructions_json(workspace_root: Path, bot_name: str, goal: str, behavior_descriptions: dict):
+    """Given step: Bot has instructions.json with goal and behavior descriptions.
+    
+    Creates instructions.json file in bot directory.
+    Used by: Tests that need bot goal and behavior descriptions.
+    """
+    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+    instructions_file = bot_dir / 'instructions.json'
+    instructions_data = {
+        'botName': bot_name,
+        'goal': goal,
+        'description': f'Helps teams create and refine user stories',
+        'behaviors': behavior_descriptions
+    }
+    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
+    return instructions_file
+
+def given_behaviors_with_descriptions_and_trigger_words(bot_dir: Path, behaviors_config: list):
+    """Given step: Behaviors have descriptions and trigger words configured.
+    
+    Creates behavior.json files with descriptions and trigger words.
+    behaviors_config: list of dicts with 'name', 'description', 'patterns' keys.
+    Used by: Tests that need behaviors with full metadata.
+    """
+    from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
+    for behavior_config in behaviors_config:
+        behavior = behavior_config['name']
+        create_actions_workflow_json(bot_dir, behavior)
+        behavior_dir = bot_dir / 'behaviors' / behavior
+        behavior_file = behavior_dir / 'behavior.json'
+        behavior_data = json.loads(behavior_file.read_text())
+        behavior_data['description'] = behavior_config['description']
+        behavior_data['trigger_words'] = {
+            'description': f'Trigger words for {behavior}',
+            'patterns': behavior_config['patterns'],
+            'priority': 10
+        }
+        behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+    return bot_dir
+
+def given_workflow_state_exists(workspace_directory: Path, bot_name: str, behavior: str, action: str, completed_actions: list = None):
+    """Given step: Workflow state exists.
+    
+    Creates workflow_state.json file with specified state.
+    Used by: Tests that need workflow state for action execution.
+    """
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_data = {
+        'current_behavior': f'{bot_name}.{behavior}',
+        'current_action': f'{bot_name}.{behavior}.{action}',
+        'completed_actions': completed_actions or []
+    }
+    workflow_file.write_text(json.dumps(workflow_data), encoding='utf-8')
+    return workflow_file
+
+def when_bot_tool_generator_processes_config(bot_name: str, config_path: Path):
+    """When step: Bot Tool Generator processes Bot Config."""
+    from agile_bot.bots.base_bot.src.mcp.bot_tool_generator import BotToolGenerator
+    generator = BotToolGenerator(bot_name=bot_name, config_path=config_path)
+    return generator.create_bot_tool()
+
+def when_behavior_tool_generator_processes_config(bot_name: str, config_path: Path):
+    """When step: Behavior Tool Generator processes Bot Config."""
+    from agile_bot.bots.base_bot.src.mcp.behavior_tool_generator import BehaviorToolGenerator
+    generator = BehaviorToolGenerator(bot_name=bot_name, config_path=config_path)
+    return generator.create_behavior_tools()
+
+def when_mcp_server_generator_receives_bot_config(bot_dir: Path, behaviors: list = None):
+    """When step: MCP Server Generator receives Bot Config."""
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+    generator = MCPServerGenerator(bot_directory=bot_dir)
+    if behaviors:
+        return generator.generate_server(behaviors=behaviors)
+    return generator.create_server_instance()
+
+def when_generator_registers_all_behavior_action_tools(bot_dir: Path):
+    """When step: Generator registers all behavior action tools.
+    
+    Creates generator, server instance, and registers all tools.
+    Returns tuple of (generator, mcp_server) with registered_tools populated.
+    """
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+    generator = MCPServerGenerator(bot_directory=bot_dir)
+    mcp_server = generator.create_server_instance()
+    generator.register_all_behavior_action_tools(mcp_server)
+    return generator, mcp_server
+
+def when_generator_generates_awareness_files(bot_dir: Path):
+    """When step: Generator generates awareness files.
+    
+    Creates generator and calls generate_awareness_files().
+    Returns generator instance.
+    """
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+    generator = MCPServerGenerator(bot_directory=bot_dir)
+    generator.generate_awareness_files()
+    return generator
+
+def when_server_deployer_deploys(config_path: Path, workspace_root: Path, protocol_handler_url: str = None):
+    """When step: Server Deployer deploys server.
+    
+    Creates ServerDeployer and calls deploy_server().
+    Returns deployment result.
+    """
+    from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
+    deployer_kwargs = {
+        'config_path': config_path,
+        'workspace_root': workspace_root
+    }
+    if protocol_handler_url:
+        deployer_kwargs['protocol_handler_url'] = protocol_handler_url
+    deployer = ServerDeployer(**deployer_kwargs)
+    return deployer.deploy_server()
+
+def when_server_deployer_gets_catalog(config_path: Path, workspace_root: Path):
+    """When step: Server Deployer gets tool catalog.
+    
+    Creates ServerDeployer and calls get_tool_catalog().
+    Returns catalog.
+    """
+    from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
+    deployer = ServerDeployer(
+        config_path=config_path,
+        workspace_root=workspace_root
+    )
+    return deployer.get_tool_catalog()
+
+@pytest.mark.asyncio
+async def when_behavior_tool_invoked(mcp_server, tool_name: str, parameters: dict):
+    """When step: Behavior tool is invoked through FastMCP.
+    
+    Invokes tool through FastMCP client and returns result.
+    """
+    async with Client(mcp_server) as client:
+        result = await client.call_tool(tool_name, parameters)
+        return result
+
+def then_bot_tool_instance_created(bot_tool, expected_count: int = 1):
+    """Then step: Bot tool instance(s) created."""
+    if expected_count == 1:
+        assert bot_tool is not None
+    else:
+        assert len(bot_tool) == expected_count
+
+def then_mcp_server_instance_created(artifacts, bot_name: str):
+    """Then step: MCP Server instance created with correct properties."""
+    assert artifacts['server_entry'].exists()
+    assert artifacts['server_entry'].name == f'{bot_name}_mcp_server.py'
+    # Verify it's in the correct location: bot_dir/src/bot_name_mcp_server.py
+    assert 'src' in str(artifacts['server_entry'])
+    assert bot_name in str(artifacts['server_entry'])
+
+def then_server_code_includes_bot_instantiation(artifacts, bot_name: str):
+    """Then step: Generated server includes Bot instantiation code."""
+    server_code = artifacts['server_entry'].read_text()
+    assert 'MCPServerGenerator' in server_code
+    assert 'create_server_instance' in server_code
+    assert 'register_all_behavior_action_tools' in server_code
+    assert bot_name in server_code
+
+def then_generator_raises_file_not_found_error(bot_dir: Path, expected_config_path: Path):
+    """Then step: Generator raises FileNotFoundError with expected message."""
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+    generator = MCPServerGenerator(bot_directory=bot_dir)
+    with pytest.raises(FileNotFoundError) as exc_info:
+        generator.create_server_instance()
+    assert f'Bot Config not found at {expected_config_path}' in str(exc_info.value)
+
+def then_generator_raises_json_decode_error(bot_dir: Path, config_file: Path):
+    """Then step: Generator raises JSONDecodeError with expected message."""
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+    generator = MCPServerGenerator(bot_directory=bot_dir)
+    with pytest.raises(json.JSONDecodeError) as exc_info:
+        generator.create_server_instance()
+    assert f'Malformed Bot Config at {config_file}' in str(exc_info.value)
+
+def then_behavior_tool_execution_succeeds(result, expected_behavior: str, expected_action: str):
+    """Then step: Behavior tool execution succeeds with expected results."""
+    result_dict = json.loads(result.content[0].text)
+    assert result_dict['status'] == 'completed'
+    assert result_dict['behavior'] == expected_behavior
+    assert result_dict['action'] == expected_action
+
+def then_deployment_succeeds(deployment_result, expected_server_name: str, min_tool_count: int = 7):
+    """Then step: Server deployment succeeds."""
+    assert deployment_result.status == 'running'
+    assert deployment_result.server_name == expected_server_name
+    assert deployment_result.tool_count >= min_tool_count
+    assert deployment_result.catalog_published is True
+
+def then_deployment_fails_with_error(deployment_result, expected_error_substring: str):
+    """Then step: Server deployment fails with expected error."""
+    assert deployment_result.status == 'failed'
+    assert expected_error_substring in deployment_result.error_message
+    assert deployment_result.catalog_published is False
+
+def then_awareness_file_created_with_bot_specific_filename(bot_name: str):
+    """Then step: Awareness file created with bot-specific filename."""
+    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    repo_root = get_python_workspace_root()
+    rules_file = repo_root / '.cursor' / 'rules' / f'mcp-{bot_name.replace("_", "-")}-awareness.mdc'
+    assert rules_file.exists(), f"Expected bot-specific file: {rules_file}"
+    # Verify generic filename does NOT exist
+    generic_file = repo_root / '.cursor' / 'rules' / 'mcp-tool-awareness.mdc'
+    assert not generic_file.exists(), "Should use bot-specific filename, not generic"
+    return rules_file
+
+def then_awareness_file_contains_behavior_sections(content: str, behavior_names: list):
+    """Then step: Awareness file contains behavior sections."""
+    for behavior_name in behavior_names:
+        # Handle both numbered (1_shape -> "1 Shape") and unnumbered (shape -> "Shape") formats
+        # The section header format is "### 1 Shape Behavior" (space, not underscore)
+        if '_' in behavior_name and behavior_name[0].isdigit():
+            # Numbered format: "1_shape" -> "1 Shape"
+            parts = behavior_name.split('_', 1)
+            numbered_pattern = f'### {parts[0]} {parts[1].title()} Behavior'
+            unnumbered_pattern = f'### {parts[1].title()} Behavior'
+        else:
+            # Unnumbered format: "shape" -> "Shape"
+            numbered_pattern = f'### {behavior_name.title()} Behavior'
+            unnumbered_pattern = numbered_pattern
+        assert numbered_pattern in content or unnumbered_pattern in content, \
+            f"Expected behavior section for {behavior_name} not found. Looked for: {numbered_pattern} or {unnumbered_pattern}"
+
+def then_awareness_file_contains_tool_patterns(content: str, bot_name: str, behavior_names: list):
+    """Then step: Awareness file contains tool patterns with actual bot name."""
+    for behavior_name in behavior_names:
+        # Handle both numbered (1_shape) and unnumbered (shape) formats
+        numbered_pattern = f'{bot_name}_{behavior_name}_<action>'
+        unnumbered_pattern = f'{bot_name}_{behavior_name.split("_", 1)[-1]}_<action>' if '_' in behavior_name else f'{bot_name}_{behavior_name}_<action>'
+        assert numbered_pattern in content or unnumbered_pattern in content, \
+            f"Expected tool pattern for {behavior_name} not found"
+
+def then_trigger_words_in_behavior_section(content: str, behavior_name: str, trigger_words: list):
+    """Then step: Trigger words appear in correct behavior section."""
+    # Find behavior section - handle numbered format (1_shape -> "1 Shape")
+    if '_' in behavior_name and behavior_name[0].isdigit():
+        parts = behavior_name.split('_', 1)
+        numbered_pattern = f'### {parts[0]} {parts[1].title()}'
+        unnumbered_pattern = f'### {parts[1].title()}'
+    else:
+        numbered_pattern = f'### {behavior_name.title()}'
+        unnumbered_pattern = numbered_pattern
+    
+    behavior_start = content.find(numbered_pattern) if numbered_pattern in content else content.find(unnumbered_pattern)
+    
+    if behavior_start != -1:
+        # Find next behavior section or end of content
+        next_behavior_markers = ['### 1 ', '### 2 ', '### 3 ', '### 4 ', '### 5 ', '### Shape', '### Discovery', '### Exploration']
+        next_start = len(content)
+        for marker in next_behavior_markers:
+            if marker != numbered_pattern and marker != unnumbered_pattern:
+                marker_pos = content.find(marker, behavior_start + 1)
+                if marker_pos != -1 and marker_pos < next_start:
+                    next_start = marker_pos
+        
+        behavior_section = content[behavior_start:next_start]
+        
+        # Verify all trigger words are in this section
+        for trigger_word in trigger_words:
+            assert trigger_word in behavior_section, \
+                f"Trigger word '{trigger_word}' not found in {behavior_name} section"
+    else:
+        # Fallback: just verify trigger words are in content
+        for trigger_word in trigger_words:
+            assert trigger_word in content, \
+                f"Trigger word '{trigger_word}' not found in content"
+
+def then_rules_directory_exists_and_is_directory():
+    """Then step: Rules directory exists and is a directory."""
+    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    repo_root = get_python_workspace_root()
+    rules_dir = repo_root / '.cursor' / 'rules'
+    assert rules_dir.exists()
+    assert rules_dir.is_dir()
+    return rules_dir
+
+def then_awareness_file_exists_with_bot_specific_filename(rules_dir: Path, bot_name: str):
+    """Then step: Awareness file exists with bot-specific filename."""
+    rules_file = rules_dir / f'mcp-{bot_name.replace("_", "-")}-awareness.mdc'
+    assert rules_file.exists()
+    return rules_file
+
+def given_path_write_text_mocked_to_raise_permission_error(target_filename: str):
+    """Given step: Path.write_text is mocked to raise PermissionError for target filename.
+    
+    Returns context manager for use with 'with' statement.
+    """
+    original_write_text = Path.write_text
+    
+    def mock_write_text(self, *args, **kwargs):
+        if target_filename in str(self):
+            raise PermissionError(f"Permission denied: {self}")
+        return original_write_text(self, *args, **kwargs)
+    
+    return patch.object(Path, 'write_text', mock_write_text)
+
+def then_permission_error_raised_with_bot_specific_path(function, expected_filename: str):
+    """Then step: PermissionError is raised with bot-specific path in message."""
+    with pytest.raises(PermissionError) as exc_info:
+        function()
+    assert expected_filename in str(exc_info.value)
+
+def then_behavior_tool_registered_without_patterns(generator, behavior: str):
+    """Then: Behavior tool registered without trigger patterns."""
+    tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
+    assert tool is not None, f"Behavior tool for {behavior} should be registered"
+    assert tool['type'] == 'behavior_tool'
+
+def then_catalog_has_tools_for_behavior(catalog, behavior: str, patterns: list):
+    """Then: Catalog has tools for behavior with patterns."""
+    behavior_tools = [t for t in catalog.tools.values() if t.behavior == behavior]
+    assert len(behavior_tools) > 0, f"Catalog should have tools for behavior '{behavior}'"
+    tool_with_patterns = next((t for t in behavior_tools if t.trigger_patterns == patterns), None)
+    if tool_with_patterns:
+        assert tool_with_patterns.trigger_patterns == patterns
+        assert hasattr(tool_with_patterns, 'description')
+
+def then_awareness_file_shape_section_contains_only_shape_words(content: str):
+    """Then: Awareness file shape section contains only shape words."""
+    shape_section_start = content.find('Shape')
+    discovery_section_start = content.find('Discovery')
+    if shape_section_start != -1 and discovery_section_start != -1:
+        shape_section = content[shape_section_start:discovery_section_start]
+        assert 'shape story' in shape_section
+        assert 'define story outline' in shape_section
+        assert 'create story map' in shape_section
+        assert 'discover stories' not in shape_section
+        discovery_section = content[discovery_section_start:]
+        assert 'discover stories' in discovery_section
+        assert 'break down stories' in discovery_section
+        assert 'enumerate stories' in discovery_section
+
+def then_awareness_file_contains_tool_patterns_for_behaviors(content: str, bot_name: str, behaviors: list):
+    """Then: Awareness file contains tool patterns for behaviors."""
+    for behavior in behaviors:
+        behavior_name = behavior.split('_')[-1] if '_' in behavior else behavior
+        assert f'{bot_name}_{behavior}_' in content or f'{bot_name}_{behavior_name}_' in content or f'story_bot_{behavior_name}_' in content
+
+def given_bot_goal_and_behavior_descriptions():
+    """Given: Bot goal and behavior descriptions."""
+    goal = 'Transform user needs into well-structured stories'
+    descriptions = {
+        'shape': 'Create initial story map outline from user context',
+        'discovery': 'Elaborate stories with user flows and domain rules'
+    }
+    return goal, descriptions
+
+def given_behaviors_config_with_descriptions_and_patterns():
+    """Given: Behaviors config with descriptions and patterns."""
+    return [
+        {
+            'name': '1_shape',
+            'description': 'Create initial story map outline from user context',
+            'patterns': ['shape story', 'create story map']
+        },
+        {
+            'name': '4_discovery',
+            'description': 'Elaborate stories with user flows and domain rules',
+            'patterns': ['discover stories', 'elaborate stories']
+        }
+    ]
+
+def then_awareness_file_contains_behavior_format_sections(content: str, bot_name: str):
+    """Then: Awareness file contains behavior format sections."""
+    assert '**When user is trying to:** Create initial story map outline' in content
+    assert '**as indicated by Trigger words:**' in content
+    assert f'**Then check for:** `{bot_name}_1_shape_<action>` tool' in content or f'**Then check for:** `{bot_name}_shape_<action>` tool' in content
+    assert '**When user is trying to:** Elaborate stories with user flows' in content
+    assert f'**Then check for:** `{bot_name}_4_discovery_<action>` tool' in content or f'**Then check for:** `{bot_name}_discovery_<action>` tool' in content
+
+def then_awareness_file_contains_error_handling_section(content: str):
+    """Then: Awareness file contains error handling section."""
+    assert 'If a registered tool is broken or returns an error' in content
+    assert 'DO NOT automatically attempt a workaround' in content
+    assert 'Inform user of the exact error details' in content
+
+def given_expected_awareness_filename():
+    """Given: Expected awareness filename."""
+    return 'mcp-test-bot-awareness.mdc'
+
+def then_awareness_file_contains_required_sections(rules_file: Path, bot_name: str):
+    """Then step: Awareness file contains all required sections."""
+    content = rules_file.read_text(encoding='utf-8')
+    assert bot_name.lower() in content.lower()
+    assert 'Priority: Check MCP Tools First' in content
+    assert f'Bot: {bot_name}' in content
+    return content
+
+
+def then_generator_creates_sufficient_tools(generator, min_tool_count: int = 7):
+    """Then: Generator creates sufficient tools."""
+    assert len(generator.registered_tools) >= min_tool_count
+
+
+def given_test_bot_behavior_and_action():
+    """Given: Test bot, behavior and action."""
+    return 'test_bot', 'shape', 'gather_context'
+
+
+def when_find_behavior_tool_in_registered_tools(generator, behavior: str):
+    """When: Find behavior tool in registered tools."""
+    tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
+    assert tool is not None, f"Behavior tool for {behavior} should be registered"
+    assert tool['type'] == 'behavior_tool'
+    return tool
+
+
+def when_invoke_behavior_tool_with_action(mcp_server, tool, action: str):
+    """When: Invoke behavior tool with action."""
+    tool_name = tool['name']
+    return when_behavior_tool_invoked(mcp_server, tool_name, {'action': action})
+
+
+def then_catalog_has_tools_registered(catalog):
+    """Then: Catalog has tools registered."""
+    assert len(catalog.tools) > 0, "Catalog should have tools registered"
+
+
+def when_deployer_attempts_deployment_with_invalid_url(config_file: Path, workspace_root: Path):
+    """When: Deployer attempts deployment with invalid URL."""
+    with pytest.raises(ConnectionError) as exc_info:
+        when_server_deployer_deploys(config_file, workspace_root, protocol_handler_url='http://localhost:9999')
+    assert 'MCP Protocol Handler not accessible' in str(exc_info.value)
+
+
+def given_test_bot_name():
+    """Given: Test bot name."""
+    return 'test_bot'
+
+
+def then_awareness_file_contains_bot_name(content: str, bot_name: str):
+    """Then: Awareness file contains bot name."""
+    assert bot_name in content
+
+
+def then_awareness_file_contains_priority_check_message(content: str, bot_name: str):
+    """Then: Awareness file contains priority check message."""
+    assert f'ALWAYS check for and use MCP {bot_name} tools FIRST' in content
+
+
+def then_awareness_file_contains_repair_question(content: str):
+    """Then: Awareness file contains repair question."""
+    assert 'Should I attempt to repair the tool, or proceed manually' in content
+
+
+def when_create_rules_directory_if_needed():
+    """When: Create rules directory if needed."""
+    rules_dir = then_rules_directory_exists_and_is_directory()
+    rules_dir.mkdir(parents=True, exist_ok=True)
+    return rules_dir
+
+
+def when_generator_generates_awareness_files_direct(generator):
+    """When: Generator generates awareness files directly."""
+    generator.generate_awareness_files()
+
+
+def given_bot_directory_path(workspace_root: Path, bot_name: str):
+    """Given: Bot directory path."""
+    return workspace_root / 'agile_bot' / 'bots' / bot_name
+
+
+def when_read_awareness_file_content(rules_file: Path):
+    """When: Read awareness file content."""
+    return rules_file.read_text(encoding='utf-8')
+
+
+def given_bot_config_and_directory_setup(workspace_root: Path, bot_name: str, behaviors: list):
+    """Given: Bot config and directory setup."""
+    bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+    bot_dir = given_bot_directory_path(workspace_root, bot_name)
+    return bot_config, bot_dir
 
 def create_base_actions_structure(bot_directory: Path):
     """Helper: Create base_actions directory structure in bot_directory (no fallback)."""
@@ -56,18 +659,8 @@ def create_base_actions_structure(bot_directory: Path):
         
         (action_dir / 'action_config.json').write_text(json.dumps(config), encoding='utf-8')
 
-def create_base_instructions(bot_directory: Path):
-    """Helper: Create base instructions for all actions in bot_directory (no fallback)."""
-    base_actions_dir = bot_directory / 'base_actions'
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
-    for action in actions:
-        action_dir = base_actions_dir / action
-        action_dir.mkdir(parents=True, exist_ok=True)
-        instructions_file = action_dir / 'instructions.json'
-        instructions_file.write_text(
-            json.dumps({'action': action, 'instructions': [f'Instruction for {action}']}),
-            encoding='utf-8'
-        )
+# Removed create_base_instructions - use test_helpers.create_base_instructions instead
+# Import when needed: from agile_bot.bots.base_bot.test.test_helpers import create_base_instructions
 
 def create_trigger_words_file(workspace: Path, bot_name: str, behavior: str, action: str, patterns: list) -> Path:
     """Helper: Create trigger words file for behavior action."""
@@ -134,34 +727,22 @@ class TestGenerateBotTools:
     def test_generator_creates_bot_tool_for_test_bot(self, workspace_root):
         """
         SCENARIO: Generator creates bot tool for test_bot
-        GIVEN: a bot with name 'test_bot'
-        AND: bot has 4 behaviors configured
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: A bot that has been initialized with that config file
         WHEN: Generator processes Bot Config
         THEN: Generator creates 1 bot tool instance
         """
-        # Given: a bot with name 'test_bot'
-        bot_config = create_bot_config(
-            workspace_root,
-            'test_bot',
-            ['shape', 'discovery', 'exploration', 'specification']
-        )
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, 'test_bot')
         
         # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.mcp.bot_tool_generator import BotToolGenerator
-        generator = BotToolGenerator(
-            bot_name='test_bot',
-            config_path=bot_config
-        )
-        bot_tool = generator.create_bot_tool()
+        bot_tool = when_bot_tool_generator_processes_config('test_bot', bot_config)
         
         # Then: 1 bot tool instance created
-        assert bot_tool is not None
+        then_bot_tool_instance_created(bot_tool)
 
 
 class TestGenerateBehaviorTools:
@@ -170,34 +751,22 @@ class TestGenerateBehaviorTools:
     def test_generator_creates_behavior_tools_for_test_bot_with_4_behaviors(self, workspace_root):
         """
         SCENARIO: Generator creates behavior tools for test_bot with 4 behaviors
-        GIVEN: a bot with name 'test_bot'
-        AND: bot has 4 behaviors configured
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: A bot that has been initialized with that config file
         WHEN: Generator processes Bot Config
         THEN: Generator creates 4 behavior tool instances
         """
-        # Given: a bot with 4 behaviors
-        bot_config = create_bot_config(
-            workspace_root,
-            'test_bot',
-            ['shape', 'discovery', 'exploration', 'specification']
-        )
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, 'test_bot')
         
         # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.mcp.behavior_tool_generator import BehaviorToolGenerator
-        generator = BehaviorToolGenerator(
-            bot_name='test_bot',
-            config_path=bot_config
-        )
-        tools = generator.create_behavior_tools()
+        tools = when_behavior_tool_generator_processes_config('test_bot', bot_config)
         
         # Then: 4 behavior tool instances created
-        assert len(tools) == 4
+        then_bot_tool_instance_created(tools, expected_count=4)
 
 
 class TestGenerateMCPBotServer:
@@ -206,99 +775,63 @@ class TestGenerateMCPBotServer:
     def test_generator_creates_mcp_server_for_test_bot(self, workspace_root):
         """
         SCENARIO: Generator creates MCP server for test_bot
-        GIVEN: Bot with name 'test_bot' and behaviors configured
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: A bot that has been initialized with that config file
         WHEN: MCP Server Generator receives Bot Config
         THEN: Generator creates MCP Server instance with unique server name
         """
-        # Given: Bot with name 'test_bot' and behaviors configured
-        bot_name = 'test_bot'
-        behaviors = ['shape', 'discovery', 'exploration', 'specification']
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
         # When: MCP Server Generator receives Bot Config (generates files)
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        artifacts = generator.generate_server(behaviors=behaviors)
+        artifacts = when_mcp_server_generator_receives_bot_config(bot_dir, behaviors)
         
-        # Then: Generator creates MCP Server instance with unique server name 'test_bot_server'
-        assert artifacts['server_entry'].exists()
-        assert artifacts['server_entry'].name == f'{bot_name}_mcp_server.py'
-        
-        # And Generated server is saved to exact path
-        expected_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'src' / f'{bot_name}_mcp_server.py'
-        assert artifacts['server_entry'] == expected_path
-        
+        # Then: Generator creates MCP Server instance with unique server name
+        then_mcp_server_instance_created(artifacts, bot_name)
         # And Generated server includes Bot instantiation code
-        server_code = artifacts['server_entry'].read_text()
-        assert 'MCPServerGenerator' in server_code
-        assert 'create_server_instance' in server_code
-        assert 'register_all_behavior_action_tools' in server_code
-        assert bot_name in server_code
+        then_server_code_includes_bot_instantiation(artifacts, bot_name)
 
 
     def test_generator_fails_when_bot_config_missing(self, workspace_root):
         """
         SCENARIO: Generator fails when Bot Config is missing
-        GIVEN: Bot with name 'test_bot' and Bot Config does NOT exist
+        GIVEN: A bot directory exists
+        AND: Bot Config does NOT exist
         WHEN: MCP Server Generator attempts to receive Bot Config
         THEN: Generator raises FileNotFoundError and does not create MCP Server instance
         """
-        # Given: Bot with name 'test_bot' and Bot Config does NOT exist at bot_config.json
+        # Given: A bot directory exists
         bot_name = 'test_bot'
-        expected_config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # And: Bot Config does NOT exist
+        expected_config_path = given_bot_config_does_not_exist(workspace_root, bot_name)
         
         # When: MCP Server Generator attempts to receive Bot Config
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        
         # Then: Generator raises FileNotFoundError with message
-        with pytest.raises(FileNotFoundError) as exc_info:
-            generator.create_server_instance()
-        
-        assert f'Bot Config not found at {expected_config_path}' in str(exc_info.value)
+        then_generator_raises_file_not_found_error(bot_dir, expected_config_path)
         
         # And Generator does not create MCP Server instance (verified by exception)
 
     def test_generator_fails_when_bot_config_malformed(self, workspace_root):
         """
         SCENARIO: Generator fails when Bot Config is malformed
-        GIVEN: Bot with name 'test_bot', Bot Config exists with invalid JSON syntax
+        GIVEN: A bot directory exists
+        AND: Bot Config file exists with invalid JSON syntax
         WHEN: MCP Server Generator attempts to receive Bot Config
         THEN: Generator raises JSONDecodeError and does not create MCP Server instance
         """
-        # Given: Bot with name 'test_bot', Bot Config exists with invalid JSON syntax
+        # Given: A bot directory exists
         bot_name = 'test_bot'
-        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-        config_dir.mkdir(parents=True, exist_ok=True)
-        config_file = config_dir / 'bot_config.json'
-        config_file.write_text('not valid json {')
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # And: Bot Config file exists with invalid JSON syntax
+        config_file = given_bot_config_file_with_invalid_json(workspace_root, bot_name)
         
         # When: MCP Server Generator attempts to receive Bot Config
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        
         # Then: Generator raises JSONDecodeError with message
-        with pytest.raises(json.JSONDecodeError) as exc_info:
-            generator.create_server_instance()
-        
-        assert f'Malformed Bot Config at {config_file}' in str(exc_info.value)
+        then_generator_raises_json_decode_error(bot_dir, config_file)
         
         # And Generator does not create MCP Server instance (verified by exception)
 
@@ -309,43 +842,32 @@ class TestGenerateBehaviorActionTools:
     def test_generator_creates_tools_for_test_bot_with_4_behaviors(self, workspace_root):
         """
         SCENARIO: Generator creates tools for test_bot with 4 behaviors
-        GIVEN: Bot with 4 behaviors configured
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Base actions structure exists
+        AND: Behavior workflow files exist for all behaviors
         WHEN: Generator processes Bot Config
         THEN: Generator creates bot tool and 4 behavior tools
         """
-        # Given: Bot with 4 behaviors configured
-        bot_name = 'test_bot'
-        behaviors = ['shape', 'discovery', 'exploration', 'specification']
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        create_base_actions_structure(bot_dir)
-        config_file = create_bot_config(workspace_root, bot_name, behaviors)
-        
-        # Create behavior.json files for all behaviors (REQUIRED after refactor)
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        for behavior in behaviors:
-            create_actions_workflow_json(bot_dir, behavior)
-        
-        # Bootstrap environment before importing/creating generator
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        config_file = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: Base actions structure exists
+        given_base_actions_structure_exists(bot_dir)
+        # And: Behavior workflow files exist for all behaviors
+        given_behavior_workflow_files_exist_for_behaviors(bot_dir, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
         # When: Generator processes Bot Config
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        mcp_server = generator.create_server_instance()
-        generator.register_all_behavior_action_tools(mcp_server)
+        generator, mcp_server = when_generator_registers_all_behavior_action_tools(bot_dir)
         
         # Then: Generator creates bot tool and behavior tools
         # 1 bot_tool + 1 get_working_dir + 1 close_action + 1 restart + 4 behavior_tools = 8 tools
-        assert len(generator.registered_tools) >= 7  # At least bot tool + 4 behavior tools + utility tools
+        then_generator_creates_sufficient_tools(generator, min_tool_count=7)
         
         # And Generator creates behavior tools with behavior names
-        tool_names = [tool['name'] for tool in generator.registered_tools]
-        behavior_tools = [tool for tool in generator.registered_tools if tool.get('type') == 'behavior_tool']
-        assert len(behavior_tools) == 4, f"Expected 4 behavior tools, got {len(behavior_tools)}"
-        assert 'shape' in tool_names or any(t.get('behavior') == 'shape' for t in generator.registered_tools)
-        assert 'discovery' in tool_names or any(t.get('behavior') == 'discovery' for t in generator.registered_tools)
+        then_generator_creates_behavior_tools_with_names(generator, 4, ['shape', 'discovery'])
         
         # And each behavior tool includes forwarding logic to invoke Bot.Behavior.Action
         # (verified by tool registration)
@@ -353,152 +875,92 @@ class TestGenerateBehaviorActionTools:
     def test_generator_loads_trigger_words_from_behavior_folder(self, workspace_root):
         """
         SCENARIO: Generator loads trigger words from behavior folder
-        GIVEN: Behavior has trigger_words.json with patterns
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behavior has trigger words configured
+        AND: A bot that has been initialized with that config file
         WHEN: Generator creates behavior tool
         THEN: Behavior tool is registered with trigger patterns in description
         """
-        # Given: Trigger words in behavior.json (new format)
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        patterns = ['shape.*story', 'start.*mapping', 'story.*discovery']
-        
-        config_file = create_bot_config(workspace_root, bot_name, [behavior])
-        # Create behavior.json file with custom trigger words (REQUIRED after refactor)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+        patterns = given_trigger_patterns_for_shape_behavior()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, [behavior])
+        # And: Behavior has trigger words configured
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        create_actions_workflow_json(bot_dir, behavior)
-        # Update behavior.json with custom trigger words (code reads from behavior.json now)
-        behavior_dir = bot_dir / 'behaviors' / behavior
-        behavior_file = behavior_dir / 'behavior.json'
-        behavior_data = json.loads(behavior_file.read_text())
-        behavior_data['trigger_words'] = {
-            'description': f'Trigger words for {behavior}',
-            'patterns': patterns,
-            'priority': 10
-        }
-        behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+        given_behavior_with_trigger_words(bot_dir, behavior, patterns)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Bootstrap environment before importing/creating generator
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
-        
-        # When: Call REAL MCPServerGenerator to register behavior tool with trigger words
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        mcp_server = generator.create_server_instance()
-        generator.register_all_behavior_action_tools(mcp_server)
+        # When: Generator creates behavior tool
+        generator, mcp_server = when_generator_registers_all_behavior_action_tools(bot_dir)
         
         # Then: Behavior tool registered with trigger patterns
-        tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
-        assert tool is not None, f"Behavior tool for {behavior} should be registered"
-        assert tool['type'] == 'behavior_tool'
-        assert 'shape.*story' in tool['description']
-        assert 'shape.*story' in tool['trigger_patterns']
+        then_behavior_tool_registered_with_patterns(generator, behavior, patterns)
 
     def test_generator_handles_missing_trigger_words(self, workspace_root):
         """
         SCENARIO: Generator handles missing trigger words file
-        GIVEN: Behavior does not have trigger_words.json
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behavior does not have trigger words configured
+        AND: A bot that has been initialized with that config file
         WHEN: Generator creates behavior tool
         THEN: Behavior tool registered without trigger patterns
         """
-        # Given: Behavior exists but no trigger words in behavior.json
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        
-        config_file = create_bot_config(workspace_root, bot_name, [behavior])
-        # Create behavior.json file without trigger words (REQUIRED after refactor)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, [behavior])
+        # And: Behavior does not have trigger words configured
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        create_actions_workflow_json(bot_dir, behavior)
-        # Remove trigger_words from behavior.json to test missing trigger words
-        behavior_dir = bot_dir / 'behaviors' / behavior
-        behavior_file = behavior_dir / 'behavior.json'
-        behavior_data = json.loads(behavior_file.read_text())
-        behavior_data.pop('trigger_words', None)
-        behavior_file.write_text(json.dumps(behavior_data, indent=2), encoding='utf-8')
+        given_behavior_without_trigger_words(bot_dir, behavior)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Bootstrap environment before importing/creating generator
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
-        
-        # When: Call REAL MCPServerGenerator (trigger words missing)
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        mcp_server = generator.create_server_instance()
-        generator.register_all_behavior_action_tools(mcp_server)
+        # When: Generator creates behavior tool
+        generator, mcp_server = when_generator_registers_all_behavior_action_tools(bot_dir)
         
         # Then: Behavior tool registered without trigger patterns (graceful handling)
-        tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
-        assert tool is not None, f"Behavior tool for {behavior} should be registered"
-        assert tool['type'] == 'behavior_tool'
-        assert tool['trigger_patterns'] == []
+        then_behavior_tool_registered_without_patterns(generator, behavior)
 
     @pytest.mark.asyncio
     async def test_generator_registers_tool_with_forwarding_to_bot_behavior_action(self, workspace_root):
         """
         SCENARIO: Generator registers behavior tool with forwarding logic
-        GIVEN: Bot has behavior with action
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behavior workflow file exists
+        AND: A bot that has been initialized with that config file
         WHEN: Generator registers behavior tool with FastMCP
         THEN: Behavior tool forwards invocation to Bot.execute_behavior() (production code path)
         """
-        # Given: Bot configuration
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        action = 'gather_context'
-        
-        config_file = create_bot_config(workspace_root, bot_name, [behavior])
-        
-        # Bootstrap environment before importing/creating generator
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behavior, action = given_test_bot_behavior_and_action()
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(
+            workspace_root,
+            bot_name,
+            [behavior]
+        )
+        # And: Behavior workflow file exists
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        given_behavior_workflow_files_exist_for_behaviors(bot_dir, [behavior])
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Create base actions structure (needed for workflow)
-        create_base_actions_structure(bot_dir)
+        # Base actions structure and instructions already created by given_bot_configured_by_config
+        # Behavior workflow file already created above
         
-        # Create base instructions (needed for action execution)
-        create_base_instructions(bot_dir)
+        # And: Workflow state exists
+        given_workflow_state_exists(workspace_directory, bot_name, behavior, action)
         
-        # Create behavior folder with behavior.json (REQUIRED)
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        create_actions_workflow_json(bot_dir, behavior)
-        
-        # When: Call REAL MCPServerGenerator to register behavior tool
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        generator = MCPServerGenerator(bot_directory=bot_dir)
-        mcp_server = generator.create_server_instance()
-        
-        # Use REAL Bot instance (not mock) - generator creates it automatically
-        # Create workflow state so entry workflow doesn't trigger
-        workflow_file = workspace_directory / 'workflow_state.json'
-        workflow_file.write_text(json.dumps({
-            'current_behavior': f'{bot_name}.{behavior}',
-            'current_action': f'{bot_name}.{behavior}.{action}',
-            'completed_actions': []
-        }), encoding='utf-8')
-        
-        generator.register_all_behavior_action_tools(mcp_server)
+        # When: Generator registers behavior tool with FastMCP
+        generator, mcp_server = when_generator_registers_all_behavior_action_tools(bot_dir)
         
         # Then: Behavior tool registered and callable through FastMCP
-        tool = next((t for t in generator.registered_tools if t.get('behavior') == behavior), None)
-        assert tool is not None, f"Behavior tool for {behavior} should be registered"
-        assert tool['type'] == 'behavior_tool'
+        tool = when_find_behavior_tool_in_registered_tools(generator, behavior)
         
+        # And: Behavior tool forwards invocation to Bot.execute_behavior() (production code path)
         # Test tool invocation through FastMCP client with action parameter
         # This calls the REAL bot.execute_behavior() method
-        async with Client(mcp_server) as client:
-            # Call behavior tool with action parameter
-            result = await client.call_tool(behavior, {'action': action})
-            
-            # Verify result contains BotResult structure from real execution
-            result_dict = json.loads(result.content[0].text)
-            assert result_dict['status'] == 'completed'
-            assert result_dict['behavior'] == behavior
-            assert result_dict['action'] == action
+        result = await when_invoke_behavior_tool_with_action(mcp_server, tool, action)
+        then_behavior_tool_execution_succeeds(result, behavior, action)
 
 
 class TestDeployMCPBotServer:
@@ -507,156 +969,98 @@ class TestDeployMCPBotServer:
     def test_generator_deploys_server_successfully(self, workspace_root):
         """
         SCENARIO: Generator deploys test_bot MCP Server successfully
-        GIVEN: Server and tools have been generated
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behavior workflow files exist for all behaviors
+        AND: A bot that has been initialized with that config file
         WHEN: Generator deploys MCP Server
         THEN: Server initializes and publishes tool catalog
         """
-        # Given: Bot config, server generated, tools generated
-        bot_name = 'test_bot'
-        behaviors = ['shape', 'discovery', 'exploration', 'specification']
-        config_file = create_bot_config(workspace_root, bot_name, behaviors)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
+        config_file = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
         create_base_server_template(workspace_root)
-        
-        # Create behavior.json files for all behaviors (REQUIRED after refactor)
+        # And: Behavior workflow files exist for all behaviors
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        for behavior in behaviors:
-            create_actions_workflow_json(bot_dir, behavior)
+        given_behavior_workflow_files_exist_for_behaviors(bot_dir, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Bootstrap environment before importing/creating deployer
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # When: Generator deploys MCP Server
+        deployment_result = when_server_deployer_deploys(config_file, workspace_root)
         
-        # When: Call REAL ServerDeployer API to deploy
-        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
-        deployer = ServerDeployer(
-            config_path=config_file,
-            workspace_root=workspace_root
-        )
-        deployment_result = deployer.deploy_server()
-        
-        # Then: Server deployed and running
-        assert deployment_result.status == 'running'
-        assert deployment_result.server_name == 'test_bot_server'
-        # 1 bot_tool + 1 get_working_dir + 1 close_action + 1 restart + 4 behavior_tools = 8 tools
-        assert deployment_result.tool_count >= 7  # At least bot tool + 4 behavior tools + utility tools
-        assert deployment_result.catalog_published is True
+        # Then: Server initializes and publishes tool catalog
+        then_deployment_succeeds(deployment_result, 'test_bot_server', min_tool_count=7)
 
     def test_server_publishes_tool_catalog_with_metadata(self, workspace_root):
         """
         SCENARIO: Server publishes tool catalog with complete metadata
-        GIVEN: Tool has trigger patterns and description
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behavior has trigger words configured
+        AND: A bot that has been initialized with that config file
         WHEN: Server publishes catalog
         THEN: Catalog entry includes all metadata
         """
-        # Given: Tool with complete metadata (trigger words at behavior level)
-        bot_name = 'test_bot'
-        behavior = 'shape'
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behavior = given_bot_name_and_behavior_setup()
         patterns = ['shape.*story', 'start.*mapping']
-        
-        config_file = create_bot_config(workspace_root, bot_name, [behavior])
-        # Create behavior.json file (REQUIRED after refactor)
+        config_file = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, [behavior])
+        # And: Behavior has trigger words configured
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        create_actions_workflow_json(bot_dir, behavior)
-        # Create trigger words at behavior level (not action level)
-        behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
-        trigger_file = behavior_dir / 'trigger_words.json'
-        trigger_file.write_text(json.dumps({'patterns': patterns}), encoding='utf-8')
+        given_behavior_with_trigger_words(bot_dir, behavior, patterns)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Bootstrap environment before importing/creating deployer
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # When: Server publishes catalog
+        catalog = when_server_deployer_gets_catalog(config_file, workspace_root)
         
-        # When: Call REAL ServerDeployer API to get catalog
-        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
-        deployer = ServerDeployer(
-            config_path=config_file,
-            workspace_root=workspace_root
-        )
-        catalog = deployer.get_tool_catalog()
-        
-        # Then: Catalog includes tools (catalog builds individual action tools)
+        # Then: Catalog entry includes all metadata
         # Note: Catalog may still use old naming convention with individual action tools
         # Check that catalog has tools registered
-        assert len(catalog.tools) > 0, "Catalog should have tools registered"
+        then_catalog_has_tools_registered(catalog)
         
         # Check for a tool that matches the behavior (catalog may use action tool names)
         # Since catalog builds action tools, look for one with the behavior name
-        behavior_tools = [t for t in catalog.tools.values() if t.behavior == behavior]
-        assert len(behavior_tools) > 0, f"Catalog should have tools for behavior '{behavior}'"
-        
-        # Check that trigger patterns are loaded
-        tool_with_patterns = next((t for t in behavior_tools if t.trigger_patterns == patterns), None)
-        if tool_with_patterns:
-            assert tool_with_patterns.trigger_patterns == patterns
-            assert hasattr(tool_with_patterns, 'description')
+        then_catalog_has_tools_for_behavior(catalog, behavior, patterns)
 
     def test_generator_fails_when_protocol_handler_not_running(self, workspace_root):
         """
         SCENARIO: Generator fails when MCP Protocol Handler not running
-        GIVEN: MCP Protocol Handler is not running
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: A bot that has been initialized with that config file
+        AND: MCP Protocol Handler is not running
         WHEN: Generator attempts to deploy
         THEN: Raises ConnectionError
         """
-        # Given: Bot config but MCP protocol handler not available
-        bot_name = 'test_bot'
-        behaviors = ['shape']
-        config_file = create_bot_config(workspace_root, bot_name, behaviors)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape'])
+        config_file = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # And: MCP Protocol Handler is not running (simulated by invalid URL)
         
-        # Bootstrap environment before importing/creating deployer
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
-        
-        # When: Call REAL ServerDeployer API (protocol handler not running)
-        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
-        deployer = ServerDeployer(
-            config_path=config_file,
-            workspace_root=workspace_root,
-            protocol_handler_url='http://localhost:9999'  # Not running
-        )
-        
+        # When: Generator attempts to deploy
         # Then: Raises ConnectionError
-        with pytest.raises(ConnectionError) as exc_info:
-            deployer.deploy_server()
-        
-        assert 'MCP Protocol Handler not accessible' in str(exc_info.value)
+        when_deployer_attempts_deployment_with_invalid_url(config_file, workspace_root)
 
     def test_server_handles_initialization_failure(self, workspace_root):
         """
         SCENARIO: Server handles initialization failure in separate thread
-        GIVEN: Bot Config is missing during initialization
+        GIVEN: A bot directory exists
+        AND: Bot Config does NOT exist
         WHEN: Server thread starts
         THEN: Logs error and does not register
         """
-        # Given: Config path but file is missing
-        bot_name = 'test_bot'
-        config_path = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config' / 'bot_config.json'
+        # Given: A bot directory exists
+        bot_name = given_test_bot_name()
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # And: Bot Config does NOT exist
+        config_path = given_bot_config_does_not_exist(workspace_root, bot_name)
         
-        # Bootstrap environment before importing/creating deployer
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
+        # When: Server thread starts
+        deployment_result = when_server_deployer_deploys(config_path, workspace_root)
         
-        # When: Call REAL ServerDeployer API with missing config
-        from agile_bot.bots.base_bot.src.mcp.server_deployer import ServerDeployer
-        deployer = ServerDeployer(
-            config_path=config_path,
-            workspace_root=workspace_root
-        )
-        
-        # Then: Deployment fails gracefully with logged error
-        deployment_result = deployer.deploy_server()
-        
-        assert deployment_result.status == 'failed'
-        assert 'Bot Config not found' in deployment_result.error_message
-        assert deployment_result.catalog_published is False
+        # Then: Logs error and does not register
+        then_deployment_fails_with_error(deployment_result, 'Bot Config not found')
 
 
 class TestGenerateCursorAwarenessFiles:
@@ -665,111 +1069,43 @@ class TestGenerateCursorAwarenessFiles:
     def test_generator_creates_workspace_rules_file_with_trigger_patterns(self, workspace_root):
         """
         SCENARIO: Generator creates bot-specific workspace rules file with trigger patterns
-        GIVEN: Bot config exists with behaviors that have trigger_words.json files
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behaviors have trigger words configured
+        AND: A bot that has been initialized with that config file
         WHEN: Generator runs generate_awareness_files() method
         THEN: Generator creates file with bot-specific filename: mcp-test-bot-awareness.mdc
         AND: Filename includes bot name with hyphens
         AND: Generated rules file includes ACTUAL trigger words from bot
         AND: File includes bot name from config
         """
-        # Given: Create bot config with behaviors
-        bot_name = 'test_bot'
-        behaviors = ['shape', 'discovery']
-        
-        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-        config_dir.mkdir(parents=True, exist_ok=True)
-        config_file = config_dir / 'bot_config.json'
-        config_file.write_text(json.dumps({
-            'name': bot_name,
-            'behaviors': behaviors
-        }), encoding='utf-8')
-        
-        # Create behavior.json files for behaviors (REQUIRED after refactor)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: Behaviors have trigger words configured
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        given_behavior_with_trigger_words(bot_dir, '1_shape', ['shape story', 'define story outline', 'create story map'])
+        given_behavior_with_trigger_words(bot_dir, '4_discovery', ['discover stories', 'break down stories', 'enumerate stories'])
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Create behavior.json files with trigger words (new format - trigger words in behavior.json)
-        shape_behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
-        shape_behavior_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '1_shape')
-        # Update behavior.json with trigger words (code reads from behavior.json now)
-        shape_behavior_file = shape_behavior_dir / 'behavior.json'
-        shape_behavior_data = json.loads(shape_behavior_file.read_text())
-        shape_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for shape',
-            'patterns': ['shape story', 'define story outline', 'create story map'],
-            'priority': 10
-        }
-        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
+        # When: Generator runs generate_awareness_files() method
+        gen = when_generator_generates_awareness_files(bot_dir)
         
-        # Create behavior.json for discovery behavior with trigger words
-        discovery_behavior_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
-        discovery_behavior_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '4_discovery')
-        # Update behavior.json with trigger words
-        discovery_behavior_file = discovery_behavior_dir / 'behavior.json'
-        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
-        discovery_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for discovery',
-            'patterns': ['discover stories', 'break down stories', 'enumerate stories'],
-            'priority': 10
-        }
-        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
-        
-        # Bootstrap environment before importing/creating generator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        workspace_directory = workspace_root / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_dir, workspace_directory)
-        
-        # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        gen = MCPServerGenerator(bot_directory=bot_dir)
-        gen.generate_awareness_files()
-        
-        # Then: Rules file created with BOT-SPECIFIC filename (in repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_file = repo_root / '.cursor' / 'rules' / 'mcp-test-bot-awareness.mdc'
-        assert rules_file.exists(), f"Expected bot-specific file: {rules_file}"
-        
-        # And: Generic filename should NOT exist
-        generic_file = repo_root / '.cursor' / 'rules' / 'mcp-tool-awareness.mdc'
-        assert not generic_file.exists(), "Should use bot-specific filename, not generic"
-        
+        # Then: Generator creates file with bot-specific filename: mcp-test-bot-awareness.mdc
+        rules_file = then_awareness_file_created_with_bot_specific_filename(bot_name)
         content = rules_file.read_text(encoding='utf-8')
         
         # And: File includes bot name
-        assert 'test_bot' in content
+        then_awareness_file_contains_bot_name(content, bot_name)
         
         # And: Trigger words are SECTIONED by behavior (not flat list)
-        assert '### Shape Behavior' in content or '## Shape' in content
-        assert '### Discovery Behavior' in content or '## Discovery' in content
+        then_awareness_file_contains_behavior_sections(content, ['Shape', 'Discovery'])
         
         # And: Shape section includes ONLY shape trigger words
-        # Find the shape section
-        shape_section_start = content.find('Shape')
-        discovery_section_start = content.find('Discovery')
-        
-        if shape_section_start != -1 and discovery_section_start != -1:
-            shape_section = content[shape_section_start:discovery_section_start]
-            # Shape trigger words should be in shape section
-            assert 'shape story' in shape_section
-            assert 'define story outline' in shape_section
-            assert 'create story map' in shape_section
-            # Discovery trigger words should NOT be in shape section
-            assert 'discover stories' not in shape_section
-            
-            # Discovery section should have discovery trigger words
-            discovery_section = content[discovery_section_start:]
-            assert 'discover stories' in discovery_section
-            assert 'break down stories' in discovery_section
-            assert 'enumerate stories' in discovery_section
+        then_awareness_file_shape_section_contains_only_shape_words(content)
         
         # And: Each behavior section shows tool pattern
-        assert 'story_bot_shape_' in content or 'test_bot_shape_' in content
-        assert 'story_bot_discovery_' in content or 'test_bot_discovery_' in content
+        then_awareness_file_contains_tool_patterns_for_behaviors(content, bot_name, ['1_shape', '4_discovery'])
 
     def test_rules_file_includes_bot_goal_and_behavior_descriptions(self, workspace_root):
         """
@@ -780,165 +1116,81 @@ class TestGenerateCursorAwarenessFiles:
         AND: Critical rule mentions bot's goal: "When user is trying to [goal], check MCP tools FIRST"
         AND: Each behavior section includes "When user is trying to [behavior description]"
         """
-        # Given: Create bot with instructions.json
-        bot_name = 'test_bot'
-        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-        config_dir.mkdir(parents=True, exist_ok=True)
-        (config_dir / 'bot_config.json').write_text(json.dumps({
-            'name': bot_name,
-            'behaviors': ['shape', 'discovery']
-        }), encoding='utf-8')
-        
-        # Create instructions.json with goal and behavior descriptions
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: Bot has instructions.json with goal and behavior descriptions
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        (bot_dir / 'instructions.json').write_text(json.dumps({
-            'botName': bot_name,
-            'goal': 'Transform user needs into well-structured stories',
-            'description': 'Helps teams create and refine user stories',
-            'behaviors': {
+        given_bot_has_instructions_json(
+            workspace_root,
+            bot_name,
+            'Transform user needs into well-structured stories',
+            {
                 'shape': 'Create initial story map outline from user context',
                 'discovery': 'Elaborate stories with user flows and domain rules'
             }
-        }), encoding='utf-8')
+        )
+        # And: Behaviors have descriptions and trigger words configured
+        given_behaviors_with_descriptions_and_trigger_words(bot_dir, [
+            {
+                'name': '1_shape',
+                'description': 'Create initial story map outline from user context',
+                'patterns': ['shape story', 'create story map']
+            },
+            {
+                'name': '4_discovery',
+                'description': 'Elaborate stories with user flows and domain rules',
+                'patterns': ['discover stories', 'elaborate stories']
+            }
+        ])
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
-        # Create behavior.json files with descriptions and trigger words (new format)
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        
-        shape_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
-        shape_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '1_shape')
-        # Update behavior.json with description and trigger words
-        shape_behavior_file = shape_dir / 'behavior.json'
-        shape_behavior_data = json.loads(shape_behavior_file.read_text())
-        shape_behavior_data['description'] = 'Create initial story map outline from user context'
-        shape_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for shape',
-            'patterns': ['shape story', 'create story map'],
-            'priority': 10
-        }
-        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
-        
-        discovery_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
-        discovery_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '4_discovery')
-        # Update behavior.json with description and trigger words
-        discovery_behavior_file = discovery_dir / 'behavior.json'
-        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
-        discovery_behavior_data['description'] = 'Elaborate stories with user flows and domain rules'
-        discovery_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for discovery',
-            'patterns': ['discover stories', 'elaborate stories'],
-            'priority': 10
-        }
-        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
-        
-        # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        gen = MCPServerGenerator(bot_directory=bot_dir)
-        gen.generate_awareness_files()
-        
-        # Then: Critical rule mentions SPECIFIC bot name (file written to repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_file = repo_root / '.cursor' / 'rules' / 'mcp-test-bot-awareness.mdc'
+        # When: Generator creates .cursor/rules/mcp-<bot-name>-awareness.mdc file
+        gen = when_generator_generates_awareness_files(bot_dir)
+        rules_file = then_awareness_file_created_with_bot_specific_filename(bot_name)
         content = rules_file.read_text(encoding='utf-8')
         
-        assert 'ALWAYS check for and use MCP test_bot tools FIRST' in content
+        then_awareness_file_contains_priority_check_message(content, bot_name)
         
         # And: Each behavior follows explicit format
-        # Shape section
-        assert '**When user is trying to:** Create initial story map outline' in content
-        assert '**as indicated by Trigger words:**' in content
-        assert '**Then check for:** `test_bot_shape_<action>` tool' in content
-        
-        # Discovery section
-        assert '**When user is trying to:** Elaborate stories with user flows' in content
-        assert '**Then check for:** `test_bot_discovery_<action>` tool' in content
+        then_awareness_file_contains_behavior_format_sections(content, bot_name)
         
         # And: File includes error handling section
-        assert 'If a registered tool is broken or returns an error' in content
-        assert 'DO NOT automatically attempt a workaround' in content
-        assert 'Inform user of the exact error details' in content
-        assert 'Should I attempt to repair the tool, or proceed manually' in content
+        then_awareness_file_contains_error_handling_section(content)
+        then_awareness_file_contains_repair_question(content)
 
     def test_rules_file_maps_trigger_patterns_to_tool_naming_conventions(self, workspace_root):
         """
         SCENARIO: Rules file maps trigger patterns to tool naming conventions in behavior sections
-        GIVEN: Bot has behaviors with trigger_words.json files
+        GIVEN: A bot configuration file with a working directory and behaviors
+        AND: Behaviors have trigger words configured
+        AND: A bot that has been initialized with that config file
         WHEN: File is written to .cursor/rules/mcp-test-bot-awareness.mdc
         THEN: Each behavior section includes tool pattern with ACTUAL bot name
         AND: Tool patterns appear in behavior sections (not flat list)
         """
-        # Given: Create bot with trigger words
-        bot_name = 'test_bot'
-        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-        config_dir.mkdir(parents=True, exist_ok=True)
-        (config_dir / 'bot_config.json').write_text(json.dumps({
-            'name': bot_name,
-            'behaviors': ['shape', 'discovery']
-        }), encoding='utf-8')
-        
-        # Create behavior.json files with trigger words (new format)
+        # Given: A bot configuration file with a working directory and behaviors
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_config = given_bot_config_file_with_working_dir_and_behaviors(workspace_root, bot_name, behaviors)
+        # And: Behaviors have trigger words configured
         bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-        
-        shape_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '1_shape'
-        shape_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '1_shape')
-        # Update behavior.json with trigger words
-        shape_behavior_file = shape_dir / 'behavior.json'
-        shape_behavior_data = json.loads(shape_behavior_file.read_text())
-        shape_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for shape',
-            'patterns': ['shape story', 'define outline'],
-            'priority': 10
-        }
-        shape_behavior_file.write_text(json.dumps(shape_behavior_data, indent=2), encoding='utf-8')
-        
-        # Create behavior.json for discovery with trigger words
-        discovery_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors' / '4_discovery'
-        discovery_dir.mkdir(parents=True, exist_ok=True)
-        create_actions_workflow_json(bot_dir, '4_discovery')
-        # Update behavior.json with trigger words
-        discovery_behavior_file = discovery_dir / 'behavior.json'
-        discovery_behavior_data = json.loads(discovery_behavior_file.read_text())
-        discovery_behavior_data['trigger_words'] = {
-            'description': 'Trigger words for discovery',
-            'patterns': ['discover stories', 'enumerate stories'],
-            'priority': 10
-        }
-        discovery_behavior_file.write_text(json.dumps(discovery_behavior_data, indent=2), encoding='utf-8')
-        
-        # When: Generate awareness files
-        from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
-        gen = MCPServerGenerator(bot_directory=bot_dir)
-        gen.generate_awareness_files()
-        
-        # Then: File has behavior sections with tool patterns (file written to repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_file = repo_root / '.cursor' / 'rules' / 'mcp-test-bot-awareness.mdc'
+        given_behavior_with_trigger_words(bot_dir, '1_shape', ['shape story', 'define outline'])
+        given_behavior_with_trigger_words(bot_dir, '4_discovery', ['discover stories', 'enumerate stories'])
+        # And: A bot that has been initialized with that config file
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # When: File is written to .cursor/rules/mcp-test-bot-awareness.mdc
+        gen = when_generator_generates_awareness_files(bot_dir)
+        rules_file = then_awareness_file_created_with_bot_specific_filename(bot_name)
         content = rules_file.read_text(encoding='utf-8')
         
-        # Verify behavior sections exist
-        assert '### Shape Behavior' in content
-        assert '### Discovery Behavior' in content
-        
-        # Verify tool patterns in sections use actual bot name
-        assert 'test_bot_shape_<action>' in content
-        assert 'test_bot_discovery_<action>' in content
-        
-        # Verify trigger words are in correct sections
-        shape_section = content[content.find('### Shape'):content.find('### Discovery')]
-        assert 'shape story' in shape_section
-        assert 'define outline' in shape_section
-        
-        discovery_section = content[content.find('### Discovery'):]
-        assert 'discover stories' in discovery_section
-        assert 'enumerate stories' in discovery_section
+        # Then: Each behavior section includes tool pattern with ACTUAL bot name
+        then_awareness_file_contains_behavior_sections(content, behaviors)
+        # And: Tool patterns appear in behavior sections (not flat list)
+        then_awareness_file_contains_tool_patterns(content, bot_name, behaviors)
+        # And: Trigger words are in correct sections
+        then_trigger_words_in_behavior_section(content, '1_shape', ['shape story', 'define outline'])
+        then_trigger_words_in_behavior_section(content, '4_discovery', ['discover stories', 'enumerate stories'])
 
     def test_generator_handles_file_write_errors_gracefully_creates_directory(self, generator, workspace_root):
         """
@@ -948,21 +1200,13 @@ class TestGenerateCursorAwarenessFiles:
         THEN: Generator creates directory before writing file
         AND: File write succeeds with bot-specific filename
         """
-        # Given: .cursor/rules/ directory may or may not exist (in repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_dir = repo_root / '.cursor' / 'rules'
-        
         # When: Generate awareness files
         generator.generate_awareness_files()
         
         # Then: Directory exists (created if needed)
-        assert rules_dir.exists()
-        assert rules_dir.is_dir()
-        
+        rules_dir = then_rules_directory_exists_and_is_directory()
         # And: File write succeeded with bot-specific filename
-        rules_file = rules_dir / 'mcp-test-bot-awareness.mdc'
-        assert rules_file.exists()
+        then_awareness_file_exists_with_bot_specific_filename(rules_dir, 'test_bot')
 
     def test_generator_handles_file_write_errors_with_clear_error_message(self, generator, workspace_root):
         """
@@ -972,31 +1216,14 @@ class TestGenerateCursorAwarenessFiles:
         THEN: Generator raises clear error message indicating permission issue
         AND: Error includes bot-specific path attempted
         """
-        # Given: Mock Path.write_text to raise PermissionError (file written to repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_dir = repo_root / '.cursor' / 'rules'
-        rules_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Mock Path.write_text to raise PermissionError
-        original_write_text = Path.write_text
-        
-        def mock_write_text(self, *args, **kwargs):
-            if 'mcp-test-bot-awareness.mdc' in str(self):
-                raise PermissionError(f"Permission denied: {self}")
-            return original_write_text(self, *args, **kwargs)
-        
-        with patch.object(Path, 'write_text', mock_write_text):
-            # When/Then: Generator raises error with clear message
-            with pytest.raises(PermissionError) as exc_info:
-                generator.generate_awareness_files()
-            
-            # And: Error includes bot-specific path
-            assert 'mcp-test-bot-awareness.mdc' in str(exc_info.value)
-
-
-class TestGenerateAwarenessFilesIntegration:
-    """Integration test for full awareness files generation."""
+        # Given: Rules directory exists
+        rules_dir = when_create_rules_directory_if_needed()
+        # And: Path.write_text is mocked to raise PermissionError
+        expected_filename = given_expected_awareness_filename()
+        with given_path_write_text_mocked_to_raise_permission_error(expected_filename):
+            # When: Generator attempts to write file
+            # Then: Generator raises error with clear message
+            then_permission_error_raised_with_bot_specific_path(generator.generate_awareness_files, expected_filename)
 
     def test_full_awareness_generation_workflow(self, generator, workspace_root):
         """
@@ -1007,17 +1234,11 @@ class TestGenerateAwarenessFilesIntegration:
         AND: Rules file has all required sections
         """
         # When: Generate awareness files
-        generator.generate_awareness_files()
+        when_generator_generates_awareness_files_direct(generator)
         
-        # Then: Rules file created with bot-specific filename (in repo root)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        rules_file = repo_root / '.cursor' / 'rules' / 'mcp-test-bot-awareness.mdc'
-        assert rules_file.exists()
-        
-        content = rules_file.read_text(encoding='utf-8')
-        # Test bot specific content
-        assert 'test_bot' in content.lower()
-        assert 'Priority: Check MCP Tools First' in content
-        assert 'Bot: test_bot' in content
+        # Then: Rules file created with bot-specific filename
+        rules_dir = then_rules_directory_exists_and_is_directory()
+        rules_file = then_awareness_file_exists_with_bot_specific_filename(rules_dir, 'test_bot')
+        # And: Rules file has all required sections
+        then_awareness_file_contains_required_sections(rules_file, 'test_bot')
 

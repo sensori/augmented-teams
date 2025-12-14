@@ -1,0 +1,54 @@
+# Incremental Backlog
+
+## Increment 2: Simplest MCP
+
+- MCP Server Generator --> Generate MCP Bot Server
+- Bot Behavior --> Generate Behavior Action Tools
+- System --> Deploy MCP Bot Server
+- Bot Behavior --> Inject Validation Rules for Validate Rules Action
+
+## Increment 3: Workflow
+
+- Bot Behavior --> Initialize Project Location
+- System --> Track Activity for Gather Context Action
+- System --> Proceed To Decide Planning
+- Bot Behavior --> Inject Knowledge Graph Template and Builder Instructions
+- Bot Behavior --> Track Activity for Build Knowledge Action
+- System --> Proceed To Render Output
+- Bot Behavior --> Load Render Configurations
+- Bot Behavior --> Inject Template Instructions
+- System --> Inject Synchronizer Instructions
+- System --> Track Activity for Render Output Action
+- System --> Track Activity for Validate Rules Action
+- System --> Complete Validate Rules Action
+
+## Increment 6: Inject / Store Content
+
+- Bot Behavior --> Store Context Files
+- System --> Stores Activity for Initialize Project Action
+- System --> Save Through MCP
+- System --> Save Through CLI
+- System --> Gather Context Saves To Context Folder
+- System --> Load + Inject  Guardrails
+- System --> Save Final Assumptions and Decisions
+- System --> Load + Inject Knolwedge Graph
+- System --> Save Knowledge Graph
+- System --> Load+ Inject Content Into Instructions
+- System --> Save Content
+- System --> Run Diagnostics + inject Results
+
+## Increment 7: Code Scanner
+
+- Bot Behavior --> Inject Validation Rules for Validate Rules Action
+- Bot Behavior --> System Discovers Scanners
+- System --> System Runs Scanners After Build Knowledge
+- System --> Scanner Detects Violations Using Regex Patterns
+- System --> System Collects Violations from All Scanners
+- System --> Track Activity for Validate Rules Action
+- System --> System Loads Scanner Classes
+- System --> System Runs Scanners After Render Output
+- System --> Scanner Detects Violations Using AST Parsing
+- System --> System Reports Violations with Location Context
+- System --> Complete Validate Rules Action
+- System --> System Runs Scanners Before AI Validation
+- System --> Scanner Detects Violations Using File Structure Analysis

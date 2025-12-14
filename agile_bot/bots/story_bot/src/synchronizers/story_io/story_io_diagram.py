@@ -1016,29 +1016,28 @@ class StoryIODiagram(StoryIOComponent):
         if not isinstance(priority, (int, str)):
             priority = 1
         
+        # Handle both 'name' and 'title' fields (title is used in base_bot format)
+        increment_name = data.get('name') or data.get('title', '')
         increment = Increment(
-            name=data['name'],
+            name=increment_name,
             priority=priority  # Pass as-is to preserve string format
         )
         
         # Store story names if provided (increments reference stories by name)
+        # Only support flat stories array structure (no nested epics/sub_epics)
         if 'stories' in data and isinstance(data['stories'], list):
             story_list = data['stories']
-            # Check if stories are names (strings) or objects
-            if story_list and isinstance(story_list[0], str):
-                # Stories are names - store as story_names
-                increment.story_names = story_list
-            else:
-                # Stories are objects - create story objects and add to increment
-                for story_data in story_list:
-                    if isinstance(story_data, dict):
-                        story = self._create_story_from_data(story_data)
-                        story.change_parent(increment)
-        
-        # Add epics/features (if present)
-        for epic_data in data.get('epics', []):
-            epic = self._create_epic_from_data(epic_data)
-            epic.change_parent(increment)
+            if story_list:
+                # Check if stories are names (strings) or objects
+                if isinstance(story_list[0], str):
+                    # Stories are names - store as story_names
+                    increment.story_names = story_list
+                else:
+                    # Stories are objects - create story objects and add to increment
+                    for story_data in story_list:
+                        if isinstance(story_data, dict):
+                            story = self._create_story_from_data(story_data)
+                            story.change_parent(increment)
         
         # Store additional increment metadata
         if 'relative_size' in data:

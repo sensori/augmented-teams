@@ -116,5 +116,18 @@
       ],
       "story_groups": []
     }
+  ],
+  "increments": [
+    {
+      "name": "",
+      "priority": 1,
+      "stories": [
+        {
+          "name": "",
+          "users": [],
+          "sequential_order": 1
+        }
+      ]
+    }
   ]
 }

@@ -18,7 +18,8 @@ from conftest import (
     create_workflow_state_file,
     create_base_actions_structure
 )
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_actions_workflow_json
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_behavior_action_instructions, create_base_action_instructions
+from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
 
 # ============================================================================
 # HELPER CLASSES
@@ -201,20 +202,9 @@ class TriggerRouterTestHelper:
 # HELPER FUNCTIONS
 # ============================================================================
 
-def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior: str, action: str) -> Path:
-    """Helper: Create behavior action instructions file."""
-    instructions_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'behaviors' / behavior / action
-    instructions_dir.mkdir(parents=True, exist_ok=True)
-    instructions_file = instructions_dir / 'instructions.json'
-    instructions_data = {
-        'action': action,
-        'behavior': behavior,
-        'instructions': [f'{action} instructions for {behavior}']
-    }
-    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
-    return instructions_file
-
-def create_base_action_instructions(workspace: Path, action: str) -> Path:
+# Removed create_behavior_action_instructions - use test_helpers.create_behavior_action_instructions instead
+# Removed create_base_action_instructions - use test_helpers.create_base_action_instructions instead
+def create_base_action_instructions_duplicate_removed(workspace: Path, action: str) -> Path:
     """Helper: Create base action instructions file with numbered prefix."""
     action_prefixes = {
         'initialize_workspace': '1_initialize_workspace',

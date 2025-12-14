@@ -1,0 +1,772 @@
+{
+  "epics": [
+    {
+      "name": "Build Agile Bots8 stories",
+      "sequential_order": 1,
+      "estimated_stories": 8,
+      "sub_epics": [
+        {
+          "name": "Generate MCP Tools6 stories",
+          "sequential_order": 1,
+          "estimated_stories": 6,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Generate MCP Bot Server",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Generate Behavior Action Tools",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Deploy MCP BOT Server",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Store Context Files",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Stores Activity for Initialize Project Action",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Restart MCP Server To Load Code Changes",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Generate CLI2 stories",
+          "sequential_order": 2,
+          "estimated_stories": 2,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Generate BOT CLI code",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "MCP Server Generator"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Generate Cursor Command Files",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Invoke Bot24 stories",
+      "sequential_order": 2,
+      "estimated_stories": 24,
+      "sub_epics": [
+        {
+          "name": "Init Project6 stories",
+          "sequential_order": 1,
+          "estimated_stories": 6,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Initialize Project Creates Context Folder",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Input File Copied To Context Folder",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Store Context Files",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Guards Prevent Writes Without Project",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Stores Activity for Initialize Project Action",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Initialize Project Location",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Invoke MCP5 stories",
+          "sequential_order": 2,
+          "estimated_stories": 5,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Bot Tool Invocation",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "AI Chat"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Behavior Action Instructions",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Forward To Current Behavior and Current Action",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Forward To Current Action",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Through MCP",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Invoke CLI6 stories",
+          "sequential_order": 3,
+          "estimated_stories": 6,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Invoke Bot CLI",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Human"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Invoke Bot Behavior CLI",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Invoke Bot Behavior Action CLI",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Get Help for Command Line Functions",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Detect Trigger Words Through Extension",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Through CLI",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Perform Behavior Action7 stories",
+          "sequential_order": 4,
+          "estimated_stories": 7,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Close Current Action",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Complete Workflow Integration",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Provide Behavior Action Instructions",
+                  "sequential_order": 3,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Activity Tracker Guard",
+                  "sequential_order": 4,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Workflow Guard",
+                  "sequential_order": 5,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Activity Tracking Location",
+                  "sequential_order": 6,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Find Behavior Folder",
+                  "sequential_order": 7,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    },
+    {
+      "name": "Execute Behavior Actions36 stories",
+      "sequential_order": 3,
+      "estimated_stories": 36,
+      "sub_epics": [
+        {
+          "name": "Gather Context6 stories",
+          "sequential_order": 1,
+          "estimated_stories": 6,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Track Activity for Gather Context Action",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Proceed To Decide Planning",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Gather Context Saves To Context Folder",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Load + Inject  Guardrails",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Gather Context Action Guardrails",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Saves Answers and Evidence",
+                  "sequential_order": 2,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Decide Planning Criteria Action4 stories",
+          "sequential_order": 2,
+          "estimated_stories": 4,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Inject Planning Criteria Into Instructions",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Planning Action",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Proceed To Build Knowledge",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Final Assumptions and Decisions",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Build Knowledge5 stories",
+          "sequential_order": 3,
+          "estimated_stories": 5,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Inject Knowledge Graph Template and Builder Instructions",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Build Knowledge Action",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Proceed To Render Output",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Load + Inject Knolwedge Graph",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Knowledge Graph",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Render Output7 stories",
+          "sequential_order": 4,
+          "estimated_stories": 7,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Load Render Configurations",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Inject Template Instructions",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Inject Synchronizer Instructions",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Render Output Action",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Load+ Inject Content Into Instructions",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Save Content",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Proceed To Validate Rules",
+                  "sequential_order": 1,
+                  "connector": "and",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Validate Knowledge & Content Against Rules14 stories",
+          "sequential_order": 5,
+          "estimated_stories": 14,
+          "sub_epics": [],
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Track Activity for Validate Rules Action",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Complete Validate Rules Action",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "or",
+              "connector": "or",
+              "stories": [
+                {
+                  "name": "Inject Validation Rules for Validate Rules Action",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Discovers Scanners from rule.json",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Runs Scanners After Build Knowledge",
+                  "sequential_order": 3,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Scanner Detects Violations Using Regex Patterns",
+                  "sequential_order": 4,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Collects Violations from All Scanners",
+                  "sequential_order": 5,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Track Activity for Validate Rules Action",
+                  "sequential_order": 6,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Loads Scanner Classes",
+                  "sequential_order": 7,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Runs Scanners After Render Output",
+                  "sequential_order": 8,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Scanner Detects Violations Using AST Parsing",
+                  "sequential_order": 9,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Reports Violations with Location Context",
+                  "sequential_order": 10,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Complete Validate Rules Action",
+                  "sequential_order": 11,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "System Runs Scanners Before AI Validation",
+                  "sequential_order": 12,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Scanner Detects Violations Using File Structure Analysis",
+                  "sequential_order": 13,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            },
+            {
+              "type": "or",
+              "connector": null,
+              "stories": [
+                {
+                  "name": "Inject Validation Rules for Validate Rules Action",
+                  "sequential_order": 1,
+                  "connector": "or",
+                  "users": [
+                    "Bot Behavior"
+                  ],
+                  "story_type": "user"
+                },
+                {
+                  "name": "Run Diagnostics + inject Results",
+                  "sequential_order": 2,
+                  "connector": "or",
+                  "users": [],
+                  "story_type": "user"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stories": []
+    }
+  ],
+  "increments": []
+}

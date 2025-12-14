@@ -1,0 +1,60 @@
+ORPHANED STORIES -> INCREMENT ASSIGNMENTS
+==========================================
+
+INCREMENT 1: Simplest MCP (Priority 1)
+----------------------------------------
+1. Restart MCP Server To Load Code Changes
+2. Inject Planning Criteria Into Instructions
+3. Find Behavior Folder
+
+
+INCREMENT 2: Workflow (Priority 2)
+-----------------------------------
+1. Initialize Project Creates Context Folder
+2. Input File Copied To Context Folder
+3. Guards Prevent Writes Without Project
+4. Invoke Bot Tool
+5. Load And Merge Behavior Action Instructions
+6. Forward To Current Behavior and Current Action
+7. Forward To Current Action
+8. Track Activity for Planning Action
+9. Proceed To Build Knowledge
+10. Proceed To Validate Rules
+11. Close Current Action
+12. Complete Workflow Integration
+13. Provide Behavior Action Instructions
+14. Activity Tracker Guard
+15. Workflow Guard
+16. Activity Tracking Location
+
+
+INCREMENT 3: Save Content (Priority 3)
+---------------------------------------
+1. Gather Context Action Guardrails
+2. Saves Answers and Evidence
+
+
+NEW INCREMENT: CLI (Priority - TBD)
+------------------------------------
+1. Generate BOT CLI code
+2. Generate Cursor Command Files
+3. Invoke Bot CLI
+4. Invoke Bot Behavior CLI
+5. Invoke Bot Behavior Action CLI
+6. Get Help for Command Line Functions
+7. Detect Trigger Words Through Extension
+
+
+INCREMENT 4: Later (Priority 4)
+--------------------------------
+(No orphaned stories assigned - empty)
+
+
+SUMMARY
+-------
+Total Orphaned Stories: 28
+- Increment 1 (Simplest MCP): 3 stories
+- Increment 2 (Workflow): 16 stories
+- Increment 3 (Save Content): 2 stories
+- NEW Increment (CLI): 7 stories
+- Increment 4 (Later): 0 stories

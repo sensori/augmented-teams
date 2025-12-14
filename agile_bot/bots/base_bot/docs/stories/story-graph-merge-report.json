@@ -1,0 +1,1443 @@
+{
+  "timestamp": "2025-12-13T16:22:37.130472",
+  "extracted_file": "agile_bot\\bots\\base_bot\\docs\\stories\\story-graph.json",
+  "original_file": "agile_bot\\bots\\base_bot\\docs\\stories\\story-graph.json",
+  "summary": {
+    "total_extracted_stories": 71,
+    "total_original_stories": 71,
+    "exact_matches": 71,
+    "fuzzy_matches": 0,
+    "new_stories": 0,
+    "removed_stories": 0
+  },
+  "exact_matches": [
+    {
+      "extracted": {
+        "name": "Generate MCP Bot Server",
+        "users": [
+          "MCP Server Generator"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Generate MCP Bot Server",
+        "users": [
+          "MCP Server Generator"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Generate Behavior Action Tools",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Generate Behavior Action Tools",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Deploy MCP BOT Server",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Deploy MCP BOT Server",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Store Context Files",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Store Context Files",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Stores Activity for Initialize Project Action",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Stores Activity for Initialize Project Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Restart MCP Server To Load Code Changes",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "original": {
+        "name": "Restart MCP Server To Load Code Changes",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate MCP Tools6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Generate BOT CLI code",
+        "users": [
+          "MCP Server Generator"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate CLI2 stories"
+      },
+      "original": {
+        "name": "Generate BOT CLI code",
+        "users": [
+          "MCP Server Generator"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate CLI2 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Generate Cursor Command Files",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate CLI2 stories"
+      },
+      "original": {
+        "name": "Generate Cursor Command Files",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Build Agile Bots8 stories",
+        "sub_epic_name": "Generate CLI2 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Initialize Project Creates Context Folder",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Initialize Project Creates Context Folder",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Input File Copied To Context Folder",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Input File Copied To Context Folder",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Store Context Files",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Store Context Files",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Guards Prevent Writes Without Project",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Guards Prevent Writes Without Project",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Stores Activity for Initialize Project Action",
+        "users": [],
+        "sequential_order": 5,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Stores Activity for Initialize Project Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Initialize Project Location",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 6,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "original": {
+        "name": "Initialize Project Location",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Init Project6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Bot Tool Invocation",
+        "users": [
+          "AI Chat"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "original": {
+        "name": "Bot Tool Invocation",
+        "users": [
+          "AI Chat"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Behavior Action Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "original": {
+        "name": "Behavior Action Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Forward To Current Behavior and Current Action",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "original": {
+        "name": "Forward To Current Behavior and Current Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Forward To Current Action",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "original": {
+        "name": "Forward To Current Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Save Through MCP",
+        "users": [],
+        "sequential_order": 5,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "original": {
+        "name": "Save Through MCP",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke MCP5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Invoke Bot CLI",
+        "users": [
+          "Human"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Invoke Bot CLI",
+        "users": [
+          "Human"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Invoke Bot Behavior CLI",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Invoke Bot Behavior CLI",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Invoke Bot Behavior Action CLI",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Invoke Bot Behavior Action CLI",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Get Help for Command Line Functions",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Get Help for Command Line Functions",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Detect Trigger Words Through Extension",
+        "users": [],
+        "sequential_order": 5,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Detect Trigger Words Through Extension",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Save Through CLI",
+        "users": [],
+        "sequential_order": 6,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "original": {
+        "name": "Save Through CLI",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Invoke CLI6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Close Current Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Close Current Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Complete Workflow Integration",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Complete Workflow Integration",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Provide Behavior Action Instructions",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Provide Behavior Action Instructions",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Activity Tracker Guard",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Activity Tracker Guard",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Workflow Guard",
+        "users": [],
+        "sequential_order": 5,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Workflow Guard",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Activity Tracking Location",
+        "users": [],
+        "sequential_order": 6,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Activity Tracking Location",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Find Behavior Folder",
+        "users": [],
+        "sequential_order": 7,
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "original": {
+        "name": "Find Behavior Folder",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Invoke Bot24 stories",
+        "sub_epic_name": "Perform Behavior Action7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Gather Context Action",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Track Activity for Gather Context Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Proceed To Decide Planning",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Proceed To Decide Planning",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Gather Context Saves To Context Folder",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Gather Context Saves To Context Folder",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Load + Inject  Guardrails",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Load + Inject  Guardrails",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Gather Context Action Guardrails",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Gather Context Action Guardrails",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Saves Answers and Evidence",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "original": {
+        "name": "Saves Answers and Evidence",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Gather Context6 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Planning Criteria Into Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "original": {
+        "name": "Inject Planning Criteria Into Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Planning Action",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "original": {
+        "name": "Track Activity for Planning Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Proceed To Build Knowledge",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "original": {
+        "name": "Proceed To Build Knowledge",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Save Final Assumptions and Decisions",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "original": {
+        "name": "Save Final Assumptions and Decisions",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Decide Planning Criteria Action4 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Knowledge Graph Template and Builder Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "original": {
+        "name": "Inject Knowledge Graph Template and Builder Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Build Knowledge Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "original": {
+        "name": "Track Activity for Build Knowledge Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Proceed To Render Output",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "original": {
+        "name": "Proceed To Render Output",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Load + Inject Knolwedge Graph",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "original": {
+        "name": "Load + Inject Knolwedge Graph",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Save Knowledge Graph",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "original": {
+        "name": "Save Knowledge Graph",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Build Knowledge5 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Load Render Configurations",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Load Render Configurations",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Template Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Inject Template Instructions",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Synchronizer Instructions",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Inject Synchronizer Instructions",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Render Output Action",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Track Activity for Render Output Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Load+ Inject Content Into Instructions",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Load+ Inject Content Into Instructions",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Save Content",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Save Content",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Proceed To Validate Rules",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "original": {
+        "name": "Proceed To Validate Rules",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Render Output7 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Validate Rules Action",
+        "users": [],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Track Activity for Validate Rules Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Complete Validate Rules Action",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Complete Validate Rules Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Validation Rules for Validate Rules Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Inject Validation Rules for Validate Rules Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Discovers Scanners from rule.json",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Discovers Scanners from rule.json",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Runs Scanners After Build Knowledge",
+        "users": [],
+        "sequential_order": 3,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Runs Scanners After Build Knowledge",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Scanner Detects Violations Using Regex Patterns",
+        "users": [],
+        "sequential_order": 4,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Scanner Detects Violations Using Regex Patterns",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Collects Violations from All Scanners",
+        "users": [],
+        "sequential_order": 5,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Collects Violations from All Scanners",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Track Activity for Validate Rules Action",
+        "users": [],
+        "sequential_order": 6,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Track Activity for Validate Rules Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Loads Scanner Classes",
+        "users": [],
+        "sequential_order": 7,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Loads Scanner Classes",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Runs Scanners After Render Output",
+        "users": [],
+        "sequential_order": 8,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Runs Scanners After Render Output",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Scanner Detects Violations Using AST Parsing",
+        "users": [],
+        "sequential_order": 9,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Scanner Detects Violations Using AST Parsing",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Reports Violations with Location Context",
+        "users": [],
+        "sequential_order": 10,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Reports Violations with Location Context",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Complete Validate Rules Action",
+        "users": [],
+        "sequential_order": 11,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Complete Validate Rules Action",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "System Runs Scanners Before AI Validation",
+        "users": [],
+        "sequential_order": 12,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "System Runs Scanners Before AI Validation",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Scanner Detects Violations Using File Structure Analysis",
+        "users": [],
+        "sequential_order": 13,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Scanner Detects Violations Using File Structure Analysis",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Inject Validation Rules for Validate Rules Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "sequential_order": 1,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Inject Validation Rules for Validate Rules Action",
+        "users": [
+          "Bot Behavior"
+        ],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    },
+    {
+      "extracted": {
+        "name": "Run Diagnostics + inject Results",
+        "users": [],
+        "sequential_order": 2,
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "original": {
+        "name": "Run Diagnostics + inject Results",
+        "users": [],
+        "Steps": [],
+        "acceptance_criteria": [],
+        "epic_name": "Execute Behavior Actions36 stories",
+        "sub_epic_name": "Validate Knowledge & Content Against Rules14 stories"
+      },
+      "match_type": "exact",
+      "confidence": 1.0
+    }
+  ],
+  "fuzzy_matches": [],
+  "new_stories": [],
+  "removed_stories": []
+}

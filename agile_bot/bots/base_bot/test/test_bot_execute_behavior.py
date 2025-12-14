@@ -10,23 +10,14 @@ Tests the main entry point for behavior execution that handles:
 import pytest
 import json
 from pathlib import Path
+from conftest import create_bot_config_file
 from agile_bot.bots.base_bot.src.bot.bot import Bot, BotResult
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_actions_workflow_json
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_base_instructions, given_bot_name_and_behavior_setup, given_bot_instance_created
+from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
 
 
-def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> Path:
-    """Helper: Create bot configuration file."""
-    config_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'config'
-    config_dir.mkdir(parents=True, exist_ok=True)
-    config_file = config_dir / 'bot_config.json'
-    config_file.write_text(
-        json.dumps({'name': bot_name, 'behaviors': behaviors}),
-        encoding='utf-8'
-    )
-    return config_file
-
-
-def create_actions_workflow_json(bot_directory: Path, behavior_name: str) -> Path:
+# Removed create_actions_workflow_json - use test_build_agile_bots_helpers.create_actions_workflow_json instead
+# Already imported at top of file
     """Helper: Create behavior.json for a behavior (REQUIRED)."""
     behavior_dir = bot_directory / 'behaviors' / behavior_name
     behavior_dir.mkdir(parents=True, exist_ok=True)
@@ -61,35 +52,154 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str) -> Pat
     behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     return behavior_file
 
-def create_base_instructions(bot_directory: Path):
-    """Helper: Create base instructions for all actions in bot_directory."""
-    base_actions_dir = bot_directory / 'base_actions'
-    
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
-    for action in actions:
-        action_dir = base_actions_dir / f'{actions.index(action) + 2}_{action}'
-        action_dir.mkdir(parents=True, exist_ok=True)
-        instructions_file = action_dir / 'instructions.json'
-        instructions_file.write_text(
-            json.dumps({'actionName': action, 'instructions': [f'Instruction for {action}']}),
-            encoding='utf-8'
-        )
-        # Create action_config.json for workflow
-        config_file = action_dir / 'action_config.json'
-        order = actions.index(action) + 2
-        next_action = actions[order - 1] if order < len(actions) + 1 else None
-        config_file.write_text(
-            json.dumps({
-                'name': action,
-                'workflow': True,
-                'order': order,
-                'next_action': next_action
-            }),
-            encoding='utf-8'
-        )
+# Removed create_base_instructions - use test_helpers.create_base_instructions instead
 
 
-class TestBotExecuteBehavior:
+def given_test_environment_setup(bot_directory: Path, workspace_directory: Path):
+    """Given: Test environment setup."""
+    bootstrap_env(bot_directory, workspace_directory)
+    create_base_instructions(bot_directory)  # Imported from test_helpers
+
+
+def given_bot_config_created(bot_directory: Path, bot_name: str, behaviors: list) -> Path:
+    """Given: Bot config created."""
+    return create_bot_config_file(bot_directory, bot_name, behaviors)
+
+
+def given_behavior_workflow_created(bot_directory: Path, behavior_name: str):
+    """Given: Behavior workflow created."""
+    create_actions_workflow_json(bot_directory, behavior_name)
+
+
+def given_multiple_behavior_workflows_created(bot_directory: Path, behavior_names: list):
+    """Given: Multiple behavior workflows created."""
+    for behavior_name in behavior_names:
+        given_behavior_workflow_created(bot_directory, behavior_name)
+
+
+def given_completed_action_entry(bot_name: str, behavior: str, action: str, timestamp: str = None) -> dict:
+    """Given: Completed action entry for workflow state."""
+    if timestamp is None:
+        timestamp = '2025-12-04T15:44:22.812230'
+    return {'action_state': f'{bot_name}.{behavior}.{action}', 'timestamp': timestamp}
+
+
+def given_workflow_state_created(workspace_directory: Path, bot_name: str, behavior: str, current_action: str, completed_actions: list = None):
+    """Given: Workflow state created."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_file.write_text(json.dumps({
+        'current_behavior': f'{bot_name}.{behavior}',
+        'current_action': f'{bot_name}.{behavior}.{current_action}',
+        'completed_actions': completed_actions or []
+    }), encoding='utf-8')
+    return workflow_file
+
+
+# Removed given_bot_instance_created - use test_helpers.given_bot_instance_created instead
+
+
+def given_bot_setup_with_action(bot_directory: Path, workspace_directory: Path, bot_name: str, behaviors: list, behavior: str, action: str) -> tuple[Bot, Path]:
+    """Given: Bot setup with action."""
+    given_test_environment_setup(bot_directory, workspace_directory)
+    bot_config = given_bot_config_created(bot_directory, bot_name, behaviors)
+    given_behavior_workflow_created(bot_directory, behavior)
+    given_workflow_state_created(workspace_directory, bot_name, behavior, action)
+    bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
+    return bot, bot_config
+
+
+def given_bot_setup_with_current_action(bot_directory: Path, workspace_directory: Path, bot_name: str, behaviors: list, behavior: str, current_action: str, completed_actions: list = None) -> tuple[Bot, Path]:
+    """Given: Bot setup with current action."""
+    given_test_environment_setup(bot_directory, workspace_directory)
+    bot_config = given_bot_config_created(bot_directory, bot_name, behaviors)
+    given_behavior_workflow_created(bot_directory, behavior)
+    given_workflow_state_created(workspace_directory, bot_name, behavior, current_action, completed_actions)
+    bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
+    return bot, bot_config
+
+
+def given_bot_setup_with_multiple_behaviors(bot_directory: Path, workspace_directory: Path, bot_name: str, behaviors: list, current_behavior: str, current_action: str, completed_actions: list = None) -> tuple[Bot, Path]:
+    """Given: Bot setup with multiple behaviors."""
+    given_test_environment_setup(bot_directory, workspace_directory)
+    bot_config = given_bot_config_created(bot_directory, bot_name, behaviors)
+    given_multiple_behavior_workflows_created(bot_directory, behaviors)
+    given_workflow_state_created(workspace_directory, bot_name, current_behavior, current_action, completed_actions)
+    bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
+    return bot, bot_config
+
+
+def given_bot_setup_without_workflow_state(bot_directory: Path, workspace_directory: Path, bot_name: str, behaviors: list, behavior: str) -> tuple[Bot, Path]:
+    """Given: Bot setup without workflow state."""
+    given_test_environment_setup(bot_directory, workspace_directory)
+    bot_config = given_bot_config_created(bot_directory, bot_name, behaviors)
+    given_behavior_workflow_created(bot_directory, behavior)
+    given_no_workflow_state_exists(workspace_directory)
+    bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
+    return bot, bot_config
+
+
+def when_execute_behavior_called(bot: Bot, behavior: str, action: str = None) -> BotResult:
+    """When: Execute behavior called."""
+    if action:
+        return bot.execute_behavior(behavior, action=action)
+    else:
+        return bot.execute_behavior(behavior)
+
+
+def then_bot_result_has_correct_status(result: BotResult, expected_status: str, expected_behavior: str = None, expected_action: str = None):
+    """Then: BotResult has correct status."""
+    assert isinstance(result, BotResult)
+    assert result.status == expected_status
+    if expected_behavior:
+        assert result.behavior == expected_behavior
+    if expected_action:
+        assert result.action == expected_action
+
+
+def then_bot_result_requires_confirmation_with_tool(result: BotResult, tool_name: str):
+    """Then: BotResult requires confirmation with specific tool."""
+    assert isinstance(result, BotResult)
+    assert result.status == 'requires_confirmation'
+    assert 'confirmation_tool' in result.data
+    assert result.data['confirmation_tool'] == tool_name
+
+
+def then_bot_result_requires_entry_workflow_confirmation(result: BotResult, expected_behavior: str):
+    """Then: BotResult requires entry workflow confirmation."""
+    assert isinstance(result, BotResult)
+    assert result.status == 'requires_confirmation'
+    assert 'behaviors' in result.data
+    assert expected_behavior in result.data['behaviors']
+
+
+def given_standard_workflow_actions():
+    """Given: Standard workflow actions list."""
+    return ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
+
+def then_bot_result_has_error_with_invalid_action_message(result: BotResult, bot_name: str, behavior: str, invalid_action: str, valid_actions: list):
+    """Then: BotResult has error with invalid action message."""
+    assert isinstance(result, BotResult)
+    assert result.status == 'error'
+    assert result.behavior == behavior
+    assert result.action == invalid_action
+    assert 'message' in result.data
+    assert 'INVALID ACTION' in result.data['message']
+    assert invalid_action in result.data['message']
+    for valid_action in valid_actions:
+        assert valid_action in result.data['message']
+    assert 'valid_actions' in result.data
+    for valid_action in valid_actions:
+        assert valid_action in result.data['valid_actions']
+        assert f'{bot_name}_{behavior}_{valid_action}' in result.data['message']
+
+
+def given_no_workflow_state_exists(workspace_directory: Path):
+    """Given: No workflow state exists."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    assert not workflow_file.exists()
+
+
+class TestExecuteBehavior:
     """Tests for Bot.execute_behavior() - Production code path."""
 
     def test_execute_behavior_with_action_parameter(self, bot_directory, workspace_directory):
@@ -99,38 +209,11 @@ class TestBotExecuteBehavior:
         WHEN: Bot.execute_behavior('shape', action='gather_context') is called
         THEN: Action executes and returns BotResult
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        bot, _ = given_bot_setup_with_action(bot_directory, workspace_directory, 'test_bot', ['shape'], 'shape', 'gather_context')
         
-        # Create base actions structure in bot_directory (no fallback)
-        create_base_instructions(bot_directory)
+        result = when_execute_behavior_called(bot, 'shape', 'gather_context')
         
-        # Create bot config
-        bot_name = 'test_bot'
-        bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
-        
-        # Create behavior folder with actions-workflow.json (REQUIRED)
-        create_actions_workflow_json(bot_directory, 'shape')
-        
-        # Create workflow state
-        workflow_file = workspace_directory / 'workflow_state.json'
-        workflow_file.write_text(json.dumps({
-            'current_behavior': f'{bot_name}.shape',
-            'current_action': f'{bot_name}.shape.gather_context',
-            'completed_actions': []
-        }), encoding='utf-8')
-        
-        # Create bot
-        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
-        
-        # When: Execute behavior with action
-        result = bot.execute_behavior('shape', action='gather_context')
-        
-        # Then: Returns BotResult with correct status
-        assert isinstance(result, BotResult)
-        assert result.status == 'completed'
-        assert result.behavior == 'shape'
-        assert result.action == 'gather_context'
+        then_bot_result_has_correct_status(result, 'completed', 'shape', 'gather_context')
 
     def test_execute_behavior_without_action_forwards_to_current(self, bot_directory, workspace_directory):
         """
@@ -139,38 +222,12 @@ class TestBotExecuteBehavior:
         WHEN: Bot.execute_behavior('shape') is called (no action parameter)
         THEN: Forwards to current action (decide_planning_criteria)
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        completed_action = given_completed_action_entry('test_bot', 'shape', 'gather_context')
+        bot, _ = given_bot_setup_with_current_action(bot_directory, workspace_directory, 'test_bot', ['shape'], 'shape', 'decide_planning_criteria', [completed_action])
         
-        # Create base actions structure in bot_directory (no fallback)
-        create_base_instructions(bot_directory)
+        result = when_execute_behavior_called(bot, 'shape')
         
-        # Create bot config
-        bot_name = 'test_bot'
-        bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
-        
-        # Create behavior folder with actions-workflow.json (REQUIRED)
-        create_actions_workflow_json(bot_directory, 'shape')
-        
-        # Create workflow state with current_action
-        workflow_file = workspace_directory / 'workflow_state.json'
-        workflow_file.write_text(json.dumps({
-            'current_behavior': f'{bot_name}.shape',
-            'current_action': f'{bot_name}.shape.decide_planning_criteria',
-            'completed_actions': [
-                {'action_state': f'{bot_name}.shape.gather_context', 'timestamp': '2025-12-04T15:44:22.812230'}
-            ]
-        }), encoding='utf-8')
-        
-        # Create bot
-        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
-        
-        # When: Execute behavior without action parameter
-        result = bot.execute_behavior('shape')
-        
-        # Then: Forwards to current action
-        assert isinstance(result, BotResult)
-        assert result.action == 'decide_planning_criteria'
+        then_bot_result_has_correct_status(result, 'completed', expected_action='decide_planning_criteria')
 
     def test_execute_behavior_requires_confirmation_when_out_of_order(self, bot_directory, workspace_directory):
         """
@@ -179,42 +236,12 @@ class TestBotExecuteBehavior:
         WHEN: Bot.execute_behavior('shape') is called
         THEN: Returns BotResult with status 'requires_confirmation'
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        completed_action = given_completed_action_entry('test_bot', 'shape', 'validate_rules', '2025-12-04T15:45:00.000000')
+        bot, _ = given_bot_setup_with_multiple_behaviors(bot_directory, workspace_directory, 'test_bot', ['shape', 'prioritization', 'discovery'], 'prioritization', 'gather_context', [completed_action])
         
-        # Create base actions structure in bot_directory (no fallback)
-        create_base_instructions(bot_directory)
+        result = when_execute_behavior_called(bot, 'shape')
         
-        # Create bot config with multiple behaviors (need 3+ to test going backwards)
-        bot_name = 'test_bot'
-        bot_config = create_bot_config_file(bot_directory, bot_name, ['shape', 'prioritization', 'discovery'])
-        
-        # Create behavior folders with behavior.json files (REQUIRED)
-        for behavior in ['shape', 'prioritization', 'discovery']:
-            create_actions_workflow_json(bot_directory, behavior)
-        
-        # Create workflow state showing current behavior is 'prioritization' (middle of sequence)
-        # Shape is before prioritization, so going back to shape should require confirmation
-        workflow_file = workspace_directory / 'workflow_state.json'
-        workflow_file.write_text(json.dumps({
-            'current_behavior': f'{bot_name}.prioritization',
-            'current_action': f'{bot_name}.prioritization.gather_context',
-            'completed_actions': [
-                {'action_state': f'{bot_name}.shape.validate_rules', 'timestamp': '2025-12-04T15:45:00.000000'}
-            ]
-        }), encoding='utf-8')
-        
-        # Create bot
-        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
-        
-        # When: Execute behavior out of order (shape when prioritization is current - going backwards)
-        result = bot.execute_behavior('shape')
-        
-        # Then: Returns confirmation requirement
-        assert isinstance(result, BotResult)
-        assert result.status == 'requires_confirmation'
-        assert 'confirmation_tool' in result.data
-        assert result.data['confirmation_tool'] == 'confirm_out_of_order'
+        then_bot_result_requires_confirmation_with_tool(result, 'confirm_out_of_order')
 
     def test_execute_behavior_handles_entry_workflow_when_no_state(self, bot_directory, workspace_directory):
         """
@@ -223,34 +250,11 @@ class TestBotExecuteBehavior:
         WHEN: Bot.execute_behavior('shape') is called
         THEN: Returns BotResult with status 'requires_confirmation' for entry workflow
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        bot, _ = given_bot_setup_without_workflow_state(bot_directory, workspace_directory, 'test_bot', ['shape'], 'shape')
         
-        # Create base actions structure in bot_directory (no fallback)
-        create_base_instructions(bot_directory)
+        result = when_execute_behavior_called(bot, 'shape')
         
-        # Create bot config
-        bot_name = 'test_bot'
-        bot_config = create_bot_config_file(bot_directory, bot_name, ['shape'])
-        
-        # Create behavior folder with behavior.json (REQUIRED)
-        create_actions_workflow_json(bot_directory, 'shape')
-        
-        # Verify no workflow state exists
-        workflow_file = workspace_directory / 'workflow_state.json'
-        assert not workflow_file.exists()
-        
-        # Create bot
-        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
-        
-        # When: Execute behavior without workflow state
-        result = bot.execute_behavior('shape')
-        
-        # Then: Returns entry workflow requirement
-        assert isinstance(result, BotResult)
-        assert result.status == 'requires_confirmation'
-        assert 'behaviors' in result.data
-        assert 'shape' in result.data['behaviors']
+        then_bot_result_requires_entry_workflow_confirmation(result, 'shape')
 
     def test_execute_behavior_returns_error_for_invalid_action(self, bot_directory, workspace_directory):
         """
@@ -259,43 +263,10 @@ class TestBotExecuteBehavior:
         WHEN: Bot.execute_behavior('prioritization', action='start') is called with invalid action 'start'
         THEN: Returns BotResult with status 'error' and message listing valid actions
         """
-        # Bootstrap environment
-        bootstrap_env(bot_directory, workspace_directory)
+        bot, _ = given_bot_setup_with_action(bot_directory, workspace_directory, 'test_bot', ['prioritization'], 'prioritization', 'gather_context')
         
-        # Create base actions structure in bot_directory (no fallback)
-        create_base_instructions(bot_directory)
+        result = when_execute_behavior_called(bot, 'prioritization', 'start')
         
-        # Create bot config
-        bot_name = 'test_bot'
-        bot_config = create_bot_config_file(bot_directory, bot_name, ['prioritization'])
-        
-        # Create behavior folder with actions-workflow.json (REQUIRED)
-        create_actions_workflow_json(bot_directory, 'prioritization')
-        
-        # Create workflow state
-        workflow_file = workspace_directory / 'workflow_state.json'
-        workflow_file.write_text(json.dumps({
-            'current_behavior': f'{bot_name}.prioritization',
-            'current_action': f'{bot_name}.prioritization.gather_context',
-            'completed_actions': []
-        }), encoding='utf-8')
-        
-        # Create bot
-        bot = Bot(bot_name=bot_name, bot_directory=bot_directory, config_path=bot_config)
-        
-        # When: Execute behavior with invalid action
-        result = bot.execute_behavior('prioritization', action='start')
-        
-        # Then: Returns error with valid actions listed
-        assert isinstance(result, BotResult)
-        assert result.status == 'error'
-        assert result.behavior == 'prioritization'
-        assert result.action == 'start'
-        assert 'message' in result.data
-        assert 'INVALID ACTION' in result.data['message']
-        assert 'start' in result.data['message']
-        assert 'gather_context' in result.data['message']  # Should list valid actions
-        assert 'valid_actions' in result.data
-        assert 'gather_context' in result.data['valid_actions']
-        assert f'{bot_name}_prioritization_gather_context' in result.data['message']  # Should suggest correct format
+        valid_actions = given_standard_workflow_actions()
+        then_bot_result_has_error_with_invalid_action_message(result, 'test_bot', 'prioritization', 'start', valid_actions)
 

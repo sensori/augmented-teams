@@ -8,30 +8,65 @@ import json
 import os
 from pathlib import Path
 from agile_bot.bots.base_bot.src.state.workflow import Workflow
-from conftest import bootstrap_env, create_workflow_state_file
+from conftest import bootstrap_env, create_workflow_state_file, create_test_workflow, given_bot_name_and_behavior_setup
+from agile_bot.bots.base_bot.test.test_helpers import then_workflow_current_state_is
 
 
 # ============================================================================
-# INLINE HELPERS - Used only by tests in this file
+# HELPER FUNCTIONS
 # ============================================================================
 
-def create_test_workflow(
-    bot_dir: Path,
-    workspace_dir: Path,
-    bot_name: str,
-    behavior: str,
-    current_action: str,
-    completed_actions: list = None
-) -> Workflow:
-    """Helper: Create workflow with specified state for testing."""
-    # Bootstrap environment
-    bootstrap_env(bot_dir, workspace_dir)
-    
-    # Create workflow state file
-    create_workflow_state_file(
-        workspace_dir, bot_name, behavior, current_action, completed_actions
-    )
-    
+# Removed given_bot_and_behavior_setup - use test_helpers.given_bot_name_and_behavior_setup instead
+# Import when needed: from agile_bot.bots.base_bot.test.test_helpers import given_bot_name_and_behavior_setup
+
+
+def given_workflow_state_file_with_empty_current_action(workspace_directory: Path, bot_name: str, behavior: str, completed_actions: list):
+    """Given: Workflow state file with empty current_action."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_file.write_text(json.dumps({
+        'current_behavior': f'{bot_name}.{behavior}',
+        'current_action': '',
+        'completed_actions': completed_actions,
+        'timestamp': '2025-12-04T15:45:00.000000'
+    }), encoding='utf-8')
+    return workflow_file
+
+
+def given_workflow_state_file_with_completed_actions(workspace_directory: Path, bot_name: str, behavior: str, current_action: str, completed_actions: list):
+    """Given: Workflow state file with completed actions."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_file.write_text(json.dumps({
+        'current_behavior': f'{bot_name}.{behavior}',
+        'current_action': f'{bot_name}.{behavior}.{current_action}',
+        'completed_actions': completed_actions,
+        'timestamp': '2025-12-04T15:48:00.000000'
+    }), encoding='utf-8')
+    return workflow_file
+
+
+def when_workflow_navigates_to_action(workflow: Workflow, target_action: str, out_of_order: bool = False):
+    """When: Workflow navigates to action."""
+    workflow.navigate_to_action(target_action, out_of_order=out_of_order)
+
+
+def then_current_state_is(workflow: Workflow, expected_state: str):
+    """Then: Current state is expected."""
+    assert workflow.current_state == expected_state
+
+
+def then_completed_actions_do_not_include(workflow_file: Path, bot_name: str, behavior: str, action_name: str):
+    """Then: Completed actions do not include specified action."""
+    loaded_state = json.loads(workflow_file.read_text(encoding='utf-8'))
+    completed_action_states = [a['action_state'] for a in loaded_state['completed_actions']]
+    assert f'{bot_name}.{behavior}.{action_name}' not in completed_action_states
+
+
+# Removed then_completed_actions_include - use test_helpers.then_completed_actions_include instead
+# Note: test_helpers version takes different signature - adapt calls accordingly
+
+
+def given_standard_workflow_states_and_transitions():
+    """Given: Standard workflow states and transitions."""
     states = ['gather_context', 'decide_planning_criteria', 
               'build_knowledge', 'validate_rules', 'render_output']
     transitions = [
@@ -40,14 +75,105 @@ def create_test_workflow(
         {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
         {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
-    
-    return Workflow(
+    return states, transitions
+
+
+def given_workflow_created(bot_name: str, behavior: str, bot_directory: Path, states: list = None, transitions: list = None):
+    """Given: Workflow created with states and transitions."""
+    if states is None or transitions is None:
+        states, transitions = given_standard_workflow_states_and_transitions()
+    workflow = Workflow(
         bot_name=bot_name,
         behavior=behavior,
-        bot_directory=bot_dir,
+        bot_directory=bot_directory,
         states=states,
         transitions=transitions
     )
+    return workflow
+
+
+def given_workflow_state_with_completed_actions(workspace_directory: Path, bot_name: str, behavior: str, current_action: str, completed_actions: list):
+    """Given: Workflow state with completed actions."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_file.write_text(json.dumps({
+        'current_behavior': f'{bot_name}.{behavior}',
+        'current_action': f'{bot_name}.{behavior}.{current_action}',
+        'completed_actions': completed_actions,
+        'timestamp': '2025-12-04T15:48:00.000000'
+    }), encoding='utf-8')
+    return workflow_file
+
+
+# Removed then_workflow_current_state_is - use test_helpers.then_workflow_current_state_is instead
+# Import when needed: from agile_bot.bots.base_bot.test.test_helpers import then_workflow_current_state_is
+
+
+def then_completed_actions_removed_after_target(workflow_file: Path, bot_name: str, behavior: str, target_action: str):
+    """Then: Completed actions after target are removed."""
+    loaded_state = json.loads(workflow_file.read_text(encoding='utf-8'))
+    completed_action_states = [a['action_state'] for a in loaded_state['completed_actions']]
+    # Actions after target should be removed
+    action_order = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
+    target_index = action_order.index(target_action)
+    for i in range(target_index + 1, len(action_order)):
+        assert f'{bot_name}.{behavior}.{action_order[i]}' not in completed_action_states
+
+
+def given_behavior_config_created(bot_directory: Path, behavior: str, behavior_config: dict):
+    """Given: Behavior config created."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_file.write_text(json.dumps(behavior_config), encoding='utf-8')
+    return behavior_file
+
+
+def when_behavior_is_initialized(bot_name: str, behavior: str, bot_directory: Path):
+    """When: Behavior is initialized."""
+    from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    behavior_instance = Behavior(
+        name=behavior,
+        bot_name=bot_name,
+        bot_directory=bot_directory
+    )
+    return behavior_instance
+
+
+def then_workflow_states_match(behavior_instance, expected_states: list):
+    """Then: Workflow states match expected."""
+    assert behavior_instance.workflow.states == expected_states, (
+        f"Expected states {expected_states}, got {behavior_instance.workflow.states}"
+    )
+
+
+def then_workflow_transitions_match(behavior_instance, expected_transitions: list):
+    """Then: Workflow transitions match expected."""
+    assert behavior_instance.workflow.transitions == expected_transitions, (
+        f"Expected transitions {expected_transitions}, got {behavior_instance.workflow.transitions}"
+    )
+
+
+def when_behavior_is_initialized_raises_error(bot_name: str, behavior: str, bot_directory: Path):
+    """When: Behavior is initialized raises error."""
+    from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    with pytest.raises(FileNotFoundError) as exc_info:
+        Behavior(
+            name=behavior,
+            bot_name=bot_name,
+            bot_directory=bot_directory
+        )
+    return exc_info
+
+
+def then_error_mentions_behavior_json_required(exc_info, behavior: str):
+    """Then: Error mentions behavior.json is REQUIRED."""
+    assert 'behavior.json is REQUIRED' in str(exc_info.value)
+    assert behavior in str(exc_info.value)
+
+
+# ============================================================================
+# INLINE HELPERS - Used only by tests in this file
+# ============================================================================
 
 
 def test_workflow_determines_next_action_from_current_action(bot_directory, workspace_directory):
@@ -56,12 +182,11 @@ def test_workflow_determines_next_action_from_current_action(bot_directory, work
     # Given workflow_state.json shows:
     #   - current_action: build_knowledge
     #   - completed_actions: [gather_context] (may be behind)
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     completed = [{'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:44:22.812230'}]
     
     # When workflow loads state (current_action is the source of truth)
-    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'build_knowledge', completed)
+    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'build_knowledge', completed, return_workflow_file=False)
     
     # Then current_state should be build_knowledge (uses current_action from file)
     assert workflow.current_state == 'build_knowledge'
@@ -71,10 +196,9 @@ def test_workflow_starts_at_first_action_when_no_completed_actions(bot_directory
     """Scenario: No completed actions yet"""
     
     # Given workflow loads state with no completed_actions
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     
-    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'gather_context', [])
+    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'gather_context', [], return_workflow_file=False)
     
     # Then current_state should be the first action (gather_context)
     assert workflow.current_state == 'gather_context'
@@ -85,13 +209,12 @@ def test_workflow_uses_current_action_when_provided(bot_directory, workspace_dir
     
     # Given current_action: decide_planning_criteria
     # And completed_actions: [gather_context]
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     completed = [
         {'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:45:00.000000'}
     ]
     
-    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'decide_planning_criteria', completed)
+    workflow = create_test_workflow(bot_directory, workspace_directory, bot_name, behavior, 'decide_planning_criteria', completed, return_workflow_file=False)
     
     # Then current_state should be decide_planning_criteria (uses current_action from file)
     assert workflow.current_state == 'decide_planning_criteria'
@@ -100,28 +223,15 @@ def test_workflow_uses_current_action_when_provided(bot_directory, workspace_dir
 def test_workflow_falls_back_to_completed_actions_when_current_action_missing(bot_directory, workspace_directory):
     """Scenario: Workflow falls back to completed_actions when current_action is missing"""
     
-    # Given workflow_state.json shows:
-    #   - current_action: "" (missing or empty)
-    #   - completed_actions: [gather_context, decide_planning_criteria, build_knowledge]
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     completed = [
         {'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:45:00.000000'},
         {'action_state': f'{bot_name}.{behavior}.decide_planning_criteria', 'timestamp': '2025-12-04T15:46:00.000000'},
         {'action_state': f'{bot_name}.{behavior}.build_knowledge', 'timestamp': '2025-12-04T15:47:00.000000'}
     ]
     
-    # Bootstrap environment
     bootstrap_env(bot_directory, workspace_directory)
-    
-    # Create workflow state with empty current_action
-    workflow_file = workspace_directory / 'workflow_state.json'
-    workflow_file.write_text(json.dumps({
-        'current_behavior': f'{bot_name}.{behavior}',
-        'current_action': '',  # Empty - should trigger fallback
-        'completed_actions': completed,
-        'timestamp': '2025-12-04T15:45:00.000000'
-    }), encoding='utf-8')
+    given_workflow_state_file_with_empty_current_action(workspace_directory, bot_name, behavior, completed)
     
     states = ['gather_context', 'decide_planning_criteria', 
               'build_knowledge', 'validate_rules', 'render_output']
@@ -140,36 +250,21 @@ def test_workflow_falls_back_to_completed_actions_when_current_action_missing(bo
         transitions=transitions
     )
     
-    # Then current_state should be validate_rules (next after last completed: build_knowledge)
-    assert workflow.current_state == 'validate_rules'
+    then_current_state_is(workflow, 'validate_rules')
 
 
 def test_workflow_starts_at_first_action_when_no_workflow_state_file_exists(bot_directory, workspace_directory):
     """Scenario: No workflow_state.json file exists (fresh start)"""
-    # Given workspace directory exists but workflow_state.json does NOT exist
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     
-    # Bootstrap environment
     bootstrap_env(bot_directory, workspace_directory)
-    
     workflow_file = workspace_directory / 'workflow_state.json'
     assert not workflow_file.exists()
     
-    # When workflow is created
-    states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'validate_rules', 'render_output']
-    transitions = [
-        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
-        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
-    ]
+    states, transitions = given_standard_workflow_states_and_transitions()
+    workflow = given_workflow_created(bot_name, behavior, bot_directory, states, transitions)
     
-    workflow = Workflow(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory, states=states, transitions=transitions)
-    
-    # Then current_state should be the FIRST action (gather_context)
-    assert workflow.current_state == 'gather_context'
+    then_current_state_is(workflow, 'gather_context')
 
 
 def test_workflow_out_of_order_navigation_removes_completed_actions_after_target(bot_directory, workspace_directory):
@@ -178,8 +273,7 @@ def test_workflow_out_of_order_navigation_removes_completed_actions_after_target
     # Given workflow_state.json shows:
     #   - current_action: validate_rules (at the end)
     #   - completed_actions: [gather_context, decide_planning_criteria, build_knowledge, validate_rules]
-    bot_name = 'story_bot'
-    behavior = 'shape'
+    bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
     completed = [
         {'action_state': f'{bot_name}.{behavior}.gather_context', 'timestamp': '2025-12-04T15:44:22.812230'},
         {'action_state': f'{bot_name}.{behavior}.decide_planning_criteria', 'timestamp': '2025-12-04T15:45:00.000000'},
@@ -191,71 +285,42 @@ def test_workflow_out_of_order_navigation_removes_completed_actions_after_target
     bootstrap_env(bot_directory, workspace_directory)
     
     # Create initial workflow state with all actions completed
-    workflow_file = workspace_directory / 'workflow_state.json'
-    workflow_file.write_text(json.dumps({
-        'current_behavior': f'{bot_name}.{behavior}',
-        'current_action': f'{bot_name}.{behavior}.validate_rules',
-        'completed_actions': completed,
-        'timestamp': '2025-12-04T15:48:00.000000'
-    }), encoding='utf-8')
-    
-    # Create workflow with states
-    states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'validate_rules', 'render_output']
-    transitions = [
-        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
-        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
-    ]
-    
-    workflow = Workflow(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory,
-        states=states,
-        transitions=transitions
+    workflow_file = given_workflow_state_with_completed_actions(
+        workspace_directory, bot_name, behavior, 'validate_rules', completed
     )
     
+    # Create workflow with states
+    states, transitions = given_standard_workflow_states_and_transitions()
+    workflow = given_workflow_created(bot_name, behavior, bot_directory, states, transitions)
+    
     # Verify initial state
-    assert workflow.current_state == 'validate_rules'
+    then_workflow_current_state_is(workflow, 'validate_rules')
     
     # When navigating out of order back to build_knowledge using production method
     target_action = 'build_knowledge'
-    workflow.navigate_to_action(target_action, out_of_order=True)
+    when_workflow_navigates_to_action(workflow, target_action, out_of_order=True)
     
     # Then current_state should be build_knowledge
-    assert workflow.current_state == target_action
+    then_workflow_current_state_is(workflow, target_action)
     
     # And render_output should be removed from completed_actions
-    loaded_state = json.loads(workflow_file.read_text(encoding='utf-8'))
-    completed_action_states = [a['action_state'] for a in loaded_state['completed_actions']]
-    assert f'{bot_name}.{behavior}.render_output' not in completed_action_states
+    then_completed_actions_do_not_include(workflow_file, bot_name, behavior, 'render_output')
     
     # And build_knowledge and earlier actions should still be in completed_actions
-    assert f'{bot_name}.{behavior}.gather_context' in completed_action_states
-    assert f'{bot_name}.{behavior}.decide_planning_criteria' in completed_action_states
-    assert f'{bot_name}.{behavior}.build_knowledge' in completed_action_states
+    then_completed_actions_include(workflow_file, bot_name, behavior, ['gather_context', 'decide_planning_criteria', 'build_knowledge'])
 
 
 # ============================================================================
 # STORY: Behavior-Specific Workflow Order
 # ============================================================================
 
-class TestBehaviorSpecificWorkflowOrder:
+class TestInvokeBehaviorInWorkflowOrder:
     """Story: Behavior-Specific Workflow Order - Tests behavior-specific workflow configuration."""
     
     def test_behavior_loads_workflow_order_from_behavior_specific_actions_workflow(self, bot_directory, workspace_directory):
         """Scenario: Behavior loads workflow order from behaviors/{behavior_name}/behavior.json"""
         
-        # Given: A behavior with behavior-specific behavior.json file
-        bot_name = 'story_bot'
-        behavior = '7_write_tests'
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create behavior-specific behavior.json with reversed order
-        # (render_output before validate_rules for code generation behaviors)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', '7_write_tests')
         behavior_config = {
             "behaviorName": "write_tests",
             "description": "Test behavior: tests",
@@ -289,71 +354,34 @@ class TestBehaviorSpecificWorkflowOrder:
             }
         }
         
-        behavior_file = behavior_dir / 'behavior.json'
-        behavior_file.write_text(json.dumps(behavior_config), encoding='utf-8')
-        
-        # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
+        given_behavior_config_created(bot_directory, behavior, behavior_config)
         
-        # When: Behavior is initialized (will call load_workflow_states_and_transitions with behavior_name)
-        from agile_bot.bots.base_bot.src.bot.bot import Behavior
-        behavior_instance = Behavior(
-            name=behavior,
-            bot_name=bot_name,
-            bot_directory=bot_directory
-        )
+        behavior_instance = when_behavior_is_initialized(bot_name, behavior, bot_directory)
         
-        # Then: Workflow states should be loaded from behavior-specific directory
-        # States should be in behavior-specific order: build_knowledge, render_output, validate_rules
-        expected_states = ['build_knowledge', 'render_output', 'validate_rules']
-        assert behavior_instance.workflow.states == expected_states, (
-            f"Expected states {expected_states}, got {behavior_instance.workflow.states}"
-        )
-        
-        # And: Transitions should match behavior-specific order
-        expected_transitions = [
+        then_workflow_states_match(behavior_instance, ['build_knowledge', 'render_output', 'validate_rules'])
+        then_workflow_transitions_match(behavior_instance, [
             {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'render_output'},
             {'trigger': 'proceed', 'source': 'render_output', 'dest': 'validate_rules'},
-        ]
-        assert behavior_instance.workflow.transitions == expected_transitions, (
-            f"Expected transitions {expected_transitions}, got {behavior_instance.workflow.transitions}"
-        )
+        ])
     
     def test_behavior_requires_actions_workflow_json_no_fallback(self, bot_directory, workspace_directory):
         """Scenario: Behavior REQUIRES behavior.json - no fallback exists"""
         
-        # Given: Behavior folder exists but behavior.json is missing
-        bot_name = 'story_bot'
-        behavior = '7_write_tests'
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', '7_write_tests')
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         
-        # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
         
-        # When: Behavior is initialized without behavior.json
-        # Then: Should raise FileNotFoundError
-        from agile_bot.bots.base_bot.src.bot.bot import Behavior
-        with pytest.raises(FileNotFoundError) as exc_info:
-            Behavior(
-                name=behavior,
-                bot_name=bot_name,
-                bot_directory=bot_directory
-            )
+        exc_info = when_behavior_is_initialized_raises_error(bot_name, behavior, bot_directory)
         
-        assert 'behavior.json is REQUIRED' in str(exc_info.value)
-        assert behavior in str(exc_info.value)
+        then_error_mentions_behavior_json_required(exc_info, behavior)
     
     def test_behavior_loads_from_actions_workflow_json(self, bot_directory, workspace_directory):
         """Scenario: Behavior loads workflow order from behavior.json"""
         
-        # Given: Behavior with behavior.json file
-        bot_name = 'story_bot'
-        behavior = '7_write_tests'
-        behavior_dir = bot_directory / 'behaviors' / behavior
-        behavior_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create behavior-specific behavior.json with reversed order
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', '7_write_tests')
         behavior_config = {
             "behaviorName": "write_tests",
             "description": "Test behavior: tests",
@@ -387,19 +415,10 @@ class TestBehaviorSpecificWorkflowOrder:
             }
         }
         
-        behavior_file = behavior_dir / 'behavior.json'
-        behavior_file.write_text(json.dumps(behavior_config), encoding='utf-8')
-        
-        # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
+        given_behavior_config_created(bot_directory, behavior, behavior_config)
         
-        # When: Behavior is initialized
-        from agile_bot.bots.base_bot.src.bot.bot import Behavior
-        behavior_instance = Behavior(
-            name=behavior,
-            bot_name=bot_name,
-            bot_directory=bot_directory
-        )
+        behavior_instance = when_behavior_is_initialized(bot_name, behavior, bot_directory)
         
         # Bootstrap environment
         bootstrap_env(bot_directory, workspace_directory)
@@ -421,7 +440,7 @@ class TestBehaviorSpecificWorkflowOrder:
     def test_different_behaviors_can_have_different_action_orders(self, bot_directory, workspace_directory):
         """Scenario: Different behaviors can have different action orders"""
         
-        bot_name = 'story_bot'
+        bot_name, _ = given_bot_name_and_behavior_setup('story_bot')
         
         # Given: Knowledge graph behavior (1_shape) with standard order
         knowledge_behavior = '1_shape'
@@ -542,8 +561,7 @@ class TestBehaviorSpecificWorkflowOrder:
         """Scenario: Workflow transitions are built correctly from behavior.json"""
         
         # Given: Behavior with behavior.json and custom transitions
-        bot_name = 'story_bot'
-        behavior = '8_code'
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', '8_code')
         behavior_dir = bot_directory / 'behaviors' / behavior
         behavior_dir.mkdir(parents=True, exist_ok=True)
         

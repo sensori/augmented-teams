@@ -17,23 +17,14 @@ Uses transitions state machine for workflow state management.
 import pytest
 from pathlib import Path
 import json
+from conftest import create_bot_config_file, create_workflow_state_file
 from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
-from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_actions_workflow_json
+from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_base_action_instructions
+from agile_bot.bots.base_bot.test.test_build_agile_bots_helpers import create_actions_workflow_json
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
-
-def create_bot_config_file(workspace: Path, bot_name: str, behaviors: list) -> Path:
-    """Helper: Create bot configuration file."""
-    config_dir = workspace / 'agile_bot' / 'bots' / bot_name / 'config'
-    config_dir.mkdir(parents=True, exist_ok=True)
-    config_file = config_dir / 'bot_config.json'
-    config_file.write_text(
-        json.dumps({'name': bot_name, 'behaviors': behaviors}),
-        encoding='utf-8'
-    )
-    return config_file
 
 def create_base_instructions(bot_directory: Path):
     """Helper: Create base instructions for all actions in bot_directory (no fallback)."""
@@ -54,17 +45,7 @@ def create_base_instructions(bot_directory: Path):
             encoding='utf-8'
         )
 
-def create_workflow_state(workspace: Path, current_behavior: str, current_action: str) -> Path:
-    """Helper: Create workflow state file."""
-    # Workflow state is created directly in workspace_directory
-    state_file = workspace / 'workflow_state.json'
-    state_file.write_text(json.dumps({
-        'current_behavior': current_behavior,
-        'current_action': current_action,
-        'completed_actions': [],
-        'timestamp': '2025-12-03T10:00:00Z'
-    }), encoding='utf-8')
-    return state_file
+# Removed duplicate create_workflow_state - use conftest.create_workflow_state_file instead
 
 # ============================================================================
 # FIXTURES
@@ -99,29 +80,144 @@ def create_behavior_action_instructions(workspace: Path, bot_name: str, behavior
     instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
     return instructions_file
 
-def create_base_action_instructions(workspace: Path, action: str) -> Path:
-    """Helper: Create base action instructions file with numbered prefix."""
-    action_prefixes = {
-        'gather_context': '1_gather_context',
-        'decide_planning_criteria': '2_decide_planning_criteria',
-        'build_knowledge': '3_build_knowledge',
-        'render_output': '4_render_output',
-        'validate_rules': '5_validate_rules'
-    }
-    
-    action_folder = action_prefixes.get(action, action)
-    base_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action_folder
-    base_dir.mkdir(parents=True, exist_ok=True)
-    instructions_file = base_dir / 'instructions.json'
-    instructions_data = {
-        'actionName': action,
-        'instructions': [f'Base {action} instructions']
-    }
-    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
-    return instructions_file
+# Use shared helper from test_helpers - imported above
 
-class TestBotToolInvocation:
-    """Bot tool invocation behavior tests (Increment 1/2 foundational)."""
+
+def given_behavior_action_instructions_for_multiple_behaviors(workspace_root: Path, bot_name: str, behaviors: list, action: str):
+    """Given: Behavior action instructions for multiple behaviors."""
+    for behavior in behaviors:
+        create_behavior_action_instructions(workspace_root, bot_name, behavior, action)
+
+
+def given_behavior_json_files_for_behaviors(bot_directory: Path, behaviors: list):
+    """Given: Behavior.json files for behaviors."""
+    for behavior in behaviors:
+        create_actions_workflow_json(bot_directory, behavior)
+
+
+def given_base_action_instructions_created(bot_directory: Path, action: str):
+    """Given: Base action instructions created."""
+    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    repo_root = get_python_workspace_root()
+    return create_base_action_instructions(bot_directory, action)
+
+
+# Removed given_bot_instance_created - use test_helpers.given_bot_instance_created instead
+
+
+def then_bot_result_has_status_and_behavior_and_action(result, expected_status: str, expected_behavior: str, expected_action: str):
+    """Then: Bot result has correct status, behavior, and action."""
+    assert result.status == expected_status
+    assert result.behavior == expected_behavior
+    assert result.action == expected_action
+
+
+def then_bot_result_has_behavior_and_action(result, expected_behavior: str, expected_action: str):
+    """Then: Bot result has correct behavior and action."""
+    assert result.behavior == expected_behavior
+    assert result.action == expected_action
+
+
+def given_knowledge_graph_setup_for_behaviors(workspace_root: Path, bot_name: str, behavior_mapping: dict, action: str):
+    """Given: Knowledge graph setup for behaviors."""
+    behaviors_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'behaviors'
+    bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
+    for behavior, prefixed_name in behavior_mapping.items():
+        behavior_dir = behaviors_dir / prefixed_name
+        behavior_dir.mkdir(parents=True, exist_ok=True)
+        create_actions_workflow_json(bot_dir, prefixed_name)
+        kg_dir = behavior_dir / 'content' / 'knowledge_graph'
+        kg_dir.mkdir(parents=True, exist_ok=True)
+        template_filename = 'test_template.json'
+        kg_config = {'template': template_filename}
+        (kg_dir / 'build_story_graph_outline.json').write_text(
+            json.dumps(kg_config), encoding='utf-8'
+        )
+        template_content = {'instructions': ['Test knowledge graph template']}
+        (kg_dir / template_filename).write_text(
+            json.dumps(template_content), encoding='utf-8'
+        )
+
+
+def given_base_actions_structure_created(bot_directory: Path):
+    """Given: Base actions structure created."""
+    from agile_bot.bots.base_bot.test.conftest import create_base_actions_structure
+    create_base_actions_structure(bot_directory)
+
+
+def given_workflow_state_created(workspace_directory: Path, current_behavior: str, current_action: str):
+    """Given: Workflow state created."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    workflow_file.write_text(json.dumps({
+        'current_behavior': current_behavior,
+        'current_action': current_action,
+        'completed_actions': []
+    }), encoding='utf-8')
+    return workflow_file
+
+
+def given_base_instructions_created(bot_directory: Path):
+    """Given: Base instructions created."""
+    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    repo_root = get_python_workspace_root()
+    create_base_instructions(bot_directory)
+
+
+def given_bot_config_and_behavior_workflow(bot_directory: Path, bot_name: str, behaviors: list):
+    """Given: Bot config and behavior workflow created."""
+    bot_config = create_bot_config_file(bot_directory, bot_name, behaviors)
+    given_behavior_json_files_for_behaviors(bot_directory, behaviors)
+    return bot_config
+
+
+def then_workflow_state_file_exists(workspace_directory: Path):
+    """Then: Workflow state file exists."""
+    workflow_file = workspace_directory / 'workflow_state.json'
+    assert workflow_file.exists(), "Workflow state should be created"
+    return workflow_file
+
+
+def then_workflow_state_has_correct_values(workflow_file: Path, expected_behavior: str, expected_action: str):
+    """Then: Workflow state has correct values."""
+    state_data = json.loads(workflow_file.read_text())
+    assert state_data['current_behavior'] == expected_behavior
+    assert state_data['current_action'] == expected_action
+
+
+def given_activity_tracker_created(workspace_directory: Path, bot_name: str):
+    """Given: Activity tracker created."""
+    from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
+    return ActivityTracker(workspace_directory=workspace_directory, bot_name=bot_name)
+
+
+def when_activity_tracker_tracks_start(tracker, bot_name: str, behavior: str, action: str):
+    """When: Activity tracker tracks start."""
+    tracker.track_start(bot_name, behavior, action)
+
+
+def then_activity_log_exists_at_path(expected_path: Path):
+    """Then: Activity log exists at expected path."""
+    assert expected_path.exists(), f"Activity log should be at {expected_path}"
+
+
+def then_activity_log_does_not_exist_at_path(unexpected_path: Path):
+    """Then: Activity log does not exist at unexpected path."""
+    assert not unexpected_path.exists(), f"Activity log should NOT be at {unexpected_path}"
+
+
+def then_activity_log_has_entry_with_action_state(workspace_directory: Path, expected_action_state: str, expected_status: str = 'started'):
+    """Then: Activity log has entry with expected action_state."""
+    from tinydb import TinyDB
+    log_file = workspace_directory / 'activity_log.json'
+    with TinyDB(log_file) as db:
+        entries = db.all()
+        assert len(entries) == 1
+        assert entries[0]['action_state'] == expected_action_state
+        assert entries[0]['status'] == expected_status
+
+
+class TestInvokeBotTool:
+    """Story: Invoke Bot Tool - Tests bot tool invocation behavior."""
 
     def test_tool_invokes_behavior_action_when_called(self, bot_directory, workspace_directory, test_bot_config):
         """
@@ -134,31 +230,17 @@ class TestBotToolInvocation:
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given: Bot configuration and instructions exist
-        # workspace_root is workspace_directory.parent (tmp_path)
         workspace_root = workspace_directory.parent
         create_behavior_action_instructions(workspace_root, 'test_bot', 'shape', 'gather_context')
-        # Create behavior.json files for all behaviors in config (REQUIRED after refactor)
-        # test_bot_config lists: ['shape', 'discovery', 'exploration', 'specification']
-        for behavior in ['shape', 'discovery', 'exploration', 'specification']:
-            create_actions_workflow_json(bot_directory, behavior)
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_action_instructions(bot_directory, 'gather_context')
+        given_behavior_json_files_for_behaviors(bot_directory, ['shape', 'discovery', 'exploration', 'specification'])
+        given_base_action_instructions_created(bot_directory, 'gather_context')
         
         # When: Call REAL Bot API
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            bot_directory=bot_directory,
-            config_path=test_bot_config
-        )
+        bot = given_bot_instance_created('test_bot', bot_directory, test_bot_config)
         result = bot.shape.gather_context()
         
         # Then: Tool executed and returned result
-        assert result.status == 'completed'
-        assert result.behavior == 'shape'
-        assert result.action == 'gather_context'
+        then_bot_result_has_status_and_behavior_and_action(result, 'completed', 'shape', 'gather_context')
 
     def test_tool_routes_to_correct_behavior_action_method(self, bot_directory, workspace_directory, test_bot_config):
         """
@@ -171,65 +253,27 @@ class TestBotToolInvocation:
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given: Multiple behaviors exist
-        # workspace_root is workspace_directory.parent (tmp_path)
         workspace_root = workspace_directory.parent
-        # bot_directory is tmp_path / 'agile_bot' / 'bots' / 'test_bot'
-        # So behavior folders should be created relative to workspace_root (which is tmp_path)
-        create_behavior_action_instructions(workspace_root, 'test_bot', 'shape', 'build_knowledge')
-        create_behavior_action_instructions(workspace_root, 'test_bot', 'discovery', 'build_knowledge')
-        create_behavior_action_instructions(workspace_root, 'test_bot', 'exploration', 'build_knowledge')
-        # Ensure behavior folders exist (not just action subfolders)
-        behaviors_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot' / 'behaviors'
-        bot_dir = workspace_root / 'agile_bot' / 'bots' / 'test_bot'
+        given_behavior_action_instructions_for_multiple_behaviors(
+            workspace_root, 'test_bot', ['shape', 'discovery', 'exploration'], 'build_knowledge'
+        )
         behavior_mapping = {'shape': '1_shape', 'discovery': '4_discovery', 'exploration': '5_exploration'}
-        for behavior, prefixed_name in behavior_mapping.items():
-            behavior_dir = behaviors_dir / prefixed_name
-            behavior_dir.mkdir(parents=True, exist_ok=True)
-            # Create behavior.json file
-            create_actions_workflow_json(bot_dir, prefixed_name)
-            # Create knowledge graph folder for build_knowledge action
-            kg_dir = behavior_dir / 'content' / 'knowledge_graph'
-            kg_dir.mkdir(parents=True, exist_ok=True)
-            # Create a dummy config file with template field pointing to a template file
-            template_filename = 'test_template.json'
-            kg_config = {'template': template_filename}
-            (kg_dir / 'build_story_graph_outline.json').write_text(
-                json.dumps(kg_config), encoding='utf-8'
-            )
-            # Create the actual template file (JSON format)
-            template_content = {'instructions': ['Test knowledge graph template']}
-            (kg_dir / template_filename).write_text(
-                json.dumps(template_content), encoding='utf-8'
-            )
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_action_instructions(bot_directory, 'build_knowledge')
-        
-        # Create base actions structure with action_config.json (needed for workflow)
-        from agile_bot.bots.base_bot.test.conftest import create_base_actions_structure
-        create_base_actions_structure(bot_directory)
-        
-        # Create workflow state so action can execute
+        given_knowledge_graph_setup_for_behaviors(workspace_root, 'test_bot', behavior_mapping, 'build_knowledge')
+        given_base_action_instructions_created(bot_directory, 'build_knowledge')
+        given_base_actions_structure_created(bot_directory)
         create_bot_config_file(bot_directory, 'test_bot', ['shape', 'discovery', 'exploration'])
-        create_workflow_state(workspace_directory, 'test_bot.exploration', 'test_bot.exploration.build_knowledge')
+        given_workflow_state_created(workspace_directory, 'test_bot.exploration', 'test_bot.exploration.build_knowledge')
         
         # When: Call REAL Bot API for specific behavior
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            bot_directory=bot_directory,
-            config_path=test_bot_config
-        )
+        bot = given_bot_instance_created('test_bot', bot_directory, test_bot_config)
         result = bot.exploration.build_knowledge()
         
         # Then: Routes to exploration behavior only
-        assert result.behavior == 'exploration'
-        assert result.action == 'build_knowledge'
+        then_bot_result_has_behavior_and_action(result, 'exploration', 'build_knowledge')
 
 
-class TestBehaviorActionInstructions:
-    """Behavior action instruction loading and merging tests (Increment 1/2 foundational)."""
+class TestLoadAndMergeBehaviorActionInstructions:
+    """Story: Load And Merge Behavior Action Instructions - Tests instruction loading and merging."""
 
     def test_action_loads_and_merges_instructions(self, bot_directory, workspace_directory):
         """
@@ -245,15 +289,10 @@ class TestBehaviorActionInstructions:
         bot_name = 'test_bot'
         behavior = 'shape'
         action = 'gather_context'
-        
-        # workspace_root is workspace_directory.parent (tmp_path)
         workspace_root = workspace_directory.parent
         config_file = create_bot_config_file(bot_directory, bot_name, ['shape'])
         behavior_instructions = create_behavior_action_instructions(workspace_root, bot_name, behavior, action)
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        base_instructions = create_base_action_instructions(bot_directory, action)
+        base_instructions = given_base_action_instructions_created(bot_directory, action)
         
         # When: Call REAL GatherContextAction API
         action_obj = GatherContextAction(
@@ -282,22 +321,15 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_instructions(bot_directory)
-        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['discovery'])
-        # Create behavior.json file (REQUIRED after refactor)
-        create_actions_workflow_json(bot_directory, 'discovery')
+        given_base_instructions_created(bot_directory)
+        bot_config = given_bot_config_and_behavior_workflow(bot_directory, 'test_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(bot_name='test_bot', bot_directory=bot_directory, config_path=bot_config)
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
         # Then
-        assert result.behavior == 'discovery'
-        assert result.action == 'gather_context'
+        then_bot_result_has_behavior_and_action(result, 'discovery', 'gather_context')
 
     def test_bot_tool_defaults_to_first_behavior_and_first_action_when_state_missing(self, bot_directory, workspace_directory):
         """
@@ -310,23 +342,15 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_instructions(bot_directory)
-        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['shape', 'discovery'])
-        # Create behavior.json files for all behaviors (REQUIRED after refactor)
-        for behavior in ['shape', 'discovery']:
-            create_actions_workflow_json(bot_directory, behavior)
+        given_base_instructions_created(bot_directory)
+        bot_config = given_bot_config_and_behavior_workflow(bot_directory, 'test_bot', ['shape', 'discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(bot_name='test_bot', bot_directory=bot_directory, config_path=bot_config)
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         result = bot.forward_to_current_behavior_and_current_action()
         
         # Then
-        assert result.behavior == 'shape'
-        assert result.action == 'gather_context'
+        then_bot_result_has_behavior_and_action(result, 'shape', 'gather_context')
 
 
 class TestForwardToCurrentAction:
@@ -342,21 +366,11 @@ class TestForwardToCurrentAction:
         """
         # Given
         bootstrap_env(bot_directory, workspace_directory)
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_instructions(bot_directory)
-        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['discovery'])
-        # Create behavior.json file (REQUIRED after refactor)
-        create_actions_workflow_json(bot_directory, 'discovery')
+        given_base_instructions_created(bot_directory)
+        bot_config = given_bot_config_and_behavior_workflow(bot_directory, 'test_bot', ['discovery'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            bot_directory=bot_directory,
-            config_path=bot_config
-        )
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         result = bot.discovery.forward_to_current_action()
         
         # Then
@@ -372,22 +386,11 @@ class TestForwardToCurrentAction:
         """
         # Given
         bootstrap_env(bot_directory, workspace_directory)
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_instructions(bot_directory)
-        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['discovery', 'exploration'])
-        # Create behavior.json files for all behaviors (REQUIRED after refactor)
-        for behavior in ['discovery', 'exploration']:
-            create_actions_workflow_json(bot_directory, behavior)
+        given_base_instructions_created(bot_directory)
+        bot_config = given_bot_config_and_behavior_workflow(bot_directory, 'test_bot', ['discovery', 'exploration'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            bot_directory=bot_directory,
-            config_path=bot_config
-        )
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         result = bot.exploration.forward_to_current_action()
         
         # Then
@@ -403,21 +406,11 @@ class TestForwardToCurrentAction:
         """
         # Given
         bootstrap_env(bot_directory, workspace_directory)
-        # Base actions need to be created in actual repo location (where base_actions_dir looks)
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
-        repo_root = get_python_workspace_root()
-        create_base_instructions(bot_directory)
-        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['shape'])
-        # Create behavior.json file (REQUIRED after refactor)
-        create_actions_workflow_json(bot_directory, 'shape')
+        given_base_instructions_created(bot_directory)
+        bot_config = given_bot_config_and_behavior_workflow(bot_directory, 'test_bot', ['shape'])
         
         # When
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
-        bot = Bot(
-            bot_name='test_bot',
-            bot_directory=bot_directory,
-            config_path=bot_config
-        )
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         result = bot.shape.forward_to_current_action()
         
         # Then
@@ -461,14 +454,12 @@ class TestForwardToCurrentAction:
         result = bot.shape.gather_context()
         
         # Then
-        assert workflow_file.exists(), "Workflow state should be created"
-        state_data = json.loads(workflow_file.read_text())
-        assert state_data['current_behavior'] == 'test_bot.shape'
-        assert state_data['current_action'] == 'test_bot.shape.gather_context'
+        workflow_file = then_workflow_state_file_exists(workspace_directory)
+        then_workflow_state_has_correct_values(workflow_file, 'test_bot.shape', 'test_bot.shape.gather_context')
         assert result.action == 'gather_context'
 
 
-class TestActivityTrackingLocation:
+class TestTrackActivityForWorkspace:
     """Story: Activity Logged To Workspace Area Not Bot Area - Tests that activity is tracked in the correct workspace_area location."""
 
     def test_activity_logged_to_workspace_area_not_bot_area(self, bot_directory, workspace_directory):
@@ -485,17 +476,16 @@ class TestActivityTrackingLocation:
         bootstrap_env(bot_directory, workspace_directory)
         
         # When: Activity tracker tracks activity
-        from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
-        tracker = ActivityTracker(workspace_directory=workspace_directory, bot_name='story_bot')
-        tracker.track_start('story_bot', 'shape', 'gather_context')
+        tracker = given_activity_tracker_created(workspace_directory, 'story_bot')
+        when_activity_tracker_tracks_start(tracker, 'story_bot', 'shape', 'gather_context')
         
         # Then: Activity log exists in workspace area (no workspace_area subdirectory)
         expected_log = workspace_directory / 'activity_log.json'
-        assert expected_log.exists(), f"Activity log should be at {expected_log}"
+        then_activity_log_exists_at_path(expected_log)
         
         # And: Activity log does NOT exist in bot's area
         bot_area_log = bot_directory / 'activity_log.json'
-        assert not bot_area_log.exists(), f"Activity log should NOT be at {bot_area_log}"
+        then_activity_log_does_not_exist_at_path(bot_area_log)
 
     def test_activity_log_contains_correct_entry(self, bot_directory, workspace_directory):
         """
@@ -511,15 +501,8 @@ class TestActivityTrackingLocation:
         bootstrap_env(bot_directory, workspace_directory)
         
         # When: Activity tracker tracks activity
-        from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
-        tracker = ActivityTracker(workspace_directory=workspace_directory, bot_name='test_bot')
-        tracker.track_start('test_bot', 'shape', 'gather_context')
+        tracker = given_activity_tracker_created(workspace_directory, 'test_bot')
+        when_activity_tracker_tracks_start(tracker, 'test_bot', 'shape', 'gather_context')
         
         # Then: Activity log has entry
-        from tinydb import TinyDB
-        log_file = workspace_directory / 'activity_log.json'
-        with TinyDB(log_file) as db:
-            entries = db.all()
-            assert len(entries) == 1
-            assert entries[0]['action_state'] == 'test_bot.shape.gather_context'
-            assert entries[0]['status'] == 'started'
+        then_activity_log_has_entry_with_action_state(workspace_directory, 'test_bot.shape.gather_context', 'started')

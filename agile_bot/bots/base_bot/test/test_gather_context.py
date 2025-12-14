@@ -9,14 +9,17 @@ import pytest
 from pathlib import Path
 import json
 from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
+from conftest import create_workflow_state_file
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
     create_activity_log_file,
-    create_workflow_state,
     read_activity_log,
     create_guardrails_files,
     verify_workflow_transition,
-    verify_workflow_saves_completed_action
+    verify_workflow_saves_completed_action,
+    given_bot_name_and_behavior_setup,
+    then_activity_logged_with_action_state,
+    then_completion_entry_logged_with_outputs
 )
 
 def verify_activity_logged(log_file: Path, action_state: str):
@@ -24,6 +27,273 @@ def verify_activity_logged(log_file: Path, action_state: str):
     with TinyDB(log_file) as db:
         entries = db.all()
         assert any(entry['action_state'] == action_state for entry in entries)
+
+# ============================================================================
+# GIVEN/WHEN/THEN HELPER FUNCTIONS
+# ============================================================================
+
+def given_action_outputs_with_counts(questions_count: int = 5, evidence_count: int = 3):
+    """Given: Action outputs with counts."""
+    return {'questions_count': questions_count, 'evidence_count': evidence_count}
+
+def given_action_duration(duration: int = 330):
+    """Given: Action duration."""
+    return duration
+
+def given_activity_log_entries_for_behaviors(bot_name: str = 'story_bot', behaviors: list = None):
+    """Given: Activity log entries for multiple behaviors."""
+    if behaviors is None:
+        behaviors = ['shape', 'discovery']
+    entries = []
+    for i, behavior in enumerate(behaviors):
+        entries.append({
+            'action_state': f'{bot_name}.{behavior}.gather_context',
+            'timestamp': f'{9 + i}:00'
+        })
+    return entries
+
+def given_expected_activity_log_entries_for_behaviors(bot_name: str = 'story_bot', behaviors: list = None):
+    """Given: Expected activity log entries for multiple behaviors."""
+    if behaviors is None:
+        behaviors = ['shape', 'discovery']
+    return [
+        {'action_state': f'{bot_name}.{behavior}.gather_context'}
+        for behavior in behaviors
+    ]
+
+def given_questions_and_evidence_for_guardrails():
+    """Given: Questions and evidence for guardrails."""
+    questions = ['What is the scope?', 'Who are the users?']
+    evidence = ['Requirements doc', 'User interviews']
+    return questions, evidence
+
+def given_json_decode_error_expected_message():
+    """Given: JSON decode error expected message."""
+    return ['key_questions.json', 'Expecting']
+
+def given_workflow_states_and_transitions():
+    """Given: Standard workflow states and transitions."""
+    states = ['gather_context', 'decide_planning_criteria', 'build_knowledge']
+    transitions = [
+        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
+        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
+    ]
+    return states, transitions
+
+def given_workflow_state_file_with_completed_action(workspace_directory: Path, bot_name: str, behavior: str, action: str, completed_actions: list):
+    """Given: Workflow state file with completed action."""
+    from conftest import create_workflow_state_file
+    return create_workflow_state_file(workspace_directory, bot_name, behavior, action, completed_actions=completed_actions)
+
+def given_workflow_with_states_and_transitions(bot_directory: Path, bot_name: str, behavior: str):
+    """Given: Workflow with states and transitions."""
+    from agile_bot.bots.base_bot.src.state.workflow import Workflow
+    states, transitions = given_workflow_states_and_transitions()
+    return Workflow(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory, states=states, transitions=transitions)
+
+def given_completed_action_entry_for_behavior(bot_name: str, behavior: str, action: str, timestamp: str = '2025-12-03T10:05:30Z'):
+    """Given: Completed action entry for behavior."""
+    return [{
+        'action_state': f'{bot_name}.{behavior}.{action}',
+        'timestamp': timestamp
+    }]
+
+def when_action_tracks_activity_with_outputs(action, outputs: dict, duration: int):
+    """When: Action tracks activity with outputs."""
+    return when_action_tracks_activity_on_completion(action, outputs=outputs, duration=duration)
+
+def when_workflow_transitions_if_action_completed(workflow, action_name: str):
+    """When: Workflow transitions if action is completed."""
+    if workflow.is_action_completed(action_name):
+        workflow.transition_to_next()
+
+def given_clarification_parameters_with_questions_and_evidence():
+    """Given: Clarification parameters with questions and evidence."""
+    return {
+        'key_questions_answered': {
+            'user_types': 'Game Masters',
+            'first_action': 'Group tokens into mobs'
+        },
+        'evidence_provided': {
+            'original_input': 'I want to turn minions into mobs',
+            'source_file': 'input.txt'
+        }
+    }
+
+def given_clarification_parameters_for_shape_behavior():
+    """Given: Clarification parameters for shape behavior."""
+    return {
+        'key_questions_answered': {'user_types': 'Game Masters'},
+        'evidence_provided': {'input': 'input.txt'}
+    }
+
+def given_expected_key_questions_for_shape():
+    """Given: Expected key questions for shape behavior."""
+    return {'user_types': 'Game Masters'}
+
+def given_expected_evidence_for_shape():
+    """Given: Expected evidence for shape behavior."""
+    return {'original_input': 'I want to turn minions into mobs'}
+
+def given_discovery_key_questions_and_evidence():
+    """Given: Discovery key questions and evidence."""
+    key_questions = {'scope': 'Component level'}
+    evidence = {'doc': 'requirements.md'}
+    return key_questions, evidence
+
+def then_clarification_json_contains_shape_data(clarification_file: Path):
+    """Then: Clarification JSON contains shape data."""
+    expected_key_questions = given_expected_key_questions_for_shape()
+    expected_evidence = given_expected_evidence_for_shape()
+    then_clarification_json_contains_behavior_data(clarification_file, 'shape', expected_key_questions, expected_evidence)
+
+def then_clarification_data_contains_discovery_scope(clarification_data: dict, expected_scope: str):
+    """Then: Clarification data contains discovery scope."""
+    assert clarification_data['discovery']['key_questions']['scope'] == expected_scope
+
+def then_clarification_data_contains_shape_user_types(clarification_data: dict, expected_user_types: str):
+    """Then: Clarification data contains shape user types."""
+    assert clarification_data['shape']['key_questions']['user_types'] == expected_user_types
+
+def given_gather_context_action_is_initialized(bot_directory: Path, bot_name: str, behavior: str):
+    """Given step: GatherContextAction is initialized."""
+    return GatherContextAction(
+        bot_name=bot_name,
+        behavior=behavior,
+        bot_directory=bot_directory
+    )
+
+def when_action_tracks_activity_on_start(action: GatherContextAction):
+    """When step: Action tracks activity on start."""
+    action.track_activity_on_start()
+
+def when_action_tracks_activity_on_completion(action: GatherContextAction, outputs: dict = None, duration: int = None):
+    """When step: Action tracks activity on completion."""
+    if outputs is None:
+        outputs = given_action_outputs_with_counts()
+    if duration is None:
+        duration = given_action_duration()
+    action.track_activity_on_completion(outputs=outputs, duration=duration)
+
+# Removed then_activity_logged_with_action_state - use test_helpers.then_activity_logged_with_action_state instead
+# Import when needed: from agile_bot.bots.base_bot.test.test_helpers import then_activity_logged_with_action_state
+
+
+# Removed then_completion_entry_logged_with_outputs - use test_helpers.then_completion_entry_logged_with_outputs instead
+# Import when needed: from agile_bot.bots.base_bot.test.test_helpers import then_completion_entry_logged_with_outputs
+
+
+def given_activity_log_contains_entries(workspace_directory: Path, entries: list):
+    """Given step: Activity log contains entries."""
+    workspace_directory.mkdir(parents=True, exist_ok=True)
+    log_file = workspace_directory / 'activity_log.json'
+    from tinydb import TinyDB
+    with TinyDB(log_file) as db:
+        for entry in entries:
+            db.insert(entry)
+    return log_file
+
+
+def then_activity_log_contains_entries(log_file: Path, expected_entries: list):
+    """Then step: Activity log contains expected entries."""
+    from tinydb import TinyDB
+    with TinyDB(log_file) as db:
+        entries = db.all()
+        assert len(entries) == len(expected_entries)
+        for expected_entry in expected_entries:
+            assert any(
+                entry.get('action_state') == expected_entry.get('action_state')
+                for entry in entries
+            )
+
+# Removed duplicate then_completion_entry_logged_with_outputs - use test_helpers version instead
+# Removed duplicate given_activity_log_contains_entries - already defined above
+# Removed duplicate then_activity_log_contains_entries - already defined above (line 197)
+
+def when_action_injects_questions_and_evidence(action: GatherContextAction):
+    """When step: Action injects questions and evidence."""
+    return action.inject_questions_and_evidence()
+
+def then_instructions_contain_guardrails(instructions: dict, expected_questions: list, expected_evidence: list):
+    """Then step: Instructions contain guardrails with questions and evidence."""
+    assert 'guardrails' in instructions
+    assert 'key_questions' in instructions['guardrails']
+    assert instructions['guardrails']['key_questions'] == expected_questions
+    assert 'evidence' in instructions['guardrails']
+    assert instructions['guardrails']['evidence'] == expected_evidence
+
+def then_instructions_do_not_contain_guardrails(instructions: dict):
+    """Then step: Instructions do not contain guardrails."""
+    assert 'guardrails' not in instructions or instructions['guardrails'] == {}
+
+def given_malformed_guardrails_json_exists(bot_directory: Path, behavior: str):
+    """Given step: Malformed guardrails JSON exists."""
+    guardrails_dir = bot_directory / 'behaviors' / behavior / 'guardrails' / 'required_context'
+    guardrails_dir.mkdir(parents=True, exist_ok=True)
+    questions_file = guardrails_dir / 'key_questions.json'
+    questions_file.write_text('invalid json {')
+    return questions_file
+
+def then_json_decode_error_raised_with_message(function, expected_keywords: list):
+    """Then step: JSONDecodeError is raised with expected keywords.
+    
+    Checks that at least one of the expected keywords appears in the error message.
+    """
+    with pytest.raises(json.JSONDecodeError) as exc_info:
+        function()
+    error_message = str(exc_info.value)
+    assert any(keyword in error_message for keyword in expected_keywords), \
+        f"Expected at least one of {expected_keywords} in error message: {error_message}"
+
+def when_action_executes_with_clarification_parameters(action: GatherContextAction, parameters: dict):
+    """When step: Action executes with clarification parameters."""
+    action.do_execute(parameters)
+
+def then_clarification_json_file_exists(workspace_directory: Path):
+    """Then step: clarification.json file exists."""
+    clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
+    assert clarification_file.exists(), "clarification.json should be created"
+    return clarification_file
+
+def then_clarification_json_file_does_not_exist(workspace_directory: Path):
+    """Then step: clarification.json file does not exist."""
+    clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
+    assert not clarification_file.exists(), "clarification.json should not be created when no clarification data provided"
+
+def then_clarification_json_contains_behavior_data(clarification_file: Path, behavior: str, expected_key_questions: dict = None, expected_evidence: dict = None):
+    """Then step: clarification.json contains behavior data."""
+    clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
+    assert behavior in clarification_data
+    if expected_key_questions:
+        assert 'key_questions' in clarification_data[behavior]
+        for key, value in expected_key_questions.items():
+            assert clarification_data[behavior]['key_questions'][key] == value
+    if expected_evidence:
+        assert 'evidence' in clarification_data[behavior]
+        for key, value in expected_evidence.items():
+            assert clarification_data[behavior]['evidence'][key] == value
+    return clarification_data
+
+def given_clarification_json_exists_with_data(workspace_directory: Path, behavior: str, key_questions: dict, evidence: dict):
+    """Given step: clarification.json exists with data for behavior."""
+    stories_folder = workspace_directory / 'docs' / 'stories'
+    stories_folder.mkdir(parents=True, exist_ok=True)
+    clarification_file = stories_folder / 'clarification.json'
+    existing_data = {
+        behavior: {
+            'key_questions': key_questions,
+            'evidence': evidence
+        }
+    }
+    clarification_file.write_text(json.dumps(existing_data, indent=2), encoding='utf-8')
+    return clarification_file
+
+def then_clarification_json_preserves_existing_behaviors(clarification_file: Path, existing_behaviors: list):
+    """Then step: clarification.json preserves existing behavior data."""
+    clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
+    for behavior in existing_behaviors:
+        assert behavior in clarification_data, f"Existing {behavior} data should be preserved"
+    return clarification_data
 
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
 
@@ -41,22 +311,18 @@ class TestTrackActivityForGatherContextAction:
         WHEN: gather_context action starts execution
         THEN: Activity logger creates entry with timestamp and action_state
         """
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Activity log initialized
+        # And: Activity log initialized
         log_file = create_activity_log_file(workspace_directory)
+        # And: GatherContextAction is initialized
+        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'discovery')
         
         # When: Action starts and logs activity
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='discovery',
-            bot_directory=bot_directory
-        )
-        action.track_activity_on_start()
+        when_action_tracks_activity_on_start(action)
         
         # Then: Activity logged with correct action_state
-        verify_activity_logged(log_file, 'story_bot.discovery.gather_context')
+        then_activity_logged_with_action_state(log_file, 'story_bot.discovery.gather_context')
 
     def test_track_activity_when_gather_context_action_completes(self, bot_directory, workspace_directory):
         """
@@ -65,30 +331,20 @@ class TestTrackActivityForGatherContextAction:
         WHEN: gather_context action finishes execution
         THEN: Activity logger creates completion entry with outputs and duration
         """
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Activity log with start entry
+        # And: Activity log with start entry
         log_file = create_activity_log_file(workspace_directory)
+        # And: GatherContextAction is initialized
+        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'discovery')
         
         # When: Action completes
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='discovery',
-            bot_directory=bot_directory
-        )
-        action.track_activity_on_completion(
-            outputs={'questions_count': 5, 'evidence_count': 3},
-            duration=330
-        )
+        when_action_tracks_activity_on_completion(action)
         
-        # Then: Completion entry logged
-        from tinydb import TinyDB
-        with TinyDB(log_file) as db:
-            log_data = db.all()
-            completion_entry = next(e for e in log_data if 'outputs' in e)
-            assert completion_entry['outputs']['questions_count'] == 5
-            assert completion_entry['duration'] == 330
+        # Then: Completion entry logged with outputs and duration
+        outputs = given_action_outputs_with_counts()
+        duration = given_action_duration()
+        then_completion_entry_logged_with_outputs(log_file, outputs, duration)
 
     def test_track_multiple_gather_context_invocations_across_behaviors(self, workspace_directory):
         """
@@ -97,22 +353,16 @@ class TestTrackActivityForGatherContextAction:
         WHEN: both entries are present
         THEN: activity log distinguishes same action in different behaviors using full path
         """
-        # Given: Activity log with multiple behavior entries (in workspace_directory)
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        log_file = workspace_directory / 'activity_log.json'
-        from tinydb import TinyDB
-        with TinyDB(log_file) as db:
-            db.insert({'action_state': 'story_bot.shape.gather_context', 'timestamp': '09:00'})
-            db.insert({'action_state': 'story_bot.discovery.gather_context', 'timestamp': '10:00'})
+        # Given: Activity log contains entries for shape and discovery
+        entries = given_activity_log_entries_for_behaviors()
+        log_file = given_activity_log_contains_entries(workspace_directory, entries)
         
-        # When: Read activity log
-        with TinyDB(log_file) as db:
-            log_data = db.all()
+        # When: Both entries are present
+        # (log file already created above)
         
-        # Then: 2 separate entries with full paths
-        assert len(log_data) == 2
-        assert log_data[0]['action_state'] == 'story_bot.shape.gather_context'
-        assert log_data[1]['action_state'] == 'story_bot.discovery.gather_context'
+        # Then: Activity log distinguishes same action in different behaviors using full path
+        expected_entries = given_expected_activity_log_entries_for_behaviors()
+        then_activity_log_contains_entries(log_file, expected_entries)
 
 
 # ============================================================================
@@ -151,38 +401,16 @@ class TestProceedToDecidePlanning:
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given: Workflow state with completed gather_context and current_action pointing to it
-        from agile_bot.bots.base_bot.src.state.workflow import Workflow
-        
-        state_file = create_workflow_state(
-            workspace_directory,
-            'story_bot',
-            'discovery',
-            'gather_context',
-            completed_actions=[{
-                'action_state': 'story_bot.discovery.gather_context',
-                'timestamp': '2025-12-03T10:05:30Z'
-            }]
-        )
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'discovery')
+        completed_actions = given_completed_action_entry_for_behavior(bot_name, behavior, 'gather_context')
+        state_file = given_workflow_state_file_with_completed_action(workspace_directory, bot_name, behavior, 'gather_context', completed_actions)
         
         # When: Workflow loads and determines next action
-        states = ['gather_context', 'decide_planning_criteria', 'build_knowledge']
-        transitions = [
-            {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-            {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        ]
-        
-        workflow = Workflow(
-            bot_name='story_bot',
-            behavior='discovery',
-            bot_directory=bot_directory,
-            states=states,
-            transitions=transitions
-        )
+        workflow = given_workflow_with_states_and_transitions(bot_directory, bot_name, behavior)
         
         # Then: Workflow should auto-advance past completed gather_context
         # If current_action is completed, workflow should transition to next
-        if workflow.is_action_completed('gather_context'):
-            workflow.transition_to_next()
+        when_workflow_transitions_if_action_completed(workflow, 'gather_context')
         
         assert workflow.current_state == 'decide_planning_criteria'
 
@@ -195,55 +423,47 @@ class TestInjectGuardrailsAsPartOfClarifyRequirements:
     """Story: Inject Guardrails as Part of Clarify Requirements - Tests guardrail injection."""
 
     def test_action_injects_questions_and_evidence(self, bot_directory, workspace_directory):
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        questions = ['What is the scope?', 'Who are the users?']
-        evidence = ['Requirements doc', 'User interviews']
-        
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+        questions, evidence = given_questions_and_evidence_for_guardrails()
+        # And: Guardrails files exist
         create_guardrails_files(bot_directory, behavior, questions, evidence)
+        # And: GatherContextAction is initialized
+        action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
         
-        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        instructions = action_obj.inject_questions_and_evidence()
+        # When: Action injects questions and evidence
+        instructions = when_action_injects_questions_and_evidence(action_obj)
         
-        assert 'key_questions' in instructions['guardrails']
-        assert instructions['guardrails']['key_questions'] == questions
-        assert 'evidence' in instructions['guardrails']
-        assert instructions['guardrails']['evidence'] == evidence
+        # Then: Instructions contain guardrails with questions and evidence
+        then_instructions_contain_guardrails(instructions, questions, evidence)
 
     def test_action_uses_base_instructions_when_guardrails_missing(self, bot_directory, workspace_directory):
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+        # And: GatherContextAction is initialized (no guardrails)
+        action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
         
-        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        instructions = action_obj.inject_questions_and_evidence()
+        # When: Action injects questions and evidence
+        instructions = when_action_injects_questions_and_evidence(action_obj)
         
-        assert 'guardrails' not in instructions or instructions['guardrails'] == {}
+        # Then: Instructions do not contain guardrails
+        then_instructions_do_not_contain_guardrails(instructions)
 
     def test_action_handles_malformed_guardrails_json(self, bot_directory, workspace_directory):
-        bot_name = 'test_bot'
-        behavior = 'shape'
-        
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+        # And: Malformed guardrails JSON exists
+        given_malformed_guardrails_json_exists(bot_directory, behavior)
+        # And: GatherContextAction is initialized
+        action_obj = given_gather_context_action_is_initialized(bot_directory, bot_name, behavior)
         
-        guardrails_dir = bot_directory / 'behaviors' / behavior / 'guardrails' / 'required_context'
-        guardrails_dir.mkdir(parents=True, exist_ok=True)
-        
-        questions_file = guardrails_dir / 'key_questions.json'
-        questions_file.write_text('invalid json {')
-        
-        action_obj = GatherContextAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-        
-        with pytest.raises(json.JSONDecodeError) as exc_info:
-            action_obj.inject_questions_and_evidence()
-        
-        assert 'key_questions.json' in str(exc_info.value) or 'Expecting' in str(exc_info.value)
+        # When: Action injects questions and evidence
+        # Then: JSONDecodeError is raised with expected message
+        expected_message = given_json_decode_error_expected_message()
+        then_json_decode_error_raised_with_message(lambda: when_action_injects_questions_and_evidence(action_obj), expected_message)
 
 
 # ============================================================================
@@ -262,42 +482,25 @@ class TestStoreClarificationData:
         THEN: clarification.json file is created in docs/stories/ folder
         AND: file contains behavior section with key_questions and evidence
         """
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Action initialized
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='shape',
-            bot_directory=bot_directory
-        )
-        
-        # Given: Parameters with clarification data
-        parameters = {
-            'key_questions_answered': {
-                'user_types': 'Game Masters',
-                'first_action': 'Group tokens into mobs'
-            },
-            'evidence_provided': {
-                'original_input': 'I want to turn minions into mobs',
-                'source_file': 'input.txt'
-            }
-        }
+        # And: Action initialized
+        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+        # And: Parameters with clarification data
+        parameters = given_clarification_parameters_with_questions_and_evidence()
         
         # When: Action executes with parameters
-        action.do_execute(parameters)
+        when_action_executes_with_clarification_parameters(action, parameters)
         
         # Then: clarification.json file exists
-        clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
-        assert clarification_file.exists(), "clarification.json should be created"
-        
-        # Then: File contains correct structure
-        clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
-        assert 'shape' in clarification_data
-        assert 'key_questions' in clarification_data['shape']
-        assert 'evidence' in clarification_data['shape']
-        assert clarification_data['shape']['key_questions']['user_types'] == 'Game Masters'
-        assert clarification_data['shape']['evidence']['original_input'] == 'I want to turn minions into mobs'
+        clarification_file = then_clarification_json_file_exists(workspace_directory)
+        # And: File contains correct structure
+        then_clarification_json_contains_behavior_data(
+            clarification_file,
+            'shape',
+            expected_key_questions={'user_types': 'Game Masters'},
+            expected_evidence={'original_input': 'I want to turn minions into mobs'}
+        )
 
     def test_preserve_existing_clarification_data_when_saving(self, bot_directory, workspace_directory):
         """
@@ -308,43 +511,23 @@ class TestStoreClarificationData:
         THEN: clarification.json contains both 'discovery' and 'shape' sections
         AND: existing 'discovery' data is preserved
         """
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Existing clarification.json with discovery data
-        stories_folder = workspace_directory / 'docs' / 'stories'
-        stories_folder.mkdir(parents=True, exist_ok=True)
-        clarification_file = stories_folder / 'clarification.json'
-        existing_data = {
-            'discovery': {
-                'key_questions': {'scope': 'Component level'},
-                'evidence': {'doc': 'requirements.md'}
-            }
-        }
-        clarification_file.write_text(json.dumps(existing_data, indent=2), encoding='utf-8')
-        
-        # Given: Action initialized for shape behavior
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='shape',
-            bot_directory=bot_directory
-        )
-        
-        # Given: Parameters with shape clarification data
-        parameters = {
-            'key_questions_answered': {'user_types': 'Game Masters'},
-            'evidence_provided': {'input': 'input.txt'}
-        }
+        # And: Existing clarification.json with discovery data
+        discovery_key_questions, discovery_evidence = given_discovery_key_questions_and_evidence()
+        clarification_file = given_clarification_json_exists_with_data(workspace_directory, 'discovery', discovery_key_questions, discovery_evidence)
+        # And: Action initialized for shape behavior
+        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+        # And: Parameters with shape clarification data
+        parameters = given_clarification_parameters_for_shape_behavior()
         
         # When: Action executes with parameters
-        action.do_execute(parameters)
+        when_action_executes_with_clarification_parameters(action, parameters)
         
         # Then: Both behaviors' data are preserved
-        clarification_data = json.loads(clarification_file.read_text(encoding='utf-8'))
-        assert 'discovery' in clarification_data, "Existing discovery data should be preserved"
-        assert 'shape' in clarification_data, "New shape data should be added"
-        assert clarification_data['discovery']['key_questions']['scope'] == 'Component level'
-        assert clarification_data['shape']['key_questions']['user_types'] == 'Game Masters'
+        clarification_data = then_clarification_json_preserves_existing_behaviors(clarification_file, ['discovery', 'shape'])
+        then_clarification_data_contains_discovery_scope(clarification_data, 'Component level')
+        then_clarification_data_contains_shape_user_types(clarification_data, 'Game Masters')
 
     def test_skip_saving_when_no_clarification_parameters_provided(self, bot_directory, workspace_directory):
         """
@@ -354,22 +537,15 @@ class TestStoreClarificationData:
         WHEN: do_execute is called with empty or unrelated parameters
         THEN: clarification.json file is not created
         """
-        # Bootstrap environment
+        # Given: Environment is bootstrapped
         bootstrap_env(bot_directory, workspace_directory)
-        
-        # Given: Action initialized
-        action = GatherContextAction(
-            bot_name='story_bot',
-            behavior='shape',
-            bot_directory=bot_directory
-        )
-        
-        # Given: Parameters without clarification data
+        # And: Action initialized
+        action = given_gather_context_action_is_initialized(bot_directory, 'story_bot', 'shape')
+        # And: Parameters without clarification data
         parameters = {'other_data': 'some value'}
         
         # When: Action executes with parameters
-        action.do_execute(parameters)
+        when_action_executes_with_clarification_parameters(action, parameters)
         
         # Then: clarification.json file is not created
-        clarification_file = workspace_directory / 'docs' / 'stories' / 'clarification.json'
-        assert not clarification_file.exists(), "clarification.json should not be created when no clarification data provided"
+        then_clarification_json_file_does_not_exist(workspace_directory)

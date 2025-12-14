@@ -23,6 +23,100 @@ from agile_bot.bots.base_bot.test.test_helpers import (
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def given_base_instructions_for_render_output_copied(bot_directory: Path):
+    """Given: Base instructions for render_output copied."""
+    from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
+    import shutil
+    repo_root = Path(__file__).parent.parent.parent.parent.parent
+    actual_base_actions_dir = get_base_actions_dir(repo_root)
+    actual_instructions_file = actual_base_actions_dir / '4_render_output' / 'instructions.json'
+    bot_base_actions_dir = bot_directory / 'base_actions' / '4_render_output'
+    bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
+    bot_instructions_file = bot_base_actions_dir / 'instructions.json'
+    if actual_instructions_file.exists():
+        shutil.copy2(actual_instructions_file, bot_instructions_file)
+    else:
+        bot_instructions_file.write_text(json.dumps({
+            'actionName': 'render_output',
+            'instructions': [
+                'Render outputs using render configs',
+                '{{render_configs}}',
+                '{{render_instructions}}'
+            ]
+        }), encoding='utf-8')
+    return bot_instructions_file
+
+
+def given_behavior_render_instructions_created(bot_directory: Path, behavior: str):
+    """Given: Behavior render instructions created."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    render_dir = behavior_dir / '2_content' / '2_render'
+    render_dir.mkdir(parents=True, exist_ok=True)
+    render_instructions_file = render_dir / 'instructions.json'
+    render_instructions_file.write_text(
+        json.dumps({
+            'behaviorName': behavior,
+            'instructions': ['Render all story files', 'Generate markdown output']
+        }),
+        encoding='utf-8'
+    )
+    return render_instructions_file
+
+
+def given_render_configs_created(render_dir: Path, configs: list):
+    """Given: Render configs created."""
+    created_configs = []
+    for config_data in configs:
+        config_file = render_dir / f"{config_data['name']}.json"
+        config_file.write_text(json.dumps(config_data), encoding='utf-8')
+        created_configs.append(config_file)
+    return created_configs
+
+
+def when_render_output_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
+    """When: RenderOutputAction loads and merges instructions."""
+    action_obj = RenderOutputAction(
+        bot_name=bot_name,
+        behavior=behavior,
+        bot_directory=bot_directory
+    )
+    instructions = action_obj.load_and_merge_instructions()
+    return action_obj, instructions
+
+
+def then_render_configs_template_variable_replaced(base_instructions_text: str):
+    """Then: {{render_configs}} template variable replaced."""
+    assert '{{render_configs}}' not in base_instructions_text
+    assert 'render_story_files' in base_instructions_text
+    assert 'render_story_map_txt' in base_instructions_text
+
+
+def then_render_configs_include_all_required_fields(base_instructions_text: str):
+    """Then: Render configs include all required fields."""
+    assert 'Instructions:' in base_instructions_text or 'instructions' in base_instructions_text.lower()
+    assert 'Synchronizer:' in base_instructions_text or 'synchronizer' in base_instructions_text.lower()
+    assert 'Template:' in base_instructions_text or 'template' in base_instructions_text.lower()
+    assert 'Input:' in base_instructions_text or 'input' in base_instructions_text.lower()
+    assert 'Output:' in base_instructions_text or 'output' in base_instructions_text.lower()
+
+
+def then_specific_field_values_present(base_instructions_text: str):
+    """Then: Specific field values present."""
+    assert 'synchronizers.story_scenarios.StoryScenariosSynchronizer' in base_instructions_text
+    assert 'templates/story-map.txt' in base_instructions_text
+    assert 'story-graph.json' in base_instructions_text
+
+
+def then_render_instructions_template_variable_replaced(base_instructions_text: str):
+    """Then: {{render_instructions}} template variable replaced."""
+    assert '{{render_instructions}}' not in base_instructions_text
+    assert 'Render all story files' in base_instructions_text or 'Generate markdown output' in base_instructions_text
+
+
+# ============================================================================
 # STORY: Track Activity for Render Output Action
 # ============================================================================
 
@@ -133,56 +227,17 @@ class TestInjectRenderInstructionsAndConfigs:
         WHEN: Action loads and merges instructions with all injections
         THEN: All template variables are replaced with actual content
         """
-        # Bootstrap
         bootstrap_env(bot_directory, workspace_directory)
-        
         bot_name = 'test_bot'
         behavior = 'shape'
         
-        # Create base instructions with template variables (copy from actual base_actions or create if missing)
-        from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
-        import shutil
-        repo_root = Path(__file__).parent.parent.parent.parent.parent
-        actual_base_actions_dir = get_base_actions_dir(repo_root)
-        actual_instructions_file = actual_base_actions_dir / '4_render_output' / 'instructions.json'
-        
-        # Create base_actions structure in bot_directory
-        bot_base_actions_dir = bot_directory / 'base_actions' / '4_render_output'
-        bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy actual instructions file with template variables (or create if missing)
-        bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-        if actual_instructions_file.exists():
-            shutil.copy2(actual_instructions_file, bot_instructions_file)
-        else:
-            # Create test instructions file with template variables if actual file doesn't exist
-            bot_instructions_file.write_text(json.dumps({
-                'actionName': 'render_output',
-                'instructions': [
-                    'Render outputs using render configs',
-                    '{{render_configs}}',
-                    '{{render_instructions}}'
-                ]
-            }), encoding='utf-8')
-        
-        # Create behavior-specific render instructions
+        given_base_instructions_for_render_output_copied(bot_directory)
         behavior_dir = bot_directory / 'behaviors' / behavior
         render_dir = behavior_dir / '2_content' / '2_render'
         render_dir.mkdir(parents=True, exist_ok=True)
-        
-        render_instructions_file = render_dir / 'instructions.json'
-        render_instructions_file.write_text(
-            json.dumps({
-                'behaviorName': behavior,
-                'instructions': ['Render all story files', 'Generate markdown output']
-            }),
-            encoding='utf-8'
-        )
-        
-        # Create render configs with all fields
-        render_config1 = render_dir / 'render_story_files.json'
-        render_config1.write_text(
-            json.dumps({
+        given_behavior_render_instructions_created(bot_directory, behavior)
+        given_render_configs_created(render_dir, [
+            {
                 'name': 'render_story_files',
                 'type': 'synchronizer',
                 'path': 'docs/stories',
@@ -190,13 +245,8 @@ class TestInjectRenderInstructionsAndConfigs:
                 'synchronizer': 'synchronizers.story_scenarios.StoryScenariosSynchronizer',
                 'output': 'docs/stories',
                 'instructions': 'Render story-graph.json to story markdown files'
-            }),
-            encoding='utf-8'
-        )
-        
-        render_config2 = render_dir / 'render_story_map_txt.json'
-        render_config2.write_text(
-            json.dumps({
+            },
+            {
                 'name': 'render_story_map_txt',
                 'type': 'template',
                 'path': 'docs/stories',
@@ -204,43 +254,16 @@ class TestInjectRenderInstructionsAndConfigs:
                 'template': 'templates/story-map.txt',
                 'output': 'story-map.txt',
                 'instructions': 'Render story-graph.json to story-map.txt format'
-            }),
-            encoding='utf-8'
-        )
+            }
+        ])
         
-        # When: Call RenderOutputAction and get final instructions
-        action_obj = RenderOutputAction(
-            bot_name=bot_name,
-            behavior=behavior,
-            bot_directory=bot_directory
-        )
+        action_obj, instructions = when_render_output_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
-        # Get merged instructions (this calls _merge_instructions internally)
-        instructions = action_obj.load_and_merge_instructions()
-        
-        # Then: All template variables should be replaced
         base_instructions_text = '\n'.join(instructions.get('base_instructions', []))
-        
-        # Verify {{render_configs}} is replaced
-        assert '{{render_configs}}' not in base_instructions_text
-        assert 'render_story_files' in base_instructions_text
-        assert 'render_story_map_txt' in base_instructions_text
-        
-        # Verify render_configs includes all required fields
-        assert 'Instructions:' in base_instructions_text or 'instructions' in base_instructions_text.lower()
-        assert 'Synchronizer:' in base_instructions_text or 'synchronizer' in base_instructions_text.lower()
-        assert 'Template:' in base_instructions_text or 'template' in base_instructions_text.lower()
-        assert 'Input:' in base_instructions_text or 'input' in base_instructions_text.lower()
-        assert 'Output:' in base_instructions_text or 'output' in base_instructions_text.lower()
-        
-        # Verify specific field values are present
-        assert 'synchronizers.story_scenarios.StoryScenariosSynchronizer' in base_instructions_text
-        assert 'templates/story-map.txt' in base_instructions_text
-        assert 'story-graph.json' in base_instructions_text
-        
-        # Verify {{render_instructions}} is replaced
-        assert '{{render_instructions}}' not in base_instructions_text
-        assert 'Render all story files' in base_instructions_text or 'Generate markdown output' in base_instructions_text
+        then_render_configs_template_variable_replaced(base_instructions_text)
+        then_render_configs_include_all_required_fields(base_instructions_text)
+        then_specific_field_values_present(base_instructions_text)
+        then_render_instructions_template_variable_replaced(base_instructions_text)
 
     def test_render_configs_format_includes_all_fields(self, bot_directory, workspace_directory):
         """

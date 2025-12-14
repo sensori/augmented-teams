@@ -106,27 +106,11 @@
     {
       "name": "",
       "priority": 1,
-      "epics": [
+      "stories": [
         {
           "name": "",
           "users": [],
-          "sequential_order": 1,
-          "estimated_stories": null,
-          "sub_epics": [
-            {
-              "name": "",
-              "users": [],
-              "sequential_order": 1,
-              "estimated_stories": null,
-              "stories": [
-                {
-                  "name": "",
-                  "users": [],
-                  "sequential_order": 1
-                }
-              ]
-            }
-          ]
+          "sequential_order": 1
         }
       ]
     }
