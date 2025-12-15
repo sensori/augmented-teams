@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
-from agile_bot.bots.base_bot.src.bot.guardrails import Guardrails
-from agile_bot.bots.base_bot.src.bot.content import Content
+from agile_bot.bots.base_bot.src.actions.guardrails import Guardrails
+from agile_bot.bots.base_bot.src.actions.content import Content
 from agile_bot.bots.base_bot.src.bot.rules import Rules
 from agile_bot.bots.base_bot.src.actions.actions import Actions
 from agile_bot.bots.base_bot.src.bot.trigger_words import TriggerWords
