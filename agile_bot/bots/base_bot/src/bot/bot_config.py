@@ -12,18 +12,10 @@ class BotConfig:
             raise TypeError("bot_paths must be an instance of BotPaths")
         
         self.bot_paths = bot_paths
-        # Check bot_config.json in bot directory first, then fall back to config/bot_config.json
-        config_path_in_bot = self.bot_paths.bot_directory / 'bot_config.json'
-        config_path_in_config = self.bot_paths.bot_directory / 'config' / 'bot_config.json'
+        self.config_path = self.bot_paths.bot_directory / 'bot_config.json'
         
-        if config_path_in_bot.exists():
-            self.config_path = config_path_in_bot
-        elif config_path_in_config.exists():
-            self.config_path = config_path_in_config
-        else:
-            raise FileNotFoundError(
-                f'Bot config not found at {config_path_in_bot} or {config_path_in_config}'
-            )
+        if not self.config_path.exists():
+            raise FileNotFoundError(f'Bot config not found at {self.config_path}')
         
         self._config = read_json_file(self.config_path)
     

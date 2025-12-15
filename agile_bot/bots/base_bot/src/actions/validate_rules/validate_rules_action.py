@@ -166,8 +166,8 @@ class ValidateRulesAction(Action):
             if scope_config.get('test_files'):
                 test_files_to_scan.extend(scope_config['test_files'])
             
-            # Auto-discover test files if not provided and we're in 7_write_tests behavior
-            if not test_files_to_scan and self.behavior.name == '7_write_tests':
+            # Auto-discover test files if not provided and we're in write_tests behavior
+            if not test_files_to_scan and self.behavior.name == 'write_tests':
                 project_location = content_info.get('project_location')
                 if project_location:
                     project_path = Path(project_location)

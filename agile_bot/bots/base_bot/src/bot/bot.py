@@ -296,3 +296,18 @@ class Bot:
             current_behavior_obj.actions.close_current()
         
         return current_behavior_obj.forward_to_current_action()
+    
+    @property
+    def behaviors(self):
+        """Access behaviors collection."""
+        return self._behaviors_collection
+    
+    def __getattr__(self, name: str):
+        """Allow accessing behaviors as attributes (e.g., bot.code, bot.shape)."""
+        # Check if it's a behavior name
+        behavior = self._behaviors_collection.find_by_name(name)
+        if behavior:
+            return behavior
+        
+        # Default behavior for unknown attributes
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")

@@ -28,8 +28,8 @@ class CliGenerator:
         # Derive bot_name from last folder in bot_location
         self.bot_name = self.bot_location.name
         
-        # Config path follows convention: {bot_location}/config/bot_config.json
-        self.config_path = self.workspace_root / self.bot_location / 'config' / 'bot_config.json'
+        # Config path follows convention: {bot_location}/bot_config.json
+        self.config_path = self.workspace_root / self.bot_location / 'bot_config.json'
     
     def generate_cli_code(self) -> Dict[str, Any]:
         """Generate CLI code for bot.
@@ -133,7 +133,7 @@ os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
 # 2. Read bot_config.json and set workspace directory (if not already set)
 if 'WORKING_AREA' not in os.environ and 'WORKING_DIR' not in os.environ:
-    config_path = bot_directory / 'config' / 'bot_config.json'
+    config_path = bot_directory / 'bot_config.json'
     if config_path.exists():
         bot_config = json.loads(config_path.read_text(encoding='utf-8'))
         # Check mcp.env.WORKING_AREA (standard location)
@@ -141,6 +141,9 @@ if 'WORKING_AREA' not in os.environ and 'WORKING_DIR' not in os.environ:
             mcp_env = bot_config['mcp']['env']
             if 'WORKING_AREA' in mcp_env:
                 os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
+        # Fallback to top-level WORKING_AREA
+        elif 'WORKING_AREA' in bot_config:
+            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
 
 # ============================================================================
 # Now import - everything will read from environment variables
@@ -164,7 +167,7 @@ def main():
     workspace_directory = get_workspace_directory()
 
     bot_name = '{self.bot_name}'
-    bot_config_path = bot_directory / 'config' / 'bot_config.json'
+    bot_config_path = bot_directory / 'bot_config.json'
     
     cli = BaseBotCli(
         bot_name=bot_name,

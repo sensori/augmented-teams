@@ -110,14 +110,14 @@ def get_behavior_folder(bot_name: str, behavior: str) -> Path:
 
     Args:
         bot_name: Name of the bot (e.g., 'story_bot')
-        behavior: Name of the behavior (e.g., '1_shape', 'shape')
+        behavior: Name of the behavior (e.g., 'shape')
 
     Returns:
         Path to behavior folder in bot directory
 
     Example: 
-        get_behavior_folder('story_bot', '1_shape') ->
-        C:/dev/augmented-teams/agile_bot/bots/story_bot/behaviors/1_shape
+        get_behavior_folder('story_bot', 'shape') ->
+        C:/dev/augmented-teams/agile_bot/bots/story_bot/behaviors/shape
     """
     bot_directory = get_bot_directory()
     return bot_directory / 'behaviors' / behavior

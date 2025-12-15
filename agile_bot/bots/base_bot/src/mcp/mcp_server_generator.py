@@ -23,8 +23,8 @@ class MCPServerGenerator:
         # Derive bot_name from last folder in bot_directory
         self.bot_name = self.bot_directory.name
         
-        # Config path follows convention: {bot_directory}/config/bot_config.json
-        self.config_path = self.bot_directory / 'config' / 'bot_config.json'
+        # Config path follows convention: {bot_directory}/bot_config.json
+        self.config_path = self.bot_directory / 'bot_config.json'
         
         self.bot = None
         self.registered_tools = []
@@ -283,12 +283,13 @@ class MCPServerGenerator:
                         }
                 else:
                     # Not final - normal transition within behavior
-                    message = f"Action '{action_name}' marked complete. Transitioned to '{new_state}'."
+                    new_action_name = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
+                    message = f"Action '{action_name}' marked complete. Transitioned to '{new_action_name}'."
                     
                     return {
                         "status": "completed",
                         "completed_action": action_name,
-                        "next_action": new_state,
+                        "next_action": new_action_name,
                         "message": message
                     }
                 
@@ -661,10 +662,7 @@ class MCPServerGenerator:
         return []
     
     def generate_bot_config_file(self, behaviors: list) -> Path:
-        config_dir = self.bot_directory / 'config'
-        config_dir.mkdir(parents=True, exist_ok=True)
-        
-        config_path = config_dir / 'bot_config.json'
+        config_path = self.bot_directory / 'bot_config.json'
         config_data = {
             'name': self.bot_name,
             'behaviors': behaviors
@@ -704,7 +702,7 @@ os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
 # 2. Read bot_config.json and set workspace directory (if not already set by mcp.json env)
 if 'WORKING_AREA' not in os.environ:
-    config_path = bot_directory / 'config' / 'bot_config.json'
+    config_path = bot_directory / 'bot_config.json'
     if config_path.exists():
         bot_config = json.loads(config_path.read_text(encoding='utf-8'))
         # Check mcp.env.WORKING_AREA (standard location)
