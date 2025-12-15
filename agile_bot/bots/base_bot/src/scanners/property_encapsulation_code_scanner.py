@@ -103,3 +103,5 @@ class PropertyEncapsulationCodeScanner(CodeScanner):
         return None
 
 
+
+

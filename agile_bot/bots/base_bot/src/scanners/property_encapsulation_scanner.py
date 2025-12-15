@@ -71,3 +71,5 @@ class PropertyEncapsulationScanner(StoryScanner):
         return violations
 
 
+
+

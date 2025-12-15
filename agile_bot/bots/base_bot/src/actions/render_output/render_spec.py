@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from agile_bot.bots.base_bot.src.actions.render_output.template import Template
 from agile_bot.bots.base_bot.src.actions.render_output.synchronizer import Synchronizer
+from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
 
 
 class RenderSpec:
@@ -16,20 +17,20 @@ class RenderSpec:
         Properties: input, output, template, synchronizer, instructions
     """
     
-    def __init__(self, config_data: Dict[str, Any], render_folder: Path, bot_directory: Path, config_file: Path = None):
+    def __init__(self, config_data: Dict[str, Any], render_folder: Path, bot_paths: BotPaths, config_file: Path = None):
         """Initialize RenderSpec.
         
         Args:
             config_data: Render config dictionary
             render_folder: Path to render folder
-            bot_directory: Path to bot directory
+            bot_paths: BotPaths instance for accessing bot directory
             config_file: Path to config file (optional, for file path tracking)
         """
         self._config_data = config_data.copy()
         self._render_folder = render_folder
-        self._bot_directory = bot_directory
+        self._bot_paths = bot_paths
         if config_file:
-            self._config_data['file'] = str(config_file.relative_to(bot_directory))
+            self._config_data['file'] = str(config_file.relative_to(bot_paths.bot_directory))
         
         # Extract properties from config
         self._input = config_data.get('input')

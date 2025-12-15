@@ -2,7 +2,8 @@
 
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from .validate_rules_action import ValidateRulesAction, Rule
+from .validate_rules_action import ValidateRulesAction
+from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
 from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
 
@@ -103,8 +104,8 @@ class CodeQualityAction(ValidateRulesAction):
                             break
         
         # Resolve code file paths
-        project_location = content_info.get('project_location')
-        workspace_path = Path(project_location) if project_location else self.workspace_directory
+        workspace = content_info.get('workspace')
+        workspace_path = Path(workspace) if workspace else self.behavior.bot_paths.workspace_directory
         
         # Find repo root
         repo_root = None
@@ -140,7 +141,7 @@ class CodeQualityAction(ValidateRulesAction):
                         resolved_path = repo_root / code_path
                         code_file_paths.append(resolved_path)
                     else:
-                        resolved_path = self.workspace_directory / code_path
+                        resolved_path = self.behavior.bot_paths.workspace_directory / code_path
                         code_file_paths.append(resolved_path)
         
         # Run scanners with story graph and code files (only CodeScanner instances)

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List, Optional, Iterator, Dict, Any, TYPE_CHECKING
 from datetime import datetime
 
-from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
 
 if TYPE_CHECKING:
     from agile_bot.bots.base_bot.src.actions.action import Action
@@ -72,7 +72,7 @@ class Actions:
                 # Create ActivityTracker
                 from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
                 workspace_dir = self.bot_paths.workspace_directory
-                activity_tracker = ActivityTracker(workspace_dir, self.bot_name)
+                activity_tracker = ActivityTracker(self.bot_paths, self.bot_name)
                 
                 # Instantiate concrete Action class (e.g., GatherContextAction)
                 action_instance = self._instantiate_action(

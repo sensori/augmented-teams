@@ -36,3 +36,5 @@ class ResourceOrientedDesignScanner(StoryScanner):
         return violations
 
 
+
+

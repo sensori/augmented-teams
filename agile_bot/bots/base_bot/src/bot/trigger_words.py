@@ -33,3 +33,5 @@ class TriggerWords:
                 if pattern.lower() in text.lower():
                     return True
         return False
+
+

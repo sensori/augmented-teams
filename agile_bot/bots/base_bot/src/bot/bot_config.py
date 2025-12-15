@@ -43,8 +43,7 @@ class BotConfig:
             raise TypeError("bot_paths must be an instance of BotPaths")
         
         self.bot_paths = bot_paths
-        self.bot_directory = bot_paths.bot_directory
-        self.config_path = self.bot_directory / 'config' / 'bot_config.json'
+        self.config_path = self.bot_paths.bot_directory / 'config' / 'bot_config.json'
         
         # Load config
         if not self.config_path.exists():
@@ -78,7 +77,7 @@ class BotConfig:
         Returns:
             Path to base_actions directory in bot directory.
         """
-        return self.bot_directory / 'base_actions'
+        return self.bot_paths.bot_directory / 'base_actions'
     
     @property
     def description(self) -> str:

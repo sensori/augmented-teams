@@ -56,3 +56,5 @@ class KnowledgeGraphTemplate:
         """Get path to template file."""
         return self._template_path
 
+
+

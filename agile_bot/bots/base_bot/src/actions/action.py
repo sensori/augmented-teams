@@ -94,10 +94,7 @@ class Action:
     def tracker(self) -> ActivityTracker:
         """Get activity tracker (lazy initialization)."""
         if self._activity_tracker is None:
-            if self.behavior.bot is None:
-                raise RuntimeError("Cannot access tracker: bot instance not set on behavior")
-            workspace_dir = self.behavior.bot.bot_paths.workspace_directory
-            self._activity_tracker = ActivityTracker(workspace_dir, self.bot_name)
+            self._activity_tracker = ActivityTracker(self.behavior.bot_paths, self.bot_name)
         return self._activity_tracker
 
     @property
@@ -110,33 +107,17 @@ class Action:
         For tests: Always create base_actions in bot_directory to ensure isolation.
         For production: Falls back to shared base_bot/base_actions if bot doesn't have its own.
         """
-        if self.behavior.bot is None:
-            raise RuntimeError("Cannot access base_actions_dir: bot instance not set on behavior")
-        return get_base_actions_directory(bot_directory=self.behavior.bot.bot_paths.bot_directory)
-    
-    @property
-    def bot_directory(self) -> Path:
-        """Get bot directory where bot code lives."""
-        if self.behavior.bot is None:
-            raise RuntimeError("Cannot access bot_directory: bot instance not set on behavior")
-        return self.behavior.bot.bot_paths.bot_directory
-    
-    @property
-    def workspace_directory(self) -> Path:
-        """Get workspace directory (auto-detected from environment/bot_config.json)."""
-        if self.behavior.bot is None:
-            raise RuntimeError("Cannot access workspace_directory: bot instance not set on behavior")
-        return self.behavior.bot.bot_paths.workspace_directory
+        return get_base_actions_directory(bot_directory=self.behavior.bot_paths.bot_directory)
     
     @property
     def working_dir(self) -> Path:
         """Get workspace directory where content files are created."""
-        return self.workspace_directory
+        return self.behavior.bot_paths.workspace_directory
     
     @property
     def bot_dir(self) -> Path:
         """Get bot directory where bot code lives."""
-        return self.bot_directory
+        return self.behavior.bot_paths.bot_directory
     
     
     def track_activity_on_start(self):

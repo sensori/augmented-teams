@@ -65,3 +65,5 @@ class DependencyChainingScanner(StoryScanner):
         return len(collaborator.split()) > 1
 
 
+
+

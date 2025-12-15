@@ -2,7 +2,8 @@
 
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from .validate_rules_action import ValidateRulesAction, Rule
+from .validate_rules_action import ValidateRulesAction
+from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
 from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
 
@@ -95,8 +96,8 @@ class TestValidateAction(ValidateRulesAction):
                             break
         
         # Resolve test file paths
-        project_location = content_info.get('project_location')
-        workspace_path = Path(project_location) if project_location else self.workspace_directory
+        workspace = content_info.get('workspace')
+        workspace_path = Path(workspace) if workspace else self.behavior.bot_paths.workspace_directory
         
         # Find repo root
         repo_root = None
@@ -132,7 +133,7 @@ class TestValidateAction(ValidateRulesAction):
                         resolved_path = repo_root / test_path
                         test_file_paths.append(resolved_path)
                     else:
-                        resolved_path = self.workspace_directory / test_path
+                        resolved_path = self.behavior.bot_paths.workspace_directory / test_path
                         test_file_paths.append(resolved_path)
         
         # Run scanners with story graph and test files (only TestScanner instances)

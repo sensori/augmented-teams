@@ -3,7 +3,7 @@
 from typing import Optional, Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from agile_bot.bots.base_bot.src.bot.validate_rules_action import Rule
+    from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
 
 
 class Violation:

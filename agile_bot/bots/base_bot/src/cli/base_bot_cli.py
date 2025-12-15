@@ -417,7 +417,7 @@ class BaseBotCli:
         Handles:
         - Named parameters: --key=value
         - File paths: detected automatically (including Cursor @file references)
-        - test_files and code_files parameters (supports comma-separated or space-separated)
+        - test and src parameters (supports comma-separated or space-separated)
         - Any additional context passed as positional arguments
         """
         params = {}
@@ -434,20 +434,20 @@ class BaseBotCli:
                 key, value = arg.split('=', 1)
                 key = key.lstrip('--')
                 
-                # Handle test_files and code_files - convert comma-separated to list
-                if key in ['test_files', 'code_files']:
+                # Handle test and src - convert comma-separated to list
+                if key in ['test', 'src']:
                     if ',' in value:
-                        # Comma-separated: --test_files=file1.py,file2.py
+                        # Comma-separated: --test=file1.py,file2.py
                         params[key] = [f.strip() for f in value.split(',')]
                     else:
-                        # Single file: --test_files=file1.py
+                        # Single file: --test=file1.py
                         params[key] = value
                 else:
                     params[key] = value
                 i += 1
                     
-            elif arg in ['--test_files', '--code_files']:
-                # Handle --test_files file1.py file2.py format
+            elif arg in ['--test', '--src']:
+                # Handle --test file1.py file2.py format
                 key = arg.lstrip('--')
                 file_list = []
                 i += 1

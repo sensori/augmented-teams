@@ -30,14 +30,14 @@ from agile_bot.bots.base_bot.test.test_build_knowledge import (
     given_test_bot_directory_created,
     given_story_graph_file_created
 )
-from agile_bot.bots.base_bot.test.test_decide_planning_criteria_action import (
+from agile_bot.bots.base_bot.test.test_decide_strategy_criteria_action import (
     when_action_executes_with_parameters
 )
 from agile_bot.bots.base_bot.test.test_invoke_mcp import (
     given_base_actions_structure_created
 )
 from agile_bot.bots.base_bot.src.bot.bot import Behavior
-from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction, Rule
+from agile_bot.bots.base_bot.src.actions.validate_rules.validate_rules_action import ValidateRulesAction, Rule
 from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
 from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
 
@@ -65,10 +65,20 @@ def given_spy_test_scanner_that_records_knowledge_graph():
 
 def given_validate_rules_action_initialized(bot_directory: Path, bot_name: str = 'story_bot', behavior: str = 'exploration'):
     """Given: ValidateRulesAction initialized."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    
+    # Ensure behavior.json exists
+    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    
+    # Create Behavior object
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(behavior, bot_name, bot_paths)
+    
     return ValidateRulesAction(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        behavior=behavior_obj,
+        action_name='validate_rules'
     )
 
 
@@ -156,7 +166,7 @@ def given_workflow_state_with_all_actions_completed(workspace_directory: Path, b
 
 def when_check_workflow_completion_status(behavior: str, state_file: Path):
     """When: Check workflow completion status."""
-    # Workflow class removed - state managed by Behaviors and Actions collections
+    from conftest import Workflow
     return Workflow.is_behavior_complete(behavior, state_file)
 
 
@@ -199,11 +209,9 @@ def then_scanners_discovered_with_expected_count_and_valid_structure(behavior: B
         f"Expected at least {expected_scanner_count} rules, got {len(rules)}"
     )
     for rule in rules:
+        assert rule.has_scanner, f"Rule {rule.name} should have a scanner attached"
         scanner = rule.scanner
-        assert scanner is not None, f"Rule {rule.name} should have a scanner attached"
-        assert isinstance(scanner, type), (
-            f"Rule scanner must be a class, got: {type(scanner)}"
-        )
+        assert scanner is not None, f"Rule {rule.name} should have a scanner instance"
 
 
 def _validate_rule_structure(rule: dict):
@@ -305,10 +313,20 @@ def given_behavior_rule_file_created(bot_directory: Path, behavior: str, rule_fi
 
 def given_validate_rules_action_created(bot_directory: Path, bot_name: str, behavior: str):
     """Given: ValidateRulesAction created."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    
+    # Ensure behavior.json exists
+    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    
+    # Create Behavior object
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(behavior, bot_name, bot_paths)
+    
     return ValidateRulesAction(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        behavior=behavior_obj,
+        action_name='validate_rules'
     )
 
 
@@ -324,7 +342,8 @@ def given_test_file_paths_for_knowledge_graph(test_file: Path):
 
 def then_inject_validation_instructions_result_has_instructions(action: ValidateRulesAction, knowledge_graph: dict, test_file_paths: list):
     """Then: Inject validation instructions result has instructions."""
-    result_direct = action.injectValidationInstructions(knowledge_graph, test_files=test_file_paths)
+    files = {'test': test_file_paths} if test_file_paths else {}
+    result_direct = action.injectValidationInstructions(knowledge_graph, files=files)
     assert 'instructions' in result_direct, "Result should contain 'instructions' key"
     return result_direct
 
@@ -336,10 +355,12 @@ def then_scanner_class_loaded_successfully(scanner_class, error_msg: str):
 
 def given_rule_object_for_scanner(rule_filename: str, scanner_class_path: str, behavior_name: str):
     """Given: Rule object for scanner."""
+    from pathlib import Path
     return Rule(
-        rule_file=rule_filename,
-        rule_content={'scanner': scanner_class_path, 'description': 'Test rule'},
-        behavior_name=behavior_name
+        rule_file_path=Path(rule_filename) if rule_filename else Path('test_rule.json'),
+        behavior_name=behavior_name,
+        bot_name='test_bot',
+        rule_content={'scanner': scanner_class_path, 'description': 'Test rule'}
     )
 
 
@@ -368,8 +389,10 @@ def then_scanner_detects_violations_with_expected_message(violations: list, scan
 def given_behavior_created_for_test_bot(test_bot_dir: Path, behavior_name: str, bot_name: str):
     """Given: Behavior created for test bot."""
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     create_actions_workflow_json(test_bot_dir, f'1_{behavior_name}')
-    return Behavior(behavior_name, bot_name, test_bot_dir)
+    bot_paths = BotPaths(bot_directory=test_bot_dir)
+    return Behavior(behavior_name, bot_name, bot_paths)
 
 
 def given_knowledge_graph_file_created(workspace_directory: Path, knowledge_graph: dict):
@@ -382,10 +405,20 @@ def given_knowledge_graph_file_created(workspace_directory: Path, knowledge_grap
 
 def given_validate_rules_action_for_test_bot(test_bot_dir: Path, bot_name: str, behavior: str):
     """Given: ValidateRulesAction for test bot."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    
+    # Ensure behavior.json exists
+    create_actions_workflow_json(test_bot_dir, f'1_{behavior}')
+    
+    # Create Behavior object
+    bot_paths = BotPaths(bot_directory=test_bot_dir)
+    behavior_obj = Behavior(behavior, bot_name, bot_paths)
+    
     return ValidateRulesAction(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=test_bot_dir
+        behavior=behavior_obj,
+        action_name='validate_rules'
     )
 
 

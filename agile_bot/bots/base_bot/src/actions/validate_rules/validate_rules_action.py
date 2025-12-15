@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-import importlib
 import logging
 from agile_bot.bots.base_bot.src.utils import read_json_file
 from agile_bot.bots.base_bot.src.actions.action import Action
-from agile_bot.bots.base_bot.src.scanners.scanner import Scanner
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
+from agile_bot.bots.base_bot.src.bot.rule import Rule
+from agile_bot.bots.base_bot.src.bot.rules import Rules
+from agile_bot.bots.base_bot.src.bot.scanner_loader import ScannerLoader
 
 logger = logging.getLogger(__name__)
 
@@ -27,112 +28,13 @@ class ScannerExecutionError(Exception):
         super().__init__(message)
 
 
-class Rule:
-    """Represents a validation rule with optional scanner.
-    
-    Simple rule class loaded on bot load, contains link to scanner and provides
-    property access to data like examples, descriptions, etc.
-    """
-    
-    def __init__(self, rule_file: str, rule_content: Dict[str, Any], behavior_name: str = 'common'):
-        self._name = rule_file.replace('.json', '') if rule_file else 'unknown'
-        self._rule_file = rule_file
-        self._rule_content = rule_content
-        self._behavior_name = behavior_name
-        self._scanner_class = None
-        self._scanner_error = None
-        
-        # Load scanner if present
-        scanner_path = rule_content.get('scanner')
-        if scanner_path:
-            self._scanner_class, self._scanner_error = self._load_scanner_class(scanner_path)
-    
-    @property
-    def name(self) -> str:
-        """Get rule name."""
-        return self._name
-    
-    @property
-    def rule_file(self) -> str:
-        """Get rule file path."""
-        return self._rule_file
-    
-    @property
-    def behavior_name(self) -> str:
-        """Get behavior name."""
-        return self._behavior_name
-    
-    @property
-    def scanner(self) -> Optional[type]:
-        """Get scanner class for this rule (0 or 1 scanner per rule)."""
-        return self._scanner_class
-    
-    @property
-    def description(self) -> str:
-        """Get rule description."""
-        return self._rule_content.get('description', '')
-    
-    @property
-    def examples(self) -> List[Dict[str, Any]]:
-        """Get rule examples."""
-        return self._rule_content.get('examples', [])
-    
-    @property
-    def scanner_path(self) -> Optional[str]:
-        """Get scanner module path if present."""
-        return self._rule_content.get('scanner')
-    
-    @property
-    def rule_content(self) -> Dict[str, Any]:
-        """Get full rule content dictionary."""
-        return self._rule_content
-    
-    def _load_scanner_class(self, scanner_module_path: str) -> tuple:
-        """Load scanner class from module path.
-        
-        Tries multiple locations:
-        1. Exact path specified
-        2. base_bot/src/scanners/ (if path contains bot name)
-        3. Bot's src/scanners/ (if path contains bot name)
-        
-        Validates that scanner class inherits from Scanner base class.
-        """
-        try:
-            module_path, class_name = scanner_module_path.rsplit('.', 1)
-            
-            paths_to_try = [module_path]
-            
-            scanner_name = class_name.lower().replace('scanner', '')
-            base_bot_path = f'agile_bot.bots.base_bot.src.scanners.{scanner_name}_scanner'
-            
-            if 'story_bot' in module_path or 'test_story_bot' in module_path:
-                bot_name = 'story_bot' if 'story_bot' in module_path else 'test_story_bot'
-                bot_path = f'agile_bot.bots.{bot_name}.src.scanners.{scanner_name}_scanner'
-                paths_to_try.extend([base_bot_path, bot_path])
-            else:
-                paths_to_try.append(base_bot_path)
-            
-            for path in paths_to_try:
-                try:
-                    module = importlib.import_module(path)
-                    if hasattr(module, class_name):
-                        scanner_class = getattr(module, class_name)
-                        
-                        if isinstance(scanner_class, type):
-                            if not issubclass(scanner_class, Scanner):
-                                continue
-                            if not hasattr(scanner_class, 'scan'):
-                                continue
-                            return scanner_class, None
-                except (ImportError, AttributeError, TypeError):
-                    continue
-            
-            return None, f"Scanner class not found: {scanner_module_path}"
-        except Exception as e:
-            return None, f"Error loading scanner {scanner_module_path}: {e}"
-
-
 class ValidateRulesAction(Action):
+    """Validate rules action for validating content against rules.
+    
+    Domain Model:
+        Instantiated with: Behavior
+        Properties: rules, validation_context, validation_scope
+    """
     
     def __init__(self, base_action_config=None, behavior=None, activity_tracker=None,
                  bot_name: str = None, action_name: str = 'validate_rules'):
@@ -145,6 +47,22 @@ class ValidateRulesAction(Action):
         super().__init__(base_action_config=base_action_config, behavior=behavior,
                         activity_tracker=activity_tracker, bot_name=bot_name, action_name=action_name)
         self._violations = []  # Store violations from scanner execution
+        
+        # Instantiate Rules collection
+        if self.behavior:
+            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths if self.behavior else None)
+        else:
+            self._rules = None
+    
+    @property
+    def rules(self) -> Optional[Rules]:
+        """Get Rules collection.
+        
+        Domain Model: rules: Rules
+        """
+        if self._rules is None and self.behavior:
+            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths if self.behavior else None)
+        return self._rules
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
@@ -408,6 +326,10 @@ class ValidateRulesAction(Action):
         }
     
     def inject_behavior_specific_and_bot_rules(self) -> Dict[str, Any]:
+        """Load behavior-specific and bot-level rules.
+        
+        Uses Rules collection to load rules, then converts to legacy format for backward compatibility.
+        """
         # Load action-specific instructions from base_actions
         action_instructions = []
         base_actions_path = self.base_actions_dir
@@ -419,63 +341,24 @@ class ValidateRulesAction(Action):
             config = read_json_file(config_path)
             action_instructions = config.get('instructions', [])
         
-        # Load common rules - try multiple paths
-        common_rules = []
+        # Use Rules collection to load rules
+        if not self.rules:
+            return {
+                'action_instructions': action_instructions,
+                'validation_rules': []
+            }
         
-        # Try bot's own rules directory first (for test bots)
-        bot_rules_dir = self.bot_directory / 'rules'
-        if bot_rules_dir.exists() and bot_rules_dir.is_dir():
-            for rule_file in bot_rules_dir.glob('*.json'):
-                rule_data = read_json_file(rule_file)
-                common_rules.append({
-                    'rule_file': str(rule_file.relative_to(self.bot_directory)),
-                    'rule_content': rule_data
-                })
-        
-        # Try base_bot rules directory (common/bot-level rules)
-        base_bot_rules_dir = self.bot_dir.parent / 'base_bot' / 'rules'
-        
-        if base_bot_rules_dir.exists() and base_bot_rules_dir.is_dir():
-            for rule_file in base_bot_rules_dir.glob('*.json'):
-                rule_data = read_json_file(rule_file)
-                common_rules.append({
-                    'rule_file': f'agile_bot/bots/base_bot/rules/{rule_file.name}',
-                    'rule_content': rule_data
-                })
-        
-        # Load behavior-specific rules
-        behavior_rules = []
-        
-        # Find behavior folder
-        try:
-            behavior_folder = self.behavior.find_behavior_folder()
-            # Use utility to find rules folder
-            behavior_rules_dir = behavior_folder / 'rules'
-        except FileNotFoundError:
-            behavior_rules_dir = None
-        
-        # Check for single validation_rules.json file
-        if behavior_rules_dir and behavior_rules_dir.exists():
-            behavior_file = behavior_rules_dir / 'validation_rules.json'
-            if behavior_file.exists():
-                behavior_data = read_json_file(behavior_file)
-                behavior_rules = behavior_data.get('rules', [])
-            # Otherwise load all .json files from rules directory
-            elif behavior_rules_dir.is_dir():
-                for rule_file in behavior_rules_dir.glob('*.json'):
-                    rule_data = read_json_file(rule_file)
-                    # Add the rule file content with filename as identifier
-                    behavior_rules.append({
-                        'rule_file': rule_file.name,
-                        'rule_content': rule_data
-                    })
-        
-        # Merge rules
-        all_rules = common_rules + behavior_rules
+        # Convert Rule objects to legacy dict format for backward compatibility
+        validation_rules = []
+        for rule in self.rules.iterate():
+            validation_rules.append({
+                'rule_file': rule.rule_file,
+                'rule_content': rule.rule_content
+            })
         
         return {
             'action_instructions': action_instructions,
-            'validation_rules': all_rules
+            'validation_rules': validation_rules
         }
     
     def inject_next_action_instructions(self):
@@ -535,63 +418,27 @@ class ValidateRulesAction(Action):
         Returns:
             Dictionary with 'scanners' (list of scanner classes), 'errors' (list of error messages)
         """
-        rules_data = self.inject_behavior_specific_and_bot_rules()
-        validation_rules = rules_data.get('validation_rules', [])
+        if not self.rules:
+            return {
+                'scanners': [],
+                'errors': []
+            }
         
         scanners = []
         errors = []
         
-        for rule_dict in validation_rules:
-            if isinstance(rule_dict, dict):
-                rule_content = rule_dict.get('rule_content', rule_dict)
-                scanner_path = rule_content.get('scanner')
-                if scanner_path:
-                    scanner_class, error_msg = self._load_scanner_class(scanner_path)
-                    if scanner_class:
-                        scanners.append(scanner_class)
-                    else:
-                        errors.append(error_msg)
+        for rule in self.rules.iterate():
+            scanner = rule.scanner
+            if scanner:
+                scanners.append(scanner)
+            elif rule.scanner_path:
+                # Scanner failed to load - error was already logged during Rule creation
+                errors.append(f"Scanner failed to load for rule {rule.rule_file}: {rule.scanner_path}")
         
         return {
             'scanners': scanners,
             'errors': errors
         }
-    
-    def _load_scanner_class(self, scanner_module_path: str) -> tuple:
-        """Load scanner class from module path.
-        
-        Tries multiple locations:
-        1. Exact path specified
-        2. base_bot/src/scanners/ (always checked)
-        3. Bot's src/scanners/ (if bot_name is set)
-        """
-        try:
-            module_path, class_name = scanner_module_path.rsplit('.', 1)
-            
-            paths_to_try = [module_path]
-            
-            scanner_name = class_name.lower().replace('scanner', '')
-            base_bot_path = f'agile_bot.bots.base_bot.src.scanners.{scanner_name}_scanner'
-            paths_to_try.append(base_bot_path)
-            
-            if self.bot_name and self.bot_name != 'base_bot':
-                bot_path = f'agile_bot.bots.{self.bot_name}.src.scanners.{scanner_name}_scanner'
-                paths_to_try.append(bot_path)
-            
-            for path in paths_to_try:
-                try:
-                    module = importlib.import_module(path)
-                    if hasattr(module, class_name):
-                        scanner_class = getattr(module, class_name)
-                        
-                        if isinstance(scanner_class, type) and hasattr(scanner_class, 'scan'):
-                            return scanner_class, None
-                except (ImportError, AttributeError):
-                    continue
-            
-            return None, f"Scanner class not found: {scanner_module_path}"
-        except Exception as e:
-            return None, f"Error loading scanner {scanner_module_path}: {e}"
     
     def injectValidationInstructions(self, knowledge_graph: Dict[str, Any], test_files: Optional[List[Path]] = None, code_files: Optional[List[Path]] = None) -> Dict[str, Any]:
         """Inject validation instructions with scanner results.
@@ -615,20 +462,31 @@ class ValidateRulesAction(Action):
         # TWO-PASS SYSTEM: First pass (file-by-file), then second pass (cross-file)
         processed_rules = []
         
+        # Use Rules collection to get Rule objects
+        rule_objects = []
+        if self.rules:
+            rule_objects = list(self.rules.iterate())
+        
+        # Map rule_file to Rule object for quick lookup
+        rule_by_file = {rule.rule_file: rule for rule in rule_objects}
+        
         for idx, rule_dict in enumerate(validation_rules):
             if isinstance(rule_dict, dict):
-                rule_content = rule_dict.get('rule_content', rule_dict)
-                scanner_path = rule_content.get('scanner')
-                
-                # Create Rule object for this rule
                 rule_file = rule_dict.get('rule_file', 'unknown.json')
-                behavior_name = 'common'
-                if '/behaviors/' in rule_file:
-                    parts = rule_file.split('/behaviors/')
-                    if len(parts) > 1:
-                        behavior_name = parts[1].split('/')[0]
                 
-                rule_obj = Rule(rule_file, rule_content, behavior_name)
+                # Get Rule object from collection (already has scanner loaded)
+                rule_obj = rule_by_file.get(rule_file)
+                if not rule_obj:
+                    # Fallback: create Rule object from dict (shouldn't happen if Rules collection is working)
+                    rule_content = rule_dict.get('rule_content', rule_dict)
+                    behavior_name = 'common'
+                    if '/behaviors/' in rule_file:
+                        parts = rule_file.split('/behaviors/')
+                        if len(parts) > 1:
+                            behavior_name = parts[1].split('/')[0]
+                    scanner_loader = ScannerLoader(self.bot_name)
+                    scanner = scanner_loader.load_scanner(rule_content.get('scanner')) if rule_content.get('scanner') else None
+                    rule_obj = Rule(rule_file, rule_content, behavior_name, scanner)
                 
                 rule_result = dict(rule_dict)  # Copy rule
                 
@@ -636,18 +494,15 @@ class ValidateRulesAction(Action):
                 from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
                 from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
                 
-                if scanner_path:
-                    scanner_class, error_msg = self._load_scanner_class(scanner_path)
-                    is_test_or_code_scanner = (
-                        scanner_class and (
-                            issubclass(scanner_class, TestScanner) or 
-                            issubclass(scanner_class, CodeScanner)
-                        )
+                scanner_class = rule_obj.scanner if rule_obj else None
+                scanner_path = rule_obj.scanner_path if rule_obj else None
+                
+                is_test_or_code_scanner = (
+                    scanner_class and (
+                        issubclass(scanner_class, TestScanner) or 
+                        issubclass(scanner_class, CodeScanner)
                     )
-                else:
-                    scanner_class = None
-                    error_msg = None
-                    is_test_or_code_scanner = False
+                )
                 
                 # Use two-pass format only for TestScanner and CodeScanner
                 if is_test_or_code_scanner:
@@ -659,93 +514,93 @@ class ValidateRulesAction(Action):
                     # Old format for StoryScanner and other scanners
                     rule_result['scanner_results'] = {}
                 
-                if scanner_path:
-                    if scanner_class:
-                        try:
-                            scanner_instance = scanner_class()
-                            
-                            # PASS 1: File-by-file scanning (current behavior)
-                            logger.info(f"Running file-by-file scan for rule: {rule_file}")
-                            violations_file_by_file = scanner_instance.scan(
-                                knowledge_graph, 
+                if scanner_path and scanner_class:
+                    try:
+                        scanner_instance = scanner_class()
+                        
+                        # PASS 1: File-by-file scanning (current behavior)
+                        logger.info(f"Running file-by-file scan for rule: {rule_file}")
+                        violations_file_by_file = scanner_instance.scan(
+                            knowledge_graph, 
+                            rule_obj=rule_obj,
+                            test_files=test_files,
+                            code_files=code_files
+                        )
+                        violations_list_file = violations_file_by_file if isinstance(violations_file_by_file, list) else []
+                        
+                        # Convert violations to dictionaries
+                        violations_dicts_file = []
+                        for violation in violations_list_file:
+                            if isinstance(violation, Violation):
+                                violation_dict = violation.to_dict()
+                                violations_dicts_file.append(violation_dict)
+                            elif isinstance(violation, dict):
+                                if 'rule' not in violation:
+                                    violation['rule'] = rule_obj.name
+                                if 'rule_file' not in violation:
+                                    violation['rule_file'] = rule_obj.rule_file
+                                violations_dicts_file.append(violation)
+                        
+                        # Store violations based on scanner type
+                        self._violations.extend(violations_dicts_file)
+                        
+                        if is_test_or_code_scanner:
+                            # Two-pass format
+                            rule_result['scanner_results']['file_by_file']['violations'] = violations_dicts_file
+                        else:
+                            # Old format (for StoryScanner and others)
+                            rule_result['scanner_results']['violations'] = violations_dicts_file
+                        
+                        # PASS 2: Cross-file scanning (ONLY for TestScanner and CodeScanner)
+                        if is_test_or_code_scanner and (test_files or code_files) and hasattr(scanner_instance, 'scan_cross_file'):
+                            logger.info(f"Running cross-file scan for rule: {rule_file}")
+                            violations_cross_file = scanner_instance.scan_cross_file(
                                 rule_obj=rule_obj,
                                 test_files=test_files,
                                 code_files=code_files
                             )
-                            violations_list_file = violations_file_by_file if isinstance(violations_file_by_file, list) else []
+                            violations_list_cross = violations_cross_file if isinstance(violations_cross_file, list) else []
                             
                             # Convert violations to dictionaries
-                            violations_dicts_file = []
-                            for violation in violations_list_file:
+                            violations_dicts_cross = []
+                            for violation in violations_list_cross:
                                 if isinstance(violation, Violation):
                                     violation_dict = violation.to_dict()
-                                    violations_dicts_file.append(violation_dict)
+                                    violations_dicts_cross.append(violation_dict)
                                 elif isinstance(violation, dict):
                                     if 'rule' not in violation:
                                         violation['rule'] = rule_obj.name
                                     if 'rule_file' not in violation:
                                         violation['rule_file'] = rule_obj.rule_file
-                                    violations_dicts_file.append(violation)
+                                    # Mark as cross-file violation
+                                    violation['_pass'] = 'cross_file'
+                                    violations_dicts_cross.append(violation)
                             
-                            # Store violations based on scanner type
-                            self._violations.extend(violations_dicts_file)
-                            
-                            if is_test_or_code_scanner:
-                                # Two-pass format
-                                rule_result['scanner_results']['file_by_file']['violations'] = violations_dicts_file
-                            else:
-                                # Old format (for StoryScanner and others)
-                                rule_result['scanner_results']['violations'] = violations_dicts_file
-                            
-                            # PASS 2: Cross-file scanning (ONLY for TestScanner and CodeScanner)
-                            if is_test_or_code_scanner and (test_files or code_files) and hasattr(scanner_instance, 'scan_cross_file'):
-                                logger.info(f"Running cross-file scan for rule: {rule_file}")
-                                violations_cross_file = scanner_instance.scan_cross_file(
-                                    rule_obj=rule_obj,
-                                    test_files=test_files,
-                                    code_files=code_files
-                                )
-                                violations_list_cross = violations_cross_file if isinstance(violations_cross_file, list) else []
-                                
-                                # Convert violations to dictionaries
-                                violations_dicts_cross = []
-                                for violation in violations_list_cross:
-                                    if isinstance(violation, Violation):
-                                        violation_dict = violation.to_dict()
-                                        violations_dicts_cross.append(violation_dict)
-                                    elif isinstance(violation, dict):
-                                        if 'rule' not in violation:
-                                            violation['rule'] = rule_obj.name
-                                        if 'rule_file' not in violation:
-                                            violation['rule_file'] = rule_obj.rule_file
-                                        # Mark as cross-file violation
-                                        violation['_pass'] = 'cross_file'
-                                        violations_dicts_cross.append(violation)
-                                
-                                # Store cross-file violations separately
-                                self._violations.extend(violations_dicts_cross)
-                                rule_result['scanner_results']['cross_file']['violations'] = violations_dicts_cross
-                            
-                        except Exception as e:
-                            # Log the error for debugging
-                            logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
-                            
-                            # Raise exception with context - don't swallow scanner crashes
-                            rule_file = rule_dict.get('rule_file', 'unknown')
-                            scanner_path = rule_content.get('scanner', 'unknown')
-                            raise ScannerExecutionError(rule_file, scanner_path, e) from e
+                            # Store cross-file violations separately
+                            self._violations.extend(violations_dicts_cross)
+                            rule_result['scanner_results']['cross_file']['violations'] = violations_dicts_cross
+                    
+                    except Exception as e:
+                        # Log the error for debugging
+                        logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
+                        
+                        # Raise exception with context - don't swallow scanner crashes
+                        rule_file = rule_dict.get('rule_file', 'unknown')
+                        scanner_path = rule_obj.scanner_path if rule_obj else 'unknown'
+                        raise ScannerExecutionError(rule_file, scanner_path, e) from e
+                elif scanner_path and not scanner_class:
+                    # Error loading scanner - use appropriate format
+                    error_msg = f"Scanner failed to load: {scanner_path}"
+                    if is_test_or_code_scanner:
+                        rule_result['scanner_results'] = {
+                            'file_by_file': {'violations': [], 'error': error_msg},
+                            'cross_file': {'violations': []}
+                        }
                     else:
-                        # Error loading scanner - use appropriate format
-                        if is_test_or_code_scanner:
-                            rule_result['scanner_results'] = {
-                                'file_by_file': {'violations': [], 'error': error_msg},
-                                'cross_file': {'violations': []}
-                            }
-                        else:
-                            rule_result['scanner_results'] = {
-                                'violations': [],
-                                'error': error_msg
-                            }
+                        rule_result['scanner_results'] = {
+                            'violations': [],
+                            'error': error_msg
+                        }
                 
                 processed_rules.append(rule_result)
         

@@ -88,7 +88,7 @@ class RenderOutputAction(Action):
         for render_json_file in render_json_files:
             try:
                 config_data = read_json_file(render_json_file)
-                render_spec = RenderSpec(config_data, render_folder, self.bot_directory, render_json_file)
+                render_spec = RenderSpec(config_data, render_folder, self.behavior.bot_paths, render_json_file)
                 self._render_specs.append(render_spec)
             except Exception as e:
                 logger.warning(f'Skipping unreadable render JSON file {render_json_file}: {e}')
@@ -153,7 +153,7 @@ class RenderOutputAction(Action):
             return None
         
         config_entry = {
-            'file': str(render_json_file.relative_to(self.bot_directory)),
+            'file': str(render_json_file.relative_to(self.behavior.bot_paths.bot_directory)),
             'config': config
         }
         
@@ -233,7 +233,8 @@ class RenderOutputAction(Action):
         
         # Add workspace path information to instructions
         workspace_path = self.working_dir
-        if workspace_path and workspace_path != self.bot_directory:
+        bot_directory = self.behavior.bot_paths.bot_directory
+        if workspace_path and workspace_path != bot_directory:
             workspace_info = f"\n**WORKSPACE PATH: {workspace_path}**\nAll render outputs must be written to paths relative to this workspace path, NOT to the bot's own directories."
             base_instructions_list.insert(0, workspace_info)
         
@@ -250,7 +251,7 @@ class RenderOutputAction(Action):
         if render_configs:
             instructions['render_configs'] = render_configs
         
-        if workspace_path and workspace_path != self.bot_directory:
+        if workspace_path and workspace_path != bot_directory:
             instructions['workspace_path'] = str(workspace_path)
     
     def _inject_render_template_variables(self, instructions_list: List[str], render_instructions: Optional[Dict[str, Any]], render_configs: List[Dict[str, Any]]) -> None:

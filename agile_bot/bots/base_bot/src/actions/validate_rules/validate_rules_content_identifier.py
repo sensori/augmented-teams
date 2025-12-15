@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from agile_bot.bots.base_bot.src.utils import read_json_file
+from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
 
 
 class ContentIdentifier:
@@ -9,40 +10,36 @@ class ContentIdentifier:
     Finds rendered outputs, clarification files, planning files, and sets report path.
     """
     
-    def __init__(self, bot_directory: Path, bot_name: str, behavior: str, workspace_directory: Path, documentation_path: Path = None):
+    def __init__(self, bot_paths: BotPaths, bot_name: str, behavior: str):
         """Initialize ContentIdentifier.
         
         Args:
-            bot_directory: Directory where bot code lives
+            bot_paths: BotPaths instance for accessing paths
             bot_name: Name of the bot
             behavior: Name of the behavior
-            workspace_directory: Workspace directory where content files are located
-            documentation_path: Path to documentation directory (relative to workspace), defaults to 'docs/stories'
         """
-        self.bot_directory = bot_directory
+        self._bot_paths = bot_paths
         self.bot_name = bot_name
         self.behavior = behavior
-        self.workspace_directory = workspace_directory
-        self._documentation_path = documentation_path or Path('docs/stories')
     
     def identify_content(self) -> Dict[str, Any]:
         """Identify what content needs to be validated from the project.
         
         Returns:
-            Dictionary with project_location, rendered_outputs, clarification_file,
+            Dictionary with workspace, rendered_outputs, clarification_file,
             planning_file, and report_path
         """
-        project_dir = self.workspace_directory
+        workspace_directory = self._bot_paths.workspace_directory
         content_info = {
-            'project_location': str(project_dir),
+            'workspace': str(workspace_directory),
             'rendered_outputs': [],
             'clarification_file': None,
             'planning_file': None,
             'report_path': None
         }
         
-        docs_path = self._find_docs_path()
-        docs_dir = project_dir / docs_path
+        docs_path = self._bot_paths.documentation_path
+        docs_dir = workspace_directory / docs_path
         
         self._find_clarification_and_planning(docs_dir, content_info)
         self._set_report_path(docs_dir, content_info)
@@ -50,9 +47,6 @@ class ContentIdentifier:
         
         return content_info
     
-    def _find_docs_path(self) -> Path:
-        """Get docs_path from configured documentation path."""
-        return self._documentation_path
     
     def _find_clarification_and_planning(self, docs_dir: Path, content_info: Dict[str, Any]) -> None:
         """Find clarification.json and planning.json files."""

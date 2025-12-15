@@ -26,3 +26,5 @@ class Synchronizer:
         """Get synchronizer class path."""
         return self._synchronizer_class_path
 
+
+

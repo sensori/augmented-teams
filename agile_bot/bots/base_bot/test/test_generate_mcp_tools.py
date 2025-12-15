@@ -1391,15 +1391,13 @@ class TestRestartMCPServerToLoadCodeChanges:
         # Then: Processes list is valid (may be empty if no servers running)
         then_processes_list_is_valid(processes)
 
-
-
-
+    async def test_behavior_tool_forwards_invocation(self, workspace_root):
+        """
+        SCENARIO: Behavior Tool Forwards Invocation
+        GIVEN: A bot configuration file with a working directory and behaviors
         AND: A bot that has been initialized with that config file
-
         WHEN: Generator registers behavior tool with FastMCP
-
         THEN: Behavior tool forwards invocation to Bot.execute_behavior() (production code path)
-
         """
 
         # Given: A bot configuration file with a working directory and behaviors
@@ -1936,7 +1934,7 @@ class TestRestartMCPServerToLoadCodeChanges:
 
         Note: This test requires actual MCP server to be running to be meaningful.
 
-        For now, just tests the function doesn't crash.
+        For now, just tests the function doesn\'t crash.
 
         """
 

@@ -105,6 +105,10 @@ def create_guardrails_files(bot_dir: Path, behavior: str, questions: list, evide
     return questions_file, evidence_file
 
 def create_planning_guardrails(bot_dir: Path, behavior: str, assumptions: list, criteria: dict) -> tuple:
+    """Create planning guardrails (alias for create_strategy_guardrails for backward compatibility)."""
+    return create_strategy_guardrails(bot_dir, behavior, assumptions, criteria)
+
+def create_strategy_guardrails(bot_dir: Path, behavior: str, assumptions: list, criteria: dict) -> tuple:
     """Create planning guardrails in behavior folder."""
     guardrails_dir = get_behavior_dir(bot_dir, behavior) / 'guardrails' / 'planning'
     guardrails_dir.mkdir(parents=True, exist_ok=True)

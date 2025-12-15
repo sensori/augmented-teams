@@ -21,12 +21,13 @@ from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
 from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
 from conftest import (
     bootstrap_env, create_workflow_state_file, create_bot_config_file, 
-    create_test_workflow, given_bot_name_and_behavior_setup, given_bot_name_and_behaviors_setup
+    create_test_workflow, given_bot_name_and_behavior_setup, given_bot_name_and_behaviors_setup,
+    Workflow
 )
 from agile_bot.bots.base_bot.test.test_helpers import (
-    bootstrap_env as test_helpers_bootstrap_env, read_activity_log, create_activity_log_file,
+    bootstrap_env, read_activity_log, create_activity_log_file,
     create_actions_workflow_json, create_behavior_folder, create_behavior_folder_with_json,
-    get_workflow_state_path, given_bot_name_and_behavior_setup as test_helpers_given_bot_name_and_behavior_setup
+    get_workflow_state_path, given_bot_name_and_behavior_setup
 )
 from agile_bot.bots.base_bot.test.test_helpers import (
     when_bot_is_created, create_base_instructions, given_bot_instance_created
@@ -199,7 +200,7 @@ def given_story_graph_file_exists(workspace_directory: Path):
 
 def given_environment_setup_for_final_action_test(bot_directory: Path, workspace_directory: Path, behaviors: list):
     """Given: Environment setup for final action test."""
-    test_helpers_bootstrap_env(bot_directory, workspace_directory)
+    bootstrap_env(bot_directory, workspace_directory)
     create_bot_config_file(bot_directory, 'story_bot', behaviors)
     given_behavior_workflow_with_validate_rules_as_final(bot_directory, 'shape')
     given_base_action_instructions_exist_for_validate_rules(bot_directory)
@@ -209,7 +210,7 @@ def given_environment_setup_for_final_action_test(bot_directory: Path, workspace
 
 def given_environment_setup_for_non_final_action_test(bot_directory: Path, workspace_directory: Path, behaviors: list):
     """Given: Environment setup for non-final action test."""
-    test_helpers_bootstrap_env(bot_directory, workspace_directory)
+    bootstrap_env(bot_directory, workspace_directory)
     create_bot_config_file(bot_directory, 'story_bot', behaviors)
     given_standard_workflow_states(bot_directory)
     given_base_action_instructions_exist_for_validate_rules_not_final(bot_directory)
@@ -219,7 +220,7 @@ def given_environment_setup_for_non_final_action_test(bot_directory: Path, works
 
 def given_environment_setup_for_last_behavior_test(bot_directory: Path, workspace_directory: Path, behaviors: list):
     """Given: Environment setup for last behavior test."""
-    test_helpers_bootstrap_env(bot_directory, workspace_directory)
+    bootstrap_env(bot_directory, workspace_directory)
     create_bot_config_file(bot_directory, 'story_bot', behaviors)
     # Create behavior.json with render_output as final action
     create_actions_workflow_json(

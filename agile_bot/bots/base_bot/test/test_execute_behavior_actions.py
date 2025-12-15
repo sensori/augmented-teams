@@ -11,6 +11,7 @@ For functions used across multiple epics, see test_helpers.py.
 """
 import json
 from pathlib import Path
+from conftest import Workflow
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
     create_activity_log_file,
@@ -31,11 +32,32 @@ def verify_action_tracks_start(bot_dir: Path, workspace_dir: Path, action_class,
     bootstrap_env(bot_dir, workspace_dir)
     create_activity_log_file(workspace_dir)
     
-    # Create action (no workspace_root parameter)
+    # Create mock behavior object
+    from types import SimpleNamespace
+    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+    
+    class MockBotPaths:
+        def __init__(self, bot_dir, workspace_dir):
+            self.bot_directory = bot_dir
+            self.workspace_directory = workspace_dir
+    
+    behavior_folder = bot_dir / 'behaviors' / behavior
+    behavior_obj = SimpleNamespace()
+    behavior_obj.folder = behavior_folder
+    behavior_obj.name = behavior
+    behavior_obj.bot_name = bot_name
+    behavior_obj.bot_paths = MockBotPaths(bot_dir, workspace_dir)
+    behavior_obj.bot = None
+    
+    # Create activity tracker
+    activity_tracker = ActivityTracker(workspace_dir, bot_name)
+    
+    # Create action using old signature (bot_name, behavior, action_name)
     action = action_class(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir
+        behavior=behavior_obj,
+        action_name=action_name,
+        activity_tracker=activity_tracker
     )
     action.track_activity_on_start()
     
@@ -54,11 +76,32 @@ def verify_action_tracks_completion(bot_dir: Path, workspace_dir: Path, action_c
     bootstrap_env(bot_dir, workspace_dir)
     create_activity_log_file(workspace_dir)
     
-    # Create action (no workspace_root parameter)
+    # Create mock behavior object
+    from types import SimpleNamespace
+    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+    
+    class MockBotPaths:
+        def __init__(self, bot_dir, workspace_dir):
+            self.bot_directory = bot_dir
+            self.workspace_directory = workspace_dir
+    
+    behavior_folder = bot_dir / 'behaviors' / behavior
+    behavior_obj = SimpleNamespace()
+    behavior_obj.folder = behavior_folder
+    behavior_obj.name = behavior
+    behavior_obj.bot_name = bot_name
+    behavior_obj.bot_paths = MockBotPaths(bot_dir, workspace_dir)
+    behavior_obj.bot = None
+    
+    # Create activity tracker
+    activity_tracker = ActivityTracker(workspace_dir, bot_name)
+    
+    # Create action using old signature (bot_name, behavior, action_name)
     action = action_class(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir
+        behavior=behavior_obj,
+        action_name=action_name,
+        activity_tracker=activity_tracker
     )
     action.track_activity_on_completion(
         outputs=outputs or {},
@@ -160,11 +203,22 @@ def then_completed_actions_include(workflow_file: Path, expected_action_states: 
 
 def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create ValidateRulesAction instance."""
-    from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+    from agile_bot.bots.base_bot.src.actions.validate_rules.validate_rules_action import ValidateRulesAction
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    
+    # Ensure behavior.json exists
+    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    
+    # Create Behavior object
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(behavior, bot_name, bot_paths)
+    
     return ValidateRulesAction(
         bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        behavior=behavior_obj,
+        action_name='validate_rules'
     )
 
 
@@ -195,6 +249,30 @@ def _create_gather_context_action(bot_name: str, behavior: str, bot_directory: P
             }
         }
         behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
+    # Create guardrails files if they don't exist (required by GatherContextAction and Guardrails)
+    # Required context files
+    guardrails_dir = behavior_dir / 'guardrails' / 'required_context'
+    guardrails_dir.mkdir(parents=True, exist_ok=True)
+    questions_file = guardrails_dir / 'key_questions.json'
+    if not questions_file.exists():
+        questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
+    evidence_file = guardrails_dir / 'evidence.json'
+    if not evidence_file.exists():
+        evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
+    
+    # Strategy guardrails files (required by Guardrails.Strategy)
+    strategy_dir = behavior_dir / 'guardrails' / 'strategy'
+    strategy_dir.mkdir(parents=True, exist_ok=True)
+    assumptions_file = strategy_dir / 'typical_assumptions.json'
+    if not assumptions_file.exists():
+        assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
+    recommended_activities_file = strategy_dir / 'recommended_activities.json'
+    if not recommended_activities_file.exists():
+        recommended_activities_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
+    # StrategyCriterias loads from decision_criteria folder, create empty folder
+    decision_criteria_dir = strategy_dir / 'decision_criteria'
+    decision_criteria_dir.mkdir(parents=True, exist_ok=True)
     
     # Create proper Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)

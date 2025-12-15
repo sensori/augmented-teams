@@ -31,7 +31,8 @@ from agile_bot.bots.base_bot.test.test_helpers import update_bot_config_with_wor
 
 
 # Removed create_behavior_folder - use test_helpers.create_behavior_folder instead
-# Already imported from test_helpers at top of file
+from agile_bot.bots.base_bot.test.test_helpers import create_behavior_folder
+
 def create_behavior_folder_duplicate_removed(bot_directory: Path, behavior_name: str):
     """Helper: Create behavior folder structure with behavior.json."""
     behavior_dir = bot_directory / 'behaviors' / behavior_name

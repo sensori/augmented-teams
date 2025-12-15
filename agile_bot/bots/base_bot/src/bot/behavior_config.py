@@ -32,8 +32,7 @@ class BehaviorConfig:
 
         self.behavior_name = behavior_name
         self.bot_paths = bot_paths
-        self.bot_directory = bot_paths.bot_directory
-        self.behavior_directory = self.bot_directory / "behaviors" / behavior_name
+        self.behavior_directory = self.bot_paths.bot_directory / "behaviors" / behavior_name
         self.config_path = self.behavior_directory / "behavior.json"
 
         if not self.config_path.exists():

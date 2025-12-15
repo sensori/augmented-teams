@@ -92,3 +92,5 @@ class DomainLanguageCodeScanner(CodeScanner):
         return len(name.split()) > 1 or name.lower() not in ['data', 'config', 'parameter', 'result']
 
 
+
+

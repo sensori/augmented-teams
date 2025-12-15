@@ -197,10 +197,45 @@ def given_bot_name_behavior_and_action_setup():
 
 def when_create_gather_context_action(bot_name: str, behavior: str, bot_directory: Path):
     """When: Create gather context action."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    
+    # Create bot_paths
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    
+    # Ensure behavior.json exists
+    import json
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_file = behavior_dir / 'behavior.json'
+    if not behavior_file.exists():
+        behavior_config = {
+            "behaviorName": behavior,
+            "description": f"Test behavior: {behavior}",
+            "goal": f"Test goal for {behavior}",
+            "inputs": "Test inputs",
+            "outputs": "Test outputs",
+            "instructions": {},
+            "actions_workflow": {
+                "actions": [
+                    {'name': 'gather_context', 'order': 1}
+                ]
+            }
+        }
+        behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
+    # Create Behavior object
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    
+    # Create BaseActionConfig
+    base_action_config = BaseActionConfig('gather_context', bot_paths)
+    
+    # Create GatherContextAction with correct signature
     action_obj = GatherContextAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None
     )
     return action_obj
 

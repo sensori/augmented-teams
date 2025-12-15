@@ -1,0 +1,1 @@
+{"name": "render_output", "workflow": true, "order": 5, "instructions": ["Render story map documents", "Render domain model documents"]}

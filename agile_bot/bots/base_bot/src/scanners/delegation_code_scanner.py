@@ -64,3 +64,5 @@ class DelegationCodeScanner(CodeScanner):
         return (name_lower.endswith('s') and len(name_lower) > 3) or 'collection' in name_lower or 'list' in name_lower
 
 
+
+

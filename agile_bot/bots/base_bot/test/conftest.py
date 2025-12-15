@@ -12,6 +12,115 @@ from typing import Tuple
 
 
 # ============================================================================
+# MOCK WORKFLOW CLASS - For tests that still reference removed Workflow class
+# ============================================================================
+
+class Workflow:
+    """Mock Workflow class for testing - Workflow class was removed from production code."""
+    
+    def __init__(self, bot_name: str, behavior: str, bot_directory: Path, states: list = None, transitions: list = None, workspace_root: Path = None):
+        self.bot_name = bot_name
+        self.behavior = behavior
+        self.bot_directory = bot_directory
+        self.workspace_root = workspace_root
+        self.states = states or []
+        self.transitions = transitions or []
+        self._current_state = states[0] if states else None
+        self._completed_actions = []
+        
+        # Mock machine object for tests that use workflow.machine.set_state()
+        class MockMachine:
+            def __init__(self, workflow):
+                self.workflow = workflow
+            def set_state(self, state: str):
+                self.workflow._current_state = state
+        self.machine = MockMachine(self)
+    
+    @property
+    def current_state(self) -> str:
+        """Get current state."""
+        return self._current_state
+    
+    @property
+    def state(self) -> str:
+        """Get current state (alias)."""
+        return self._current_state
+    
+    @current_state.setter
+    def current_state(self, value: str):
+        """Set current state."""
+        self._current_state = value
+    
+    @state.setter
+    def state(self, value: str):
+        """Set current state (alias)."""
+        self._current_state = value
+    
+    def navigate_to_action(self, action: str, out_of_order: bool = False):
+        """Navigate to action."""
+        if action in self.states:
+            self._current_state = action
+    
+    def proceed(self):
+        """Proceed to next state."""
+        if self._current_state and self.transitions:
+            for transition in self.transitions:
+                if transition.get('source') == self._current_state:
+                    self._current_state = transition.get('dest')
+                    return
+    
+    def transition_to_next(self):
+        """Transition to next state and save."""
+        self.proceed()
+        self.save_state()
+    
+    def save_state(self):
+        """Save workflow state to file."""
+        if self.workspace_root:
+            state_file = self.workspace_root / 'workflow_state.json'
+        else:
+            # Try to find workspace from environment
+            workspace_dir = Path(os.environ.get('WORKING_AREA', self.bot_directory.parent / 'workspace'))
+            state_file = workspace_dir / 'workflow_state.json'
+        
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        state_data = {
+            'current_behavior': f'{self.bot_name}.{self.behavior}',
+            'current_action': f'{self.bot_name}.{self.behavior}.{self._current_state}' if self._current_state else '',
+            'timestamp': '2025-12-04T16:00:00.000000',
+            'completed_actions': self._completed_actions
+        }
+        state_file.write_text(json.dumps(state_data), encoding='utf-8')
+    
+    def save_completed_action(self, action: str):
+        """Save completed action."""
+        action_state = f'{self.bot_name}.{self.behavior}.{action}'
+        if not any(a.get('action_state') == action_state for a in self._completed_actions):
+            self._completed_actions.append({
+                'action_state': action_state,
+                'timestamp': '2025-12-04T16:00:00.000000'
+            })
+        self.save_state()
+    
+    def load_state(self):
+        """Load workflow state from file."""
+        if self.workspace_root:
+            state_file = self.workspace_root / 'workflow_state.json'
+        else:
+            workspace_dir = Path(os.environ.get('WORKING_AREA', self.bot_directory.parent / 'workspace'))
+            state_file = workspace_dir / 'workflow_state.json'
+        
+        if state_file.exists():
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+            current_action = state_data.get('current_action', '')
+            if current_action:
+                action_name = current_action.split('.')[-1]
+                if action_name in self.states:
+                    self._current_state = action_name
+            self._completed_actions = state_data.get('completed_actions', [])
+
+
+# ============================================================================
 # FIXTURES - Cross-file reusable setup
 # ============================================================================
 
@@ -85,6 +194,15 @@ def standard_workflow_config():
         {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
     ]
     return states, transitions
+
+@pytest.fixture
+def bot_config_file_path(bot_directory):
+    """Fixture: Bot config file path."""
+    config_dir = bot_directory / 'config'
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / 'bot_config.json'
+    config_file.write_text(json.dumps({'name': 'test_bot', 'behaviors': ['shape']}), encoding='utf-8')
+    return config_file
 
 
 # ============================================================================

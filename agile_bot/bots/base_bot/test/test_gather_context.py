@@ -266,6 +266,30 @@ def given_gather_context_action_is_initialized(bot_directory: Path, bot_name: st
     }
     behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
+    # Create guardrails files if they don't exist (required by GatherContextAction and Guardrails)
+    # Required context files
+    guardrails_dir = behavior_dir / 'guardrails' / 'required_context'
+    guardrails_dir.mkdir(parents=True, exist_ok=True)
+    questions_file = guardrails_dir / 'key_questions.json'
+    if not questions_file.exists():
+        questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
+    evidence_file = guardrails_dir / 'evidence.json'
+    if not evidence_file.exists():
+        evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
+    
+    # Strategy guardrails files (required by Guardrails.Strategy)
+    strategy_dir = behavior_dir / 'guardrails' / 'strategy'
+    strategy_dir.mkdir(parents=True, exist_ok=True)
+    assumptions_file = strategy_dir / 'typical_assumptions.json'
+    if not assumptions_file.exists():
+        assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
+    recommended_activities_file = strategy_dir / 'recommended_activities.json'
+    if not recommended_activities_file.exists():
+        recommended_activities_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
+    # StrategyCriterias loads from decision_criteria folder, create empty folder
+    decision_criteria_dir = strategy_dir / 'decision_criteria'
+    decision_criteria_dir.mkdir(parents=True, exist_ok=True)
+    
     # Create Behavior object
     behavior = Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
     

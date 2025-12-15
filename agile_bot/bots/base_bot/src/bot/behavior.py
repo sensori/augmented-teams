@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
 from agile_bot.bots.base_bot.src.actions.guardrails import Guardrails
 from agile_bot.bots.base_bot.src.actions.content import Content
-from agile_bot.bots.base_bot.src.bot.rules import Rules
+from agile_bot.bots.base_bot.src.actions.validate_rules.rules import Rules
 from agile_bot.bots.base_bot.src.actions.actions import Actions
 from agile_bot.bots.base_bot.src.bot.trigger_words import TriggerWords
 from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
@@ -47,7 +47,7 @@ class Behavior:
         # Instantiate collaborators (per domain model)
         self.guardrails = Guardrails(self.behavior_config)
         self.content = Content(self.behavior_config)
-        self.rules_collection = Rules(self)
+        self.rules_collection = Rules(behavior=self, bot_paths=self.bot_paths)
         self.actions = Actions(self.behavior_config, self)
         self.trigger_words = TriggerWords(self.behavior_config)
 
@@ -58,12 +58,48 @@ class Behavior:
 
     @property
     def rules(self):
-        """Get all rules for this behavior (delegated to Rules collection)."""
-        return self.rules_collection.all()
+        """Get all rules for this behavior (delegated to Rules collection).
+        
+        Domain Model: rules: Rules
+        """
+        return list(self.rules_collection.iterate())
 
     def matches_trigger(self, text: str) -> bool:
         """Determine if provided text matches configured trigger words/patterns."""
         return self.trigger_words.matches(text)
+    
+    @staticmethod
+    def find_behavior_folder(bot_directory: Path, bot_name: str, behavior_name: str) -> Path:
+        """Find behavior folder by name, handling numbered prefixes.
+        
+        Args:
+            bot_directory: Bot directory path
+            bot_name: Bot name (unused, kept for compatibility)
+            behavior_name: Behavior name (e.g., 'shape', 'discovery')
+            
+        Returns:
+            Path to behavior folder (e.g., '1_shape', '5_exploration')
+            
+        Raises:
+            FileNotFoundError: If behavior folder not found
+        """
+        behaviors_dir = bot_directory / 'behaviors'
+        if not behaviors_dir.exists():
+            raise FileNotFoundError(f"Behavior folder not found: {behavior_name}")
+        
+        # First try exact match
+        exact_folder = behaviors_dir / behavior_name
+        if exact_folder.exists() and exact_folder.is_dir():
+            return exact_folder
+        
+        # Then try numbered prefix (e.g., '1_shape' for 'shape')
+        for folder in behaviors_dir.iterdir():
+            if folder.is_dir():
+                # Check if folder name ends with behavior_name (e.g., '1_shape' ends with 'shape')
+                if folder.name.endswith(f'_{behavior_name}') or folder.name == behavior_name:
+                    return folder
+        
+        raise FileNotFoundError(f"Behavior folder not found: {behavior_name}")
 
     # ============================================================================
     # LEGACY METHODS - Not in domain model, kept for refactoring reference

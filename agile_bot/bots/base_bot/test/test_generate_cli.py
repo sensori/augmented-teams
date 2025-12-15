@@ -44,6 +44,7 @@ from agile_bot.bots.base_bot.test.test_generate_mcp_tools import (
     then_permission_error_raised_with_bot_specific_path,
     then_rules_directory_and_file_exist,
     then_awareness_file_contains_required_sections,
+    generator,  # Import generator fixture
 )
 
 # Use shared helpers from conftest

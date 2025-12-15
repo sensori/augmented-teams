@@ -8,7 +8,7 @@ Tests for all stories in the 'Render Output' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.bot.render_output_action import RenderOutputAction
+from agile_bot.bots.base_bot.src.actions.render_output.render_output_action import RenderOutputAction
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
     create_activity_log_file,
