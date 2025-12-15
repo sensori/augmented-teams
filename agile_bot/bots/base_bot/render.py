@@ -8,3 +8,5 @@ result = diagram.render_increments(output_path=Path('docs/stories/story-map-incr
 print(f'Generated: {result["output_path"]}')
 print(f'Epics: {result["summary"]["epics"]}, Increments: {result["summary"]["increments"]}, Stories: {result["summary"]["stories"]}')
 
+
+

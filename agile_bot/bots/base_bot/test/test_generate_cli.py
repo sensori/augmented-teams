@@ -232,3 +232,5 @@ class TestGenerateCursorAwarenessFiles:
         # And: Rules file has all required sections
         then_awareness_file_contains_required_sections(rules_file, 'test_bot')
 
+
+

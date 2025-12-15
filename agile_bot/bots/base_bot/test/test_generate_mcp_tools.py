@@ -1383,3 +1383,565 @@ class TestRestartMCPServerToLoadCodeChanges:
 
 
 
+
+        AND: A bot that has been initialized with that config file
+
+        WHEN: Generator registers behavior tool with FastMCP
+
+        THEN: Behavior tool forwards invocation to Bot.execute_behavior() (production code path)
+
+        """
+
+        # Given: A bot configuration file with a working directory and behaviors
+
+        bot_name, behavior, action = given_test_bot_behavior_and_action()
+
+        bot_config, bot_dir = given_bot_config_and_dir_for_single_behavior(workspace_root, bot_name, behavior)
+
+        # And: Behavior workflow file exists
+
+        given_behavior_workflow_files_exist_for_behaviors(bot_dir, [behavior])
+
+        # And: A bot that has been initialized with that config file
+
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+
+        
+
+        # Base actions structure and instructions already created by given_bot_configured_by_config
+
+        # Behavior workflow file already created above
+
+        
+
+        # And: Workflow state exists
+
+        given_workflow_state_exists(workspace_directory, bot_name, behavior, action)
+
+        
+
+        # When: Generator registers behavior tool with FastMCP
+
+        generator, mcp_server = when_generator_registers_all_behavior_action_tools(bot_dir)
+
+        
+
+        # Then: Behavior tool registered and callable through FastMCP
+
+        tool = when_find_behavior_tool_in_registered_tools(generator, behavior)
+
+        
+
+        # And: Behavior tool forwards invocation to Bot.execute_behavior() (production code path)
+
+        # Test tool invocation through FastMCP client with action parameter
+
+        # This calls the REAL bot.execute_behavior() method
+
+        result = await when_invoke_behavior_tool_with_action(mcp_server, tool, action)
+
+        then_behavior_tool_execution_succeeds(result, behavior, action)
+
+
+
+
+
+class TestDeployMCPBotServer:
+
+    """Story: Deploy MCP Bot Server - Tests server deployment."""
+
+
+
+    def test_generator_deploys_server_successfully(self, workspace_root):
+
+        """
+
+        SCENARIO: Generator Deploys Server Successfully
+
+        GIVEN: A bot configuration file with a working directory and behaviors
+
+        AND: Behavior workflow files exist for all behaviors
+
+        AND: A bot that has been initialized with that config file
+
+        WHEN: Generator deploys MCP Server
+
+        THEN: Server initializes and publishes tool catalog
+
+        """
+
+        # Given: A bot configuration file with a working directory and behaviors
+
+        bot_name, behaviors = given_bot_name_and_behaviors_setup()
+
+        config_file, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
+
+        create_base_server_template(workspace_root)
+
+        # And: Behavior workflow files exist for all behaviors
+
+        given_behavior_workflow_files_exist_for_behaviors(bot_dir, behaviors)
+
+        # And: A bot that has been initialized with that config file
+
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+
+        
+
+        # When: Generator deploys MCP Server
+
+        deployment_result = when_server_deployer_deploys(config_file, workspace_root)
+
+        
+
+        # Then: Server initializes and publishes tool catalog
+
+        then_deployment_succeeds(deployment_result, 'test_bot_server', min_tool_count=7)
+
+
+
+    def test_server_publishes_tool_catalog_with_metadata(self, workspace_root):
+
+        """
+
+        SCENARIO: Server Publishes Tool Catalog With Metadata
+
+        GIVEN: A bot configuration file with a working directory and behaviors
+
+        AND: Behavior has trigger words configured
+
+        AND: A bot that has been initialized with that config file
+
+        WHEN: Server publishes catalog
+
+        THEN: Catalog entry includes all metadata
+
+        """
+
+        # Given: A bot configuration file with a working directory and behaviors
+
+        bot_name, behavior = given_bot_name_and_behavior_setup()
+
+        patterns = given_trigger_patterns_for_catalog_test()
+
+        config_file, bot_dir = given_bot_config_and_dir_for_single_behavior(workspace_root, bot_name, behavior)
+
+        # And: Behavior has trigger words configured
+
+        given_behavior_with_trigger_words(bot_dir, behavior, patterns)
+
+        # And: A bot that has been initialized with that config file
+
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+
+        
+
+        # When: Server publishes catalog
+
+        catalog = when_server_deployer_gets_catalog(config_file, workspace_root)
+
+        
+
+        # Then: Catalog entry includes all metadata
+
+        # Note: Catalog may still use old naming convention with individual action tools
+
+        # Check that catalog has tools registered
+
+        then_catalog_has_tools_registered(catalog)
+
+        
+
+        # Check for a tool that matches the behavior (catalog may use action tool names)
+
+        # Since catalog builds action tools, look for one with the behavior name
+
+        then_catalog_has_tools_for_behavior(catalog, behavior, patterns)
+
+
+
+    def test_generator_fails_when_protocol_handler_not_running(self, workspace_root):
+
+        """
+
+        SCENARIO: Generator Fails When Protocol Handler Not Running
+
+        GIVEN: A bot configuration file with a working directory and behaviors
+
+        AND: A bot that has been initialized with that config file
+
+        AND: MCP Protocol Handler is not running
+
+        WHEN: Generator attempts to deploy
+
+        THEN: Raises ConnectionError
+
+        """
+
+        # Given: A bot configuration file with a working directory and behaviors
+
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape'])
+
+        config_file, _ = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
+
+        # And: A bot that has been initialized with that config file
+
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+
+        # And: MCP Protocol Handler is not running (simulated by invalid URL)
+
+        
+
+        # When: Generator attempts to deploy
+
+        # Then: Raises ConnectionError
+
+        when_deployer_attempts_deployment_with_invalid_url(config_file, workspace_root)
+
+
+
+    def test_server_handles_initialization_failure(self, workspace_root):
+
+        """
+
+        SCENARIO: Server Handles Initialization Failure
+
+        GIVEN: A bot directory exists
+
+        AND: Bot Config does NOT exist
+
+        WHEN: Server thread starts
+
+        THEN: Logs error and does not register
+
+        """
+
+        # Given: A bot directory exists
+
+        bot_name = given_test_bot_name()
+
+        bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+
+        # And: Bot Config does NOT exist
+
+        config_path = given_bot_config_does_not_exist(workspace_root, bot_name)
+
+        
+
+        # When: Server thread starts
+
+        deployment_result = when_server_deployer_deploys(config_path, workspace_root)
+
+        
+
+        # Then: Logs error and does not register
+
+        then_deployment_fails_with_error(deployment_result, 'Bot Config not found')
+
+
+
+
+
+# ============================================================================
+
+# EXCEPTION HANDLING TESTS
+
+# ============================================================================
+
+
+
+def given_bot_directory_created_without_base_actions(tmp_path, bot_name: str):
+
+    """Given step: Bot directory created without base_actions directory."""
+
+    bot_directory = tmp_path / 'agile_bot' / 'bots' / bot_name
+
+    bot_directory.mkdir(parents=True, exist_ok=True)
+
+    return bot_directory
+
+
+
+
+
+def given_fake_repo_root_created(tmp_path):
+
+    """Given step: Fake repo root created without base_actions."""
+
+    fake_repo_root = tmp_path / 'agile_bot'
+
+    fake_repo_root.mkdir(parents=True, exist_ok=True)
+
+    return fake_repo_root
+
+
+
+
+
+def when_mcp_generator_created_without_base_actions(bot_directory: Path, fake_repo_root: Path):
+
+    """When step: MCPServerGenerator created without base_actions directory."""
+
+    from agile_bot.bots.base_bot.src.mcp.mcp_server_generator import MCPServerGenerator
+
+    with patch('agile_bot.bots.base_bot.src.state.workspace.get_python_workspace_root', return_value=fake_repo_root):
+
+        with pytest.raises(FileNotFoundError, match="Base actions directory not found"):
+
+            MCPServerGenerator(bot_directory=bot_directory)
+
+
+
+
+
+class TestMCPGeneratorExceptions:
+
+    """Tests for MCPServerGenerator exception handling - no fallbacks."""
+
+
+
+    def test_mcp_generator_raises_exception_when_base_actions_not_found(self, tmp_path):
+
+        """
+
+        SCENARIO: MCPServerGenerator raises exception when base_actions not found
+
+        GIVEN: Bot directory exists without base_actions directory
+
+        AND: Fake repo root created without base_actions
+
+        WHEN: MCPServerGenerator is created without base_actions directory
+
+        THEN: FileNotFoundError is raised
+
+        """
+
+        # Given: Bot directory exists without base_actions directory
+
+        bot_directory = given_bot_directory_created_without_base_actions(tmp_path, 'test_bot')
+
+        
+
+        # And: Fake repo root created without base_actions
+
+        fake_repo_root = given_fake_repo_root_created(tmp_path)
+
+        
+
+        # When: MCPServerGenerator is created without base_actions directory
+
+        when_mcp_generator_created_without_base_actions(bot_directory, fake_repo_root)
+
+
+
+
+
+# ============================================================================
+
+# RESTART MCP SERVER TESTS
+
+# ============================================================================
+
+
+
+def given_pycache_directories_exist(base_path: Path, cache_paths: list):
+
+    """Given step: __pycache__ directories exist with .pyc files.
+
+    
+
+    Creates cache directories and .pyc files for testing.
+
+    Returns list of created cache directories.
+
+    """
+
+    for cache_dir in cache_paths:
+
+        cache_dir.mkdir(parents=True)
+
+        (cache_dir / 'test.cpython-312.pyc').write_text('bytecode')
+
+        (cache_dir / 'test2.cpython-312.pyc').write_text('bytecode')
+
+    return cache_paths
+
+
+
+
+
+def when_clear_python_cache_is_called(base_path: Path):
+
+    """When step: clear_python_cache is called.
+
+    
+
+    Calls clear_python_cache function and returns cleared count.
+
+    """
+
+    from agile_bot.bots.base_bot.src.mcp.server_restart import clear_python_cache
+
+    return clear_python_cache(base_path)
+
+
+
+
+
+def then_all_pycache_directories_removed(cache_dirs: list):
+
+    """Then step: All __pycache__ directories are removed."""
+
+    assert not any(d.exists() for d in cache_dirs)
+
+
+
+
+
+def then_all_pyc_files_deleted(cache_dirs: list):
+
+    """Then step: All .pyc files are deleted."""
+
+    for cache_dir in cache_dirs:
+
+        pyc_files = list(cache_dir.glob('*.pyc'))
+
+        assert len(pyc_files) == 0
+
+
+
+
+
+def then_cache_cleared_count_matches(cached_count: int, expected_count: int):
+
+    """Then step: Cache cleared count matches expected."""
+
+    assert cached_count == expected_count
+
+
+
+
+
+def when_find_mcp_server_processes_is_called(server_name: str):
+
+    """When step: find_mcp_server_processes is called."""
+
+    from agile_bot.bots.base_bot.src.mcp.server_restart import find_mcp_server_processes
+
+    return find_mcp_server_processes(server_name)
+
+
+
+
+
+def then_processes_list_is_valid(processes: list):
+
+    """Then step: Processes list is valid."""
+
+    assert isinstance(processes, list)
+
+    for pid in processes:
+
+        assert isinstance(pid, int)
+
+        assert pid > 0
+
+
+
+
+
+class TestRestartMCPServerToLoadCodeChanges:
+
+    """Story: Restart MCP Server To Load Code Changes - Tests automatic restart of MCP server."""
+
+
+
+    def test_clear_python_bytecode_cache(self, tmp_path):
+
+        """
+
+        SCENARIO: Clear Python bytecode cache removes all __pycache__ directories and .pyc files
+
+        GIVEN: __pycache__ directories exist with .pyc files
+
+        WHEN: clear_python_cache is called
+
+        THEN: All __pycache__ directories are removed
+
+        AND: All .pyc files are deleted
+
+        """
+
+        # Given: __pycache__ directories exist with .pyc files
+
+        cache_dirs = [
+
+            tmp_path / 'agile_bot' / 'bots' / 'test_bot' / 'src' / '__pycache__',
+
+            tmp_path / 'agile_bot' / 'bots' / 'test_bot' / 'src' / 'bot' / '__pycache__',
+
+            tmp_path / 'agile_bot' / 'bots' / 'base_bot' / 'src' / '__pycache__',
+
+        ]
+
+        given_pycache_directories_exist(tmp_path, cache_dirs)
+
+        assert all(d.exists() for d in cache_dirs)
+
+        
+
+        # When: clear_python_cache is called
+
+        cleared_count = when_clear_python_cache_is_called(tmp_path / 'agile_bot')
+
+        
+
+        # Then: All __pycache__ directories are removed
+
+        then_all_pycache_directories_removed(cache_dirs)
+
+        # And: All .pyc files are deleted
+
+        then_all_pyc_files_deleted(cache_dirs)
+
+        # And: Cache cleared count matches expected
+
+        then_cache_cleared_count_matches(cleared_count, 3)
+
+
+
+    def test_find_mcp_server_processes(self):
+
+        """
+
+        SCENARIO: Find MCP Server Processes
+
+        GIVEN: MCP server processes may or may not be running
+
+        WHEN: Finding MCP server processes
+
+        THEN: Function returns valid processes list (may be empty if no servers running)
+
+        
+
+        Note: This test requires actual MCP server to be running to be meaningful.
+
+        For now, just tests the function doesn't crash.
+
+        """
+
+        # Given: MCP server processes may or may not be running
+
+        # When: find_mcp_server_processes is called
+
+        processes = when_find_mcp_server_processes_is_called('story_bot')
+
+        
+
+        # Then: Processes list is valid (may be empty if no servers running)
+
+        then_processes_list_is_valid(processes)
+
+
+
+

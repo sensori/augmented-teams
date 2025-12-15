@@ -1,0 +1,49 @@
+{
+  "description": "CRITICAL: Domain concepts must be grouped by domain area and relationships, not by technical layers, object types, or architectural concerns.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.domain_grouping_scanner.DomainGroupingScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Group by domain area and relationships",
+        "content": [
+          "Group related concepts together by domain area",
+          "Keep domain concepts in same section regardless of technical layer",
+          "",
+          "Correct Examples (grouped by domain):",
+          "## Wealth Management Domain",
+          "WealthAdvisor",
+          "Client",
+          "Portfolio",
+          "",
+          "## Investment Planning Domain",
+          "RebalanceAction",
+          "RebalanceRecommendation"
+        ]
+      },
+      "dont": {
+        "description": "Don't group by technical layers or object types",
+        "content": [
+          "Don't group by technical layers (presentation, business, data)",
+          "Don't group by object types (DTOs, services, repositories)",
+          "Don't group by architectural concerns",
+          "",
+          "Wrong Examples (grouped by technical layers):",
+          "## Presentation Layer",
+          "PortfolioReport",
+          "",
+          "## Business Logic Layer",
+          "WealthAdvisor",
+          "",
+          "## Data Access Layer",
+          "PortfolioRepository",
+          "",
+          "Technical Grouping Indicators (REJECT):",
+          "- Sections named 'Layer', 'Tier', 'Service', 'Repository', 'DTO'",
+          "- Grouping by technical concerns instead of domain relationships",
+          "- Separating domain concepts by architectural layers"
+        ]
+      }
+    }
+  ]
+}
+

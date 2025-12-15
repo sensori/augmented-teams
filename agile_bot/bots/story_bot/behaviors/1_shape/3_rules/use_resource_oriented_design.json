@@ -1,0 +1,52 @@
+{
+  "description": "CRITICAL: Domain concepts must use resource-oriented, object-oriented design. Use object-oriented classes (singular or collection) with responsibilities that encapsulate logic over manager/doer/loader patterns. Maximize encapsulation through collaborator relationships.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.resource_oriented_design_scanner.ResourceOrientedDesignScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Use resource-oriented domain concepts",
+        "content": [
+          "Domain concepts should be object-oriented classes (singular or collection)",
+          "Responsibilities should encapsulate logic",
+          "Use collection classes (e.g., Behaviors, Rules, Holdings) instead of managers",
+          "Maximize encapsulation through collaborator relationships",
+          "",
+          "Correct Examples (resource-oriented):",
+          "Portfolio",
+          "    Instantiated with: AccountId, RiskTolerance",
+          "    Get total value: Holdings",
+          "    Assess risk: Holdings, RiskModel",
+          "",
+          "Holdings (Collection Class)",
+          "    Instantiated with: Portfolio",
+          "    Get many positions: Position",
+          "    Find by symbol: Symbol"
+        ]
+      },
+      "dont": {
+        "description": "Don't use manager/doer/loader patterns",
+        "content": [
+          "Don't create manager classes (e.g., PortfolioManager, HoldingsLoader)",
+          "Don't use doer classes (e.g., PortfolioDoer, HoldingsHandler)",
+          "Don't separate loading logic from domain concepts",
+          "",
+          "Wrong Examples (manager pattern):",
+          "PortfolioManager",
+          "    Instantiated with: FileSystem",
+          "    Get holdings: ClientId, AccountId",
+          "    Calculate total value: Holdings",
+          "",
+          "HoldingsLoader",
+          "    Instantiated with: FileSystem",
+          "    Load holdings: ClientId, AccountId",
+          "",
+          "Manager Pattern Indicators (REJECT):",
+          "- Classes ending in 'Manager', 'Loader', 'Handler', 'Doer'",
+          "- Classes that operate on other domain concepts without being part of them",
+          "- Classes that expose loading/storage mechanisms instead of domain concepts"
+        ]
+      }
+    }
+  ]
+}
+
