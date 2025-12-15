@@ -21,19 +21,25 @@ if str(python_workspace_root) not in sys.path:
 bot_directory = Path(__file__).parent.parent  # src/ -> story_bot/
 os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
-# 2. Read agent.json and set workspace directory (if not already set by mcp.json)
+# 2. Read bot_config.json and set workspace directory (if not already set by mcp.json)
 if 'WORKING_AREA' not in os.environ:
-    agent_json_path = bot_directory / 'agent.json'
-    if agent_json_path.exists():
-        agent_config = json.loads(agent_json_path.read_text(encoding='utf-8'))
-        if 'WORKING_AREA' in agent_config:
-            os.environ['WORKING_AREA'] = agent_config['WORKING_AREA']
+    config_path = bot_directory / 'bot_config.json'
+    if config_path.exists():
+        bot_config = json.loads(config_path.read_text(encoding='utf-8'))
+        # Check mcp.env.WORKING_AREA (standard location)
+        if 'mcp' in bot_config and 'env' in bot_config['mcp']:
+            mcp_env = bot_config['mcp']['env']
+            if 'WORKING_AREA' in mcp_env:
+                os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
+        # Fallback to top-level WORKING_AREA
+        elif 'WORKING_AREA' in bot_config:
+            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
 
 # ============================================================================
 # Now import - everything will read from environment variables
 # ============================================================================
 
-from agile_bot.bots.base_bot.src.state.workspace import (
+from agile_bot.bots.base_bot.src.bot.workspace import (
     get_bot_directory,
     get_workspace_directory
 )
@@ -45,7 +51,7 @@ def main():
 
     Environment variables are bootstrapped before import:
     - BOT_DIRECTORY: Self-detected from script location
-    - WORKING_AREA: Read from agent.json (or overridden by mcp.json env)
+    - WORKING_AREA: Read from bot_config.json (or overridden by mcp.json env)
     
     All subsequent code reads from these environment variables.
     """

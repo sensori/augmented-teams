@@ -76,9 +76,7 @@ class BuildKnowledgeAction(Action):
         return ValidateRulesAction(
             base_action_config=None,
             behavior=self.behavior,
-            activity_tracker=None,
-            bot_name=self.bot_name,
-            action_name='validate_rules'
+            activity_tracker=None
         )
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
@@ -188,7 +186,11 @@ class BuildKnowledgeAction(Action):
         instructions['rules'] = all_rules
     
     def _format_rules(self, rules: list) -> str:
-        """Format rules list into a readable text string for insertion into instructions."""
+        """Format rules list into a readable text string for insertion into instructions.
+        
+        Args:
+            rules: List of rule dicts with 'rule_file' and 'rule_content' keys
+        """
         if not rules:
             return "No validation rules found."
         
@@ -198,6 +200,7 @@ class BuildKnowledgeAction(Action):
         
         for rule in rules:
             rule_file = rule.get('rule_file', '')
+            
             if 'base_bot/rules' in rule_file or (not 'behaviors' in rule_file and '/rules/' in rule_file):
                 bot_rules.append(rule)
             else:
@@ -218,11 +221,17 @@ class BuildKnowledgeAction(Action):
         
         return "\n".join(formatted_sections)
     
-    def _format_rule(self, rule: Dict[str, Any]) -> list:
-        """Format a single rule into a list of formatted strings."""
+    def _format_rule(self, rule: dict) -> list:
+        """Format a single rule into a list of formatted strings.
+        
+        Args:
+            rule: Rule dict with 'rule_file' and 'rule_content' keys
+        """
         formatted = []
+        
         rule_file = rule.get('rule_file', 'unknown')
         rule_content = rule.get('rule_content', {})
+        
         rule_description = rule_content.get('description', '')
         
         formatted.append(f"\n**Rule:** {rule_file}")

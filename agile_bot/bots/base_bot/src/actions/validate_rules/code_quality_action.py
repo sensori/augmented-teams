@@ -195,27 +195,33 @@ class CodeQualityAction(ValidateRulesAction):
         # Process each rule: run scanner if exists and matches filter, add results
         processed_rules = []
         for idx, rule_dict in enumerate(validation_rules):
-            if isinstance(rule_dict, dict):
-                rule_content = rule_dict.get('rule_content', rule_dict)
-                scanner_path = rule_content.get('scanner')
-                
-                # Create Rule object for this rule
-                rule_file = rule_dict.get('rule_file', 'unknown.json')
-                behavior_name = 'common'
-                if '/behaviors/' in rule_file:
-                    parts = rule_file.split('/behaviors/')
-                    if len(parts) > 1:
-                        behavior_name = parts[1].split('/')[0]
-                
-                rule_obj = Rule(rule_file, rule_content, behavior_name)
-                
-                rule_result = dict(rule_dict)  # Copy rule
-                rule_result['scanner_results'] = {
-                    'file_by_file': {'violations': []},
-                    'cross_file': {'violations': []}
-                }
-                
-                if scanner_path:
+            if not isinstance(rule_dict, dict):
+                continue
+            
+            rule_file = rule_dict.get('rule_file', 'unknown.json')
+            rule_content = rule_dict.get('rule_content', {})
+            
+            # Create Rule object for scanning
+            behavior_name = 'common'
+            if '/behaviors/' in rule_file:
+                parts = rule_file.split('/behaviors/')
+                if len(parts) > 1:
+                    behavior_name = parts[1].split('/')[0]
+            rule_obj = Rule(Path(rule_file), behavior_name, self.bot_name, rule_content)
+            
+            scanner_path = rule_content.get('scanner')
+            
+            # Build rule result dict
+            rule_result = {
+                'rule_file': rule_file,
+                'rule_content': rule_content
+            }
+            rule_result['scanner_results'] = {
+                'file_by_file': {'violations': []},
+                'cross_file': {'violations': []}
+            }
+            
+            if scanner_path:
                     scanner_class, error_msg = self._load_scanner_class(scanner_path)
                     if scanner_class:
                         # Only run scanners that match the filter (CodeScanner instances)
@@ -273,8 +279,7 @@ class CodeQualityAction(ValidateRulesAction):
                                     rule_result['scanner_results']['cross_file']['violations'] = violations_dicts_cross
                                 
                             except Exception as e:
-                                logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
-                                rule_file = rule_dict.get('rule_file', 'unknown')
+                                logger.error(f"Scanner execution failed for rule {rule_file}: {e}", exc_info=True)
                                 scanner_path = rule_content.get('scanner', 'unknown')
                                 from .validate_rules_action import ScannerExecutionError
                                 raise ScannerExecutionError(rule_file, scanner_path, e) from e

@@ -6,7 +6,7 @@ from agile_bot.bots.base_bot.src.actions.action import Action
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
 from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
 from agile_bot.bots.base_bot.src.actions.validate_rules.rules import Rules
-from agile_bot.bots.base_bot.src.bot.scanner_loader import ScannerLoader
+from agile_bot.bots.base_bot.src.actions.validate_rules.scanners.scanner_loader import ScannerLoader
 
 logger = logging.getLogger(__name__)
 
@@ -36,21 +36,21 @@ class ValidateRulesAction(Action):
         Properties: rules, validation_context, validation_scope
     """
     
-    def __init__(self, base_action_config=None, behavior=None, activity_tracker=None,
-                 bot_name: str = None, action_name: str = 'validate_rules'):
+    def __init__(self, base_action_config=None, behavior=None, activity_tracker=None):
         """Initialize ValidateRulesAction.
         
-        Supports both signatures:
-        - New: (base_action_config, behavior, activity_tracker)
-        - Old: (bot_name, behavior, action_name) for backward compatibility
+        Args:
+            base_action_config: BaseActionConfig instance
+            behavior: Behavior instance
+            activity_tracker: ActivityTracker instance
         """
         super().__init__(base_action_config=base_action_config, behavior=behavior,
-                        activity_tracker=activity_tracker, bot_name=bot_name, action_name=action_name)
+                        activity_tracker=activity_tracker)
         self._violations = []  # Store violations from scanner execution
         
         # Instantiate Rules collection
         if self.behavior:
-            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths if self.behavior else None)
+            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths)
         else:
             self._rules = None
     
@@ -61,13 +61,11 @@ class ValidateRulesAction(Action):
         Domain Model: rules: Rules
         """
         if self._rules is None and self.behavior:
-            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths if self.behavior else None)
+            self._rules = Rules(behavior=self.behavior, bot_paths=self.behavior.bot_paths)
         return self._rules
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute validate_rules action logic."""
-        logger.info("=== validate_rules action START ===")
-        logger.info(f"Parameters: {parameters}")
         try:
             # Identify content to validate
             logger.info("Step 1: Identifying content to validate...")
@@ -233,13 +231,10 @@ class ValidateRulesAction(Action):
                         test_file_paths.append(test_path)
                     else:
                         # Always resolve against repo root (test files are relative to repo root)
-                        if repo_root:
-                            resolved_path = repo_root / test_path
-                            test_file_paths.append(resolved_path)
-                        else:
-                            # Fallback: resolve against workspace (shouldn't happen if repo_root detection works)
-                            resolved_path = self.workspace_directory / test_path
-                            test_file_paths.append(resolved_path)
+                        if not repo_root:
+                            raise ValueError(f"Cannot resolve test file path '{test_path}': repo root not found")
+                        resolved_path = repo_root / test_path
+                        test_file_paths.append(resolved_path)
             
             code_file_paths = []
             if code_files_to_scan:
@@ -250,13 +245,10 @@ class ValidateRulesAction(Action):
                         code_file_paths.append(code_path)
                     else:
                         # Always resolve against repo root (code files are relative to repo root)
-                        if repo_root:
-                            resolved_path = repo_root / code_path
-                            code_file_paths.append(resolved_path)
-                        else:
-                            # Fallback: resolve against workspace
-                            resolved_path = self.workspace_directory / code_path
-                            code_file_paths.append(resolved_path)
+                        if not repo_root:
+                            raise ValueError(f"Cannot resolve code file path '{code_path}': repo root not found")
+                        resolved_path = repo_root / code_path
+                        code_file_paths.append(resolved_path)
         
             # Run scanners with story graph and optional test/code files (one-off, not persisted)
             logger.info("Step 5: Running scanners via injectValidationInstructions...")
@@ -328,7 +320,7 @@ class ValidateRulesAction(Action):
     def inject_behavior_specific_and_bot_rules(self) -> Dict[str, Any]:
         """Load behavior-specific and bot-level rules.
         
-        Uses Rules collection to load rules, then converts to legacy format for backward compatibility.
+        Returns Rules collection and action instructions.
         """
         # Load action-specific instructions from base_actions
         action_instructions = []
@@ -341,21 +333,14 @@ class ValidateRulesAction(Action):
             config = read_json_file(config_path)
             action_instructions = config.get('instructions', [])
         
-        # Use Rules collection to load rules
-        if not self.rules:
-            return {
-                'action_instructions': action_instructions,
-                'validation_rules': []
-            }
-        
-        # Convert Rule objects to legacy dict format for backward compatibility
+        # Return rules as dicts (standardized format)
         validation_rules = []
-        for rule in self.rules.iterate():
-            validation_rules.append({
-                'rule_file': rule.rule_file,
-                'rule_content': rule.rule_content
-            })
-        
+        if self.rules:
+            for rule in self.rules:
+                validation_rules.append({
+                    'rule_file': str(rule.rule_file),
+                    'rule_content': rule.rule_content
+                })
         return {
             'action_instructions': action_instructions,
             'validation_rules': validation_rules
@@ -427,7 +412,7 @@ class ValidateRulesAction(Action):
         scanners = []
         errors = []
         
-        for rule in self.rules.iterate():
+        for rule in self.rules:
             scanner = rule.scanner
             if scanner:
                 scanners.append(scanner)
@@ -478,7 +463,7 @@ class ValidateRulesAction(Action):
         # Validate rules against knowledge graph and files - handles scanning internally
         processed_rules = self.rules.validate(knowledge_graph, files)
         
-        # Track violations from processed rules for backward compatibility
+        # Track violations from processed rules for reporting and analysis
         for rule_result in processed_rules:
             scanner_results = rule_result.get('scanner_results', {})
             # Handle two-pass format
@@ -661,9 +646,8 @@ class ValidateRulesAction(Action):
                 scanner_results = rule_dict.get('scanner_results', {})
                 rule_name = Path(rule_file).stem if rule_file else 'unknown'
                 
-                # Handle both old format (backward compatibility) and new two-pass format
+                # Handle two-pass format
                 if 'file_by_file' in scanner_results or 'cross_file' in scanner_results:
-                    # New two-pass format
                     file_by_file_violations = scanner_results.get('file_by_file', {}).get('violations', [])
                     cross_file_violations = scanner_results.get('cross_file', {}).get('violations', [])
                     
@@ -673,12 +657,6 @@ class ValidateRulesAction(Action):
                     if cross_file_violations:
                         cross_file_violations_by_rule[rule_name] = cross_file_violations
                         total_cross_file += len(cross_file_violations)
-                else:
-                    # Old format (backward compatibility) - treat as file-by-file
-                    violations = scanner_results.get('violations', [])
-                    if violations:
-                        file_by_file_violations_by_rule[rule_name] = violations
-                        total_file_by_file += len(violations)
             
             total_violations = total_file_by_file + total_cross_file
             
@@ -1001,7 +979,7 @@ class ValidateRulesAction(Action):
             for violation in violations:
                 severity = violation.get('severity', 'error')
                 severity_breakdown[severity] = severity_breakdown.get(severity, 0) + 1
-                rule_name = violation.get('rule') or violation.get('rule_name')  # Support both for backward compatibility
+                rule_name = violation.get('rule')
                 if rule_name:
                     rule_count.add(rule_name)
             

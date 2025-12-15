@@ -19,16 +19,7 @@ class Strategy:
     
     def __init__(self, behavior_folder: Path):
         self._behavior_folder = behavior_folder
-        # Look for strategy folder, but fallback to 'planning' for backward compatibility
-        strategy_dir = behavior_folder / 'guardrails' / 'strategy'
-        planning_dir = behavior_folder / 'guardrails' / 'planning'
-        if strategy_dir.exists():
-            self._strategy_dir = strategy_dir
-        elif planning_dir.exists():
-            # Fallback to 'planning' folder for backward compatibility
-            self._strategy_dir = planning_dir
-        else:
-            self._strategy_dir = strategy_dir  # Use strategy even if it doesn't exist yet
+        self._strategy_dir = behavior_folder / 'guardrails' / 'strategy'
         
         # Instantiate StrategyCriterias, Assumptions, and RecommendedActivities
         self.strategy_criterias = StrategyCriterias(self._strategy_dir)

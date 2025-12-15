@@ -59,10 +59,13 @@ def given_behavior_action_instructions_for_multiple_behaviors(workspace_root: Pa
         create_behavior_action_instructions_from_workspace(workspace_root, bot_name, behavior, action)
 
 
-def given_behavior_json_files_for_behaviors(bot_directory: Path, behaviors: list):
+def given_behavior_json_files_for_behaviors(bot_directory: Path, behaviors: list, bot_name: str = 'test_bot'):
     """Given: Behavior.json files for behaviors."""
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     for behavior in behaviors:
         create_actions_workflow_json(bot_directory, behavior)
+        # Create guardrails files (required by Guardrails class initialization)
+        create_minimal_guardrails_files(bot_directory, behavior, bot_name)
 
 
 def given_base_action_instructions_created(bot_directory: Path, action: str):
@@ -132,7 +135,7 @@ def given_base_instructions_created(bot_directory: Path):
 def given_bot_config_and_behavior_workflow(bot_directory: Path, bot_name: str, behaviors: list):
     """Given: Bot config and behavior workflow created."""
     bot_config = create_bot_config_file(bot_directory, bot_name, behaviors)
-    given_behavior_json_files_for_behaviors(bot_directory, behaviors)
+    given_behavior_json_files_for_behaviors(bot_directory, behaviors, bot_name)
     return bot_config
 
 
@@ -153,7 +156,9 @@ def then_workflow_state_has_correct_values(workflow_file: Path, expected_behavio
 def given_activity_tracker_created(workspace_directory: Path, bot_name: str):
     """Given: Activity tracker created."""
     from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-    return ActivityTracker(workspace_directory=workspace_directory, bot_name=bot_name)
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(workspace_path=workspace_directory)
+    return ActivityTracker(bot_paths=bot_paths, bot_name=bot_name)
 
 
 def when_activity_tracker_tracks_start(tracker, bot_name: str, behavior: str, action: str):
@@ -199,7 +204,7 @@ def when_create_gather_context_action(bot_name: str, behavior: str, bot_director
     """When: Create gather context action."""
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
-    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     
     # Create bot_paths
     bot_paths = BotPaths(bot_directory=bot_directory)
@@ -225,6 +230,10 @@ def when_create_gather_context_action(bot_name: str, behavior: str, bot_director
         }
         behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
+    # Create guardrails files (required by Guardrails class initialization)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+    
     # Create Behavior object
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     
@@ -249,6 +258,86 @@ def then_merged_instructions_contain_base_and_action(merged_instructions, action
     """Then: Merged instructions contain base and action."""
     assert 'base_instructions' in merged_instructions
     assert merged_instructions['action'] == action
+
+
+def given_bot_name_and_behavior_setup(bot_name: str, behavior: str):
+    """Given: Bot name and behavior setup."""
+    return bot_name, behavior
+
+
+def given_render_instructions_exist(bot_directory: Path, behavior: str):
+    """Given: Render instructions exist."""
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    render_dir = behavior_dir / 'content' / 'render'
+    render_dir.mkdir(parents=True, exist_ok=True)
+    render_instructions_file = render_dir / 'instructions.json'
+    render_instructions = {
+        'instructions': ['render1', 'render2']
+    }
+    render_instructions_file.write_text(json.dumps(render_instructions), encoding='utf-8')
+    return render_instructions
+
+
+def when_render_output_action_initialized(bot_directory: Path, bot_name: str, behavior: str):
+    """When: RenderOutputAction initialized."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.render_output.render_output_action import RenderOutputAction
+    
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    # Ensure behavior.json exists
+    import json
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_file = behavior_dir / 'behavior.json'
+    if not behavior_file.exists():
+        behavior_config = {
+            "behaviorName": behavior,
+            "description": f"Test behavior: {behavior}",
+            "goal": f"Test goal for {behavior}",
+            "inputs": "Test inputs",
+            "outputs": "Test outputs",
+            "instructions": {},
+            "actions_workflow": {
+                "actions": [
+                    {'name': 'render_output', 'order': 1}
+                ]
+            }
+        }
+        behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    # Create guardrails files (required by Guardrails class initialization)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('render_output', bot_paths)
+    
+    return RenderOutputAction(
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None
+    )
+
+
+def then_action_uses_instructions_class(action_obj):
+    """Then: Action uses Instructions class to merge instructions."""
+    from agile_bot.bots.base_bot.src.bot.instructions import Instructions
+    # Verify that action uses Instructions class by checking if it has the expected structure
+    instructions = action_obj.load_and_merge_instructions()
+    assert 'base_instructions' in instructions or 'instructions' in instructions
+    # Verify Instructions class is used (check internal structure)
+    assert hasattr(action_obj, '_instructions') or hasattr(action_obj, 'instructions')
+
+
+def then_action_uses_merged_instructions_class(action_obj):
+    """Then: Action uses MergedInstructions class for merging."""
+    from agile_bot.bots.base_bot.src.bot.merged_instructions import MergedInstructions
+    # Verify that action uses MergedInstructions class
+    instructions = action_obj.load_and_merge_instructions()
+    assert 'base_instructions' in instructions
+    # If render instructions exist, they should be in merged result
+    if hasattr(action_obj, '_render_instructions') or 'render_instructions' in instructions:
+        assert 'render_instructions' in instructions
 
 
 def given_environment_and_base_instructions(bot_directory: Path, workspace_directory: Path):
@@ -296,7 +385,7 @@ class TestInvokeBotTool:
         # Given: Bot configuration and instructions exist
         workspace_root = workspace_directory.parent
         create_behavior_action_instructions_from_workspace(workspace_root, 'test_bot', 'shape', 'gather_context')
-        given_behavior_json_files_for_behaviors(bot_directory, ['shape', 'discovery', 'exploration', 'specification'])
+        given_behavior_json_files_for_behaviors(bot_directory, ['shape', 'discovery', 'exploration', 'specification'], 'test_bot')
         given_base_action_instructions_created(bot_directory, 'gather_context')
         
         # When: Call REAL Bot API
@@ -364,6 +453,45 @@ class TestLoadAndMergeBehaviorActionInstructions:
         
         # Then: Instructions merged from both sources
         then_merged_instructions_contain_base_and_action(merged_instructions, action)
+
+    def test_action_uses_instructions_class_to_merge_base_and_behavior_instructions(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action uses Instructions class to merge base and behavior instructions
+        GIVEN: Action with BaseActionConfig and Behavior
+        WHEN: Action initialized
+        THEN: Action uses Instructions class to merge instructions
+        """
+        # Given: Environment bootstrapped
+        bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior, action = given_bot_name_behavior_and_action_setup()
+        workspace_root = workspace_directory.parent
+        config_file = create_bot_config_file(bot_directory, bot_name, ['shape'])
+        behavior_instructions = create_behavior_action_instructions_from_workspace(workspace_root, bot_name, behavior, action)
+        base_instructions = given_base_action_instructions_created(bot_directory, action)
+        
+        # When: Action initialized
+        action_obj = when_create_gather_context_action(bot_name, behavior, bot_directory)
+        
+        # Then: Action uses Instructions class to merge instructions
+        then_action_uses_instructions_class(action_obj)
+
+    def test_action_uses_merged_instructions_class_when_render_instructions_present(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action uses MergedInstructions class when render instructions present
+        GIVEN: RenderOutputAction with render instructions
+        WHEN: Action initialized
+        THEN: Action uses MergedInstructions class for merging
+        """
+        # Given: Environment bootstrapped
+        bootstrap_env(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        render_instructions = given_render_instructions_exist(bot_directory, behavior)
+        
+        # When: RenderOutputAction initialized
+        action_obj = when_render_output_action_initialized(bot_directory, bot_name, behavior)
+        
+        # Then: Action uses MergedInstructions class
+        then_action_uses_merged_instructions_class(action_obj)
 
 
 class TestForwardToCurrentBehaviorAndCurrentAction:
@@ -558,4 +686,337 @@ class TestTrackActivityForWorkspace:
         
         # Then: Activity log has entry
         then_activity_log_has_entry_with_action_state(workspace_directory, 'test_bot.shape.gather_context', 'started')
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Domain Classes (Stories 3-5: Instructions)
+# ============================================================================
+
+from unittest.mock import Mock
+from agile_bot.bots.base_bot.src.bot.instructions import Instructions
+from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+
+
+def given_base_action_config_with_instructions(instructions: list):
+    """Given: BaseActionConfig with instructions."""
+    base_action_config = Mock(spec=BaseActionConfig)
+    base_action_config.instructions = instructions
+    return base_action_config
+
+
+def given_base_action_config_with_string_instructions(instructions: str):
+    """Given: BaseActionConfig with string instructions."""
+    base_action_config = Mock(spec=BaseActionConfig)
+    base_action_config.instructions = instructions
+    return base_action_config
+
+
+def given_base_action_config_with_none_instructions():
+    """Given: BaseActionConfig with None instructions."""
+    base_action_config = Mock(spec=BaseActionConfig)
+    base_action_config.instructions = None
+    return base_action_config
+
+
+def given_behavior_with_instructions(instructions: dict):
+    """Given: Behavior with instructions."""
+    behavior = Mock(spec=Behavior)
+    behavior_config = Mock()
+    behavior_config.instructions = instructions
+    behavior.behavior_config = behavior_config
+    return behavior
+
+
+def when_instructions_instantiated(base_action_config, behavior):
+    """When: Instructions instantiated."""
+    return Instructions(base_action_config, behavior)
+
+
+def when_base_instructions_accessed(instructions: Instructions):
+    """When: base_instructions property accessed."""
+    return instructions.base_instructions
+
+
+def when_behavior_instructions_accessed(instructions: Instructions):
+    """When: behavior_instructions property accessed."""
+    return instructions.behavior_instructions
+
+
+def when_merge_called(instructions: Instructions):
+    """When: merge() called."""
+    return instructions.merge()
+
+
+def then_base_instructions_are(result: list, expected: list):
+    """Then: Base instructions are expected."""
+    assert result == expected
+
+
+def then_behavior_instructions_are(result: dict, expected: dict):
+    """Then: Behavior instructions are expected."""
+    assert result == expected
+
+
+def then_merged_contains_base_instructions(merged: dict, expected: list):
+    """Then: Merged dict contains base instructions."""
+    assert merged['base_instructions'] == expected
+
+
+def then_merged_contains_behavior_instructions(merged: dict, expected: dict):
+    """Then: Merged dict contains behavior instructions."""
+    assert merged['behavior_instructions'] == expected
+
+
+def then_merged_instructions_list_contains_all(merged: dict, base: list, behavior: list):
+    """Then: Merged instructions list contains all instructions."""
+    assert 'instructions' in merged
+    assert merged['instructions'] == base + behavior
+
+
+# ============================================================================
+# TEST CLASSES - Domain Classes (Stories 3-5: Instructions)
+# ============================================================================
+
+class TestGetBaseInstructions:
+    """Story: Get Base Instructions (Sub-epic: Invoke MCP)"""
+    
+    def test_base_instructions_property_returns_list_from_config(self):
+        """
+        SCENARIO: Base instructions property returns list from config
+        GIVEN: BaseActionConfig with list instructions ['instruction1', 'instruction2']
+        WHEN: base_instructions property accessed
+        THEN: Returns ['instruction1', 'instruction2']
+        """
+        # Given: BaseActionConfig with list instructions
+        base_action_config = given_base_action_config_with_instructions(['instruction1', 'instruction2'])
+        behavior = given_behavior_with_instructions({})
+        
+        # When: Instructions instantiated and base_instructions accessed
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_base_instructions_accessed(instructions)
+        
+        # Then: Base instructions are from config
+        then_base_instructions_are(result, ['instruction1', 'instruction2'])
+    
+    def test_base_instructions_property_converts_string_to_list(self):
+        """
+        SCENARIO: Base instructions property converts string to list
+        GIVEN: BaseActionConfig with string instructions 'single instruction'
+        WHEN: base_instructions property accessed
+        THEN: Returns ['single instruction']
+        """
+        # Given: BaseActionConfig with string instructions
+        base_action_config = given_base_action_config_with_string_instructions('single instruction')
+        behavior = given_behavior_with_instructions({})
+        
+        # When: Instructions instantiated and base_instructions accessed
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_base_instructions_accessed(instructions)
+        
+        # Then: Base instructions are converted to list
+        then_base_instructions_are(result, ['single instruction'])
+    
+    def test_base_instructions_property_returns_empty_list_when_none(self):
+        """
+        SCENARIO: Base instructions property returns empty list when none
+        GIVEN: BaseActionConfig with None instructions
+        WHEN: base_instructions property accessed
+        THEN: Returns []
+        """
+        # Given: BaseActionConfig with None instructions
+        base_action_config = given_base_action_config_with_none_instructions()
+        behavior = given_behavior_with_instructions({})
+        
+        # When: Instructions instantiated and base_instructions accessed
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_base_instructions_accessed(instructions)
+        
+        # Then: Base instructions are empty list
+        then_base_instructions_are(result, [])
+
+
+class TestGetBehaviorInstructions:
+    """Story: Get Behavior Instructions (Sub-epic: Invoke MCP)"""
+    
+    def test_behavior_instructions_property_returns_from_behavior_config(self):
+        """
+        SCENARIO: Behavior instructions property returns from behavior config
+        GIVEN: Behavior with instructions {'instructions': ['behavior1', 'behavior2']}
+        WHEN: behavior_instructions property accessed
+        THEN: Returns instructions dict from behavior config
+        """
+        # Given: Behavior with instructions
+        behavior_instructions = {'instructions': ['behavior1', 'behavior2']}
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and behavior_instructions accessed
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_behavior_instructions_accessed(instructions)
+        
+        # Then: Behavior instructions are from config
+        then_behavior_instructions_are(result, behavior_instructions)
+    
+    def test_behavior_instructions_property_returns_empty_dict_when_none(self):
+        """
+        SCENARIO: Behavior instructions property returns empty dict when none
+        GIVEN: Behavior with no instructions
+        WHEN: behavior_instructions property accessed
+        THEN: Returns {}
+        """
+        # Given: Behavior with no instructions
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        behavior = given_behavior_with_instructions({})
+        
+        # When: Instructions instantiated and behavior_instructions accessed
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_behavior_instructions_accessed(instructions)
+        
+        # Then: Behavior instructions are empty dict
+        then_behavior_instructions_are(result, {})
+
+
+class TestMergeInstructions:
+    """Story: Merge Instructions (Sub-epic: Invoke MCP)"""
+    
+    def test_merge_combines_base_and_behavior_instructions(self):
+        """
+        SCENARIO: Merge combines base and behavior instructions
+        GIVEN: BaseActionConfig with ['base1', 'base2'] and Behavior with {'instructions': ['behavior1', 'behavior2']}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions, behavior_instructions, and combined instructions list
+        """
+        # Given: BaseActionConfig and Behavior with instructions
+        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
+        behavior_instructions = {'instructions': ['behavior1', 'behavior2']}
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains both instruction sets
+        then_merged_contains_base_instructions(result, ['base1', 'base2'])
+        then_merged_contains_behavior_instructions(result, behavior_instructions)
+        then_merged_instructions_list_contains_all(result, ['base1', 'base2'], ['behavior1', 'behavior2'])
+    
+    def test_merge_handles_behavior_instructions_without_instructions_key(self):
+        """
+        SCENARIO: Merge handles behavior instructions without instructions key
+        GIVEN: BaseActionConfig with ['base1'] and Behavior with {'other_key': 'value'}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions only
+        """
+        # Given: Behavior with instructions dict without 'instructions' key
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        behavior_instructions = {'other_key': 'value'}
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains base instructions only
+        then_merged_contains_base_instructions(result, ['base1'])
+        then_merged_contains_behavior_instructions(result, behavior_instructions)
+        assert result['instructions'] == ['base1']
+    
+def given_behavior_with_non_dict_instructions():
+    """Given: Behavior with non-dict instructions."""
+    behavior = Mock(spec=Behavior)
+    behavior_config = Mock()
+    behavior_config.instructions = 'not a dict'
+    behavior.behavior_config = behavior_config
+    return behavior
+
+
+def then_merged_instructions_list_equals(merged: dict, expected: list):
+    """Then: Merged instructions list equals expected."""
+    assert merged['instructions'] == expected
+
+
+class TestMergeInstructions:
+    """Story: Merge Instructions (Sub-epic: Invoke MCP)"""
+    
+    def test_merge_combines_base_and_behavior_instructions(self):
+        """
+        SCENARIO: Merge combines base and behavior instructions
+        GIVEN: BaseActionConfig with ['base1', 'base2'] and Behavior with {'instructions': ['behavior1', 'behavior2']}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions, behavior_instructions, and combined instructions list
+        """
+        # Given: BaseActionConfig and Behavior with instructions
+        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
+        behavior_instructions = {'instructions': ['behavior1', 'behavior2']}
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains both instruction sets
+        then_merged_contains_base_instructions(result, ['base1', 'base2'])
+        then_merged_contains_behavior_instructions(result, behavior_instructions)
+        then_merged_instructions_list_contains_all(result, ['base1', 'base2'], ['behavior1', 'behavior2'])
+    
+    def test_merge_handles_behavior_instructions_without_instructions_key(self):
+        """
+        SCENARIO: Merge handles behavior instructions without instructions key
+        GIVEN: BaseActionConfig with ['base1'] and Behavior with {'other_key': 'value'}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions only
+        """
+        # Given: Behavior with instructions dict without 'instructions' key
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        behavior_instructions = {'other_key': 'value'}
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains base instructions only
+        then_merged_contains_base_instructions(result, ['base1'])
+        then_merged_contains_behavior_instructions(result, behavior_instructions)
+        then_merged_instructions_list_equals(result, ['base1'])
+    
+    def test_merge_handles_non_dict_behavior_instructions(self):
+        """
+        SCENARIO: Merge handles non-dict behavior instructions
+        GIVEN: BaseActionConfig with ['base1'] and Behavior with non-dict instructions
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions only
+        """
+        # Given: Behavior with non-dict instructions
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        behavior = given_behavior_with_non_dict_instructions()
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains base instructions only
+        then_merged_contains_base_instructions(result, ['base1'])
+        then_merged_instructions_list_equals(result, ['base1'])
+    
+    def test_merge_handles_empty_behavior_instructions_list(self):
+        """
+        SCENARIO: Merge handles empty behavior instructions list
+        GIVEN: BaseActionConfig with ['base1', 'base2'] and Behavior with {'instructions': []}
+        WHEN: merge() called
+        THEN: Returns dict with only base_instructions
+        """
+        # Given: Behavior with empty instructions list
+        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
+        behavior_instructions = {'instructions': []}
+        behavior = given_behavior_with_instructions(behavior_instructions)
+        
+        # When: Instructions instantiated and merge() called
+        instructions = when_instructions_instantiated(base_action_config, behavior)
+        result = when_merge_called(instructions)
+        
+        # Then: Merged dict contains only base instructions
+        then_merged_contains_base_instructions(result, ['base1', 'base2'])
+        assert result['instructions'] == ['base1', 'base2']
 

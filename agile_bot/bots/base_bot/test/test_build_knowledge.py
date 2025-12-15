@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 import json
 from agile_bot.bots.base_bot.src.actions.build_knowledge.build_knowledge_action import BuildKnowledgeAction
-from agile_bot.bots.base_bot.src.scanners.story_map import (
+from agile_bot.bots.base_bot.src.actions.validate_rules.scanners.story_map import (
     StoryMap, Epic, SubEpic, StoryGroup, Story, Scenario, ScenarioOutline
 )
 from agile_bot.bots.base_bot.test.test_helpers import (

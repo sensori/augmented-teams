@@ -63,7 +63,7 @@ class Rule:
         Returns:
             Scanner class if found and valid, None otherwise.
         """
-        from agile_bot.bots.base_bot.src.bot.scanner_loader import ScannerLoader
+        from agile_bot.bots.base_bot.src.actions.validate_rules.scanners.scanner_loader import ScannerLoader
         
         scanner_loader = ScannerLoader(self._bot_name)
         return scanner_loader.load_scanner(scanner_module_path)

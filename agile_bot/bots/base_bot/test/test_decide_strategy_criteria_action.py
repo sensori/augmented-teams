@@ -103,11 +103,15 @@ def given_strategy_action_is_initialized(bot_directory: Path, bot_name: str, beh
         }
         behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
+    # Create guardrails files (required by Guardrails class initialization)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_directory, behavior_name, bot_name)
+    
     # Create Behavior object
     behavior = Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
     
     # Create StrategyAction with new signature
-    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     base_action_config = BaseActionConfig('decide_strategy', bot_paths)
     
     return DecideStrategyAction(

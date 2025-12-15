@@ -4,7 +4,7 @@ TriggerWords class.
 Handles trigger word matching for behaviors.
 """
 import re
-from typing import List, Union, Dict, Any, Optional
+from typing import List, Dict, Any
 
 
 class TriggerWords:
@@ -16,18 +16,16 @@ class TriggerWords:
         Property: priority
     """
 
-    def __init__(self, behavior_config: Any, behavior: Optional[Any] = None):
+    def __init__(self, behavior_config: Any):
         """Initialize TriggerWords.
         
-        Domain Model: Instantiated with: Behavior, BehaviorConfig
+        Domain Model: Instantiated with: BehaviorConfig
         
         Args:
             behavior_config: BehaviorConfig instance (provides trigger_words property)
-            behavior: Optional Behavior instance (for backward compatibility, can be None)
         """
         # behavior_config expected to provide trigger_words property (BehaviorConfig)
         self._behavior_config = behavior_config
-        self._behavior = behavior
         self._triggers = getattr(behavior_config, "trigger_words", None)
 
     def matches(self, text: str) -> bool:

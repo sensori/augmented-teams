@@ -179,8 +179,13 @@ def then_workspace_area_environment_variable_equals_expected_and_not_different(e
 
 def given_bot_config_and_behavior_exist(bot_directory: Path, bot_name: str, behavior_name: str):
     """Given step: Bot configuration and behavior folder exist."""
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     config_path = create_bot_config_file(bot_directory, bot_name, [behavior_name])
-    create_behavior_folder(bot_directory, behavior_name)
+    # Create behavior.json file
+    create_actions_workflow_json(bot_directory, behavior_name)
+    # Create guardrails files (required by Guardrails class initialization)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_directory, behavior_name, bot_name)
     return config_path
 
 def when_entry_point_bootstraps_from_bot_config(bot_directory: Path):

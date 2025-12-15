@@ -136,11 +136,8 @@ if 'WORKING_AREA' not in os.environ and 'WORKING_DIR' not in os.environ:
     config_path = bot_directory / 'config' / 'bot_config.json'
     if config_path.exists():
         bot_config = json.loads(config_path.read_text(encoding='utf-8'))
-        # Check for WORKING_AREA in bot_config.json (legacy field)
-        if 'WORKING_AREA' in bot_config:
-            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
-        # Also check mcp.env.WORKING_AREA (new location)
-        elif 'mcp' in bot_config and 'env' in bot_config['mcp']:
+        # Check mcp.env.WORKING_AREA (standard location)
+        if 'mcp' in bot_config and 'env' in bot_config['mcp']:
             mcp_env = bot_config['mcp']['env']
             if 'WORKING_AREA' in mcp_env:
                 os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']

@@ -27,11 +27,8 @@ class StrategyCriterias:
         self._load_strategy_criterias()
     
     def _load_strategy_criterias(self):
-        """Load strategy criteria from strategy_criteria/*.json or decision_criteria/*.json files."""
-        # Try strategy_criteria first, then fallback to decision_criteria for backward compatibility
+        """Load strategy criteria from strategy_criteria/*.json files."""
         criteria_dir = self._strategy_dir / 'strategy_criteria'
-        if not criteria_dir.exists() or not criteria_dir.is_dir():
-            criteria_dir = self._strategy_dir / 'decision_criteria'
         
         # If criteria directory doesn't exist, that's okay - no criteria files to load
         if criteria_dir.exists() and criteria_dir.is_dir():

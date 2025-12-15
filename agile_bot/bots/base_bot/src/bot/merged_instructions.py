@@ -66,8 +66,8 @@ class MergedInstructions:
             'base_instructions': self.base_instructions
         }
         
-        # Add render_instructions if available
-        if self.render_instructions:
+        # Add render_instructions if provided (including empty dict)
+        if self.render_instructions is not None:
             merged['render_instructions'] = self.render_instructions
         
         return merged

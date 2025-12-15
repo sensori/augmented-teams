@@ -25,7 +25,7 @@ class Rules:
         Args:
             behavior: Behavior instance to load rules for (behavior-specific rules)
             bot_config: BotConfig instance (for bot-level/common rules)
-            bot_paths: BotPaths instance (for resolving paths)
+            bot_paths: BotPaths instance (for resolving paths) - required when behavior is provided
             
         Note:
             Either behavior or bot_config should be provided, not both.
@@ -34,20 +34,17 @@ class Rules:
         """
         self.behavior = behavior
         self.bot_config = bot_config
-        self.bot_paths = bot_paths
         
         if behavior:
+            if not bot_paths:
+                raise ValueError("bot_paths is required when behavior is provided")
             self.bot_name = behavior.bot_name
             self.behavior_name = behavior.name
-            # Use behavior's bot_paths if not provided
-            if not self.bot_paths and behavior.bot_paths:
-                self.bot_paths = behavior.bot_paths
+            self.bot_paths = bot_paths
         elif bot_config:
             self.bot_name = bot_config.name
             self.behavior_name = 'common'
-            # Use bot_config's bot_paths if not provided
-            if not self.bot_paths and bot_config.bot_paths:
-                self.bot_paths = bot_config.bot_paths
+            self.bot_paths = bot_paths
         else:
             raise ValueError("Either behavior or bot_config must be provided")
         
@@ -198,15 +195,6 @@ class Rules:
         for rule in rules:
             yield rule
     
-    def iterate(self) -> Iterator['Rule']:
-        """Iterate all rules (legacy method, use __iter__ instead).
-        
-        Domain Model: Iterate: Rule
-        
-        Yields:
-            Rule objects in order (bot-level first, then behavior-specific).
-        """
-        yield from self
     
     @property
     def instructions(self) -> Optional['Rule']:

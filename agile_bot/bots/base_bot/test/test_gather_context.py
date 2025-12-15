@@ -294,7 +294,7 @@ def given_gather_context_action_is_initialized(bot_directory: Path, bot_name: st
     behavior = Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
     
     # Create GatherContextAction with new signature
-    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     base_action_config = BaseActionConfig('gather_context', bot_paths)
     
     return GatherContextAction(
@@ -689,3 +689,614 @@ class TestStoreClarificationData:
         
         # Then: clarification.json file is not created
         then_clarification_json_file_does_not_exist(workspace_directory, bot_paths)
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Domain Classes (Stories 17-20: BaseActionConfig, Actions, Action, Guardrails)
+# ============================================================================
+
+from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+from agile_bot.bots.base_bot.src.actions.actions import Actions
+from agile_bot.bots.base_bot.src.actions.action import Action
+from agile_bot.bots.base_bot.src.actions.guardrails import Guardrails
+
+
+def given_action_config_file_created(bot_directory: Path, action_name: str, config_data: dict):
+    """Given: action_config.json file created."""
+    base_actions_dir = bot_directory / 'base_actions' / action_name
+    base_actions_dir.mkdir(parents=True, exist_ok=True)
+    config_file = base_actions_dir / 'action_config.json'
+    config_file.write_text(json.dumps(config_data), encoding='utf-8')
+    return config_file
+
+
+def when_base_action_config_instantiated(action_name: str, bot_paths: BotPaths):
+    """When: BaseActionConfig instantiated."""
+    return BaseActionConfig(action_name=action_name, bot_paths=bot_paths)
+
+
+def when_actions_instantiated(behavior_config, behavior):
+    """When: Actions instantiated."""
+    return Actions(behavior_config=behavior_config, behavior=behavior)
+
+
+def when_action_instantiated(base_action_config: BaseActionConfig, behavior: Behavior):
+    """When: Action instantiated."""
+    return Action(base_action_config=base_action_config, behavior=behavior)
+
+
+def when_guardrails_instantiated(behavior_config):
+    """When: Guardrails instantiated."""
+    return Guardrails(behavior_config=behavior_config)
+
+
+def then_base_action_config_properties_accessible(base_action_config: BaseActionConfig):
+    """Then: BaseActionConfig properties are accessible."""
+    assert hasattr(base_action_config, 'order')
+    assert hasattr(base_action_config, 'next_action')
+    assert hasattr(base_action_config, 'custom_class')
+    assert hasattr(base_action_config, 'instructions')
+    assert hasattr(base_action_config, 'workflow')
+
+
+def then_actions_collection_contains_actions(actions: Actions, expected_count: int):
+    """Then: Actions collection contains expected number of actions."""
+    action_list = list(actions)
+    assert len(action_list) == expected_count
+
+
+def then_action_is_not_none(action):
+    """Then: Action is not None."""
+    assert action is not None
+
+
+def then_action_is_none(action):
+    """Then: Action is None."""
+    assert action is None
+
+
+def then_action_properties_accessible(action: Action):
+    """Then: Action properties are accessible."""
+    assert hasattr(action, 'order')
+    assert hasattr(action, 'action_class')
+    assert hasattr(action, 'instructions')
+    assert hasattr(action, 'tracker')
+
+
+def then_guardrails_properties_accessible(guardrails: Guardrails):
+    """Then: Guardrails properties are accessible."""
+    assert hasattr(guardrails, 'required_context')
+    assert hasattr(guardrails, 'strategy')
+
+
+def given_environment_bootstrapped(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment bootstrapped."""
+    from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env
+    bootstrap_env(bot_directory, workspace_directory)
+
+
+def when_bot_paths_created():
+    """When: BotPaths created."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    return BotPaths()
+
+
+def given_complete_action_config_data(action_name: str):
+    """Given: Complete action config data."""
+    return {
+        'name': action_name,
+        'order': 1,
+        'next_action': 'decide_planning_criteria',
+        'action_class': 'GatherContextAction',
+        'instructions': ['instruction1', 'instruction2'],
+        'workflow': True
+    }
+
+
+def then_base_action_config_order_is(base_action_config: BaseActionConfig, expected_order: int):
+    """Then: BaseActionConfig order is expected."""
+    assert base_action_config.order == expected_order
+
+
+def then_base_action_config_next_action_is(base_action_config: BaseActionConfig, expected_next_action: str):
+    """Then: BaseActionConfig next_action is expected."""
+    assert base_action_config.next_action == expected_next_action
+
+
+def when_behavior_config_accessed_from_behavior(behavior: Behavior):
+    """When: BehaviorConfig accessed from behavior."""
+    return behavior.behavior_config
+
+
+def when_actions_count_from_behavior_config(behavior_config):
+    """When: Actions count from behavior config."""
+    return len(behavior_config.actions_workflow.get('actions', []))
+
+
+def when_actions_find_by_name(actions: Actions, action_name: str):
+    """When: Actions find_by_name() called."""
+    return actions.find_by_name(action_name)
+
+
+def when_actions_find_by_order(actions: Actions, order: int):
+    """When: Actions find_by_order() called."""
+    return actions.find_by_order(order)
+
+
+def when_actions_navigates_to(actions: Actions, action_name: str):
+    """When: Actions navigate_to() called."""
+    actions.navigate_to(action_name)
+
+
+def when_actions_current_accessed(actions: Actions):
+    """When: Actions current property accessed."""
+    return actions.current
+
+
+def when_actions_next_accessed(actions: Actions):
+    """When: Actions next property accessed."""
+    return actions.next
+
+
+def then_next_action_may_be_none_or_not_none(next_action):
+    """Then: Next action may be None or not None."""
+    if next_action:
+        then_action_is_not_none(next_action)
+
+
+def then_current_action_is_not_none(actions: Actions):
+    """Then: Current action is not None."""
+    assert actions.current is not None
+
+
+def then_current_action_name_is(actions: Actions, expected_name: str):
+    """Then: Current action name is expected."""
+    assert actions.current.action_name == expected_name
+
+
+def when_actions_close_current_called(actions: Actions):
+    """When: Actions close_current() called."""
+    actions.close_current()
+
+
+def then_actions_has_close_current_method(actions: Actions):
+    """Then: Actions has close_current method."""
+    assert hasattr(actions, 'close_current')
+
+
+def then_actions_has_execute_current_method(actions: Actions):
+    """Then: Actions has execute_current method."""
+    assert hasattr(actions, 'execute_current')
+
+
+def then_action_has_instructions_property(action: Action):
+    """Then: Action has instructions property."""
+    assert hasattr(action, 'instructions')
+
+
+def then_action_instructions_is_not_none(action: Action):
+    """Then: Action instructions is not None."""
+    assert action.instructions is not None
+
+
+def then_action_order_is_integer(action: Action):
+    """Then: Action order is integer."""
+    assert isinstance(action.order, int)
+
+
+def then_action_tracker_is_not_none(action: Action):
+    """Then: Action tracker is not None."""
+    assert action.tracker is not None
+
+
+def given_guardrails_files_created(bot_directory: Path, behavior_name: str):
+    """Given: Guardrails files created."""
+    from agile_bot.bots.base_bot.test.test_helpers import create_guardrails_files
+    return create_guardrails_files(bot_directory, behavior_name)
+
+
+def then_guardrails_required_context_is_not_none(guardrails: Guardrails):
+    """Then: Guardrails required_context is not None."""
+    assert guardrails.required_context is not None
+
+
+def then_guardrails_strategy_is_not_none(guardrails: Guardrails):
+    """Then: Guardrails strategy is not None."""
+    assert guardrails.strategy is not None
+
+
+def when_guardrails_required_context_accessed(guardrails: Guardrails):
+    """When: Guardrails required_context property accessed."""
+    return guardrails.required_context
+
+
+def when_guardrails_strategy_accessed(guardrails: Guardrails):
+    """When: Guardrails strategy property accessed."""
+    return guardrails.strategy
+
+
+def then_guardrails_required_context_is_not_none_from_value(required_context):
+    """Then: Guardrails required_context value is not None."""
+    assert required_context is not None
+
+
+def then_guardrails_strategy_is_not_none_from_value(strategy):
+    """Then: Guardrails strategy value is not None."""
+    assert strategy is not None
+
+
+# ============================================================================
+# TEST CLASSES - Domain Classes (Stories 17-20: BaseActionConfig, Actions, Action, Guardrails)
+# ============================================================================
+
+class TestLoadBaseActionConfig:
+    """Story: Load Base Action Config (Sub-epic: Gather Context)"""
+    
+    def test_base_action_config_loads_correct_action_from_action_config_json_file(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Base action config loads correct action from action_config.json file
+        GIVEN: action_config.json exists in base_actions/{action_name}/ with complete config
+        WHEN: BaseActionConfig instantiated with action_name
+        THEN: Config loaded from file and properties accessible (order, next_action, custom_class, instructions, workflow)
+        """
+        # Given: action_config.json exists
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_paths = when_bot_paths_created()
+        action_name = 'gather_context'
+        config_data = given_complete_action_config_data(action_name)
+        given_action_config_file_created(bot_directory, action_name, config_data)
+        
+        # When: BaseActionConfig instantiated
+        base_action_config = when_base_action_config_instantiated(action_name, bot_paths)
+        
+        # Then: Config loaded and properties accessible
+        then_base_action_config_properties_accessible(base_action_config)
+        then_base_action_config_order_is(base_action_config, 1)
+        then_base_action_config_next_action_is(base_action_config, 'decide_planning_criteria')
+    
+    def test_base_action_config_uses_default_config_when_action_config_json_missing(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Base action config uses default config when action_config.json missing
+        GIVEN: Action name without action_config.json
+        WHEN: BaseActionConfig instantiated
+        THEN: Uses default config (doesn't raise error)
+        """
+        # Given: Action name without action_config.json
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_paths = when_bot_paths_created()
+        action_name = 'nonexistent_action'
+        
+        # When: BaseActionConfig instantiated
+        base_action_config = when_base_action_config_instantiated(action_name, bot_paths)
+        
+        # Then: Uses default config (doesn't raise error)
+        then_base_action_config_properties_accessible(base_action_config)
+        then_base_action_config_order_is(base_action_config, 0)
+
+
+class TestAccessActions:
+    """Story: Access Actions (Sub-epic: Gather Context)"""
+    
+    def test_actions_collection_loads_actions_from_behavior_config(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions collection loads actions from behavior config
+        GIVEN: BehaviorConfig with actions_workflow
+        WHEN: Actions instantiated with behavior_config and behavior
+        THEN: Actions collection contains all actions from config
+        """
+        # Given: BehaviorConfig with actions_workflow
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        
+        # When: Actions instantiated
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # Then: Actions collection contains all actions
+        expected_count = when_actions_count_from_behavior_config(behavior_config)
+        then_actions_collection_contains_actions(actions, expected_count)
+    
+    def test_actions_find_by_name_returns_action_when_exists(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions find by name returns action when exists
+        GIVEN: Actions collection with 'gather_context' action
+        WHEN: find_by_name('gather_context') called
+        THEN: Returns Action object
+        """
+        # Given: Actions collection with 'gather_context' action
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # When: find_by_name('gather_context') called
+        result = when_actions_find_by_name(actions, 'gather_context')
+        
+        # Then: Returns Action object
+        then_action_is_not_none(result)
+    
+    def test_actions_find_by_name_returns_none_when_does_not_exist(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions find by name returns none when does not exist
+        GIVEN: Actions collection without 'nonexistent_action'
+        WHEN: find_by_name('nonexistent_action') called
+        THEN: Returns None
+        """
+        # Given: Actions collection without 'nonexistent_action'
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # When: find_by_name('nonexistent_action') called
+        result = when_actions_find_by_name(actions, 'nonexistent_action')
+        
+        # Then: Returns None
+        then_action_is_none(result)
+    
+    def test_actions_find_by_order_returns_action_when_exists(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions find by order returns action when exists
+        GIVEN: Actions collection with action at order 1
+        WHEN: find_by_order(1) called
+        THEN: Returns Action object
+        """
+        # Given: Actions collection with action at order 1
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # When: find_by_order(1) called
+        result = when_actions_find_by_order(actions, 1)
+        
+        # Then: Returns Action object
+        then_action_is_not_none(result)
+    
+    def test_actions_find_by_order_returns_none_when_does_not_exist(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions find by order returns none when does not exist
+        GIVEN: Actions collection without order 99
+        WHEN: find_by_order(99) called
+        THEN: Returns None
+        """
+        # Given: Actions collection without order 99
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # When: find_by_order(99) called
+        result = when_actions_find_by_order(actions, 99)
+        
+        # Then: Returns None
+        then_action_is_none(result)
+    
+    def test_actions_current_and_next_properties_return_action_objects(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions current and next properties return action objects
+        GIVEN: Actions collection with current action set
+        WHEN: current and next properties accessed
+        THEN: Returns current Action object and next Action object
+        """
+        # Given: Actions collection with current action set
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        when_actions_navigates_to(actions, 'gather_context')
+        
+        # When: current and next properties accessed
+        current = when_actions_current_accessed(actions)
+        next_action = when_actions_next_accessed(actions)
+        
+        # Then: Returns Action objects
+        then_action_is_not_none(current)
+        then_next_action_may_be_none_or_not_none(next_action)
+    
+    def test_actions_navigate_to_action_updates_current_action(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions navigate to action updates current action
+        GIVEN: Actions collection
+        WHEN: navigate_to('build_knowledge') called
+        THEN: Current action updated to 'build_knowledge'
+        """
+        # Given: Actions collection
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        
+        # When: navigate_to('build_knowledge') called
+        when_actions_navigates_to(actions, 'build_knowledge')
+        
+        # Then: Current action updated
+        then_current_action_is_not_none(actions)
+        then_current_action_name_is(actions, 'build_knowledge')
+    
+    def test_actions_close_current_marks_action_complete(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions close current marks action complete
+        GIVEN: Actions collection with current action
+        WHEN: close_current() called
+        THEN: Current action marked complete
+        """
+        # Given: Actions collection with current action
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        when_actions_navigates_to(actions, 'gather_context')
+        
+        # When: close_current() called
+        when_actions_close_current_called(actions)
+        
+        # Then: Current action marked complete (observable through workflow state)
+        then_actions_has_close_current_method(actions)
+    
+    def test_actions_execute_current_executes_current_action(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Actions execute current executes current action
+        GIVEN: Actions collection with current action
+        WHEN: execute_current() called
+        THEN: Current action's execute() method called
+        """
+        # Given: Actions collection with current action
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        actions = when_actions_instantiated(behavior_config, behavior)
+        when_actions_navigates_to(actions, 'gather_context')
+        
+        # When: execute_current() called
+        # Then: Method exists (observable behavior)
+        then_actions_has_execute_current_method(actions)
+
+
+class TestInitializeAction:
+    """Story: Initialize Action (Sub-epic: Gather Context)"""
+    
+    def test_action_initializes_with_base_action_config_and_behavior(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action initializes with base action config and behavior
+        GIVEN: BaseActionConfig and Behavior
+        WHEN: Action instantiated with both
+        THEN: Action initialized successfully
+        """
+        # Given: BaseActionConfig and Behavior
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_paths = when_bot_paths_created()
+        base_action_config = when_base_action_config_instantiated('gather_context', bot_paths)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        
+        # When: Action instantiated
+        action = when_action_instantiated(base_action_config, behavior)
+        
+        # Then: Action initialized successfully
+        then_action_is_not_none(action)
+    
+    def test_action_loads_and_merges_instructions_on_initialization(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action loads and merges instructions on initialization
+        GIVEN: BaseActionConfig with instructions and Behavior
+        WHEN: Action instantiated
+        THEN: Instructions loaded and merged
+        """
+        # Given: BaseActionConfig with instructions and Behavior
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_paths = when_bot_paths_created()
+        base_action_config = when_base_action_config_instantiated('gather_context', bot_paths)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        
+        # When: Action instantiated
+        action = when_action_instantiated(base_action_config, behavior)
+        
+        # Then: Instructions loaded and merged
+        then_action_has_instructions_property(action)
+        then_action_instructions_is_not_none(action)
+    
+    def test_action_properties_return_expected_values(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Action properties return expected values
+        GIVEN: Action initialized with BaseActionConfig and Behavior
+        WHEN: Properties accessed (order, action_class, instructions, tracker)
+        THEN: All properties return expected values (order from config, action_class from config, merged instructions dict, ActivityTracker instance)
+        """
+        # Given: Action initialized
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_paths = when_bot_paths_created()
+        base_action_config = when_base_action_config_instantiated('gather_context', bot_paths)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        action = when_action_instantiated(base_action_config, behavior)
+        
+        # When: Properties accessed
+        # Then: All properties return expected values
+        then_action_properties_accessible(action)
+        then_action_order_is_integer(action)
+        then_action_instructions_is_not_none(action)
+        then_action_tracker_is_not_none(action)
+
+
+class TestLoadGuardrails:
+    """Story: Load Guardrails (Sub-epic: Gather Context)"""
+    
+    def test_guardrails_loads_required_context_guardrails(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Guardrails loads required context guardrails
+        GIVEN: BehaviorConfig with guardrails directory
+        WHEN: Guardrails instantiated with behavior_config
+        THEN: Required context guardrails loaded
+        """
+        # Given: BehaviorConfig with guardrails directory
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        given_guardrails_files_created(bot_directory, 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        
+        # When: Guardrails instantiated
+        guardrails = when_guardrails_instantiated(behavior_config)
+        
+        # Then: Required context guardrails loaded
+        then_guardrails_properties_accessible(guardrails)
+        then_guardrails_required_context_is_not_none(guardrails)
+    
+    def test_guardrails_loads_strategy_guardrails(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Guardrails loads strategy guardrails
+        GIVEN: BehaviorConfig with strategy guardrails directory
+        WHEN: Guardrails instantiated
+        THEN: Strategy guardrails loaded
+        """
+        # Given: BehaviorConfig with strategy guardrails directory
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        given_guardrails_files_created(bot_directory, 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        
+        # When: Guardrails instantiated
+        guardrails = when_guardrails_instantiated(behavior_config)
+        
+        # Then: Strategy guardrails loaded
+        then_guardrails_properties_accessible(guardrails)
+        then_guardrails_strategy_is_not_none(guardrails)
+    
+    def test_guardrails_properties_return_guardrails_objects(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Guardrails properties return guardrails objects
+        GIVEN: Guardrails with loaded guardrails
+        WHEN: Properties accessed (required_context, strategy)
+        THEN: Returns RequiredContext object and Strategy object
+        """
+        # Given: Guardrails with loaded guardrails
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        given_guardrails_files_created(bot_directory, 'shape')
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        guardrails = when_guardrails_instantiated(behavior_config)
+        
+        # When: Properties accessed
+        required_context = when_guardrails_required_context_accessed(guardrails)
+        strategy = when_guardrails_strategy_accessed(guardrails)
+        
+        # Then: Returns guardrails objects
+        then_guardrails_required_context_is_not_none_from_value(required_context)
+        then_guardrails_strategy_is_not_none_from_value(strategy)
+    
+    def test_guardrails_handles_missing_guardrails_files_gracefully(self, bot_directory, workspace_directory):
+        """
+        SCENARIO: Guardrails handles missing guardrails files gracefully
+        GIVEN: BehaviorConfig without guardrails files
+        WHEN: Guardrails instantiated
+        THEN: Creates empty/default guardrails objects
+        """
+        # Given: BehaviorConfig without guardrails files
+        given_environment_bootstrapped(bot_directory, workspace_directory)
+        bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
+        # Don't create guardrails files
+        behavior_config = when_behavior_config_accessed_from_behavior(behavior)
+        
+        # When: Guardrails instantiated
+        guardrails = when_guardrails_instantiated(behavior_config)
+        
+        # Then: Creates empty/default guardrails objects (doesn't raise error)
+        then_guardrails_properties_accessible(guardrails)

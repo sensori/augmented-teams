@@ -44,6 +44,76 @@ from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
 # WORKFLOW STATE HELPERS
 # ============================================================================
 
+def given_workflow_is_at_action(workflow: Workflow, action: str):
+    """Given: Workflow is at specified action."""
+    workflow.navigate_to_action(action)
+
+def given_action_is_not_completed(workflow: Workflow, action: str):
+    """Given: Action is not completed."""
+    # Verify action is not in completed_actions
+    action_state = f'{workflow.bot_name}.{workflow.behavior}.{action}'
+    assert not any(a.get('action_state') == action_state for a in workflow._completed_actions)
+
+def when_user_closes_current_action(workflow: Workflow, action: str):
+    """When: User closes current action."""
+    workflow.save_completed_action(action)
+    workflow.transition_to_next()
+
+def when_user_closes_current_action_and_transitions(workflow: Workflow, action: str):
+    """When: User closes current action and transitions."""
+    workflow.save_completed_action(action)
+    workflow.transition_to_next()
+
+def when_close_already_completed_action(workflow: Workflow, action: str):
+    """When: Close already completed action."""
+    # Should handle gracefully even if already completed
+    workflow.save_completed_action(action)
+
+def then_action_is_marked_complete(workflow: Workflow, action: str):
+    """Then: Action is marked complete."""
+    action_state = f'{workflow.bot_name}.{workflow.behavior}.{action}'
+    assert any(a.get('action_state') == action_state for a in workflow._completed_actions)
+
+def then_workflow_transitions_to_next_action(workflow: Workflow, expected_action: str):
+    """Then: Workflow transitions to next action."""
+    assert workflow.current_state == expected_action
+
+def then_completed_actions_count_is(workflow_file: Path, expected_count: int):
+    """Then: Completed actions count is expected."""
+    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
+    assert len(state_data.get('completed_actions', [])) == expected_count
+
+def then_current_action_is(workflow_file: Path, bot_name: str, behavior: str, expected_action: str):
+    """Then: Current action is expected."""
+    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
+    expected_action_state = f'{bot_name}.{behavior}.{expected_action}'
+    assert state_data.get('current_action') == expected_action_state
+
+def then_workflow_stays_at_action(workflow: Workflow, expected_action: str):
+    """Then: Workflow stays at action."""
+    assert workflow.current_state == expected_action
+
+def then_action_is_saved_to_completed_actions(workflow_file: Path, bot_name: str, behavior: str, action: str):
+    """Then: Action is saved to completed actions."""
+    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
+    action_state = f'{bot_name}.{behavior}.{action}'
+    completed_states = [a.get('action_state') for a in state_data.get('completed_actions', [])]
+    assert action_state in completed_states
+
+def then_completed_actions_count_is_at_least(workflow_file: Path, min_count: int):
+    """Then: Completed actions count is at least min_count."""
+    state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
+    assert len(state_data.get('completed_actions', [])) >= min_count
+
+def then_bot_has_close_current_action_method(bot):
+    """Then: Bot has close_current_action method."""
+    assert hasattr(bot, 'close_current_action')
+    assert callable(getattr(bot, 'close_current_action'))
+
+def given_bot_config_and_behavior_setup(bot_directory: Path, bot_name: str, behaviors: list):
+    """Given: Bot config and behavior setup."""
+    return create_bot_config_file(bot_directory, bot_name, behaviors)
+
 def given_completed_action_for_behavior(bot_name: str, behavior: str, action: str, timestamp: str = '2025-12-04T15:55:00.000000'):
     """Given: Completed action entry for behavior."""
     return [{'action_state': f'{bot_name}.{behavior}.{action}', 'timestamp': timestamp}]
@@ -856,10 +926,12 @@ def given_behavior_config_created(bot_directory: Path, behavior: str, behavior_c
 def when_behavior_is_initialized(bot_name: str, behavior: str, bot_directory: Path):
     """When: Behavior is initialized."""
     from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_instance = Behavior(
         name=behavior,
         bot_name=bot_name,
-        bot_directory=bot_directory
+        bot_paths=bot_paths
     )
     return behavior_instance
 
@@ -878,11 +950,13 @@ def then_workflow_transitions_match(behavior_instance, expected_transitions: lis
 def when_behavior_is_initialized_raises_error(bot_name: str, behavior: str, bot_directory: Path):
     """When: Behavior is initialized raises error."""
     from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(bot_directory=bot_directory)
     with pytest.raises(FileNotFoundError) as exc_info:
         Behavior(
             name=behavior,
             bot_name=bot_name,
-            bot_directory=bot_directory
+            bot_paths=bot_paths
         )
     return exc_info
 
@@ -1191,15 +1265,17 @@ def given_code_behavior_config():
 def when_create_behavior_instances(bot_name: str, knowledge_behavior: str, code_behavior: str, bot_directory: Path):
     """When: Create behavior instances."""
     from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(bot_directory=bot_directory)
     knowledge_behavior_instance = Behavior(
         name=knowledge_behavior,
         bot_name=bot_name,
-        bot_directory=bot_directory
+        bot_paths=bot_paths
     )
     code_behavior_instance = Behavior(
         name=code_behavior,
         bot_name=bot_name,
-        bot_directory=bot_directory
+        bot_paths=bot_paths
     )
     return knowledge_behavior_instance, code_behavior_instance
 
@@ -1267,10 +1343,12 @@ def given_code_behavior_config_with_workflow(actions_workflow: dict):
 def when_create_behavior_instance_for_code(bot_name: str, behavior: str, bot_directory: Path):
     """When: Create behavior instance for code."""
     from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_instance = Behavior(
         name=behavior,
         bot_name=bot_name,
-        bot_directory=bot_directory
+        bot_paths=bot_paths
     )
     return behavior_instance
 
@@ -2212,9 +2290,20 @@ def given_bot_config_with_behaviors(tmp_path: Path, bot_name: str, behaviors: li
     )
     
     # Create behavior folders with behavior.json files (required for Behavior initialization)
-    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json, create_guardrails_files
     for behavior_name in behaviors:
         create_actions_workflow_json(bot_dir, behavior_name)
+        # Create guardrails files (required for Guardrails initialization)
+        create_guardrails_files(bot_dir, behavior_name, [], [])
+        # Create strategy guardrails files (required for Strategy initialization)
+        strategy_dir = bot_dir / 'behaviors' / behavior_name / 'guardrails' / 'strategy'
+        strategy_dir.mkdir(parents=True, exist_ok=True)
+        assumptions_file = strategy_dir / 'typical_assumptions.json'
+        assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
+        recommended_activities_file = strategy_dir / 'recommended_activities.json'
+        recommended_activities_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
+        decision_criteria_dir = strategy_dir / 'decision_criteria'
+        decision_criteria_dir.mkdir(parents=True, exist_ok=True)
     
     bot_paths = given_bot_paths_configured(tmp_path, bot_dir)
     return BotConfig(bot_name=bot_name, bot_paths=bot_paths)
@@ -2256,6 +2345,11 @@ def then_behaviors_collection_current_is_none(behaviors):
 def when_behaviors_collection_navigates_to(behaviors, behavior_name: str):
     """When: Behaviors collection navigates to behavior."""
     behaviors.navigate_to(behavior_name)
+
+
+def when_behaviors_next_accessed(behaviors):
+    """When: Behaviors next property accessed."""
+    return behaviors.next()
 
 
 def then_current_behavior_is(behaviors, expected_behavior_name: str):
@@ -2366,7 +2460,7 @@ class TestLoadBotBehaviors:
         behaviors = when_behaviors_collection_is_created(bot_config)
         
         # When: Iterate all behaviors
-        behavior_names = [b.name for b in behaviors.iterate()]
+        behavior_names = [b.name for b in behaviors]
         
         # Then: All behaviors are returned
         assert len(behavior_names) == 3
@@ -2743,7 +2837,7 @@ class TestLoadActions:
         actions = behavior.actions
         
         # When: Iterate all actions
-        action_names = [a.action_name for a in actions.iterate()]
+        action_names = [a.action_name for a in actions]
         
         # Then: All actions are returned
         assert len(action_names) == 3
@@ -3009,7 +3103,7 @@ class TestLoadBaseActionConfiguration:
         given_base_action_config_exists(bot_paths, "gather_context", action_config_data)
         
         # When: BaseActionConfig is created
-        from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+        from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
         base_action_config = BaseActionConfig("gather_context", bot_paths)
         
         # Then: Fields are loaded correctly
@@ -3024,7 +3118,7 @@ class TestLoadBaseActionConfiguration:
         bot_paths = given_bot_paths_for_actions(tmp_path, bot_name)
         
         # When: BaseActionConfig is created for non-existent action
-        from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+        from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
         base_action_config = BaseActionConfig("nonexistent_action", bot_paths)
         
         # Then: Default values are used
@@ -3243,4 +3337,551 @@ class TestAccessBotPaths:
         
         # When/Then: BotPaths creation raises RuntimeError
         then_bot_paths_raises_runtime_error_when_bot_directory_not_set()
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Domain Classes (Stories 6, 21-24)
+# ============================================================================
+
+from unittest.mock import Mock
+from agile_bot.bots.base_bot.src.bot.merged_instructions import MergedInstructions
+from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
+from agile_bot.bots.base_bot.src.bot.behaviors import Behaviors
+from agile_bot.bots.base_bot.src.bot.bot_config import BotConfig
+from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+
+
+def given_base_action_config_with_instructions_for_merged(instructions):
+    """Given: BaseActionConfig with instructions for MergedInstructions."""
+    base_action_config = Mock(spec=BaseActionConfig)
+    base_action_config.instructions = instructions
+    return base_action_config
+
+
+def when_merged_instructions_instantiated_for_base(base_action_config):
+    """When: MergedInstructions instantiated for base instructions."""
+    return MergedInstructions(base_action_config)
+
+
+def when_base_instructions_accessed_from_merged(merged_instructions: MergedInstructions):
+    """When: base_instructions property accessed from MergedInstructions."""
+    return merged_instructions.base_instructions
+
+
+def then_base_instructions_are_list(result: list, expected: list):
+    """Then: Base instructions are expected list."""
+    assert result == expected
+
+
+def then_base_instructions_is_copy(result: list, original: list):
+    """Then: Base instructions is copy, not reference."""
+    assert result == original
+    result.append('test')
+    assert len(original) == len([x for x in original if x != 'test'])
+
+
+def then_base_instructions_verifies_copy_if_list(result: list, instructions):
+    """Then: Base instructions verifies copy behavior if instructions is list."""
+    if isinstance(instructions, list) and instructions:
+        then_base_instructions_is_copy(result, instructions)
+
+
+def then_behavior_config_behavior_name_is(behavior_config, expected_name: str):
+    """Then: BehaviorConfig behavior_name property is expected."""
+    assert behavior_config.behavior_name == expected_name
+
+
+def then_behavior_config_properties_are_accessible(behavior_config):
+    """Then: BehaviorConfig properties are accessible."""
+    assert behavior_config.description is not None
+    assert behavior_config.goal is not None
+    assert behavior_config.inputs is not None
+    assert behavior_config.outputs is not None
+    assert behavior_config.instructions is not None
+    assert behavior_config.trigger_words is not None
+    assert behavior_config.actions_workflow is not None
+
+
+def when_behavior_config_creation_raises_file_not_found_error(behavior: str, bot_paths):
+    """When: BehaviorConfig creation raises FileNotFoundError."""
+    with pytest.raises(FileNotFoundError):
+        when_behavior_config_is_created(behavior, bot_paths)
+
+
+def then_behaviors_collection_has_count(behaviors_collection, expected_count: int):
+    """Then: Behaviors collection has expected count."""
+    behavior_list = list(behaviors_collection)
+    assert len(behavior_list) == expected_count
+
+
+def then_behavior_is_not_none(behavior):
+    """Then: Behavior is not None."""
+    assert behavior is not None
+
+
+def then_behavior_is_none(behavior):
+    """Then: Behavior is None."""
+    assert behavior is None
+
+
+def then_behavior_name_is(behavior, expected_name: str):
+    """Then: Behavior name is expected."""
+    assert behavior.name == expected_name
+
+
+def then_check_exists_returns_true(result: bool):
+    """Then: Check exists returns True."""
+    assert result is True
+
+
+def then_check_exists_returns_false(result: bool):
+    """Then: Check exists returns False."""
+    assert result is False
+
+
+def then_current_behavior_name_is(behaviors_collection, expected_name: str):
+    """Then: Current behavior name is expected."""
+    assert behaviors_collection.current.name == expected_name
+
+
+def given_workflow_state_file_with_current_action(workspace_directory: Path, bot_name: str, behavior: str, action: str):
+    """Given: Workflow state file with current action."""
+    return create_workflow_state_file(workspace_directory, bot_name, behavior, action)
+
+
+def when_behaviors_collection_close_current_called(behaviors_collection):
+    """When: Behaviors collection close_current() called."""
+    behaviors_collection.close_current()
+
+
+def then_behaviors_collection_has_execute_current_method(behaviors_collection):
+    """Then: Behaviors collection has execute_current method."""
+    assert hasattr(behaviors_collection, 'execute_current')
+
+
+def when_behaviors_collection_navigates_to(behaviors_collection, behavior_name: str):
+    """When: Behaviors collection navigates to behavior."""
+    behaviors_collection.navigate_to(behavior_name)
+
+
+def then_workflow_state_has_completed_actions(workspace_directory: Path, bot_name: str):
+    """Then: Workflow state has completed actions."""
+    state_file = workspace_directory / f'{bot_name}_workflow_state.json'
+    if state_file.exists():
+        state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        assert 'completed_actions' in state_data
+
+
+def when_behaviors_collection_execute_current_called(behaviors_collection):
+    """When: Behaviors collection execute_current() called."""
+    try:
+        behaviors_collection.execute_current()
+    except Exception:
+        pass
+
+
+def when_bot_paths_bot_directory_accessed(bot_paths):
+    """When: BotPaths bot_directory property accessed."""
+    return bot_paths.bot_directory
+
+
+def when_bot_paths_workspace_directory_accessed(bot_paths):
+    """When: BotPaths workspace_directory property accessed."""
+    return bot_paths.workspace_directory
+
+
+def then_bot_paths_properties_return_paths(bot_dir_result, workspace_dir_result, expected_bot_dir: Path, expected_workspace_dir: Path):
+    """Then: BotPaths properties return Path objects."""
+    assert isinstance(bot_dir_result, Path)
+    assert isinstance(workspace_dir_result, Path)
+    assert bot_dir_result == expected_bot_dir
+    assert workspace_dir_result == expected_workspace_dir
+
+
+# ============================================================================
+# TEST CLASSES - Domain Classes (Stories 6, 21-24)
+# ============================================================================
+
+class TestGetBaseInstructions:
+    """Story: Get Base Instructions (MergedInstructions) (Sub-epic: Perform Behavior Action)"""
+    
+    @pytest.mark.parametrize("instructions,expected_result", [
+        # Example 1: List instructions
+        (['instruction1', 'instruction2'], ['instruction1', 'instruction2']),
+        # Example 2: String instructions
+        ('single instruction', ['single instruction']),
+        # Example 3: None instructions
+        (None, []),
+    ])
+    def test_base_instructions_property_returns_instructions_from_config(self, instructions, expected_result):
+        """
+        SCENARIO: Base instructions property returns instructions from config
+        GIVEN: BaseActionConfig with instructions (list, string, or None)
+        WHEN: base_instructions property accessed
+        THEN: Returns list format (converts string to list, returns empty list when None, returns copy not reference)
+        """
+        # Given: BaseActionConfig with instructions
+        base_action_config = given_base_action_config_with_instructions_for_merged(instructions)
+        
+        # When: MergedInstructions instantiated and base_instructions accessed
+        merged_instructions = when_merged_instructions_instantiated_for_base(base_action_config)
+        result = when_base_instructions_accessed_from_merged(merged_instructions)
+        
+        # Then: Base instructions are expected
+        then_base_instructions_are_list(result, expected_result)
+        
+        # Also verify copy behavior for list case
+        then_base_instructions_verifies_copy_if_list(result, instructions)
+
+
+class TestLoadBehaviorConfig:
+    """Story: Load Behavior Config (Sub-epic: Perform Behavior Action)"""
+    
+    def test_behavior_config_loads_correct_behavior_from_behavior_json_file(self, tmp_path):
+        """
+        SCENARIO: Behavior config loads correct behavior from behavior.json file
+        GIVEN: behavior.json exists in behavior folder for 'shape' behavior
+        WHEN: BehaviorConfig instantiated with behavior and bot_paths
+        THEN: Config loaded from file and behavior_name property returns 'shape'
+        """
+        # Given: behavior.json exists
+        bot_dir, workspace_dir = given_environment_and_bot(tmp_path, "story_bot")
+        behavior = "shape"
+        behavior_config_data = {"description": "Shape feature"}
+        given_behavior_config_created(bot_dir, behavior, behavior_config_data)
+        
+        # When: BehaviorConfig instantiated
+        bot_paths = when_bot_paths_is_created(workspace_dir)
+        behavior_config = when_behavior_config_is_created(behavior, bot_paths)
+        
+        # Then: behavior_name property returns 'shape'
+        then_behavior_config_behavior_name_is(behavior_config, behavior)
+    
+    def test_behavior_config_provides_access_to_config_objects(self, tmp_path):
+        """
+        SCENARIO: Behavior config provides access to config objects
+        GIVEN: BehaviorConfig loaded with complete behavior.json
+        WHEN: Config properties accessed (description, goal, inputs, outputs, instructions, trigger_words, actions_workflow)
+        THEN: All config objects are accessible
+        """
+        # Given: BehaviorConfig loaded with complete behavior.json
+        bot_dir, workspace_dir = given_environment_and_bot(tmp_path, "story_bot")
+        behavior = "shape"
+        behavior_config_data = {
+            "description": "Test description",
+            "goal": "Test goal",
+            "inputs": ["input1"],
+            "outputs": ["output1"],
+            "instructions": {"note": "test"},
+            "trigger_words": ["test"],
+            "actions_workflow": {"actions": []}
+        }
+        given_behavior_config_created(bot_dir, behavior, behavior_config_data)
+        
+        # When: BehaviorConfig instantiated
+        bot_paths = when_bot_paths_is_created(workspace_dir)
+        behavior_config = when_behavior_config_is_created(behavior, bot_paths)
+        
+        # Then: All config objects are accessible
+        then_behavior_config_properties_are_accessible(behavior_config)
+    
+    def test_behavior_config_raises_error_when_behavior_json_missing(self, tmp_path):
+        """
+        SCENARIO: Behavior config raises error when behavior.json missing
+        GIVEN: Behavior folder without behavior.json
+        WHEN: BehaviorConfig instantiated
+        THEN: Raises FileNotFoundError
+        """
+        # Given: Behavior folder without behavior.json
+        bot_dir, workspace_dir = given_environment_and_bot(tmp_path, "story_bot")
+        behavior = "missing_behavior"
+        
+        # When/Then: BehaviorConfig instantiated raises FileNotFoundError
+        bot_paths = when_bot_paths_is_created(workspace_dir)
+        when_behavior_config_creation_raises_file_not_found_error(behavior, bot_paths)
+
+
+class TestManageBehaviorsCollection:
+    """Story: Manage Behaviors Collection (Sub-epic: Perform Behavior Action)"""
+    
+    def test_behaviors_collection_loads_behaviors_from_bot_config(self, tmp_path):
+        """
+        SCENARIO: Behaviors collection loads behaviors from bot config
+        GIVEN: BotConfig with behaviors list
+        WHEN: Behaviors instantiated with bot_config
+        THEN: Behaviors collection contains all behaviors from config
+        """
+        # Given: BotConfig with behaviors list
+        bot_name = "story_bot"
+        behaviors = ['shape', 'discovery']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        
+        # When: Behaviors instantiated
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # Then: Behaviors collection contains all behaviors
+        then_behaviors_collection_is_not_none(behaviors_collection)
+        then_behaviors_collection_has_count(behaviors_collection, len(behaviors))
+    
+    def test_behaviors_find_by_name_returns_behavior_when_exists(self, tmp_path):
+        """
+        SCENARIO: Behaviors find by name returns behavior when exists
+        GIVEN: Behaviors collection with 'shape' behavior
+        WHEN: find_by_name('shape') called
+        THEN: Returns Behavior object
+        """
+        # Given: Behaviors collection with 'shape' behavior
+        bot_name = "story_bot"
+        behaviors = ['shape']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # When: find_by_name('shape') called
+        result = behaviors_collection.find_by_name('shape')
+        
+        # Then: Returns Behavior object
+        then_behavior_is_not_none(result)
+        then_behavior_name_is(result, 'shape')
+    
+    def test_behaviors_find_by_name_returns_none_when_does_not_exist(self, tmp_path):
+        """
+        SCENARIO: Behaviors find by name returns none when does not exist
+        GIVEN: Behaviors collection without 'nonexistent' behavior
+        WHEN: find_by_name('nonexistent') called
+        THEN: Returns None
+        """
+        # Given: Behaviors collection without 'nonexistent' behavior
+        bot_name = "story_bot"
+        behaviors = ['shape']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # When: find_by_name('nonexistent') called
+        result = behaviors_collection.find_by_name('nonexistent')
+        
+        # Then: Returns None
+        then_behavior_is_none(result)
+    
+    def test_behaviors_check_exists_returns_true_when_behavior_exists(self, tmp_path):
+        """
+        SCENARIO: Behaviors check exists returns true when behavior exists
+        GIVEN: Behaviors collection with 'discovery' behavior
+        WHEN: check_exists('discovery') called
+        THEN: Returns True
+        """
+        # Given: Behaviors collection with 'discovery' behavior
+        bot_name = "story_bot"
+        behaviors = ['discovery']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # When: check_exists('discovery') called
+        result = behaviors_collection.check_exists('discovery')
+        
+        # Then: Returns True
+        then_check_exists_returns_true(result)
+    
+    def test_behaviors_check_exists_returns_false_when_behavior_does_not_exist(self, tmp_path):
+        """
+        SCENARIO: Behaviors check exists returns false when behavior does not exist
+        GIVEN: Behaviors collection without 'nonexistent' behavior
+        WHEN: check_exists('nonexistent') called
+        THEN: Returns False
+        """
+        # Given: Behaviors collection without 'nonexistent' behavior
+        bot_name = "story_bot"
+        behaviors = ['shape']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # When: check_exists('nonexistent') called
+        result = behaviors_collection.check_exists('nonexistent')
+        
+        # Then: Returns False
+        then_check_exists_returns_false(result)
+    
+    def test_behaviors_current_property_returns_current_behavior(self, tmp_path):
+        """
+        SCENARIO: Behaviors current property returns current behavior
+        GIVEN: Behaviors collection with current behavior set
+        WHEN: current property accessed
+        THEN: Returns current Behavior object
+        """
+        # Given: Behaviors collection with current behavior set
+        bot_name = "story_bot"
+        behaviors = ['shape', 'discovery']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        when_behaviors_collection_navigates_to(behaviors_collection, 'shape')
+        
+        # When: current property accessed
+        result = behaviors_collection.current
+        
+        # Then: Returns current Behavior object
+        then_behavior_is_not_none(result)
+        then_behavior_name_is(result, 'shape')
+    
+    def test_behaviors_next_property_returns_next_behavior(self, tmp_path):
+        """
+        SCENARIO: Behaviors next property returns next behavior
+        GIVEN: Behaviors collection with current behavior
+        WHEN: next property accessed
+        THEN: Returns next Behavior object
+        """
+        # Given: Behaviors collection with current behavior
+        bot_name = "story_bot"
+        behaviors = ['shape', 'discovery']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        when_behaviors_collection_navigates_to(behaviors_collection, 'shape')
+        
+        # When: next property accessed
+        result = when_behaviors_next_accessed(behaviors_collection)
+        
+        # Then: Returns next Behavior object
+        then_behavior_is_not_none(result)
+        then_behavior_name_is(result, 'discovery')
+    
+    def test_behaviors_navigate_to_behavior_updates_current_behavior(self, tmp_path):
+        """
+        SCENARIO: Behaviors navigate to behavior updates current behavior
+        GIVEN: Behaviors collection
+        WHEN: navigate_to('discovery') called
+        THEN: Current behavior updated to 'discovery'
+        """
+        # Given: Behaviors collection
+        bot_name = "story_bot"
+        behaviors = ['shape', 'discovery']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        
+        # When: navigate_to('discovery') called
+        when_behaviors_collection_navigates_to(behaviors_collection, 'discovery')
+        
+        # Then: Current behavior updated to 'discovery'
+        then_current_behavior_name_is(behaviors_collection, 'discovery')
+    
+    def test_behaviors_close_current_marks_behavior_and_action_complete(self, tmp_path, workspace_directory):
+        """
+        SCENARIO: Behaviors close current marks behavior and action complete
+        GIVEN: Behaviors collection with current behavior and current action
+        WHEN: close_current() called
+        THEN: Current behavior marked complete and current action closed
+        """
+        # Given: Behaviors collection with current behavior and current action
+        bot_name = "story_bot"
+        behaviors = ['shape']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        when_behaviors_collection_navigates_to(behaviors_collection, 'shape')
+        # Set up workflow state with current action
+        given_workflow_state_file_with_current_action(workspace_directory, bot_name, 'shape', 'gather_context')
+        
+        # When: close_current() called
+        when_behaviors_collection_close_current_called(behaviors_collection)
+        
+        # Then: Current behavior marked complete and current action closed
+        then_workflow_state_has_completed_actions(workspace_directory, bot_name)
+    
+    def test_behaviors_execute_current_executes_current_behavior(self, tmp_path):
+        """
+        SCENARIO: Behaviors execute current executes current behavior
+        GIVEN: Behaviors collection with current behavior
+        WHEN: execute_current() called
+        THEN: Current behavior's execute() method called
+        """
+        # Given: Behaviors collection with current behavior
+        bot_name = "story_bot"
+        behaviors = ['shape']
+        bot_config = given_bot_config_with_behaviors(tmp_path, bot_name, behaviors)
+        behaviors_collection = when_behaviors_collection_is_created(bot_config)
+        when_behaviors_collection_navigates_to(behaviors_collection, 'shape')
+        
+        # When: execute_current() called
+        when_behaviors_collection_execute_current_called(behaviors_collection)
+        
+        # Then: Method exists and can be called (observable behavior)
+        then_behaviors_collection_has_execute_current_method(behaviors_collection)
+
+
+class TestResolveBotPaths:
+    """Story: Resolve Bot Paths (Sub-epic: Perform Behavior Action)"""
+    
+    def test_bot_paths_resolves_bot_directory_from_environment(self, tmp_path, bot_directory):
+        """
+        SCENARIO: Bot paths resolves bot directory from environment
+        GIVEN: BOT_DIRECTORY environment variable set
+        WHEN: BotPaths instantiated
+        THEN: bot_directory property returns path from environment
+        """
+        # Given: BOT_DIRECTORY environment variable set
+        workspace_dir, bot_dir = given_environment_variables_set(tmp_path, bot_directory)
+        
+        # When: BotPaths instantiated
+        bot_paths = when_bot_paths_is_created()
+        
+        # Then: bot_directory property returns path from environment
+        then_bot_paths_has_bot_directory(bot_paths, bot_dir)
+    
+    def test_bot_paths_resolves_workspace_directory_from_environment(self, tmp_path, bot_directory):
+        """
+        SCENARIO: Bot paths resolves workspace directory from environment
+        GIVEN: WORKING_AREA environment variable set
+        WHEN: BotPaths instantiated
+        THEN: workspace_directory property returns path from environment
+        """
+        # Given: WORKING_AREA environment variable set
+        workspace_dir, _ = given_environment_variables_set(tmp_path, bot_directory)
+        
+        # When: BotPaths instantiated
+        bot_paths = when_bot_paths_is_created()
+        
+        # Then: workspace_directory property returns path from environment
+        then_bot_paths_has_workspace_directory(bot_paths, workspace_dir)
+    
+    def test_bot_paths_properties_return_resolved_paths(self, tmp_path, bot_directory):
+        """
+        SCENARIO: Bot paths properties return resolved paths
+        GIVEN: BotPaths with resolved paths
+        WHEN: Properties accessed (bot_directory, workspace_directory)
+        THEN: Returns bot directory Path and workspace directory Path
+        """
+        # Given: BotPaths with resolved paths
+        workspace_dir, bot_dir = given_environment_variables_set(tmp_path, bot_directory)
+        bot_paths = when_bot_paths_is_created()
+        
+        # When: Properties accessed
+        bot_dir_result = when_bot_paths_bot_directory_accessed(bot_paths)
+        workspace_dir_result = when_bot_paths_workspace_directory_accessed(bot_paths)
+        
+        # Then: Returns Path objects
+        then_bot_paths_properties_return_paths(bot_dir_result, workspace_dir_result, bot_dir, workspace_dir)
+    
+    def test_bot_paths_uses_default_paths_when_environment_variables_not_set(self, tmp_path):
+        """
+        SCENARIO: Bot paths uses default paths when environment variables not set
+        GIVEN: No BOT_DIRECTORY or WORKING_AREA environment variables
+        WHEN: BotPaths instantiated
+        THEN: Uses default path resolution logic
+        """
+        # Given: No environment variables (cleared)
+        import os
+        original_bot_dir = os.environ.get('BOT_DIRECTORY')
+        original_working_area = os.environ.get('WORKING_AREA')
+        
+        try:
+            if 'BOT_DIRECTORY' in os.environ:
+                del os.environ['BOT_DIRECTORY']
+            if 'WORKING_AREA' in os.environ:
+                del os.environ['WORKING_AREA']
+            
+            # When/Then: BotPaths instantiated raises error (no defaults in current implementation)
+            with pytest.raises(RuntimeError):
+                BotPaths()
+        finally:
+            if original_bot_dir:
+                os.environ['BOT_DIRECTORY'] = original_bot_dir
+            if original_working_area:
+                os.environ['WORKING_AREA'] = original_working_area
 

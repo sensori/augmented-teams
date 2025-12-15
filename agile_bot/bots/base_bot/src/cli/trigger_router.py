@@ -27,7 +27,7 @@ class TriggerRouter:
         self._bot_registry = self._load_bot_registry()
         
         if bot_name:
-            # Single-bot mode (for backward compatibility)
+            # Single-bot mode
             self._bot_triggers = {bot_name: self._load_bot_triggers(bot_name)}
             self._behavior_triggers = {bot_name: self._load_behavior_triggers(bot_name)}
             self._action_triggers = {bot_name: self._load_action_triggers(bot_name)}
@@ -108,7 +108,7 @@ class TriggerRouter:
             Bot name or None
         """
         for bot_name, bot_info in self._bot_registry.items():
-            # Try registry patterns first (for backward compatibility)
+            # Try registry patterns first, then fall back to trigger_words.json
             patterns = bot_info.get('trigger_patterns', [])
             
             # If no patterns in registry, load from bot's trigger_words.json

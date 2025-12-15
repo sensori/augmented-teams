@@ -49,8 +49,10 @@ def verify_action_tracks_start(bot_dir: Path, workspace_dir: Path, action_class,
     behavior_obj.bot_paths = MockBotPaths(bot_dir, workspace_dir)
     behavior_obj.bot = None
     
-    # Create activity tracker
-    activity_tracker = ActivityTracker(workspace_dir, bot_name)
+    # Create activity tracker - ActivityTracker needs BotPaths, not Path
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(workspace_path=workspace_dir, bot_directory=bot_dir)
+    activity_tracker = ActivityTracker(bot_paths, bot_name)
     
     # Create action using old signature (bot_name, behavior, action_name)
     action = action_class(
@@ -93,8 +95,10 @@ def verify_action_tracks_completion(bot_dir: Path, workspace_dir: Path, action_c
     behavior_obj.bot_paths = MockBotPaths(bot_dir, workspace_dir)
     behavior_obj.bot = None
     
-    # Create activity tracker
-    activity_tracker = ActivityTracker(workspace_dir, bot_name)
+    # Create activity tracker - ActivityTracker needs BotPaths, not Path
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    bot_paths = BotPaths(workspace_path=workspace_dir, bot_directory=bot_dir)
+    activity_tracker = ActivityTracker(bot_paths, bot_name)
     
     # Create action using old signature (bot_name, behavior, action_name)
     action = action_class(
@@ -287,10 +291,16 @@ def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: P
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(behavior, bot_name, bot_paths)
     
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+    
+    base_action_config = BaseActionConfig('validate_rules', bot_paths)
+    activity_tracker = ActivityTracker(bot_paths, bot_name)
+    
     return ValidateRulesAction(
-        bot_name=bot_name,
+        base_action_config=base_action_config,
         behavior=behavior_obj,
-        action_name='validate_rules'
+        activity_tracker=activity_tracker
     )
 
 
@@ -299,7 +309,7 @@ def _create_gather_context_action(bot_name: str, behavior: str, bot_directory: P
     from agile_bot.bots.base_bot.src.actions.gather_context.gather_context_action import GatherContextAction
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
-    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     import json
     
     # Ensure behavior.json exists

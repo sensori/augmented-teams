@@ -85,19 +85,33 @@ def given_behavior_render_directory_created(bot_directory: Path, behavior: str) 
 
 def when_render_output_action_created(bot_name: str, behavior: str, bot_directory: Path):
     """When: RenderOutputAction created."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('render_output', bot_paths)
     return RenderOutputAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None,
+        bot_name=bot_name
     )
 
 
 def when_render_output_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
     """When: RenderOutputAction loads and merges instructions."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('render_output', bot_paths)
     action_obj = RenderOutputAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None,
+        bot_name=bot_name
     )
     instructions = action_obj.load_and_merge_instructions()
     return action_obj, instructions
@@ -170,10 +184,17 @@ def then_activity_log_file_does_not_exist(workspace_directory: Path):
 
 def when_render_output_action_tracks_start(bot_name: str, behavior: str, bot_directory: Path):
     """When: Render output action tracks start."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('render_output', bot_paths)
     action = RenderOutputAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None,
+        bot_name=bot_name
     )
     action.track_activity_on_start()
     return action
@@ -193,10 +214,17 @@ def given_bot_name_and_behavior_for_discovery():
 
 def when_create_render_output_action(bot_name: str, behavior: str, bot_directory: Path):
     """When: Create render output action."""
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('render_output', bot_paths)
     action = RenderOutputAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None,
+        bot_name=bot_name
     )
     return action
 
@@ -455,3 +483,167 @@ class TestInjectRenderInstructionsAndConfigs:
         then_formatted_configs_contain_sync_and_template(formatted)
         then_formatted_configs_contain_synchronizer_fields(formatted)
         then_formatted_configs_contain_template_fields(formatted)
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Domain Classes (Stories 7-8: MergedInstructions Render)
+# ============================================================================
+
+from unittest.mock import Mock
+from agile_bot.bots.base_bot.src.bot.merged_instructions import MergedInstructions
+from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+
+
+def given_base_action_config_with_instructions(instructions: list):
+    """Given: BaseActionConfig with instructions."""
+    base_action_config = Mock(spec=BaseActionConfig)
+    base_action_config.instructions = instructions
+    return base_action_config
+
+
+def given_render_instructions(instructions: dict):
+    """Given: Render instructions dict."""
+    return instructions
+
+
+def when_merged_instructions_instantiated(base_action_config, render_instructions=None):
+    """When: MergedInstructions instantiated."""
+    return MergedInstructions(base_action_config, render_instructions)
+
+
+def when_render_instructions_accessed(merged_instructions: MergedInstructions):
+    """When: render_instructions property accessed."""
+    return merged_instructions.render_instructions
+
+
+def when_merge_called(merged_instructions: MergedInstructions):
+    """When: merge() called."""
+    return merged_instructions.merge()
+
+
+def then_render_instructions_are(result: dict, expected: dict):
+    """Then: Render instructions are expected."""
+    assert result == expected
+
+
+def then_render_instructions_is_none(result):
+    """Then: Render instructions is None."""
+    assert result is None
+
+
+def then_merged_contains_base_instructions(merged: dict, expected: list):
+    """Then: Merged dict contains base instructions."""
+    assert merged['base_instructions'] == expected
+
+
+def then_merged_contains_render_instructions(merged: dict, expected: dict):
+    """Then: Merged dict contains render instructions."""
+    assert 'render_instructions' in merged
+    assert merged['render_instructions'] == expected
+
+
+def then_merged_does_not_contain_render_instructions(merged: dict):
+    """Then: Merged dict does not contain render instructions."""
+    assert 'render_instructions' not in merged
+
+
+# ============================================================================
+# TEST CLASSES - Domain Classes (Stories 7-8: MergedInstructions Render)
+# ============================================================================
+
+class TestGetRenderInstructions:
+    """Story: Get Render Instructions (Sub-epic: Render Output)"""
+    
+def then_render_instructions_matches_expected(result, expected_result):
+    """Then: Render instructions matches expected result."""
+    if expected_result is None:
+        then_render_instructions_is_none(result)
+    else:
+        then_render_instructions_are(result, expected_result)
+
+
+class TestGetRenderInstructions:
+    """Story: Get Render Instructions (Sub-epic: Render Output)"""
+    
+    @pytest.mark.parametrize("render_instructions,expected_result", [
+        # Example 1: Render instructions provided
+        ({'instructions': ['render1', 'render2']}, {'instructions': ['render1', 'render2']}),
+        # Example 2: No render instructions
+        (None, None),
+    ])
+    def test_render_instructions_property_returns_provided_instructions_or_none(self, render_instructions, expected_result):
+        """
+        SCENARIO: Render instructions property returns provided instructions or None
+        GIVEN: MergedInstructions with or without render instructions
+        WHEN: render_instructions property accessed
+        THEN: Returns render instructions dict when provided, None when not provided
+        """
+        # Given: BaseActionConfig and optional render instructions
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        
+        # When: MergedInstructions instantiated and render_instructions accessed
+        merged_instructions = when_merged_instructions_instantiated(base_action_config, render_instructions)
+        result = when_render_instructions_accessed(merged_instructions)
+        
+        # Then: Render instructions are expected
+        then_render_instructions_matches_expected(result, expected_result)
+
+
+class TestMergeBaseAndRenderInstructions:
+    """Story: Merge Base and Render Instructions (Sub-epic: Render Output)"""
+    
+    def test_merge_combines_base_and_render_instructions(self):
+        """
+        SCENARIO: Merge combines base and render instructions
+        GIVEN: BaseActionConfig with ['base1', 'base2'] and render instructions {'instructions': ['render1', 'render2']}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions and render_instructions
+        """
+        # Given: BaseActionConfig and render instructions
+        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
+        render_instructions = {'instructions': ['render1', 'render2']}
+        
+        # When: MergedInstructions instantiated and merge() called
+        merged_instructions = when_merged_instructions_instantiated(base_action_config, render_instructions)
+        result = when_merge_called(merged_instructions)
+        
+        # Then: Merged dict contains both instruction sets
+        then_merged_contains_base_instructions(result, ['base1', 'base2'])
+        then_merged_contains_render_instructions(result, render_instructions)
+    
+    def test_merge_handles_missing_render_instructions(self):
+        """
+        SCENARIO: Merge handles missing render instructions
+        GIVEN: BaseActionConfig with ['base1', 'base2'] without render instructions
+        WHEN: merge() called
+        THEN: Returns dict with only base_instructions
+        """
+        # Given: BaseActionConfig without render instructions
+        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
+        
+        # When: MergedInstructions instantiated and merge() called
+        merged_instructions = when_merged_instructions_instantiated(base_action_config)
+        result = when_merge_called(merged_instructions)
+        
+        # Then: Merged dict contains only base instructions
+        then_merged_contains_base_instructions(result, ['base1', 'base2'])
+        then_merged_does_not_contain_render_instructions(result)
+    
+    def test_merge_handles_empty_render_instructions(self):
+        """
+        SCENARIO: Merge handles empty render instructions
+        GIVEN: BaseActionConfig with ['base1'] and empty render instructions {}
+        WHEN: merge() called
+        THEN: Returns dict with base_instructions and empty render_instructions
+        """
+        # Given: BaseActionConfig with empty render instructions dict
+        base_action_config = given_base_action_config_with_instructions(['base1'])
+        render_instructions = {}
+        
+        # When: MergedInstructions instantiated and merge() called
+        merged_instructions = when_merged_instructions_instantiated(base_action_config, render_instructions)
+        result = when_merge_called(merged_instructions)
+        
+        # Then: Merged dict contains base instructions and empty render instructions
+        then_merged_contains_base_instructions(result, ['base1'])
+        then_merged_contains_render_instructions(result, render_instructions)

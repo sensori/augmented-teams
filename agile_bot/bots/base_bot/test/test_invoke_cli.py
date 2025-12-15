@@ -602,3 +602,248 @@ class TestCLIExceptions:
         # Then: ValueError is raised (verified by pytest.raises)
         with pytest.raises(ValueError, match="Cannot infer parameter description"):
             when_cli_infers_parameter_description_for_unknown_command(cli)
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Domain Classes (Stories 1-2: TriggerWords)
+# ============================================================================
+
+from unittest.mock import Mock
+from agile_bot.bots.base_bot.src.bot.trigger_words import TriggerWords
+from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
+
+
+def given_behavior_config_with_trigger_patterns(patterns: list, priority: int = 0):
+    """Given: BehaviorConfig with trigger patterns."""
+    behavior_config = Mock(spec=BehaviorConfig)
+    behavior_config.trigger_words = {
+        'patterns': patterns,
+        'priority': priority
+    }
+    return behavior_config
+
+
+def given_behavior_config_with_list_triggers(patterns: list):
+    """Given: BehaviorConfig with list trigger words."""
+    behavior_config = Mock(spec=BehaviorConfig)
+    behavior_config.trigger_words = patterns
+    return behavior_config
+
+
+def given_behavior_config_with_no_triggers():
+    """Given: BehaviorConfig with no trigger words."""
+    behavior_config = Mock(spec=BehaviorConfig)
+    behavior_config.trigger_words = None
+    return behavior_config
+
+
+def when_trigger_words_instantiated(behavior_config, behavior=None):
+    """When: TriggerWords instantiated."""
+    return TriggerWords(behavior_config, behavior)
+
+
+def when_matches_called(trigger_words: TriggerWords, text: str):
+    """When: matches() called."""
+    return trigger_words.matches(text)
+
+
+def when_priority_accessed(trigger_words: TriggerWords):
+    """When: priority property accessed."""
+    return trigger_words.priority
+
+
+def then_priority_is(result: int, expected: int):
+    """Then: Priority is expected value."""
+    assert result == expected
+
+
+def then_matches_returns(result: bool, expected: bool):
+    """Then: Matches returns expected value."""
+    assert result == expected
+
+
+# ============================================================================
+# TEST CLASSES - Domain Classes (Stories 1-2: TriggerWords)
+# ============================================================================
+
+class TestGetTriggerPriority:
+    """Story: Get Trigger Priority (Sub-epic: Invoke CLI)"""
+    
+def given_behavior_config_from_trigger_config(trigger_config):
+    """Given: BehaviorConfig from trigger configuration."""
+    if isinstance(trigger_config, dict):
+        return given_behavior_config_with_trigger_patterns(
+            trigger_config.get('patterns', []),
+            trigger_config.get('priority', 0)
+        )
+    else:
+        return given_behavior_config_with_list_triggers(trigger_config)
+
+
+class TestGetTriggerPriority:
+    """Story: Get Trigger Priority (Sub-epic: Invoke CLI)"""
+    
+    @pytest.mark.parametrize("trigger_config,expected_priority", [
+        # Example 1: Priority configured
+        ({'patterns': ['test'], 'priority': 5}, 5),
+        # Example 2: No priority field
+        ({'patterns': ['test']}, 0),
+        # Example 3: List trigger format
+        (['test', 'pattern'], 0),
+    ])
+    def test_priority_property_returns_configured_priority_or_zero(self, trigger_config, expected_priority):
+        """
+        SCENARIO: Priority property returns configured priority or zero
+        GIVEN: BehaviorConfig with different trigger configurations
+        WHEN: priority property accessed
+        THEN: Returns configured priority when available, otherwise returns 0
+        """
+        # Given: BehaviorConfig with trigger configuration
+        behavior_config = given_behavior_config_from_trigger_config(trigger_config)
+        
+        # When: TriggerWords instantiated and priority accessed
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_priority_accessed(trigger_words)
+        
+        # Then: Priority is expected value
+        then_priority_is(result, expected_priority)
+
+
+class TestMatchTextAgainstTriggers:
+    """Story: Match Text Against Triggers (Sub-epic: Invoke CLI)"""
+    
+    def test_matches_returns_true_when_text_matches_any_pattern(self):
+        """
+        SCENARIO: Matches returns true when text matches any pattern
+        GIVEN: BehaviorConfig with multiple patterns ['test', 'pattern', 'xyz']
+        WHEN: matches() called with text 'This is a test'
+        THEN: Returns True
+        """
+        # Given: BehaviorConfig with multiple patterns
+        behavior_config = given_behavior_config_with_trigger_patterns(['test', 'pattern', 'xyz'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This is a test')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
+    
+    def test_matches_returns_false_when_no_patterns_match(self):
+        """
+        SCENARIO: Matches returns false when no patterns match
+        GIVEN: BehaviorConfig with patterns ['xyz', 'abc']
+        WHEN: matches() called with text 'This is a test'
+        THEN: Returns False
+        """
+        # Given: BehaviorConfig with patterns
+        behavior_config = given_behavior_config_with_trigger_patterns(['xyz', 'abc'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This is a test')
+        
+        # Then: Returns False
+        then_matches_returns(result, False)
+    
+    def test_matches_returns_false_when_no_triggers_configured(self):
+        """
+        SCENARIO: Matches returns false when no triggers configured
+        GIVEN: BehaviorConfig with no triggers
+        WHEN: matches() called with text 'This is a test'
+        THEN: Returns False
+        """
+        # Given: BehaviorConfig with no triggers
+        behavior_config = given_behavior_config_with_no_triggers()
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This is a test')
+        
+        # Then: Returns False
+        then_matches_returns(result, False)
+    
+    def test_matches_works_with_list_trigger_format(self):
+        """
+        SCENARIO: Matches works with list trigger format
+        GIVEN: BehaviorConfig with list triggers ['test', 'pattern']
+        WHEN: matches() called with text 'This is a test'
+        THEN: Returns True
+        """
+        # Given: BehaviorConfig with list triggers
+        behavior_config = given_behavior_config_with_list_triggers(['test', 'pattern'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This is a test')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
+    
+    def test_matches_checks_all_patterns_until_match_found(self):
+        """
+        SCENARIO: Matches checks all patterns until match found
+        GIVEN: BehaviorConfig with patterns ['xyz', 'abc', 'test']
+        WHEN: matches() called with text 'This is a test'
+        THEN: Returns True (third pattern matches)
+        """
+        # Given: BehaviorConfig with patterns
+        behavior_config = given_behavior_config_with_trigger_patterns(['xyz', 'abc', 'test'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This is a test')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
+    
+    def test_matches_handles_regex_patterns(self):
+        """
+        SCENARIO: Matches handles regex patterns
+        GIVEN: BehaviorConfig with regex pattern 'test.*pattern'
+        WHEN: matches() called with text 'test this pattern'
+        THEN: Returns True
+        """
+        # Given: BehaviorConfig with regex pattern
+        behavior_config = given_behavior_config_with_trigger_patterns(['test.*pattern'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'test this pattern')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
+    
+    def test_matches_is_case_insensitive(self):
+        """
+        SCENARIO: Matches is case insensitive
+        GIVEN: BehaviorConfig with pattern 'TEST'
+        WHEN: matches() called with text 'this is a test'
+        THEN: Returns True (case insensitive)
+        """
+        # Given: BehaviorConfig with pattern
+        behavior_config = given_behavior_config_with_trigger_patterns(['TEST'])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'this is a test')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
+    
+    def test_matches_handles_invalid_regex_patterns_by_falling_back_to_literal(self):
+        """
+        SCENARIO: Matches handles invalid regex patterns by falling back to literal
+        GIVEN: BehaviorConfig with invalid regex pattern '['
+        WHEN: matches() called with text 'This contains [ bracket'
+        THEN: Returns True (fallback to literal matching)
+        """
+        # Given: BehaviorConfig with invalid regex pattern
+        behavior_config = given_behavior_config_with_trigger_patterns(['['])
+        
+        # When: TriggerWords instantiated and matches() called
+        trigger_words = when_trigger_words_instantiated(behavior_config)
+        result = when_matches_called(trigger_words, 'This contains [ bracket')
+        
+        # Then: Returns True
+        then_matches_returns(result, True)
