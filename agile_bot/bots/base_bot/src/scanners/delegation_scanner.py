@@ -44,3 +44,4 @@ class DelegationScanner(StoryScanner):
         name_lower = name.lower()
         return (name_lower.endswith('s') and len(name_lower) > 3) or 'collection' in name_lower
 
+

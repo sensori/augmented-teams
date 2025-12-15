@@ -3,7 +3,7 @@ import json
 from fastmcp import FastMCP
 from typing import Dict, Any
 from agile_bot.bots.base_bot.src.utils import read_json_file
-from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root, get_base_actions_directory
+from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root, get_base_actions_directory
 
 
 class MCPServerGenerator:
@@ -13,10 +13,10 @@ class MCPServerGenerator:
         
         Args:
             bot_directory: Directory where bot code lives (e.g., agile_bot/bots/story_bot)
-                          Contains: agent.json, config/, behaviors/, src/
+                          Contains: config/, behaviors/, src/
                           
         Note:
-            workspace_directory is auto-detected from agent.json WORKING_AREA field
+            workspace_directory is auto-detected from bot_config.json WORKING_AREA field (or mcp.env.WORKING_AREA)
         """
         self.bot_directory = Path(bot_directory)
         
@@ -39,14 +39,13 @@ class MCPServerGenerator:
         
         workflow_actions = []
         for item in base_actions_path.iterdir():
-            if item.is_dir() and item.name[0].isdigit() and '_' in item.name:
-                # Extract action name without number prefix (e.g., '1_gather_context' -> 'gather_context')
-                action_name = item.name.split('_', 1)[1]
-                workflow_actions.append((int(item.name.split('_')[0]), action_name))
+            if item.is_dir() and not item.name.startswith('.'):
+                # Action folders no longer have number prefixes
+                action_name = item.name
+                workflow_actions.append(action_name)
         
-        # Sort by number prefix and return just the action names
-        workflow_actions.sort(key=lambda x: x[0])
-        return [action for _, action in workflow_actions]
+        # Return action names (sorted alphabetically for consistency)
+        return sorted(workflow_actions)
     
     def _discover_independent_actions(self) -> list:
         # Use centralized workspace utility to get base_actions directory
@@ -54,7 +53,7 @@ class MCPServerGenerator:
         
         independent_actions = []
         for item in base_actions_path.iterdir():
-            if item.is_dir() and not (item.name[0].isdigit() and '_' in item.name):
+            if item.is_dir() and not item.name.startswith('.'):
                 independent_actions.append(item.name)
         
         return independent_actions
@@ -124,11 +123,6 @@ class MCPServerGenerator:
         for behavior in behaviors:
             self.register_behavior_tool(mcp_server, behavior)
     
-    def _normalize_name_for_tool(self, name: str) -> str:
-        """Normalize behavior name using centralized utility."""
-        from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
-        return normalize_behavior_name(name)
-    
     def register_bot_tool(self, mcp_server: FastMCP):
         tool_name = 'tool'
         
@@ -168,7 +162,7 @@ class MCPServerGenerator:
                 return {"error": "Bot not initialized"}
 
             # Always use workspace_directory from WORKING_AREA
-            from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+            from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
             working_dir = get_workspace_directory()
             return {
                 'working_dir': str(working_dir),
@@ -198,21 +192,13 @@ class MCPServerGenerator:
             if self.bot is None:
                 return {"error": "Bot not initialized"}
 
-            # Locate an active workflow_state.json from any behavior's workflow file
-            state_file = None
-            for behavior in self._get_bot_behaviors():
-                behavior_obj = getattr(self.bot, behavior, None)
-                if behavior_obj is None:
-                    continue
-                wf_file = behavior_obj.workflow.file
-                if wf_file.exists():
-                    state_file = wf_file
-                    break
-
-            if state_file is None:
+            # Locate an active behavior_action_state.json from workspace directory
+            state_file = self.bot.bot_paths.workspace_directory / 'behavior_action_state.json'
+            
+            if not state_file.exists():
                 return {
                     "error": "No active workflow found",
-                    "message": "No workflow_state.json exists for any behavior. Start a workflow first."
+                    "message": "No behavior_action_state.json exists. Start a workflow first."
                 }
             
             try:
@@ -242,23 +228,20 @@ class MCPServerGenerator:
                         "message": f"Available behaviors: {', '.join(bot_behaviors)}"
                     }
                 
-                # Workflow computes its own working_dir via the workspace helper;
-                # no explicit set is required here.
-                
-                # Mark action as complete and transition
-                # (idempotent - safe to call multiple times)
-                behavior_obj.workflow.save_completed_action(action_name)
+                # Mark action as complete using Actions collection
+                behavior_obj.actions.close_current()
                 
                 # Action is complete - check if this is the final action in behavior
-                is_final_action = (action_name == behavior_obj.workflow.states[-1] if behavior_obj.workflow.states else False)
+                action_names = behavior_obj.actions.names
+                is_final_action = (action_name == action_names[-1] if action_names else False)
                 
                 # Transition to next action within behavior
-                previous_state = behavior_obj.workflow.current_state
-                behavior_obj.workflow.transition_to_next()
-                new_state = behavior_obj.workflow.current_state
+                previous_action = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
+                behavior_obj.actions.navigate_to_next()
+                new_action = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
                 
                 # Check if behavior is complete (stayed at same state = end of behavior)
-                behavior_complete = (previous_state == new_state and is_final_action)
+                behavior_complete = (previous_action == new_action and is_final_action)
                 
                 if behavior_complete:
                     # Final action - check for next behavior
@@ -271,7 +254,8 @@ class MCPServerGenerator:
                         
                         # Update workflow state to next behavior, first action
                         next_behavior_obj = getattr(self.bot, next_behavior_name)
-                        first_action = next_behavior_obj.workflow.states[0] if next_behavior_obj.workflow.states else 'gather_context'
+                        action_names = next_behavior_obj.actions.names
+                        first_action = action_names[0] if action_names else 'gather_context'
                         
                         # Update state file with new behavior
                         state_data['current_behavior'] = f'{self.bot_name}.{next_behavior_name}'
@@ -340,7 +324,7 @@ class MCPServerGenerator:
             if self.bot is None:
                 return {"error": "Bot not initialized"}
             
-            from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+            from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
             working_dir = get_workspace_directory()
             workflow_state_file = working_dir / 'workflow_state.json'
             
@@ -356,28 +340,22 @@ class MCPServerGenerator:
                 
                 state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
                 
-                # Normalize behavior name for consistent storage/retrieval using centralized utility
-                from agile_bot.bots.base_bot.src.bot.behavior_folder_finder import normalize_behavior_name
-                normalized_behavior = normalize_behavior_name(behavior)
-                
-                # Store confirmation in workflow state (using normalized name)
+                # Store confirmation in workflow state
                 if 'out_of_order_confirmations' not in state_data:
                     state_data['out_of_order_confirmations'] = {}
                 
-                state_data['out_of_order_confirmations'][normalized_behavior] = {
+                state_data['out_of_order_confirmations'][behavior] = {
                     'confirmed_at': datetime.now().isoformat(),
-                    'confirmed_by': 'human',
-                    'original_behavior': behavior  # Store original for reference
+                    'confirmed_by': 'human'
                 }
                 
                 workflow_state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
                 
                 return {
                     "status": "confirmed",
-                    "behavior": normalized_behavior,
-                    "original_behavior": behavior,
-                    "message": f"Out-of-order execution confirmed for behavior '{normalized_behavior}'. You may now execute this behavior.",
-                    "confirmed_at": state_data['out_of_order_confirmations'][normalized_behavior]['confirmed_at']
+                    "behavior": behavior,
+                    "message": f"Out-of-order execution confirmed for behavior '{behavior}'. You may now execute this behavior.",
+                    "confirmed_at": state_data['out_of_order_confirmations'][behavior]['confirmed_at']
                 }
                 
             except Exception as e:
@@ -450,8 +428,7 @@ class MCPServerGenerator:
         })
     
     def register_behavior_tool(self, mcp_server: FastMCP, behavior: str):
-        normalized_behavior = self._normalize_name_for_tool(behavior)
-        tool_name = normalized_behavior
+        tool_name = behavior
         
         # Load trigger patterns from behavior folder
         trigger_patterns = self._load_trigger_words_from_behavior_folder(behavior=behavior)
@@ -494,7 +471,7 @@ class MCPServerGenerator:
         
         Always returns workspace_directory from WORKING_AREA environment variable.
         """
-        from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+        from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
         return get_workspace_directory()
     
     def _execute_entry_workflow(self, working_dir: Path, parameters: dict) -> dict:
@@ -618,10 +595,11 @@ class MCPServerGenerator:
         if behavior_obj is None:
             raise ValueError(f"Behavior {behavior} not found")
         
-        first_action = behavior_obj.workflow.states[0] if behavior_obj.workflow.states else 'gather_context'
+        action_names = behavior_obj.actions.names
+        first_action = action_names[0] if action_names else 'gather_context'
         
-        # Create initial workflow state
-        workflow_state_file = working_dir / 'workflow_state.json'
+        # Create initial behavior_action_state
+        workflow_state_file = working_dir / 'behavior_action_state.json'
         state_data = {
             'current_behavior': f'{self.bot_name}.{behavior}',
             'current_action': f'{self.bot_name}.{behavior}.{first_action}',
@@ -637,7 +615,7 @@ class MCPServerGenerator:
         behavior: str,
         action: str = None
     ) -> list:
-        # Find behavior folder (handles numbered prefixes)
+        # Find behavior folder
         from agile_bot.bots.base_bot.src.bot.bot import Behavior
         
         try:
@@ -724,19 +702,25 @@ if str(python_workspace_root) not in sys.path:
 bot_directory = Path(__file__).parent.parent  # src/ -> {self.bot_name}/
 os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
-# 2. Read agent.json and set workspace directory (if not already set by mcp.json)
+# 2. Read bot_config.json and set workspace directory (if not already set by mcp.json env)
 if 'WORKING_AREA' not in os.environ:
-    agent_json_path = bot_directory / 'agent.json'
-    if agent_json_path.exists():
-        agent_config = json.loads(agent_json_path.read_text(encoding='utf-8'))
-        if 'WORKING_AREA' in agent_config:
-            os.environ['WORKING_AREA'] = agent_config['WORKING_AREA']
+    config_path = bot_directory / 'config' / 'bot_config.json'
+    if config_path.exists():
+        bot_config = json.loads(config_path.read_text(encoding='utf-8'))
+        # Check for WORKING_AREA in bot_config.json (legacy field)
+        if 'WORKING_AREA' in bot_config:
+            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
+        # Also check mcp.env.WORKING_AREA (new location)
+        elif 'mcp' in bot_config and 'env' in bot_config['mcp']:
+            mcp_env = bot_config['mcp']['env']
+            if 'WORKING_AREA' in mcp_env:
+                os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
 
 # ============================================================================
 # Now import - everything will read from environment variables
 # ============================================================================
 
-from agile_bot.bots.base_bot.src.state.workspace import (
+from agile_bot.bots.base_bot.src.bot.workspace import (
     get_bot_directory,
     get_workspace_directory
 )
@@ -748,7 +732,7 @@ def main():
 
     Environment variables are bootstrapped before import:
     - BOT_DIRECTORY: Self-detected from script location
-    - WORKING_AREA: Read from agent.json (or overridden by mcp.json env)
+    - WORKING_AREA: Read from bot_config.json (or overridden by mcp.json env)
     
     All subsequent code reads from these environment variables.
     """
@@ -786,7 +770,7 @@ if __name__ == '__main__':
                     'args': [server_path],
                     'cwd': repo_root
                     # Note: BOT_DIRECTORY and WORKING_AREA are now self-detected by the script
-                    # You can add 'env': {'WORKING_AREA': 'path'} here to override agent.json
+                    # You can add 'env': {'WORKING_AREA': 'path'} here to override bot_config.json
                 }
             }
         }
@@ -842,15 +826,10 @@ if __name__ == '__main__':
         bot_config = read_json_file(self.config_path)
         behaviors = bot_config.get('behaviors', [])
         
-        # Load bot-level instructions.json for goal and description
-        instructions_path = self.bot_directory / 'instructions.json'
-        bot_goal = ''
-        bot_description = ''
-        
-        if instructions_path.exists():
-            instructions = read_json_file(instructions_path)
-            bot_goal = instructions.get('goal', '')
-            bot_description = instructions.get('description', '')
+        # Load bot-level goal and description from bot_config.json
+        bot_config = read_json_file(self.config_path)
+        bot_goal = bot_config.get('goal', '')
+        bot_description = bot_config.get('description', '')
         
         # Collect trigger words and descriptions from all behaviors (from behavior.json)
         behavior_trigger_words = {}
@@ -886,9 +865,9 @@ if __name__ == '__main__':
             # Get behavior description from behavior.json (already loaded above)
             behavior_desc = behavior_descriptions.get(behavior, '')
             if not behavior_desc:
-                # Try with number prefix lookup
+                # Try exact match lookup
                 for key in behavior_descriptions.keys():
-                    if key.endswith(behavior) or key.endswith(f'_{behavior}'):
+                    if key == behavior:
                         behavior_desc = behavior_descriptions[key]
                         break
             

@@ -18,3 +18,4 @@ class CodeRepresentationCodeScanner(CodeScanner):
         # For now, return empty - can be enhanced later
         return []
 
+

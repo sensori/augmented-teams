@@ -84,7 +84,7 @@ def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action
     # Bootstrap environment
     bootstrap_env(bot_dir, workspace_dir)
     
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
+    # Workflow class removed - state managed by Behaviors and Actions collections
     states = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
     # Create all transitions, not just the one we're testing
     transitions = [
@@ -117,7 +117,7 @@ def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, a
     # Bootstrap environment
     bootstrap_env(bot_dir, workspace_dir)
     
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
+    # Workflow class removed - state managed by Behaviors and Actions collections
     # No workspace_root parameter
     workflow = Workflow(
         bot_name=bot_name,
@@ -170,11 +170,41 @@ def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: P
 
 def _create_gather_context_action(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create GatherContextAction instance."""
-    from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
+    from agile_bot.bots.base_bot.src.actions.gather_context.gather_context_action import GatherContextAction
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.base_action_config import BaseActionConfig
+    import json
+    
+    # Ensure behavior.json exists
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_file = behavior_dir / 'behavior.json'
+    if not behavior_file.exists():
+        behavior_config = {
+            "behaviorName": behavior,
+            "description": f"Test behavior: {behavior}",
+            "goal": f"Test goal for {behavior}",
+            "inputs": "Test inputs",
+            "outputs": "Test outputs",
+            "instructions": {},
+            "actions_workflow": {
+                "actions": [
+                    {'name': 'gather_context', 'order': 1}
+                ]
+            }
+        }
+        behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    
+    # Create proper Behavior object
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
+    base_action_config = BaseActionConfig('gather_context', bot_paths)
+    
     return GatherContextAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj,
+        activity_tracker=None
     )
 
 

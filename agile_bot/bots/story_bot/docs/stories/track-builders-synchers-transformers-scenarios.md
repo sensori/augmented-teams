@@ -39,7 +39,7 @@ And behavior folder structure exists with components
 
 **Steps:**
 ```gherkin
-Given story graph JSON contains builder reference at path "2_content/2_render/templates/builder.py"
+Given story graph JSON contains builder reference at path "content/render/templates/builder.py"
 And builder file exists at behavior folder relative path
 When Story Graph loads from JSON file
 Then Story Graph stores builder path in component registry
@@ -51,7 +51,7 @@ And Story Graph includes builder metadata if specified
 
 **Steps:**
 ```gherkin
-Given story graph JSON contains synchronizer reference at path "2_content/3_synchronize/synchronize_drawio.json"
+Given story graph JSON contains synchronizer reference at path "content/synchronize/synchronize_drawio.json"
 And synchronizer configuration file exists at behavior folder relative path
 When Story Graph loads from JSON file
 Then Story Graph stores synchronizer path in component registry
@@ -63,7 +63,7 @@ And Story Graph includes synchronizer configuration metadata
 
 **Steps:**
 ```gherkin
-Given story graph JSON contains transformer reference at path "2_content/2_render/templates/transformer.py"
+Given story graph JSON contains transformer reference at path "content/render/templates/transformer.py"
 And transformer file exists at behavior folder relative path
 When Story Graph loads from JSON file
 Then Story Graph stores transformer path in component registry

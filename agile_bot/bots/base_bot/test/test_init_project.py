@@ -12,7 +12,7 @@ import shutil
 import os
 from conftest import create_bot_config_file
 from agile_bot.bots.base_bot.src.bot.bot import Bot
-from agile_bot.bots.base_bot.src.state.workspace import (
+from agile_bot.bots.base_bot.src.bot.workspace import (
     get_bot_directory,
     get_workspace_directory,
     get_behavior_folder
@@ -26,8 +26,8 @@ from agile_bot.bots.base_bot.src.state.workspace import (
 # Removed duplicate create_bot_config - use conftest.create_bot_config_file instead
 
 
-# Removed duplicate - imported from test_helpers
-from agile_bot.bots.base_bot.test.test_helpers import create_agent_json
+# Removed create_agent_json - use update_bot_config_with_working_area instead
+from agile_bot.bots.base_bot.test.test_helpers import update_bot_config_with_working_area
 
 
 # Removed create_behavior_folder - use test_helpers.create_behavior_folder instead
@@ -149,19 +149,27 @@ def given_bot_directory_and_workspace_area_environment_variables_set(bot_directo
     os.environ['BOT_DIRECTORY'] = str(bot_directory)
     os.environ['WORKING_AREA'] = str(workspace_directory)
 
-def then_agent_json_file_does_not_exist(bot_directory: Path):
-    """Then step: Agent JSON file does not exist."""
-    agent_json_path = bot_directory / 'agent.json'
-    assert not agent_json_path.exists()
+def then_bot_config_does_not_have_working_area(bot_directory: Path):
+    """Then step: Bot config does not have WORKING_AREA field."""
+    config_path = bot_directory / 'config' / 'bot_config.json'
+    if config_path.exists():
+        config = json.loads(config_path.read_text(encoding='utf-8'))
+        assert 'WORKING_AREA' not in config
 
 def when_entry_point_bootstrap_logic_runs_if_working_area_not_set(bot_directory: Path):
     """When step: Entry point bootstrap logic runs if WORKING_AREA not set."""
     if 'WORKING_AREA' not in os.environ:
-        agent_json_path = bot_directory / 'agent.json'
-        if agent_json_path.exists():
-            agent_config = json.loads(agent_json_path.read_text(encoding='utf-8'))
-            if 'WORKING_AREA' in agent_config:
-                os.environ['WORKING_AREA'] = agent_config['WORKING_AREA']
+        config_path = bot_directory / 'config' / 'bot_config.json'
+        if config_path.exists():
+            bot_config = json.loads(config_path.read_text(encoding='utf-8'))
+            # Check for WORKING_AREA in bot_config.json (legacy field)
+            if 'WORKING_AREA' in bot_config:
+                os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
+            # Also check mcp.env.WORKING_AREA (new location)
+            elif 'mcp' in bot_config and 'env' in bot_config['mcp']:
+                mcp_env = bot_config['mcp']['env']
+                if 'WORKING_AREA' in mcp_env:
+                    os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
 
 def then_workspace_area_environment_variable_equals_expected_and_not_different(expected_value: Path, different_value: Path):
     """Then step: WORKING_AREA environment variable equals expected and not different."""
@@ -174,22 +182,28 @@ def given_bot_config_and_behavior_exist(bot_directory: Path, bot_name: str, beha
     create_behavior_folder(bot_directory, behavior_name)
     return config_path
 
-def when_entry_point_bootstraps_from_agent_json(bot_directory: Path):
+def when_entry_point_bootstraps_from_bot_config(bot_directory: Path):
     """When step: Entry point bootstrap code runs (simulated).
     
     Simulates what entry point does:
     1. Self-detect bot directory
-    2. Read agent.json and set WORKING_AREA if not already set
+    2. Read bot_config.json and set WORKING_AREA if not already set
     """
     # 1. Self-detect bot directory
     os.environ['BOT_DIRECTORY'] = str(bot_directory)
     
-    # 2. Read agent.json and set WORKING_AREA if not already set
-    agent_json_path = bot_directory / 'agent.json'
-    if agent_json_path.exists() and 'WORKING_AREA' not in os.environ:
-        agent_config = json.loads(agent_json_path.read_text(encoding='utf-8'))
-        if 'WORKING_AREA' in agent_config:
-            os.environ['WORKING_AREA'] = agent_config['WORKING_AREA']
+    # 2. Read bot_config.json and set WORKING_AREA if not already set
+    config_path = bot_directory / 'config' / 'bot_config.json'
+    if config_path.exists() and 'WORKING_AREA' not in os.environ:
+        bot_config = json.loads(config_path.read_text(encoding='utf-8'))
+        # Check for WORKING_AREA in bot_config.json (legacy field)
+        if 'WORKING_AREA' in bot_config:
+            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
+        # Also check mcp.env.WORKING_AREA (new location)
+        elif 'mcp' in bot_config and 'env' in bot_config['mcp']:
+            mcp_env = bot_config['mcp']['env']
+            if 'WORKING_AREA' in mcp_env:
+                os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
 
 def when_bot_is_instantiated(bot_name: str, bot_directory: Path, config_path: Path):
     """When step: Bot is instantiated."""
@@ -401,23 +415,23 @@ class TestBootstrapWorkspace:
         then_runtime_error_raised_with_message(get_workspace_directory, ['WORKING_AREA', 'bootstrap'])
     
     # ========================================================================
-    # SCENARIO GROUP 3: Bootstrap from agent.json
+    # SCENARIO GROUP 3: Bootstrap from bot_config.json
     # ========================================================================
     
-    def test_entry_point_bootstraps_from_agent_json(self, bot_directory, workspace_directory):
+    def test_entry_point_bootstraps_from_bot_config(self, bot_directory, workspace_directory):
         """
-        SCENARIO: Entry point reads agent.json and sets environment
-        GIVEN: agent.json exists with WORKING_AREA field
+        SCENARIO: Entry point reads bot_config.json and sets environment
+        GIVEN: bot_config.json exists with WORKING_AREA field
         AND: BOT_DIRECTORY can be self-detected from script location
         WHEN: Entry point bootstrap code runs (simulated)
-        THEN: WORKING_AREA environment variable is set from agent.json
+        THEN: WORKING_AREA environment variable is set from bot_config.json
         AND: BOT_DIRECTORY environment variable is set from script location
         """
-        # Given: agent.json exists with WORKING_AREA field
-        create_agent_json(bot_directory, workspace_directory)
+        # Given: bot_config.json exists with WORKING_AREA field
+        update_bot_config_with_working_area(bot_directory, workspace_directory)
         
         # When: Entry point bootstrap code runs (simulated)
-        when_entry_point_bootstraps_from_agent_json(bot_directory)
+        when_entry_point_bootstraps_from_bot_config(bot_directory)
         
         # Then: Environment variables are set correctly
         then_environment_variable_is_set('BOT_DIRECTORY', bot_directory)
@@ -426,22 +440,22 @@ class TestBootstrapWorkspace:
         # And: Functions return correct values
         then_bot_and_workspace_directories_match_expected(get_bot_directory(), get_workspace_directory(), bot_directory, workspace_directory)
     
-    def test_environment_variable_takes_precedence_over_agent_json(
+    def test_environment_variable_takes_precedence_over_bot_config(
         self, bot_directory, workspace_directory, temp_workspace
     ):
         """
         SCENARIO: Pre-set environment variable not overwritten
-        GIVEN: WORKING_AREA environment variable is already set (e.g., by mcp.json)
-        AND: agent.json also has WORKING_AREA field with different value
+        GIVEN: WORKING_AREA environment variable is already set (e.g., by mcp.json env)
+        AND: bot_config.json also has WORKING_AREA field with different value
         WHEN: Entry point bootstrap code runs (simulated)
         THEN: WORKING_AREA environment variable retains original value
-        AND: agent.json value is NOT used (override pattern)
+        AND: bot_config.json value is NOT used (override pattern)
         """
         # Given: Environment variable already set with one value
         override_workspace = given_override_workspace_directory_created_and_set(temp_workspace, 'override_workspace')
         
-        # And: agent.json has different value
-        create_agent_json(bot_directory, str(workspace_directory))
+        # And: bot_config.json has different value
+        update_bot_config_with_working_area(bot_directory, workspace_directory)
         given_bot_directory_environment_variable_set(bot_directory)
         
         # When: Entry point bootstrap code runs (simulated with check)
@@ -454,14 +468,14 @@ class TestBootstrapWorkspace:
         # And: Function returns override value
         assert get_workspace_directory() == override_workspace
     
-    def test_missing_agent_json_with_preconfig_env_var_works(
+    def test_missing_bot_config_with_preconfig_env_var_works(
         self, bot_directory, workspace_directory
     ):
         """
-        SCENARIO: agent.json not required if env vars pre-configured
+        SCENARIO: bot_config.json not required if env vars pre-configured
         GIVEN: WORKING_AREA environment variable is already set
         AND: BOT_DIRECTORY environment variable is already set
-        AND: agent.json does NOT exist
+        AND: bot_config.json does NOT exist or does NOT have WORKING_AREA
         WHEN: Functions are called
         THEN: No error occurs
         AND: Environment variables work correctly
@@ -470,7 +484,7 @@ class TestBootstrapWorkspace:
         given_bot_directory_and_workspace_area_environment_variables_set(bot_directory, workspace_directory)
         
         # And: agent.json does NOT exist
-        then_agent_json_file_does_not_exist(bot_directory)
+        then_bot_config_does_not_have_working_area(bot_directory)
         
         # When: Functions are called
         # Then: Functions work without error
@@ -523,7 +537,8 @@ class TestBootstrapWorkspace:
         bot = when_bot_is_instantiated('test_bot', bot_directory, config_path)
         
         # When: Workflow file path is accessed
-        workflow_file = bot.shape.workflow.file
+        shape_behavior = bot.behaviors.find_by_name('shape')
+        workflow_file = shape_behavior.workflow.file
         
         # Then: Path is in workspace directory
         assert workflow_file.parent == workspace_directory

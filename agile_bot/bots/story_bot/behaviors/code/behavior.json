@@ -1,0 +1,64 @@
+{
+  "behaviorName": "code",
+  "order": 7,
+  "description": "Generate production source code from domain model and story specifications",
+  "goal": "Create clean, maintainable production code that implements story behavior",
+  "inputs": "Domain model, story specifications, and test files",
+  "outputs": "Source code files (.py, .js, etc.) with production implementation",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "Create clean, maintainable production code that implements story behavior",
+    "**CODE MUST FOLLOW CLEAN CODE PRINCIPLES:",
+  ],
+  "actions_workflow": {
+    "actions": [
+      {
+        "name": "decide_planning_criteria",
+        "order": 1,
+        "next_action": "render_output",
+        "instructions": [
+          "code: render code required to implement all tests that have been recently built or updated"
+        ]
+      },
+      {
+        "name": "render_output",
+        "order": 2,
+        "next_action": "validate_rules",
+        "instructions": [
+          "code: build clean code"
+        ]
+      },
+      {
+        "name": "validate_rules",
+        "order": 3,
+        "action_class": "agile_bot.bots.story_bot.src.bot.validate_code_files_action.ValidateCodeFilesAction",
+        "instructions": [
+          "code: validate source code quality AND domain model refinements",
+          "Validate that all source files, classes, and functions are properly mapped to story-graph.json",
+          "MANDATORY: Discover and pass code_files parameter - CodeScanner requires explicit file paths to scan for violations"
+        ]
+      }
+    ]
+  },
+  "trigger_words": {
+    "description": "Behavior-level trigger words - specific to production code generation behavior",
+    "patterns": [
+      "generate.*source.*code",
+      "create.*production.*code",
+      "write.*source.*files",
+      "implement.*production.*code",
+      "generate.*implementation",
+      "create.*source.*files",
+      "write.*production.*code",
+      "implement.*source.*code",
+      "generate.*code",
+      "create.*code",
+      "write.*code",
+      "implement.*code",
+      "production.*code",
+      "source.*code.*generation"
+    ]
+  }
+}
+
+

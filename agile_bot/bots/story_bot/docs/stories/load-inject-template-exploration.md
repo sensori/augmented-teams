@@ -8,7 +8,7 @@
 
 ## Story Description
 
-Render Output Action loads render JSON files from 2_content/2_render/ that specify what needs to be rendered, then loads template files specified in those render JSON files (for template-based rendering, not builders), and injects both the render JSON configurations and template content into instructions so that the AI can use them during render output execution.
+Render Output Action loads render JSON files from content/render/ that specify what needs to be rendered, then loads template files specified in those render JSON files (for template-based rendering, not builders), and injects both the render JSON configurations and template content into instructions so that the AI can use them during render output execution.
 
 ---
 
@@ -17,8 +17,8 @@ Render Output Action loads render JSON files from 2_content/2_render/ that speci
 ### Core Domain Concepts
 
 - **Render Output Action**: Base bot action that executes render_output workflow step
-- **Behavior Folder**: Contains behavior-specific content (2_content/2_render/, 2_content/3_synchronize/, etc.)
-- **Render JSON Files**: Configuration files in 2_content/2_render/ that specify what to render (name, path, template, output, builder)
+- **Behavior Folder**: Contains behavior-specific content (content/render/, content/synchronize/, etc.)
+- **Render JSON Files**: Configuration files in content/render/ that specify what to render (name, path, template, output, builder)
 - **Template File**: File-based template (not code) specified in render JSON template field
 - **Builder File**: Python code file specified in render JSON builder field (executed, not injected)
 - **Instructions**: Merged instruction set that includes base instructions, behavior instructions, and injected render configs/templates
@@ -27,7 +27,7 @@ Render Output Action loads render JSON files from 2_content/2_render/ that speci
 
 ### Domain Behaviors
 
-- **Render Output Action loads render JSON filesrenb**: Discovers and loads all *.json files from 2_content/2_render/ folder
+- **Render Output Action loads render JSON filesrenb**: Discovers and loads all *.json files from content/render/ folder
 - **Render Output Action loads templates**: Reads template files specified in render JSON template field (for non-builder renders)
 - **Render Output Action injects into instructions**: Adds render configs and templates to merged instructions dictionary
 - **Render Output Action executes builders**: Runs builder Python files specified in render JSON builder field (not injected)
@@ -37,12 +37,12 @@ Render Output Action loads render JSON files from 2_content/2_render/ that speci
 
 ### Domain Rules
 
-- **Render folder contains render JSON files**: All *.json files in 2_content/2_render/ define what needs to be rendered
+- **Render folder contains render JSON files**: All *.json files in content/render/ define what needs to be rendered
 - **Templates are for non-builder renders**: Only render JSONs without builder field use templates (templates get injected)
 - **Builders are executed, not injected**: Render JSONs with builder field execute Python code (builders don't get injected)
-- **Template paths are relative to templates folder**: Template paths in render JSON are relative to 2_render/templates/ folder
+- **Template paths are relative to templates folder**: Template paths in render JSON are relative to render/templates/ folder
 - **Missing files are skipped gracefully**: If template or render JSON file cannot be read, skip it and continue
-- **Synchronize folder is separate**: 3_synchronize/ folder is for post-render synchronization (not part of Load + Inject Template)
+- **Synchronize folder is separate**: synchronize/ folder is for post-render synchronization (not part of Load + Inject Template)
 
 ---
 
@@ -51,7 +51,7 @@ Render Output Action loads render JSON files from 2_content/2_render/ that speci
 **Acceptance Criteria:**
 
 (AC) WHEN render_output action executes for a behavior
-(AC) THEN render_output discovers render folder in 2_content/2_render/ (or *_content/*_render/)
+(AC) THEN render_output discovers render folder in content/render/
 (AC) AND render_output loads all *.json files from render folder (render JSON files)
 (AC) AND render_output loads instructions.json from render folder if it exists
 
@@ -61,7 +61,7 @@ Render Output Action loads render JSON files from 2_content/2_render/ that speci
 (AC) AND render_output loads template file specified in template field for non-builder renders
 
 (AC) WHEN render JSON specifies template file (without builder field)
-(AC) THEN render_output loads template file from 2_render/templates/ folder
+(AC) THEN render_output loads template file from render/templates/ folder
 (AC) AND render_output loads template file as text content
 (AC) AND render_output stores template content with render config
 (AC) AND render_output handles missing template files gracefully (skips if not found)

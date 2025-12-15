@@ -61,12 +61,22 @@ def bootstrap_env(bot_dir: Path, workspace_dir: Path):
     os.environ['BOT_DIRECTORY'] = str(bot_dir)
     os.environ['WORKING_AREA'] = str(workspace_dir)
 
-def create_agent_json(bot_dir: Path, workspace_dir: Path) -> Path:
-    """Create agent.json file in bot directory."""
-    agent_json = bot_dir / 'agent.json'
-    agent_json.parent.mkdir(parents=True, exist_ok=True)
-    agent_json.write_text(json.dumps({'WORKING_AREA': str(workspace_dir)}), encoding='utf-8')
-    return agent_json
+def update_bot_config_with_working_area(bot_dir: Path, workspace_dir: Path) -> Path:
+    """Update bot_config.json with WORKING_AREA field."""
+    config_dir = bot_dir / 'config'
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_path = config_dir / 'bot_config.json'
+    
+    # Load existing config or create new one
+    if config_path.exists():
+        config = json.loads(config_path.read_text(encoding='utf-8'))
+    else:
+        config = {'name': bot_dir.name, 'behaviors': []}
+    
+    # Add WORKING_AREA
+    config['WORKING_AREA'] = str(workspace_dir)
+    config_path.write_text(json.dumps(config, indent=2), encoding='utf-8')
+    return config_path
 
 # Removed duplicate create_bot_config - use conftest.create_bot_config_file instead
 # Import conftest functions when needed: from conftest import create_bot_config_file
@@ -141,41 +151,45 @@ def create_common_rules(repo_root: Path, rules: list) -> Path:
 # ============================================================================
 
 def create_base_instructions(bot_directory: Path):
-    """Create base action instructions in bot_directory (no fallback to repo root)."""
+    """Create base action configs in bot_directory (no fallback to repo root)."""
     base_actions = bot_directory / 'base_actions'
-    for idx, action in enumerate(['gather_context', 'decide_planning_criteria', 
-                                    'build_knowledge', 'validate_rules', 'render_output'], start=2):
-        action_dir = base_actions / f'{idx}_{action}'
+    # Action folders no longer have number prefixes
+    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
+    orders = [2, 3, 4, 5, 6]
+    next_actions = ['decide_strategy', 'build_knowledge', 'validate_rules', 'render_output', None]
+    
+    for action, order, next_action in zip(actions, orders, next_actions):
+        action_dir = base_actions / action
         action_dir.mkdir(parents=True, exist_ok=True)
-        instructions_file = action_dir / 'instructions.json'
-        instructions_file.write_text(json.dumps({'instructions': [f'{action} base instructions']}), encoding='utf-8')
+        config = {
+            'name': action,
+            'workflow': True,
+            'order': order,
+            'instructions': [f'{action} base instructions']
+        }
+        if next_action:
+            config['next_action'] = next_action
+        config_file = action_dir / 'action_config.json'
+        config_file.write_text(json.dumps(config), encoding='utf-8')
 
 
 def create_base_action_instructions(bot_directory: Path, action: str) -> Path:
-    """Create base action instructions for specific action in bot_directory (no fallback)."""
+    """Create base action config for specific action in bot_directory (no fallback)."""
     base_actions_dir = bot_directory / 'base_actions'
     
-    action_mapping = {
-        'gather_context': '1_gather_context',
-        'decide_planning_criteria': '2_decide_planning_criteria',
-        'build_knowledge': '3_build_knowledge',
-        'render_output': '4_render_output',
-        'validate_rules': '5_validate_rules'
-    }
-    
-    folder_name = action_mapping.get(action, action)
-    action_dir = base_actions_dir / folder_name
+    # Action folders no longer have number prefixes
+    action_dir = base_actions_dir / action
     action_dir.mkdir(parents=True, exist_ok=True)
     
-    instructions_file = action_dir / 'instructions.json'
-    instructions_file.write_text(
-        json.dumps({
-            'actionName': action,
-            'instructions': [f'{action} base instructions']
-        }),
-        encoding='utf-8'
-    )
-    return instructions_file
+    config = {
+        'name': action,
+        'workflow': True,
+        'order': 1,
+        'instructions': [f'{action} base instructions']
+    }
+    config_file = action_dir / 'action_config.json'
+    config_file.write_text(json.dumps(config), encoding='utf-8')
+    return config_file
 
 
 def create_behavior_folder(bot_dir: Path, folder_name: str) -> Path:
@@ -223,7 +237,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 1,
                 "next_action": "decide_planning_criteria",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/1_gather_context/instructions.json",
+                    f"Follow agile_bot/bots/base_bot/base_actions/gather_context/action_config.json",
                     f"Test instructions for gather_context in {behavior_name}"
                 ]
             },
@@ -232,7 +246,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 2,
                 "next_action": "build_knowledge",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/2_decide_planning_criteria/instructions.json",
+                    f"Follow agile_bot/bots/base_bot/base_actions/decide_planning_criteria/action_config.json",
                     f"Test instructions for decide_planning_criteria in {behavior_name}"
                 ]
             },
@@ -241,7 +255,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 3,
                 "next_action": "validate_rules",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/3_build_knowledge/instructions.json",
+                    f"Follow agile_bot/bots/base_bot/base_actions/build_knowledge/action_config.json",
                     f"Test instructions for build_knowledge in {behavior_name}"
                 ]
             },
@@ -250,7 +264,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 4,
                 "next_action": "render_output",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/4_validate_rules/instructions.json",
+                    f"Follow agile_bot/bots/base_bot/base_actions/validate_rules/action_config.json",
                     f"Test instructions for validate_rules in {behavior_name}"
                 ]
             },
@@ -258,7 +272,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "name": "render_output",
                 "order": 5,
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/5_render_output/instructions.json",
+                    f"Follow agile_bot/bots/base_bot/base_actions/render_output/action_config.json",
                     f"Test instructions for render_output in {behavior_name}"
                 ]
             }

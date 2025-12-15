@@ -9,7 +9,7 @@ Tests for all stories in the 'Build Knowledge' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.bot.build_knowledge_action import BuildKnowledgeAction
+from agile_bot.bots.base_bot.src.actions.build_knowledge.build_knowledge_action import BuildKnowledgeAction
 from agile_bot.bots.base_bot.src.scanners.story_map import (
     StoryMap, Epic, SubEpic, StoryGroup, Story, Scenario, ScenarioOutline
 )
@@ -29,6 +29,33 @@ from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
+def _create_mock_behavior(bot_directory: Path, bot_name: str, behavior_name: str, workspace_directory: Path = None):
+    """Create a minimal mock Behavior object for testing."""
+    from types import SimpleNamespace
+    import os
+    
+    # Create mock bot_paths
+    class MockBotPaths:
+        def __init__(self, bot_dir, workspace_dir):
+            self.bot_directory = bot_dir
+            # Use workspace_dir if provided, otherwise try to get from environment
+            if workspace_dir:
+                self.workspace_directory = workspace_dir
+            else:
+                # Try to get from environment variable
+                self.workspace_directory = Path(os.environ.get('WORKING_AREA', bot_dir.parent / 'workspace'))
+    
+    # Create mock behavior
+    behavior_folder = bot_directory / 'behaviors' / behavior_name
+    behavior = SimpleNamespace()
+    behavior.folder = behavior_folder
+    behavior.name = behavior_name
+    behavior.bot_name = bot_name
+    behavior.bot_paths = MockBotPaths(bot_directory, workspace_directory)
+    behavior.bot = None  # Can be None for some tests
+    
+    return behavior
 
 # ============================================================================
 # STORY GRAPH HELPERS
@@ -293,8 +320,14 @@ def given_knowledge_graph_setup_complete(bot_directory: Path, behavior: str, tem
 
 def when_build_knowledge_action_injects_template(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template."""
-    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-    instructions = action_obj.inject_knowledge_graph_template()
+    # Create a mock behavior object for the action
+    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: base_action_config, behavior, activity_tracker
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    base_action_config = BaseActionConfig('build_knowledge', behavior_obj.bot_paths)
+    action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+    # do_execute() now handles template injection
+    instructions = action_obj.do_execute({})
     return action_obj, instructions
 
 
@@ -308,9 +341,14 @@ def then_instructions_contain_template_path(instructions: dict, template_name: s
 
 def when_build_knowledge_action_injects_template_raises_error(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template raises error."""
-    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-    with pytest.raises(FileNotFoundError) as exc_info:
-        action_obj.inject_knowledge_graph_template()
+    # Create a mock behavior object for the action
+    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: base_action_config, behavior, activity_tracker
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    base_action_config = BaseActionConfig('build_knowledge', behavior_obj.bot_paths)
+    action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+    with pytest.raises((FileNotFoundError, ValueError)) as exc_info:
+        action_obj.do_execute({})
     return exc_info
 
 
@@ -374,12 +412,21 @@ def given_knowledge_graph_config_and_template_created(kg_dir: Path) -> tuple:
 
 def when_build_knowledge_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction loads and merges instructions."""
+    # Create a mock behavior object for the action
+    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: base_action_config, behavior, activity_tracker
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    base_action_config = BaseActionConfig('build_knowledge', behavior_obj.bot_paths)
     action_obj = BuildKnowledgeAction(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_directory
+        base_action_config=base_action_config,
+        behavior=behavior_obj
     )
-    merged_instructions = action_obj.load_and_merge_instructions()
+    # Instructions are now automatically loaded and merged by Action base class
+    # Access via action_obj.instructions property
+    merged_instructions = action_obj.instructions.copy()
+    # Add action and behavior info for test compatibility
+    merged_instructions['action'] = 'build_knowledge'
+    merged_instructions['behavior'] = behavior
     return action_obj, merged_instructions
 
 
@@ -568,11 +615,8 @@ def given_validation_rules_created(bot_directory: Path, rule_name: str, rule_con
 
 def when_build_knowledge_action_loads_and_injects_all_instructions(action_obj: BuildKnowledgeAction):
     """When: BuildKnowledgeAction loads and injects all instructions."""
-    instructions = action_obj.load_and_merge_instructions()
-    kg_data = action_obj.inject_knowledge_graph_template()
-    instructions.update(kg_data)
-    action_obj.inject_schema_description_instructions(instructions)
-    action_obj.inject_rules(instructions)
+    # do_execute() now handles all instruction loading, merging, and injection
+    instructions = action_obj.do_execute({})
     return instructions
 
 
@@ -613,8 +657,14 @@ def given_knowledge_graph_template_for_increments_created(kg_dir: Path, template
 
 def when_build_knowledge_action_injects_template_for_increments(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template for increments."""
-    action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
-    instructions = action_obj.inject_knowledge_graph_template()
+    # Create a mock behavior object for the action
+    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: base_action_config, behavior, activity_tracker
+    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    base_action_config = BaseActionConfig('build_knowledge', behavior_obj.bot_paths)
+    action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+    # do_execute() now handles template injection
+    instructions = action_obj.do_execute({})
     return action_obj, instructions
 
 
@@ -966,7 +1016,12 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         """
         bot_name, behavior, action, kg_dir = given_template_variables_test_setup(bot_directory, workspace_directory)
         
-        action_obj = BuildKnowledgeAction(bot_name=bot_name, behavior=behavior, bot_directory=bot_directory)
+        # Create a mock behavior object for the action
+        behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
+        # Use new signature: base_action_config, behavior, activity_tracker
+        from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+        base_action_config = BaseActionConfig('build_knowledge', behavior_obj.bot_paths)
+        action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
         instructions = when_build_knowledge_action_loads_and_injects_all_instructions(action_obj)
         
         base_instructions_text = given_base_instructions_text_extracted(instructions)

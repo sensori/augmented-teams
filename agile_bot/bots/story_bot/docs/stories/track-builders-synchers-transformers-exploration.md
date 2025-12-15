@@ -17,11 +17,11 @@ Render Output Action loads configuration files relating to content necessary to 
 ### Core Domain Concepts
 
 - **Render Output Action**: Base bot action that executes render_output workflow step
-- **Behavior Folder**: Contains behavior-specific content (2_content/2_render/, 2_content/3_synchronize/, etc.)
-- **Synchronize Configuration**: synchronize_*.json files in 2_content/3_synchronize/ that define sync scripts and templates
+- **Behavior Folder**: Contains behavior-specific content (content/render/, content/synchronize/, etc.)
+- **Synchronize Configuration**: synchronize_*.json files in content/synchronize/ that define sync scripts and templates
 - **Template File**: File-based template (not code) specified in synchronize config templates array
 - **Instructions**: Merged instruction set that includes base instructions, behavior instructions, and injected configs/templates
-- **Synchronize Instructions**: General instructions from 3_synchronize/instructions.json
+- **Synchronize Instructions**: General instructions from synchronize/instructions.json
 - **Synchronize Configs**: Array of loaded synchronize_*.json configurations with loaded templates
 
 ---
@@ -37,9 +37,9 @@ Render Output Action loads configuration files relating to content necessary to 
 
 ### Domain Rules
 
-- **Synchronize folder is optional**: Behavior may or may not have 2_content/3_synchronize/ folder
+- **Synchronize folder is optional**: Behavior may or may not have content/synchronize/ folder
 - **Templates are file-based**: Templates are text files (not code/builders) loaded as content
-- **Template paths are relative to synchronize folder**: Template paths in config are relative to 3_synchronize/ folder
+- **Template paths are relative to synchronize folder**: Template paths in config are relative to synchronize/ folder
 - **Missing files are skipped gracefully**: If template or config file cannot be read, skip it and continue
 - **Templates are injected with configs**: Each synchronize_config entry includes both config and loaded templates dictionary
 
@@ -50,7 +50,7 @@ Render Output Action loads configuration files relating to content necessary to 
 **Acceptance Criteria:**
 
 (AC) WHEN render_output action executes for a behavior
-(AC) THEN render_output discovers synchronize folder in 2_content/3_synchronize/ (or *_content/*_synchronize/)
+(AC) THEN render_output discovers synchronize folder in content/synchronize/
 (AC) AND render_output loads instructions.json from synchronize folder if it exists
 (AC) AND render_output loads all synchronize_*.json configuration files from synchronize folder
 

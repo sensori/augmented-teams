@@ -1,0 +1,91 @@
+{
+  "behaviorName": "specification_scenarios",
+  "order": 5,
+  "description": "Write detailed plain-English scenarios (Given/When/Then) that specify exact behavior for each story",
+  "goal": "Specify stories with detailed, testable scenarios using plain English",
+  "inputs": "Acceptance criteria from exploration, domain models, integration contracts",
+  "outputs": "Individual story .md files with detailed scenarios (no variables/examples tables)",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "Organize stories into delivery increments based on business value, dependencies, and risk"
+  ],
+  "actions_workflow": {
+    "actions": [
+      {
+        "name": "gather_context",
+        "order": 1,
+        "next_action": "decide_planning_criteria",
+        "instructions": []
+      },
+      {
+        "name": "decide_planning_criteria",
+        "order": 2,
+        "next_action": "build_knowledge",
+        "instructions": []
+      },
+      {
+        "name": "build_knowledge",
+        "order": 3,
+        "next_action": "validate_rules",
+        "instructions": [
+          "Follow agile_bot/bots/story_bot/behaviors/scenarios/content/knowledge_graph/instructions.json",
+          "specification_scenarios: build scenarios AND refine domain model based on scenario details",
+          "Refine domain model concepts, relationships, and responsibilities based on detailed scenario specifications",
+          "CRITICAL: Add/update scenarios and scenario_outlines ONLY in main epics section (single source of truth), NOT in increments section"
+        ]
+      },
+      {
+        "name": "validate_rules",
+        "order": 4,
+        "next_action": "render_output",
+        "instructions": [
+          "specification_scenarios: validate scenario structure AND domain model refinements"
+        ]
+      },
+      {
+        "name": "render_output",
+        "order": 5,
+        "instructions": [
+          "specification_scenarios: render story documents with scenarios"
+        ]
+      }
+    ]
+  },
+  "trigger_words": {
+    "description": "Behavior-level trigger words - specific to specification scenarios writing behavior",
+    "patterns": [
+      "specify.*scenarios",
+      "*specification",
+      "write.*scenarios",
+      "define.*test.*scenario",
+      "write.*details",
+      "get.*to.*exact.*flow",
+      "describe.*step.*by.*step",
+      "elaborate.*flow",
+      "model.*edge.*cases",
+      "walk.*through.*test.*case",
+      "spec.*acceptance.*scenario",
+      "detail.*logic",
+      "level.*specification",
+      "define.*preconditions",
+      "create.*test.*scenarios",
+      "scenario.*based.*design",
+      "specification.*scenarios",
+      "specify.*examples",
+      "add.*test.*data",
+      "define.*test.*data",
+      "write.*examples",
+      "create.*examples.*table",
+      "add.*variables.*to.*scenarios",
+      "convert.*to.*scenario.*outline",
+      "add.*examples.*to.*scenarios",
+      "define.*inputs",
+      "define.*expected.*functionality",
+      "capture.*data.*needs",
+      "specification.*examples",
+      "test.*data"
+    ]
+  }
+}
+
+

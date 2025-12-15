@@ -15,7 +15,7 @@ class MCPServer:
             config_path: Path to bot_config.json
             
         Note:
-            workspace_directory is auto-detected from agent.json
+            workspace_directory is auto-detected from bot_config.json
         """
         self.bot_name = bot_name
         self.bot_directory = Path(bot_directory)

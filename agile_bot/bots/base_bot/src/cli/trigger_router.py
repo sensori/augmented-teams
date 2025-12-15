@@ -333,31 +333,23 @@ class TriggerRouter:
     def _extract_behavior_name(self, dir_name: str) -> str:
         """Extract behavior name from directory name.
         
-        Handles numbered prefixes like '1_shape' -> 'shape'
-        
         Args:
             dir_name: Directory name
             
         Returns:
-            Behavior name without number prefix
+            Behavior name
         """
-        if '_' in dir_name and dir_name[0].isdigit():
-            return dir_name.split('_', 1)[1]
         return dir_name
     
     def _extract_action_name(self, dir_name: str) -> str:
         """Extract action name from directory name.
         
-        Handles numbered prefixes like '2_gather_context' -> 'gather_context'
-        
         Args:
             dir_name: Directory name
             
         Returns:
-            Action name without number prefix
+            Action name
         """
-        if '_' in dir_name and dir_name[0].isdigit():
-            return dir_name.split('_', 1)[1]
         return dir_name
     
     def _load_patterns_from_file(self, file_path: Path) -> List[str]:

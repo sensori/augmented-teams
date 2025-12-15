@@ -24,7 +24,7 @@ from agile_bot.bots.base_bot.test.test_build_agile_bots import (
 
 # Consolidated helpers imported from test_generate_mcp_tools.py
 from agile_bot.bots.base_bot.test.test_generate_mcp_tools import (
-    given_bot_has_instructions_json,
+    given_bot_config_has_goal_and_description,
     given_behaviors_with_descriptions_and_trigger_words,
     when_generate_awareness_files_and_read_content,
     when_create_rules_directory_if_needed,
@@ -107,24 +107,22 @@ class TestGenerateCursorAwarenessFiles:
     def test_rules_file_includes_bot_goal_and_behavior_descriptions(self, workspace_root):
         """
         SCENARIO: Rules file includes bot goal and behavior descriptions
-        GIVEN: Bot has instructions.json with goal and behavior descriptions
+        GIVEN: Bot config has goal and description
         WHEN: Generator creates .cursor/rules/mcp-<bot-name>-awareness.mdc file
-        THEN: File includes bot's goal from instructions.json
+        THEN: File includes bot's goal from bot_config.json
         AND: Critical rule mentions bot's goal: "When user is trying to [goal], check MCP tools FIRST"
         AND: Each behavior section includes "When user is trying to [behavior description]"
         """
         # Given: A bot configuration file with a working directory and behaviors
         bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
         bot_config, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
-        # And: Bot has instructions.json with goal and behavior descriptions
-        given_bot_has_instructions_json(
+        # And: Bot config has goal and description
+        from agile_bot.bots.base_bot.test.test_generate_mcp_tools import given_bot_config_has_goal_and_description
+        given_bot_config_has_goal_and_description(
             workspace_root,
             bot_name,
             'Transform user needs into well-structured stories',
-            {
-                'shape': 'Create initial story map outline from user context',
-                'discovery': 'Elaborate stories with user flows and domain rules'
-            }
+            'Helps teams create and refine user stories'
         )
         # And: Behaviors have descriptions and trigger words configured
         given_behaviors_with_descriptions_and_trigger_words(bot_dir, [
@@ -231,6 +229,8 @@ class TestGenerateCursorAwarenessFiles:
         rules_dir, rules_file = then_rules_directory_and_file_exist()
         # And: Rules file has all required sections
         then_awareness_file_contains_required_sections(rules_file, 'test_bot')
+
+
 
 
 

@@ -120,21 +120,31 @@ def given_bot_config_does_not_exist(workspace_root: Path, bot_name: str):
     return config_path
 
 
-def given_bot_has_instructions_json(workspace_root: Path, bot_name: str, goal: str, behavior_descriptions: dict):
-    """Given: Bot has instructions.json.
+def given_bot_config_has_goal_and_description(workspace_root: Path, bot_name: str, goal: str, description: str = None):
+    """Given: Bot config has goal and description.
     
-    
+    Updates bot_config.json with goal and description fields.
     """
     bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
-    instructions_file = bot_dir / 'instructions.json'
-    instructions_data = {
-        'botName': bot_name,
-        'goal': goal,
-        'description': f'Helps teams create and refine user stories',
-        'behaviors': behavior_descriptions
-    }
-    instructions_file.write_text(json.dumps(instructions_data), encoding='utf-8')
-    return instructions_file
+    config_dir = bot_dir / 'config'
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_path = config_dir / 'bot_config.json'
+    
+    # Load existing config or create new one
+    if config_path.exists():
+        config = json.loads(config_path.read_text(encoding='utf-8'))
+    else:
+        config = {'name': bot_name, 'behaviors': []}
+    
+    # Add goal and description
+    config['goal'] = goal
+    if description:
+        config['description'] = description
+    else:
+        config['description'] = 'Helps teams create and refine user stories'
+    
+    config_path.write_text(json.dumps(config, indent=2), encoding='utf-8')
+    return config_path
 
 
 def given_behaviors_with_descriptions_and_trigger_words(bot_dir: Path, behaviors_config: list):
@@ -562,7 +572,7 @@ def then_awareness_file_created_with_bot_specific_filename(bot_name: str):
     
     
     """
-    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
     repo_root = get_python_workspace_root()
     rules_file = repo_root / '.cursor' / 'rules' / f'mcp-{bot_name.replace("_", "-")}-awareness.mdc'
     assert rules_file.exists(), f"Expected bot-specific file: {rules_file}"
@@ -634,7 +644,7 @@ def then_rules_directory_exists_and_is_directory():
     
     
     """
-    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
     repo_root = get_python_workspace_root()
     rules_dir = repo_root / '.cursor' / 'rules'
     assert rules_dir.exists()

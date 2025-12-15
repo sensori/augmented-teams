@@ -131,19 +131,25 @@ if str(python_workspace_root) not in sys.path:
 bot_directory = Path(__file__).parent.parent  # src/ -> {self.bot_name}/
 os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
-# 2. Read agent.json and set workspace directory (if not already set)
+# 2. Read bot_config.json and set workspace directory (if not already set)
 if 'WORKING_AREA' not in os.environ and 'WORKING_DIR' not in os.environ:
-    agent_json_path = bot_directory / 'agent.json'
-    if agent_json_path.exists():
-        agent_config = json.loads(agent_json_path.read_text(encoding='utf-8'))
-        if 'WORKING_AREA' in agent_config:
-            os.environ['WORKING_AREA'] = agent_config['WORKING_AREA']
+    config_path = bot_directory / 'config' / 'bot_config.json'
+    if config_path.exists():
+        bot_config = json.loads(config_path.read_text(encoding='utf-8'))
+        # Check for WORKING_AREA in bot_config.json (legacy field)
+        if 'WORKING_AREA' in bot_config:
+            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
+        # Also check mcp.env.WORKING_AREA (new location)
+        elif 'mcp' in bot_config and 'env' in bot_config['mcp']:
+            mcp_env = bot_config['mcp']['env']
+            if 'WORKING_AREA' in mcp_env:
+                os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
 
 # ============================================================================
 # Now import - everything will read from environment variables
 # ============================================================================
 
-from agile_bot.bots.base_bot.src.state.workspace import get_bot_directory, get_workspace_directory
+from agile_bot.bots.base_bot.src.bot.workspace import get_bot_directory, get_workspace_directory
 from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
 
 
@@ -152,7 +158,7 @@ def main():
 
     Environment variables are bootstrapped before import:
     - BOT_DIRECTORY: Self-detected from script location
-    - WORKING_AREA: Read from agent.json (or pre-set by user)
+    - WORKING_AREA: Read from bot_config.json (or pre-set by user)
     
     All subsequent code reads from these environment variables.
     """
@@ -256,7 +262,14 @@ if __name__ == '__main__':
             return []
     
     def _generate_cursor_commands(self, cli_script_path: Path) -> Dict[str, Path]:
-        """Generate cursor command files for bot.
+        """Generate cursor command files for bot and behaviors.
+        
+        Generates:
+        - Bot command: routes to current behavior/action
+        - Behavior commands: one per behavior, accepts optional action parameter via ${1:}
+          If no action parameter provided, uses default/current action
+        - Continue command: closes current action and continues to next
+        - Help command: lists all cursor commands and their parameters
         
         Args:
             cli_script_path: Path to the Python CLI script that will be invoked
@@ -264,25 +277,9 @@ if __name__ == '__main__':
         Returns:
             Dict mapping command names to cursor command file paths
         """
-        import os
-        from agile_bot.bots.base_bot.src.cli.base_bot_cli import BaseBotCli
-        
-        # Set environment variables before creating BaseBotCli
-        bot_directory = self.workspace_root / self.bot_location
-        os.environ['BOT_DIRECTORY'] = str(bot_directory)
-        # Set a temporary WORKING_AREA if not already set
-        if 'WORKING_AREA' not in os.environ:
-            os.environ['WORKING_AREA'] = str(self.workspace_root)
-        
-        # Create BaseBotCli instance to use its generate_cursor_commands method
-        bot_config_path = self.workspace_root / self.bot_location / 'config' / 'bot_config.json'
-        cli = BaseBotCli(
-            bot_name=self.bot_name,
-            bot_config_path=bot_config_path
-        )
-        
         # Generate cursor commands in .cursor/commands directory
         commands_dir = self.workspace_root / '.cursor' / 'commands'
+        commands_dir.mkdir(parents=True, exist_ok=True)
         
         # Use relative path from workspace root for the Python CLI script
         if cli_script_path.is_absolute():
@@ -293,8 +290,98 @@ if __name__ == '__main__':
         
         # Convert to forward slashes for cross-platform compatibility (Python handles both)
         cli_script_str = str(rel_cli_script_path).replace('\\', '/')
+        python_command = f"python {cli_script_str}"
         
-        return cli.generate_cursor_commands(commands_dir, Path(cli_script_str))
+        # Get behaviors from config
+        behaviors = self._get_behaviors_from_config()
+        
+        current_command_files = self._get_current_command_files(commands_dir)
+        commands = {}
+        
+        # Bot command: routes to current behavior/action
+        bot_command = f"{python_command}"
+        commands[f'{self.bot_name}'] = self._write_command_file(commands_dir / f'{self.bot_name}.md', bot_command)
+        
+        # Continue command: closes current action and continues to next
+        continue_command = f"{python_command} --close"
+        commands[f'{self.bot_name}-continue'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-continue.md',
+            continue_command
+        )
+        
+        # Help command: lists all cursor commands and their parameters
+        help_command = f"{python_command} --help-cursor"
+        commands[f'{self.bot_name}-help'] = self._write_command_file(
+            commands_dir / f'{self.bot_name}-help.md',
+            help_command
+        )
+        
+        # Behavior commands: accept optional action parameter and any additional context
+        for behavior_name in behaviors:
+            # ${1:} is optional action name (if provided, routes to that action)
+            # ${2:} is optional context (file paths, parameters, etc. - CLI will parse and pass to action)
+            # If no action provided, behavior uses default/current action
+            # Note: Cursor will replace ${1:} and ${2:} with user input or empty string
+            # Additional arguments can be passed as --key=value or file paths
+            # Use --behavior and --action named parameters
+            # ${1:} is optional action - if empty, argparse treats --action as None
+            # ${2:} is optional context - passed as positional argument
+            behavior_command = f"{python_command} --behavior {behavior_name} --action ${{1:}}${{2:+ }}${{2:}}"
+            commands[f'{self.bot_name}-{behavior_name}'] = self._write_command_file(
+                commands_dir / f'{self.bot_name}-{behavior_name}.md', 
+                behavior_command
+            )
+        
+        self._remove_obsolete_command_files(commands_dir, current_command_files, commands)
+        
+        return commands
+    
+    def _get_current_command_files(self, commands_dir: Path) -> set:
+        """Get set of existing command files for this bot.
+        
+        Args:
+            commands_dir: Directory containing command files
+            
+        Returns:
+            Set of existing command file paths
+        """
+        if not commands_dir.exists():
+            return set()
+        
+        bot_prefix = f'{self.bot_name}'
+        existing_files = set()
+        
+        for file_path in commands_dir.glob(f'{bot_prefix}*.md'):
+            existing_files.add(file_path)
+        
+        return existing_files
+    
+    def _remove_obsolete_command_files(self, commands_dir: Path, existing_files: set, current_commands: Dict[str, Path]):
+        """Remove command files that no longer correspond to current bot behaviors/actions.
+        
+        Args:
+            commands_dir: Directory containing command files
+            existing_files: Set of existing command file paths before generation
+            current_commands: Dict of current command names to file paths
+        """
+        current_file_paths = set(current_commands.values())
+        
+        for file_path in existing_files:
+            if file_path not in current_file_paths:
+                file_path.unlink(missing_ok=True)
+    
+    def _write_command_file(self, file_path: Path, command: str) -> Path:
+        """Write cursor command file with command content.
+        
+        Args:
+            file_path: Path to command file
+            command: Command string to write
+            
+        Returns:
+            Path to written file
+        """
+        file_path.write_text(command, encoding='utf-8')
+        return file_path
     
     def _update_bot_registry(self, cli_script_path: Path) -> Path:
         """Update bot registry with this bot's information.

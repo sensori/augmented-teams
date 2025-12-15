@@ -40,3 +40,4 @@ class DomainConceptNode:
         
         return ".".join(path_parts)
 
+

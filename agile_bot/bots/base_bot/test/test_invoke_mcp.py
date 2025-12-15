@@ -18,7 +18,7 @@ import pytest
 from pathlib import Path
 import json
 from conftest import create_bot_config_file, create_workflow_state_file
-from agile_bot.bots.base_bot.src.bot.gather_context_action import GatherContextAction
+from agile_bot.bots.base_bot.src.actions.gather_context.gather_context_action import GatherContextAction
 from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_behavior_action_instructions, create_actions_workflow_json
 from agile_bot.bots.base_bot.test.test_helpers import (
     create_base_action_instructions,
@@ -67,7 +67,7 @@ def given_behavior_json_files_for_behaviors(bot_directory: Path, behaviors: list
 
 def given_base_action_instructions_created(bot_directory: Path, action: str):
     """Given: Base action instructions created."""
-    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
     repo_root = get_python_workspace_root()
     return create_base_action_instructions(bot_directory, action)
 
@@ -124,7 +124,7 @@ def given_workflow_state_created(workspace_directory: Path, current_behavior: st
 
 def given_base_instructions_created(bot_directory: Path):
     """Given: Base instructions created."""
-    from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+    from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
     repo_root = get_python_workspace_root()
     create_base_instructions(bot_directory)
 
@@ -152,7 +152,7 @@ def then_workflow_state_has_correct_values(workflow_file: Path, expected_behavio
 
 def given_activity_tracker_created(workspace_directory: Path, bot_name: str):
     """Given: Activity tracker created."""
-    from agile_bot.bots.base_bot.src.state.activity_tracker import ActivityTracker
+    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
     return ActivityTracker(workspace_directory=workspace_directory, bot_name=bot_name)
 
 
@@ -266,7 +266,8 @@ class TestInvokeBotTool:
         
         # When: Call REAL Bot API
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config_file_path)
-        action_result = bot.shape.gather_context()
+        shape_behavior = bot.behaviors.find_by_name('shape')
+        action_result = shape_behavior.gather_context()
         
         # Then: Tool executed and returned result
         then_bot_result_has_status_and_behavior_and_action(action_result, 'completed', 'shape', 'gather_context')
@@ -295,7 +296,8 @@ class TestInvokeBotTool:
         
         # When: Call REAL Bot API for specific behavior
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config_file_path)
-        action_result = bot.exploration.build_knowledge()
+        exploration_behavior = bot.behaviors.find_by_name('exploration')
+        action_result = exploration_behavior.build_knowledge()
         
         # Then: Routes to exploration behavior only
         then_bot_result_has_behavior_and_action(action_result, 'exploration', 'build_knowledge')
@@ -393,7 +395,8 @@ class TestForwardToCurrentAction:
         
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
-        action_result = bot.discovery.forward_to_current_action()
+        discovery_behavior = bot.behaviors.find_by_name('discovery')
+        action_result = discovery_behavior.forward_to_current_action()
         
         # Then
         then_result_action_matches_expected(action_result, 'gather_context')
@@ -413,7 +416,8 @@ class TestForwardToCurrentAction:
         
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
-        action_result = bot.exploration.forward_to_current_action()
+        exploration_behavior = bot.behaviors.find_by_name('exploration')
+        action_result = exploration_behavior.forward_to_current_action()
         
         # Then
         assert action_result.behavior == 'exploration'
@@ -433,7 +437,8 @@ class TestForwardToCurrentAction:
         
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
-        action_result = bot.shape.forward_to_current_action()
+        shape_behavior = bot.behaviors.find_by_name('shape')
+        action_result = shape_behavior.forward_to_current_action()
         
         # Then
         then_result_action_matches_expected(action_result, 'gather_context')
@@ -462,7 +467,8 @@ class TestForwardToCurrentAction:
         workflow_file = then_workflow_state_does_not_exist(workspace_directory)
         
         # Call gather_context DIRECTLY (not via forward_to_current_action)
-        action_result = bot.shape.gather_context()
+        shape_behavior = bot.behaviors.find_by_name('shape')
+        action_result = shape_behavior.gather_context()
         
         # Then
         workflow_file = then_workflow_state_file_exists(workspace_directory)

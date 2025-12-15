@@ -95,3 +95,4 @@ class DomainLanguageScanner(StoryScanner):
                 return True
         return False
 
+

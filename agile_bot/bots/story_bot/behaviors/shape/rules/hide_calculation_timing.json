@@ -1,0 +1,43 @@
+{
+  "description": "CRITICAL: Domain concepts must hide calculation timing. Properties hide when calculations occur—they may be computed on-demand, cached, pre-computed, or loaded from storage. The caller shouldn't know or care when the value was calculated.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.calculation_timing_scanner.CalculationTimingScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Use properties that hide calculation timing",
+        "content": [
+          "Responsibilities should use 'Get X' not 'Calculate X'",
+          "Properties hide when calculations occur (on-demand, cached, pre-computed)",
+          "Callers shouldn't know when value was calculated",
+          "",
+          "Correct Examples (timing hidden):",
+          "Portfolio",
+          "    Get total value: Holdings (could be calculated now, cached, or pre-computed)",
+          "    Get risk score: Holdings, RiskModel (computation timing hidden)",
+          "    Get performance metrics: Holdings, PerformanceCalculator"
+        ]
+      },
+      "dont": {
+        "description": "Don't expose calculation timing in responsibilities",
+        "content": [
+          "Don't use 'Calculate X' (reveals it's calculated NOW)",
+          "Don't use 'Get cached X' (reveals it's cached)",
+          "Don't reveal when or how calculations happen",
+          "",
+          "Wrong Examples (timing exposed):",
+          "Portfolio",
+          "    Calculate total value: Holdings (reveals it's calculated NOW)",
+          "    Get cached total value: None (reveals it's cached)",
+          "    Compute risk score: Holdings, RiskModel (reveals computation)",
+          "",
+          "Timing Exposure Indicators (REJECT):",
+          "- Responsibilities starting with 'Calculate', 'Compute', 'Derive'",
+          "- Responsibilities mentioning 'cached', 'pre-computed', 'on-demand'",
+          "- Responsibilities that reveal implementation timing"
+        ]
+      }
+    }
+  ]
+}
+
+

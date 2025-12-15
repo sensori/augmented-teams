@@ -1,0 +1,49 @@
+{
+  "description": "CRITICAL: Domain concepts must use domain-specific language, not generic terms. Objects should expose properties representing what they contain (e.g., recommended_trades), not methods that 'generate' or 'calculate' things. If field-level variables are needed for clarity, show them with dot notation (class.field).",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.domain_language_scanner.DomainLanguageScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Use domain-specific language with properties",
+        "content": [
+          "Use domain-specific terms for classes, responsibilities, and collaborators",
+          "Properties represent what objects contain (Get recommended trades)",
+          "Use dot notation for field-level variables (class.field)",
+          "",
+          "Correct Examples (domain language with properties):",
+          "RebalanceRecommendation",
+          "    Instantiated with: Portfolio, TargetAllocation",
+          "    Get recommended trades: Portfolio, TargetAllocation",
+          "    Get allocation comparison: Portfolio, TargetAllocation",
+          "",
+          "Portfolio",
+          "    Get total value: Holdings",
+          "    Get risk score: Holdings, RiskModel"
+        ]
+      },
+      "dont": {
+        "description": "Don't use generic terms or generate/calculate methods",
+        "content": [
+          "Don't use generic terms like 'parameter', 'result', 'data', 'config' without domain context",
+          "Don't use method names like 'generate' or 'calculate' when a property would better represent the domain concept",
+          "",
+          "Wrong Examples (generic terms):",
+          "RebalanceRecommendation",
+          "    Generate recommendation: PortfolioData, TargetConfig",
+          "    Calculate trades: HoldingsData, PercentagesConfig",
+          "",
+          "Portfolio",
+          "    Calculate total value: HoldingsData",
+          "    Get result: CalculationResult",
+          "",
+          "Generic Term Indicators (REJECT):",
+          "- Classes/responsibilities using 'Data', 'Config', 'Parameter', 'Result' without domain context",
+          "- Responsibilities starting with 'Generate', 'Calculate' when property would be better",
+          "- Collaborators that are generic types without domain meaning"
+        ]
+      }
+    }
+  ]
+}
+
+

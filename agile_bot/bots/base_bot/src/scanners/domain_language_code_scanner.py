@@ -91,3 +91,4 @@ class DomainLanguageCodeScanner(CodeScanner):
         # Simple heuristic: if it's just "Data" or "Config" it's generic
         return len(name.split()) > 1 or name.lower() not in ['data', 'config', 'parameter', 'result']
 
+

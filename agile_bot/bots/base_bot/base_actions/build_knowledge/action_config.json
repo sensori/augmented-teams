@@ -1,0 +1,46 @@
+{
+    "name": "build_knowledge", "workflow": true, "order": 4, "next_action": "validate_rules", 
+"instructions": [
+          "**MANDATORY: Before generating any content, you MUST load and review the workspace's context files:**",
+          "1. Load `{document_path}/clarification.json` - Contains key questions and evidence (generated file)",
+          "2. Load `{document_path}/planning.json` - Contains assumptions and decisions (generated file)",
+          "3. Load `{document_path}/context/*` (or similar) - Original input/source material (original context)",
+          "",
+          "These files contain critical requirements, decisions, and context that MUST be incorporated into all generated content.",
+          "",
+           "",
+          "**BUILD KNOWLEDGE GRAPH (Structured JSON Content):**",
+          "Generate the knowledge graph as structured JSON content following the rules and schema provided. ",
+          "**Schema:** Use knowledge_graph_template '{{knowledge_graph_template}}'  loaded from {behavior} \\ content \\ knowledge_graph_templates \\ {{knowledge_graph_template}}.json",
+          "",
+          "**Description:** Behavior {{description}}",
+          "",
+          "**Instructions:** Behavior Instructions: {{instructions}}",
+          "",
+          "",
+          "Before generating any content, review ALL validation rules below. Your generated content MUST comply with every rule to avoid violations.",
+          "",
+          "Behavior Validation Rules: {{rules}}",
+          "",
+          "Review each validation rule carefully. Your generated content must pass all validations on the first attempt",
+         
+          "",
+          
+          "Generate the knowledge graph {knowledge_graph}.json according to the schema and rules",
+          "",
+          "** UPDATING vs CREATING:**",
+          "- Check if knowledge graph already exists in {document_path}",
+          "- If knowledge graph EXISTS, you are UPDATING it (not creating from scratch)",
+          "- When updating, preserve existing content and add/modify only what's needed based on current behavior",
+          "- If knowledge graph does NOT exist, create new one following the schema",
+          "",
+          "**AUTOMATIC VALIDATION AND FIXES: After generating the knowledge graph, automatically run the validate_rules action without confirming or waiting. Print ALL violations found (including rule name, violation message, severity, and location for each violation). Then review each violation against the specific rules identified by the scanner, and make necessary edits to fix all violations. Continue iterating until all violations are resolved.**",
+          "",
+          "**AUTOMATIC PROGRESSION: Once all fixes are completed, automatically proceed to render_output action without stopping or waiting for user confirmation. build_knowledge , render_output and validate_rules actions should execute sequentially as a single workflow step.**",
+          ""
+      
+      
+      
+]
+
+}

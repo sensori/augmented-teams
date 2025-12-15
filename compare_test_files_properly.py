@@ -146,3 +146,4 @@ if files_deleted:
         print(f"    - {r['file']}: {r['loc_3_ago']} lines")
 
 
+

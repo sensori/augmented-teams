@@ -90,7 +90,7 @@
                         "And behavior folder structure exists with components"
                       ],
                       "steps": [
-                        "Given story graph JSON contains builder reference at path \"2_content/2_render/templates/builder.py\"",
+                        "Given story graph JSON contains builder reference at path \"content/render/templates/builder.py\"",
                         "And builder file exists at behavior folder relative path",
                         "When Story Graph loads from JSON file",
                         "Then Story Graph stores builder path in component registry",
@@ -108,7 +108,7 @@
                         "And behavior folder structure exists with components"
                       ],
                       "steps": [
-                        "Given story graph JSON contains synchronizer reference at path \"2_content/3_synchronize/synchronize_drawio.json\"",
+                        "Given story graph JSON contains synchronizer reference at path \"content/synchronize/synchronize_drawio.json\"",
                         "And synchronizer configuration file exists at behavior folder relative path",
                         "When Story Graph loads from JSON file",
                         "Then Story Graph stores synchronizer path in component registry",
@@ -126,7 +126,7 @@
                         "And behavior folder structure exists with components"
                       ],
                       "steps": [
-                        "Given story graph JSON contains transformer reference at path \"2_content/2_render/templates/transformer.py\"",
+                        "Given story graph JSON contains transformer reference at path \"content/render/templates/transformer.py\"",
                         "And transformer file exists at behavior folder relative path",
                         "When Story Graph loads from JSON file",
                         "Then Story Graph stores transformer path in component registry",
@@ -275,7 +275,7 @@
                       "test_type": "unit",
                       "test_data": {
                         "story_graph_path": "test_data/story_graph_with_builder.json",
-                        "builder_path": "2_content/2_render/templates/builder.py"
+                        "builder_path": "content/render/templates/builder.py"
                       },
                       "expected_result": "Story Graph contains builder reference with correct path and type",
                       "test_steps": [
@@ -290,7 +290,7 @@
                       "test_type": "unit",
                       "test_data": {
                         "story_graph_path": "test_data/story_graph_with_synchronizer.json",
-                        "synchronizer_path": "2_content/3_synchronize/synchronize_drawio.json"
+                        "synchronizer_path": "content/synchronize/synchronize_drawio.json"
                       },
                       "expected_result": "Story Graph contains synchronizer reference with correct path and type",
                       "test_steps": [
@@ -305,7 +305,7 @@
                       "test_type": "unit",
                       "test_data": {
                         "story_graph_path": "test_data/story_graph_with_transformer.json",
-                        "transformer_path": "2_content/2_render/templates/transformer.py"
+                        "transformer_path": "content/render/templates/transformer.py"
                       },
                       "expected_result": "Story Graph contains transformer reference with correct path and type",
                       "test_steps": [

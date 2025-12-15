@@ -102,3 +102,4 @@ class PropertyEncapsulationCodeScanner(CodeScanner):
                         return parent
         return None
 
+

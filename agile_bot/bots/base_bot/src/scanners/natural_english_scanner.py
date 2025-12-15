@@ -48,3 +48,4 @@ class NaturalEnglishScanner(StoryScanner):
         
         return violations
 
+

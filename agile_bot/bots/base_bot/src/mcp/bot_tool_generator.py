@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict, Any
-from agile_bot.bots.base_bot.src.state.workspace import get_workspace_directory
+from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
 
 
 class BotTool:
@@ -12,7 +12,7 @@ class BotTool:
     
     def invoke(self, parameters: Dict[str, Any] = None):
         from agile_bot.bots.base_bot.src.bot.bot import Bot
-        from agile_bot.bots.base_bot.src.state.workspace import get_bot_directory
+        from agile_bot.bots.base_bot.src.bot.workspace import get_bot_directory
         
         bot_directory = get_bot_directory()
 

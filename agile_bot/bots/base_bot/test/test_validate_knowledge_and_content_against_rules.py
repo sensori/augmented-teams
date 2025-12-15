@@ -156,7 +156,7 @@ def given_workflow_state_with_all_actions_completed(workspace_directory: Path, b
 
 def when_check_workflow_completion_status(behavior: str, state_file: Path):
     """When: Check workflow completion status."""
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
+    # Workflow class removed - state managed by Behaviors and Actions collections
     return Workflow.is_behavior_complete(behavior, state_file)
 
 

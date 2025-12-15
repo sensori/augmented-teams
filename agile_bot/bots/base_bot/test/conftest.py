@@ -180,8 +180,9 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
         if next_action:
             action_config['next_action'] = next_action
             
+        # Instructions are now in action_config.json
+        action_config['instructions'] = [f'{action_name} base instructions']
         (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
-        (action_dir / 'instructions.json').write_text(json.dumps({'instructions': [f'{action_name} base instructions']}), encoding='utf-8')
     
     return base_actions_dir
 
@@ -219,7 +220,7 @@ def create_test_workflow(
     
     
     """
-    from agile_bot.bots.base_bot.src.state.workflow import Workflow
+    # Workflow class removed - state managed by Behaviors and Actions collections
     
     # Bootstrap environment
     bootstrap_env(bot_dir, workspace_dir)

@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Tuple
 from agile_bot.bots.base_bot.src.bot.bot import Bot
-from agile_bot.bots.base_bot.src.state.workspace import get_base_actions_directory, get_bot_directory
+from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory, get_bot_directory
 
 
 class BaseBotCli:
@@ -63,13 +63,13 @@ class BaseBotCli:
         return self._route_to_current_behavior_and_action()
     
     def _route_to_specific_action(self, behavior_name: str, action_name: str, parameters: Dict[str, Any]):
-        # If behavior_name is None, get current behavior from workflow
+        # If behavior_name is None, get current behavior from Behaviors collection
         if behavior_name is None:
-            workflow = self.bot.workflow
-            if workflow and workflow.current_stage:
-                behavior_name = workflow.current_stage
+            current_behavior = self.bot.behaviors.current
+            if current_behavior:
+                behavior_name = current_behavior.name
             else:
-                raise ValueError(f"Cannot execute action '{action_name}' without knowing the behavior. No current behavior found in workflow state.")
+                raise ValueError(f"Cannot execute action '{action_name}' without knowing the behavior. No current behavior found in state.")
         
         behavior_obj = getattr(self.bot, behavior_name)
         action_method = getattr(behavior_obj, action_name)
@@ -149,37 +149,34 @@ class BaseBotCli:
         # Use centralized workspace utility to get base_actions directory
         base_actions_dir = get_base_actions_directory(bot_directory=get_bot_directory())
         
-        # Check numbered format (e.g., 2_gather_context, 3_decide_planning_criteria)
+        # Action folders no longer have number prefixes
         action_prefixes = {
-            'gather_context': '1_gather_context',
-            'decide_planning_criteria': '2_decide_planning_criteria',
-            'build_knowledge': '3_build_knowledge',
-            'render_output': '4_render_output',
-            'validate_rules': '5_validate_rules'
+            'gather_context': 'gather_context',
+            'decide_planning_criteria': 'decide_planning_criteria',
+            'build_knowledge': 'build_knowledge',
+            'render_output': 'render_output',
+            'validate_rules': 'validate_rules'
         }
         
         action_folder = action_prefixes.get(action_name, action_name)
-        instructions_path = base_actions_dir / action_folder / 'instructions.json'
+        config_path = base_actions_dir / action_folder / 'action_config.json'
         
-        if instructions_path.exists():
+        if config_path.exists():
             try:
                 import json
-                instructions = json.loads(instructions_path.read_text(encoding='utf-8'))
+                config = json.loads(config_path.read_text(encoding='utf-8'))
                 
                 # Extract description from instructions
-                if isinstance(instructions, dict):
-                    # Look for description field or first line of instructions
-                    if 'description' in instructions:
-                        return instructions['description']
-                    elif 'instructions' in instructions and isinstance(instructions['instructions'], list):
-                        # Get first meaningful line from instructions
-                        for line in instructions['instructions']:
-                            if line and not line.startswith('**') and len(line.strip()) > 10:
-                                # Return first substantial line, truncated if too long
-                                desc = line.strip()
-                                if len(desc) > 80:
-                                    desc = desc[:77] + '...'
-                                return desc
+                instructions = config.get('instructions', [])
+                if isinstance(instructions, list):
+                    # Get first meaningful line from instructions
+                    for line in instructions:
+                        if line and not line.startswith('**') and len(line.strip()) > 10:
+                            # Return first substantial line, truncated if too long
+                            desc = line.strip()
+                            if len(desc) > 80:
+                                desc = desc[:77] + '...'
+                            return desc
             except Exception:
                 pass
         
@@ -189,7 +186,7 @@ class BaseBotCli:
     def help_cursor_commands(self):
         """List all available cursor commands and their parameters."""
         # Use centralized repository root
-        from agile_bot.bots.base_bot.src.state.workspace import get_python_workspace_root
+        from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
         repo_root = get_python_workspace_root()
         commands_dir = repo_root / '.cursor' / 'commands'
         
@@ -265,20 +262,16 @@ class BaseBotCli:
             self.bot_directory / 'behaviors' / behavior_name / 'behavior.json'
         )
         
-        # Also check numbered behavior folders (e.g., 1_shape, 2_prioritization)
+        # Check all behavior folders for matching name
         if not behavior_file_path.exists():
-            # Try numbered format - check all numbered folders
             behaviors_dir = self.bot_directory / 'behaviors'
             if behaviors_dir.exists():
                 for folder in behaviors_dir.iterdir():
-                    if folder.is_dir():
-                        # Check if folder name ends with behavior_name (e.g., "1_shape" ends with "shape")
-                        folder_name = folder.name
-                        if folder_name.endswith(f'_{behavior_name}') or folder_name == behavior_name:
-                            potential_path = folder / 'behavior.json'
-                            if potential_path.exists():
-                                behavior_file_path = potential_path
-                                break
+                    if folder.is_dir() and folder.name == behavior_name:
+                        potential_path = folder / 'behavior.json'
+                        if potential_path.exists():
+                            behavior_file_path = potential_path
+                            break
         
         if behavior_file_path.exists():
             try:
@@ -294,20 +287,16 @@ class BaseBotCli:
             self.bot_directory / 'behaviors' / behavior_name / 'instructions.json'
         )
         
-        # Also check numbered behavior folders (e.g., 1_shape, 2_prioritization)
+        # Check all behavior folders for matching name
         if not behavior_instructions_path.exists():
-            # Try numbered format - check all numbered folders
             behaviors_dir = self.bot_directory / 'behaviors'
             if behaviors_dir.exists():
                 for folder in behaviors_dir.iterdir():
-                    if folder.is_dir():
-                        # Check if folder name ends with behavior_name (e.g., "1_shape" ends with "shape")
-                        folder_name = folder.name
-                        if folder_name.endswith(f'_{behavior_name}') or folder_name == behavior_name:
-                            potential_path = folder / 'instructions.json'
-                            if potential_path.exists():
-                                behavior_instructions_path = potential_path
-                                break
+                    if folder.is_dir() and folder.name == behavior_name:
+                        potential_path = folder / 'instructions.json'
+                        if potential_path.exists():
+                            behavior_instructions_path = potential_path
+                            break
         
         if behavior_instructions_path.exists():
             try:
@@ -568,113 +557,4 @@ class BaseBotCli:
         sys.stderr.flush()
         sys.exit(1)
     
-    def generate_cursor_commands(self, commands_dir: Path, cli_script_path: Path) -> Dict[str, Path]:
-        """Generate cursor command files for bot and behaviors.
-        
-        Generates:
-        - Bot command: routes to current behavior/action
-        - Behavior commands: one per behavior, accepts optional action parameter via ${1:}
-          If no action parameter provided, uses default/current action
-        - Initialize project command: for confirming project location
-        
-        Args:
-            commands_dir: Directory where cursor command files will be written (.cursor/commands/)
-            cli_script_path: Path to the Python CLI script that will be invoked
-            
-        Returns:
-            Dict mapping command name to file path
-        """
-        commands_dir.mkdir(parents=True, exist_ok=True)
-        
-        current_command_files = self._get_current_command_files(commands_dir)
-        commands = {}
-        
-        # Use Python directly instead of script wrapper
-        cli_script_str = str(cli_script_path).replace('\\', '/')
-        python_command = f"python {cli_script_str}"
-        
-        # Bot command: routes to current behavior/action
-        bot_command = f"{python_command}"
-        commands[f'{self.bot_name}'] = self._write_command_file(commands_dir / f'{self.bot_name}.md', bot_command)
-        
-        # Continue command: closes current action and continues to next
-        continue_command = f"{python_command} --close"
-        commands[f'{self.bot_name}-continue'] = self._write_command_file(
-            commands_dir / f'{self.bot_name}-continue.md',
-            continue_command
-        )
-        
-        # Help command: lists all cursor commands and their parameters
-        help_command = f"{python_command} --help-cursor"
-        commands[f'{self.bot_name}-help'] = self._write_command_file(
-            commands_dir / f'{self.bot_name}-help.md',
-            help_command
-        )
-        
-        # Behavior commands: accept optional action parameter and any additional context
-        for behavior_name in self.bot.behaviors:
-            # ${1:} is optional action name (if provided, routes to that action)
-            # ${2:} is optional context (file paths, parameters, etc. - CLI will parse and pass to action)
-            # If no action provided, behavior uses default/current action
-            # Note: Cursor will replace ${1:} and ${2:} with user input or empty string
-            # Additional arguments can be passed as --key=value or file paths
-            # Use --behavior and --action named parameters
-            # ${1:} is optional action - if empty, argparse treats --action as None
-            # ${2:} is optional context - passed as positional argument
-            behavior_command = f"{python_command} --behavior {behavior_name} --action ${{1:}}${{2:+ }}${{2:}}"
-            commands[f'{self.bot_name}-{behavior_name}'] = self._write_command_file(
-                commands_dir / f'{self.bot_name}-{behavior_name}.md', 
-                behavior_command
-            )
-        
-        self._remove_obsolete_command_files(commands_dir, current_command_files, commands)
-        
-        return commands
-    
-    def _get_current_command_files(self, commands_dir: Path) -> set:
-        """Get set of existing command files for this bot.
-        
-        Args:
-            commands_dir: Directory containing command files
-            
-        Returns:
-            Set of existing command file paths
-        """
-        if not commands_dir.exists():
-            return set()
-        
-        bot_prefix = f'{self.bot_name}'
-        existing_files = set()
-        
-        for file_path in commands_dir.glob(f'{bot_prefix}*.md'):
-            existing_files.add(file_path)
-        
-        return existing_files
-    
-    def _remove_obsolete_command_files(self, commands_dir: Path, existing_files: set, current_commands: Dict[str, Path]):
-        """Remove command files that no longer correspond to current bot behaviors/actions.
-        
-        Args:
-            commands_dir: Directory containing command files
-            existing_files: Set of existing command file paths before generation
-            current_commands: Dict of current command names to file paths
-        """
-        current_file_paths = set(current_commands.values())
-        
-        for file_path in existing_files:
-            if file_path not in current_file_paths:
-                file_path.unlink(missing_ok=True)
-    
-    def _write_command_file(self, file_path: Path, command: str) -> Path:
-        """Write cursor command file with command content.
-        
-        Args:
-            file_path: Path to command file
-            command: Command string to write
-            
-        Returns:
-            Path to written file
-        """
-        file_path.write_text(command, encoding='utf-8')
-        return file_path
 
