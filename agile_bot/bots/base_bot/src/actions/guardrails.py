@@ -20,10 +20,11 @@ class Guardrails:
         """Initialize Guardrails.
         
         Args:
-            behavior_config: BehaviorConfig instance (has behavior_name and bot_paths)
+            behavior_config: BehaviorConfig instance (has behavior_name, behavior_directory, and bot_paths)
         """
         self._behavior_config = behavior_config
-        behavior_folder = behavior_config.bot_paths.bot_directory / "behaviors" / behavior_config.behavior_name
+        # Use behavior_directory from BehaviorConfig, which handles numbered prefixes correctly
+        behavior_folder = behavior_config.behavior_directory
         
         # Instantiate RequiredContext and Strategy
         self.required_context = RequiredContext(behavior_folder)

@@ -201,6 +201,74 @@ def then_completed_actions_include(workflow_file: Path, expected_action_states: 
 # ACTION INITIALIZATION HELPERS
 # ============================================================================
 
+def create_minimal_guardrails_files(bot_dir: Path, behavior_name: str, bot_name: str = 'test_bot'):
+    """Create minimal guardrails files structure for tests.
+    
+    Creates empty guardrails files required by Guardrails class initialization.
+    This helper is used by test helpers that need to create Behavior objects.
+    
+    Args:
+        bot_dir: Bot directory path
+        behavior_name: Behavior name - can be prefixed (e.g., '1_exploration') or unprefixed (e.g., 'exploration').
+                      If prefixed, extracts the unprefixed name and uses Behavior.find_behavior_folder
+                      to find the correct folder. This ensures files are created in the same folder
+                      that Behavior will use when initialized with the unprefixed name.
+        bot_name: Bot name (default: 'test_bot')
+    """
+    import json
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    
+    # Extract unprefixed behavior name (e.g., '1_exploration' -> 'exploration')
+    # This matches how Behavior is initialized (with unprefixed name)
+    unprefixed_name = behavior_name
+    if '_' in behavior_name and behavior_name[0].isdigit():
+        # Extract name after the prefix (e.g., '1_exploration' -> 'exploration')
+        unprefixed_name = behavior_name.split('_', 1)[1]
+    
+    # Use Behavior.find_behavior_folder to find the correct behavior folder
+    # This ensures we create files in the same folder that Behavior will use
+    behavior_dir = Behavior.find_behavior_folder(bot_dir, bot_name, unprefixed_name)
+    
+    # Required context files
+    required_context_dir = behavior_dir / 'guardrails' / 'required_context'
+    required_context_dir.mkdir(parents=True, exist_ok=True)
+    
+    questions_file = required_context_dir / 'key_questions.json'
+    if not questions_file.exists():
+        questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
+    
+    evidence_file = required_context_dir / 'evidence.json'
+    if not evidence_file.exists():
+        evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
+    
+    instructions_file = required_context_dir / 'instructions.json'
+    if not instructions_file.exists():
+        instructions_file.write_text(json.dumps({'instructions': []}), encoding='utf-8')
+    
+    # Strategy/planning guardrails files (check both 'strategy' and 'planning' folder names)
+    for folder_name in ['strategy', 'planning']:
+        strategy_dir = behavior_dir / 'guardrails' / folder_name
+        if strategy_dir.exists() or folder_name == 'strategy':  # Create strategy if it doesn't exist, or if planning exists
+            strategy_dir.mkdir(parents=True, exist_ok=True)
+            
+            assumptions_file = strategy_dir / 'typical_assumptions.json'
+            if not assumptions_file.exists():
+                assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
+            
+            # Check for both naming conventions
+            for activity_file_name in ['recommended_activities.json', 'recommended_human_activity.json']:
+                activity_file = strategy_dir / activity_file_name
+                if not activity_file.exists():
+                    activity_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
+            
+            # Decision criteria folder
+            decision_criteria_dir = strategy_dir / 'decision_criteria'
+            decision_criteria_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Only create one set of files
+            if folder_name == 'strategy':
+                break
+
 def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create ValidateRulesAction instance."""
     from agile_bot.bots.base_bot.src.actions.validate_rules.validate_rules_action import ValidateRulesAction
@@ -209,7 +277,11 @@ def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: P
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     
     # Ensure behavior.json exists
-    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    behavior_name_with_prefix = f'1_{behavior}'
+    create_actions_workflow_json(bot_directory, behavior_name_with_prefix)
+    
+    # Create minimal guardrails files (required by Guardrails class initialization)
+    create_minimal_guardrails_files(bot_directory, behavior_name_with_prefix, bot_name)
     
     # Create Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)
@@ -250,29 +322,8 @@ def _create_gather_context_action(bot_name: str, behavior: str, bot_directory: P
         }
         behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
-    # Create guardrails files if they don't exist (required by GatherContextAction and Guardrails)
-    # Required context files
-    guardrails_dir = behavior_dir / 'guardrails' / 'required_context'
-    guardrails_dir.mkdir(parents=True, exist_ok=True)
-    questions_file = guardrails_dir / 'key_questions.json'
-    if not questions_file.exists():
-        questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
-    evidence_file = guardrails_dir / 'evidence.json'
-    if not evidence_file.exists():
-        evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
-    
-    # Strategy guardrails files (required by Guardrails.Strategy)
-    strategy_dir = behavior_dir / 'guardrails' / 'strategy'
-    strategy_dir.mkdir(parents=True, exist_ok=True)
-    assumptions_file = strategy_dir / 'typical_assumptions.json'
-    if not assumptions_file.exists():
-        assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
-    recommended_activities_file = strategy_dir / 'recommended_activities.json'
-    if not recommended_activities_file.exists():
-        recommended_activities_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
-    # StrategyCriterias loads from decision_criteria folder, create empty folder
-    decision_criteria_dir = strategy_dir / 'decision_criteria'
-    decision_criteria_dir.mkdir(parents=True, exist_ok=True)
+    # Create guardrails files if they don't exist (required by Guardrails class initialization)
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     
     # Create proper Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)

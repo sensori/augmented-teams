@@ -279,11 +279,11 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
     base_actions_dir = bot_directory / 'base_actions'
     
     workflow_actions = [
-        ('1_gather_context', 'gather_context', 1, 'decide_planning_criteria'),
-        ('2_decide_planning_criteria', 'decide_planning_criteria', 2, 'build_knowledge'),
-        ('3_build_knowledge', 'build_knowledge', 3, 'validate_rules'),
-        ('4_validate_rules', 'validate_rules', 4, 'render_output'),
-        ('5_render_output', 'render_output', 5, None)
+        ('gather_context', 'gather_context', 1, 'decide_planning_criteria'),
+        ('decide_planning_criteria', 'decide_planning_criteria', 2, 'build_knowledge'),
+        ('build_knowledge', 'build_knowledge', 3, 'validate_rules'),
+        ('validate_rules', 'validate_rules', 4, 'render_output'),
+        ('render_output', 'render_output', 5, None)
     ]
     
     for folder_name, action_name, order, next_action in workflow_actions:

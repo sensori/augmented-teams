@@ -45,7 +45,7 @@ def create_behavior_folder_duplicate_removed(bot_directory: Path, behavior_name:
         "goal": f"Test goal for {behavior_name}",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": [
             f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
             "",

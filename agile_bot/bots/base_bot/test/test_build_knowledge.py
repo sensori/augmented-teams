@@ -364,9 +364,9 @@ def given_base_instructions_copied_to_bot_directory(bot_directory: Path, action_
     import shutil
     repo_root = Path(__file__).parent.parent.parent.parent.parent
     actual_base_actions_dir = get_base_actions_dir(repo_root)
-    actual_instructions_file = actual_base_actions_dir / f'3_{action_name}' / 'instructions.json'
+    actual_instructions_file = actual_base_actions_dir / action_name / 'instructions.json'
     
-    bot_base_actions_dir = bot_directory / 'base_actions' / f'3_{action_name}'
+    bot_base_actions_dir = bot_directory / 'base_actions' / action_name
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
     bot_instructions_file = bot_base_actions_dir / 'instructions.json'
     shutil.copy2(actual_instructions_file, bot_instructions_file)

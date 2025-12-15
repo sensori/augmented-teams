@@ -139,8 +139,10 @@ def given_behavior_workflow_with_validate_rules_as_final(bot_directory: Path, be
 def given_base_action_instructions_exist_for_validate_rules(bot_directory: Path):
     """Given: Base action instructions exist for validate_rules."""
     from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+    # Create base_actions in bot_directory first to prevent fallback to production
+    (bot_directory / 'base_actions').mkdir(parents=True, exist_ok=True)
     base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
-    validate_rules_dir = base_actions_dir / '5_validate_rules'
+    validate_rules_dir = base_actions_dir / 'validate_rules'
     validate_rules_dir.mkdir(parents=True, exist_ok=True)
     
     config = {
@@ -161,17 +163,19 @@ def given_base_action_instructions_exist_for_validate_rules(bot_directory: Path)
 def given_standard_workflow_actions_config(bot_directory: Path):
     """Given: Standard workflow actions config (gather_context through validate_rules)."""
     return given_action_configs_exist_for_workflow_actions(bot_directory, [
-        ('1_gather_context', 'gather_context', 1),
-        ('2_decide_planning_criteria', 'decide_planning_criteria', 2),
-        ('3_build_knowledge', 'build_knowledge', 3),
-        ('4_render_output', 'render_output', 4),
-        ('5_validate_rules', 'validate_rules', 5)
+        ('gather_context', 'gather_context', 1),
+        ('decide_planning_criteria', 'decide_planning_criteria', 2),
+        ('build_knowledge', 'build_knowledge', 3),
+        ('render_output', 'render_output', 4),
+        ('validate_rules', 'validate_rules', 5)
     ])
 
 
 def given_action_configs_exist_for_workflow_actions(bot_directory: Path, workflow_actions: list):
     """Given: action_config.json files for workflow actions."""
     from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+    # Create base_actions in bot_directory first to prevent fallback to production
+    (bot_directory / 'base_actions').mkdir(parents=True, exist_ok=True)
     base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
     
     for folder_name, action_name, order in workflow_actions:
@@ -301,7 +305,7 @@ def given_base_action_instructions_exist_for_validate_rules_not_final(bot_direct
     bot_base_actions_dir = bot_directory / 'base_actions'
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
     
-    validate_rules_dir = bot_base_actions_dir / '4_validate_rules'
+    validate_rules_dir = bot_base_actions_dir / 'validate_rules'
     validate_rules_dir.mkdir(parents=True, exist_ok=True)
     
     config = {
@@ -322,11 +326,11 @@ def given_action_configs_exist_for_workflow_actions_with_render_output_after(bot
     """Given: action_config.json files for workflow actions with render_output after validate_rules."""
     bot_base_actions_dir = bot_directory / 'base_actions'
     workflow_actions = [
-        ('1_gather_context', 'gather_context', 1),
-        ('2_decide_planning_criteria', 'decide_planning_criteria', 2),
-        ('3_build_knowledge', 'build_knowledge', 3),
-        ('4_validate_rules', 'validate_rules', 4),
-        ('5_render_output', 'render_output', 5)
+        ('gather_context', 'gather_context', 1),
+        ('decide_planning_criteria', 'decide_planning_criteria', 2),
+        ('build_knowledge', 'build_knowledge', 3),
+        ('validate_rules', 'validate_rules', 4),
+        ('render_output', 'render_output', 5)
     ]
     for folder_name, action_name, order in workflow_actions:
         action_dir = bot_base_actions_dir / folder_name
@@ -353,10 +357,11 @@ def then_base_instructions_do_not_include_next_behavior_reminder(action_result):
 
 def given_base_action_instructions_exist_for_render_output(bot_directory: Path):
     """Given: Base action instructions exist for render_output."""
-    from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root
-    repo_root = get_python_workspace_root()
-    base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'
-    render_output_dir = base_actions_dir / '5_render_output'
+    from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+    # Create base_actions in bot_directory first to prevent fallback to production
+    (bot_directory / 'base_actions').mkdir(parents=True, exist_ok=True)
+    base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
+    render_output_dir = base_actions_dir / 'render_output'
     render_output_dir.mkdir(parents=True, exist_ok=True)
     
     config = {
@@ -576,8 +581,9 @@ def given_behaviors_exist_with_workflow(bot_directory: Path, behaviors: list):
 def given_base_actions_exist_with_transitions(bot_directory: Path):
     """Given step: Base actions exist with next_action transitions."""
     from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+    # Create base_actions in bot_directory first to prevent fallback to production
+    (bot_directory / 'base_actions').mkdir(parents=True, exist_ok=True)
     base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
-    base_actions_dir.mkdir(parents=True, exist_ok=True)
     
     actions_config = [
         ('gather_context', 2, 'decide_planning_criteria'),
@@ -587,7 +593,7 @@ def given_base_actions_exist_with_transitions(bot_directory: Path):
     ]
     
     for action_name, order, next_action in actions_config:
-        action_dir = base_actions_dir / f'{order}_{action_name}'
+        action_dir = base_actions_dir / action_name
         action_dir.mkdir(parents=True, exist_ok=True)
         (action_dir / 'action_config.json').write_text(json.dumps({
             'name': action_name,
@@ -989,7 +995,7 @@ def given_write_tests_behavior_config():
         "goal": "Test goal for tests",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": ["Test instructions for tests."],
         "actions_workflow": {
             "actions": [
@@ -1099,7 +1105,7 @@ def given_knowledge_behavior_config():
         "goal": "Test goal for knowledge",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": ["Test instructions for knowledge."],
         "actions_workflow": {
             "actions": [
@@ -1155,7 +1161,7 @@ def given_code_behavior_config():
         "goal": "Test goal for tests",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": ["Test instructions for tests."],
         "actions_workflow": {
             "actions": [
@@ -1248,7 +1254,7 @@ def given_code_behavior_config_with_workflow(actions_workflow: dict):
         "goal": "Test goal for code",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": ["Test instructions for code."],
         "actions_workflow": actions_workflow,
         "trigger_words": {

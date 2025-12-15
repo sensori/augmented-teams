@@ -4,8 +4,8 @@ import logging
 from agile_bot.bots.base_bot.src.utils import read_json_file
 from agile_bot.bots.base_bot.src.actions.action import Action
 from agile_bot.bots.base_bot.src.scanners.violation import Violation
-from agile_bot.bots.base_bot.src.bot.rule import Rule
-from agile_bot.bots.base_bot.src.bot.rules import Rules
+from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
+from agile_bot.bots.base_bot.src.actions.validate_rules.rules import Rules
 from agile_bot.bots.base_bot.src.bot.scanner_loader import ScannerLoader
 
 logger = logging.getLogger(__name__)
@@ -456,166 +456,43 @@ class ValidateRulesAction(Action):
         """
         rules_data = self.inject_behavior_specific_and_bot_rules()
         action_instructions = rules_data.get('action_instructions', [])
-        validation_rules = rules_data.get('validation_rules', [])
         
-        # Process each rule: run scanner if exists, add results
-        # TWO-PASS SYSTEM: First pass (file-by-file), then second pass (cross-file)
-        processed_rules = []
+        if not self.rules:
+            return {
+                'instructions': {
+                    'action': 'validate_rules',
+                    'behavior': self.behavior.name,
+                    'base_instructions': action_instructions,
+                    'validation_rules': [],
+                    'content_to_validate': self._identify_content_to_validate()
+                }
+            }
         
-        # Use Rules collection to get Rule objects
-        rule_objects = []
-        if self.rules:
-            rule_objects = list(self.rules.iterate())
+        # Build files dict for Rules.validate() - expects {'test': [...], 'src': [...]}
+        files = {}
+        if test_files:
+            files['test'] = test_files
+        if code_files:
+            files['src'] = code_files
         
-        # Map rule_file to Rule object for quick lookup
-        rule_by_file = {rule.rule_file: rule for rule in rule_objects}
+        # Validate rules against knowledge graph and files - handles scanning internally
+        processed_rules = self.rules.validate(knowledge_graph, files)
         
-        for idx, rule_dict in enumerate(validation_rules):
-            if isinstance(rule_dict, dict):
-                rule_file = rule_dict.get('rule_file', 'unknown.json')
-                
-                # Get Rule object from collection (already has scanner loaded)
-                rule_obj = rule_by_file.get(rule_file)
-                if not rule_obj:
-                    # Fallback: create Rule object from dict (shouldn't happen if Rules collection is working)
-                    rule_content = rule_dict.get('rule_content', rule_dict)
-                    behavior_name = 'common'
-                    if '/behaviors/' in rule_file:
-                        parts = rule_file.split('/behaviors/')
-                        if len(parts) > 1:
-                            behavior_name = parts[1].split('/')[0]
-                    scanner_loader = ScannerLoader(self.bot_name)
-                    scanner = scanner_loader.load_scanner(rule_content.get('scanner')) if rule_content.get('scanner') else None
-                    rule_obj = Rule(rule_file, rule_content, behavior_name, scanner)
-                
-                rule_result = dict(rule_dict)  # Copy rule
-                
-                # Check scanner type to determine format
-                from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
-                from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
-                
-                scanner_class = rule_obj.scanner if rule_obj else None
-                scanner_path = rule_obj.scanner_path if rule_obj else None
-                
-                is_test_or_code_scanner = (
-                    scanner_class and (
-                        issubclass(scanner_class, TestScanner) or 
-                        issubclass(scanner_class, CodeScanner)
-                    )
-                )
-                
-                # Use two-pass format only for TestScanner and CodeScanner
-                if is_test_or_code_scanner:
-                    rule_result['scanner_results'] = {
-                        'file_by_file': {'violations': []},
-                        'cross_file': {'violations': []}
-                    }
-                else:
-                    # Old format for StoryScanner and other scanners
-                    rule_result['scanner_results'] = {}
-                
-                if scanner_path and scanner_class:
-                    try:
-                        scanner_instance = scanner_class()
-                        
-                        # PASS 1: File-by-file scanning (current behavior)
-                        logger.info(f"Running file-by-file scan for rule: {rule_file}")
-                        violations_file_by_file = scanner_instance.scan(
-                            knowledge_graph, 
-                            rule_obj=rule_obj,
-                            test_files=test_files,
-                            code_files=code_files
-                        )
-                        violations_list_file = violations_file_by_file if isinstance(violations_file_by_file, list) else []
-                        
-                        # Convert violations to dictionaries
-                        violations_dicts_file = []
-                        for violation in violations_list_file:
-                            if isinstance(violation, Violation):
-                                violation_dict = violation.to_dict()
-                                violations_dicts_file.append(violation_dict)
-                            elif isinstance(violation, dict):
-                                if 'rule' not in violation:
-                                    violation['rule'] = rule_obj.name
-                                if 'rule_file' not in violation:
-                                    violation['rule_file'] = rule_obj.rule_file
-                                violations_dicts_file.append(violation)
-                        
-                        # Store violations based on scanner type
-                        self._violations.extend(violations_dicts_file)
-                        
-                        if is_test_or_code_scanner:
-                            # Two-pass format
-                            rule_result['scanner_results']['file_by_file']['violations'] = violations_dicts_file
-                        else:
-                            # Old format (for StoryScanner and others)
-                            rule_result['scanner_results']['violations'] = violations_dicts_file
-                        
-                        # PASS 2: Cross-file scanning (ONLY for TestScanner and CodeScanner)
-                        if is_test_or_code_scanner and (test_files or code_files) and hasattr(scanner_instance, 'scan_cross_file'):
-                            logger.info(f"Running cross-file scan for rule: {rule_file}")
-                            violations_cross_file = scanner_instance.scan_cross_file(
-                                rule_obj=rule_obj,
-                                test_files=test_files,
-                                code_files=code_files
-                            )
-                            violations_list_cross = violations_cross_file if isinstance(violations_cross_file, list) else []
-                            
-                            # Convert violations to dictionaries
-                            violations_dicts_cross = []
-                            for violation in violations_list_cross:
-                                if isinstance(violation, Violation):
-                                    violation_dict = violation.to_dict()
-                                    violations_dicts_cross.append(violation_dict)
-                                elif isinstance(violation, dict):
-                                    if 'rule' not in violation:
-                                        violation['rule'] = rule_obj.name
-                                    if 'rule_file' not in violation:
-                                        violation['rule_file'] = rule_obj.rule_file
-                                    # Mark as cross-file violation
-                                    violation['_pass'] = 'cross_file'
-                                    violations_dicts_cross.append(violation)
-                            
-                            # Store cross-file violations separately
-                            self._violations.extend(violations_dicts_cross)
-                            rule_result['scanner_results']['cross_file']['violations'] = violations_dicts_cross
-                    
-                    except Exception as e:
-                        # Log the error for debugging
-                        logger.error(f"Scanner execution failed for rule {rule_dict.get('rule_file', 'unknown')}: {e}", exc_info=True)
-                        
-                        # Raise exception with context - don't swallow scanner crashes
-                        rule_file = rule_dict.get('rule_file', 'unknown')
-                        scanner_path = rule_obj.scanner_path if rule_obj else 'unknown'
-                        raise ScannerExecutionError(rule_file, scanner_path, e) from e
-                elif scanner_path and not scanner_class:
-                    # Error loading scanner - use appropriate format
-                    error_msg = f"Scanner failed to load: {scanner_path}"
-                    if is_test_or_code_scanner:
-                        rule_result['scanner_results'] = {
-                            'file_by_file': {'violations': [], 'error': error_msg},
-                            'cross_file': {'violations': []}
-                        }
-                    else:
-                        rule_result['scanner_results'] = {
-                            'violations': [],
-                            'error': error_msg
-                        }
-                
-                processed_rules.append(rule_result)
+        # Track violations from processed rules for backward compatibility
+        for rule_result in processed_rules:
+            scanner_results = rule_result.get('scanner_results', {})
+            # Handle two-pass format
+            if 'file_by_file' in scanner_results:
+                file_by_file_violations = scanner_results.get('file_by_file', {}).get('violations', [])
+                cross_file_violations = scanner_results.get('cross_file', {}).get('violations', [])
+                self._violations.extend(file_by_file_violations)
+                self._violations.extend(cross_file_violations)
+            # Handle single-pass format
+            elif 'violations' in scanner_results:
+                self._violations.extend(scanner_results.get('violations', []))
         
         # Add instructions to edit knowledge graph based on violations
-        violation_summary = []
-        for rule in processed_rules:
-            scanner_results = rule.get('scanner_results', {})
-            file_by_file = scanner_results.get('file_by_file', {}).get('violations', [])
-            cross_file = scanner_results.get('cross_file', {}).get('violations', [])
-            total_violations = len(file_by_file) + len(cross_file)
-            if total_violations > 0:
-                violation_summary.append(
-                    f"Rule {rule.get('rule_file', 'unknown')}: "
-                    f"{len(file_by_file)} file-by-file, {len(cross_file)} cross-file violations"
-                )
+        violation_summary = self.rules.violation_summary
         
         if violation_summary:
             edit_instructions = [

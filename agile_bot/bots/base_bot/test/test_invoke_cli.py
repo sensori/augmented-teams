@@ -209,19 +209,17 @@ class TriggerRouterTestHelper:
 # Removed create_base_action_instructions - use test_helpers.create_base_action_instructions instead
 # Consolidated helper functions from test_invoke_bot_cli.py
 
-def create_base_action_instructions_duplicate_removed(workspace: Path, action: str) -> Path:
-    """Helper: Create base action instructions file with numbered prefix."""
-    action_prefixes = {
-        'initialize_workspace': '1_initialize_workspace',
-        'gather_context': '1_gather_context',
-        'decide_planning_criteria': '2_decide_planning_criteria',
-        'build_knowledge': '3_build_knowledge',
-        'render_output': '4_render_output',
-        'validate_rules': '5_validate_rules'
-    }
+def create_base_action_instructions_duplicate_removed(bot_directory: Path, action: str) -> Path:
+    """Helper: Create base action instructions file in bot directory.
     
-    action_folder = action_prefixes.get(action, action)
-    base_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action_folder
+    Action folders no longer use numbered prefixes.
+    """
+    # Create base_actions in bot_directory first to prevent fallback to production
+    (bot_directory / 'base_actions').mkdir(parents=True, exist_ok=True)
+    from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+    base_actions_dir = get_base_actions_directory(bot_directory=bot_directory)
+    # Action folders no longer use numbered prefixes - use action name directly
+    base_dir = base_actions_dir / action
     base_dir.mkdir(parents=True, exist_ok=True)
     instructions_file = base_dir / 'instructions.json'
     instructions_data = {
@@ -432,12 +430,12 @@ def when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_
             )
             verify_func(setup, helper, behavior, action, route, result)
 
-def _create_base_action_instructions(workspace_root: Path):
-    """Helper: Create base action instructions."""
+def _create_base_action_instructions(bot_directory: Path):
+    """Helper: Create base action instructions in bot directory."""
     actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
                'build_knowledge', 'validate_rules', 'render_output']
     for action in actions:
-        create_base_action_instructions(workspace_root, action)
+        create_base_action_instructions(bot_directory, action)
 
 def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
     """Helper: Set up complete bot structure for testing.
@@ -447,7 +445,7 @@ def setup_bot_for_testing(workspace_root: Path, bot_name: str, behaviors: list):
     bot_dir = workspace_root / 'agile_bot' / 'bots' / bot_name
     bot_config = create_bot_config_file(bot_dir, bot_name, behaviors)
     create_base_actions_structure(bot_dir)
-    _create_base_action_instructions(workspace_root)
+    _create_base_action_instructions(bot_dir)
     return bot_config
 
 # Removed then_route_matches_expected and then_cli_result_matches_expected - imported from test_helpers

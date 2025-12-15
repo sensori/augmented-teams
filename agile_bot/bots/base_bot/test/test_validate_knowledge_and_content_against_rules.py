@@ -37,7 +37,8 @@ from agile_bot.bots.base_bot.test.test_invoke_mcp import (
     given_base_actions_structure_created
 )
 from agile_bot.bots.base_bot.src.bot.bot import Behavior
-from agile_bot.bots.base_bot.src.actions.validate_rules.validate_rules_action import ValidateRulesAction, Rule
+from agile_bot.bots.base_bot.src.actions.validate_rules.validate_rules_action import ValidateRulesAction
+from agile_bot.bots.base_bot.src.actions.validate_rules.rule import Rule
 from agile_bot.bots.base_bot.src.scanners.code_scanner import CodeScanner
 from agile_bot.bots.base_bot.src.scanners.test_scanner import TestScanner
 
@@ -67,11 +68,16 @@ def given_validate_rules_action_initialized(bot_directory: Path, bot_name: str =
     """Given: ValidateRulesAction initialized."""
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     
-    # Ensure behavior.json exists
-    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    # Ensure behavior.json exists - Behavior.find_behavior_folder handles numbered prefixes
+    behavior_name_with_prefix = f'1_{behavior}'
+    create_actions_workflow_json(bot_directory, behavior_name_with_prefix)
     
-    # Create Behavior object
+    # Create minimal guardrails files (required by Guardrails class initialization)
+    create_minimal_guardrails_files(bot_directory, behavior_name_with_prefix, bot_name)
+    
+    # Create Behavior object - Behavior.find_behavior_folder will find the prefixed folder
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(behavior, bot_name, bot_paths)
     
@@ -105,9 +111,9 @@ def given_activity_log_with_entries(workspace_directory: Path, entries: list):
             db.insert(entry)
 
 
-def given_terminal_action_config(workspace_directory: Path, action_name: str, order: int):
-    """Given: Terminal action config (next_action=None)."""
-    actions_dir = workspace_directory / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions' / action_name
+def given_terminal_action_config(bot_directory: Path, action_name: str, order: int):
+    """Given: Terminal action config (next_action=None) in test bot directory."""
+    actions_dir = bot_directory / 'base_actions' / action_name
     actions_dir.mkdir(parents=True, exist_ok=True)
     action_config = actions_dir / 'action_config.json'
     action_config.write_text(json.dumps({
@@ -315,9 +321,14 @@ def given_validate_rules_action_created(bot_directory: Path, bot_name: str, beha
     """Given: ValidateRulesAction created."""
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     
     # Ensure behavior.json exists
-    create_actions_workflow_json(bot_directory, f'1_{behavior}')
+    behavior_name_with_prefix = f'1_{behavior}'
+    create_actions_workflow_json(bot_directory, behavior_name_with_prefix)
+    
+    # Create minimal guardrails files (required by Guardrails class initialization)
+    create_minimal_guardrails_files(bot_directory, behavior_name_with_prefix, bot_name)
     
     # Create Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)
@@ -407,9 +418,14 @@ def given_validate_rules_action_for_test_bot(test_bot_dir: Path, bot_name: str, 
     """Given: ValidateRulesAction for test bot."""
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     
     # Ensure behavior.json exists
-    create_actions_workflow_json(test_bot_dir, f'1_{behavior}')
+    behavior_name_with_prefix = f'1_{behavior}'
+    create_actions_workflow_json(test_bot_dir, behavior_name_with_prefix)
+    
+    # Create minimal guardrails files (required by Guardrails class initialization)
+    create_minimal_guardrails_files(test_bot_dir, behavior_name_with_prefix, 'test_bot')
     
     # Create Behavior object
     bot_paths = BotPaths(bot_directory=test_bot_dir)
@@ -984,7 +1000,7 @@ def given_test_file_for_scanner_type(workspace_directory: Path, scanner_class_pa
 def given_base_action_instructions_for_validate_rules(bot_directory: Path, save_report_instruction: bool = False):
     """Given: Base action instructions for validate_rules."""
     base_actions_dir = bot_directory / 'base_actions'
-    validate_rules_dir = base_actions_dir / '5_validate_rules'
+    validate_rules_dir = base_actions_dir / 'validate_rules'
     validate_rules_dir.mkdir(parents=True, exist_ok=True)
     
     action_config_file = validate_rules_dir / 'action_config.json'
@@ -1654,7 +1670,7 @@ def then_instructions_file_exists_and_has_content(instructions_file: Path):
 def then_action_finds_instructions_file(action: ValidateRulesAction, expected_instructions_file: Path):
     """Then: Action finds instructions file."""
     action_base_actions_dir = action.base_actions_dir
-    action_instructions_file = action_base_actions_dir / '5_validate_rules' / 'instructions.json'
+    action_instructions_file = action_base_actions_dir / 'validate_rules' / 'instructions.json'
     assert action_instructions_file.exists(), f"Action should find instructions at {action_instructions_file}, base_actions_dir={action_base_actions_dir}"
     action_file_content = json.loads(action_instructions_file.read_text(encoding='utf-8'))
     assert 'instructions' in action_file_content, f"Action instructions file should have 'instructions' key: {action_file_content}"
@@ -1751,8 +1767,8 @@ def then_violations_found_in_test_files(all_violations: list, test_files: list):
 
 
 def given_test_file_created(workspace_directory: Path, filename: str, content: str):
-    """Given: Test file created in test directory."""
-    test_dir = workspace_directory / 'agile_bot' / 'bots' / 'base_bot' / 'test'
+    """Given: Test file created in test directory (using test_base_bot structure)."""
+    test_dir = workspace_directory / 'agile_bot' / 'bots' / 'test_base_bot' / 'test'
     test_dir.mkdir(parents=True, exist_ok=True)
     test_file = test_dir / filename
     test_file.write_text(content, encoding='utf-8')
@@ -1760,8 +1776,8 @@ def given_test_file_created(workspace_directory: Path, filename: str, content: s
 
 
 def given_source_file_created(workspace_directory: Path, filename: str, content: str):
-    """Given: Source file created in src directory."""
-    src_dir = workspace_directory / 'agile_bot' / 'bots' / 'base_bot' / 'src' / 'bot'
+    """Given: Source file created in src directory (using test_base_bot structure)."""
+    src_dir = workspace_directory / 'agile_bot' / 'bots' / 'test_base_bot' / 'src' / 'bot'
     src_dir.mkdir(parents=True, exist_ok=True)
     source_file = src_dir / filename
     source_file.write_text(content, encoding='utf-8')
@@ -2128,7 +2144,7 @@ class TestInvokeCompleteValidationWorkflow:
         THEN: No next action instructions injected
         """
         # Given: Terminal action
-        given_terminal_action_config(workspace_directory, 'validate_rules', 5)
+        given_terminal_action_config(bot_directory, 'validate_rules', 5)
         action = given_validate_rules_action_initialized(bot_directory, 'story_bot', 'scenarios')
         
         # When: Action injects instructions

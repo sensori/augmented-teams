@@ -829,7 +829,7 @@ def create_base_server_template(workspace: Path) -> Path:
     
     
     """
-    template_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'src'
+    template_dir = workspace / 'agile_bot' / 'bots' / 'test_base_bot' / 'src'
     template_dir.mkdir(parents=True, exist_ok=True)
     template_file = template_dir / 'base_mcp_server.py'
     template_file.write_text('# Base MCP Server template')
@@ -841,7 +841,7 @@ def create_base_bot_class(workspace: Path) -> Path:
     
     
     """
-    base_dir = workspace / 'agile_bot' / 'bots' / 'base_bot' / 'src'
+    base_dir = workspace / 'agile_bot' / 'bots' / 'test_base_bot' / 'src'
     base_dir.mkdir(parents=True, exist_ok=True)
     base_file = base_dir / 'base_bot.py'
     base_file.write_text('# Base Bot class')

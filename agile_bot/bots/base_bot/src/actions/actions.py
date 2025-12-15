@@ -107,9 +107,10 @@ class Actions:
         # Get action class path (from custom_class or default)
         action_class_path = base_action_config.custom_class
         if not action_class_path:
-            # Default: agile_bot.bots.base_bot.src.bot.{action_name}_action.{ActionName}Action
+            # Default: agile_bot.bots.base_bot.src.actions.{action_name}.{action_name}_action.{ActionName}Action
+            # e.g., gather_context -> agile_bot.bots.base_bot.src.actions.gather_context.gather_context_action.GatherContextAction
             action_class_name = action_name.title().replace('_', '') + 'Action'
-            action_class_path = f"agile_bot.bots.base_bot.src.bot.{action_name}_action.{action_class_name}"
+            action_class_path = f"agile_bot.bots.base_bot.src.actions.{action_name}.{action_name}_action.{action_class_name}"
         
         # Import and instantiate action class
         module_path, class_name = action_class_path.rsplit(".", 1)

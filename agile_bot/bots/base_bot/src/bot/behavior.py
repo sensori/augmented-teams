@@ -38,7 +38,7 @@ class Behavior:
         self.bot = bot_instance  # Reference to parent Bot instance
 
         # Load behavior configuration via BehaviorConfig
-        self.behavior_config = BehaviorConfig(self.name, self.bot_paths)
+        self.behavior_config = BehaviorConfig(self.name, self.bot_paths, self.bot_name)
         self.description = self.behavior_config.description
         self.goal = self.behavior_config.goal
         self.inputs = self.behavior_config.inputs
@@ -49,7 +49,7 @@ class Behavior:
         self.content = Content(self.behavior_config)
         self.rules_collection = Rules(behavior=self, bot_paths=self.bot_paths)
         self.actions = Actions(self.behavior_config, self)
-        self.trigger_words = TriggerWords(self.behavior_config)
+        self.trigger_words = TriggerWords(self.behavior_config, behavior=self)
 
     @property
     def folder(self) -> Path:

@@ -33,8 +33,8 @@ def given_base_instructions_for_render_output_copied(bot_directory: Path):
     import shutil
     repo_root = Path(__file__).parent.parent.parent.parent.parent
     actual_base_actions_dir = get_base_actions_dir(repo_root)
-    actual_instructions_file = actual_base_actions_dir / '4_render_output' / 'instructions.json'
-    bot_base_actions_dir = bot_directory / 'base_actions' / '4_render_output'
+    actual_instructions_file = actual_base_actions_dir / 'render_output' / 'instructions.json'
+    bot_base_actions_dir = bot_directory / 'base_actions' / 'render_output'
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
     bot_instructions_file = bot_base_actions_dir / 'instructions.json'
     if actual_instructions_file.exists():

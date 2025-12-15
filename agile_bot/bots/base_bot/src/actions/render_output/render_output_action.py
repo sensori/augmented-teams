@@ -6,6 +6,7 @@ import logging
 from agile_bot.bots.base_bot.src.utils import read_json_file
 from agile_bot.bots.base_bot.src.actions.action import Action
 from agile_bot.bots.base_bot.src.actions.render_output.render_spec import RenderSpec
+from agile_bot.bots.base_bot.src.bot.merged_instructions import MergedInstructions
 
 logger = logging.getLogger(__name__)
 
@@ -33,15 +34,19 @@ class RenderOutputAction(Action):
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute render_output action logic."""
-        # Get merged instructions from base class
-        instructions = self.instructions.copy()
-        
         # Load render-specific data (render_instructions and render_configs)
         behavior_folder = self.behavior.folder if self.behavior else None
         render_instructions = self._load_render_instructions(behavior_folder)
         render_configs = self._load_render_configs(behavior_folder)
         
-        # Inject render-specific data into instructions
+        # Use MergedInstructions to merge base and render instructions
+        merged_instructions = MergedInstructions(
+            base_action_config=self.base_action_config,
+            render_instructions=render_instructions
+        )
+        instructions = merged_instructions.merge()
+        
+        # Inject render-specific data into instructions (template variables, workspace path, etc.)
         self._inject_render_data(instructions, render_instructions, render_configs)
         
         return {'instructions': instructions}

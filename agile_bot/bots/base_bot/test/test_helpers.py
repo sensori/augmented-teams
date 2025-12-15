@@ -45,11 +45,11 @@ def get_behavior_dir(bot_dir: Path, behavior: str) -> Path:
     return bot_dir / 'behaviors' / behavior
 
 def get_base_bot_dir(repo_root: Path) -> Path:
-    """Get base_bot directory path."""
-    return repo_root / 'agile_bot' / 'bots' / 'base_bot'
+    """Get test_base_bot directory path for tests (not production base_bot)."""
+    return repo_root / 'agile_bot' / 'bots' / 'test_base_bot'
 
 def get_base_actions_dir(repo_root: Path) -> Path:
-    """Get base_actions directory path."""
+    """Get base_actions directory path from test_base_bot."""
     return get_base_bot_dir(repo_root) / 'base_actions'
 
 def get_base_bot_rules_dir(repo_root: Path) -> Path:
@@ -92,7 +92,7 @@ def create_activity_log_file(workspace_dir: Path) -> Path:
 # Import conftest functions when needed: from conftest import create_workflow_state_file
 
 def create_guardrails_files(bot_dir: Path, behavior: str, questions: list, evidence: list) -> tuple:
-    """Create guardrails files in behavior folder."""
+    """Create guardrails files in behavior folder with specific content."""
     guardrails_dir = get_behavior_dir(bot_dir, behavior) / 'guardrails' / 'required_context'
     guardrails_dir.mkdir(parents=True, exist_ok=True)
     
@@ -241,7 +241,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 1,
                 "next_action": "decide_planning_criteria",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/gather_context/action_config.json",
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/gather_context/action_config.json",
                     f"Test instructions for gather_context in {behavior_name}"
                 ]
             },
@@ -250,7 +250,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 2,
                 "next_action": "build_knowledge",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/decide_planning_criteria/action_config.json",
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/decide_planning_criteria/action_config.json",
                     f"Test instructions for decide_planning_criteria in {behavior_name}"
                 ]
             },
@@ -259,7 +259,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 3,
                 "next_action": "validate_rules",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/build_knowledge/action_config.json",
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/build_knowledge/action_config.json",
                     f"Test instructions for build_knowledge in {behavior_name}"
                 ]
             },
@@ -268,7 +268,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "order": 4,
                 "next_action": "render_output",
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/validate_rules/action_config.json",
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/validate_rules/action_config.json",
                     f"Test instructions for validate_rules in {behavior_name}"
                 ]
             },
@@ -276,7 +276,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
                 "name": "render_output",
                 "order": 5,
                 "instructions": [
-                    f"Follow agile_bot/bots/base_bot/base_actions/render_output/action_config.json",
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/render_output/action_config.json",
                     f"Test instructions for render_output in {behavior_name}"
                 ]
             }
@@ -289,7 +289,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
         "goal": f"Test goal for {behavior_name}",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": [
             f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
             "",
@@ -317,24 +317,24 @@ def create_base_actions_structure(bot_directory: Path):
     """
     base_actions_dir = bot_directory / 'base_actions'
     
+    # Actions no longer have number prefixes - use clean names
     actions = [
-        ('1_initialize_project', 'decide_planning_criteria'),
-        ('1_gather_context', 'decide_planning_criteria'),
-        ('2_decide_planning_criteria', 'build_knowledge'),
-        ('3_build_knowledge', 'validate_rules'),
-        ('4_validate_rules', 'render_output'),
-        ('5_render_output', None)
+        ('gather_context', 1, 'decide_planning_criteria'),
+        ('decide_planning_criteria', 2, 'build_knowledge'),
+        ('build_knowledge', 3, 'validate_rules'),
+        ('validate_rules', 4, 'render_output'),
+        ('render_output', 5, None)
     ]
     
-    for order_name, next_action in actions:
-        action_dir = base_actions_dir / order_name
+    for action_name, order, next_action in actions:
+        action_dir = base_actions_dir / action_name
         action_dir.mkdir(parents=True, exist_ok=True)
         
         # Create action_config.json
         config = {
-            'name': order_name.split('_', 1)[1],
+            'name': action_name,
             'workflow': True,
-            'order': int(order_name.split('_')[0])
+            'order': order
         }
         if next_action:
             config['next_action'] = next_action
@@ -498,7 +498,7 @@ def create_behavior_folder_with_json(bot_dir: Path, folder_name: str) -> Path:
         "goal": f"Test goal for {folder_name}",
         "inputs": "Test inputs",
         "outputs": "Test outputs",
-        "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+        "baseActionsPath": "agile_bot/bots/test_base_bot/base_actions",
         "instructions": [
             f"**BEHAVIOR WORKFLOW INSTRUCTIONS:**",
             "",

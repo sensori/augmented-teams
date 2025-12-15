@@ -26,13 +26,21 @@ class BehaviorConfig:
         actions_workflow: Sorted list of action dicts from config
     """
 
-    def __init__(self, behavior_name: str, bot_paths: BotPaths):
+    def __init__(self, behavior_name: str, bot_paths: BotPaths, bot_name: str = None):
         if not isinstance(bot_paths, BotPaths):
             raise TypeError("bot_paths must be an instance of BotPaths")
 
         self.behavior_name = behavior_name
         self.bot_paths = bot_paths
-        self.behavior_directory = self.bot_paths.bot_directory / "behaviors" / behavior_name
+        self.bot_name = bot_name or (bot_paths.bot_name if hasattr(bot_paths, 'bot_name') else 'unknown')
+        
+        # Use Behavior.find_behavior_folder to handle numbered prefixes
+        from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+        self.behavior_directory = Behavior.find_behavior_folder(
+            self.bot_paths.bot_directory, 
+            self.bot_name,
+            behavior_name
+        )
         self.config_path = self.behavior_directory / "behavior.json"
 
         if not self.config_path.exists():
