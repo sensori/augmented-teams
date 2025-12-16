@@ -1,0 +1,25 @@
+{
+  "shape": {
+    "decisions_made": {
+      "flow_scope_and_granularity": "Intra-system level - Focus on interactions within Foundry VTT module",
+      "drill_down_approach": [
+        "Dig deep on user workflows",
+        "Dig deep on system interactions",
+        "Focus on highest value areas"
+      ],
+      "depth_of_shaping": {
+        "discovery": "Decompose - Discover all stories listed",
+        "scenarios": "Workflow - logical process, conditions",
+        "examples": "Testable - minimal examples"
+      }
+    },
+    "assumptions_made": [
+      "Focus on user flow over internal systems",
+      "Assume stories should be independently testable",
+      "Drill down where integration complexity exists (Foundry API)",
+      "Skip deep drill-down for standard patterns (CRUD for mob management)",
+      "Focus on core domain (mob/strategy) over supporting"
+    ]
+  }
+}
+

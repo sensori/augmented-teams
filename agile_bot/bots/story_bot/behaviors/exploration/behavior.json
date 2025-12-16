@@ -7,26 +7,26 @@
   "outputs": "story-graph.json (with acceptance criteria), individual story files with AC",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
-    "Define acceptance criteria (When/Then) for stories to establish clear success criteria",
+    "Define acceptance criteria (When/Then) for stories to establish clear success criteria"
   ],
   "actions_workflow": {
     "actions": [
       {
-        "name": "gather_context",
+        "name": "clarify",
         "order": 1,
-        "next_action": "decide_planning_criteria",
+        "next_action": "strategy",
         "instructions": []
       },
       {
-        "name": "decide_planning_criteria",
+        "name": "strategy",
         "order": 2,
-        "next_action": "build_knowledge",
+        "next_action": "build",
         "instructions": []
       },
       {
-        "name": "build_knowledge",
+        "name": "build",
         "order": 3,
-        "next_action": "validate_rules",
+        "next_action": "validate",
         "instructions": [
           "exploration: build acceptance criteria AND refine domain model based on acceptance criteria details",
           "Refine domain model concepts, relationships, and responsibilities based on acceptance criteria exploration",
@@ -35,15 +35,15 @@
         ]
       },
       {
-        "name": "validate_rules",
+        "name": "validate",
         "order": 4,
-        "next_action": "render_output",
+        "next_action": "render",
         "instructions": [
           "exploration: validate AC format and coverage AND domain model refinements"
         ]
       },
       {
-        "name": "render_output",
+        "name": "render",
         "order": 5,
         "instructions": [
           "exploration: render feature documents with AC"

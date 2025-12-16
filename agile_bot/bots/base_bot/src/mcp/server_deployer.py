@@ -42,11 +42,20 @@ class ServerDeployer:
         workspace_root: Path,
         protocol_handler_url: Optional[str] = None
     ):
-        self.config_path = Path(config_path)
-        self.workspace_root = Path(workspace_root)
+        self.config_path = Path(config_path).resolve()
+        self.workspace_root = Path(workspace_root).resolve()
         
         # Derive bot_name from config path
-        self.bot_name = self.config_path.parent.parent.name
+        # Config path is: workspace_root/agile_bot/bots/bot_name/bot_config.json
+        # So bot_name is config_path.parent.name (the directory containing bot_config.json)
+        self.bot_name = self.config_path.parent.name
+        # Debug output
+        import sys
+        if 'pytest' in sys.modules:
+            print(f"DEBUG ServerDeployer.__init__: config_path={self.config_path}")
+            print(f"DEBUG ServerDeployer.__init__: config_path.parent={self.config_path.parent}")
+            print(f"DEBUG ServerDeployer.__init__: config_path.parent.name={self.config_path.parent.name}")
+            print(f"DEBUG ServerDeployer.__init__: self.bot_name={self.bot_name}")
         
         self.protocol_handler_url = protocol_handler_url
         self.catalog = ToolCatalog()
@@ -76,9 +85,12 @@ class ServerDeployer:
         base_actions = 6  # From MCPServerGenerator.BASE_ACTIONS
         tool_count = len(behaviors) * base_actions
         
+        # Use bot_name derived from path, not from config file (path is source of truth)
+        server_name = f'{self.bot_name}_server'
+        
         return DeploymentResult(
             status='running',
-            server_name=f'{self.bot_name}_server',
+            server_name=server_name,
             tool_count=tool_count,
             catalog_published=True
         )
@@ -91,11 +103,11 @@ class ServerDeployer:
         behaviors = bot_config.get('behaviors', [])
         
         base_actions = [
-            'gather_context',
-            'decide_planning_criteria',
-            'build_knowledge',
-            'render_output',
-            'validate_rules'
+            'clarify',
+            'strategy',
+            'build',
+            'render',
+            'validate'
         ]
         
         for behavior in behaviors:

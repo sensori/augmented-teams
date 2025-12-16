@@ -8,9 +8,12 @@
     "3. Load each decision criteria from `decision_criteria/` folder and present its options",
     "4. Confirm where they want to emphasize precision, coverage, or simplification in story exploration",
     "5. Ask user to select acceptance criteria granularity level",
-    "6. Ask user to confirm acceptance criteria count approach",
-    "7. Ask user to confirm acceptance criteria consolidation strategy",
-    "8. Validate preferences before generating acceptance criteria"
+    "6. Ask user to confirm acceptance criteria count approach and story splitting/merging strategy",
+    "7. Ask user to confirm acceptance criteria types (behavioral vs domain)",
+    "8. Ask user to evaluate increment size and whether splitting is needed",
+    "9. Ask user to confirm acceptance criteria consolidation strategy",
+    "10. Ask user to confirm acceptance criteria validation approach",
+    "11. Validate preferences before generating acceptance criteria"
   ]
 }
 

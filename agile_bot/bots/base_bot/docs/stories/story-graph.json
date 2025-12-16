@@ -804,98 +804,38 @@
                   ]
                 },
                 {
-                  "name": "Find Behavior Folder",
+                  "name": "Insert Context Into Instructions",
                   "sequential_order": 3,
                   "connector": "and",
-                  "users": [],
+                  "users": [
+                    "Bot Behavior"
+                  ],
                   "story_type": "user",
                   "scenarios": [
                     {
-                      "name": "Find behavior folder with number prefix",
+                      "name": "Action Loads Context Data Into Instructions",
                       "type": "happy_path",
-                      "test_method": "test_finds_behavior_folder_with_number_prefix",
+                      "test_method": "test_action_loads_context_data_into_instructions",
                       "background": [],
                       "steps": [
-                        "Given Behavior folder exists with number prefix (8_tests)",
-                        "When find_behavior_folder is called with behavior name without prefix (tests)",
-                        "Then Returns path to numbered folder (8_tests)"
-                      ]
-                    },
-                    {
-                      "name": "Find behavior folder with number prefix",
-                      "type": "happy_path",
-                      "test_method": "test_finds_behavior_folder_with_number_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists with number prefix (8_tests)",
-                        "When find_behavior_folder is called with behavior name without prefix (tests)",
-                        "Then Returns path to numbered folder (8_tests)"
-                      ]
-                    },
-                    {
-                      "name": "Raises error when behavior folder doesn't exist",
-                      "type": "error_case",
-                      "test_method": "test_raises_error_when_behavior_folder_not_found",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder does not exist",
-                        "When find_behavior_folder is called",
-                        "Then Raises FileNotFoundError with clear message"
-                      ]
-                    },
-                    {
-                      "name": "Handles Prioritization Folder With Prefix",
-                      "type": "edge_case",
-                      "test_method": "test_handles_prioritization_folder_with_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists as 2_prioritization",
-                        "When find_behavior_folder is called with behavior name (prioritization)",
-                        "Then Returns path to 2_prioritization"
-                      ]
-                    },
-                    {
-                      "name": "Handles Scenarios Folder With Prefix",
-                      "type": "edge_case",
-                      "test_method": "test_handles_scenarios_folder_with_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists as 6_scenarios",
-                        "When find_behavior_folder is called with behavior name (scenarios)",
-                        "Then Returns path to 6_scenarios"
-                      ]
-                    },
-                    {
-                      "name": "Handles Examples Folder With Prefix",
-                      "type": "edge_case",
-                      "test_method": "test_handles_examples_folder_with_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists as 7_examples",
-                        "When find_behavior_folder is called with behavior name (examples)",
-                        "Then Returns path to 7_examples"
-                      ]
-                    },
-                    {
-                      "name": "Find shape folder with number prefix",
-                      "type": "happy_path",
-                      "test_method": "test_finds_shape_folder_with_number_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists with number prefix (1_shape)",
-                        "When find_behavior_folder is called with behavior name (shape)",
-                        "Then Returns path to numbered folder (1_shape)"
-                      ]
-                    },
-                    {
-                      "name": "Find exploration folder with number prefix",
-                      "type": "happy_path",
-                      "test_method": "test_finds_exploration_folder_with_number_prefix",
-                      "background": [],
-                      "steps": [
-                        "Given Behavior folder exists with number prefix (5_exploration)",
-                        "When find_behavior_folder is called with behavior name (exploration)",
-                        "Then Returns path to numbered folder (5_exploration)"
+                        "Given A clarification.json file exists with data for multiple behaviors",
+                        "And A strategy.json file exists with data for multiple behaviors",
+                        "And A docs/context/ folder exists with input.txt and other files",
+                        "And An Action is initialized",
+                        "When Action loads and merges instructions",
+                        "Then Instructions contain 'clarification' key with all clarification data",
+                        "And Instructions contain 'strategy' key with all strategy data",
+                        "And Instructions contain 'context_files' key with list of file names",
+                        "And Base instructions include explanation of clarification data",
+                        "And Base instructions include explanation of strategy data",
+                        "And Base instructions include explanation of context files",
+                        "And Context file contents are NOT loaded into instructions",
+                        "When No clarification.json file exists",
+                        "Then Instructions do NOT contain 'clarification' key and no error is raised",
+                        "When No strategy.json file exists",
+                        "Then Instructions do NOT contain 'strategy' key and no error is raised",
+                        "When No docs/context/ folder exists",
+                        "Then Instructions do NOT contain 'context_files' key and no error is raised"
                       ]
                     }
                   ]

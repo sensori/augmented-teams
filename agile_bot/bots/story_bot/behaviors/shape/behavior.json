@@ -3,7 +3,7 @@
   "order": 1,
   "description": "Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements",
   "goal": "Shape both story map and domain model together from user context - capture domain concepts, responsibilities, and requirements alongside story structure",
-  "inputs": "User context, interviews, vision documents, existing requirements, business DOmain Experts interviews",
+  "inputs": "User context, interviews, vision documents, existing requirements, business Domain Experts interviews",
   "outputs": "story-graph.json, story-map.md, story-map-outline.drawio, story-map.txt, domain_outline.md, domain_graph.json, domain-model-description.md",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
@@ -12,25 +12,25 @@
   "actions_workflow": {
     "actions": [
       {
-        "name": "gather_context",
+        "name": "clarify",
         "order": 1,
-        "next_action": "decide_planning_criteria",
+        "next_action": "strategy",
         "instructions": [
           "Gather context for both story mapping and domain modeling"
         ]
       },
       {
-        "name": "decide_planning_criteria",
+        "name": "strategy",
         "order": 2,
-        "next_action": "build_knowledge",
+        "next_action": "build",
         "instructions": [
           "Include domain modeling planning criteria alongside story mapping criteria"
         ]
       },
       {
-        "name": "build_knowledge",
+        "name": "build",
         "order": 3,
-        "next_action": "validate_rules",
+        "next_action": "validate",
         "instructions": [
           "shape: build story map structure AND domain model",
           "Apply story shaping rules (context: 'when shaping stories') for story structure",
@@ -38,9 +38,9 @@
         ]
       },
       {
-        "name": "validate_rules",
+        "name": "validate",
         "order": 4,
-        "next_action": "render_output",
+        "next_action": "render",
         "instructions": [
           "shape: validate hierarchy, story structure, AND domain model",
           "Apply story shaping rules (context: 'when shaping stories') for story structure",
@@ -48,7 +48,7 @@
         ]
       },
       {
-        "name": "render_output",
+        "name": "render",
         "order": 5,
         "instructions": [
           "shape: render story map documents AND domain model documents"

@@ -7,16 +7,6 @@ from agile_bot.bots.base_bot.src.bot.bot import Bot
 class MCPServer:
     
     def __init__(self, bot_name: str, bot_directory: Path, config_path: Path):
-        """Initialize MCP Server.
-        
-        Args:
-            bot_name: Name of the bot
-            bot_directory: Directory where bot code lives
-            config_path: Path to bot_config.json
-            
-        Note:
-            workspace_directory is auto-detected from bot_config.json
-        """
         self.bot_name = bot_name
         self.bot_directory = Path(bot_directory)
         self.config_path = Path(config_path)
@@ -30,15 +20,7 @@ class MCPServer:
         )
     
     def invoke_tool(self, tool_name: str, parameters: Dict[str, Any]):
-        """Invoke a tool using the preloaded bot.
-        
-        Args:
-            tool_name: Name of the tool (e.g., 'test_bot_shape_gather_context')
-            parameters: Tool parameters
-            
-        Returns:
-            Result from bot tool invocation
-        """
+
         if self.bot is None:
             raise RuntimeError('Bot not initialized. Call start() first.')
         
@@ -51,9 +33,9 @@ class MCPServer:
             without_bot_name = '_'.join(parts[2:])  # Get everything after 'test_bot'
             
             # Try to find the split point between behavior and action
-            # Common actions: gather_context, decide_planning_criteria, build_knowledge, etc.
-            action_keywords = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 
-                              'render_output', 'validate_rules', 'test_validate', 'code_quality']
+            # Common actions: clarify, strategy, build, render, validate, etc.
+            action_keywords = ['clarify', 'strategy', 'build', 
+                              'render', 'validate', 'test_validate']
             
             behavior = None
             action = None

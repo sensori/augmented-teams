@@ -14,7 +14,7 @@
     "4. Be PESSIMISTIC and CONSERVATIVE - if an answer seems incomplete, vague, or could be interpreted multiple ways, you MUST ask for clarification",
     "5. There is NEVER too much detail at this stage - it is EXTREMELY IMPORTANT to stop and get complete answers",
     "6. **MANDATORY STORAGE STEP:** After user confirms all answers are complete, you MUST pass `key_questions_answered` and `evidence_provided` as parameters to the behavior action tool:",
-    "   - Pass parameters to the behavior action tool (e.g., `mcp_story-bot_code` with action `gather_context`):",
+    "   - Pass parameters to the behavior action tool (e.g., `mcp_story-bot_code` with action `clarify`):",
     "     * `key_questions_answered`: dict mapping question keys to answer strings",
     "     * `evidence_provided`: dict mapping evidence types to evidence content",
     "   - Example: key_questions_answered={'target_file': 'path/to/file.py', 'language': 'python', 'main_functions': ['calculate_total', 'process_order']}",

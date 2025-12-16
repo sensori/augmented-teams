@@ -21,7 +21,7 @@ if str(python_workspace_root) not in sys.path:
 bot_directory = Path(__file__).parent.parent  # src/ -> story_bot/
 os.environ['BOT_DIRECTORY'] = str(bot_directory)
 
-# 2. Read bot_config.json and set workspace directory (if not already set by mcp.json)
+# 2. Read bot_config.json and set workspace directory (if not already set by mcp.json env)
 if 'WORKING_AREA' not in os.environ:
     config_path = bot_directory / 'bot_config.json'
     if config_path.exists():
@@ -31,9 +31,6 @@ if 'WORKING_AREA' not in os.environ:
             mcp_env = bot_config['mcp']['env']
             if 'WORKING_AREA' in mcp_env:
                 os.environ['WORKING_AREA'] = mcp_env['WORKING_AREA']
-        # Fallback to top-level WORKING_AREA
-        elif 'WORKING_AREA' in bot_config:
-            os.environ['WORKING_AREA'] = bot_config['WORKING_AREA']
 
 # ============================================================================
 # Now import - everything will read from environment variables

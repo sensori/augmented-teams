@@ -1,5 +1,3 @@
-"""CLI Generator - Generates bot-specific CLI code from bot configuration."""
-
 from pathlib import Path
 import json
 import stat
@@ -8,16 +6,7 @@ from agile_bot.bots.base_bot.src.utils import read_json_file
 
 
 class CliGenerator:
-    """Generator that creates CLI code for bots based on bot configuration."""
-    
     def __init__(self, workspace_root: Path, bot_location: str = None):
-        """Initialize CLI generator.
-        
-        Args:
-            workspace_root: Root workspace directory
-            bot_location: Path to bot directory (e.g., 'agile_bot/bots/story_bot')
-                          If None, defaults to 'agile_bot/bots/base_bot'
-        """
         self.workspace_root = Path(workspace_root)
         
         if bot_location is None:
@@ -32,20 +21,6 @@ class CliGenerator:
         self.config_path = self.workspace_root / self.bot_location / 'bot_config.json'
     
     def generate_cli_code(self) -> Dict[str, Any]:
-        """Generate CLI code for bot.
-        
-        Returns:
-            Dict mapping artifact names to file paths:
-            - 'cli_python': Path to Python CLI script
-            - 'cli_script': Path to shell script wrapper (bash)
-            - 'cli_powershell': Path to PowerShell script wrapper (Windows)
-            - 'cursor_commands': Dict mapping command names to cursor command file paths
-            - 'registry': Path to updated bot registry
-            
-        Raises:
-            FileNotFoundError: If bot config does not exist
-            json.JSONDecodeError: If bot config is malformed
-        """
         if not self.config_path.exists():
             raise FileNotFoundError(
                 f'Bot Config not found at {self.config_path}'
@@ -84,11 +59,6 @@ class CliGenerator:
         }
     
     def _generate_python_cli_script(self) -> Path:
-        """Generate Python CLI script that uses BaseBotCli.
-        
-        Returns:
-            Path to generated Python CLI script
-        """
         bot_dir = self.workspace_root / self.bot_location
         src_dir = bot_dir / 'src'
         src_dir.mkdir(parents=True, exist_ok=True)
@@ -110,8 +80,8 @@ Usage:
 Examples:
     {self.bot_name}                                    # Route to current behavior/action from workflow state
     {self.bot_name} --behavior exploration            # Route to exploration behavior, auto-forward to current action
-    {self.bot_name} --behavior exploration --action gather_context  # Route directly to exploration.gather_context action
-    {self.bot_name} --behavior exploration --action gather_context --increment_file=increment.txt  # With parameters
+    {self.bot_name} --behavior exploration --action clarify  # Route directly to exploration.clarify action
+    {self.bot_name} --behavior exploration --action clarify --increment_file=increment.txt  # With parameters
 """
 from pathlib import Path
 import sys
@@ -189,11 +159,6 @@ if __name__ == '__main__':
         return cli_file
     
     def _generate_shell_script(self) -> Path:
-        """Generate shell script wrapper for CLI.
-        
-        Returns:
-            Path to generated shell script
-        """
         bot_dir = self.workspace_root / self.bot_location
         script_file = bot_dir / f'{self.bot_name}_cli'
         
@@ -219,11 +184,6 @@ if __name__ == '__main__':
         return script_file
     
     def _generate_powershell_script(self) -> Path:
-        """Generate PowerShell script wrapper for CLI.
-        
-        Returns:
-            Path to generated PowerShell script
-        """
         bot_dir = self.workspace_root / self.bot_location
         script_file = bot_dir / f'{self.bot_name}_cli.ps1'
         
@@ -247,11 +207,6 @@ if __name__ == '__main__':
         return script_file
     
     def _get_behaviors_from_config(self) -> list:
-        """Get behaviors list from bot config.
-        
-        Returns:
-            List of behavior names
-        """
         if not self.config_path.exists():
             return []
         
@@ -262,21 +217,6 @@ if __name__ == '__main__':
             return []
     
     def _generate_cursor_commands(self, cli_script_path: Path) -> Dict[str, Path]:
-        """Generate cursor command files for bot and behaviors.
-        
-        Generates:
-        - Bot command: routes to current behavior/action
-        - Behavior commands: one per behavior, accepts optional action parameter via ${1:}
-          If no action parameter provided, uses default/current action
-        - Continue command: closes current action and continues to next
-        - Help command: lists all cursor commands and their parameters
-        
-        Args:
-            cli_script_path: Path to the Python CLI script that will be invoked
-            
-        Returns:
-            Dict mapping command names to cursor command file paths
-        """
         # Generate cursor commands in .cursor/commands directory
         commands_dir = self.workspace_root / '.cursor' / 'commands'
         commands_dir.mkdir(parents=True, exist_ok=True)
@@ -337,14 +277,6 @@ if __name__ == '__main__':
         return commands
     
     def _get_current_command_files(self, commands_dir: Path) -> set:
-        """Get set of existing command files for this bot.
-        
-        Args:
-            commands_dir: Directory containing command files
-            
-        Returns:
-            Set of existing command file paths
-        """
         if not commands_dir.exists():
             return set()
         
@@ -357,13 +289,6 @@ if __name__ == '__main__':
         return existing_files
     
     def _remove_obsolete_command_files(self, commands_dir: Path, existing_files: set, current_commands: Dict[str, Path]):
-        """Remove command files that no longer correspond to current bot behaviors/actions.
-        
-        Args:
-            commands_dir: Directory containing command files
-            existing_files: Set of existing command file paths before generation
-            current_commands: Dict of current command names to file paths
-        """
         current_file_paths = set(current_commands.values())
         
         for file_path in existing_files:
@@ -371,27 +296,10 @@ if __name__ == '__main__':
                 file_path.unlink(missing_ok=True)
     
     def _write_command_file(self, file_path: Path, command: str) -> Path:
-        """Write cursor command file with command content.
-        
-        Args:
-            file_path: Path to command file
-            command: Command string to write
-            
-        Returns:
-            Path to written file
-        """
         file_path.write_text(command, encoding='utf-8')
         return file_path
     
     def _update_bot_registry(self, cli_script_path: Path) -> Path:
-        """Update bot registry with this bot's information.
-        
-        Args:
-            cli_script_path: Path to the bot's CLI script
-            
-        Returns:
-            Path to the registry file
-        """
         registry_path = self.workspace_root / 'agile_bot' / 'bots' / 'registry.json'
         
         # Load existing registry or create new one
@@ -428,11 +336,6 @@ if __name__ == '__main__':
         return registry_path
     
     def _load_bot_trigger_patterns(self) -> list:
-        """Load bot-level trigger patterns from trigger_words.json.
-        
-        Returns:
-            List of trigger patterns, or empty list if file doesn't exist
-        """
         trigger_file = self.workspace_root / self.bot_location / 'trigger_words.json'
         
         if not trigger_file.exists():

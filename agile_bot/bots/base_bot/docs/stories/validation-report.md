@@ -2,7 +2,7 @@
 
 **Generated:** 2025-12-14 20:27:57
 **Project:** base_bot
-**Behavior:** 7_write_tests
+**Behavior:** 7_tests
 **Action:** validate_rules
 
 ## Summary

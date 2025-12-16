@@ -8,7 +8,7 @@
     "- This is the SAME file used by Shape, Discovery, and all other behaviors",
     "- Do NOT create story-graph-explored.json or any other separate file",
     "- Update the existing story-graph.json file by adding acceptance_criteria to stories",
-    "- The build_knowledge action outputs to story-graph.json (the main file)",
+    "- The build action outputs to story-graph.json (the main file)",
     "",
     "**CRITICAL: Story Graph Structure - Main Epics Section is Single Source of Truth**",
     "",

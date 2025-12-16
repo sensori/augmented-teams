@@ -1,12 +1,32 @@
 {
   "behaviorName": "shape",
   "instructions": [
-    "Present the following assumptions and decision making criteria to the user and ask for their opinion on key decisions. Ask them to review the assumptions and select their preferred criteria/options for each decision point.",
+    "CRITICAL: Before presenting decision criteria, you MUST review the existing analysis and recommend appropriate strategies based on problem nature and solution approach.",
     "",
-    "1. Review all decision making criteria with the user",
-    "2. Ask user to select preferred options for each decision point",
-    "3. Store planning decisions using agent_store_planning() MCP tool",
-    "4. Apply planning decisions to story mapping and domain modeling work"
+    "**STEP 1: REVIEW EXISTING ANALYSIS**",
+    "Review the analysis that has already been completed:",
+    "",
+    "**A. Review Problem Nature Analysis (Already Completed):**",
+    "   - Review the problem type classification that has been determined",
+    "   - Review the complexity assessment that has been made",
+    "   - Understand the context: New system vs. integration vs. workflow improvement vs. domain modeling, etc.",
+    "",
+    "**B. Review Solution Approach Analysis (Already Completed):**",
+    "   - Review the user journey characteristics that have been identified",
+    "   - Review the value delivery patterns that have been determined",
+    "   - Review integration requirements and domain structure needs that have been analyzed",
+    "",
+    "**STEP 2: RECOMMEND STRATEGIES**",
+    "Based on your review of the analysis, suggest appropriate shaping strategies by recommending decision criteria options.",
+    "Refer to the decision criteria config files in `planning/decision_criteria/` for available options and match the problem nature and solution approach to the appropriate options from each file.",
+    "",
+    "**STEP 3: PRESENT STRATEGIES AND DECISION CRITERIA**",
+    "1. Present your strategy recommendations with rationale based on the reviewed analysis, referencing the appropriate options from the decision criteria config files",
+    "2. Present all decision making criteria (from the config files) to the user and ask for their opinion on key decisions",
+    "3. Ask user to review the recommendations and select preferred options for each decision point",
+    "4. Validate strategy recommendations with the user - ensure they align with their understanding of the problem and desired approach",
+    "5. Store planning decisions",
+    "6. Apply planning decisions to story mapping and domain modeling work"
   ]
 }
 

@@ -13,7 +13,6 @@
 **/venv/
 **/env/
 **/dist/
-**/build/
 **/.cache/
 **/cache/
 **/node_modules/
@@ -84,6 +83,13 @@ agile_bot/bots/character/code/logs/
 **/test/**/scenarios/**/expected-*.json
 **/test/**/scenarios/**/*-merge-report.json
 **/test/**/scenarios/**/*-layout.json
+
+# Test scenario directories (all JSON files in test synchronizers)
+**/test/synchronizers/**/*.json
+
+# Test bot directories (exclude entire test bot from indexing)
+**/test_story_bot/
+agile_bot/bots/test_story_bot/
 
 # Backup directories
 **/* backup/

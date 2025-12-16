@@ -2,12 +2,12 @@
 Validate Code Files Action
 
 Extends ValidateRulesAction to validate generated code files
-(test files for 7_write_tests behavior, source files for 8_code behavior).
+(test files for 7_tests behavior, source files for 8_code behavior).
 Files must be passed as parameters - no auto-discovery.
 """
 from pathlib import Path
 from typing import Dict, Any, List
-from agile_bot.bots.base_bot.src.bot.validate_rules_action import ValidateRulesAction
+from agile_bot.bots.base_bot.src.actions.validate.validate_action import ValidateRulesAction
 
 
 class ValidateCodeFilesAction(ValidateRulesAction):
@@ -73,9 +73,10 @@ class ValidateCodeFilesAction(ValidateRulesAction):
             # Create a new ValidateRulesAction instance to validate this file
             # Use test_file parameter to validate the file
             file_validator = ValidateRulesAction(
-                bot_name=self.bot_name,
+                base_action_config=self.base_action_config,
                 behavior=self.behavior,
-                bot_directory=self.bot_directory
+                activity_tracker=self.activity_tracker,
+                bot_name=self.bot_name
             )
             
             # Validate the file

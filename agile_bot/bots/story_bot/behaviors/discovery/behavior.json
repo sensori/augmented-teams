@@ -7,26 +7,26 @@
   "outputs": "story-graph.json (with discovery details), story-map-discovery.drawio, feature/story detail documents",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
-    "Create a complete list of stories with a well defined story flow for specfied increments",
+    "Create a complete list of stories with a well defined story flow for specified increments"
   ],
   "actions_workflow": {
     "actions": [
       {
-        "name": "gather_context",
+        "name": "clarify",
         "order": 1,
-        "next_action": "decide_planning_criteria",
+        "next_action": "strategy",
         "instructions": []
       },
       {
-        "name": "decide_planning_criteria",
+        "name": "strategy",
         "order": 2,
-        "next_action": "build_knowledge",
+        "next_action": "build",
         "instructions": []
       },
       {
-        "name": "build_knowledge",
+        "name": "build",
         "order": 3,
-        "next_action": "validate_rules",
+        "next_action": "validate",
         "instructions": [
           "discovery: build story refinements and increments AND refine domain model based on discovered details",
           "Refine domain model concepts, relationships, and responsibilities based on story discovery details",
@@ -34,15 +34,15 @@
         ]
       },
       {
-        "name": "validate_rules",
+        "name": "validate",
         "order": 4,
-        "next_action": "render_output",
+        "next_action": "render",
         "instructions": [
           "discovery: validate story decomposition AND domain model refinements"
         ]
       },
       {
-        "name": "render_output",
+        "name": "render",
         "order": 5,
         "instructions": [
           "discovery: render story map increments in scope using all rendering specifications mentioned in the behavior instructions"

@@ -135,7 +135,7 @@ function matchBehavior(message, workspaceRoot) {
     "4_discovery",
     "5_exploration",
     "6_scenarios",
-    "7_write_tests",
+    "7_tests",
     "8_code"
   ];
   

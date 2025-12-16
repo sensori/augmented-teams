@@ -1,0 +1,331 @@
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+classDiagram
+   
+ namespace CLI {
+ 
+    class CliGenerator {
+        +generate_cli_code()
+        +_generate_python_cli_script()
+        +_generate_shell_script()
+        +_generate_powershell_script()
+        +_generate_cursor_commands()
+    }
+
+    class StoryBotCli {
+        +main()
+    }
+
+    class BaseBotCli {
+        +run()
+        +close_current_action()
+        +list_behaviors()
+        +list_actions()
+    }
+
+    class TriggerRouter {
+        +match_trigger()
+        +route_to_bot()
+        +route_to_behavior()
+        +route_to_action()
+    }
+    }
+
+
+ namespace MCP {
+    class MCPServerGenerator {
+        +create_server_instance()
+        +_discover_workflow_actions()
+    }
+
+    class MCPServer {
+        +start()
+        +invoke_tool()
+    }
+
+    class BotToolGenerator {
+        +create_bot_tool()
+    }
+
+    class BehaviorToolGenerator {
+        +create_behavior_tools()
+    }
+}
+
+ namespace Bot_ {
+    class Bot {
+        +execute_behavior()
+        +forward_to_current_behavior_and_current_action()
+        +close_current_action()
+        +find_behavior_by_name()
+        +infer_working_dir_from_path()
+    }
+
+    class BotPaths {
+        +bot_directory
+        +workspace_directory
+        +documentation_path
+    }
+
+    class Behaviors {
+        +find_by_name()
+        +navigate_to()
+        +close_current()
+        +execute_current()
+        +save_state()
+        +load_state()
+    }
+
+    class Behavior {
+        +forward_to_current_action()
+        +matches_trigger()
+    }
+
+    class BehaviorConfig {
+        +actions_workflow
+        +description
+        +goal
+    }
+
+    class TriggerWords {
+        +matches()
+    }
+
+    class BotConfig {
+        +behaviors_list
+        +description
+        +goal
+        +instructions
+    }
+
+}
+
+namespace Actions_ {
+    class Actions {
+        +find_by_name()
+        +navigate_to()
+        +close_current()
+        +execute_current()
+        +save_state()
+        +load_state()
+    }
+
+    class Action {
+        +execute()
+        +do_execute()
+        +track_activity_on_start()
+        +track_activity_on_completion()
+    }
+
+    class BaseActionConfig {
+        +action_name
+        +order
+        +instructions
+        +custom_class
+    }
+
+    class ActivityTracker {
+        +track_start()
+        +track_completion()
+    }
+}
+
+namespace Clarify_ {
+    class ClarifyContextAction {
+        +do_execute()
+    }
+
+    class RequiredContext {
+        +key_questions
+        +evidence
+    }
+
+    class KeyQuestions {
+        +questions
+    }
+
+    class Evidence {
+        +evidence_list
+    }
+
+    class RequirementsClarifications {
+        +save()
+        +load()
+    }
+}
+
+namespace Strategy_ {
+    class StrategyAction {
+        +do_execute()
+    }
+
+    class Strategy {
+        +strategy_criterias
+        +assumptions
+        +recommended_activities
+    }
+
+    class StrategyCriterias {
+        +strategy_criterias
+        +_load_strategy_criterias()
+    }
+
+    class StrategyCriteria {
+        +question
+        +options
+        +outcome
+    }
+
+    class StrategyDecision {
+        +save()
+        +load()
+    }
+}
+
+namespace Knowledge_ {
+    class BuildKnowledgeAction {
+        +do_execute()
+    }
+
+    class Knowledge {
+        +knowledge_graph_spec
+        +knowledge_graph_template
+    }
+
+    class StoryGraph {
+        +load_from_file()
+        +get_content()
+    }
+
+    class KnowledgeGraphSpec {
+        +output_path
+        +output_filename
+        +template
+    }
+
+    class KnowledgeGraphTemplate {
+        +template_content
+        +schema
+    }
+    
+}
+
+namespace Validate_ {
+    class ValidateRulesAction {
+        +do_execute()
+    }
+
+    class Rules {
+        +find_behavior_specific_rules()
+        +find_common_bot_rules()
+    }
+
+    class Rule {
+        +scanner
+        +description
+        +examples
+    }
+
+    class Scanner {
+        +scan()
+    }
+
+    class ValidationScope {
+        +scope
+        +all_files()
+    }
+
+    class ValidationReportWriter {
+        +write()
+        +get_report_path()
+    }
+}
+
+namespace Render {
+    class RenderOutputAction {
+        +do_execute()
+    }
+
+    class RenderSpec {
+        +template_path
+        +output_path
+    }
+
+    class Template {
+        +content
+        +render()
+    }
+
+    class MergedInstructions {
+        +merge()
+    }
+
+    class Guardrails {
+        +instructions
+    }
+
+    class Content {
+        +instructions
+    }
+}
+
+
+    StoryBotCli --|> BaseBotCli : extends
+    BaseBotCli --> TriggerRouter : uses
+    BaseBotCli --> Bot : uses
+    CliGenerator ..> StoryBotCli : creates
+    CliGenerator --> BotConfig : uses
+    TriggerRouter --> TriggerWords : uses
+    TriggerRouter --> Bot : routes to
+    MCPServerGenerator ..> MCPServer : creates
+    MCPServer --> Bot : uses
+    MCPServerGenerator --> Bot : uses
+    MCPServerGenerator --> BotToolGenerator : uses
+    MCPServerGenerator --> BehaviorToolGenerator : uses
+    BotToolGenerator --> Bot : creates tools for
+    BehaviorToolGenerator --> Bot : creates tools for
+    Bot --> Behaviors : uses
+    Bot --> BotConfig : uses
+    Bot --> BotPaths : uses
+    Behaviors --> Behavior : contains
+    Behavior --> Actions : uses
+    Behavior --> Render.Guardrails : uses
+    Behavior --> Render.Content : uses
+    Behavior <--> Validate_.Rules : uses
+    Behavior --> TriggerWords : uses
+    Behavior --> BehaviorConfig : uses
+    Actions --> Action : contains
+    Action --> Clarify.ClarifyContextAction : extends
+    Action --> Strategy_.StrategyAction : extends
+    Action --> Knowledge_.BuildKnowledgeAction : extends
+    Action --> Validate_.ValidateRulesAction : extends
+    Action --> Render.RenderOutputAction : extends
+    Action --> Behavior : uses
+    Action --> BaseActionConfig : uses
+    Action --> ActivityTracker : uses
+    Clarify.ClarifyContextAction --> Clarify.RequiredContext : uses
+    Clarify.ClarifyContextAction --> Clarify.RequirementsClarifications : uses
+    Clarify.RequiredContext --> Clarify.KeyQuestions : contains
+    Clarify.RequiredContext --> Clarify.Evidence : contains
+    Strategy_.StrategyAction --> Strategy_.Strategy : uses
+    Strategy_.Strategy --> Strategy_.StrategyCriterias : uses
+    Strategy_.StrategyCriterias --> Strategy_.StrategyCriteria : contains
+    Strategy_.StrategyAction --> Strategy_.StrategyDecision : uses
+    Knowledge_.BuildKnowledgeAction --> Knowledge_.Knowledge : uses
+    Knowledge_.Knowledge --> Knowledge_.KnowledgeGraphSpec : contains
+    Knowledge_.KnowledgeGraphSpec --> Knowledge_.KnowledgeGraphTemplate : contains
+    Knowledge_.Knowledge --> Knowledge_.StoryGraph : uses
+    Validate_.ValidateRulesAction --> Validate_.Rules : uses
+    Validate_.ValidateRulesAction --> Knowledge_.StoryGraph : uses
+    Validate_.ValidateRulesAction --> Validate_.ValidationScope : uses
+    Validate_.ValidateRulesAction --> Validate_.ValidationReportWriter : uses
+    Render.RenderOutputAction --> Render.RenderSpec : uses
+    Render.RenderSpec --> Render.Template : uses
+    Render.RenderOutputAction --> Render.MergedInstructions : uses
+    Render.Guardrails --> Clarify.RequiredContext : uses
+    Render.Guardrails --> Strategy_.Strategy : uses
+    Validate_.Rules --> Validate_.Rule : contains
+    Validate_.Rule --> Validate_.Scanner : uses
+
+
+
+```

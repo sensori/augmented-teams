@@ -1,1 +1,0 @@
-{"name": "build_knowledge", "instructions": ["Test build_knowledge"], "workflow": true, "order": 4, "next_action": "validate_rules"}

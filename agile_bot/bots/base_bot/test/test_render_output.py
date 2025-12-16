@@ -8,7 +8,7 @@ Tests for all stories in the 'Render Output' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.actions.render_output.render_output_action import RenderOutputAction
+from agile_bot.bots.base_bot.src.actions.render.render_action import RenderOutputAction
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
     create_activity_log_file,
@@ -29,32 +29,34 @@ from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
 
 def given_base_instructions_for_render_output_copied(bot_directory: Path):
     """Given: Base instructions for render_output copied."""
-    from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir
+    from agile_bot.bots.base_bot.test.test_helpers import get_base_actions_dir, get_test_base_actions_dir
     import shutil
     repo_root = Path(__file__).parent.parent.parent.parent.parent
     actual_base_actions_dir = get_base_actions_dir(repo_root)
-    actual_instructions_file = actual_base_actions_dir / 'render_output' / 'instructions.json'
-    bot_base_actions_dir = bot_directory / 'base_actions' / 'render_output'
+    # BaseActionConfig loads from action_config.json, not instructions.json
+    actual_config_file = actual_base_actions_dir / 'render_output' / 'action_config.json'
+    bot_base_actions_dir = get_test_base_actions_dir(bot_directory) / 'render_output'
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
-    bot_instructions_file = bot_base_actions_dir / 'instructions.json'
-    if actual_instructions_file.exists():
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
+    bot_config_file = bot_base_actions_dir / 'action_config.json'
+    if actual_config_file.exists():
+        shutil.copy2(actual_config_file, bot_config_file)
     else:
-        bot_instructions_file.write_text(json.dumps({
-            'actionName': 'render_output',
+        # Create action_config.json with instructions containing template placeholders
+        bot_config_file.write_text(json.dumps({
+            'name': 'render_output',
             'instructions': [
                 'Render outputs using render configs',
                 '{{render_configs}}',
                 '{{render_instructions}}'
             ]
         }), encoding='utf-8')
-    return bot_instructions_file
+    return bot_config_file
 
 
 def given_behavior_render_instructions_created(bot_directory: Path, behavior: str):
     """Given: Behavior render instructions created."""
     behavior_dir = bot_directory / 'behaviors' / behavior
-    render_dir = behavior_dir / '2_content' / '2_render'
+    render_dir = behavior_dir / 'content' / 'render'
     render_dir.mkdir(parents=True, exist_ok=True)
     render_instructions_file = render_dir / 'instructions.json'
     render_instructions_file.write_text(
@@ -79,7 +81,7 @@ def given_render_configs_created(render_dir: Path, configs: list):
 def given_behavior_render_directory_created(bot_directory: Path, behavior: str) -> Path:
     """Given: Behavior render directory created."""
     behavior_dir = bot_directory / 'behaviors' / behavior
-    render_dir = behavior_dir / '2_content' / '2_render'
+    render_dir = behavior_dir / 'content' / 'render'
     render_dir.mkdir(parents=True, exist_ok=True)
     return render_dir
 
@@ -88,6 +90,11 @@ def when_render_output_action_created(bot_name: str, behavior: str, bot_director
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    # Create behavior.json and guardrails files
+    create_actions_workflow_json(bot_directory, behavior)
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     base_action_config = BaseActionConfig('render_output', bot_paths)
@@ -104,6 +111,11 @@ def when_render_output_action_loads_and_merges_instructions(bot_name: str, behav
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    # Create behavior.json and guardrails files
+    create_actions_workflow_json(bot_directory, behavior)
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     base_action_config = BaseActionConfig('render_output', bot_paths)
@@ -113,7 +125,9 @@ def when_render_output_action_loads_and_merges_instructions(bot_name: str, behav
         activity_tracker=None,
         bot_name=bot_name
     )
-    instructions = action_obj.load_and_merge_instructions()
+    # Call do_execute to trigger template variable replacement via _inject_render_data
+    result = action_obj.do_execute(parameters={})
+    instructions = result.get('instructions', {})
     return action_obj, instructions
 
 
@@ -187,6 +201,11 @@ def when_render_output_action_tracks_start(bot_name: str, behavior: str, bot_dir
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    # Create behavior.json and guardrails files
+    create_actions_workflow_json(bot_directory, behavior)
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     base_action_config = BaseActionConfig('render_output', bot_paths)
@@ -217,6 +236,11 @@ def when_create_render_output_action(bot_name: str, behavior: str, bot_directory
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    # Create behavior.json and guardrails files
+    create_actions_workflow_json(bot_directory, behavior)
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     base_action_config = BaseActionConfig('render_output', bot_paths)
@@ -232,7 +256,8 @@ def when_create_render_output_action(bot_name: str, behavior: str, bot_directory
 def then_action_has_correct_bot_name_and_behavior(action, expected_bot_name: str, expected_behavior: str):
     """Then: Action has correct bot name and behavior."""
     assert action.bot_name == expected_bot_name
-    assert action.behavior == expected_behavior
+    # action.behavior is a Behavior object, not a string, so check its name attribute
+    assert action.behavior.name == expected_behavior
 
 
 def given_bot_name_and_behavior_for_shape():
@@ -245,7 +270,7 @@ def given_bot_name_and_behavior_for_shape():
 def given_render_dir_and_configs_setup(bot_directory: Path, behavior: str):
     """Given: Render dir and configs setup."""
     behavior_dir = bot_directory / 'behaviors' / behavior
-    render_dir = behavior_dir / '2_content' / '2_render'
+    render_dir = behavior_dir / 'content' / 'render'
     render_dir.mkdir(parents=True, exist_ok=True)
     given_behavior_render_instructions_created(bot_directory, behavior)
     given_render_configs_created(render_dir, [
@@ -273,7 +298,7 @@ def given_render_dir_and_configs_setup(bot_directory: Path, behavior: str):
 
 def when_format_render_configs(action_obj):
     """When: Format render configs."""
-    behavior_folder = action_obj._find_behavior_folder()
+    behavior_folder = action_obj.behavior.folder if action_obj.behavior else None
     render_configs = action_obj._load_render_configs(behavior_folder)
     formatted = action_obj._format_render_configs(render_configs)
     return formatted
@@ -406,7 +431,7 @@ class TestProceedToValidateRules:
         # Given: Bot directory and workspace directory are set up
         # When: Validate rules action completes
         # Then: Workflow transitions to render_output (verified by verify_workflow_transition)
-        verify_workflow_transition(bot_directory, workspace_directory, 'validate_rules', 'render_output', behavior='discovery')
+        verify_workflow_transition(bot_directory, workspace_directory, 'validate_rules', 'render', behavior='discovery')
 
     def test_workflow_state_captures_render_output_completion(self, bot_directory, workspace_directory):
         """
@@ -415,7 +440,7 @@ class TestProceedToValidateRules:
         # Given: Bot directory and workspace directory are set up
         # When: Render output action completes
         # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
-        verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'render_output')
+        verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'render')
 
     def test_render_output_action_executes_successfully(self, bot_directory, workspace_directory):
         """

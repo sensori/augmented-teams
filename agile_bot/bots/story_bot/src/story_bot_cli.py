@@ -14,8 +14,8 @@ Usage:
 Examples:
     story_bot                                    # Route to current behavior/action from workflow state
     story_bot --behavior exploration            # Route to exploration behavior, auto-forward to current action
-    story_bot --behavior exploration --action gather_context  # Route directly to exploration.gather_context action
-    story_bot --behavior exploration --action gather_context --increment_file=increment.txt  # With parameters
+    story_bot --behavior exploration --action clarify  # Route directly to exploration.clarify action
+    story_bot --behavior exploration --action clarify --increment_file=increment.txt  # With parameters
 """
 from pathlib import Path
 import sys

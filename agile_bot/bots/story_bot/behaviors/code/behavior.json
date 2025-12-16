@@ -8,28 +8,28 @@
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "Create clean, maintainable production code that implements story behavior",
-    "**CODE MUST FOLLOW CLEAN CODE PRINCIPLES:",
+    "**CODE MUST FOLLOW CLEAN CODE PRINCIPLES:"
   ],
   "actions_workflow": {
     "actions": [
       {
-        "name": "decide_planning_criteria",
+        "name": "strategy",
         "order": 1,
-        "next_action": "render_output",
+        "next_action": "render",
         "instructions": [
           "code: render code required to implement all tests that have been recently built or updated"
         ]
       },
       {
-        "name": "render_output",
+        "name": "render",
         "order": 2,
-        "next_action": "validate_rules",
+        "next_action": "validate",
         "instructions": [
           "code: build clean code"
         ]
       },
       {
-        "name": "validate_rules",
+        "name": "validate",
         "order": 3,
         "action_class": "agile_bot.bots.story_bot.src.bot.validate_code_files_action.ValidateCodeFilesAction",
         "instructions": [

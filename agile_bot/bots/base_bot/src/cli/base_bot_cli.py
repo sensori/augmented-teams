@@ -7,17 +7,7 @@ from pathlib import Path
 from typing import Dict, Any, Tuple
 from agile_bot.bots.base_bot.src.bot.bot import Bot
 from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory, get_bot_directory
-
-
-#!/usr/bin/env python3
-
-import sys
-import argparse
-import json
-from pathlib import Path
-from typing import Dict, Any, Tuple
-from agile_bot.bots.base_bot.src.bot.bot import Bot
-from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory, get_bot_directory
+from agile_bot.bots.base_bot.src.utils import read_json_file
 
 
 class BaseBotCli:
@@ -25,7 +15,7 @@ class BaseBotCli:
         if bot:
             self.bot = bot
             self.bot_name = bot.name
-            self.bot_directory = bot.bot_directory
+            self.bot_directory = bot.bot_paths.bot_directory
         elif bot_name and bot_config_path:
             self.bot_name = bot_name
             self.bot_config_path = bot_config_path
@@ -87,7 +77,7 @@ class BaseBotCli:
     def list_behaviors(self):
         print(f"Available behaviors for {self.bot_name}:")
         for behavior in self.bot.behaviors:
-            print(f"  - {behavior}")
+            print(f"  - {behavior.name}")
         sys.stdout.flush()
     
     def list_actions(self, behavior_name: str):
@@ -104,7 +94,8 @@ class BaseBotCli:
         print(f"Available Behaviors and Actions for {self.bot_name}:\n")
         print("=" * 70)
         
-        for behavior_name in self.bot.behaviors:
+        for behavior in self.bot.behaviors:
+            behavior_name = behavior.name
             # Get behavior description
             behavior_description = self._get_behavior_description(f'{self.bot_name}-{behavior_name}')
             
@@ -140,11 +131,11 @@ class BaseBotCli:
         base_actions_dir = get_base_actions_directory(bot_directory=get_bot_directory())
         
         action_prefixes = {
-            'gather_context': 'gather_context',
-            'decide_planning_criteria': 'decide_planning_criteria',
-            'build_knowledge': 'build_knowledge',
-            'render_output': 'render_output',
-            'validate_rules': 'validate_rules'
+            'clarify': 'clarify',
+            'strategy': 'strategy',
+            'build': 'build',
+            'render': 'render',
+            'validate': 'validate'
         }
         
         action_folder = action_prefixes.get(action_name, action_name)
@@ -233,54 +224,21 @@ class BaseBotCli:
             self.bot_directory / 'behaviors' / behavior_name / 'behavior.json'
         )
         
-        if not behavior_file_path.exists():
-            behaviors_dir = self.bot_directory / 'behaviors'
-            if behaviors_dir.exists():
-                for folder in behaviors_dir.iterdir():
-                    if folder.is_dir() and folder.name == behavior_name:
-                        potential_path = folder / 'behavior.json'
-                        if potential_path.exists():
-                            behavior_file_path = potential_path
-                            break
-        
         if behavior_file_path.exists():
             try:
                 behavior_data = read_json_file(behavior_file_path)
                 instructions = behavior_data.get('instructions', [])
                 if instructions:
                     return '\n'.join(instructions) if isinstance(instructions, list) else str(instructions)
-            except Exception:
-                pass
-        
-        behavior_instructions_path = (
-            self.bot_directory / 'behaviors' / behavior_name / 'instructions.json'
-        )
-        
-        if not behavior_instructions_path.exists():
-            behaviors_dir = self.bot_directory / 'behaviors'
-            if behaviors_dir.exists():
-                for folder in behaviors_dir.iterdir():
-                    if folder.is_dir() and folder.name == behavior_name:
-                        potential_path = folder / 'instructions.json'
-                        if potential_path.exists():
-                            behavior_instructions_path = potential_path
-                            break
-        
-        if behavior_instructions_path.exists():
-            try:
-                import json
-                instructions = json.loads(behavior_instructions_path.read_text(encoding='utf-8'))
                 
+                # Fallback to description/goal/outputs if instructions not found
                 description_parts = []
-                
-                if instructions.get('description'):
-                    description_parts.append(instructions['description'])
-                
-                if instructions.get('goal'):
-                    description_parts.append(instructions['goal'])
-                
-                if instructions.get('outputs') and len(description_parts) < 3:
-                    outputs = instructions['outputs']
+                if behavior_data.get('description'):
+                    description_parts.append(behavior_data['description'])
+                if behavior_data.get('goal'):
+                    description_parts.append(behavior_data['goal'])
+                if behavior_data.get('outputs') and len(description_parts) < 3:
+                    outputs = behavior_data['outputs']
                     if isinstance(outputs, str):
                         first_output = outputs.split(',')[0].strip()
                         description_parts.append(f"Outputs: {first_output}")
@@ -293,16 +251,17 @@ class BaseBotCli:
         return behavior_name.replace('_', ' ').title()
     
     def _infer_parameter_description(self, cmd_name: str, param_num: str, cmd_content: str) -> str:
-        if 'shape' in cmd_name or 'discovery' in cmd_name or 'exploration' in cmd_name:
-            if param_num == '1':
-                return 'Optional action name or file path'
-        elif 'continue' in cmd_name or 'help' in cmd_name:
+        if 'continue' in cmd_name or 'help' in cmd_name:
             return 'No parameters'
         
-        raise ValueError(
-            f"Cannot infer parameter description for command '{cmd_name}', parameter {param_num}. "
-            f"This indicates a configuration error - parameter descriptions should be explicit."
-        )
+        # All behavior commands have the same parameter pattern:
+        # $1 = optional action name, $2 = optional context/file path
+        if param_num == '1':
+            return 'Optional action name (e.g., clarify, strategy, build, render, validate)'
+        elif param_num == '2':
+            return 'Optional context or file path'
+        
+        return f'Parameter {param_num}'
     
     def _get_behavior_actions(self, behavior_obj) -> list:
         excluded_attrs = {'forward_to_current_action', 'dir', 'current_project_file'}

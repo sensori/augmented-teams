@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Any
-from agile_bot.bots.base_bot.src.actions.gather_context.required_context import RequiredContext
-from agile_bot.bots.base_bot.src.actions.decide_strategy.strategy import Strategy
+from agile_bot.bots.base_bot.src.actions.clarify.required_context import RequiredContext
+from agile_bot.bots.base_bot.src.actions.strategy.strategy import Strategy
 
 
 class Guardrails:

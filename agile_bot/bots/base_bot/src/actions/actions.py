@@ -1,9 +1,3 @@
-"""
-Actions collection class.
-
-Manages collection of Action objects and tracks current action.
-State is persisted to behavior_action_state.json.
-"""
 from __future__ import annotations
 
 import json
@@ -19,35 +13,7 @@ if TYPE_CHECKING:
 
 
 class Actions:
-    """Collection of Action objects with state persistence.
-    
-    Instantiated with: Behavior, BaseActionsConfig, BehaviorConfig
-    Instantiates: Action
-    Properties:
-        current: Action (persisted to behavior_action_state.json)
-    Methods:
-        find_by_name(): Find action by name
-        find_by_order(): Find action by order
-        next(): Get next action in sequence
-        iterate(): Iterate all actions
-        navigate_to(): Navigate to specific action
-        close_current(): Close current action
-        execute_current(): Execute current action
-        save_state(): Save current action to behavior_action_state.json
-        load_state(): Load current action from behavior_action_state.json
-    """
-    
     def __init__(self, behavior_config, behavior):
-        """Initialize Actions collection.
-        
-        Args:
-            behavior_config: BehaviorConfig instance containing actions_workflow
-            behavior: Behavior instance (for accessing bot and state)
-            
-        Note:
-            Automatically loads state from behavior_action_state.json if it exists.
-            Otherwise, sets first action as current.
-        """
         self.behavior_config = behavior_config
         self.behavior = behavior
         self.bot_name = behavior.bot_name
@@ -67,26 +33,24 @@ class Actions:
         for action_dict in actions_list:
             action_name = action_dict.get("name", "")
             if action_name:
-                try:
-                    # Load base action config
-                    base_action_config = BaseActionConfig(action_name, self.bot_paths)
-                    # Create ActivityTracker
-                    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-                    workspace_dir = self.bot_paths.workspace_directory
-                    activity_tracker = ActivityTracker(self.bot_paths, self.bot_name)
-                    
-                    # Instantiate concrete Action class (e.g., GatherContextAction)
-                    action_instance = self._instantiate_action(
-                        action_name=action_name,
-                        base_action_config=base_action_config,
-                        behavior=behavior,
-                        activity_tracker=activity_tracker
-                    )
-                    self._actions.append(action_instance)
-                except (ImportError, ModuleNotFoundError, AttributeError) as e:
-                    # Skip actions that can't be imported (e.g., missing dependencies)
-                    # This allows tests to run even if some action modules aren't fully implemented
-                    pass
+                # Load base action config
+                base_action_config = BaseActionConfig(action_name, self.bot_paths)
+                # Override order from behavior.json if present (behavior.json is authoritative)
+                if "order" in action_dict:
+                    base_action_config._config["order"] = action_dict["order"]
+                # Create ActivityTracker
+                from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+                workspace_dir = self.bot_paths.workspace_directory
+                activity_tracker = ActivityTracker(self.bot_paths, self.bot_name)
+                
+                # Instantiate concrete Action class (e.g., GatherContextAction)
+                action_instance = self._instantiate_action(
+                    action_name=action_name,
+                    base_action_config=base_action_config,
+                    behavior=behavior,
+                    activity_tracker=activity_tracker
+                )
+                self._actions.append(action_instance)
         
         # Track current action index
         self._current_index: Optional[int] = None
@@ -96,100 +60,90 @@ class Actions:
     
     def _instantiate_action(self, action_name: str, base_action_config: BaseActionConfig, 
                            behavior: Behavior, activity_tracker) -> Action:
-        """Instantiate concrete Action class (e.g., GatherContextAction).
-        
-        Args:
-            action_name: Name of the action
-            base_action_config: BaseActionConfig instance
-            behavior: Behavior instance
-            activity_tracker: ActivityTracker instance
-            
-        Returns:
-            Instance of concrete Action class
-        """
         import importlib
         
         # Get action class path (from custom_class or default)
         action_class_path = base_action_config.custom_class
         if not action_class_path:
-            # Map action names to module names and class names (for actions where name doesn't match module)
+            # Map action names to module names and class names
             action_module_mapping = {
-                'decide_planning_criteria': ('decide_strategy', 'DecideStrategyAction')
+                'clarify': ('clarify', 'clarify_action', 'ClarifyContextAction'),
+                'strategy': ('strategy', 'strategy_action', 'StrategyAction'),
+                'decide_strategy': ('strategy', 'strategy_action', 'StrategyAction'),
+                'build': ('build', 'build_action', 'BuildKnowledgeAction'),
+                'build_knowledge': ('build', 'build_action', 'BuildKnowledgeAction'),
+                'validate': ('validate', 'validate_action', 'ValidateRulesAction'),
+                'validate_rules': ('validate', 'validate_action', 'ValidateRulesAction'),
+                'render': ('render', 'render_action', 'RenderOutputAction'),
+                'render_output': ('render', 'render_action', 'RenderOutputAction'),
             }
             mapping = action_module_mapping.get(action_name)
             if mapping:
-                module_name, action_class_name = mapping
+                module_name, module_file, action_class_name = mapping
+                action_class_path = f"agile_bot.bots.base_bot.src.actions.{module_name}.{module_file}.{action_class_name}"
             else:
+                # Default: try to construct from action name
                 module_name = action_name
                 action_class_name = action_name.title().replace('_', '') + 'Action'
-            
-            # Default: agile_bot.bots.base_bot.src.actions.{module_name}.{module_name}_action.{ActionClass}Action
-            action_class_path = f"agile_bot.bots.base_bot.src.actions.{module_name}.{module_name}_action.{action_class_name}"
+                action_class_path = f"agile_bot.bots.base_bot.src.actions.{module_name}.{module_name}_action.{action_class_name}"
         
         # Import and instantiate action class
         module_path, class_name = action_class_path.rsplit(".", 1)
-        module = importlib.import_module(module_path)
-        action_class = getattr(module, class_name)
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError as e:
+            raise ValueError(
+                f"Action '{action_name}' cannot be loaded: module '{module_path}' not found. "
+                f"Action classes must exist for all configured actions. "
+                f"Expected path: {action_class_path}"
+            ) from e
+        
+        try:
+            action_class = getattr(module, class_name)
+        except AttributeError as e:
+            raise ValueError(
+                f"Action '{action_name}' cannot be loaded: class '{class_name}' not found in module '{module_path}'. "
+                f"Action classes must exist for all configured actions."
+            ) from e
         
         # Instantiate with BaseActionConfig, Behavior, ActivityTracker
-        action_instance = action_class(
-            base_action_config=base_action_config,
-            behavior=behavior,
-            activity_tracker=activity_tracker
-        )
+        try:
+            action_instance = action_class(
+                base_action_config=base_action_config,
+                behavior=behavior,
+                activity_tracker=activity_tracker
+            )
+        except Exception as e:
+            raise ValueError(
+                f"Action '{action_name}' cannot be instantiated: {e}. "
+                f"Action classes must be properly implemented for all configured actions."
+            ) from e
         
         return action_instance
     
     @property
     def current(self) -> Optional[Action]:
-        """Get current action.
-        
-        Returns:
-            Current Action object, or None if no actions exist.
-        """
         if self._current_index is not None and 0 <= self._current_index < len(self._actions):
             return self._actions[self._current_index]
         return None
     
     @property
     def names(self) -> List[str]:
-        """Get list of all action names."""
         return [action.action_name for action in self._actions]
     
     def find_by_name(self, action_name: str) -> Optional[Action]:
-        """Find action by name.
-        
-        Args:
-            action_name: Name of action to find
-            
-        Returns:
-            Action object if found, None otherwise.
-        """
         for action in self._actions:
             if action.action_name == action_name:
                 return action
         return None
     
     def find_by_order(self, order: int) -> Optional[Action]:
-        """Find action by order.
-        
-        Args:
-            order: Order number of action
-            
-        Returns:
-            Action object if found, None otherwise.
-        """
         for action in self._actions:
             if action.order == order:
                 return action
         return None
     
     def next(self) -> Optional[Action]:
-        """Get next action in sequence.
-        
-        Returns:
-            Next Action object, or None if at last action or no current action.
-        """
         if self._current_index is None:
             return None
         
@@ -199,23 +153,10 @@ class Actions:
         return None
     
     def __iter__(self) -> Iterator[Action]:
-        """Iterate all actions.
-        
-        Yields:
-            Action objects in order.
-        """
         for action in self._actions:
             yield action
     
     def navigate_to(self, action_name: str):
-        """Navigate to specific action.
-        
-        Args:
-            action_name: Name of action to navigate to
-            
-        Raises:
-            ValueError: If action not found
-        """
         action = self.find_by_name(action_name)
         if action is None:
             raise ValueError(f"Action '{action_name}' not found")
@@ -228,11 +169,6 @@ class Actions:
                 return
     
     def close_current(self):
-        """Close current action (mark as complete and move to next).
-        
-        Note:
-            This saves the completed action and transitions to next.
-        """
         if self._current_index is not None:
             current_action_obj = self.current
             if current_action_obj:
@@ -245,19 +181,6 @@ class Actions:
                 self.save_state()
     
     def execute_current(self, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Execute current action.
-        
-        Domain Model: Execute current: Action
-        
-        Args:
-            parameters: Optional parameters for action execution
-            
-        Returns:
-            Dict with action execution results (with next action reminder injected if final action)
-            
-        Raises:
-            ValueError: If no current action
-        """
         if self.current is None:
             raise ValueError("No current action to execute")
         
@@ -270,15 +193,29 @@ class Actions:
         return result
     
     def _inject_next_action_reminder(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """Inject next action reminder into instructions if current action is final.
-        
-        Domain Model: Inject next action reminder: Action
-        """
-        # Check if current action is final
+        # Check if current action is final (last action in the behavior)
         if not self._is_final_action():
             return result
         
-        # Get next action reminder
+        # When the final action executes, always inject behavior reminder (not action reminder)
+        # because there's no next action in this behavior
+        reminder = self._get_next_behavior_reminder()
+        if reminder:
+            # Inject behavior reminder into instructions if they exist
+            if 'instructions' in result:
+                instructions = result['instructions']
+                if isinstance(instructions, dict) and 'base_instructions' in instructions:
+                    base_instructions = instructions.get('base_instructions', [])
+                    if isinstance(base_instructions, list):
+                        base_instructions = list(base_instructions)  # Make mutable copy
+                        base_instructions.append("")
+                        base_instructions.append("**NEXT BEHAVIOR REMINDER:**")
+                        base_instructions.append(reminder)
+                        instructions['base_instructions'] = base_instructions
+                        result['instructions'] = instructions
+            return result
+        
+        # If no next behavior, check for next action (shouldn't happen if action is final, but handle gracefully)
         reminder = self._get_next_action_reminder()
         if not reminder:
             return result
@@ -298,8 +235,45 @@ class Actions:
         
         return result
     
+    def _is_final_behavior(self) -> bool:
+        """Check if current behavior is the final behavior in the bot."""
+        try:
+            if not self.behavior or not self.behavior.bot:
+                return False
+            # Get behavior names from bot config
+            behavior_names = self.behavior.bot.bot_config.behaviors_list
+            if behavior_names and self.behavior.name == behavior_names[-1]:
+                return True
+        except Exception:
+            pass
+        return False
+    
+    def _get_next_behavior_reminder(self) -> str:
+        """Get reminder for next behavior."""
+        try:
+            if not self.behavior or not self.behavior.bot:
+                return ""
+            # Get behavior names from bot config
+            behavior_names = self.behavior.bot.bot_config.behaviors_list
+            if not behavior_names:
+                return ""
+            # Find current behavior index
+            try:
+                current_index = behavior_names.index(self.behavior.name)
+                if current_index + 1 < len(behavior_names):
+                    next_behavior_name = behavior_names[current_index + 1]
+                    return (
+                        f"After completing this behavior, the next behavior in sequence is `{next_behavior_name}`. "
+                        f"When the user is ready to continue, remind them: 'The next behavior in sequence is `{next_behavior_name}`. "
+                        f"Would you like to continue with `{next_behavior_name}` or work on a different behavior?'"
+                    )
+            except (ValueError, IndexError):
+                pass
+        except Exception:
+            pass
+        return ""
+    
     def _is_final_action(self) -> bool:
-        """Check if current action is the final action."""
         try:
             if self.current is None:
                 return False
@@ -311,7 +285,6 @@ class Actions:
         return False
     
     def _get_next_action_reminder(self) -> str:
-        """Get reminder about next action if current is final."""
         try:
             next_action = self.next()
             if next_action:
@@ -324,10 +297,6 @@ class Actions:
         return ""
     
     def save_state(self):
-        """Save current action state to behavior_action_state.json.
-        
-        Only updates current_action field. Behaviors collection manages current_behavior.
-        """
         if self.current is None or self.behavior.bot_paths is None:
             return
         
@@ -352,10 +321,6 @@ class Actions:
         state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
     
     def load_state(self):
-        """Load current action state from behavior_action_state.json.
-        
-        If file doesn't exist or action not found, sets first action as current.
-        """
         if self.bot_paths is None or len(self._actions) == 0:
             if len(self._actions) > 0:
                 self._current_index = 0
@@ -395,7 +360,31 @@ class Actions:
                             self._current_index = i
                             return
             
-            # If saved action not found, default to first
+            # If current_action is missing, fall back to completed_actions
+            # Find the last completed action and set current to the next action after it
+            completed_actions = state_data.get('completed_actions', [])
+            if completed_actions:
+                # Find the last completed action for this behavior
+                last_completed_action_name = None
+                expected_behavior_prefix = f'{self.bot_name}.{self.behavior.name}.'
+                for completed_action in reversed(completed_actions):
+                    action_state = completed_action.get('action_state', '')
+                    if action_state.startswith(expected_behavior_prefix):
+                        last_completed_action_name = action_state.split('.')[-1]
+                        break
+                
+                # If we found a completed action, set current to the next action after it
+                if last_completed_action_name:
+                    for i, action in enumerate(self._actions):
+                        if action.action_name == last_completed_action_name:
+                            # Set to next action if available, otherwise stay at last completed
+                            if i + 1 < len(self._actions):
+                                self._current_index = i + 1
+                            else:
+                                self._current_index = i
+                            return
+            
+            # If saved action not found and no completed actions, default to first
             if len(self._actions) > 0:
                 self._current_index = 0
         except Exception:
@@ -404,7 +393,6 @@ class Actions:
                 self._current_index = 0
     
     def _save_completed_action(self, action_name: str):
-        """Save completed action to behavior_action_state.json."""
         if self.behavior.bot_paths is None:
             return
         
@@ -433,7 +421,6 @@ class Actions:
         state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
     
     def is_action_completed(self, action_name: str) -> bool:
-        """Check if an action has been marked as completed."""
         if self.behavior.bot_paths is None:
             return False
         

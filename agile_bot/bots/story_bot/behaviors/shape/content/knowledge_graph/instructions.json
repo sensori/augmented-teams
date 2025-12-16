@@ -12,7 +12,7 @@
     "- Template: story-graph-outline.json",
     "",
     "**CRITICAL - TEMPLATE STRUCTURE COMPLIANCE:**",
-    "1. The build_knowledge action has injected 'knowledge_graph_template' into your instructions",
+    "1. The build action has injected 'knowledge_graph_template' into your instructions",
     "2. This template shows the EXACT JSON structure your output MUST match",
     "3. **DO NOT invent your own schema** - examine the template and replicate its structure",
     "4. The template includes:",

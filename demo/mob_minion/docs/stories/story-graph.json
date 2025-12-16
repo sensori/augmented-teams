@@ -1,0 +1,189 @@
+{
+  "name": "Mob Minion Module",
+  "description": "Foundry VTT module for managing minion mobs in Mutants & Masterminds 3e",
+  "epics": [
+    {
+      "name": "Manage Mobs",
+      "description": "Creating and configuring mob groups",
+      "features": [
+        {
+          "name": "Create Mob",
+          "stories": [
+            {
+              "name": "GM Creates New Mob",
+              "description": "GM creates a new empty mob container to group minions"
+            }
+          ]
+        },
+        {
+          "name": "Add Minions to Mob",
+          "stories": [
+            {
+              "name": "GM Adds Selected Minions to Mob",
+              "description": "GM selects minion tokens and adds them to an existing mob"
+            }
+          ]
+        },
+        {
+          "name": "Remove Minions from Mob",
+          "stories": [
+            {
+              "name": "GM Removes Minion from Mob",
+              "description": "GM removes a specific minion from a mob"
+            }
+          ]
+        },
+        {
+          "name": "View Mob",
+          "stories": [
+            {
+              "name": "GM Views Mob Composition",
+              "description": "GM views the minions in a mob and their status"
+            }
+          ]
+        },
+        {
+          "name": "Delete Mob",
+          "stories": [
+            {
+              "name": "GM Disbands Mob",
+              "description": "GM deletes a mob, releasing minions back to individual control"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Configure Strategy",
+      "description": "Setting up how mobs behave in combat",
+      "features": [
+        {
+          "name": "Select Strategy",
+          "stories": [
+            {
+              "name": "GM Assigns Strategy to Mob",
+              "description": "GM selects a targeting strategy for the mob (attack strongest, weakest, defend leader, attack most damaged)"
+            }
+          ]
+        },
+        {
+          "name": "View Strategies",
+          "stories": [
+            {
+              "name": "GM Views Available Strategies",
+              "description": "GM sees list of available strategies with descriptions"
+            }
+          ]
+        },
+        {
+          "name": "Change Strategy",
+          "stories": [
+            {
+              "name": "GM Changes Mob Strategy",
+              "description": "GM changes the mob's strategy during combat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Execute Mob Actions",
+      "description": "Mobs acting together in combat",
+      "features": [
+        {
+          "name": "Select Target",
+          "stories": [
+            {
+              "name": "System Selects Target Based on Strategy",
+              "description": "System evaluates potential targets and selects one based on the mob's strategy"
+            }
+          ]
+        },
+        {
+          "name": "Coordinate Attack",
+          "stories": [
+            {
+              "name": "Mob Executes Coordinated Attack",
+              "description": "All minions in mob attack the selected target together"
+            }
+          ]
+        },
+        {
+          "name": "Handle Movement",
+          "stories": [
+            {
+              "name": "Minions Move to Target",
+              "description": "Melee minions move toward target, ranged minions position appropriately"
+            }
+          ]
+        },
+        {
+          "name": "Resolve Actions",
+          "stories": [
+            {
+              "name": "System Resolves Mob Attack Results",
+              "description": "System calculates and applies attack results for the mob"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mob Templates",
+      "description": "Reusable mob configurations for quick spawning",
+      "features": [
+        {
+          "name": "Create Template",
+          "stories": [
+            {
+              "name": "GM Saves Mob as Template",
+              "description": "GM saves current mob configuration as a reusable template"
+            }
+          ]
+        },
+        {
+          "name": "Spawn from Template",
+          "stories": [
+            {
+              "name": "GM Creates Mob from Template",
+              "description": "GM quickly creates a new mob instance from a saved template"
+            }
+          ]
+        },
+        {
+          "name": "Manage Templates",
+          "stories": [
+            {
+              "name": "GM Views and Manages Templates",
+              "description": "GM views, edits, or deletes saved mob templates"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "domain_model": {
+    "concepts": {
+      "Minion": "Individual token/actor in Foundry VTT that can be grouped into mobs",
+      "Mob": "Collection of minions that act together as a coordinated unit",
+      "Strategy": "Targeting/action algorithm that determines how the mob selects and attacks targets",
+      "MobTemplate": "Reusable blueprint defining minion types, leader, and strategy for quick mob creation",
+      "Target": "The entity selected by the mob's strategy for attack"
+    },
+    "strategies": [
+      "Attack Strongest - Target with highest power level",
+      "Attack Weakest - Target with lowest power level", 
+      "Defend Leader - Protect designated leader, attack threats",
+      "Attack Most Damaged - Target with most existing damage"
+    ]
+  },
+  "integrations": {
+    "platform": "Foundry Virtual Tabletop (Foundry VTT)",
+    "game_system": "Mutants & Masterminds 3rd Edition (M&M 3e)",
+    "references": [
+      "Hero SRD for M&M 3e rules",
+      "Foundry VTT M&M 3e system on GitHub"
+    ]
+  }
+}
+

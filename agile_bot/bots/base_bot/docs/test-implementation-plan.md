@@ -92,3 +92,10 @@ These files contain domain class tests that should be merged into the main test 
 4. Delete obsolete test files
 5. Run tests to verify everything works
 
+
+
+
+
+
+
+

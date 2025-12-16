@@ -1,0 +1,40 @@
+{
+  "shape": {
+    "key_questions": {
+      "users": "Game Masters (GMs) running combat encounters with multiple minions in Foundry VTT",
+      "goals": "Streamline minion management during combat - control groups of minions (mobs) with a single interaction instead of clicking each individually",
+      "first_action": "Group existing minions into a mob so they can act together",
+      "problems_to_eliminate": "Tedious, repetitive clicking on every minion token to perform the same action across multiple minions",
+      "value_drivers": "Faster combat encounters, reduced GM cognitive load, automated tactical decisions via strategies",
+      "user_journey": [
+        "1. Create a mob - Define a new mob container",
+        "2. Add minions to the mob - Select and group minions into the mob",
+        "3. Determine strategy - Choose the appropriate targeting/action strategy",
+        "4. Action play - Execute coordinated mob actions during combat"
+      ],
+      "integrations": "Foundry Virtual Tabletop (Foundry VTT) - this is a module/extension for their system",
+      "game_system": "Mutants & Masterminds 3rd Edition (M&M 3e) - Rules at Hero SRD, Foundry system on GitHub",
+      "business_domain": "Tactical combat automation for tabletop RPGs - specifically minion/mob management",
+      "core_concepts": {
+        "minion": "Individual token/actor in Foundry VTT",
+        "mob": "Collection of minions that act together as a unit",
+        "strategy": "Targeting/action algorithm that determines mob behavior",
+        "mob_template": "Reusable blueprint defining minion types, leader, and strategy - can spawn multiple mob instances",
+        "target": "Selection mechanism for choosing who the mob attacks"
+      },
+      "strategies": [
+        "Attack strongest target",
+        "Attack weakest target",
+        "Defend the leader",
+        "Attack most damaged target"
+      ],
+      "out_of_scope": ["Fleeing behavior"]
+    },
+    "evidence": {
+      "user_input": "demo/mob_minion/input.txt",
+      "system_reference": "Hero SRD for M&M 3e rules",
+      "integration_reference": "Foundry VTT M&M 3e system on GitHub"
+    }
+  }
+}
+

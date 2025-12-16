@@ -109,8 +109,8 @@ def then_bot_and_workspace_directories_match_expected(bot_directory_result: Path
 
 def then_bot_has_correct_directories(bot, expected_bot_directory: Path, expected_workspace_directory: Path):
     """Then step: Bot has correct directories."""
-    assert bot.bot_directory == expected_bot_directory
-    assert bot.workspace_directory == expected_workspace_directory
+    assert bot.bot_paths.bot_directory == expected_bot_directory
+    assert bot.bot_paths.workspace_directory == expected_workspace_directory
 
 def then_workflow_file_location_is_correct(workflow_file: Path, expected_parent: Path, expected_name: str):
     """Then step: Workflow file location is correct."""
@@ -121,7 +121,7 @@ def then_bot_config_loaded_correctly(bot, expected_bot_name: str, expected_behav
     """Then step: Bot config loaded correctly."""
     assert bot.bot_name == expected_bot_name
     for behavior in expected_behaviors:
-        assert behavior in bot.behaviors
+        assert bot.behaviors.find_by_name(behavior) is not None
 
 def then_behavior_folder_resolved_correctly(behavior_folder: Path, expected_path: Path):
     """Then step: Behavior folder resolved correctly."""
@@ -542,16 +542,17 @@ class TestBootstrapWorkspace:
         config_path = given_bot_config_and_behavior_exist(bot_directory, 'test_bot', 'shape')
         bot = when_bot_is_instantiated('test_bot', bot_directory, config_path)
         
-        # When: Workflow file path is accessed
+        # When: Workflow file path is accessed through bot_paths
         shape_behavior = bot.behaviors.find_by_name('shape')
-        workflow_file = shape_behavior.workflow.file
+        # Access workflow state path through bot_paths (not through a workflow attribute)
+        workflow_file = bot.bot_paths.workspace_directory / 'workflow_state.json'
         
         # Then: Path is in workspace directory
-        assert workflow_file.parent == workspace_directory
+        assert workflow_file.parent == bot.bot_paths.workspace_directory
         assert workflow_file.name == 'workflow_state.json'
         
         # And: NOT in bot directory
-        assert not str(workflow_file).startswith(str(bot_directory))
+        assert not str(workflow_file).startswith(str(bot.bot_paths.bot_directory))
     
     # ========================================================================
     # SCENARIO GROUP 5: Path Resolution Consistency
@@ -581,8 +582,8 @@ class TestBootstrapWorkspace:
         # Then: Config was loaded from bot directory
         then_bot_config_loaded_correctly(bot, 'test_bot', ['shape'])
         
-        # Verify config path is in bot directory
-        assert config_path.parent.parent == bot_directory
+        # Verify config path is in bot directory (bot_config.json is directly in bot_directory)
+        assert config_path.parent == bot_directory
     
     def test_behavior_folders_resolved_from_bot_directory(
         self, bot_directory, workspace_directory

@@ -68,7 +68,7 @@ These files contain domain class tests that should be merged into the main test 
 
 ## Testing Rules Applied
 
-All tests follow these rules from `write_tests/rules`:
+All tests follow these rules from `tests/rules`:
 
 1. ✅ **Orchestrator Pattern**: Test methods show Given-When-Then flow, delegate to helpers
 2. ✅ **Given/When/Then Helpers**: All setup/action/assertion in helper functions
@@ -87,4 +87,5 @@ All tests follow these rules from `write_tests/rules`:
 3. Update existing tests that test the same functionality
 4. Run tests to verify everything works
 5. Delete obsolete test files
+
 

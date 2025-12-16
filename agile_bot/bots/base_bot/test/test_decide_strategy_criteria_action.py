@@ -10,7 +10,7 @@ Tests for all stories in the 'Decide Strategy Criteria Action' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.actions.decide_strategy.decide_strategy_action import DecideStrategyAction
+from agile_bot.bots.base_bot.src.actions.strategy.strategy_action import StrategyAction
 from agile_bot.bots.base_bot.src.bot.behavior import Behavior
 from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
 from agile_bot.bots.base_bot.test.test_helpers import (
@@ -78,7 +78,7 @@ def given_expected_strategy_decisions_and_assumptions():
     return decisions, assumptions
 
 def given_strategy_action_is_initialized(bot_directory: Path, bot_name: str, behavior_name: str):
-    """Given step: DecideStrategyAction is initialized."""
+    """Given step: StrategyAction is initialized."""
     # Create bot_paths
     bot_paths = BotPaths(bot_directory=bot_directory)
     
@@ -97,7 +97,7 @@ def given_strategy_action_is_initialized(bot_directory: Path, bot_name: str, beh
             "instructions": {},
             "actions_workflow": {
                 "actions": [
-                    {'name': 'decide_strategy', 'order': 1}
+                    {'name': 'strategy', 'order': 1}
                 ]
             }
         }
@@ -112,9 +112,9 @@ def given_strategy_action_is_initialized(bot_directory: Path, bot_name: str, beh
     
     # Create StrategyAction with new signature
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig('decide_strategy', bot_paths)
+    base_action_config = BaseActionConfig('strategy', bot_paths)
     
-    return DecideStrategyAction(
+    return StrategyAction(
         base_action_config=base_action_config,
         behavior=behavior,
         activity_tracker=None
@@ -151,7 +151,7 @@ def given_strategy_json_exists_with_data(workspace_directory: Path, behavior: st
     strategy_file.write_text(json.dumps(existing_data, indent=2), encoding='utf-8')
     return strategy_file
 
-def when_action_injects_strategy_criteria_and_assumptions(action: DecideStrategyAction):
+def when_action_injects_strategy_criteria_and_assumptions(action: StrategyAction):
     """When step: Action injects decision criteria and assumptions."""
     # Call do_execute to get instructions with planning criteria injected
     result = action.do_execute({})
@@ -287,7 +287,7 @@ class TestTrackActivityForStrategyAction:
         # Given: Bot directory and workspace directory are set up
         # When: Strategy action starts
         # Then: Activity is tracked (verified by verify_action_tracks_start)
-        verify_action_tracks_start(bot_directory, workspace_directory, DecideStrategyAction, 'decide_strategy')
+        verify_action_tracks_start(bot_directory, workspace_directory, StrategyAction, 'strategy')
 
     def test_track_activity_when_strategy_action_completes(self, bot_directory, workspace_directory):
         # Given: Bot directory and workspace directory are set up
@@ -296,8 +296,8 @@ class TestTrackActivityForStrategyAction:
         verify_action_tracks_completion(
             bot_directory,
             workspace_directory, 
-            DecideStrategyAction, 
-            'decide_strategy',
+            StrategyAction, 
+            'strategy',
             outputs={'criteria_count': 3, 'assumptions_count': 2},
             duration=240
         )
@@ -314,13 +314,13 @@ class TestProceedToBuildKnowledge:
         # Given: Bot directory and workspace directory are set up
         # When: Strategy action completes
         # Then: Workflow transitions to build_knowledge (verified by verify_workflow_transition)
-        verify_workflow_transition(bot_directory, workspace_directory, 'decide_strategy', 'build_knowledge')
+        verify_workflow_transition(bot_directory, workspace_directory, 'strategy', 'build')
 
     def test_workflow_state_captures_strategy_completion(self, bot_directory, workspace_directory):
         # Given: Bot directory and workspace directory are set up
         # When: Strategy action completes
         # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
-        verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'decide_strategy', behavior='discovery')
+        verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'strategy', behavior='discovery')
 
 
 # ============================================================================
@@ -367,7 +367,7 @@ class TestStoreStrategyData:
     def test_save_strategy_data_when_parameters_provided(self, bot_directory, workspace_directory):
         """
         SCENARIO: Save strategy data when parameters are provided
-        GIVEN: decide_strategy action is initialized
+        GIVEN: strategy action is initialized
         AND: parameters contain decisions_made and assumptions_made
         WHEN: do_execute is called with these parameters
         THEN: strategy.json file is created in docs/stories/ folder
@@ -388,7 +388,7 @@ class TestStoreStrategyData:
         """
         SCENARIO: Preserve existing strategy data when saving
         GIVEN: strategy.json already exists with data for 'discovery' behavior
-        AND: decide_strategy action is initialized for 'shape' behavior
+        AND: strategy action is initialized for 'shape' behavior
         WHEN: do_execute is called with parameters
         THEN: strategy.json contains both 'discovery' and 'shape' sections
         AND: existing 'discovery' data is preserved
@@ -407,7 +407,7 @@ class TestStoreStrategyData:
     def test_skip_saving_when_no_strategy_parameters_provided(self, bot_directory, workspace_directory):
         """
         SCENARIO: Skip saving when no strategy parameters are provided
-        GIVEN: decide_strategy action is initialized
+        GIVEN: strategy action is initialized
         AND: parameters do not contain decisions_made or assumptions_made
         WHEN: do_execute is called with empty or unrelated parameters
         THEN: strategy.json file is not created

@@ -10,7 +10,7 @@
     "4_discovery": "Elaborate stories with user flows, domain rules, and integration points",
     "5_exploration": "Define acceptance criteria (Given/When/Then) for each story",
     "6_scenarios": "Write detailed plain-English scenarios (Given/When/Then) for each story",
-    "7_write_tests": "Generate executable test code from scenarios",
+    "7_tests": "Generate executable test code from scenarios",
     "8_code": "Review and validate code quality"
   },
   "instructions": [

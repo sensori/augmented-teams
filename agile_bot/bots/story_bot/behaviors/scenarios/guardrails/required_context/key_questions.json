@@ -18,9 +18,6 @@
     "What are the expected output values for each input?",
     "Are there formulas or calculations that need multiple data points to validate?",
     "Are there domain entities with named values that should be tested?",
-    "What are the boundary conditions (min, max, edge cases) for each data point?",
-    "Who is responsible for writing or validating these examples (e.g., BA, Dev, QC)?",
-    "Do scenarios need to be converted to Scenario Outlines with Examples tables?"
-
+    "What are the boundary conditions (min, max, edge cases) for each data point?"
   ]
 }

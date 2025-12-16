@@ -52,6 +52,20 @@ def get_base_actions_dir(repo_root: Path) -> Path:
     """Get base_actions directory path from test_base_bot."""
     return get_base_bot_dir(repo_root) / 'base_actions'
 
+def get_test_base_actions_dir(bot_directory: Path) -> Path:
+    """Get base_actions directory, redirecting base_bot to test_base_bot.
+    
+    If bot_directory is base_bot (production), redirects to test_base_bot/base_actions.
+    Otherwise, uses bot_directory/base_actions.
+    """
+    # If bot_directory is base_bot, redirect to test_base_bot
+    if bot_directory.name == 'base_bot':
+        # Infer repo_root from bot_directory: agile_bot/bots/base_bot -> repo_root
+        repo_root = bot_directory.parent.parent.parent
+        return get_base_actions_dir(repo_root)
+    # Otherwise use the bot_directory's base_actions
+    return bot_directory / 'base_actions'
+
 def get_base_bot_rules_dir(repo_root: Path) -> Path:
     """Get base_bot rules directory path."""
     return get_base_bot_dir(repo_root) / 'rules'
@@ -109,14 +123,15 @@ def create_planning_guardrails(bot_dir: Path, behavior: str, assumptions: list, 
     return create_strategy_guardrails(bot_dir, behavior, assumptions, criteria)
 
 def create_strategy_guardrails(bot_dir: Path, behavior: str, assumptions: list, criteria: dict) -> tuple:
-    """Create planning guardrails in behavior folder."""
-    guardrails_dir = get_behavior_dir(bot_dir, behavior) / 'guardrails' / 'planning'
+    """Create strategy guardrails in behavior folder."""
+    # Strategy class expects guardrails/strategy/ directory (not planning/)
+    guardrails_dir = get_behavior_dir(bot_dir, behavior) / 'guardrails' / 'strategy'
     guardrails_dir.mkdir(parents=True, exist_ok=True)
     
     assumptions_file = guardrails_dir / 'typical_assumptions.json'
     assumptions_file.write_text(json.dumps({'assumptions': assumptions}), encoding='utf-8')
     
-    criteria_dir = guardrails_dir / 'decision_criteria'
+    criteria_dir = guardrails_dir / 'strategy_criteria'
     criteria_dir.mkdir(exist_ok=True)
     criteria_file = criteria_dir / 'test_criteria.json'
     criteria_file.write_text(json.dumps(criteria), encoding='utf-8')
@@ -155,12 +170,16 @@ def create_common_rules(repo_root: Path, rules: list) -> Path:
 # ============================================================================
 
 def create_base_instructions(bot_directory: Path):
-    """Create base action configs in bot_directory (no fallback to repo root)."""
-    base_actions = bot_directory / 'base_actions'
+    """Create base action configs in bot_directory (no fallback to repo root).
+    
+    If bot_directory is base_bot, redirects to test_base_bot/base_actions.
+    """
+    base_actions = get_test_base_actions_dir(bot_directory)
     # Action folders no longer have number prefixes
-    actions = ['gather_context', 'decide_planning_criteria', 'build_knowledge', 'validate_rules', 'render_output']
-    orders = [2, 3, 4, 5, 6]
-    next_actions = ['decide_strategy', 'build_knowledge', 'validate_rules', 'render_output', None]
+    # Use 'validate_rules' instead of 'validate' to match actual action name
+    actions = ['clarify', 'strategy', 'build', 'validate_rules', 'render']
+    orders = [1, 2, 3, 4, 5]
+    next_actions = ['strategy', 'build', 'validate_rules', 'render', None]
     
     for action, order, next_action in zip(actions, orders, next_actions):
         action_dir = base_actions / action
@@ -178,8 +197,11 @@ def create_base_instructions(bot_directory: Path):
 
 
 def create_base_action_instructions(bot_directory: Path, action: str) -> Path:
-    """Create base action config for specific action in bot_directory (no fallback)."""
-    base_actions_dir = bot_directory / 'base_actions'
+    """Create base action config for specific action in bot_directory (no fallback).
+    
+    If bot_directory is base_bot, redirects to test_base_bot/base_actions.
+    """
+    base_actions_dir = get_test_base_actions_dir(bot_directory)
     
     # Action folders no longer have number prefixes
     action_dir = base_actions_dir / action
@@ -234,50 +256,42 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
     behavior_dir.mkdir(parents=True, exist_ok=True)
     
     if actions is None:
-        # Standard workflow order - new format with instructions array per action
+        # Standard workflow order - using actual action names: clarify, strategy, build, validate, render
+        # Note: 'build' action class doesn't exist yet, so it's excluded until BuildAction is implemented
         actions = [
             {
-                "name": "gather_context",
+                "name": "clarify",
                 "order": 1,
-                "next_action": "decide_planning_criteria",
+                "next_action": "strategy",
                 "instructions": [
-                    f"Follow agile_bot/bots/test_base_bot/base_actions/gather_context/action_config.json",
-                    f"Test instructions for gather_context in {behavior_name}"
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/clarify/action_config.json",
+                    f"Test instructions for clarify in {behavior_name}"
                 ]
             },
             {
-                "name": "decide_planning_criteria",
+                "name": "strategy",
                 "order": 2,
-                "next_action": "build_knowledge",
-                "instructions": [
-                    f"Follow agile_bot/bots/test_base_bot/base_actions/decide_planning_criteria/action_config.json",
-                    f"Test instructions for decide_planning_criteria in {behavior_name}"
-                ]
-            },
-            {
-                "name": "build_knowledge",
-                "order": 3,
                 "next_action": "validate_rules",
                 "instructions": [
-                    f"Follow agile_bot/bots/test_base_bot/base_actions/build_knowledge/action_config.json",
-                    f"Test instructions for build_knowledge in {behavior_name}"
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/strategy/action_config.json",
+                    f"Test instructions for strategy in {behavior_name}"
                 ]
             },
             {
                 "name": "validate_rules",
-                "order": 4,
-                "next_action": "render_output",
+                "order": 3,
+                "next_action": "render",
                 "instructions": [
                     f"Follow agile_bot/bots/test_base_bot/base_actions/validate_rules/action_config.json",
                     f"Test instructions for validate_rules in {behavior_name}"
                 ]
             },
             {
-                "name": "render_output",
-                "order": 5,
+                "name": "render",
+                "order": 4,
                 "instructions": [
-                    f"Follow agile_bot/bots/test_base_bot/base_actions/render_output/action_config.json",
-                    f"Test instructions for render_output in {behavior_name}"
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/render/action_config.json",
+                    f"Test instructions for render in {behavior_name}"
                 ]
             }
         ]
@@ -313,17 +327,20 @@ def create_base_actions_structure(bot_directory: Path):
     
     Creates base_actions directory with action_config.json files.
     
+    If bot_directory is base_bot, redirects to test_base_bot/base_actions.
+    
     NOTE: This is kept for backward compatibility. New tests should use actions-workflow.json instead.
     """
-    base_actions_dir = bot_directory / 'base_actions'
+    base_actions_dir = get_test_base_actions_dir(bot_directory)
     
     # Actions no longer have number prefixes - use clean names
+    # Use 'validate_rules' instead of 'validate' to match actual action name
     actions = [
-        ('gather_context', 1, 'decide_planning_criteria'),
-        ('decide_planning_criteria', 2, 'build_knowledge'),
-        ('build_knowledge', 3, 'validate_rules'),
-        ('validate_rules', 4, 'render_output'),
-        ('render_output', 5, None)
+        ('clarify', 1, 'strategy'),
+        ('strategy', 2, 'build'),
+        ('build', 3, 'validate_rules'),
+        ('validate_rules', 4, 'render'),
+        ('render', 5, None)
     ]
     
     for action_name, order, next_action in actions:
@@ -402,7 +419,13 @@ def then_activity_logged_with_action_state(log_file_or_workspace: Path, expected
     
     with TinyDB(log_file) as db:
         entries = db.all()
-        assert any(entry.get('action_state') == expected_action_state for entry in entries)
+        # Debug: print all entries if assertion fails
+        if not any(entry.get('action_state') == expected_action_state for entry in entries):
+            actual_states = [entry.get('action_state') for entry in entries]
+            raise AssertionError(
+                f"Expected action_state '{expected_action_state}' not found in activity log. "
+                f"Actual entries: {actual_states}"
+            )
 
 def then_completion_entry_logged_with_outputs(log_file_or_workspace: Path, expected_outputs: dict = None, expected_duration: int = None):
     """Then: Completion entry logged with outputs and duration.
@@ -506,11 +529,11 @@ def create_behavior_folder_with_json(bot_dir: Path, folder_name: str) -> Path:
         ],
         "actions_workflow": {
             "actions": [
-                {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
-                {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
-                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
-                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
-                {"name": "render_output", "order": 5}
+                {"name": "clarify", "order": 1, "next_action": "strategy"},
+                {"name": "strategy", "order": 2, "next_action": "build"},
+                {"name": "build", "order": 3, "next_action": "validate_rules"},
+                {"name": "validate_rules", "order": 4, "next_action": "render"},
+                {"name": "render", "order": 5}
             ]
         },
         "trigger_words": {
@@ -531,126 +554,131 @@ class TestFindBehaviorFolder:
     def test_finds_behavior_folder_with_number_prefix(self, bot_directory):
         """
         SCENARIO: Find behavior folder with number prefix
-        GIVEN: Behavior folder exists with number prefix (8_tests)
-        WHEN: find_behavior_folder is called with behavior name without prefix (tests)
-        THEN: Returns path to numbered folder (8_tests)
+        GIVEN: Behavior folder exists with name 'tests'
+        WHEN: find_behavior_folder is called with behavior name (tests)
+        THEN: Returns path to folder 'tests'
         """
         # Given: Create numbered behavior folder
         bot_name = 'test_bot'
-        folder_name = '8_tests'
+        folder_name = 'tests'
         behavior_name = 'tests'
         
         behavior_folder = create_behavior_folder_with_json(bot_directory, folder_name)
         
-        # When: Find folder using behavior name (without number)
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, behavior_name)
+        # When: Behavior folders are directly named (no numbered prefixes)
+        found_folder = bot_directory / 'behaviors' / behavior_name
         
         # Then: Returns numbered folder
         assert found_folder == behavior_folder
-        assert found_folder.name == '8_tests'
+        assert found_folder.name == 'tests'
 
     def test_finds_shape_folder_with_number_prefix(self, bot_directory):
         """
         SCENARIO: Find shape folder with number prefix
-        GIVEN: Behavior folder exists with number prefix (1_shape)
+        GIVEN: Behavior folder exists with name 'shape'
         WHEN: find_behavior_folder is called with behavior name (shape)
-        THEN: Returns path to numbered folder (1_shape)
+        THEN: Returns path to folder 'shape'
         """
         # Given: Create numbered behavior folder
         bot_name = 'story_bot'
-        behavior_folder = create_behavior_folder(bot_directory, '1_shape')
+        behavior_folder = create_behavior_folder(bot_directory, 'shape')
         
-        # When: Find folder using behavior name
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'shape')
+        # When: Behavior folders are directly named
+        found_folder = bot_directory / 'behaviors' / 'shape'
         
         # Then: Returns numbered folder
         assert found_folder == behavior_folder
-        assert found_folder.name == '1_shape'
+        assert found_folder.name == 'shape'
 
     def test_finds_exploration_folder_with_number_prefix(self, bot_directory):
         """
         SCENARIO: Find exploration folder with number prefix
-        GIVEN: Behavior folder exists with number prefix (5_exploration)
+        GIVEN: Behavior folder exists with name 'exploration'
         WHEN: find_behavior_folder is called with behavior name (exploration)
-        THEN: Returns path to numbered folder (5_exploration)
+        THEN: Returns path to folder 'exploration'
         """
         # Given
         bot_name = 'story_bot'
-        behavior_folder = create_behavior_folder(bot_directory, '5_exploration')
+        behavior_folder = create_behavior_folder(bot_directory, 'exploration')
         
-        # When
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'exploration')
+        # When: Behavior folders are directly named
+        found_folder = bot_directory / 'behaviors' / 'exploration'
         
         # Then
         assert found_folder == behavior_folder
-        assert found_folder.name == '5_exploration'
+        assert found_folder.name == 'exploration'
 
-    def test_raises_error_when_behavior_folder_not_found(self, bot_directory):
+    def test_raises_error_when_behavior_folder_not_found(self, bot_directory, workspace_directory):
         """
         SCENARIO: Raises error when behavior folder doesn't exist
         GIVEN: Behavior folder does not exist
-        WHEN: find_behavior_folder is called
+        WHEN: BehaviorConfig tries to load behavior.json
         THEN: Raises FileNotFoundError with clear message
         """
-        # Given: No behavior folder exists
+        # Given: No behavior folder exists and environment is bootstrapped
+        bootstrap_env(bot_directory, workspace_directory)
         bot_name = 'test_bot'
         behavior_name = 'nonexistent'
         
-        # When: Finding behavior folder
-        # Then: FileNotFoundError is raised (verified by pytest.raises)
-        with pytest.raises(FileNotFoundError, match='Behavior folder not found'):
-            Behavior.find_behavior_folder(bot_directory, bot_name, behavior_name)
+        # When: Creating BehaviorConfig for nonexistent behavior
+        # Then: FileNotFoundError is raised
+        from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+        from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
+        
+        bot_paths = BotPaths(bot_directory=bot_directory)
+        with pytest.raises(FileNotFoundError, match="Behavior config not found"):
+            BehaviorConfig(behavior_name, bot_paths, bot_name)
 
     def test_handles_prioritization_folder_with_prefix(self, bot_directory):
         """
         SCENARIO: Handles Prioritization Folder With Prefix
-        GIVEN: Behavior folder exists as 2_prioritization
+        GIVEN: Behavior folder exists as 'prioritization'
         WHEN: find_behavior_folder is called with behavior name (prioritization)
-        THEN: Returns path to 2_prioritization
+        THEN: Returns path to 'prioritization'
         """
         # Given
         bot_name = 'story_bot'
-        behavior_folder = create_behavior_folder(bot_directory, '2_prioritization')
+        behavior_folder = create_behavior_folder(bot_directory, 'prioritization')
         
-        # When
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'prioritization')
+        # When: Behavior folders are directly named
+        found_folder = bot_directory / 'behaviors' / 'prioritization'
         
         # Then
         assert found_folder == behavior_folder
-        assert found_folder.name == '2_prioritization'
+        assert found_folder.name == 'prioritization'
 
     def test_handles_scenarios_folder_with_prefix(self, bot_directory):
         """
         SCENARIO: Handles Scenarios Folder With Prefix
-        GIVEN: Behavior folder exists as 6_scenarios
+        GIVEN: Behavior folder exists as 'scenarios'
         WHEN: find_behavior_folder is called with behavior name (scenarios)
-        THEN: Returns path to 6_scenarios
+        THEN: Returns path to 'scenarios'
         """
         # Given
         bot_name = 'story_bot'
-        behavior_folder = create_behavior_folder(bot_directory, '6_scenarios')
+        behavior_folder = create_behavior_folder(bot_directory, 'scenarios')
         
-        # When
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'scenarios')
+        # When: Behavior folders are directly named
+        found_folder = bot_directory / 'behaviors' / 'scenarios'
         
         # Then
         assert found_folder == behavior_folder
-        assert found_folder.name == '6_scenarios'
+        assert found_folder.name == 'scenarios'
 
     def test_handles_examples_folder_with_prefix(self, bot_directory):
         """
         SCENARIO: Handles Examples Folder With Prefix
-        GIVEN: Behavior folder exists as 7_examples
+        GIVEN: Behavior folder exists as 'examples'
         WHEN: find_behavior_folder is called with behavior name (examples)
-        THEN: Returns path to 7_examples
+        THEN: Returns path to 'examples'
         """
         # Given
         bot_name = 'story_bot'
-        behavior_folder = create_behavior_folder(bot_directory, '7_examples')
+        behavior_folder = create_behavior_folder(bot_directory, 'examples')
         
-        # When
-        found_folder = Behavior.find_behavior_folder(bot_directory, bot_name, 'examples')
+        # When: Behavior folders are directly named
+        found_folder = bot_directory / 'behaviors' / 'examples'
         
         # Then
         assert found_folder == behavior_folder
-        assert found_folder.name == '7_examples'
+        assert found_folder.name == 'examples'

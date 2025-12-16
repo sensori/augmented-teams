@@ -7,8 +7,14 @@ For helpers used by only ONE test file, define them inline in that file.
 import json
 import pytest
 import os
+import sys
 from pathlib import Path
 from typing import Tuple
+
+# Add project root to Python path for imports
+_project_root = Path(__file__).parent.parent.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
 
 
 # ============================================================================
@@ -60,6 +66,18 @@ class Workflow:
         """Navigate to action."""
         if action in self.states:
             self._current_state = action
+            if out_of_order:
+                # Remove completed actions after the target action
+                try:
+                    target_index = self.states.index(action)
+                    # Remove completed actions that come after target
+                    self._completed_actions = [
+                        ca for ca in self._completed_actions
+                        if self._get_action_name_from_state(ca.get('action_state', '')) not in self.states[target_index + 1:]
+                    ]
+                    self.save_state()
+                except ValueError:
+                    pass
     
     def proceed(self):
         """Proceed to next state."""
@@ -68,6 +86,7 @@ class Workflow:
                 if transition.get('source') == self._current_state:
                     self._current_state = transition.get('dest')
                     return
+        # If no transition found, stay at current state (final action)
     
     def transition_to_next(self):
         """Transition to next state and save."""
@@ -113,11 +132,57 @@ class Workflow:
         if state_file.exists():
             state_data = json.loads(state_file.read_text(encoding='utf-8'))
             current_action = state_data.get('current_action', '')
+            self._completed_actions = state_data.get('completed_actions', [])
+            
             if current_action:
                 action_name = current_action.split('.')[-1]
                 if action_name in self.states:
                     self._current_state = action_name
-            self._completed_actions = state_data.get('completed_actions', [])
+            else:
+                # Fall back to next action after last completed action
+                if self._completed_actions:
+                    # Find the last completed action for this behavior
+                    last_completed = None
+                    expected_behavior_prefix = f'{self.bot_name}.{self.behavior}.'
+                    for completed in reversed(self._completed_actions):  # Iterate in reverse to get last one first
+                        action_state = completed.get('action_state', '')
+                        if action_state and action_state.startswith(expected_behavior_prefix):
+                            action_name = action_state.split('.')[-1]
+                            if action_name in self.states:
+                                last_completed = action_name
+                                break  # Found the last completed action for this behavior
+                    
+                    # Find next action after last completed
+                    if last_completed and last_completed in self.states:
+                        try:
+                            current_index = self.states.index(last_completed)
+                            if current_index + 1 < len(self.states):
+                                self._current_state = self.states[current_index + 1]
+                            else:
+                                # Already at last action
+                                self._current_state = last_completed
+                        except ValueError:
+                            # Last completed not in states, start at first
+                            self._current_state = self.states[0] if self.states else None
+                    else:
+                        # No completed actions for this behavior, start at first
+                        self._current_state = self.states[0] if self.states else None
+                else:
+                    # No completed actions, start at first
+                    self._current_state = self.states[0] if self.states else None
+    
+    def _get_action_name_from_state(self, action_state: str) -> str:
+        """Get action name from action_state string."""
+        if action_state:
+            parts = action_state.split('.')
+            if len(parts) >= 3:
+                return parts[-1]
+        return ''
+    
+    def is_action_completed(self, action_name: str) -> bool:
+        """Check if action is completed."""
+        action_state = f'{self.bot_name}.{self.behavior}.{action_name}'
+        return any(a.get('action_state') == action_state for a in self._completed_actions)
 
 
 # ============================================================================
@@ -184,14 +249,14 @@ def bot_name():
 
 @pytest.fixture
 def standard_workflow_config():
-    """Fixture: Standard workflow states and transitions."""
-    states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'validate_rules', 'render_output']
+    """Fixture: Standard workflow states and transitions (DEPRECATED - use Bot/Behavior/Actions)."""
+    # Workflow class removed - state managed by Behaviors and Actions collections
+    states = ['clarify', 'strategy', 'build', 'validate', 'render']
     transitions = [
-        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
-        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
+        {'trigger': 'proceed', 'source': 'clarify', 'dest': 'strategy'},
+        {'trigger': 'proceed', 'source': 'strategy', 'dest': 'build'},
+        {'trigger': 'proceed', 'source': 'build', 'dest': 'validate'},
+        {'trigger': 'proceed', 'source': 'validate', 'dest': 'render'},
     ]
     return states, transitions
 
@@ -222,18 +287,11 @@ def create_bot_config_file(
 ) -> Path:
     """Factory: Create bot config file in bot directory.
     
-    
+    BotConfig expects bot_config.json directly in bot_directory, not in config/ subdirectory.
     """
-    # Handle workspace_root pattern: workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-    if workspace_root and 'agile_bot' not in str(bot_dir):
-        # Construct full path from workspace_root
-        config_dir = workspace_root / 'agile_bot' / 'bots' / bot_name / 'config'
-    else:
-        # Use bot_dir directly: bot_dir / 'config'
-        config_dir = bot_dir / 'config'
-    
-    config_dir.mkdir(parents=True, exist_ok=True)
-    config_file = config_dir / 'bot_config.json'
+    # BotConfig expects bot_config.json directly in bot_directory
+    bot_dir.mkdir(parents=True, exist_ok=True)
+    config_file = bot_dir / 'bot_config.json'
     config_file.write_text(json.dumps({'name': bot_name, 'behaviors': behaviors}), encoding='utf-8')
     return config_file
 
@@ -275,15 +333,19 @@ def create_workflow_state_file(
     return workflow_file
 
 def create_base_actions_structure(bot_directory: Path) -> Path:
-    """Factory: Create base_actions directory structure in bot_directory (no fallback)."""
-    base_actions_dir = bot_directory / 'base_actions'
+    """Factory: Create base_actions directory structure in bot_directory (no fallback).
+    
+    If bot_directory is base_bot, redirects to test_base_bot/base_actions.
+    """
+    from agile_bot.bots.base_bot.test.test_helpers import get_test_base_actions_dir
+    base_actions_dir = get_test_base_actions_dir(bot_directory)
     
     workflow_actions = [
-        ('gather_context', 'gather_context', 1, 'decide_planning_criteria'),
-        ('decide_planning_criteria', 'decide_planning_criteria', 2, 'build_knowledge'),
-        ('build_knowledge', 'build_knowledge', 3, 'validate_rules'),
-        ('validate_rules', 'validate_rules', 4, 'render_output'),
-        ('render_output', 'render_output', 5, None)
+        ('clarify', 'clarify', 1, 'strategy'),
+        ('strategy', 'strategy', 2, 'build'),
+        ('build', 'build', 3, 'validate'),
+        ('validate', 'validate', 4, 'render'),
+        ('render', 'render', 5, None)
     ]
     
     for folder_name, action_name, order, next_action in workflow_actions:
@@ -299,7 +361,14 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
             action_config['next_action'] = next_action
             
         # Instructions are now in action_config.json
-        action_config['instructions'] = [f'{action_name} base instructions']
+        # For build action, include knowledge graph instructions
+        if action_name == 'build':
+            action_config['instructions'] = [
+                f'Build knowledge graph for {action_name}',
+                f'{action_name} base instructions'
+            ]
+        else:
+            action_config['instructions'] = [f'{action_name} base instructions']
         (action_dir / 'action_config.json').write_text(json.dumps(action_config), encoding='utf-8')
     
     return base_actions_dir
@@ -343,18 +412,43 @@ def create_test_workflow(
     # Bootstrap environment
     bootstrap_env(bot_dir, workspace_dir)
     
+    # Create bot config
+    create_bot_config_file(bot_dir, bot_name, [behavior])
+    
+    # Create behavior.json with actions_workflow.json containing standard actions
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    create_actions_workflow_json(
+        bot_directory=bot_dir,
+        behavior_name=behavior,
+        actions=[
+            {'name': 'clarify', 'order': 1, 'next_action': 'strategy'},
+            {'name': 'strategy', 'order': 2, 'next_action': 'build'},
+            {'name': 'build', 'order': 3, 'next_action': 'validate'},
+            {'name': 'validate', 'order': 4, 'next_action': 'render'},
+            {'name': 'render', 'order': 5}
+        ]
+    )
+    
+    # Create base action configs
+    from agile_bot.bots.base_bot.test.test_perform_behavior_action import given_standard_workflow_actions_config
+    given_standard_workflow_actions_config(bot_dir)
+    
+    # Create minimal guardrails files (required for Guardrails initialization)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_dir, behavior, bot_name)
+    
     # Create workflow state file
     workflow_file = create_workflow_state_file(
         workspace_dir, bot_name, behavior, current_action, completed_actions
     )
     
-    states = ['gather_context', 'decide_planning_criteria', 
-              'build_knowledge', 'validate_rules', 'render_output']
+    # Use standard action names that match the tests
+    states = ['clarify', 'strategy', 'build', 'validate', 'render']
     transitions = [
-        {'trigger': 'proceed', 'source': 'gather_context', 'dest': 'decide_planning_criteria'},
-        {'trigger': 'proceed', 'source': 'decide_planning_criteria', 'dest': 'build_knowledge'},
-        {'trigger': 'proceed', 'source': 'build_knowledge', 'dest': 'validate_rules'},
-        {'trigger': 'proceed', 'source': 'validate_rules', 'dest': 'render_output'},
+        {'trigger': 'proceed', 'source': 'clarify', 'dest': 'strategy'},
+        {'trigger': 'proceed', 'source': 'strategy', 'dest': 'build'},
+        {'trigger': 'proceed', 'source': 'build', 'dest': 'validate'},
+        {'trigger': 'proceed', 'source': 'validate', 'dest': 'render'},
     ]
     
     workflow = Workflow(
@@ -362,8 +456,15 @@ def create_test_workflow(
         behavior=behavior,
         bot_directory=bot_dir,
         states=states,
-        transitions=transitions
+        transitions=transitions,
+        workspace_root=workspace_dir
     )
+    
+    # Load state from file (including completed_actions)
+    workflow.load_state()
+    
+    # Set current state to match current_action (after loading)
+    workflow.navigate_to_action(current_action)
     
     if return_workflow_file:
         return workflow, workflow_file

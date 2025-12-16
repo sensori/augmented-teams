@@ -1,0 +1,203 @@
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+classDiagram
+    class BaseBotCli {
+        +run()
+        +close_current_action()
+        +list_behaviors()
+        +list_actions()
+    }
+
+    class MCPServer {
+        +start()
+        +invoke_tool()
+    }
+
+    class MCPServerGenerator {
+        +create_server_instance()
+        +_discover_workflow_actions()
+    }
+
+    class BotToolGenerator {
+        +create_bot_tool()
+    }
+
+    class BehaviorToolGenerator {
+        +create_behavior_tools()
+    }
+
+    class Bot {
+        +execute_behavior()
+        +forward_to_current_behavior_and_current_action()
+        +close_current_action()
+        +find_behavior_by_name()
+        +infer_working_dir_from_path()
+    }
+
+    class Behaviors {
+        +find_by_name()
+        +navigate_to()
+        +close_current()
+        +execute_current()
+        +save_state()
+        +load_state()
+    }
+
+    class Behavior {
+        +forward_to_current_action()
+        +matches_trigger()
+    }
+
+    class Actions {
+        +find_by_name()
+        +navigate_to()
+        +close_current()
+        +execute_current()
+        +save_state()
+        +load_state()
+    }
+
+    class Action {
+        +execute()
+        +do_execute()
+        +track_activity_on_start()
+        +track_activity_on_completion()
+    }
+
+    class ClarifyContextAction {
+        +do_execute()
+    }
+
+    class StrategyAction {
+        +do_execute()
+    }
+
+    class BuildKnowledgeAction {
+        +do_execute()
+    }
+
+    class ValidateRulesAction {
+        +do_execute()
+    }
+
+    class RenderOutputAction {
+        +do_execute()
+    }
+
+    class BotConfig {
+        +behaviors_list
+        +description
+        +goal
+        +instructions
+    }
+
+    class BotPaths {
+        +bot_directory
+        +workspace_directory
+        +documentation_path
+    }
+
+    class BehaviorConfig {
+        +actions_workflow
+        +description
+        +goal
+    }
+
+    class Guardrails {
+        +instructions
+    }
+
+    class Content {
+        +instructions
+    }
+
+    class Rules {
+        +find_behavior_specific_rules()
+        +find_common_bot_rules()
+    }
+
+    class TriggerRouter {
+        +match_trigger()
+        +route_to_bot()
+        +route_to_behavior()
+        +route_to_action()
+    }
+
+    class TriggerWords {
+        +matches()
+    }
+
+    class BaseActionConfig {
+        +action_name
+        +order
+        +instructions
+        +custom_class
+    }
+
+    class ActivityTracker {
+        +track_start()
+        +track_completion()
+    }
+
+    class RequiredContext {
+        +key_questions
+        +evidence
+    }
+
+    class Strategy {
+        +strategy_criterias
+        +assumptions
+        +recommended_activities
+    }
+
+    class Knowledge {
+        +knowledge_graph_spec
+        +knowledge_graph_template
+    }
+
+    class RenderSpec {
+        +template_path
+        +output_path
+    }
+
+    BaseBotCli --> TriggerRouter : uses
+    BaseBotCli --> Bot : uses
+    MCPServer --> Bot : uses
+    MCPServerGenerator --> Bot : uses
+    MCPServerGenerator --> BotToolGenerator : uses
+    MCPServerGenerator --> BehaviorToolGenerator : uses
+    BotToolGenerator --> Bot : creates tools for
+    BehaviorToolGenerator --> Behavior : creates tools for
+    TriggerRouter --> BotPaths : uses
+    TriggerRouter --> TriggerWords : uses
+    TriggerRouter --> Bot : routes to
+    TriggerRouter --> Behavior : routes to
+    Bot --> Behaviors : uses
+    Bot --> BotConfig : uses
+    Bot --> BotPaths : uses
+    Behaviors --> Behavior : contains
+    Behavior --> Actions : uses
+    Behavior --> Guardrails : uses
+    Behavior --> Content : uses
+    Behavior --> Rules : uses
+    Behavior --> TriggerWords : uses
+    Behavior --> BehaviorConfig : uses
+    Actions --> Action : contains
+    Action --> ClarifyContextAction : extends
+    Action --> StrategyAction : extends
+    Action --> BuildKnowledgeAction : extends
+    Action --> ValidateRulesAction : extends
+    Action --> RenderOutputAction : extends
+    Action --> Behavior : uses
+    Action --> BaseActionConfig : uses
+    Action --> ActivityTracker : uses
+    ClarifyContextAction --> RequiredContext : uses
+    StrategyAction --> Strategy : uses
+    BuildKnowledgeAction --> Knowledge : uses
+    RenderOutputAction --> RenderSpec : uses
+    Guardrails --> RequiredContext : uses
+    Guardrails --> Strategy : uses
+    BotConfig --> BotPaths : uses
+    BehaviorConfig --> BotPaths : uses
+    Rules --> Behavior : uses
+    Rules --> BotPaths : uses
+```

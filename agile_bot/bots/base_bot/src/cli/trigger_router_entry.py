@@ -15,6 +15,7 @@ if _workspace_root and str(_workspace_root) not in sys.path:
     sys.path.insert(0, str(_workspace_root))
 
 from agile_bot.bots.base_bot.src.cli.trigger_router import TriggerRouter
+from agile_bot.bots.base_bot.src.bot.workspace import get_bot_directory, get_workspace_directory
 
 
 def main() -> None:
@@ -23,8 +24,20 @@ def main() -> None:
     current_behavior = sys.argv[2] if len(sys.argv) > 2 else None
     current_action = sys.argv[3] if len(sys.argv) > 3 else None
 
-    # Use repo root inferred above for consistent imports
-    router = TriggerRouter(workspace_root=_workspace_root or Path.cwd())
+    # Get bot directory and workspace directory (router will use BotPaths internally)
+    try:
+        bot_directory = get_bot_directory()
+        workspace_directory = get_workspace_directory()
+    except RuntimeError:
+        # Fallback: infer from workspace root
+        if _workspace_root:
+            bot_directory = _workspace_root / 'agile_bot' / 'bots' / 'story_bot'
+            workspace_directory = _workspace_root / 'workspace'
+        else:
+            bot_directory = Path.cwd()
+            workspace_directory = Path.cwd() / 'workspace'
+    
+    router = TriggerRouter(bot_directory=bot_directory, workspace_path=workspace_directory)
     route = router.match_trigger(
         message=message.lower(),
         current_behavior=current_behavior,

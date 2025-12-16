@@ -187,8 +187,8 @@ class Bot:
                             f"**INVALID ACTION**\n\n"
                             f"Action `{action}` is not valid for behavior `{behavior_name}`.\n\n"
                             f"Valid actions are: {valid_actions}\n\n"
-                            f"When starting a new behavior, use: `{self.bot_name}_{behavior_name}_gather_context`\n"
-                            f"Example: `{self.bot_name}_{behavior_name}_gather_context`"
+                            f"When starting a new behavior, use: `{self.bot_name}_{behavior_name}_clarify`\n"
+                            f"Example: `{self.bot_name}_{behavior_name}_clarify`"
                         ),
                         'requested_action': action,
                         'valid_actions': action_names,
@@ -241,23 +241,20 @@ class Bot:
     def _initialize_workflow_state(self, working_dir: Path, confirmed_behavior: str):
         state_file = working_dir / 'behavior_action_state.json'
         
-        actual_behavior_name = self.find_behavior_by_name(confirmed_behavior)
-        if actual_behavior_name is None:
+        behavior_obj = self.behaviors.find_by_name(confirmed_behavior)
+        if behavior_obj is None:
             raise ValueError(
                 f"Behavior '{confirmed_behavior}' not found in bot '{self.name}'. "
                 f"Available behaviors: {', '.join(self.bot_config.behaviors_list)}. "
                 f"Cannot initialize state with invalid behavior."
             )
         
-        behavior_obj = self.behaviors.find_by_name(actual_behavior_name)
-        if behavior_obj is None:
-            raise ValueError(f"Behavior {actual_behavior_name} not found")
         action_names = behavior_obj.actions.names
-        first_action = action_names[0] if action_names else 'gather_context'
+        first_action = action_names[0] if action_names else 'clarify'
         
         state_data = {
-            'current_behavior': f'{self.name}.{actual_behavior_name}',
-            'current_action': f'{self.name}.{actual_behavior_name}.{first_action}',
+            'current_behavior': f'{self.name}.{behavior_obj.name}',
+            'current_action': f'{self.name}.{behavior_obj.name}.{first_action}',
             'completed_actions': [],
             'timestamp': datetime.now().isoformat()
         }
@@ -301,6 +298,8 @@ class Bot:
     def behaviors(self):
         """Access behaviors collection."""
         return self._behaviors_collection
+    
+
     
     def __getattr__(self, name: str):
         """Allow accessing behaviors as attributes (e.g., bot.code, bot.shape)."""

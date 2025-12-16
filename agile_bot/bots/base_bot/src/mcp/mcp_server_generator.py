@@ -9,15 +9,6 @@ from agile_bot.bots.base_bot.src.bot.workspace import get_python_workspace_root,
 class MCPServerGenerator:
     
     def __init__(self, bot_directory: Path):
-        """Initialize MCP Server Generator.
-        
-        Args:
-            bot_directory: Directory where bot code lives (e.g., agile_bot/bots/story_bot)
-                          Contains: config/, behaviors/, src/
-                          
-        Note:
-            workspace_directory is auto-detected from bot_config.json WORKING_AREA field (or mcp.env.WORKING_AREA)
-        """
         self.bot_directory = Path(bot_directory)
         
         # Derive bot_name from last folder in bot_directory
@@ -89,7 +80,6 @@ class MCPServerGenerator:
         return mcp_server
     
     def _get_bot_behaviors(self) -> list:
-        """Safely get behaviors list from bot, handling mocks and properties."""
         bot_behaviors = getattr(self.bot, 'behaviors', [])
         if not isinstance(bot_behaviors, list):
             # Handle case where bot.behaviors might be a property or mock
@@ -154,10 +144,6 @@ class MCPServerGenerator:
         
         @mcp_server.tool(name=tool_name, description=f'Get the current working directory from WORKING_AREA. Triggers: where are we working, what\'s my location, show working directory')
         async def get_working_dir(input_file: str = None, project_dir: str = None):
-            """Get the working directory from WORKING_AREA environment variable.
-
-            Always returns the workspace directory from WORKING_AREA (no inference).
-            """
             if self.bot is None:
                 return {"error": "Bot not initialized"}
 
@@ -180,12 +166,6 @@ class MCPServerGenerator:
         
         @mcp_server.tool(name=tool_name, description=f'Close current action tool for {self.bot_name} - marks current action complete and transitions to next')
         async def close_current_action(parameters: dict = None):
-            """Mark the current action as complete and transition to the next action.
-
-            The server derives the working directory from the workflow (via the
-            centralized workspace helper). Callers do not need to provide a
-            `working_dir`.
-            """
             if parameters is None:
                 parameters = {}
 
@@ -215,7 +195,7 @@ class MCPServerGenerator:
                 
                 # Extract behavior and action names
                 # 'story_bot.shape' -> 'shape'
-                # 'story_bot.shape.gather_context' -> 'gather_context'
+                # 'story_bot.shape.clarify' -> 'clarify'
                 behavior_name = current_behavior_path.split('.')[-1]
                 action_name = current_action_path.split('.')[-1]
                 
@@ -255,7 +235,7 @@ class MCPServerGenerator:
                         # Update workflow state to next behavior, first action
                         next_behavior_obj = getattr(self.bot, next_behavior_name)
                         action_names = next_behavior_obj.actions.names
-                        first_action = action_names[0] if action_names else 'gather_context'
+                        first_action = action_names[0] if action_names else 'clarify'
                         
                         # Update state file with new behavior
                         state_data['current_behavior'] = f'{self.bot_name}.{next_behavior_name}'
@@ -310,18 +290,6 @@ class MCPServerGenerator:
         
         @mcp_server.tool(name=tool_name, description=f'Confirm out-of-order behavior execution for {self.bot_name} - MUST be called explicitly by HUMAN USER, NOT by AI assistant. AI must ask user to call this tool, never call it directly.')
         async def confirm_out_of_order(behavior: str):
-            """Confirm that user wants to execute a behavior out of sequence.
-            
-            CRITICAL: This tool MUST be called by a HUMAN USER, NOT by the AI assistant.
-            When workflow order check requires confirmation, the AI must ask the user
-            to call this tool explicitly. The AI must never call this tool directly.
-            
-            Args:
-                behavior: The behavior name to confirm execution for (e.g., 'code', 'shape')
-            
-            Returns:
-                dict with status and confirmation details
-            """
             if self.bot is None:
                 return {"error": "Bot not initialized"}
             
@@ -376,22 +344,6 @@ class MCPServerGenerator:
         
         @mcp_server.tool(name=tool_name, description=f'Restart MCP server for {self.bot_name} - terminates processes, clears cache, and restarts to load code changes')
         async def restart_server(parameters: dict = None):
-            """
-            Restart the MCP server to load code changes.
-            
-            This will:
-            1. Find and terminate existing MCP server processes
-            2. Clear Python bytecode cache (__pycache__)
-            3. Allow Cursor to restart the server automatically with fresh code
-            
-            Call this after making code changes to bot/workflow/action files.
-            
-            Returns:
-                status: "restarted" or "ready_to_start"
-                previous_pids: List of terminated process IDs
-                cache_cleared: true/false
-                message: Human-readable status
-            """
             if parameters is None:
                 parameters = {}
             
@@ -619,43 +571,19 @@ class MCPServerGenerator:
         # Find behavior folder
         from agile_bot.bots.base_bot.src.bot.bot import Behavior
         
-        try:
-            behavior_folder = Behavior.find_behavior_folder(
-                self.bot_directory,
-                self.bot_name,
-                behavior
-            )
-        except FileNotFoundError:
+        # Behavior folder is directly named (no numbered prefixes)
+        behavior_folder = self.bot_directory / 'behaviors' / behavior
+        if not behavior_folder.exists():
             return []
         
-        # Load from behavior.json (new format)
+        # Load from behavior.json
         behavior_file = behavior_folder / 'behavior.json'
         if behavior_file.exists():
             try:
                 behavior_data = read_json_file(behavior_file)
-                if action:
-                    # Action-level trigger words - still check action folder for now
-                    trigger_path = behavior_folder / action / 'trigger_words.json'
-                    if trigger_path.exists():
-                        trigger_data = read_json_file(trigger_path)
-                        return trigger_data.get('patterns', [])
-                else:
-                    # Behavior-level trigger words from behavior.json
-                    trigger_words = behavior_data.get('trigger_words', {})
-                    return trigger_words.get('patterns', [])
-            except Exception:
-                pass
-        
-        # Load trigger words from action or behavior folder (trigger words can be defined at different levels)
-        if action:
-            trigger_path = behavior_folder / action / 'trigger_words.json'
-        else:
-            trigger_path = behavior_folder / 'trigger_words.json'
-        
-        if trigger_path.exists():
-            try:
-                trigger_data = read_json_file(trigger_path)
-                return trigger_data.get('patterns', [])
+                # Behavior-level trigger words from behavior.json
+                trigger_words = behavior_data.get('trigger_words', {})
+                return trigger_words.get('patterns', [])
             except Exception:
                 pass
         
@@ -831,14 +759,10 @@ if __name__ == '__main__':
         behavior_descriptions = {}
         for behavior in behaviors:
             # Load from behavior.json (new format)
-            from agile_bot.bots.base_bot.src.bot.bot import Behavior
+            # Behavior folder is directly named (no numbered prefixes)
+            behavior_folder = self.bot_directory / 'behaviors' / behavior
+            behavior_file = behavior_folder / 'behavior.json'
             try:
-                behavior_folder = Behavior.find_behavior_folder(
-                    self.bot_directory,
-                    self.bot_name,
-                    behavior
-                )
-                behavior_file = behavior_folder / 'behavior.json'
                 if behavior_file.exists():
                     behavior_data = read_json_file(behavior_file)
                     behavior_descriptions[behavior] = behavior_data.get('description', '')
@@ -878,14 +802,14 @@ if __name__ == '__main__':
 
 **Then check for:** `{self.bot_name}_{behavior}_<action>` tool
 
-**Example:** "{trigger_words[0]}" → use `{self.bot_name}_{behavior}_gather_context`
+**Example:** "{trigger_words[0]}" → use `{self.bot_name}_{behavior}_clarify`
 
 '''
                 else:
                     section = f'''### {behavior_display_name} Behavior
 **Trigger words:** {trigger_words_str}
 **Tool pattern:** `{self.bot_name}_{behavior}_<action>`
-**Example:** "{trigger_words[0]}" → use `{self.bot_name}_{behavior}_gather_context`
+**Example:** "{trigger_words[0]}" → use `{self.bot_name}_{behavior}_clarify`
 
 '''
                 behavior_sections.append(section)
@@ -936,7 +860,7 @@ When you recognize a trigger word:
 **AI should:**
 1. Recognize trigger word from behavior section above
 2. Check: Am I in agent mode?
-3. Check: Is `{self.bot_name}_{behaviors[0] if behaviors else 'behavior'}_gather_context` available?
+3. Check: Is `{self.bot_name}_{behaviors[0] if behaviors else 'behavior'}_clarify` available?
 4. If yes → Invoke the tool
 5. If no → Explain and ask how to proceed
 

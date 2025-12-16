@@ -52,7 +52,6 @@ class Behaviors:
         return None
     
     def __iter__(self) -> Iterator['Behavior']:
-        """Iterate all behaviors."""
         for behavior in self._behaviors:
             yield behavior
     
@@ -187,7 +186,7 @@ class Behaviors:
                     
                     # Find and set current behavior
                     for i, behavior in enumerate(self._behaviors):
-                        if behavior.name == saved_behavior_name or behavior.name.endswith(f'_{saved_behavior_name}'):
+                        if behavior.name == saved_behavior_name:
                             self._current_index = i
                             return
             

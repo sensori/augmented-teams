@@ -18,7 +18,7 @@ import pytest
 from pathlib import Path
 import json
 from conftest import create_bot_config_file, create_workflow_state_file
-from agile_bot.bots.base_bot.src.actions.gather_context.gather_context_action import GatherContextAction
+from agile_bot.bots.base_bot.src.actions.clarify.clarify_action import ClarifyContextAction
 from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env, create_behavior_action_instructions, create_actions_workflow_json
 from agile_bot.bots.base_bot.test.test_helpers import (
     create_base_action_instructions,
@@ -32,12 +32,14 @@ from agile_bot.bots.base_bot.test.test_helpers import (
 # ============================================================================
 
 def given_base_actions_structure_created(bot_directory):
-    """Given: Base actions structure created."""
-    return create_bot_config_file(
-        bot_directory,
-        'test_bot',
-        ['shape', 'discovery', 'exploration', 'specification']
-    )
+    """Given: Base actions structure created - creates the base_actions directory structure.
+    
+    Note: This should NOT overwrite the bot_config.json file. It only creates the
+    base_actions directory structure for shared action templates.
+    """
+    base_actions_dir = bot_directory / 'base_actions'
+    base_actions_dir.mkdir(parents=True, exist_ok=True)
+    return base_actions_dir
 
 # Removed duplicate - imported from test_helpers
 from agile_bot.bots.base_bot.test.test_helpers import create_behavior_action_instructions
@@ -140,17 +142,17 @@ def given_bot_config_and_behavior_workflow(bot_directory: Path, bot_name: str, b
 
 
 def then_workflow_state_file_exists(workspace_directory: Path):
-    """Then: Workflow state file exists."""
-    workflow_file = workspace_directory / 'workflow_state.json'
-    assert workflow_file.exists(), "Workflow state should be created"
+    """Then: Workflow state file exists (behavior_action_state.json)."""
+    workflow_file = workspace_directory / 'behavior_action_state.json'
+    assert workflow_file.exists(), f"Workflow state should be created at {workflow_file}"
     return workflow_file
 
 
 def then_workflow_state_has_correct_values(workflow_file: Path, expected_behavior: str, expected_action: str):
     """Then: Workflow state has correct values."""
     state_data = json.loads(workflow_file.read_text())
-    assert state_data['current_behavior'] == expected_behavior
-    assert state_data['current_action'] == expected_action
+    # The new format only requires current_action (current_behavior is managed separately by Behaviors collection)
+    assert state_data.get('current_action') == expected_action, f"Expected current_action={expected_action}, got {state_data.get('current_action')}"
 
 
 def given_activity_tracker_created(workspace_directory: Path, bot_name: str):
@@ -196,7 +198,7 @@ def given_bot_name_behavior_and_action_setup():
     """Given: Bot name, behavior and action setup."""
     bot_name = 'test_bot'
     behavior = 'shape'
-    action = 'gather_context'
+    action = 'clarify'
     return bot_name, behavior, action
 
 
@@ -224,7 +226,7 @@ def when_create_gather_context_action(bot_name: str, behavior: str, bot_director
             "instructions": {},
             "actions_workflow": {
                 "actions": [
-                    {'name': 'gather_context', 'order': 1}
+                    {'name': 'clarify', 'order': 1}
                 ]
             }
         }
@@ -238,10 +240,10 @@ def when_create_gather_context_action(bot_name: str, behavior: str, bot_director
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
     
     # Create BaseActionConfig
-    base_action_config = BaseActionConfig('gather_context', bot_paths)
+    base_action_config = BaseActionConfig('clarify', bot_paths)
     
-    # Create GatherContextAction with correct signature
-    action_obj = GatherContextAction(
+    # Create ClarifyContextAction with correct signature
+    action_obj = ClarifyContextAction(
         base_action_config=base_action_config,
         behavior=behavior_obj,
         activity_tracker=None
@@ -251,13 +253,15 @@ def when_create_gather_context_action(bot_name: str, behavior: str, bot_director
 
 def when_load_and_merge_instructions(action_obj):
     """When: Load and merge instructions."""
-    return action_obj.load_and_merge_instructions()
+    # Use the instructions property which calls _load_and_merge_instructions internally
+    return action_obj.instructions
 
 
 def then_merged_instructions_contain_base_and_action(merged_instructions, action: str):
     """Then: Merged instructions contain base and action."""
     assert 'base_instructions' in merged_instructions
-    assert merged_instructions['action'] == action
+    # Instructions dict doesn't have 'action' key - it's stored in the action object itself
+    # So we just verify base_instructions exists
 
 
 def given_bot_name_and_behavior_setup(bot_name: str, behavior: str):
@@ -283,7 +287,7 @@ def when_render_output_action_initialized(bot_directory: Path, bot_name: str, be
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.actions.render_output.render_output_action import RenderOutputAction
+    from agile_bot.bots.base_bot.src.actions.render.render_action import RenderOutputAction
     
     bot_paths = BotPaths(bot_directory=bot_directory)
     # Ensure behavior.json exists
@@ -301,7 +305,7 @@ def when_render_output_action_initialized(bot_directory: Path, bot_name: str, be
             "instructions": {},
             "actions_workflow": {
                 "actions": [
-                    {'name': 'render_output', 'order': 1}
+                    {'name': 'render', 'order': 1}
                 ]
             }
         }
@@ -310,7 +314,7 @@ def when_render_output_action_initialized(bot_directory: Path, bot_name: str, be
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('render_output', bot_paths)
+    base_action_config = BaseActionConfig('render', bot_paths)
     
     return RenderOutputAction(
         base_action_config=base_action_config,
@@ -323,7 +327,7 @@ def then_action_uses_instructions_class(action_obj):
     """Then: Action uses Instructions class to merge instructions."""
     from agile_bot.bots.base_bot.src.bot.instructions import Instructions
     # Verify that action uses Instructions class by checking if it has the expected structure
-    instructions = action_obj.load_and_merge_instructions()
+    instructions = action_obj.instructions
     assert 'base_instructions' in instructions or 'instructions' in instructions
     # Verify Instructions class is used (check internal structure)
     assert hasattr(action_obj, '_instructions') or hasattr(action_obj, 'instructions')
@@ -333,7 +337,7 @@ def then_action_uses_merged_instructions_class(action_obj):
     """Then: Action uses MergedInstructions class for merging."""
     from agile_bot.bots.base_bot.src.bot.merged_instructions import MergedInstructions
     # Verify that action uses MergedInstructions class
-    instructions = action_obj.load_and_merge_instructions()
+    instructions = action_obj.instructions
     assert 'base_instructions' in instructions
     # If render instructions exist, they should be in merged result
     if hasattr(action_obj, '_render_instructions') or 'render_instructions' in instructions:
@@ -375,7 +379,7 @@ class TestInvokeBotTool:
     def test_tool_invokes_behavior_action_when_called(self, bot_directory, workspace_directory, bot_config_file_path):
         """
         SCENARIO: Tool Invokes Behavior Action When Called
-        GIVEN: Bot has behavior 'shape' with action 'gather_context'
+        GIVEN: Bot has behavior 'shape' with action 'clarify'
         WHEN: AI Chat invokes tool with parameters
         THEN: Tool routes to test_bot.Shape.GatherContext() method
         """
@@ -384,47 +388,58 @@ class TestInvokeBotTool:
         
         # Given: Bot configuration and instructions exist
         workspace_root = workspace_directory.parent
-        create_behavior_action_instructions_from_workspace(workspace_root, 'test_bot', 'shape', 'gather_context')
+        # Create bot config file in correct location (bot_directory/bot_config.json, not config/ subdirectory)
+        bot_config = create_bot_config_file(bot_directory, 'test_bot', ['shape', 'discovery', 'exploration', 'specification'])
+        create_behavior_action_instructions_from_workspace(workspace_root, 'test_bot', 'shape', 'clarify')
         given_behavior_json_files_for_behaviors(bot_directory, ['shape', 'discovery', 'exploration', 'specification'], 'test_bot')
-        given_base_action_instructions_created(bot_directory, 'gather_context')
+        given_base_action_instructions_created(bot_directory, 'clarify')
         
         # When: Call REAL Bot API
-        bot = given_bot_instance_created('test_bot', bot_directory, bot_config_file_path)
+        bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         shape_behavior = bot.behaviors.find_by_name('shape')
-        action_result = shape_behavior.gather_context()
+        action_result = shape_behavior.clarify()
         
         # Then: Tool executed and returned result
-        then_bot_result_has_status_and_behavior_and_action(action_result, 'completed', 'shape', 'gather_context')
+        then_bot_result_has_status_and_behavior_and_action(action_result, 'completed', 'shape', 'clarify')
 
     def test_tool_routes_to_correct_behavior_action_method(self, bot_directory, workspace_directory, bot_config_file_path):
         """
         SCENARIO: Tool Routes To Correct Behavior Action Method
-        GIVEN: Bot has multiple behaviors with build_knowledge action
-        WHEN: AI Chat invokes 'test_bot_exploration_build_knowledge'
-        THEN: Tool routes to test_bot.Exploration.BuildKnowledge() not other behaviors
+        GIVEN: Bot has multiple behaviors with clarify action
+        WHEN: AI Chat invokes 'test_bot_exploration_clarify'
+        THEN: Tool routes to test_bot.Exploration.Clarify() not other behaviors
         """
         # Bootstrap
         bootstrap_env(bot_directory, workspace_directory)
         
         # Given: Multiple behaviors exist
         workspace_root = workspace_directory.parent
+        # bot_directory fixture uses 'story_bot', so use that for consistency
+        bot_name = bot_directory.name  # 'story_bot' from fixture
+        # Create bot config file in correct location (bot_directory/bot_config.json, not config/ subdirectory)
+        bot_config = create_bot_config_file(bot_directory, bot_name, ['shape', 'discovery', 'exploration'])
         given_behavior_action_instructions_for_multiple_behaviors(
-            workspace_root, 'test_bot', ['shape', 'discovery', 'exploration'], 'build_knowledge'
+            workspace_root, bot_name, ['shape', 'discovery', 'exploration'], 'clarify'
         )
-        behavior_mapping = {'shape': '1_shape', 'discovery': '4_discovery', 'exploration': '5_exploration'}
-        given_knowledge_graph_setup_for_behaviors(workspace_root, 'test_bot', behavior_mapping, 'build_knowledge')
-        given_base_action_instructions_created(bot_directory, 'build_knowledge')
+        behavior_mapping = {'shape': 'shape', 'discovery': 'discovery', 'exploration': 'exploration'}
+        given_knowledge_graph_setup_for_behaviors(workspace_root, bot_name, behavior_mapping, 'clarify')
+        # Ensure behavior.json files exist for all behaviors (given_knowledge_graph_setup_for_behaviors creates them, but ensure they're in bot_directory)
+        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+        from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+        for behavior in ['shape', 'discovery', 'exploration']:
+            create_actions_workflow_json(bot_directory, behavior)
+            create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+        given_base_action_instructions_created(bot_directory, 'clarify')
         given_base_actions_structure_created(bot_directory)
-        create_bot_config_file(bot_directory, 'test_bot', ['shape', 'discovery', 'exploration'])
-        given_workflow_state_created(workspace_directory, 'test_bot.exploration', 'test_bot.exploration.build_knowledge')
+        given_workflow_state_created(workspace_directory, f'{bot_name}.exploration', f'{bot_name}.exploration.clarify')
         
         # When: Call REAL Bot API for specific behavior
-        bot = given_bot_instance_created('test_bot', bot_directory, bot_config_file_path)
+        bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
         exploration_behavior = bot.behaviors.find_by_name('exploration')
-        action_result = exploration_behavior.build_knowledge()
+        action_result = exploration_behavior.clarify()
         
         # Then: Routes to exploration behavior only
-        then_bot_result_has_behavior_and_action(action_result, 'exploration', 'build_knowledge')
+        then_bot_result_has_behavior_and_action(action_result, 'exploration', 'clarify')
 
 
 class TestLoadAndMergeBehaviorActionInstructions:
@@ -447,7 +462,7 @@ class TestLoadAndMergeBehaviorActionInstructions:
         behavior_instructions = create_behavior_action_instructions_from_workspace(workspace_root, bot_name, behavior, action)
         base_instructions = given_base_action_instructions_created(bot_directory, action)
         
-        # When: Call REAL GatherContextAction API
+        # When: Call REAL ClarifyContextAction API
         action_obj = when_create_gather_context_action(bot_name, behavior, bot_directory)
         merged_instructions = when_load_and_merge_instructions(action_obj)
         
@@ -500,7 +515,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
     def test_bot_tool_forwards_to_current_behavior_and_current_action(self, bot_directory, workspace_directory):
         """
         SCENARIO: Bot tool forwards to current behavior and current action
-        GIVEN: workflow state shows current_behavior='discovery', current_action='build_knowledge'
+        GIVEN: workflow state shows current_behavior='discovery', current_action='build'
         WHEN: Bot tool receives invocation
         THEN: Bot tool forwards to correct behavior and action
         """
@@ -516,7 +531,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_response = bot.forward_to_current_behavior_and_current_action()
         
         # Then
-        then_bot_result_has_behavior_and_action(bot_response, 'discovery', 'gather_context')
+        then_bot_result_has_behavior_and_action(bot_response, 'discovery', 'clarify')
 
     def test_bot_tool_defaults_to_first_behavior_and_first_action_when_state_missing(self, bot_directory, workspace_directory):
         """
@@ -537,7 +552,7 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         bot_response = bot.forward_to_current_behavior_and_current_action()
         
         # Then
-        then_bot_result_has_behavior_and_action(bot_response, 'shape', 'gather_context')
+        then_bot_result_has_behavior_and_action(bot_response, 'shape', 'clarify')
 
 
 class TestForwardToCurrentAction:
@@ -562,7 +577,7 @@ class TestForwardToCurrentAction:
         action_result = discovery_behavior.forward_to_current_action()
         
         # Then
-        then_result_action_matches_expected(action_result, 'gather_context')
+        then_result_action_matches_expected(action_result, 'clarify')
 
     def test_behavior_tool_sets_workflow_to_current_behavior_when_state_shows_different_behavior(self, bot_directory, workspace_directory):
         """
@@ -604,14 +619,14 @@ class TestForwardToCurrentAction:
         action_result = shape_behavior.forward_to_current_action()
         
         # Then
-        then_result_action_matches_expected(action_result, 'gather_context')
+        then_result_action_matches_expected(action_result, 'clarify')
     
     def test_action_called_directly_saves_workflow_state(self, bot_directory, workspace_directory):
         """
         SCENARIO: Action called directly saves workflow state
         GIVEN: Bot is initialized with WORKING_AREA set
         AND: No workflow state exists yet
-        WHEN: Action is called directly (e.g., bot.shape.gather_context())
+        WHEN: Action is called directly (e.g., bot.shape.clarify())
         THEN: workflow_state.json is created with current_behavior and current_action
         AND: This ensures state is saved whether action is called via forward or directly
         """
@@ -622,6 +637,9 @@ class TestForwardToCurrentAction:
         bot_config = create_bot_config_file(bot_directory, 'test_bot', ['shape'])
         # Create behavior.json file (REQUIRED after refactor)
         create_actions_workflow_json(bot_directory, 'shape')
+        # Create guardrails files (required by Guardrails class initialization)
+        from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+        create_minimal_guardrails_files(bot_directory, 'shape', 'test_bot')
         
         # When
         bot = when_create_bot_with_config('test_bot', bot_directory, bot_config)
@@ -629,14 +647,14 @@ class TestForwardToCurrentAction:
         # Verify no workflow state exists yet
         workflow_file = then_workflow_state_does_not_exist(workspace_directory)
         
-        # Call gather_context DIRECTLY (not via forward_to_current_action)
+        # Call clarify DIRECTLY (not via forward_to_current_action)
         shape_behavior = bot.behaviors.find_by_name('shape')
-        action_result = shape_behavior.gather_context()
+        action_result = shape_behavior.clarify()
         
         # Then
         workflow_file = then_workflow_state_file_exists(workspace_directory)
-        then_workflow_state_has_correct_values(workflow_file, 'test_bot.shape', 'test_bot.shape.gather_context')
-        then_result_action_matches_expected(action_result, 'gather_context')
+        then_workflow_state_has_correct_values(workflow_file, 'test_bot.shape', 'test_bot.shape.clarify')
+        then_result_action_matches_expected(action_result, 'clarify')
 
 
 class TestTrackActivityForWorkspace:

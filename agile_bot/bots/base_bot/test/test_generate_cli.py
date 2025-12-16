@@ -82,11 +82,11 @@ class TestGenerateCursorAwarenessFiles:
         AND: File includes bot name from config
         """
         # Given: A bot configuration file with a working directory and behaviors
-        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape', 'discovery'])
         bot_config, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
         # And: Behaviors have trigger words configured
-        given_behavior_with_trigger_words(bot_dir, '1_shape', ['shape story', 'define story outline', 'create story map'])
-        given_behavior_with_trigger_words(bot_dir, '4_discovery', ['discover stories', 'break down stories', 'enumerate stories'])
+        given_behavior_with_trigger_words(bot_dir, 'shape', ['shape story', 'define story outline', 'create story map'])
+        given_behavior_with_trigger_words(bot_dir, 'discovery', ['discover stories', 'break down stories', 'enumerate stories'])
         # And: A bot that has been initialized with that config file
         bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
         
@@ -103,7 +103,7 @@ class TestGenerateCursorAwarenessFiles:
         then_awareness_file_shape_section_contains_only_shape_words(content)
         
         # And: Each behavior section shows tool pattern
-        then_awareness_file_contains_tool_patterns_for_behaviors(content, bot_name, ['1_shape', '4_discovery'])
+        then_awareness_file_contains_tool_patterns_for_behaviors(content, bot_name, ['shape', 'discovery'])
 
     def test_rules_file_includes_bot_goal_and_behavior_descriptions(self, workspace_root):
         """
@@ -115,7 +115,7 @@ class TestGenerateCursorAwarenessFiles:
         AND: Each behavior section includes "When user is trying to [behavior description]"
         """
         # Given: A bot configuration file with a working directory and behaviors
-        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape', 'discovery'])
         bot_config, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
         # And: Bot config has goal and description
         from agile_bot.bots.base_bot.test.test_generate_mcp_tools import given_bot_config_has_goal_and_description
@@ -128,12 +128,12 @@ class TestGenerateCursorAwarenessFiles:
         # And: Behaviors have descriptions and trigger words configured
         given_behaviors_with_descriptions_and_trigger_words(bot_dir, [
             {
-                'name': '1_shape',
+                'name': 'shape',
                 'description': 'Create initial story map outline from user context',
                 'patterns': ['shape story', 'create story map']
             },
             {
-                'name': '4_discovery',
+                'name': 'discovery',
                 'description': 'Elaborate stories with user flows and domain rules',
                 'patterns': ['discover stories', 'elaborate stories']
             }
@@ -165,11 +165,11 @@ class TestGenerateCursorAwarenessFiles:
         AND: Tool patterns appear in behavior sections (not flat list)
         """
         # Given: A bot configuration file with a working directory and behaviors
-        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['1_shape', '4_discovery'])
+        bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape', 'discovery'])
         bot_config, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
         # And: Behaviors have trigger words configured
-        given_behavior_with_trigger_words(bot_dir, '1_shape', ['shape story', 'define outline'])
-        given_behavior_with_trigger_words(bot_dir, '4_discovery', ['discover stories', 'enumerate stories'])
+        given_behavior_with_trigger_words(bot_dir, 'shape', ['shape story', 'define outline'])
+        given_behavior_with_trigger_words(bot_dir, 'discovery', ['discover stories', 'enumerate stories'])
         
         # And: A bot that has been initialized with that config file
         bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
@@ -181,8 +181,8 @@ class TestGenerateCursorAwarenessFiles:
         # And: Tool patterns appear in behavior sections (not flat list)
         then_awareness_file_contains_tool_patterns(content, bot_name, behaviors)
         # And: Trigger words are in correct sections
-        then_trigger_words_in_behavior_section(content, '1_shape', ['shape story', 'define outline'])
-        then_trigger_words_in_behavior_section(content, '4_discovery', ['discover stories', 'enumerate stories'])
+        then_trigger_words_in_behavior_section(content, 'shape', ['shape story', 'define outline'])
+        then_trigger_words_in_behavior_section(content, 'discovery', ['discover stories', 'enumerate stories'])
 
     def test_generator_handles_file_write_errors_gracefully_creates_directory(self, generator, workspace_root):
         """
