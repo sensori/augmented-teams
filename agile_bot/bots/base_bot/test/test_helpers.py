@@ -85,7 +85,7 @@ def update_bot_config_with_working_area(bot_dir: Path, workspace_dir: Path) -> P
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding='utf-8'))
     else:
-        config = {'name': bot_dir.name, 'behaviors': []}
+        config = {'name': bot_dir.name}
     
     # Add WORKING_AREA
     config['WORKING_AREA'] = str(workspace_dir)
@@ -176,10 +176,9 @@ def create_base_instructions(bot_directory: Path):
     """
     base_actions = get_test_base_actions_dir(bot_directory)
     # Action folders no longer have number prefixes
-    # Use 'validate_rules' instead of 'validate' to match actual action name
-    actions = ['clarify', 'strategy', 'build', 'validate_rules', 'render']
+    actions = ['clarify', 'strategy', 'build', 'validate', 'render']
     orders = [1, 2, 3, 4, 5]
-    next_actions = ['strategy', 'build', 'validate_rules', 'render', None]
+    next_actions = ['strategy', 'build', 'validate', 'render', None]
     
     for action, order, next_action in zip(actions, orders, next_actions):
         action_dir = base_actions / action
@@ -237,7 +236,7 @@ def create_behavior_action_instructions(bot_dir: Path, behavior: str, action: st
 
 # Removed duplicate create_trigger_words_file - use test_generate_mcp_tools.create_trigger_words_file instead
 
-def create_actions_workflow_json(bot_directory: Path, behavior_name: str, actions: list = None) -> Path:
+def create_actions_workflow_json(bot_directory: Path, behavior_name: str, actions: list = None, order: int = None) -> Path:
     """Given step: Behavior exists with actions workflow.
     
     Creates behavior.json file for a behavior (new format).
@@ -249,6 +248,11 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
     - Execute Behavior Actions (Execute Behavior Actions epic)
     - Validate Rules (Execute Behavior Actions epic)
     
+    Args:
+        bot_directory: Path to bot directory
+        behavior_name: Name of the behavior
+        actions: Optional list of action configs. If None, creates default actions.
+        order: Optional order number for behavior. If None, behavior.json will not have order field.
     
     """
     import json
@@ -271,19 +275,19 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
             {
                 "name": "strategy",
                 "order": 2,
-                "next_action": "validate_rules",
+                "next_action": "validate",
                 "instructions": [
                     f"Follow agile_bot/bots/test_base_bot/base_actions/strategy/action_config.json",
                     f"Test instructions for strategy in {behavior_name}"
                 ]
             },
             {
-                "name": "validate_rules",
+                "name": "validate",
                 "order": 3,
                 "next_action": "render",
                 "instructions": [
-                    f"Follow agile_bot/bots/test_base_bot/base_actions/validate_rules/action_config.json",
-                    f"Test instructions for validate_rules in {behavior_name}"
+                    f"Follow agile_bot/bots/test_base_bot/base_actions/validate/action_config.json",
+                    f"Test instructions for validate in {behavior_name}"
                 ]
             },
             {
@@ -296,7 +300,7 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
             }
         ]
     
-    # Create behavior.json with all sections
+    # Create behavior.json with all sections matching production structure
     behavior_config = {
         "behaviorName": behavior_name.split('_')[-1] if '_' in behavior_name and behavior_name[0].isdigit() else behavior_name,
         "description": f"Test behavior: {behavior_name}",
@@ -314,10 +318,14 @@ def create_actions_workflow_json(bot_directory: Path, behavior_name: str, action
         },
         "trigger_words": {
             "description": f"Trigger words for {behavior_name}",
-            "patterns": [f"test.*{behavior_name}"],
-            "priority": 10
+            "patterns": [f"test.*{behavior_name}"]
         }
     }
+    
+    # Add order field if provided (matches production structure)
+    if order is not None:
+        behavior_config["order"] = order
+    
     behavior_file = behavior_dir / 'behavior.json'
     behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     return behavior_file
@@ -334,12 +342,11 @@ def create_base_actions_structure(bot_directory: Path):
     base_actions_dir = get_test_base_actions_dir(bot_directory)
     
     # Actions no longer have number prefixes - use clean names
-    # Use 'validate_rules' instead of 'validate' to match actual action name
     actions = [
         ('clarify', 1, 'strategy'),
         ('strategy', 2, 'build'),
-        ('build', 3, 'validate_rules'),
-        ('validate_rules', 4, 'render'),
+        ('build', 3, 'validate'),
+        ('validate', 4, 'render'),
         ('render', 5, None)
     ]
     
@@ -371,7 +378,7 @@ def read_activity_log(workspace_dir: Path) -> list:
 
 # Removed verify_action_tracks_start, verify_action_tracks_completion, verify_workflow_transition, 
 # verify_workflow_saves_completed_action, then_workflow_current_state_is, then_completed_actions_include,
-# _create_validate_rules_action, _create_gather_context_action, _create_action_with_provided_class,
+# _create_validate_action, _create_gather_context_action, _create_action_with_provided_class,
 # _create_action_with_default_class, given_environment_bootstrapped_and_action_initialized
 # - These are epic-level helpers for "Execute Behavior Actions" epic, moved to test_execute_behavior_actions.py
 # Import from: from agile_bot.bots.base_bot.test.test_execute_behavior_actions import ...
@@ -464,7 +471,7 @@ def given_environment_bootstrapped_and_activity_log_initialized(bot_directory: P
     return log_file
 
 
-# Removed _create_validate_rules_action, _create_gather_context_action, _create_action_with_provided_class,
+# Removed _create_validate_action, _create_gather_context_action, _create_action_with_provided_class,
 # _create_action_with_default_class, given_environment_bootstrapped_and_action_initialized
 # - moved to test_execute_behavior_actions.py
 
@@ -531,8 +538,8 @@ def create_behavior_folder_with_json(bot_dir: Path, folder_name: str) -> Path:
             "actions": [
                 {"name": "clarify", "order": 1, "next_action": "strategy"},
                 {"name": "strategy", "order": 2, "next_action": "build"},
-                {"name": "build", "order": 3, "next_action": "validate_rules"},
-                {"name": "validate_rules", "order": 4, "next_action": "render"},
+                {"name": "build", "order": 3, "next_action": "validate"},
+                {"name": "validate", "order": 4, "next_action": "render"},
                 {"name": "render", "order": 5}
             ]
         },

@@ -86,13 +86,13 @@ class ValidateRulesAction(Action):
             if "story graph" in str(e).lower() or "story-graph.json" in str(e):
                 raise
             # Otherwise wrap in RuntimeError
-            logger.error("=== ERROR in validate_rules action ===")
+            logger.error("=== ERROR in validate action ===")
             logger.error(f"Error type: {type(e).__name__}")
             logger.error(f"Error message: {e}")
             logger.error(f"Parameters: {parameters}")
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
             error_msg = (
-                f"Error in validate_rules action: {e}\n"
+                f"Error in validate action: {e}\n"
                 f"Parameters: {parameters}\n"
                 f"Traceback:\n{traceback.format_exc()}"
             )
@@ -101,13 +101,13 @@ class ValidateRulesAction(Action):
             # Re-raise JSON/Value errors as-is (tests expect these for invalid JSON)
             raise
         except Exception as e:
-            logger.error("=== ERROR in validate_rules action ===")
+            logger.error("=== ERROR in validate action ===")
             logger.error(f"Error type: {type(e).__name__}")
             logger.error(f"Error message: {e}")
             logger.error(f"Parameters: {parameters}")
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
             error_msg = (
-                f"Error in validate_rules action: {e}\n"
+                f"Error in validate action: {e}\n"
                 f"Parameters: {parameters}\n"
                 f"Traceback:\n{traceback.format_exc()}"
             )
@@ -223,7 +223,7 @@ class ValidateRulesAction(Action):
         action_instructions.append(f"\nValidation report: {report_link}")
         
         instructions = {
-            'action': 'validate_rules',
+            'action': 'validate',
             'behavior': self.behavior.name,
             'base_instructions': action_instructions,
             'validation_rules': processed_rules,

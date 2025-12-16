@@ -36,7 +36,7 @@ When you recognize a trigger word:
 **AI should:**
 1. Recognize trigger word from behavior section above
 2. Check: Am I in agent mode?
-3. Check: Is `test_bot_shape_clarify` available?
+3. Check: Is `test_bot_behavior_clarify` available?
 4. If yes → Invoke the tool
 5. If no → Explain and ask how to proceed
 

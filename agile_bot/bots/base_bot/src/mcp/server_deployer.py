@@ -49,6 +49,7 @@ class ServerDeployer:
         # Config path is: workspace_root/agile_bot/bots/bot_name/bot_config.json
         # So bot_name is config_path.parent.name (the directory containing bot_config.json)
         self.bot_name = self.config_path.parent.name
+        self.bot_directory = self.config_path.parent
         # Debug output
         import sys
         if 'pytest' in sys.modules:
@@ -59,6 +60,19 @@ class ServerDeployer:
         
         self.protocol_handler_url = protocol_handler_url
         self.catalog = ToolCatalog()
+    
+    def _discover_behaviors_from_folders(self) -> list:
+        """Discover behaviors from folder structure."""
+        behaviors_dir = self.bot_directory / 'behaviors'
+        if not behaviors_dir.exists():
+            return []
+        
+        behaviors = []
+        for item in sorted(behaviors_dir.iterdir()):
+            if item.is_dir() and not item.name.startswith('_') and not item.name.startswith('.'):
+                if (item / 'behavior.json').exists():
+                    behaviors.append(item.name)
+        return behaviors
     
     def deploy_server(self) -> DeploymentResult:
         if not self.config_path.exists():
@@ -80,8 +94,7 @@ class ServerDeployer:
                     f'MCP Protocol Handler not accessible at {self.protocol_handler_url}'
                 )
         
-        bot_config = json.loads(self.config_path.read_text())
-        behaviors = bot_config.get('behaviors', [])
+        behaviors = self._discover_behaviors_from_folders()
         base_actions = 6  # From MCPServerGenerator.BASE_ACTIONS
         tool_count = len(behaviors) * base_actions
         
@@ -99,8 +112,7 @@ class ServerDeployer:
         if not self.config_path.exists():
             return self.catalog
         
-        bot_config = json.loads(self.config_path.read_text())
-        behaviors = bot_config.get('behaviors', [])
+        behaviors = self._discover_behaviors_from_folders()
         
         base_actions = [
             'clarify',

@@ -306,4 +306,4 @@ class RenderOutputAction(Action):
     
     
     def inject_next_action_instructions(self):
-        return "Proceed to validate_rules action"
+        return "Proceed to validate action"

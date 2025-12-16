@@ -1,0 +1,48 @@
+{
+  "description": "CRITICAL: Domain concepts must encapsulate state and behavior through properties. Properties control access to object state, hide internal representation, and allow objects to manage their own data. Objects expose properties representing what they are or contain, not raw data access methods.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.property_encapsulation_scanner.PropertyEncapsulationScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Use properties for encapsulation in domain models",
+        "content": [
+          "Responsibilities should represent properties (Get X, not Calculate X)",
+          "Properties encapsulate collection access, calculations, and complex behaviors",
+          "Hide internal structure - don't expose lists, arrays, or raw data",
+          "",
+          "Correct Examples (property encapsulation):",
+          "Portfolio",
+          "    Get holdings: Holdings (property encapsulates collection access)",
+          "    Get total value: Holdings (property encapsulates calculation)",
+          "    Get risk score: Holdings, RiskModel (property encapsulates complex behavior)",
+          "",
+          "Holdings (Collection Class)",
+          "    Get many positions: Position (property encapsulates collection)",
+          "    Find by symbol: Symbol (property encapsulates search behavior)"
+        ]
+      },
+      "dont": {
+        "description": "Don't expose internal state or structure",
+        "content": [
+          "Don't expose internal structure (Get holdings list, Get positions array)",
+          "Don't use methods that reveal internal representation",
+          "Don't allow external manipulation (Set holdings, Modify positions)",
+          "",
+          "Wrong Examples (exposed internal state):",
+          "Portfolio",
+          "    Get holdings list: List (exposes internal structure)",
+          "    Get positions array: Array (exposes internal representation)",
+          "    Set holdings: List (allows external manipulation)",
+          "    Calculate total value: Holdings (method instead of property)",
+          "",
+          "Exposed State Indicators (REJECT):",
+          "- Responsibilities mentioning 'list', 'array', 'dictionary' as return types",
+          "- Responsibilities with 'Set', 'Modify', 'Update' that expose internals",
+          "- Responsibilities that reveal internal data structures"
+        ]
+      }
+    }
+  ]
+}
+
+

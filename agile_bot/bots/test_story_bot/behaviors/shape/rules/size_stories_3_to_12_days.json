@@ -1,0 +1,29 @@
+{
+  "description": "Size stories to fall within 3-12 day effort range for effective planning and frequent delivery.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.story_sizing_scanner.StorySizingScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Create stories that represent complete flows within the effort range",
+        "content": [
+          "Create stories that represent complete flows within the effort range",
+          "Example: Customer places order (complete flow, 3-5 days)",
+          "Break/group stories so that most fall into a 3-12 day effort range",
+          "Enable frequent feedback by decomposing the work into smaller items"
+        ]
+      },
+      "dont": {
+        "description": "Avoid stories that are too large or too small",
+        "content": [
+          "Avoid stories that are too large and span multiple weeks",
+          "Don't arbitrarily decompose stories to a functional level, regardless of size",
+          "",
+          "Wrong Examples:",
+          "- Order management system (too large, 20+ days)",
+          "- Create stories that are too small without considering value"
+        ]
+      }
+    }
+  ]
+}
+

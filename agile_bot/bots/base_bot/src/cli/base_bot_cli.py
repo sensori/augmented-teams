@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 from typing import Dict, Any, Tuple
-from agile_bot.bots.base_bot.src.bot.bot import Bot
+from agile_bot.bots.base_bot.src.bot.bot import Bot, BotResult
 from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory, get_bot_directory
 from agile_bot.bots.base_bot.src.utils import read_json_file
 
@@ -36,7 +36,24 @@ class BaseBotCli:
         return self._format_result(result)
     
     def close_current_action(self) -> Dict[str, Any]:
-        result = self.bot.close_current_action()
+        current_behavior = self.bot.behaviors.current
+        if current_behavior is None:
+            if self.bot.behaviors.first:
+                self.bot.behaviors.navigate_to(self.bot.behaviors.first.name)
+                current_behavior = self.bot.behaviors.current
+            else:
+                raise ValueError("No behaviors available")
+        if current_behavior is None:
+            raise ValueError("No current behavior")
+        current_behavior.actions.load_state()
+        current_action = current_behavior.actions.current
+        if current_action:
+            current_behavior.actions.close_current()
+        action = current_behavior.actions.forward_to_current()
+        if action is None:
+            raise ValueError(f"No current action found for behavior {current_behavior.name}")
+        result_data = action.execute()
+        result = self._create_bot_result('completed', current_behavior.name, action.action_name, result_data)
         return self._format_result(result)
     
     def _route_to_action(self, behavior_name: str, action_name: str, parameters: Dict[str, Any]):
@@ -55,15 +72,47 @@ class BaseBotCli:
                 raise ValueError(f"Cannot execute action '{action_name}' without knowing the behavior. No current behavior found in state.")
         
         behavior_obj = getattr(self.bot, behavior_name)
-        action_method = getattr(behavior_obj, action_name)
-        return action_method(parameters=parameters)
+        action = behavior_obj.actions.find_by_name(action_name)
+        if action is None:
+            raise ValueError(f"Action '{action_name}' not found in behavior '{behavior_name}'")
+        
+        # Navigate to the action (saves workflow state)
+        behavior_obj.actions.navigate_to(action_name)
+        
+        # Execute action directly
+        result_data = action.execute(parameters or {})
+        result = self._create_bot_result('completed', behavior_name, action_name, result_data)
+        return self._format_result(result)
     
     def _route_to_behavior(self, behavior_name: str):
         behavior_obj = getattr(self.bot, behavior_name)
-        return behavior_obj.forward_to_current_action()
+        action = behavior_obj.actions.forward_to_current()
+        if action is None:
+            raise ValueError(f"No current action found for behavior '{behavior_name}'")
+        result_data = action.execute()
+        result = self._create_bot_result('completed', behavior_name, action.action_name, result_data)
+        return self._format_result(result)
     
     def _route_to_current_behavior_and_action(self):
-        return self.bot.forward_to_current_behavior_and_current_action()
+        current_behavior = self.bot.behaviors.current
+        if current_behavior is None:
+            if self.bot.behaviors.first:
+                self.bot.behaviors.navigate_to(self.bot.behaviors.first.name)
+                current_behavior = self.bot.behaviors.current
+            else:
+                raise ValueError("No behaviors available")
+        if current_behavior is None:
+            raise ValueError("No current behavior")
+        action = current_behavior.actions.forward_to_current()
+        if action is None:
+            raise ValueError(f"No current action found for behavior {current_behavior.name}")
+        result_data = action.execute()
+        result = self._create_bot_result('completed', current_behavior.name, action.action_name, result_data)
+        return self._format_result(result)
+    
+    def _create_bot_result(self, status: str, behavior: str, action: str, data: Dict[str, Any]) -> BotResult:
+        """Create a BotResult object - wrapping happens at CLI/MCP level."""
+        return BotResult(status=status, behavior=behavior, action=action, data=data)
     
     def _format_result(self, result) -> Dict[str, Any]:
         status = 'success' if result.status == 'completed' else result.status

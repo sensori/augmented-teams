@@ -1,0 +1,133 @@
+{
+  "_explanation": {
+    "hierarchical": "sub_epics can contain: nested sub_epics or story_groups. sequential_order is always an integer (1, 2, 3, 4) - unique within parent, no decimals.",
+    "connector": "Story groups: 'and' or 'or' (null for first group). Stories within groups: 'and' or 'or' (null for first story). Epics and sub_epics don't have connectors.",
+    "domain_placement": "domain_concepts: 'local' if relevant to single sub_epic, 'global' if relevant to multiple sub_epics. Place at most specific level (local preferred), but elevate to parent if used by multiple children.",
+    "tests": "Each story contains test cases with test_type, test_data, expected_result, and test_steps. Tests validate scenarios and scenario outlines from previous behaviors.",
+    "test_mapping": "Lowest-level sub_epics (with empty sub_epics array) have test_file field. Stories have test_class field. Scenarios map to test_method field."
+  },
+  "epics": [
+    {
+      "name": "",
+      "sequential_order": 1,
+      "estimated_stories": null,
+      "domain_concepts": [
+        {
+          "name": "",
+          "responsibilities": [
+            {
+              "name": "",
+              "collaborators": []
+            }
+          ]
+        }
+      ],
+      "sub_epics": [
+        {
+          "name": "",
+          "sequential_order": 1,
+          "estimated_stories": null,
+          "domain_concepts": [
+            {
+              "name": "",
+              "responsibilities": [
+                {
+                  "name": "",
+                  "collaborators": []
+                }
+              ]
+            }
+          ],
+          "sub_epics": [],
+          "test_file": "",
+          "story_groups": [
+            {
+              "type": "and",
+              "connector": null,
+              "sequential_order": 1,
+              "stories": [
+                {
+                  "name": "",
+                  "sequential_order": 1,
+                  "connector": null,
+                  "users": [],
+                  "story_type": "user",
+                  "test_class": "",
+                  "scenarios": [
+                    {
+                      "name": "",
+                      "type": "happy_path|edge_case|error_case",
+                      "background": [
+                        "Given <common_setup_step>",
+                        "And <another_common_setup>"
+                      ],
+                      "steps": [
+                        "Given <scenario_specific_state>",
+                        "And <scenario_specific_setup>",
+                        "When <user_action_or_system_event>",
+                        "Then <expected_outcome>",
+                        "And <another_expected_outcome>"
+                      ],
+                      "test_method": ""
+                    }
+                  ],
+                  "scenario_outlines": [
+                    {
+                      "name": "",
+                      "type": "happy_path|edge_case|error_case",
+                      "background": [
+                        "Given <common_setup_step>",
+                        "And <another_common_setup>"
+                      ],
+                      "steps": [
+                        "Given <scenario_specific_state> at \"<variable_path>\"",
+                        "And <entity> exists at \"<variable_file_path>\"",
+                        "When <action> with <variable_parameter>=\"<variable_value>\"",
+                        "Then <expected_outcome> equals \"<variable_expected_result>\"",
+                        "And <another_outcome> is \"<variable_result>\""
+                      ],
+                      "examples": {
+                        "columns": ["variable_path", "variable_file_path", "variable_parameter", "variable_value", "variable_expected_result", "variable_result"],
+                        "rows": [
+                          ["value1", "value2", "value3", "value4", "result1", "result2"],
+                          ["value5", "value6", "value7", "value8", "result3", "result4"]
+                        ]
+                      },
+                      "test_method": ""
+                    }
+                  ],
+                  "test_cases": [
+                    {
+                      "name": "",
+                      "test_type": "unit|integration|e2e|acceptance",
+                      "test_data": {},
+                      "expected_result": "",
+                      "test_steps": [
+                        "Step 1: <action>",
+                        "Step 2: <verification>"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "story_groups": []
+    }
+  ],
+  "increments": [
+    {
+      "name": "",
+      "priority": 1,
+      "stories": [
+        {
+          "name": "",
+          "users": [],
+          "sequential_order": 1
+        }
+      ]
+    }
+  ]
+}

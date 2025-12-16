@@ -1,5 +1,6 @@
 {
   "description": "Maintain verb-noun consistency from epic to feature to story to scenario",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.verb_noun_scanner.VerbNounScanner",
   "do": {
     "examples": [
       {

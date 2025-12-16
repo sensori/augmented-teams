@@ -1,0 +1,49 @@
+{
+  "description": "CRITICAL: Story filenames must match the story name exactly (no actor prefix). Actor information belongs in story description or acceptance criteria, NOT in the filename.",
+  "examples": [
+    {
+      "do": {
+        "description": "Filename matches story name without actor",
+        "content": [
+          "CORRECT:",
+          "Story name: 'Route To MCP Behavior Tool'",
+          "Filename: 📝 Route To MCP Behavior Tool.md",
+          "",
+          "Story name: 'Saves Behavior State'",
+          "Filename: 📝 Saves Behavior State.md",
+          "",
+          "Story name: 'Track Activity for Gather Context Action'",
+          "Filename: 📝 Track Activity for Gather Context Action.md"
+        ]
+      },
+      "dont": {
+        "description": "Don't include actor name in filename",
+        "content": [
+          "WRONG:",
+          "Story name: 'Route To MCP Behavior Tool'",
+          "Filename: 📝 AI Chat Route To MCP Behavior Tool.md",
+          "(Actor 'AI Chat' should NOT be in filename)",
+          "",
+          "Story name: 'Saves Behavior State'",
+          "Filename: 📝 Bot Behavior Saves Behavior State.md",
+          "(Actor 'Bot Behavior' should NOT be in filename)",
+          "",
+          "Story name: 'Track Activity for Gather Context Action'",
+          "Filename: 📝 GatherContextAction Track Activity.md",
+          "(Actor 'GatherContextAction' should NOT be in filename)",
+          "",
+          "Common mistakes:",
+          "- Including actor/user name from story description in filename",
+          "- Prefixing filename with 'AI Chat', 'Router', 'Bot Behavior', etc.",
+          "- Adding class/component names to filename",
+          "",
+          "Actor information belongs in:",
+          "- Story description",
+          "- Acceptance criteria (WHEN actor does X...)",
+          "- NOT in the filename"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.story_filename_scanner.StoryFilenameScanner"
+}

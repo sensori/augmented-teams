@@ -1,0 +1,66 @@
+{
+  "description": "CRITICAL: Increments MUST be designed as vertical slices that deliver end-to-end working flows across multiple features/epics, NOT horizontal layers that complete one feature/epic at a time. Each increment must demonstrate complete working flow from start to finish.",
+  "examples": [
+    {
+      "do": {
+        "description": "Design increments as vertical slices - end-to-end flows across multiple epics/features",
+        "content": [
+          "Design increments as VERTICAL SLICES across multiple epics/features (thin end-to-end flows)",
+          "Ensure each increment delivers a complete working flow from start to finish",
+          "Include PARTIAL features from multiple epics in each increment",
+          "Build increments that demonstrate end-to-end capability (data entry → processing → validation → persistence → display)",
+          "Start with simplest end-to-end flow (basic happy path for simplest user/scenario)",
+          "Layer subsequent increments to add complexity, additional users, edge cases, variations",
+          "Think \"What's the thinnest slice that demonstrates the entire system working together?\"",
+          "",
+          "Layering Strategy:",
+          "- Increment 1: Simplest user + simplest scenario + happy path only → Full end-to-end",
+          "- Increment 2: Add complexity (more options, validations) + Additional user types → Full end-to-end",
+          "- Increment 3: Add edge cases + Error handling + Advanced features → Full end-to-end",
+          "- Increment 4: Add variations + Alternative flows + Optimizations → Full end-to-end",
+          "",
+          "Integration Points to Consider (each increment should demonstrate):",
+          "- Data entry/input",
+          "- Business logic/processing",
+          "- Validation/error handling",
+          "- Persistence/storage",
+          "- Retrieval/loading",
+          "- Display/output",
+          "",
+          "Example - Vertical Slice (End-to-End):",
+          "Value Increment 1: Basic Character Creation Flow - NOW",
+          "  Epic: Create Character (PARTIAL - minimal creation)",
+          "    Feature: Enter Basic Info (2 stories - name, archetype only)",
+          "    Feature: Assign Abilities (1 story - simple point buy)",
+          "  Epic: Manage Character (PARTIAL - basic persistence)",
+          "    Feature: Save Character (1 story - save to file)",
+          "    Feature: Load Character (1 story - load from file)",
+          "  Epic: Display Character (PARTIAL - basic view)",
+          "    Feature: View Character Sheet (1 story - show basic info)",
+          "",
+          "Why: Each increment delivers COMPLETE END-TO-END flow. Increment 1 = basic creation → save → load → view."
+        ]
+      },
+      "dont": {
+        "description": "Don't design increments as horizontal layers - complete one feature/epic at a time",
+        "content": [
+          "Design increments as horizontal layers (complete Feature A, then Feature B, then Feature C)",
+          "Build one epic/feature completely before touching another",
+          "Create increments that only touch one area of the system",
+          "Build increments that can't demonstrate working end-to-end flow",
+          "Complete all features for one user type before starting another user type",
+          "",
+          "Example - Horizontal Layer (WRONG):",
+          "Value Increment 1: Character Creation - NOW",
+          "  Epic: Create Character (COMPLETE)",
+          "    Feature: Enter Basic Info (ALL stories)",
+          "    Feature: Assign Abilities (ALL stories)",
+          "    Feature: Select Skills (ALL stories)",
+          "",
+          "Why Wrong: Increment 1 can't be tested end-to-end (no save/load). Can't deliver working software until Increment 2. Integration risks discovered late."
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.vertical_slice_scanner.VerticalSliceScanner"
+}

@@ -1,0 +1,55 @@
+{
+  "description": "CRITICAL: Each scenario's Steps section starts with Given steps for scenario-specific setup. Background steps are automatically applied before scenario Steps. Scenario Steps should contain setup specific to THIS scenario only, not common setup that belongs in Background.",
+  "examples": [
+    {
+      "do": {
+        "description": "What goes in scenario Steps Given section - Scenario-specific setup only",
+        "content": [
+          "**What goes in scenario Steps Given section:**",
+          "- Setup specific to THIS scenario only",
+          "- Variable-dependent setup (even if similar across scenarios)",
+          "- Test data setup (paths, file names, etc.)",
+          "- Scenario-specific preconditions",
+          "- Any setup that is NOT true for ALL scenarios",
+          "",
+          "**GOOD Example structure:**",
+          "- Background has: \"Given Agent is initialized with agent_name='story_bot'\" (common to ALL scenarios)",
+          "- Background has: \"Given Project is finished initializing\" (common to ALL scenarios)",
+          "- Scenario Steps start with: \"Given test project area is set up at test_data/projects/valid-project\" (scenario-specific)",
+          "- Scenario Steps continue with: \"And valid base agent.json exists at test_data/agents/base/agent.json\" (scenario-specific)",
+          "",
+          "**Example scenario Steps:**",
+          "```gherkin",
+          "Given test project area is set up at test_data/projects/valid-project",
+          "And valid base agent.json exists at test_data/agents/base/agent.json",
+          "When Project initializes with project_path='test_data/projects/valid-project'",
+          "Then Project loads agent configuration from agent.json",
+          "```"
+        ]
+      },
+      "dont": {
+        "description": "Don't put common setup in scenario Steps or scenario-specific setup in Background",
+        "content": [
+          "**BAD Example (what NOT to do):**",
+          "- Background has: \"Given test project area is set up at test_data/projects/valid-project\" (WRONG - this is scenario-specific)",
+          "- Scenario Steps start with: \"Given Agent is initialized\" (WRONG - this belongs in Background if true for all scenarios)",
+          "",
+          "**Common mistakes:**",
+          "- Including common setup in scenario Steps that should be in Background",
+          "- Including scenario-specific setup in Background that should be in scenario Steps",
+          "- Repeating Background steps in scenario Steps (Background is automatically applied)",
+          "",
+          "**WRONG Example:**",
+          "```gherkin",
+          "Given Agent is initialized with agent_name='story_bot'",
+          "And Project is finished initializing",
+          "And test project area is set up at test_data/projects/valid-project",
+          "When Project initializes",
+          "```",
+          "(WRONG - first two Given steps belong in Background, only last Given is scenario-specific)"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.scenario_specific_given_scanner.ScenarioSpecificGivenScanner"
+}

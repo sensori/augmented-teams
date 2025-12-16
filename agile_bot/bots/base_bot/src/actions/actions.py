@@ -73,7 +73,6 @@ class Actions:
                 'build': ('build', 'build_action', 'BuildKnowledgeAction'),
                 'build_knowledge': ('build', 'build_action', 'BuildKnowledgeAction'),
                 'validate': ('validate', 'validate_action', 'ValidateRulesAction'),
-                'validate_rules': ('validate', 'validate_action', 'ValidateRulesAction'),
                 'render': ('render', 'render_action', 'RenderOutputAction'),
                 'render_output': ('render', 'render_action', 'RenderOutputAction'),
             }
@@ -156,6 +155,16 @@ class Actions:
         for action in self._actions:
             yield action
     
+    def __getattr__(self, name: str):
+        """Allow accessing actions as attributes (e.g., actions.clarify, actions.build())."""
+        # Check if it's an action name
+        action = self.find_by_name(name)
+        if action:
+            return action
+        
+        # Default behavior for unknown attributes
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+    
     def navigate_to(self, action_name: str):
         action = self.find_by_name(action_name)
         if action is None:
@@ -180,100 +189,15 @@ class Actions:
                 self._current_index += 1
                 self.save_state()
     
-    def execute_current(self, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
-        if self.current is None:
-            raise ValueError("No current action to execute")
+    def forward_to_current(self) -> Optional['Action']:
+        """Forward to current action - loads state, returns current Action object."""
+        # Load state to sync with persisted state
+        self.load_state()
         
-        # Execute the current action (Action.execute handles tracking and execution)
-        result = self.current.execute(parameters)
-        
-        # Inject next action reminder if this is the final action
-        result = self._inject_next_action_reminder(result)
-        
-        return result
+        # Return current action object (CLI/MCP will execute it)
+        return self.current
     
-    def _inject_next_action_reminder(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        # Check if current action is final (last action in the behavior)
-        if not self._is_final_action():
-            return result
-        
-        # When the final action executes, always inject behavior reminder (not action reminder)
-        # because there's no next action in this behavior
-        reminder = self._get_next_behavior_reminder()
-        if reminder:
-            # Inject behavior reminder into instructions if they exist
-            if 'instructions' in result:
-                instructions = result['instructions']
-                if isinstance(instructions, dict) and 'base_instructions' in instructions:
-                    base_instructions = instructions.get('base_instructions', [])
-                    if isinstance(base_instructions, list):
-                        base_instructions = list(base_instructions)  # Make mutable copy
-                        base_instructions.append("")
-                        base_instructions.append("**NEXT BEHAVIOR REMINDER:**")
-                        base_instructions.append(reminder)
-                        instructions['base_instructions'] = base_instructions
-                        result['instructions'] = instructions
-            return result
-        
-        # If no next behavior, check for next action (shouldn't happen if action is final, but handle gracefully)
-        reminder = self._get_next_action_reminder()
-        if not reminder:
-            return result
-        
-        # Inject reminder into instructions if they exist
-        if 'instructions' in result:
-            instructions = result['instructions']
-            if isinstance(instructions, dict) and 'base_instructions' in instructions:
-                base_instructions = instructions.get('base_instructions', [])
-                if isinstance(base_instructions, list):
-                    base_instructions = list(base_instructions)  # Make mutable copy
-                    base_instructions.append("")
-                    base_instructions.append("**NEXT ACTION REMINDER:**")
-                    base_instructions.append(reminder)
-                    instructions['base_instructions'] = base_instructions
-                    result['instructions'] = instructions
-        
-        return result
-    
-    def _is_final_behavior(self) -> bool:
-        """Check if current behavior is the final behavior in the bot."""
-        try:
-            if not self.behavior or not self.behavior.bot:
-                return False
-            # Get behavior names from bot config
-            behavior_names = self.behavior.bot.bot_config.behaviors_list
-            if behavior_names and self.behavior.name == behavior_names[-1]:
-                return True
-        except Exception:
-            pass
-        return False
-    
-    def _get_next_behavior_reminder(self) -> str:
-        """Get reminder for next behavior."""
-        try:
-            if not self.behavior or not self.behavior.bot:
-                return ""
-            # Get behavior names from bot config
-            behavior_names = self.behavior.bot.bot_config.behaviors_list
-            if not behavior_names:
-                return ""
-            # Find current behavior index
-            try:
-                current_index = behavior_names.index(self.behavior.name)
-                if current_index + 1 < len(behavior_names):
-                    next_behavior_name = behavior_names[current_index + 1]
-                    return (
-                        f"After completing this behavior, the next behavior in sequence is `{next_behavior_name}`. "
-                        f"When the user is ready to continue, remind them: 'The next behavior in sequence is `{next_behavior_name}`. "
-                        f"Would you like to continue with `{next_behavior_name}` or work on a different behavior?'"
-                    )
-            except (ValueError, IndexError):
-                pass
-        except Exception:
-            pass
-        return ""
-    
-    def _is_final_action(self) -> bool:
+    def is_final_action(self) -> bool:
         try:
             if self.current is None:
                 return False
@@ -285,6 +209,12 @@ class Actions:
         return False
     
     def _get_next_action_reminder(self) -> str:
+        """Get reminder for next action, or next behavior if this is the final action."""
+        # If this is the final action, get next behavior reminder instead
+        if self.is_final_action():
+            return self._get_next_behavior_reminder()
+        
+        # Otherwise, get next action reminder
         try:
             next_action = self.next()
             if next_action:
@@ -292,6 +222,45 @@ class Actions:
                     f"After completing this action, the next action in sequence is `{next_action.action_name}`. "
                     f"When ready to continue, proceed with `{next_action.action_name}`."
                 )
+        except Exception:
+            pass
+        return ""
+    
+    def _get_next_behavior_reminder(self) -> str:
+        """Internal: Get reminder for next behavior (only called when on final action)."""
+        try:
+            if not self.behavior or not self.behavior.bot:
+                return ""
+            # Get behavior names from behaviors collection
+            behavior_names = self.behavior.bot.behaviors.names
+            if not behavior_names:
+                return ""
+            # Find current behavior index
+            try:
+                current_index = behavior_names.index(self.behavior.name)
+                if current_index + 1 < len(behavior_names):
+                    next_behavior_name = behavior_names[current_index + 1]
+                    # Get first action of next behavior
+                    next_behavior = self.behavior.bot.behaviors.find_by_name(next_behavior_name)
+                    first_action_name = None
+                    if next_behavior and next_behavior.actions.names:
+                        first_action_name = next_behavior.actions.names[0]
+                    
+                    if first_action_name:
+                        return (
+                            f"After completing this action, the next behavior in sequence is `{next_behavior_name}`. "
+                            f"The first action in `{next_behavior_name}` is `{first_action_name}`. "
+                            f"When the user is ready to continue, remind them: 'The next behavior in sequence is `{next_behavior_name}`. "
+                            f"Would you like to continue with `{next_behavior_name}` or work on a different behavior?'"
+                        )
+                    else:
+                        return (
+                            f"After completing this behavior, the next behavior in sequence is `{next_behavior_name}`. "
+                            f"When the user is ready to continue, remind them: 'The next behavior in sequence is `{next_behavior_name}`. "
+                            f"Would you like to continue with `{next_behavior_name}` or work on a different behavior?'"
+                        )
+            except (ValueError, IndexError):
+                pass
         except Exception:
             pass
         return ""

@@ -136,7 +136,7 @@ def given_bot_config_has_goal_and_description(workspace_root: Path, bot_name: st
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding='utf-8'))
     else:
-        config = {'name': bot_name, 'behaviors': []}
+        config = {'name': bot_name}
     
     # Add goal and description
     config['goal'] = goal
@@ -899,9 +899,9 @@ def generator(workspace_root):
     # Create bot config file at bot_directory/bot_config.json (MCPServerGenerator expects it here)
     bot_dir.mkdir(parents=True, exist_ok=True)
     config_file = bot_dir / 'bot_config.json'
+    # Behaviors are discovered from folders, not stored in config
     config_file.write_text(json.dumps({
-        'name': bot_name,
-        'behaviors': ['shape', 'discovery']
+        'name': bot_name
     }), encoding='utf-8')
     
     gen = MCPServerGenerator(bot_directory=bot_dir)

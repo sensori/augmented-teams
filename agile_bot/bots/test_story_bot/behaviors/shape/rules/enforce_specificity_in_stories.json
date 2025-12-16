@@ -1,0 +1,56 @@
+{
+  "description": "CRITICAL: Stories must be specific about what, when, why, and who. Generic operations like 'Add Sub-Epic' or 'Read Epics' are insufficient - stories must include context and specificity.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.specificity_scanner.SpecificityScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Create specific stories with full context",
+        "content": [
+          "Stories must be specific about what, when, why, and who",
+          "Stories must include context: when does it happen? why? what triggers it?",
+          "Stories must specify actors, objects, and outcomes clearly",
+          "",
+          "Correct Examples (specific with context - Payment Domain):",
+          "- 'User processes payment for order #12345 with amount $50.00 when customer completes checkout' (specific: user, order ID, amount, context)",
+          "- 'Merchant invokes refund command from API and system reverses payment transaction' (specific: merchant, API, command, outcome)",
+          "- 'System validates payment card number 4111-1111-1111-1111 when user submits payment form' (specific: system, card number, trigger)",
+          "- 'User clicks Process Payment button and system prompts for payment method selection' (specific: user, action, UI element, system response)",
+          "",
+          "Specificity Requirements:",
+          "- WHO: Specific actor (User, Merchant, Customer, System, PaymentProcessor, API)",
+          "- WHAT: Specific action and object (processes payment for order #12345 with amount $50.00)",
+          "- WHEN: Specific trigger/context (when customer completes checkout, when user submits payment form)",
+          "- WHY: Purpose in journey (to complete purchase transaction, to reverse payment error)",
+          "- OUTCOME: Specific result (payment processed, transaction ID returned, notification sent)"
+        ]
+      },
+      "dont": {
+        "description": "Don't create generic stories without context",
+        "content": [
+          "Don't create generic operations without specificity",
+          "Don't omit context about when/why actions happen",
+          "Don't use vague descriptions without details",
+          "",
+          "Wrong Examples (generic without context - Payment Domain):",
+          "- 'Process Payment' (which payment? for which order? when? why?)",
+          "- 'Authorize Payment' (which payment? with which card? when? why? what happens next?)",
+          "- 'Exposes Payment API' (which endpoints? to whom? when? why?)",
+          "- 'Refund Payment' (which payment? for which reason? when? why?)",
+          "",
+          "Generic Indicators (REJECT or require more specificity):",
+          "- Single verb + noun without context: 'Process Payment', 'Authorize Payment', 'Refund Payment'",
+          "- No specific objects: 'Process Payment' (which payment? which order?)",
+          "- No context: 'Authorize Payment' (when? why? what triggers this?)",
+          "- No outcome: 'Authorize Payment' (what happens with the authorization result?)",
+          "",
+          "Instead, ask:",
+          "- Which specific object? (payment ID, order number, transaction ID, card number)",
+          "- When does this happen? (trigger, context, user action - when customer completes checkout, when merchant requests refund)",
+          "- Why does this happen? (purpose, user need, journey step - to complete purchase, to reverse error)",
+          "- What's the outcome? (result, system response, user experience - payment processed, transaction ID returned, notification sent)"
+        ]
+      }
+    }
+  ]
+}
+

@@ -55,8 +55,8 @@ def create_behavior_folder_duplicate_removed(bot_directory: Path, behavior_name:
             "actions": [
                 {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
                 {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
-                {"name": "build_knowledge", "order": 3, "next_action": "validate_rules"},
-                {"name": "validate_rules", "order": 4, "next_action": "render_output"},
+                {"name": "build_knowledge", "order": 3, "next_action": "validate"},
+                {"name": "validate", "order": 4, "next_action": "render_output"},
                 {"name": "render_output", "order": 5}
             ]
         },

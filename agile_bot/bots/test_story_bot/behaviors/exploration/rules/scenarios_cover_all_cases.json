@@ -1,0 +1,16 @@
+{
+  "description": "Scenarios must cover happy path, edge cases, and error cases based on acceptance criteria.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.scenarios_cover_all_cases_scanner.ScenariosCoverAllCasesScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Complete scenario coverage",
+        "content": "Happy path: User enters valid data → System saves. Edge case: User enters boundary value → System validates. Error case: User enters invalid data → System shows error."
+      },
+      "dont": {
+        "description": "Don't skip scenario types",
+        "content": "Only happy path scenarios (missing edge cases and error cases)"
+      }
+    }
+  ]
+}

@@ -22,33 +22,33 @@
     "",
     "**BEHAVIOR WORKFLOW AND CLI COMMANDS (execute behaviors in order):**",
     "When user requests story work, convert their request to CLI commands:",
-    "1. shape: Use when user wants to create initial story maps, epics, features, or story outlines. CLI: story_bot_cli --behavior shape. If user mentions specific action: story_bot_cli --behavior shape --action gather_context. If user provides context files, pass as positional arguments: story_bot_cli --behavior shape docs/context/input.txt.",
-    "2. prioritization: Use when user wants to organize stories into increments, prioritize backlog, or plan delivery. CLI: story_bot_cli --behavior prioritization. If user mentions specific action: story_bot_cli --behavior prioritization --action build_knowledge. If user wants to work on specific increments, use scope: story_bot_cli --behavior prioritization --action validate_rules --increment_priorities=[1,2].",
-    "3. discovery: Use when user wants to elaborate stories with flows, domain rules, or integration details. CLI: story_bot_cli --behavior discovery. If user mentions specific action: story_bot_cli --behavior discovery --action gather_context. If user wants to work on specific stories, use scope: story_bot_cli --behavior discovery --action build_knowledge --story_names=[\"Select And Capture Tokens\",\"Group Tokens And Create Mob Entity\"].",
-    "4. exploration: Use when user wants to define acceptance criteria or Given/When/Then statements. CLI: story_bot_cli --behavior exploration. If user mentions specific action: story_bot_cli --behavior exploration --action build_knowledge. If user wants to work on specific epics, use scope: story_bot_cli --behavior exploration --action validate_rules --epic_names=[\"Manage Mobs\",\"Execute Mob Actions\"].",
-    "5. scenarios: Use when user wants to write detailed scenarios or expand acceptance criteria into full scenarios. CLI: story_bot_cli --behavior scenarios. If user mentions specific action: story_bot_cli --behavior scenarios --action build_knowledge. If user wants to work on specific stories, use scope: story_bot_cli --behavior scenarios --action render_output --story_names=[\"Select And Capture Tokens\"].",
-    "6. tests: Use when user wants to generate test code from scenarios or create executable tests. CLI: story_bot_cli --behavior tests. If user mentions specific action: story_bot_cli --behavior tests --action build_knowledge. If user provides test files to validate: story_bot_cli --behavior tests --action validate_rules --test=tests/test_create_mob.py or --test=[tests/test_file1.py,tests/test_file2.py].",
-    "7. code: Use when user wants to review code quality, validate implementation, or check code against stories. CLI: story_bot_cli --behavior code. If user mentions specific action: story_bot_cli --behavior code --action validate_rules. If user provides source files to validate: story_bot_cli --behavior code --action validate_rules --src=[src/character.py,src/mob.py]. If user wants to validate specific stories: story_bot_cli --behavior code --action validate_rules --story_names=[\"Select And Capture Tokens\"] --src=[src/character.py].",
+    "1. shape: Use when user wants to create initial story maps, epics, features, or story outlines. CLI: story_bot_cli --behavior shape. If user mentions specific action: story_bot_cli --behavior shape --action clarify. If user provides context files, pass as positional arguments: story_bot_cli --behavior shape docs/context/input.txt.",
+    "2. prioritization: Use when user wants to organize stories into increments, prioritize backlog, or plan delivery. CLI: story_bot_cli --behavior prioritization. If user mentions specific action: story_bot_cli --behavior prioritization --action build. If user wants to work on specific increments, use scope: story_bot_cli --behavior prioritization --action validate --increment_priorities=[1,2].",
+    "3. discovery: Use when user wants to elaborate stories with flows, domain rules, or integration details. CLI: story_bot_cli --behavior discovery. If user mentions specific action: story_bot_cli --behavior discovery --action clarify. If user wants to work on specific stories, use scope: story_bot_cli --behavior discovery --action build --story_names=[\"Select And Capture Tokens\",\"Group Tokens And Create Mob Entity\"].",
+    "4. exploration: Use when user wants to define acceptance criteria or Given/When/Then statements. CLI: story_bot_cli --behavior exploration. If user mentions specific action: story_bot_cli --behavior exploration --action build. If user wants to work on specific epics, use scope: story_bot_cli --behavior exploration --action validate --epic_names=[\"Manage Mobs\",\"Execute Mob Actions\"].",
+    "5. scenarios: Use when user wants to write detailed scenarios or expand acceptance criteria into full scenarios. CLI: story_bot_cli --behavior scenarios. If user mentions specific action: story_bot_cli --behavior scenarios --action build. If user wants to work on specific stories, use scope: story_bot_cli --behavior scenarios --action render --story_names=[\"Select And Capture Tokens\"].",
+    "6. tests: Use when user wants to generate test code from scenarios or create executable tests. CLI: story_bot_cli --behavior tests. If user mentions specific action: story_bot_cli --behavior tests --action build. If user provides test files to validate: story_bot_cli --behavior tests --action validate --test=tests/test_create_mob.py or --test=[tests/test_file1.py,tests/test_file2.py].",
+    "7. code: Use when user wants to review code quality, validate implementation, or check code against stories. CLI: story_bot_cli --behavior code. If user mentions specific action: story_bot_cli --behavior code --action validate. If user provides source files to validate: story_bot_cli --behavior code --action validate --src=[src/character.py,src/mob.py]. If user wants to validate specific stories: story_bot_cli --behavior code --action validate --story_names=[\"Select And Capture Tokens\"] --src=[src/character.py].",
     "",
     "**GENERAL CLI COMMAND RULES:**",
     "- If user mentions a specific behavior name (shape, prioritization, discovery, exploration, scenarios, tests, code), use: story_bot_cli --behavior <name>",
-    "- If user mentions a specific action (gather_context, build_knowledge, render_output, validate_rules, etc.), use: story_bot_cli --behavior <behavior> --action <action>",
-    "- If user wants to scope work to specific stories, use: story_bot_cli --behavior <name> --action <action> --story_names=[\"Story Name 1\",\"Story Name 2\"]",
+    "- If user mentions a specific action (clarify, strategy, build, render, validate), use: story_bot_cli --behavior <behavior> --action <action>",
+    "- If user wants theto scope work to specific stories, use: story_bot_cli --behavior <name> --action <action> --story_names=[\"Story Name 1\",\"Story Name 2\"]",
     "- If user wants to scope work to specific epics, use: story_bot_cli --behavior <name> --action <action> --epic_names=[\"Epic Name 1\",\"Epic Name 2\"]",
     "- If user wants to scope work to specific increments, use: story_bot_cli --behavior <name> --action <action> --increment_priorities=[1,2]",
-    "- If user provides test files to validate, use: story_bot_cli --behavior <name> --action validate_rules --test=<file> or --test=[file1.py,file2.py]",
-    "- If user provides source files to validate, use: story_bot_cli --behavior <name> --action validate_rules --src=[file1.py,file2.py]",
+    "- If user provides test files to validate, use: story_bot_cli --behavior <name> --action validate --test=<file> or --test=[file1.py,file2.py]",
+    "- If user provides source files to validate, use: story_bot_cli --behavior <name> --action validate --src=[file1.py,file2.py]",
     "- If user provides context files, pass as positional arguments: story_bot_cli --behavior <name> docs/context/input.txt or multiple files: story_bot_cli --behavior <name> file1.txt file2.txt",
     "- If user wants to continue where they left off, use: story_bot_cli (no arguments, reads from behavior_action_state.json)",
     "- If user wants to list available behaviors, use: story_bot_cli --list (shows all behaviors: shape, prioritization, discovery, exploration, scenarios, tests, code)",
-    "- If user wants to list available actions for a behavior, use: story_bot_cli --behavior <name> --list (shows all actions within that behavior: gather_context, build_knowledge, validate_rules, render_output, etc.)",
+    "- If user wants to list available actions for a behavior, use: story_bot_cli --behavior <name> --list (shows all actions within that behavior: clarify, strategy, build, render, validate)",
     "",
     "**COMMON ACTIONS (available in most behaviors):**",
-    "- gather_context: Gather and clarify requirements (first action in workflow)",
-    "- decide_planning_criteria: Determine planning approach and criteria",
-    "- build_knowledge: Build knowledge graph and content",
-    "- validate_rules: Validate against behavior-specific rules",
-    "- render_output: Generate final output documents",
+    "- clarify: Gather context and clarify requirements (first action in workflow)",
+    "- strategy: Determine planning approach and criteria",
+    "- build: Build knowledge graph and content",
+    "- render: Generate output documents",
+    "- validate: Validate against behavior-specific rules",
     "",
     "**BEHAVIOR ACTION STATE:**",
     "The CLI automatically tracks current behavior and action in behavior_action_state.json (saved in workspace directory). When user says 'continue' or 'next', use story_bot_cli --close to advance to next action, or run story_bot_cli without arguments to continue from current state."
@@ -96,7 +96,7 @@
         ],
         "notes": [
           "If behavior_action_state.json exists and contains state for this behavior, routes to the current action",
-          "If no behavior action state exists for this behavior, routes to the first action (gather_context)",
+          "If no behavior action state exists for this behavior, routes to the first action (clarify)",
           "Behavior names: shape, prioritization, discovery, exploration, scenarios, tests, code"
         ]
       },
@@ -104,20 +104,20 @@
         "description": "Run a specific action within a behavior",
         "syntax": "story_bot_cli --behavior <behavior_name> --action <action_name> [additional_parameters]",
         "examples": [
-          "story_bot_cli --behavior shape --action gather_context",
-          "story_bot_cli --behavior shape --action decide_planning_criteria",
-          "story_bot_cli --behavior shape --action build_knowledge",
-          "story_bot_cli --behavior shape --action validate_rules",
-          "story_bot_cli --behavior shape --action render_output",
-          "story_bot_cli --behavior discovery --action gather_context --increment_file=increment.txt",
-          "story_bot_cli --behavior exploration --action build_knowledge --story_name=\"Story Name\""
+          "story_bot_cli --behavior shape --action clarify",
+          "story_bot_cli --behavior shape --action strategy",
+          "story_bot_cli --behavior shape --action build",
+          "story_bot_cli --behavior shape --action validate",
+          "story_bot_cli --behavior shape --action render",
+          "story_bot_cli --behavior discovery --action clarify --increment_file=increment.txt",
+          "story_bot_cli --behavior exploration --action build --story_name=\"Story Name\""
         ],
         "common_actions": [
-          "gather_context - Gather context and clarify requirements",
-          "decide_planning_criteria - Determine planning criteria and approach",
-          "build_knowledge - Build knowledge graph and content",
-          "validate_rules - Validate against behavior rules",
-          "render_output - Render final output documents"
+          "clarify - Gather context and clarify requirements",
+          "strategy - Determine planning criteria and approach",
+          "build - Build knowledge graph and content",
+          "render - Generate output documents",
+          "validate - Validate against behavior rules"
         ],
         "notes": [
           "If --behavior is omitted but --action is provided, uses current behavior from workflow state",
@@ -156,7 +156,7 @@
           "story_bot_cli --behavior shape --list",
           "story_bot_cli --behavior discovery --list"
         ],
-        "help": "Use this command to see all available actions for a specific behavior (e.g., gather_context, build_knowledge, validate_rules, render_output). This helps you understand the workflow steps within a behavior and which action to run next.",
+        "help": "Use this command to see all available actions for a specific behavior (e.g., clarify, strategy, build, render, validate). This helps you understand the workflow steps within a behavior and which action to run next.",
         "output": "Prints a list of all available actions for the specified behavior with their descriptions",
         "when_to_use": "Use when you want to see what actions are available in a behavior, or when you're unsure which action to run within a behavior"
       },
@@ -226,7 +226,7 @@
         "When running with --behavior but no --action, CLI uses current action from behavior action state for that behavior",
         "When running with --behavior and --action, CLI executes that specific action",
         "After action execution, behavior action state is updated automatically",
-        "State file contains: current_behavior (e.g., 'story_bot.shape'), current_action (e.g., 'story_bot.shape.gather_context'), completed_actions array, and timestamp"
+        "State file contains: current_behavior (e.g., 'story_bot.shape'), current_action (e.g., 'story_bot.shape.clarify'), completed_actions array, and timestamp. Actions: clarify, strategy, build, render, validate"
       ]
     },
     "examples": {
@@ -238,13 +238,13 @@
         "story_bot_cli --behavior shape",
         "",
         "# Run specific action in shape behavior",
-        "story_bot_cli --behavior shape --action gather_context",
+        "story_bot_cli --behavior shape --action clarify",
         "",
         "# Run discovery behavior with increment file",
         "story_bot_cli --behavior discovery --increment_file=docs/stories/increments/increment-1.txt",
         "",
         "# Run exploration action with story name",
-        "story_bot_cli --behavior exploration --action build_knowledge --story_name=\"User Login\"",
+        "story_bot_cli --behavior exploration --action build --story_name=\"User Login\"",
         "",
         "# List all behaviors",
         "story_bot_cli --list",
@@ -260,16 +260,16 @@
       ],
       "advanced_usage": [
         "# Pass multiple context files",
-        "story_bot_cli --behavior shape --action gather_context --context_files=file1.txt,file2.txt",
+        "story_bot_cli --behavior shape --action clarify --context_files=file1.txt,file2.txt",
         "",
         "# Pass context files as separate arguments",
-        "story_bot_cli --behavior shape --action gather_context --context_files=file1.txt --context_files=file2.txt",
+        "story_bot_cli --behavior shape --action clarify --context_files=file1.txt --context_files=file2.txt",
         "",
         "# Use positional file arguments",
         "story_bot_cli --behavior discovery increment.txt context1.txt context2.txt",
         "",
         "# Pass custom parameters",
-        "story_bot_cli --behavior exploration --action build_knowledge --story_name=\"Login\" --epic_name=\"Authentication\""
+        "story_bot_cli --behavior exploration --action build --story_name=\"Login\" --epic_name=\"Authentication\""
       ]
     },
     "troubleshooting": {

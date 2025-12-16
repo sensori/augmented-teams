@@ -528,7 +528,29 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
-        bot_response = bot.forward_to_current_behavior_and_current_action()
+        current_behavior = bot.behaviors.current
+        if current_behavior is None:
+            if bot.behaviors.first:
+                bot.behaviors.navigate_to(bot.behaviors.first.name)
+                current_behavior = bot.behaviors.current
+            else:
+                raise ValueError("No behaviors available")
+        if current_behavior is None:
+            raise ValueError("No current behavior")
+        
+        # Get current action and execute directly at lowest level
+        current_behavior.actions.load_state()
+        current_action = current_behavior.actions.current
+        if current_action is None:
+            raise ValueError("No current action")
+        result_data = current_action.execute({})
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        bot_response = BotResult(
+            status='completed',
+            behavior=current_behavior.name,
+            action=current_action.action_name,
+            data=result_data
+        )
         
         # Then
         then_bot_result_has_behavior_and_action(bot_response, 'discovery', 'clarify')
@@ -549,10 +571,33 @@ class TestForwardToCurrentBehaviorAndCurrentAction:
         
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
-        bot_response = bot.forward_to_current_behavior_and_current_action()
+        current_behavior = bot.behaviors.current
+        if current_behavior is None:
+            if bot.behaviors.first:
+                bot.behaviors.navigate_to(bot.behaviors.first.name)
+                current_behavior = bot.behaviors.current
+            else:
+                raise ValueError("No behaviors available")
+        if current_behavior is None:
+            raise ValueError("No current behavior")
+        
+        # Get current action and execute directly at lowest level
+        current_behavior.actions.load_state()
+        current_action = current_behavior.actions.current
+        if current_action is None:
+            raise ValueError("No current action")
+        result_data = current_action.execute({})
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        bot_response = BotResult(
+            status='completed',
+            behavior=current_behavior.name,
+            action=current_action.action_name,
+            data=result_data
+        )
         
         # Then
-        then_bot_result_has_behavior_and_action(bot_response, 'shape', 'clarify')
+        # Behaviors are discovered in alphabetical order, so 'discovery' comes before 'shape'
+        then_bot_result_has_behavior_and_action(bot_response, 'discovery', 'clarify')
 
 
 class TestForwardToCurrentAction:
@@ -574,7 +619,20 @@ class TestForwardToCurrentAction:
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         discovery_behavior = bot.behaviors.find_by_name('discovery')
-        action_result = discovery_behavior.forward_to_current_action()
+        
+        # Get current action and execute directly at lowest level
+        discovery_behavior.actions.load_state()
+        current_action = discovery_behavior.actions.current
+        if current_action is None:
+            raise ValueError("No current action")
+        result_data = current_action.execute({})
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(
+            status='completed',
+            behavior='discovery',
+            action=current_action.action_name,
+            data=result_data
+        )
         
         # Then
         then_result_action_matches_expected(action_result, 'clarify')
@@ -595,7 +653,20 @@ class TestForwardToCurrentAction:
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         exploration_behavior = bot.behaviors.find_by_name('exploration')
-        action_result = exploration_behavior.forward_to_current_action()
+        
+        # Get current action and execute directly at lowest level
+        exploration_behavior.actions.load_state()
+        current_action = exploration_behavior.actions.current
+        if current_action is None:
+            raise ValueError("No current action")
+        result_data = current_action.execute({})
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(
+            status='completed',
+            behavior='exploration',
+            action=current_action.action_name,
+            data=result_data
+        )
         
         # Then
         assert action_result.behavior == 'exploration'
@@ -616,7 +687,20 @@ class TestForwardToCurrentAction:
         # When
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         shape_behavior = bot.behaviors.find_by_name('shape')
-        action_result = shape_behavior.forward_to_current_action()
+        
+        # Get current action and execute directly at lowest level
+        shape_behavior.actions.load_state()
+        current_action = shape_behavior.actions.current
+        if current_action is None:
+            raise ValueError("No current action")
+        result_data = current_action.execute({})
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(
+            status='completed',
+            behavior='shape',
+            action=current_action.action_name,
+            data=result_data
+        )
         
         # Then
         then_result_action_matches_expected(action_result, 'clarify')

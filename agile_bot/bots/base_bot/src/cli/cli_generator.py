@@ -207,14 +207,21 @@ if __name__ == '__main__':
         return script_file
     
     def _get_behaviors_from_config(self) -> list:
-        if not self.config_path.exists():
+        """Discover behaviors from folder structure."""
+        return self._discover_behaviors_from_folders()
+    
+    def _discover_behaviors_from_folders(self) -> list:
+        """Discover behaviors from folder structure."""
+        behaviors_dir = self.workspace_root / self.bot_location / 'behaviors'
+        if not behaviors_dir.exists():
             return []
         
-        try:
-            bot_config = read_json_file(self.config_path)
-            return bot_config.get('behaviors', [])
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+        behaviors = []
+        for item in sorted(behaviors_dir.iterdir()):
+            if item.is_dir() and not item.name.startswith('_') and not item.name.startswith('.'):
+                if (item / 'behavior.json').exists():
+                    behaviors.append(item.name)
+        return behaviors
     
     def _generate_cursor_commands(self, cli_script_path: Path) -> Dict[str, Path]:
         # Generate cursor commands in .cursor/commands directory

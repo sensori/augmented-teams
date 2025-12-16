@@ -42,8 +42,8 @@ class TriggerTestSetup:
         self.bot_name = bot_name
         self.behaviors = ['shape', 'prioritization', 'arrange', 'discovery', 'exploration', 'scenarios', 'examples', 'tests']
         # Use actual action names that exist in the codebase and are configured in create_actions_workflow_json
-        # Note: create_actions_workflow_json creates: clarify, strategy, validate_rules, render (no 'build' yet)
-        self.actions = ['clarify', 'strategy', 'validate_rules', 'render']
+        # Note: create_actions_workflow_json creates: clarify, strategy, validate, render (no 'build' yet)
+        self.actions = ['clarify', 'strategy', 'validate', 'render']
         self.bot_config = None
     
     def setup_bot(self):
@@ -82,7 +82,7 @@ class TriggerTestSetup:
         )
     
     def _create_story_graph_file(self):
-        """Create story graph file in workspace for validate_rules action."""
+        """Create story graph file in workspace for validate action."""
         stories_dir = self.workspace_directory / 'docs' / 'stories'
         stories_dir.mkdir(parents=True, exist_ok=True)
         story_graph_file = stories_dir / 'story-graph.json'
@@ -406,7 +406,7 @@ def given_action_trigger_templates_dict():
         'clarify': 'gather context for {behavior}',
         'strategy': 'decide planning criteria for {behavior}',
         'render': 'render outputs for {behavior}',
-        'validate_rules': 'validate outputs for {behavior}'
+        'validate': 'validate outputs for {behavior}'
     }
 
 def given_bot_setup_with_action_triggers(bot_directory: Path, workspace_directory: Path, action_trigger_templates: dict):
@@ -449,7 +449,7 @@ def given_action_trigger_templates_dictionary():
         'clarify': 'gather context for {behavior}',
         'strategy': 'decide planning criteria for {behavior}',
         'build': 'build knowledge for {behavior}',
-        'validate_rules': 'validate rules for {behavior}',
+        'validate': 'validate rules for {behavior}',
         'render_output': 'render output for {behavior}'
     }
 
@@ -468,7 +468,7 @@ def when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_
 def _create_base_action_instructions(bot_directory: Path):
     """Helper: Create base action instructions in bot directory."""
     actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
-               'build_knowledge', 'validate_rules', 'render_output']
+               'build_knowledge', 'validate', 'render_output']
     for action in actions:
         create_base_action_instructions(bot_directory, action)
 

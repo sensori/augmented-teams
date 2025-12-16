@@ -35,6 +35,22 @@
       "system_reference": "Hero SRD for M&M 3e rules",
       "integration_reference": "Foundry VTT M&M 3e system on GitHub"
     }
+  },
+  "prioritization": {
+    "key_questions": {
+      "highest_risk_areas": "Execute Mob Actions (Mob Combat Sequence) - system stories requiring Foundry VTT API integration, target selection algorithms, movement calculations, attack resolution. Secondary: Configure Strategy - strategy algorithms must implement M&M 3e combat rules correctly.",
+      "highest_value_early": "Manage Mobs > Create and Configure Mob - first user action in journey, addresses core problem of tedious clicking, enables all downstream functionality",
+      "complexity_vs_value": "Mob Templates is most complex relative to value (enhancement/convenience, not core). Execute Mob Actions is complex but high-value (core functionality).",
+      "thin_slice_approach": "End-to-end slices - each increment delivers working GM workflow (create mob -> assign strategy -> execute action), aligns with user journey approach",
+      "reusable_components": ["Mob - core concept used across all epics", "Strategy - used by Configure Strategy and Execute Mob Actions", "Target - shared between Strategy and Mob Combat Sequence", "Foundry VTT integration layer - all features interact with Foundry API"],
+      "delivery_constraints": "No explicit constraints identified",
+      "user_rollout_order": "Single user type (GMs) - no multi-user rollout considerations"
+    },
+    "evidence": {
+      "story_map": "story-graph.json - 4 epics, ~15 stories",
+      "business_case": "clarification.json - faster combat, reduced cognitive load",
+      "domain_dependencies": "Domain concepts in story-graph.json"
+    }
   }
 }
 

@@ -1,0 +1,48 @@
+{
+  "description": "CRITICAL: Given statements describe PRECONDITIONS (what exists before the test), NOT the functionality being tested. If you're describing WHAT the system does or HOW it behaves, that belongs in Then statements, not Given.",
+  "examples": [
+    {
+      "do": {
+        "description": "Given describes preconditions only",
+        "content": [
+          "CORRECT:",
+          "Given activity log is initialized at project_area/activity log",
+          "Given user is logged in",
+          "Given character sheet exists",
+          "Given workflow state is persisted",
+          "",
+          "These describe STATE/EXISTENCE, not functionality."
+        ]
+      },
+      "dont": {
+        "description": "Don't describe functionality in Given - that's what you're testing",
+        "content": [
+          "WRONG:",
+          "Given activity log tracks: timestamp, action_state, inputs, outputs, duration",
+          "(This describes WHAT the activity log DOES - that's the functionality being tested!)",
+          "",
+          "Given system validates user input",
+          "(This describes WHAT the system DOES - that's functionality, not a precondition!)",
+          "",
+          "Given bot routes to correct action based on workflow state",
+          "(This describes HOW the bot BEHAVES - that's what you're testing!)",
+          "",
+          "Ask yourself: Am I describing WHAT EXISTS or WHAT THE SYSTEM DOES?",
+          "- If describing WHAT EXISTS → Given (precondition)",
+          "- If describing WHAT THE SYSTEM DOES → Then (expected behavior being tested)",
+          "",
+          "Common mistakes:",
+          "- Describing data structure/format in Given (that's functionality to test in Then)",
+          "- Describing system behavior in Given (that's what you're testing in Then)",
+          "- Describing validation rules in Given (that's functionality to test in Then)",
+          "",
+          "CORRECT approach:",
+          "Given activity log is initialized (precondition - it exists)",
+          "When action completes",
+          "Then activity log captures: timestamp, action_state, inputs, outputs, duration (functionality being tested)"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.given_precondition_scanner.GivenPreconditionScanner"
+}

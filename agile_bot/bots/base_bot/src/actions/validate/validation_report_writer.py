@@ -133,7 +133,7 @@ class ValidationReportWriter:
             f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"**Project:** {self.workspace_directory.name}",
             f"**Behavior:** {self.behavior_name}",
-            f"**Action:** validate_rules",
+            f"**Action:** validate",
             ""
         ]
     

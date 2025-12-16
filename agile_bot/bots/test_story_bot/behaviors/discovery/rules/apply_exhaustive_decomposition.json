@@ -1,0 +1,16 @@
+{
+  "description": "Apply exhaustive logic decomposition. Enumerate ALL permutations (prerequisite types, validation rules, calculation paths).",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.exhaustive_decomposition_scanner.ExhaustiveDecompositionScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "List all validation paths and calculation branches",
+        "content": "User enters ability rank - and system validates (STR, STA, AGL, DEX) - and system calculates modifier - and system saves"
+      },
+      "dont": {
+        "description": "Don't skip permutations or paths",
+        "content": "User enters ability - and system saves (missing validation and calculation)"
+      }
+    }
+  ]
+}

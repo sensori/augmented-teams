@@ -1,0 +1,22 @@
+{
+  "description": "CRITICAL SCOPE: Scenarios must be in story-graph.json (in scenarios or scenario_outlines fields), NOT in separate markdown files. NEVER creates feature specification documents.",
+  "examples": [
+    {
+      "do": {
+        "description": "Add scenarios to story-graph.json",
+        "content": [
+          "story-graph.json epics[].sub_epics[].story_groups[].stories[].scenarios[] - Scenarios array added",
+          "story-graph.json epics[].sub_epics[].story_groups[].stories[].scenario_outlines[] - Scenario Outlines with Examples added"
+        ]
+      },
+      "dont": {
+        "description": "Don't create feature specification documents or separate scenario files",
+        "content": [
+          "docs/stories/Epic/Feature/Feature Specification.md (WRONG - scenarios go in story-graph.json)",
+          "docs/stories/scenarios.md (WRONG - scenarios go in story-graph.json)"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.scenarios_on_story_docs_scanner.ScenariosOnStoryDocsScanner"
+}

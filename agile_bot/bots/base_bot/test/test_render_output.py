@@ -422,16 +422,16 @@ class TestTrackActivityForRenderOutputAction:
 # ============================================================================
 
 class TestProceedToValidateRules:
-    """Story: Proceed To Validate Rules - Tests transition to validate_rules action."""
+    """Story: Proceed To Validate - Tests transition to validate action."""
 
-    def test_seamless_transition_from_validate_rules_to_render_output(self, bot_directory, workspace_directory):
+    def test_seamless_transition_from_validate_to_render_output(self, bot_directory, workspace_directory):
         """
         SCENARIO: Seamless Transition From Validate Rules To Render Output
         """
         # Given: Bot directory and workspace directory are set up
         # When: Validate rules action completes
         # Then: Workflow transitions to render_output (verified by verify_workflow_transition)
-        verify_workflow_transition(bot_directory, workspace_directory, 'validate_rules', 'render', behavior='discovery')
+        verify_workflow_transition(bot_directory, workspace_directory, 'validate', 'render', behavior='discovery')
 
     def test_workflow_state_captures_render_output_completion(self, bot_directory, workspace_directory):
         """

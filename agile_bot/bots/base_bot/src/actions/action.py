@@ -198,6 +198,57 @@ class Action:
         self.track_activity_on_start()
         result = self.do_execute(parameters or {})
         self.track_activity_on_completion(outputs=result)
+        # Inject reminders if this is the final action
+        result = self._inject_reminders_if_final(result)
+        return result
+    
+    def _inject_reminders_if_final(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Inject next behavior reminder if this is the final action in the behavior."""
+        if not self.behavior or not self.behavior.actions:
+            return result
+        
+        # Check if this is the final action
+        action_names = self.behavior.actions.names
+        if not action_names or self.action_name != action_names[-1]:
+            return result
+        
+        # Get next behavior reminder (via _get_next_action_reminder which calls _get_next_behavior_reminder internally)
+        reminder = self.behavior.actions._get_next_action_reminder()
+        if not reminder:
+            return result
+        
+        # Ensure instructions dict exists in result
+        if 'instructions' not in result:
+            result['instructions'] = {}
+        
+        instructions = result['instructions']
+        
+        # If instructions is not a dict, convert it
+        if not isinstance(instructions, dict):
+            if isinstance(instructions, list):
+                instructions = {'base_instructions': instructions}
+            else:
+                instructions = {}
+            result['instructions'] = instructions
+        
+        # Get base_instructions from action's instructions or result
+        if 'base_instructions' not in instructions:
+            if isinstance(self.instructions, dict) and 'base_instructions' in self.instructions:
+                base_instructions = list(self.instructions['base_instructions'])
+            else:
+                base_instructions = []
+            instructions['base_instructions'] = base_instructions
+        
+        # Inject behavior reminder
+        base_instructions = instructions.get('base_instructions', [])
+        if isinstance(base_instructions, list):
+            base_instructions = list(base_instructions)  # Make mutable copy
+            base_instructions.append("")
+            base_instructions.append("**NEXT BEHAVIOR REMINDER:**")
+            base_instructions.append(reminder)
+            instructions['base_instructions'] = base_instructions
+            result['instructions'] = instructions
+        
         return result
     
     def do_execute(self, parameters: Dict[str, Any]) -> Dict[str, Any]:

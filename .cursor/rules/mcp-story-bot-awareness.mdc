@@ -1,0 +1,112 @@
+# MCP Tool Awareness
+
+## Bot: story_bot
+
+## Priority: Check MCP Tools First
+
+**CRITICAL RULE:** When user mentions workflow operations with trigger words, ALWAYS check for and use MCP story_bot tools FIRST before falling back to manual file operations.
+
+## Behaviors and Trigger Words
+
+### Code Behavior
+
+**When user is trying to:** Generate production source code from domain model and story specifications  
+**as indicated by Trigger words:** generate.*source.*code, create.*production.*code, write.*source.*files, implement.*production.*code, generate.*implementation, create.*source.*files, write.*production.*code, implement.*source.*code, generate.*code, create.*code, write.*code, implement.*code, production.*code, source.*code.*generation
+
+**Then check for:** `story_bot_code_<action>` tool
+
+**Example:** "generate.*source.*code" → use `story_bot_code_clarify`
+
+
+### Discovery Behavior
+
+**When user is trying to:** Create a complete list of stories with a well defined story flow for one increment  
+**as indicated by Trigger words:** start.*discovery, let.*s.*discover, begin.*discovery, do.*discovery, discovery, map.*next.*increment, discover.*all, explore.*end.*to.*end.*flow, get.*inventory, list.*for.*increment, define.*increment.*scope, what.*are.*we.*building.*next, capture.*all.*next.*release, model.*next.*increment.*flow, visualize.*increment.*scope, build.*full.*inventory, walk.*through.*increment.*flow, define.*sequence, lay.*out.*increment.*plan, draft.*full.*map.*of.*increment, capture.*increment.*workflow, refine.*increment
+
+**Then check for:** `story_bot_discovery_<action>` tool
+
+**Example:** "start.*discovery" → use `story_bot_discovery_clarify`
+
+
+### Exploration Behavior
+
+**When user is trying to:** Define acceptance criteria (When/Then) for stories to establish clear success criteria  
+**as indicated by Trigger words:** start.*exploration, let.*s.*explore, begin.*exploration, do.*exploration, exploration, explore, explore.*increment, explore.*increment.*flow, explore.*stories, explore.*story, explore.*the.*stories, explore.*some.*stories, start.*exploring.*stories, let.*s.*explore.*stories, let.*s.*explore.*the.*stories, let.*s.*explore.*some.*stories, i.*d.*like.*to.*explore.*stories, i.*want.*to.*explore.*stories, want.*to.*explore.*stories, need.*to.*explore.*stories, time.*to.*explore.*stories, define.*acceptance.*criteria, acceptance.*criteria, acceptance, write.*acceptance.*criteria, create.*acceptance.*criteria, add.*acceptance.*criteria, define.*ac, write.*ac, create.*ac, walk.*through.*user.*steps, walk.*through.*steps, user.*steps, user.*flow, user.*journey, user.*path, discover.*story.*details, discover.*details, story.*details, model.*user.*behavior, user.*behavior, what.*does.*user.*do, what.*do.*users.*do, how.*does.*user, how.*do.*users, understand.*increment.*usage, understand.*usage, map.*happy.*path, happy.*path, main.*path, primary.*path, capture.*steps.*to.*complete, steps.*to.*complete, completion.*steps, refine.*acceptance.*logic, acceptance.*logic, describe.*usage.*scenario, usage.*scenario, define.*done.*for.*feature, definition.*of.*done, done.*criteria, what.*is.*done, explore.*workflow.*steps, workflow.*steps, workflow, user.*journey.*through.*feature, journey, define.*success.*criteria, success.*criteria, collaborate.*on.*acceptance, write.*acceptance.*examples, acceptance.*examples, map.*real.*world.*usage, real.*world.*usage, actual.*usage, refine.*stories, refine.*story, dive.*into.*stories, dive.*into.*story, detail.*stories, detail.*story, flesh.*out.*stories, flesh.*out.*story, elaborate.*stories, elaborate.*story, break.*down.*stories, break.*down.*story
+
+**Then check for:** `story_bot_exploration_<action>` tool
+
+**Example:** "start.*exploration" → use `story_bot_exploration_clarify`
+
+
+### Prioritization Behavior
+
+**When user is trying to:** Organize stories into delivery increments based on business value, dependencies, and risk  
+**as indicated by Trigger words:** start.*prioritization, let.*s.*prioritize, begin.*prioritization, do.*prioritization, prioritization, prioritize, rank.*epics, value.*based.*order, decide.*what.*first, slice.*, group.*by.*value, group.*by.*risk, group.*by.*assumption, define.*thin.*slice, organize.*map, plan.*mvp.*delivery, choose.*mvp, decide.*initial.*release, pick.*first.*slice, stack.*by.*impact, delivery.*sequence, delivery.*order, assumption.*driven.*planning, cost.*of.*delay, delivery.*strategy, validate.*risk.*first, learn.*fast.*slice, test.*value.*proposition, explore.*release.*path
+
+**Then check for:** `story_bot_prioritization_<action>` tool
+
+**Example:** "start.*prioritization" → use `story_bot_prioritization_clarify`
+
+
+### Scenarios Behavior
+
+**When user is trying to:** Write detailed plain-English scenarios (Given/When/Then) that specify exact behavior for each story  
+**as indicated by Trigger words:** specify.*scenarios, *specification, write.*scenarios, define.*test.*scenario, write.*details, get.*to.*exact.*flow, describe.*step.*by.*step, elaborate.*flow, model.*edge.*cases, walk.*through.*test.*case, spec.*acceptance.*scenario, detail.*logic, level.*specification, define.*preconditions, create.*test.*scenarios, scenario.*based.*design, specification.*scenarios, specify.*examples, add.*test.*data, define.*test.*data, write.*examples, create.*examples.*table, add.*variables.*to.*scenarios, convert.*to.*scenario.*outline, add.*examples.*to.*scenarios, define.*inputs, define.*expected.*functionality, capture.*data.*needs, specification.*examples, test.*data
+
+**Then check for:** `story_bot_scenarios_<action>` tool
+
+**Example:** "specify.*scenarios" → use `story_bot_scenarios_clarify`
+
+
+### Shape Behavior
+
+**When user is trying to:** Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements  
+**as indicated by Trigger words:** start.*shaping, let.*s.*shape, begin.*shaping, do.*shaping, shaping, shape.*capability, scoping, initial.*planning, starting.*with.*requirements, begin.*capability.*shape, explore.*problem.*space, what.*are.*we.*solving, frame.*initiative, frame.*solution, kick.*off.*project, initiate.*request, describe.*need, start.*intake, capture.*ask, early.*shaping, solution.*intent, business.*intent, initial.*goal, who.*needs.*what, start.*mapping.*conversation, map.*user.*types, identify.*system.*touchpoints, start.*exploring.*flow, problem.*framing, build.*new, start.*new.*project, new.*project, begin.*new, create.*new, start.*on.*new, want.*to.*build.*new, want.*to.*start.*new, want.*to.*start.*on.*new, i.*want.*to.*build, i.*want.*to.*start, new.*initiative, new.*application, new.*solution, new.*system, new.*platform, new.*service, new.*product, new.*capability, new.*tool, new.*software, new.*technology, new.*tech.*stack, new.*architecture, new.*infrastructure, new.*integration, new.*api, new.*microservice, new.*component, new.*module, new.*framework, new.*library, new.*ecosystem, new.*transformation, new.*modernization, new.*digital, new.*automation, new.*enterprise, new.*program, launch.*new, develop.*new, design.*new, implement.*new, roll.*out.*new, deploy.*new, release.*new, introduce.*new, establish.*new, set.*up.*new, commence.*new, embark.*on.*new, undertake.*new, shape.*domain, model.*domain, identify.*bounded.*contexts, map.*domain, discover.*domain.*concepts, define.*ubiquitous.*language, start.*domain.*modeling, begin.*ddd, explore.*domain, domain.*shaping
+
+**Then check for:** `story_bot_shape_<action>` tool
+
+**Example:** "start.*shaping" → use `story_bot_shape_clarify`
+
+
+### Tests Behavior
+
+**When user is trying to:** Write test files (.py, .js, etc.) with executable test code from scenarios/examples that validate story behavior  
+**as indicated by Trigger words:** write.*test.*files, write.*test.*code, write.*pytest.*tests, write.*test.*cases, generate.*test.*code, create.*test.*file, implement.*step.*definitions, generate.*acceptance.*tests, create.*bdd.*tests, generate.*test.*implementation, create.*test.*cases, implement.*feature.*tests, specification.*tests, test.*code.*generation, bdd.*test.*code, write.*tests
+
+**Then check for:** `story_bot_tests_<action>` tool
+
+**Example:** "write.*test.*files" → use `story_bot_tests_clarify`
+
+
+
+## Error Handling
+
+**CRITICAL:** If a registered tool is broken or returns an error:
+
+1. **DO NOT automatically attempt a workaround**
+2. **Inform user of the exact error details** (include full error message, tool name, parameters used)
+3. **Ask user:** "The tool returned an error. Should I attempt to repair the tool, or proceed manually?"
+4. **Wait for user decision** before taking any action
+
+## Workflow Pattern
+
+When you recognize a trigger word:
+
+1. **Check if MCP tools are available** (ask mode vs agent mode)
+2. **If in ask mode:** Inform user to switch to agent mode for MCP tool access
+3. **If in agent mode:** Look for matching MCP tool and invoke it
+4. **If tool returns error:** Follow error handling above (do NOT workaround)
+5. **If no matching tool found:** Fall back to manual operations with explanation
+
+## Example Usage
+
+**User says:** "generate.*source.*code"
+
+**AI should:**
+1. Recognize trigger word from behavior section above
+2. Check: Am I in agent mode?
+3. Check: Is `story_bot_code_clarify` available?
+4. If yes → Invoke the tool
+5. If no → Explain and ask how to proceed
+
+**DO NOT** immediately start reading files manually without checking for tools first.

@@ -21,7 +21,7 @@ class BuildKnowledgeAction(Action):
                             activity_tracker=activity_tracker)
         else:
             if action_name is None:
-                action_name = 'build_knowledge'
+                action_name = 'build'
             # Pass action_name to super to use the bot_name/action_name path
             super().__init__(base_action_config=None, behavior=behavior,
                             activity_tracker=activity_tracker, bot_name=bot_name, action_name=action_name)

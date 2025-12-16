@@ -14,13 +14,8 @@ class BaseActionConfig:
         # Find base actions directory
         base_actions_dir = get_base_actions_directory(bot_directory=bot_paths.bot_directory)
         
-        # Handle case where action_name is 'validate_rules' but directory is 'validate'
-        # Check both the action_name directory and common aliases
+        # Check the action_name directory
         possible_dirs = [action_name]
-        if action_name == 'validate_rules':
-            possible_dirs.append('validate')
-        elif action_name == 'validate':
-            possible_dirs.append('validate_rules')
         
         self.config_path = None
         for dir_name in possible_dirs:
@@ -42,7 +37,7 @@ class BaseActionConfig:
         if self.config_path.exists():
             self._config = read_json_file(self.config_path)
             # CRITICAL: Always use action_name from constructor, not from config file
-            # Config file might have different name (e.g., config says "validate" but we want "validate_rules")
+            # Config file might have different name - support both old and new action names
             # Override config file's name with the constructor parameter
             self._config['name'] = action_name
             # Also ensure self.action_name is set (it already is, but be explicit)

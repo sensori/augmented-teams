@@ -1,0 +1,157 @@
+{
+  "behaviorName": "shape",
+  "order": 1,
+  "description": "Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements",
+  "goal": "Shape both story map and domain model together from user context - capture domain concepts, responsibilities, and requirements alongside story structure",
+  "inputs": "User context, interviews, vision documents, existing requirements, business Domain Experts interviews",
+  "outputs": "story-graph.json, story-map.md, story-map-outline.drawio, story-map.txt, domain_outline.md, domain_graph.json, domain-model-description.md",
+  "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
+  "instructions": [
+    "Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements"
+  ],
+  "actions_workflow": {
+    "actions": [
+      {
+        "name": "clarify",
+        "order": 1,
+        "next_action": "strategy",
+        "instructions": [
+          "Gather context for both story mapping and domain modeling"
+        ]
+      },
+      {
+        "name": "strategy",
+        "order": 2,
+        "next_action": "build",
+        "instructions": [
+          "Include domain modeling planning criteria alongside story mapping criteria"
+        ]
+      },
+      {
+        "name": "build",
+        "order": 3,
+        "next_action": "validate",
+        "instructions": [
+          "shape: build story map structure AND domain model",
+          "Apply story shaping rules (context: 'when shaping stories') for story structure",
+          "Apply domain shaping rules (context: 'when shaping the domain') for domain model structure"
+        ]
+      },
+      {
+        "name": "validate",
+        "order": 4,
+        "next_action": "render",
+        "instructions": [
+          "shape: validate hierarchy, story structure, AND domain model",
+          "Apply story shaping rules (context: 'when shaping stories') for story structure",
+          "Apply domain shaping rules (context: 'when shaping the domain') for domain model validation"
+        ]
+      },
+      {
+        "name": "render",
+        "order": 5,
+        "instructions": [
+          "shape: render story map documents AND domain model documents"
+        ]
+      }
+    ]
+  },
+  "trigger_words": {
+    "description": "Behavior-level trigger words - specific to shaping/scoping/initial planning behavior, including domain shaping integration",
+    "patterns": [
+      "start.*shaping",
+      "let.*s.*shape",
+      "begin.*shaping",
+      "do.*shaping",
+      "shaping",
+      "shape.*capability",
+      "scoping",
+      "initial.*planning",
+      "starting.*with.*requirements",
+      "begin.*capability.*shape",
+      "explore.*problem.*space",
+      "what.*are.*we.*solving",
+      "frame.*initiative",
+      "frame.*solution",
+      "kick.*off.*project",
+      "initiate.*request",
+      "describe.*need",
+      "start.*intake",
+      "capture.*ask",
+      "early.*shaping",
+      "solution.*intent",
+      "business.*intent",
+      "initial.*goal",
+      "who.*needs.*what",
+      "start.*mapping.*conversation",
+      "map.*user.*types",
+      "identify.*system.*touchpoints",
+      "start.*exploring.*flow",
+      "problem.*framing",
+      "build.*new",
+      "start.*new.*project",
+      "new.*project",
+      "begin.*new",
+      "create.*new",
+      "start.*on.*new",
+      "want.*to.*build.*new",
+      "want.*to.*start.*new",
+      "want.*to.*start.*on.*new",
+      "i.*want.*to.*build",
+      "i.*want.*to.*start",
+      "new.*initiative",
+      "new.*application",
+      "new.*solution",
+      "new.*system",
+      "new.*platform",
+      "new.*service",
+      "new.*product",
+      "new.*capability",
+      "new.*tool",
+      "new.*software",
+      "new.*technology",
+      "new.*tech.*stack",
+      "new.*architecture",
+      "new.*infrastructure",
+      "new.*integration",
+      "new.*api",
+      "new.*microservice",
+      "new.*component",
+      "new.*module",
+      "new.*framework",
+      "new.*library",
+      "new.*ecosystem",
+      "new.*transformation",
+      "new.*modernization",
+      "new.*digital",
+      "new.*automation",
+      "new.*enterprise",
+      "new.*program",
+      "launch.*new",
+      "develop.*new",
+      "design.*new",
+      "implement.*new",
+      "roll.*out.*new",
+      "deploy.*new",
+      "release.*new",
+      "introduce.*new",
+      "establish.*new",
+      "set.*up.*new",
+      "commence.*new",
+      "embark.*on.*new",
+      "undertake.*new",
+      "shape.*domain",
+      "model.*domain",
+      "identify.*bounded.*contexts",
+      "map.*domain",
+      "discover.*domain.*concepts",
+      "define.*ubiquitous.*language",
+      "start.*domain.*modeling",
+      "begin.*ddd",
+      "explore.*domain",
+      "domain.*shaping"
+    ]
+  }
+}
+
+

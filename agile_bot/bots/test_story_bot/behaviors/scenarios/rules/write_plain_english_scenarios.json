@@ -1,0 +1,25 @@
+{
+  "description": "Write scenarios in plain English. NO variables, NO placeholders, NO Scenario Outlines, NO Examples tables at this stage.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.plain_english_scenarios_scanner.PlainEnglishScenariosScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Plain English scenarios",
+        "content": [
+          "Given user has attached documents to chat window",
+          "And user has typed request message 'start shaping'",
+          "When AI Chat processes request",
+          "Then AI Chat identifies story shaping keywords"
+        ]
+      },
+      "dont": {
+        "description": "Don't use variables or placeholders",
+        "content": [
+          "Given user has typed request message \"<request_message>\" (WRONG - has variable)",
+          "Scenario Outline: AI Chat detects keywords (WRONG - Outline at this stage)",
+          "Examples: | request_message | (WRONG - Examples at this stage)"
+        ]
+      }
+    }
+  ]
+}

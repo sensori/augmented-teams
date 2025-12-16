@@ -35,7 +35,7 @@ class KnowledgeGraph:
             raise FileNotFoundError(
                 f"Knowledge graph file not found at {knowledge_graph_path}. "
                 f"Cannot validate rules without knowledge graph. "
-                f"Expected knowledge graph to be created by build_knowledge action before validate_rules."
+                f"Expected knowledge graph to be created by build action before validate."
             )
         
         self._content = read_json_file(knowledge_graph_path)

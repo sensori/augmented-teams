@@ -42,7 +42,7 @@ class StoryGraph:
                 raise FileNotFoundError(
                     f"Story graph file (story-graph.json) not found in {docs_dir}. "
                     f"Cannot validate rules without story graph. "
-                    f"Expected story graph to be created by build_knowledge action before validate_rules."
+                    f"Expected story graph to be created by build action before validate."
                 )
             self._content = {}
             return

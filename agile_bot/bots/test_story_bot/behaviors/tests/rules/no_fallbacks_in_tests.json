@@ -1,0 +1,27 @@
+{
+  "description": "Tests must fail if a fallback or default branch is executed. Every assertion should cover the explicitly intended path so that regressions do not hide behind fallback/default handling.",
+  "examples": [
+    {
+      "do": {
+        "description": "Assert the specific behavior path is taken and no fallback is triggered",
+        "content": [
+          "def test_handles_agile_mode_explicitly():",
+          "    result = execute_behavior(mode='agile')",
+          "    assert result.mode == 'agile'",
+          "    assert result.stage == 'agile_flow'",
+          "    assert result.used_fallback is False"
+        ]
+      },
+      "dont": {
+        "description": "Let a fallback path pass the test instead of exercising the real requirement",
+        "content": [
+          "def test_accepts_missing_mode():",
+          "    result = execute_behavior(mode=None)",
+          "    assert result.stage == 'default_flow'  # WRONG - this is the fallback path",
+          "    assert result.used_fallback is True      # Wrong because fallback masks missing coverage"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.no_fallbacks_scanner.NoFallbacksScanner"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "render_increments_drawio",
+  "type": "synchronizer",
+  "path": "docs/stories",
+  "input": "story-graph.json",
+  "synchronizer": "synchronizers.story_io.DrawIOSynchronizer",
+  "renderer_command": "render-increments",
+  "output": "story-map-increments.drawio",
+  "drawio_file": "story-map-increments.drawio",
+  "instructions": "Render increments from story-graph.json to DrawIO using the story_io CLI. Execute: python -m agile_bot.bots.story_bot.src.synchronizers.story_io.story_io_cli render-increments --story-graph {project_path}/docs/stories/story-graph.json --drawio-file {project_path}/docs/stories/story-map-increments.drawio --output {project_path}/docs/stories/story-map-increments.drawio"
+}
+

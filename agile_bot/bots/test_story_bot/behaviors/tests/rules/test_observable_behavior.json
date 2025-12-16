@@ -1,0 +1,116 @@
+{
+  "description": "Test observable behavior, not implementation details. Verify public API behavior and visible state changes. Don't assert on private methods, internal flags, or how the code works internally. Test WHAT happens, not HOW it happens. This makes tests resilient to refactoring.",
+  "examples": [
+    {
+      "do": {
+        "description": "Test observable behavior through public API",
+        "content": [
+          "def test_agent_creates_config_path_when_initialized(self, tmp_path):",
+          "    \"\"\"Agent creates configuration path when initialized.\"\"\"",
+          "    # Given",
+          "    config = {'name': 'story_bot'}",
+          "    ",
+          "    # When",
+          "    agent = Agent(agent_name='story_bot', workspace_root=tmp_path)",
+          "    agent.initialize(config)",
+          "    ",
+          "    # Then - Test observable outcomes through public API",
+          "    expected_path = tmp_path / 'agents' / 'base' / 'agent.json'",
+          "    assert agent.config_path == expected_path  # Public property",
+          "    assert agent.config_path.exists()  # Observable file system state",
+          "    assert agent.is_initialized  # Public property"
+        ]
+      },
+      "dont": {
+        "description": "Test implementation details or private state",
+        "content": [
+          "def test_agent_initialization(self, tmp_path):",
+          "    agent = Agent('story_bot', tmp_path)",
+          "    agent.initialize({'name': 'bot'})",
+          "    ",
+          "    # DON'T: Test internal implementation details",
+          "    assert agent._setup_called == True  # WRONG - private flag",
+          "    assert agent._validate_config.called  # WRONG - method called",
+          "    assert agent._internal_state == 'initialized'  # WRONG - private state",
+          "    assert len(agent._initialization_steps) == 3  # WRONG - internal list",
+          "    # These assertions break when you refactor!",
+          "    # Test BEHAVIOR not IMPLEMENTATION!"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Test behavior from user perspective",
+        "content": [
+          "def test_agent_loads_domain_graph_when_config_provided(self, tmp_path):",
+          "    \"\"\"Agent loads domain graph when configuration is provided.\"\"\"",
+          "    # Given: Configuration with domain path",
+          "    domain_file = tmp_path / 'domain_graph.json'",
+          "    domain_file.write_text('{\"nodes\": [\"node1\"]}')",
+          "    config = {'domain_graph_path': str(domain_file)}",
+          "    ",
+          "    # When: Agent initializes with config",
+          "    agent = Agent(agent_name='story_bot', workspace_root=tmp_path)",
+          "    agent.load_domain_graph(config)",
+          "    ",
+          "    # Then: Agent has loaded graph (test from user perspective)",
+          "    assert agent.has_domain_graph  # Can user check if loaded?",
+          "    assert agent.get_domain_nodes() == ['node1']  # Can user get nodes?",
+          "    # Test through PUBLIC API that users would call"
+        ]
+      },
+      "dont": {
+        "description": "Test internal data structures",
+        "content": [
+          "def test_agent_loads_graph(self, tmp_path):",
+          "    domain_file = tmp_path / 'graph.json'",
+          "    domain_file.write_text('{\"nodes\": [\"n1\"]}')",
+          "    agent = Agent('bot', tmp_path)",
+          "    agent.load_domain_graph({'domain_graph_path': str(domain_file)})",
+          "    ",
+          "    # DON'T: Test internal data structures",
+          "    assert agent._graph_data == {'nodes': ['n1']}  # WRONG - private data",
+          "    assert agent._graph_loader.was_called  # WRONG - internal component",
+          "    assert len(agent._node_cache) == 1  # WRONG - internal cache",
+          "    assert agent._parser.parse_count == 1  # WRONG - internal counter",
+          "    # If you refactor graph storage, all these tests break!",
+          "    # Test BEHAVIOR through PUBLIC API instead!"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Test makes refactoring safe",
+        "content": [
+          "# Test focuses on WHAT, not HOW",
+          "def test_config_validator_rejects_missing_name(self):",
+          "    \"\"\"Validator rejects config missing required 'name' field.\"\"\"",
+          "    validator = ConfigValidator()",
+          "    result = validator.validate({'workspace': '/tmp'})",
+          "    ",
+          "    assert not result.is_valid",
+          "    assert 'name' in result.error_message",
+          "    # This test stays valid even if you completely refactor",
+          "    # the internal validation logic!"
+        ]
+      },
+      "dont": {
+        "description": "Test couples to implementation, breaks on refactor",
+        "content": [
+          "# DON'T: Test implementation, breaks on refactor",
+          "def test_validator(self):",
+          "    validator = ConfigValidator()",
+          "    result = validator.validate({'workspace': '/tmp'})",
+          "    ",
+          "    # WRONG - coupled to implementation",
+          "    assert validator._check_name.call_count == 1  # Internal method",
+          "    assert validator._errors == ['Missing name']  # Internal list",
+          "    assert validator._validation_steps_completed == 5  # Internal counter",
+          "    # Refactor validation logic → ALL THESE TESTS BREAK!",
+          "    # Tests should NOT know HOW validation works internally!"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.scanners.observable_behavior_scanner.ObservableBehaviorScanner"
+}

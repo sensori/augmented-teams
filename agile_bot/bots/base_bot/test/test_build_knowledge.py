@@ -9,8 +9,8 @@ Tests for all stories in the 'Build Knowledge' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.actions.build.build_action import BuildKnowledgeAction
-from agile_bot.bots.base_bot.src.actions.validate.scanners.story_map import (
+from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
+from agile_bot.bots.base_bot.src.scanners.story_map import (
     StoryMap, Epic, SubEpic, StoryGroup, Story, Scenario, ScenarioOutline
 )
 from agile_bot.bots.base_bot.test.test_helpers import (
@@ -192,11 +192,11 @@ def story_map(simple_story_graph):
 # GIVEN/WHEN/THEN HELPER FUNCTIONS
 # ============================================================================
 
-def given_build_knowledge_outputs():
+def given_build_outputs():
     """Given: Build knowledge action outputs."""
     return {'knowledge_items_count': 12, 'file_path': 'knowledge.json'}
 
-def given_build_knowledge_duration():
+def given_build_duration():
     """Given: Build knowledge action duration."""
     return 420
 
@@ -246,18 +246,18 @@ def when_mock_bot_created_then_story_map_raises_file_not_found_error(test_instan
 # ============================================================================
 
 class TestTrackActivityForBuildKnowledgeAction:
-    """Story: Track Activity for Build Knowledge Action - Tests activity tracking for build_knowledge."""
+    """Story: Track Activity for Build Knowledge Action - Tests activity tracking for build."""
 
-    def test_track_activity_when_build_knowledge_action_starts(self, bot_directory, workspace_directory):
+    def test_track_activity_when_build_action_starts(self, bot_directory, workspace_directory):
         # Given: Bot directory and workspace directory are set up
         # When: Build knowledge action starts
         # Then: Activity is tracked (verified by verify_action_tracks_start)
         verify_action_tracks_start(bot_directory, workspace_directory, BuildKnowledgeAction, 'build')
 
-    def test_track_activity_when_build_knowledge_action_completes(self, bot_directory, workspace_directory):
+    def test_track_activity_when_build_action_completes(self, bot_directory, workspace_directory):
         # Given: Build knowledge outputs and duration
-        outputs = given_build_knowledge_outputs()
-        duration = given_build_knowledge_duration()
+        outputs = given_build_outputs()
+        duration = given_build_duration()
         # When: Build knowledge action completes
         # Then: Activity is tracked with outputs and duration (verified by verify_action_tracks_completion)
         verify_action_tracks_completion(bot_directory, workspace_directory, BuildKnowledgeAction, 'build', outputs=outputs, duration=duration)
@@ -270,16 +270,16 @@ class TestTrackActivityForBuildKnowledgeAction:
 class TestProceedToRenderOutput:
     """Story: Proceed To Render Output - Tests transition to render_output action."""
 
-    def test_seamless_transition_from_build_knowledge_to_validate_rules(self, bot_directory, workspace_directory):
+    def test_seamless_transition_from_build_to_validate(self, bot_directory, workspace_directory):
         """
         SCENARIO: Seamless Transition From Build Knowledge To Validate Rules
         """
         # Given: Bot directory and workspace directory are set up
         # When: Build knowledge action completes
-        # Then: Workflow transitions to validate_rules (verified by verify_workflow_transition)
+        # Then: Workflow transitions to validate (verified by verify_workflow_transition)
         verify_workflow_transition(bot_directory, workspace_directory, 'build', 'validate')
 
-    def test_workflow_state_captures_build_knowledge_completion(self, bot_directory, workspace_directory):
+    def test_workflow_state_captures_build_completion(self, bot_directory, workspace_directory):
         """
         SCENARIO: Workflow State Captures Build Knowledge Completion
         """
@@ -325,7 +325,7 @@ def given_knowledge_graph_setup_complete(bot_directory: Path, behavior: str, tem
     return kg_dir
 
 
-def when_build_knowledge_action_injects_template(bot_name: str, behavior: str, bot_directory: Path):
+def when_build_action_injects_template(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template."""
     # Ensure base_actions structure exists
     from conftest import create_base_actions_structure
@@ -351,7 +351,7 @@ def then_instructions_contain_template_path(instructions: dict, template_name: s
     assert Path(instructions['template_path']).exists()
 
 
-def when_build_knowledge_action_injects_template_raises_error(bot_name: str, behavior: str, bot_directory: Path):
+def when_build_action_injects_template_raises_error(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template raises error."""
     # Ensure base_actions structure exists
     from conftest import create_base_actions_structure
@@ -457,7 +457,7 @@ def given_knowledge_graph_config_and_template_created(kg_dir: Path) -> tuple:
     return config_file, template_file
 
 
-def when_build_knowledge_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
+def when_build_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction loads and merges instructions."""
     # Ensure base_actions structure exists
     from conftest import create_base_actions_structure
@@ -686,7 +686,7 @@ def given_validation_rules_created(bot_directory: Path, rule_name: str, rule_con
     return rule_file
 
 
-def when_build_knowledge_action_loads_and_injects_all_instructions(action_obj: BuildKnowledgeAction):
+def when_build_action_loads_and_injects_all_instructions(action_obj: BuildKnowledgeAction):
     """When: BuildKnowledgeAction loads and injects all instructions."""
     # do_execute() now handles all instruction loading, merging, and injection
     result = action_obj.do_execute({})
@@ -736,7 +736,7 @@ def given_knowledge_graph_template_for_increments_created(kg_dir: Path, template
     return template_file
 
 
-def when_build_knowledge_action_injects_template_for_increments(bot_name: str, behavior: str, bot_directory: Path):
+def when_build_action_injects_template_for_increments(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction injects template for increments."""
     # Ensure base_actions structure exists
     from conftest import create_base_actions_structure
@@ -768,8 +768,8 @@ def given_test_variables_for_exploration() -> tuple[str, str]:
     return bot_name, behavior
 
 
-def given_test_variables_for_shape_build_knowledge() -> tuple[str, str, str]:
-    """Given: Test variables for shape build_knowledge."""
+def given_test_variables_for_shape_build() -> tuple[str, str, str]:
+    """Given: Test variables for shape build."""
     bot_name = 'test_bot'
     behavior = 'shape'
     action = 'build'
@@ -823,7 +823,7 @@ def given_template_variables_test_setup(bot_directory: Path, workspace_directory
     
     
     """
-    bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+    bot_name, behavior, action = given_test_variables_for_shape_build()
     bootstrap_env(bot_directory, workspace_directory)
     
     given_base_instructions_copied_to_bot_directory(bot_directory, action)
@@ -909,7 +909,7 @@ def when_story_map_epics_retrieved(story_map):
     return story_map.epics()
 
 
-def then_epics_contain_single_build_knowledge_epic(epics):
+def then_epics_contain_single_build_epic(epics):
     """Then: Epics contain single Build Knowledge epic."""
     assert len(epics) == 1
     assert isinstance(epics[0], Epic)
@@ -1045,7 +1045,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         given_knowledge_graph_config_file_created(kg_dir, template_name)
         given_knowledge_graph_template_file_created(kg_dir, template_name)
         
-        action_obj, instructions = when_build_knowledge_action_injects_template(bot_name, behavior, bot_directory)
+        action_obj, instructions = when_build_action_injects_template(bot_name, behavior, bot_directory)
         
         then_instructions_contain_template_path(instructions, template_name)
 
@@ -1058,7 +1058,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         kg_dir = given_environment_and_knowledge_graph_setup(bot_directory, workspace_directory, behavior)
         given_knowledge_graph_config_file_created(kg_dir, 'missing-template.json')
         
-        exc_info = when_build_knowledge_action_injects_template_raises_error(bot_name, behavior, bot_directory)
+        exc_info = when_build_action_injects_template_raises_error(bot_name, behavior, bot_directory)
         
         then_error_mentions_template_or_knowledge_graph(exc_info)
 
@@ -1069,10 +1069,10 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         WHEN: Action method is invoked
         THEN: Instructions are loaded from both locations and merged
         """
-        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+        bot_name, behavior, action = given_test_variables_for_shape_build()
         given_base_and_behavior_instructions_setup(bot_directory, workspace_directory, bot_name, behavior, action)
         
-        action_obj, merged_instructions = when_build_knowledge_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
+        action_obj, merged_instructions = when_build_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
         then_instructions_merged_from_both_sources(merged_instructions, behavior, action)
         then_base_instructions_present(merged_instructions)
@@ -1086,10 +1086,10 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         WHEN: Action method is invoked
         THEN: Only base instructions are returned (no behavior_instructions key)
         """
-        bot_name, behavior, action = given_test_variables_for_shape_build_knowledge()
+        bot_name, behavior, action = given_test_variables_for_shape_build()
         given_base_instructions_only_setup(bot_directory, workspace_directory, bot_directory, behavior, action)
         
-        action_obj, merged_instructions = when_build_knowledge_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
+        action_obj, merged_instructions = when_build_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
         then_base_instructions_only_present(merged_instructions, behavior, action)
 
@@ -1108,7 +1108,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
         base_action_config = BaseActionConfig('build', behavior_obj.bot_paths)
         action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
-        instructions = when_build_knowledge_action_loads_and_injects_all_instructions(action_obj)
+        instructions = when_build_action_loads_and_injects_all_instructions(action_obj)
         
         base_instructions_text = given_base_instructions_text_extracted(instructions)
         then_all_template_variables_replaced(base_instructions_text)
@@ -1119,7 +1119,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 # ============================================================================
 
 class TestUpdateExistingKnowledgeGraph:
-    """Story: Update Existing Knowledge Graph - Tests that build_knowledge updates existing story-graph.json instead of creating a new file."""
+    """Story: Update Existing Knowledge Graph - Tests that build updates existing story-graph.json instead of creating a new file."""
 
     def test_behavior_updates_existing_story_graph_json(self, bot_directory, workspace_directory):
         """
@@ -1136,7 +1136,7 @@ class TestUpdateExistingKnowledgeGraph:
         given_knowledge_graph_config_for_story_graph_increments(kg_dir)
         given_knowledge_graph_template_for_increments(kg_dir)
         
-        action_obj, instructions = when_build_knowledge_action_injects_template_for_increments(bot_name, behavior, bot_directory)
+        action_obj, instructions = when_build_action_injects_template_for_increments(bot_name, behavior, bot_directory)
         
         then_instructions_indicate_updating_existing_file(instructions, 'story-graph.json')
         then_story_graph_updated_with_increments(instructions, story_graph_path)
@@ -1170,7 +1170,7 @@ class TestLoadStoryGraphIntoMemory:
         # When: Epics are retrieved from story map
         epics = when_story_map_epics_retrieved(story_map)
         # Then: Epics contain single build knowledge epic
-        then_epics_contain_single_build_knowledge_epic(epics)
+        then_epics_contain_single_build_epic(epics)
     
     def test_epic_has_sub_epics(self, story_map):
         """
@@ -1178,7 +1178,7 @@ class TestLoadStoryGraphIntoMemory:
         """
         # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
-        epic = then_epics_contain_single_build_knowledge_epic(epics)
+        epic = then_epics_contain_single_build_epic(epics)
         # When: Epic children are retrieved
         children = when_epic_children_retrieved(epic)
         # Then: Children contain single sub epic
@@ -1190,7 +1190,7 @@ class TestLoadStoryGraphIntoMemory:
         """
         # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
-        epic = then_epics_contain_single_build_knowledge_epic(epics)
+        epic = then_epics_contain_single_build_epic(epics)
         sub_epic = epic.children[0]
         # When: Sub epic children are retrieved
         children = when_sub_epic_children_retrieved(sub_epic)
@@ -1203,7 +1203,7 @@ class TestLoadStoryGraphIntoMemory:
         """
         # Given: Story map is loaded
         epics = when_story_map_epics_retrieved(story_map)
-        epic = then_epics_contain_single_build_knowledge_epic(epics)
+        epic = then_epics_contain_single_build_epic(epics)
         sub_epic, story_group = when_sub_epic_and_story_group_retrieved(epic)
         # When: Story group stories are retrieved
         stories = when_story_group_stories_retrieved(story_group)

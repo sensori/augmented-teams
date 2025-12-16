@@ -1,0 +1,31 @@
+{
+  "description": "Use Outcome Verbs, Not Communication Verbs",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.communication_verb_scanner.CommunicationVerbScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Use verbs that describe artifacts/outcomes",
+        "content": [
+          "Use verbs that describe artifacts/outcomes",
+          "Examples: Animation, Feedback, Indicators, Configuration",
+          "Name concepts by what they ARE or CREATE",
+          "Examples: Power Activation Animation, Combat Outcome Feedback",
+          "Focus on tangible results",
+          "Examples: Hit Indicators, Save Result Feedback"
+        ]
+      },
+      "dont": {
+        "description": "Don't use generic communication verbs",
+        "content": [
+          "Don't use generic communication verbs",
+          "Examples: showing, displaying, visualizing, presenting",
+          "Don't use vague enablement verbs",
+          "Examples: providing, enabling, allowing",
+          "Don't name concepts by their mechanism",
+          "Wrong Examples: Visualizing Power Activation, Showing Combat Results"
+        ]
+      }
+    }
+  ]
+}
+

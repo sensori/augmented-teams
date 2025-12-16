@@ -29,7 +29,7 @@ class MCPServer:
         parts = tool_name.split('_')
         if len(parts) >= 3:
             # Remove bot name parts and get behavior + action
-            # e.g., 'test_bot_shape_gather_context' -> ['shape', 'gather', 'context']
+            # e.g., 'test_bot_shape_clarify' -> ['shape', 'clarify']
             without_bot_name = '_'.join(parts[2:])  # Get everything after 'test_bot'
             
             # Try to find the split point between behavior and action

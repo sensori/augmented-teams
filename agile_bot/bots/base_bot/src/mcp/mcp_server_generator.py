@@ -80,19 +80,18 @@ class MCPServerGenerator:
         return mcp_server
     
     def _get_bot_behaviors(self) -> list:
-        bot_behaviors = getattr(self.bot, 'behaviors', [])
-        if not isinstance(bot_behaviors, list):
-            # Handle case where bot.behaviors might be a property or mock
-            bot_config = self.bot.config if hasattr(self.bot, 'config') else None
-            if bot_config and isinstance(bot_config, dict):
-                bot_behaviors = bot_config.get('behaviors', [])
-            else:
-                bot_behaviors = []
-        return bot_behaviors if isinstance(bot_behaviors, list) else []
+        """Get behavior names from bot instance or discover from folders."""
+        # Try to get from bot.behaviors.names (Behaviors collection)
+        if self.bot and hasattr(self.bot, 'behaviors'):
+            behaviors_collection = self.bot.behaviors
+            if hasattr(behaviors_collection, 'names'):
+                return behaviors_collection.names
+        # Fallback to folder discovery
+        return self.discover_behaviors_from_folders()
     
     def register_all_behavior_action_tools(self, mcp_server: FastMCP):
-        bot_config = mcp_server.bot_config
-        behaviors = bot_config.get('behaviors', [])
+        # Discover behaviors from folder structure
+        behaviors = self._get_bot_behaviors()
         
         # Register bot tool (routes to current behavior and current action)
         self.register_bot_tool(mcp_server)
@@ -124,7 +123,28 @@ class MCPServerGenerator:
             if self.bot is None:
                 return {"error": "Bot not initialized"}
             
-            result = self.bot.forward_to_current_behavior_and_current_action(parameters=parameters)
+            current_behavior = self.bot.behaviors.current
+            if current_behavior is None:
+                if self.bot.behaviors.first:
+                    self.bot.behaviors.navigate_to(self.bot.behaviors.first.name)
+                    current_behavior = self.bot.behaviors.current
+                else:
+                    raise ValueError("No behaviors available")
+            if current_behavior is None:
+                raise ValueError("No current behavior")
+            
+            action = current_behavior.actions.forward_to_current()
+            if action is None:
+                return {"error": f"No current action found for behavior {current_behavior.name}"}
+            
+            result_data = action.execute(parameters or {})
+            from agile_bot.bots.base_bot.src.bot.bot import BotResult
+            result = BotResult(
+                status='completed',
+                behavior=current_behavior.name,
+                action=action.action_name,
+                data=result_data
+            )
             
             return {
                 "status": result.status,
@@ -177,93 +197,69 @@ class MCPServerGenerator:
             
             if not state_file.exists():
                 return {
-                    "error": "No active workflow found",
-                    "message": "No behavior_action_state.json exists. Start a workflow first."
+                    "error": "No active state found",
+                    "message": "No behavior_action_state.json exists. Start a behavior first."
                 }
             
             try:
-                import json
-                state_data = json.loads(state_file.read_text(encoding='utf-8'))
-                current_behavior_path = state_data.get('current_behavior', '')
-                current_action_path = state_data.get('current_action', '')
-                
-                if not current_behavior_path or not current_action_path:
+                # Use behaviors collection to close current action
+                current_behavior = self.bot.behaviors.current
+                if current_behavior is None:
                     return {
-                        "error": "Cannot determine current action",
-                        "message": "workflow_state.json is missing current_behavior or current_action"
+                        "error": "No current behavior",
+                        "message": "No current behavior found. Initialize a behavior first."
                     }
                 
-                # Extract behavior and action names
-                # 'story_bot.shape' -> 'shape'
-                # 'story_bot.shape.clarify' -> 'clarify'
-                behavior_name = current_behavior_path.split('.')[-1]
-                action_name = current_action_path.split('.')[-1]
-                
-                # Get behavior object
-                behavior_obj = getattr(self.bot, behavior_name, None)
-                if behavior_obj is None:
-                    bot_behaviors = self._get_bot_behaviors()
+                # Load state to sync
+                current_behavior.actions.load_state()
+                current_action = current_behavior.actions.current
+                if current_action is None:
                     return {
-                        "error": f"Behavior {behavior_name} not found",
-                        "message": f"Available behaviors: {', '.join(bot_behaviors)}"
+                        "error": "No current action",
+                        "message": "No current action found."
                     }
                 
-                # Mark action as complete using Actions collection
-                behavior_obj.actions.close_current()
-                
-                # Action is complete - check if this is the final action in behavior
-                action_names = behavior_obj.actions.names
+                action_name = current_action.action_name
+                action_names = current_behavior.actions.names
                 is_final_action = (action_name == action_names[-1] if action_names else False)
                 
-                # Transition to next action within behavior
-                previous_action = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
-                behavior_obj.actions.navigate_to_next()
-                new_action = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
+                # Close current action (this transitions to next action)
+                current_behavior.actions.close_current()
                 
-                # Check if behavior is complete (stayed at same state = end of behavior)
-                behavior_complete = (previous_action == new_action and is_final_action)
+                # Check if behavior is complete
+                new_action = current_behavior.actions.current
+                behavior_complete = (new_action is None or (is_final_action and new_action.action_name == action_name))
                 
                 if behavior_complete:
-                    # Final action - check for next behavior
-                    bot_behaviors = self._get_bot_behaviors()
-                    if behavior_name in bot_behaviors:
-                        current_behavior_index = bot_behaviors.index(behavior_name)
-                        if current_behavior_index + 1 < len(bot_behaviors):
-                            # Transition to next behavior
-                            next_behavior_name = bot_behaviors[current_behavior_index + 1]
+                    # Transition to next behavior
+                    next_behavior = self.bot.behaviors.next()
+                    if next_behavior:
+                        self.bot.behaviors.navigate_to(next_behavior.name)
+                        next_behavior.actions.load_state()
+                        first_action = next_behavior.actions.current.action_name if next_behavior.actions.current else 'clarify'
                         
-                        # Update workflow state to next behavior, first action
-                        next_behavior_obj = getattr(self.bot, next_behavior_name)
-                        action_names = next_behavior_obj.actions.names
-                        first_action = action_names[0] if action_names else 'clarify'
-                        
-                        # Update state file with new behavior
-                        state_data['current_behavior'] = f'{self.bot_name}.{next_behavior_name}'
-                        state_data['current_action'] = f'{self.bot_name}.{next_behavior_name}.{first_action}'
-                        state_file.write_text(json.dumps(state_data), encoding='utf-8')
-                        
-                        message = f"Behavior '{behavior_name}' complete. Transitioned to behavior '{next_behavior_name}', action '{first_action}'."
+                        message = f"Behavior '{current_behavior.name}' complete. Transitioned to behavior '{next_behavior.name}', action '{first_action}'."
                         
                         return {
                             "status": "completed",
                             "completed_action": action_name,
-                            "completed_behavior": behavior_name,
-                            "next_behavior": next_behavior_name,
+                            "completed_behavior": current_behavior.name,
+                            "next_behavior": next_behavior.name,
                             "next_action": first_action,
                             "message": message
                         }
                     else:
-                        # No more behaviors - workflow complete
+                        # No more behaviors
                         message = f"Action '{action_name}' marked complete. All behaviors complete."
                         return {
                             "status": "completed",
                             "completed_action": action_name,
-                            "completed_behavior": behavior_name,
+                            "completed_behavior": current_behavior.name,
                             "message": message
                         }
                 else:
-                    # Not final - normal transition within behavior
-                    new_action_name = behavior_obj.actions.current.action_name if behavior_obj.actions.current else None
+                    # Normal transition within behavior
+                    new_action_name = current_behavior.actions.current.action_name if current_behavior.actions.current else None
                     message = f"Action '{action_name}' marked complete. Transitioned to '{new_action_name}'."
                     
                     return {
@@ -295,19 +291,19 @@ class MCPServerGenerator:
             
             from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
             working_dir = get_workspace_directory()
-            workflow_state_file = working_dir / 'workflow_state.json'
+            state_file = working_dir / 'behavior_action_state.json'
             
-            if not workflow_state_file.exists():
+            if not state_file.exists():
                 return {
-                    "error": "No workflow state found",
-                    "message": "Cannot confirm out-of-order execution without an active workflow. Start a workflow first."
+                    "error": "No behavior state found",
+                    "message": "Cannot confirm out-of-order execution without an active behavior state. Start a behavior first."
                 }
             
             try:
                 import json
                 from datetime import datetime
                 
-                state_data = json.loads(workflow_state_file.read_text(encoding='utf-8'))
+                state_data = json.loads(state_file.read_text(encoding='utf-8'))
                 
                 # Store confirmation in workflow state
                 if 'out_of_order_confirmations' not in state_data:
@@ -318,7 +314,7 @@ class MCPServerGenerator:
                     'confirmed_by': 'human'
                 }
                 
-                workflow_state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
+                state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
                 
                 return {
                     "status": "confirmed",
@@ -398,9 +394,43 @@ class MCPServerGenerator:
             if self.bot is None:
                 return {"error": "Bot not initialized"}
             
-            # MCP Server just forwards requests - Bot handles all workflow/state management
+            # MCP Server forwards requests using explicit object hierarchy to lowest level:
+            # 1. Find behavior from behaviors collection
+            # 2. Find action from behavior's actions collection (if specified)
+            # 3. Execute the action directly
             try:
-                result = self.bot.execute_behavior(behavior, action=action, parameters=parameters)
+                behavior_obj = self.bot.behaviors.find_by_name(behavior)
+                if behavior_obj is None:
+                    return {"error": f"Behavior '{behavior}' not found"}
+                
+                if action:
+                    # Find action and execute directly at lowest level
+                    action_obj = behavior_obj.actions.find_by_name(action)
+                    if action_obj is None:
+                        return {"error": f"Action '{action}' not found in behavior '{behavior}'"}
+                    result_data = action_obj.execute(parameters)
+                    from agile_bot.bots.base_bot.src.bot.bot import BotResult
+                    result = BotResult(
+                        status='completed',
+                        behavior=behavior,
+                        action=action,
+                        data=result_data
+                    )
+                else:
+                    # Get current action and execute directly
+                    behavior_obj.actions.load_state()
+                    current_action = behavior_obj.actions.current
+                    if current_action is None:
+                        return {"error": f"No current action in behavior '{behavior}'"}
+                    result_data = current_action.execute(parameters)
+                    from agile_bot.bots.base_bot.src.bot.bot import BotResult
+                    result = BotResult(
+                        status='completed',
+                        behavior=behavior,
+                        action=current_action.action_name,
+                        data=result_data
+                    )
+                
                 return {
                     "status": result.status,
                     "behavior": result.behavior,
@@ -471,7 +501,7 @@ class MCPServerGenerator:
             earliest_missing = bot_behaviors[-1] if bot_behaviors else None
         
         # Build suggestion message
-        message = f"**ENTRY WORKFLOW - No workflow_state.json found**\n\n"
+        message = f"**ENTRY STATE - No behavior_action_state.json found**\n\n"
         message += f"Checking for existing artifacts in `{stories_dir}`...\n\n"
         
         if existing_artifacts:
@@ -533,34 +563,6 @@ class MCPServerGenerator:
         
         return artifacts
     
-    def _initialize_workflow_state(self, working_dir: Path, behavior: str):
-        """
-        Initialize workflow_state.json for a new workflow starting with the specified behavior.
-        """
-        import json
-        
-        # Create docs/stories directory if it doesn't exist
-        stories_dir = working_dir / 'docs' / 'stories'
-        stories_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Get the behavior object to find its first action
-        behavior_obj = getattr(self.bot, behavior, None)
-        if behavior_obj is None:
-            raise ValueError(f"Behavior {behavior} not found")
-        
-        action_names = behavior_obj.actions.names
-        first_action = action_names[0] if action_names else 'gather_context'
-        
-        # Create initial behavior_action_state
-        workflow_state_file = working_dir / 'behavior_action_state.json'
-        state_data = {
-            'current_behavior': f'{self.bot_name}.{behavior}',
-            'current_action': f'{self.bot_name}.{behavior}.{first_action}',
-            'completed_actions': [],
-            'started_at': None  # Will be set by workflow when it saves
-        }
-        
-        workflow_state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
 
     
     def _load_trigger_words_from_behavior_folder(
@@ -590,13 +592,22 @@ class MCPServerGenerator:
         return []
     
     def generate_bot_config_file(self, behaviors: list) -> Path:
-        config_path = self.bot_directory / 'bot_config.json'
-        config_data = {
-            'name': self.bot_name,
-            'behaviors': behaviors
-        }
+        """Ensure bot_config.json exists but don't modify behaviors list.
         
-        config_path.write_text(json.dumps(config_data, indent=2))
+        Behaviors are discovered from folder structure at runtime by BotConfig.behaviors_list.
+        This method only creates a minimal config if none exists; otherwise leaves it untouched.
+        """
+        config_path = self.bot_directory / 'bot_config.json'
+        
+        # If config exists, don't touch it - behaviors are discovered from folders
+        if config_path.exists():
+            return config_path
+        
+        # Only create minimal config if none exists
+        config_data = {
+            'name': self.bot_name
+        }
+        config_path.write_text(json.dumps(config_data, indent=2), encoding='utf-8')
         return config_path
     
     def generate_server_entry_point(self) -> Path:
@@ -728,6 +739,10 @@ if __name__ == '__main__':
         }
     
     def generate_awareness_files(self) -> Dict[str, Path]:
+        # Initialize bot if not already initialized (needed for behavior discovery)
+        if self.bot is None:
+            self.create_server_instance()
+        
         # Generate workspace rules file
         rules_path = self._generate_workspace_rules_file()
         
@@ -745,9 +760,8 @@ if __name__ == '__main__':
         bot_name_with_hyphens = self.bot_name.replace('_', '-')
         rules_file = rules_dir / f'mcp-{bot_name_with_hyphens}-awareness.mdc'
         
-        # Load bot config to get behaviors
-        bot_config = read_json_file(self.config_path)
-        behaviors = bot_config.get('behaviors', [])
+        # Discover behaviors from folder structure
+        behaviors = self.discover_behaviors_from_folders()
         
         # Load bot-level goal and description from bot_config.json
         bot_config = read_json_file(self.config_path)

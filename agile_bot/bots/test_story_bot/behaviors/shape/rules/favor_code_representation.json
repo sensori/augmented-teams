@@ -1,0 +1,50 @@
+{
+  "description": "CRITICAL: Domain models must represent code as closely as possible. Code should represent domain concepts. If code doesn't match domain concepts, refactor the code rather than creating abstract domain models.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.code_representation_scanner.CodeRepresentationScanner",
+  "examples": [
+    {
+      "do": {
+        "description": "Domain models should represent code closely",
+        "content": [
+          "Domain models should match actual code implementation",
+          "Code should represent domain concepts",
+          "If code doesn't match domain, refactor the code",
+          "",
+          "Correct Examples (code-aligned domain model):",
+          "PortfolioAnalysis",
+          "    Instantiated with: Portfolio",
+          "    Analyze portfolio: Portfolio",
+          "    Generate report: AnalysisReport",
+          "",
+          "AnalysisReport",
+          "    Instantiated with: PortfolioAnalysis",
+          "    Get recommendations: Recommendations",
+          "    Get risk assessment: RiskAssessment"
+        ]
+      },
+      "dont": {
+        "description": "Don't create abstract domain models that don't match code",
+        "content": [
+          "Don't create abstract domain models with no code basis",
+          "Don't separate domain models from code implementation",
+          "",
+          "Wrong Examples (abstract domain model):",
+          "PortfolioAnalysis",
+          "    Analyze portfolio: PortfolioConcept",
+          "    Generate insights: DomainInsights",
+          "",
+          "DomainInsights",
+          "    Extract patterns: AbstractPatterns",
+          "    Synthesize knowledge: KnowledgeBase",
+          "",
+          "Abstract Model Indicators (REJECT):",
+          "- Domain concepts that don't exist in code",
+          "- Collaborators that are abstract concepts without code representation",
+          "- Domain models that describe ideal state rather than actual code"
+        ]
+      }
+    }
+  ]
+}
+
+

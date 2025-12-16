@@ -321,7 +321,7 @@ def create_minimal_guardrails_files(bot_dir: Path, behavior_name: str, bot_name:
         if not planning_assumptions_file.exists():
             planning_assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
 
-def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: Path):
+def _create_validate_action(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create ValidateRulesAction instance."""
     from agile_bot.bots.base_bot.src.actions.validate.validate_action import ValidateRulesAction
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
@@ -344,7 +344,7 @@ def _create_validate_rules_action(bot_name: str, behavior: str, bot_directory: P
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
     
-    base_action_config = BaseActionConfig('validate_rules', bot_paths)
+    base_action_config = BaseActionConfig('validate', bot_paths)
     activity_tracker = ActivityTracker(bot_paths, bot_name)
     
     return ValidateRulesAction(
@@ -401,7 +401,7 @@ def _create_action_with_provided_class(action_class, bot_name: str, behavior: st
     """Helper: Create action instance with provided class."""
     if action_class.__name__ == 'ValidateRulesAction':
         behavior = behavior or 'exploration'
-        return _create_validate_rules_action(bot_name, behavior, bot_directory)
+        return _create_validate_action(bot_name, behavior, bot_directory)
     else:
         behavior = behavior or 'shape'
         action_obj = action_class(
@@ -415,7 +415,7 @@ def _create_action_with_provided_class(action_class, bot_name: str, behavior: st
 def _create_action_with_default_class(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create action instance with default class detection."""
     if behavior == 'exploration':
-        return _create_validate_rules_action(bot_name, behavior, bot_directory)
+        return _create_validate_action(bot_name, behavior, bot_directory)
     else:
         if bot_name == 'story_bot' and behavior is None:
             bot_name, behavior = given_bot_name_and_behavior_setup()

@@ -1,0 +1,10 @@
+{
+  "description": "Example injection",
+  "question": "How should examples be injected into scenarios?",
+  "outcome": "Determines whether examples are parameterized with example tables or embedded directly in scenarios",
+  "options": [
+    "Parameterize scenarios with example tables – Use Scenario Outline with Examples table for data-driven scenarios",
+    "Values directly in scenarios – Embed example values directly in scenario steps without parameterization"
+  ]
+}
+

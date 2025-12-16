@@ -1,5 +1,6 @@
 {
   "description": "CRITICAL: Story names MUST follow Verb-Noun format (e.g., 'Move To Mob Leaders Turn', 'Determines Target from Strategy', 'Initiate Mob Attack'), and include italicized description showing component interactions (e.g., '*Combat Tracker moves to any mob member's turn, auto moves to mob leader's turn*'). The story name should be concise and action-oriented, while the description shows the component-to-component interactions.",
+  "scanner": "agile_bot.bots.base_bot.src.scanners.verb_noun_scanner.VerbNounScanner",
   "do": {
     "examples": [
       {

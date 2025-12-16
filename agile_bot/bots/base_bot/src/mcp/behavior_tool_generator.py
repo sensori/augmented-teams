@@ -12,7 +12,7 @@ class BehaviorTool:
         self.name = f'{bot_name}_{behavior_name}_tool'
     
     def invoke(self, parameters: Dict[str, Any] = None):
-        from agile_bot.bots.base_bot.src.bot.bot import Bot
+        from agile_bot.bots.base_bot.src.bot.bot import Bot, BotResult
         from agile_bot.bots.base_bot.src.bot.workspace import get_bot_directory
         
         bot_directory = get_bot_directory()
@@ -24,7 +24,30 @@ class BehaviorTool:
         )
         
         behavior = getattr(bot, self.behavior_name)
-        return behavior.forward_to_current_action()
+        action = behavior.actions.forward_to_current()
+        if action is None:
+            return BotResult(
+                status='error',
+                behavior=self.behavior_name,
+                action='',
+                data={'message': f'No current action found for behavior {self.behavior_name}'}
+            )
+        
+        try:
+            result_data = action.execute(parameters or {})
+            return BotResult(
+                status='completed',
+                behavior=self.behavior_name,
+                action=action.action_name,
+                data=result_data
+            )
+        except Exception as e:
+            return BotResult(
+                status='error',
+                behavior=self.behavior_name,
+                action=action.action_name,
+                data={'message': str(e), 'error': type(e).__name__}
+            )
 
 
 class BehaviorToolGenerator:

@@ -843,8 +843,8 @@ def then_actions_has_close_current_method(actions: Actions):
 
 
 def then_actions_has_execute_current_method(actions: Actions):
-    """Then: Actions has execute_current method."""
-    assert hasattr(actions, 'execute_current')
+    """Then: Actions has forward_to_current method (replaces execute_current)."""
+    assert hasattr(actions, 'forward_to_current')
 
 
 def then_action_has_instructions_property(action: Action):

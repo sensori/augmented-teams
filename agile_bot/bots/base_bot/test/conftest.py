@@ -18,10 +18,16 @@ if str(_project_root) not in sys.path:
 
 
 # ============================================================================
-# MOCK WORKFLOW CLASS - For tests that still reference removed Workflow class
+# BEHAVIOR ACTION STATE HELPERS - State is managed by Behaviors and Actions collections
 # ============================================================================
 
+# Workflow class removed - use Bot.behaviors and Behavior.actions directly
+# Behaviors know their order and what's current
+# Actions know their order and what's current
+# State is persisted in behavior_action_state.json
+
 class Workflow:
+    """DEPRECATED: Use Bot.behaviors and Behavior.actions directly instead."""
     """Mock Workflow class for testing - Workflow class was removed from production code."""
     
     def __init__(self, bot_name: str, behavior: str, bot_directory: Path, states: list = None, transitions: list = None, workspace_root: Path = None):
@@ -248,17 +254,12 @@ def bot_name():
     return 'story_bot'
 
 @pytest.fixture
-def standard_workflow_config():
-    """Fixture: Standard workflow states and transitions (DEPRECATED - use Bot/Behavior/Actions)."""
-    # Workflow class removed - state managed by Behaviors and Actions collections
-    states = ['clarify', 'strategy', 'build', 'validate', 'render']
-    transitions = [
-        {'trigger': 'proceed', 'source': 'clarify', 'dest': 'strategy'},
-        {'trigger': 'proceed', 'source': 'strategy', 'dest': 'build'},
-        {'trigger': 'proceed', 'source': 'build', 'dest': 'validate'},
-        {'trigger': 'proceed', 'source': 'validate', 'dest': 'render'},
-    ]
-    return states, transitions
+def standard_action_order():
+    """Fixture: Standard action order (DEPRECATED - use Bot/Behavior/Actions directly)."""
+    # Behaviors and Actions manage their own order
+    # Actions are ordered by 'order' field in action_config.json
+    actions = ['clarify', 'strategy', 'build', 'validate', 'render']
+    return actions
 
 @pytest.fixture
 def bot_config_file_path(bot_directory):
@@ -266,7 +267,7 @@ def bot_config_file_path(bot_directory):
     config_dir = bot_directory / 'config'
     config_dir.mkdir(parents=True, exist_ok=True)
     config_file = config_dir / 'bot_config.json'
-    config_file.write_text(json.dumps({'name': 'test_bot', 'behaviors': ['shape']}), encoding='utf-8')
+    config_file.write_text(json.dumps({'name': 'test_bot'}), encoding='utf-8')
     return config_file
 
 
@@ -282,20 +283,22 @@ def bootstrap_env(bot_dir: Path, workspace_dir: Path):
 def create_bot_config_file(
     bot_dir: Path,
     bot_name: str,
-    behaviors: list,
+    behaviors: list = None,  # Deprecated - behaviors are discovered from folders
     workspace_root: Path = None
 ) -> Path:
     """Factory: Create bot config file in bot directory.
     
     BotConfig expects bot_config.json directly in bot_directory, not in config/ subdirectory.
+    Behaviors are discovered from folders, not from config.
     """
     # BotConfig expects bot_config.json directly in bot_directory
     bot_dir.mkdir(parents=True, exist_ok=True)
     config_file = bot_dir / 'bot_config.json'
-    config_file.write_text(json.dumps({'name': bot_name, 'behaviors': behaviors}), encoding='utf-8')
+    # Behaviors are discovered from folders, not stored in config
+    config_file.write_text(json.dumps({'name': bot_name}), encoding='utf-8')
     return config_file
 
-def create_workflow_state_file(
+def create_behavior_action_state_file(
     workspace_dir: Path,
     bot_name: str,
     behavior: str,
@@ -304,9 +307,10 @@ def create_workflow_state_file(
     action_format: str = "full",
     timestamp: str = None
 ) -> Path:
-    """Factory: Create workflow_state.json in workspace directory.
+    """Factory: Create behavior_action_state.json in workspace directory.
     
-    
+    Behaviors know their order. Actions know their order.
+    State tracks current behavior and current action.
     """
     # Format current_action based on action_format
     if action_format == "full":
@@ -322,15 +326,15 @@ def create_workflow_state_file(
     if timestamp is None:
         timestamp = '2025-12-04T16:00:00.000000'
     
-    workflow_state = {
+    behavior_action_state = {
         'current_behavior': f'{bot_name}.{behavior}',
         'current_action': current_action_state,
         'timestamp': timestamp,
         'completed_actions': completed_actions or []
     }
-    workflow_file = workspace_dir / 'workflow_state.json'
-    workflow_file.write_text(json.dumps(workflow_state), encoding='utf-8')
-    return workflow_file
+    state_file = workspace_dir / 'behavior_action_state.json'
+    state_file.write_text(json.dumps(behavior_action_state), encoding='utf-8')
+    return state_file
 
 def create_base_actions_structure(bot_directory: Path) -> Path:
     """Factory: Create base_actions directory structure in bot_directory (no fallback).
@@ -340,7 +344,9 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
     from agile_bot.bots.base_bot.test.test_helpers import get_test_base_actions_dir
     base_actions_dir = get_test_base_actions_dir(bot_directory)
     
-    workflow_actions = [
+    # Actions are ordered by 'order' field in action_config.json
+    # Behaviors know their order from 'order' field in behavior.json
+    action_configs = [
         ('clarify', 'clarify', 1, 'strategy'),
         ('strategy', 'strategy', 2, 'build'),
         ('build', 'build', 3, 'validate'),
@@ -348,7 +354,7 @@ def create_base_actions_structure(bot_directory: Path) -> Path:
         ('render', 'render', 5, None)
     ]
     
-    for folder_name, action_name, order, next_action in workflow_actions:
+    for folder_name, action_name, order, next_action in action_configs:
         action_dir = base_actions_dir / folder_name
         action_dir.mkdir(parents=True, exist_ok=True)
         
@@ -394,20 +400,21 @@ def given_bot_name_and_behavior_setup(bot_name: str = 'story_bot', behavior: str
     """
     return bot_name, behavior
 
-def create_test_workflow(
+def create_test_behavior_action_state(
     bot_dir: Path,
     workspace_dir: Path,
     bot_name: str,
     behavior: str,
     current_action: str,
     completed_actions: list = None,
-    return_workflow_file: bool = True
+    return_state_file: bool = True
 ) -> Tuple:
-    """Factory: Create workflow with specified state for testing.
+    """Factory: Create behavior_action_state.json with specified state for testing.
     
-    
+    Behaviors know their order. Actions know their order.
+    State tracks current behavior and current action.
     """
-    # Workflow class removed - state managed by Behaviors and Actions collections
+    # Behaviors and Actions manage their own order and current state
     
     # Bootstrap environment
     bootstrap_env(bot_dir, workspace_dir)
@@ -437,39 +444,22 @@ def create_test_workflow(
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
     
-    # Create workflow state file
-    workflow_file = create_workflow_state_file(
+    # Create behavior_action_state.json file
+    state_file = create_behavior_action_state_file(
         workspace_dir, bot_name, behavior, current_action, completed_actions
     )
     
-    # Use standard action names that match the tests
-    states = ['clarify', 'strategy', 'build', 'validate', 'render']
-    transitions = [
-        {'trigger': 'proceed', 'source': 'clarify', 'dest': 'strategy'},
-        {'trigger': 'proceed', 'source': 'strategy', 'dest': 'build'},
-        {'trigger': 'proceed', 'source': 'build', 'dest': 'validate'},
-        {'trigger': 'proceed', 'source': 'validate', 'dest': 'render'},
-    ]
+    # Create Bot instance - behaviors and actions manage their own order
+    from agile_bot.bots.base_bot.src.bot.bot import Bot
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     
-    workflow = Workflow(
-        bot_name=bot_name,
-        behavior=behavior,
-        bot_directory=bot_dir,
-        states=states,
-        transitions=transitions,
-        workspace_root=workspace_dir
-    )
+    bot_paths = BotPaths(bot_directory=bot_dir)
+    bot = Bot(bot_name=bot_name, bot_directory=bot_dir, config_path=bot_dir / 'bot_config.json')
     
-    # Load state from file (including completed_actions)
-    workflow.load_state()
-    
-    # Set current state to match current_action (after loading)
-    workflow.navigate_to_action(current_action)
-    
-    if return_workflow_file:
-        return workflow, workflow_file
+    if return_state_file:
+        return bot, state_file
     else:
-        return workflow
+        return bot
 
 def create_base_action_instructions(action_name: str, instructions: list = None) -> dict:
     """Factory: Create base action instructions dictionary.
