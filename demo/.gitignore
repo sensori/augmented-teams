@@ -1,0 +1,10 @@
+# Ignore everything in demo folder
+*
+
+# Except mob_minion
+!mob_minion/
+!mob_minion/**
+
+# Keep this .gitignore
+!.gitignore
+
