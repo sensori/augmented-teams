@@ -1,6 +1,6 @@
 # Validation Report - Shape
 
-**Generated:** 2025-12-16 13:30:53
+**Generated:** 2025-12-16 13:53:03
 **Project:** mob_minion
 **Behavior:** shape
 **Action:** validate_rules
@@ -13,6 +13,8 @@ Validated story map and domain model against **41 validation rules**.
 
 - **Clarification:** `clarification.json`
 - **Rendered Outputs:**
+  - `mob-minion-domain-model-description.md`
+  - `mob-minion-domain-model-diagram.md`
   - `story-graph.json`
 
 ## Validation Rules Checked
@@ -81,7 +83,106 @@ Validated story map and domain model against **41 validation rules**.
 
 ## Violations Found
 
-✅ **No violations found.** All rules passed validation.
+**Total Violations:** 60
+- **File-by-File Violations:** 60
+- **Cross-File Violations:** 0
+
+### File-by-File Violations (Pass 1)
+
+These violations were detected by scanning each file individually.
+
+#### Maintain Verb Noun Consistency: 9 violation(s)
+
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].sub_epics[0].story_groups[0].stories[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].story_groups[0].stories[0].name): Story name "Creates New Mob Container" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[2].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[2].sub_epics[0].story_groups[0].stories[1].name): Story name "Minions move toward target as needed" uses noun-verb pattern - use verb-noun format (e.g., "Places Order" not "Order places")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].story_groups[0].stories[1].name): Story name "Creates New Mob from Template" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+
+#### Map Sequential Spine Vs Optional Paths: 5 violation(s)
+
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+
+#### Stories Developed And Tested In Days: 4 violation(s)
+
+- 🟡 **WARNING** - [`epics[0].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].name): Sub-epic "Create and Configure Mob" has 3 3 stories (should be 4-10)
+- 🔴 **ERROR** - [`epics[0].sub_epics[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[1].name): Sub-epic "Modify Mob Membership" has 2 2 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[1].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].sub_epics[0].name): Sub-epic "Assign Strategy to Mob" has 3 3 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[3].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].name): Sub-epic "Manage Templates" has 3 3 stories (should be 4-10)
+
+#### Story Names Must Follow Verb Noun Format: 9 violation(s)
+
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].sub_epics[0].story_groups[0].stories[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].story_groups[0].stories[0].name): Story name "Creates New Mob Container" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[2].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[2].sub_epics[0].story_groups[0].stories[1].name): Story name "Minions move toward target as needed" uses noun-verb pattern - use verb-noun format (e.g., "Places Order" not "Order places")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].story_groups[0].stories[1].name): Story name "Creates New Mob from Template" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+
+#### Use Verb Noun Format For Story Elements: 9 violation(s)
+
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].domain_concepts[1]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].domain_concepts[1]): Unknown name "Minion" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[0].sub_epics[0].story_groups[0].stories[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].story_groups[0].stories[0].name): Story name "Creates New Mob Container" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[1].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].domain_concepts[0]): Unknown name "Strategy" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[2].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[2].sub_epics[0].story_groups[0].stories[1].name): Story name "Minions move toward target as needed" uses noun-verb pattern - use verb-noun format (e.g., "Places Order" not "Order places")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].domain_concepts[0]`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].domain_concepts[0]): Unknown name "MobTemplate" appears to be noun-only - use verb-noun format (e.g., "Places Order" not "Order Management")
+- 🔴 **ERROR** - [`epics[3].sub_epics[0].story_groups[0].stories[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].story_groups[0].stories[1].name): Story name "Creates New Mob from Template" uses third-person singular verb form ("Creates") - use base verb form instead (e.g., "Creat Multiple Tokens" not "Creates Multiple Tokens")
+
+#### Apply 7 Plus Minus 2 Hierarchy: 4 violation(s)
+
+- 🟡 **WARNING** - [`epics[0].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].name): Sub-epic "Create and Configure Mob" has 3 3 stories (should be 4-10)
+- 🔴 **ERROR** - [`epics[0].sub_epics[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[1].name): Sub-epic "Modify Mob Membership" has 2 2 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[1].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].sub_epics[0].name): Sub-epic "Assign Strategy to Mob" has 3 3 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[3].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].name): Sub-epic "Manage Templates" has 3 3 stories (should be 4-10)
+
+#### Avoid Technical Implementation Language: 5 violation(s)
+
+- 🔴 **ERROR** - [`Create and Configure Mob`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Create and Configure Mob): Story element "Create and Configure Mob" uses technical implementation verb "create" - use business language focusing on user experience
+- 🔴 **ERROR** - [`Creates New Mob Container`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Creates New Mob Container): Story element "Creates New Mob Container" uses technical implementation verb "create" - use business language focusing on user experience
+- 🔴 **ERROR** - [`Configure Strategy`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Configure Strategy): Story element "Configure Strategy" uses technical implementation verb "configure" - use business language focusing on user experience
+- 🔴 **ERROR** - [`Saves Mob Configuration as Template`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Saves Mob Configuration as Template): Story element "Saves Mob Configuration as Template" uses technical implementation phrase "configuration" - focus on what user experiences, not how it's implemented
+- 🔴 **ERROR** - [`Creates New Mob from Template`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Creates New Mob from Template): Story element "Creates New Mob from Template" uses technical implementation verb "create" - use business language focusing on user experience
+
+#### Enforce Specificity In Stories: 4 violation(s)
+
+- 🔴 **ERROR** - [`epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].name): Epic name "Manage Mobs" is too generic - add context (e.g., "Process Order Payment" not "Process Payment")
+- 🔴 **ERROR** - [`epics[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].name): Epic name "Configure Strategy" is too generic - add context (e.g., "Process Order Payment" not "Process Payment")
+- 🔴 **ERROR** - [`epics[3].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].name): Epic name "Mob Templates" is too generic - add context (e.g., "Process Order Payment" not "Process Payment")
+- 🔴 **ERROR** - [`epics[3].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].name): Sub_epic name "Manage Templates" is too generic - add context (e.g., "Process Order Payment" not "Process Payment")
+
+#### Establish Spine Vs Optional Enhanced Behavior: 5 violation(s)
+
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+- 🟡 **WARNING** - ``: All stories in story group have sequential_order - consider marking some as optional if they are alternatives or enhancements
+
+#### Prevent Implementation Details As Stories: 2 violation(s)
+
+- 🔴 **ERROR** - [`Create and Configure Mob`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Create and Configure Mob): Story "Create and Configure Mob" appears to be an implementation operation - should be a step within a story that describes user/system outcome
+- 🔴 **ERROR** - [`Configure Strategy`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/Configure Strategy): Story "Configure Strategy" appears to be an implementation operation - should be a step within a story that describes user/system outcome
+
+#### Size Stories 3 To 12 Days: 4 violation(s)
+
+- 🟡 **WARNING** - [`epics[0].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[0].name): Sub-epic "Create and Configure Mob" has 3 3 stories (should be 4-10)
+- 🔴 **ERROR** - [`epics[0].sub_epics[1].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[0].sub_epics[1].name): Sub-epic "Modify Mob Membership" has 2 2 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[1].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[1].sub_epics[0].name): Sub-epic "Assign Strategy to Mob" has 3 3 stories (should be 4-10)
+- 🟡 **WARNING** - [`epics[3].sub_epics[0].name`](vscode://file/C:/dev/augmented-teams/demo/mob_minion/epics[3].sub_epics[0].name): Sub-epic "Manage Templates" has 3 3 stories (should be 4-10)
 
 ## Validation Instructions
 
@@ -97,7 +198,7 @@ The following validation steps were performed:
 8. - **Original input:** `{project_area}/docs/context/input.txt` and other original context files
 9. 
 10. These files contain critical requirements, decisions, and context that MUST be checked against during validation.
-*... and 222 more instructions*
+*... and 230 more instructions*
 
 ## Report Location
 

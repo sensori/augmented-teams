@@ -1,7 +1,7 @@
 {
   "description": "When shaping stories, use active behavioral language with action verbs. Describe behaviors, not tasks or capabilities.",
   "context": "when shaping stories",
-  "scanner": "agile_bot.bots.base_bot.src.scanners.active_language_scanner.ActiveLanguageScanner",
+  "scanner": "agile_bot.bots.base_bot.src.actions.validate.scanners.active_language_scanner.ActiveLanguageScanner",
   "examples": [
     {
       "do": {

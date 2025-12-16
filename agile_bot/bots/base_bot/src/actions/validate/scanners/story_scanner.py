@@ -22,7 +22,9 @@ class StoryScanner(Scanner):
             raise ValueError("rule_obj parameter is required for StoryScanner")
         
         violations = []
-        story_map = StoryMap(knowledge_graph)
+        # Extract story_graph from knowledge_graph if nested
+        story_graph_data = knowledge_graph.get('story_graph', knowledge_graph)
+        story_map = StoryMap(story_graph_data)
         
         # Scan domain concepts from epics and sub_epics
         for epic in story_map.epics():

@@ -1,0 +1,27 @@
+(E) Manage Mobs
+    (E) Create and Configure Mob
+        (S) GM --> Creates New Mob Container
+        (S) GM --> Adds Selected Minions to Mob
+        (S) GM --> Views Mob Composition and Status
+    (E) Modify Mob Membership
+        (S) GM --> Removes Minion from Mob
+        or (S) GM --> Disbands Mob Entirely
+
+(E) Configure Strategy
+    (E) Assign Strategy to Mob
+        (S) GM --> Views Available Strategies
+        (S) GM --> Assigns Strategy to Mob
+        (S) GM --> Changes Mob Strategy During Combat
+
+(E) Execute Mob Actions
+    (E) Mob Combat Sequence
+        (S) System --> Selects Target Based on Strategy
+        (S) System --> Minions move toward target as needed
+        (S) System --> Mob executes coordinated attack
+        (S) System --> Resolves Mob Attack Results
+
+(E) Mob Templates
+    (E) Manage Templates
+        (S) GM --> Saves Mob Configuration as Template
+        (S) GM --> Creates New Mob from Template
+        (S) GM --> Manages Saved Templates

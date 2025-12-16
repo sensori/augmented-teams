@@ -319,6 +319,7 @@ class ValidationReportWriter:
             rule_name = Path(rule_file).stem if rule_file else 'unknown'
             
             if 'file_by_file' in scanner_results or 'cross_file' in scanner_results:
+                # Two-pass scanner format
                 file_by_file_violations = scanner_results.get('file_by_file', {}).get('violations', [])
                 cross_file_violations = scanner_results.get('cross_file', {}).get('violations', [])
                 
@@ -326,6 +327,11 @@ class ValidationReportWriter:
                     file_by_file_violations_by_rule[rule_name] = file_by_file_violations
                 if cross_file_violations:
                     cross_file_violations_by_rule[rule_name] = cross_file_violations
+            elif 'violations' in scanner_results:
+                # Single-pass scanner format (e.g., StoryScanner)
+                violations = scanner_results.get('violations', [])
+                if violations:
+                    file_by_file_violations_by_rule[rule_name] = violations
         
         return file_by_file_violations_by_rule, cross_file_violations_by_rule
     

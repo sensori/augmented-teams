@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from .story_scanner import StoryScanner
 from .story_map import StoryNode, Epic, SubEpic, Story
-from agile_bot.bots.base_bot.src.scanners.violation import Violation
+from agile_bot.bots.base_bot.src.actions.validate.scanners.violation import Violation
 
 try:
     import spacy
@@ -20,6 +20,16 @@ import re
 
 class ActiveLanguageScanner(StoryScanner):
     
+    # Common actor patterns that should NOT appear in story names
+    ACTOR_PATTERNS = [
+        # Human actors
+        r'^(User|GM|Admin|Administrator|Customer|Developer|Manager|Operator|Owner)\s+',
+        # System actors
+        r'^(System|Server|Service|API|Database|Module|Component|Handler|Controller|Processor|Validator|Manager)\s+',
+        # Generic role patterns
+        r'^(The\s+)?(user|admin|system|gm)\s+',
+    ]
+    
     def scan_story_node(self, node: StoryNode, rule_obj: Any) -> List[Dict[str, Any]]:
         violations = []
         name = node.name
@@ -28,6 +38,11 @@ class ActiveLanguageScanner(StoryScanner):
             return violations
         
         node_type = self._get_node_type(node)
+        
+        # Check for actor in name (most important check per rule documentation)
+        violation = self._check_actor_in_name(name, node, node_type, rule_obj)
+        if violation:
+            violations.append(violation)
         
         violation = self._check_passive_voice(name, node, node_type, rule_obj)
         if violation:
@@ -38,6 +53,25 @@ class ActiveLanguageScanner(StoryScanner):
             violations.append(violation)
         
         return violations
+    
+    def _check_actor_in_name(self, name: str, node: StoryNode, node_type: str, rule_obj: Any) -> Optional[Dict[str, Any]]:
+        """Check if story name starts with an actor - actors should be in 'users' field, not in name."""
+        for pattern in self.ACTOR_PATTERNS:
+            match = re.match(pattern, name, re.IGNORECASE)
+            if match:
+                actor = match.group(0).strip()
+                location = node.map_location()
+                # Suggest the corrected name (without the actor prefix)
+                suggested_name = name[len(match.group(0)):].strip()
+                if suggested_name:
+                    suggested_name = suggested_name[0].upper() + suggested_name[1:] if len(suggested_name) > 1 else suggested_name.upper()
+                return Violation(
+                    rule=rule_obj,
+                    violation_message=f'{node_type.capitalize()} name "{name}" has actor "{actor}" in the name - actor should be in "users" field, not in name. Use Verb-Noun format: "{suggested_name}"',
+                    location=location,
+                    severity='error'
+                ).to_dict()
+        return None
     
     def _get_node_type(self, node: StoryNode) -> str:
         if isinstance(node, Epic):
