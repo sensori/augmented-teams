@@ -212,9 +212,20 @@ class Action:
         if not action_names or self.action_name != action_names[-1]:
             return result
         
-        # Get next behavior reminder (via _get_next_action_reminder which calls _get_next_behavior_reminder internally)
-        reminder = self.behavior.actions._get_next_action_reminder()
+        # Get next behavior reminder directly (we know this is final action)
+        # Ensure behavior has bot reference (should be set by Bot.__init__, but double-check)
+        if not self.behavior.bot:
+            # Try to get bot from behaviors collection if available
+            # This handles edge cases where bot reference might not be set yet
+            logger.warning(f"Behavior {self.behavior.name} has no bot reference when injecting reminder")
+            return result
+        
+        reminder = self.behavior.actions._get_next_behavior_reminder()
         if not reminder:
+            # Debug: Log why reminder is empty
+            logger.debug(f"Reminder is empty for action {self.action_name} in behavior {self.behavior.name if self.behavior else None}. "
+                        f"behavior.bot={self.behavior.bot if self.behavior else None}, "
+                        f"behavior.bot.behaviors.names={self.behavior.bot.behaviors.names if self.behavior and self.behavior.bot else None}")
             return result
         
         # Ensure instructions dict exists in result
@@ -232,22 +243,25 @@ class Action:
             result['instructions'] = instructions
         
         # Get base_instructions from action's instructions or result
-        if 'base_instructions' not in instructions:
-            if isinstance(self.instructions, dict) and 'base_instructions' in self.instructions:
-                base_instructions = list(self.instructions['base_instructions'])
-            else:
-                base_instructions = []
+        base_instructions = instructions.get('base_instructions', [])
+        
+        # If base_instructions is empty or missing, try to get it from self.instructions
+        if not base_instructions and isinstance(self.instructions, dict) and 'base_instructions' in self.instructions:
+            base_instructions = list(self.instructions['base_instructions'])
+            instructions['base_instructions'] = base_instructions
+        
+        # Ensure base_instructions is a list
+        if not isinstance(base_instructions, list):
+            base_instructions = []
             instructions['base_instructions'] = base_instructions
         
         # Inject behavior reminder
-        base_instructions = instructions.get('base_instructions', [])
-        if isinstance(base_instructions, list):
-            base_instructions = list(base_instructions)  # Make mutable copy
-            base_instructions.append("")
-            base_instructions.append("**NEXT BEHAVIOR REMINDER:**")
-            base_instructions.append(reminder)
-            instructions['base_instructions'] = base_instructions
-            result['instructions'] = instructions
+        base_instructions = list(base_instructions)  # Make mutable copy
+        base_instructions.append("")
+        base_instructions.append("**NEXT BEHAVIOR REMINDER:**")
+        base_instructions.append(reminder)
+        instructions['base_instructions'] = base_instructions
+        result['instructions'] = instructions
         
         return result
     

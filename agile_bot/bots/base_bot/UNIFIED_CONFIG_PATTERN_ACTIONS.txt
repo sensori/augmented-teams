@@ -1,0 +1,192 @@
+================================================================================
+CURRENT PATTERN - Actions, Behavior, Action (with separate config objects)
+================================================================================
+
+1. BEHAVIOR (uses BehaviorConfig)
+--------------------------------------------------------------------------------
+class Behavior:
+    def __init__(self, name: str, bot_name: str, bot_paths: BotPaths, bot_instance=None):
+        self.name = name
+        self.bot_name = bot_name
+        self.bot_paths = bot_paths
+        self.bot = bot_instance
+
+        # Create separate BehaviorConfig object
+        self.behavior_config = BehaviorConfig(self.name, self.bot_paths, self.bot_name)
+        
+        # Access properties through behavior_config
+        self.description = self.behavior_config.description
+        self.goal = self.behavior_config.goal
+        self.inputs = self.behavior_config.inputs
+        self.outputs = self.behavior_config.outputs
+
+        # Pass behavior_config to dependent objects
+        self.guardrails = Guardrails(self.behavior_config)
+        self.content = Content(self.behavior_config)
+        self.rules = Rules(behavior=self, bot_paths=self.bot_paths)
+        self.actions = Actions(self.behavior_config, self)  # Pass behavior_config
+        self.trigger_words = TriggerWords(self.behavior_config)
+
+
+2. BEHAVIORCONFIG (separate config class)
+--------------------------------------------------------------------------------
+class BehaviorConfig:
+    def __init__(self, behavior_name: str, bot_paths: BotPaths, bot_name: str = None):
+        self.behavior_name = behavior_name
+        self.bot_paths = bot_paths
+        self.bot_name = bot_name or ...
+        
+        self.behavior_directory = self.bot_paths.bot_directory / "behaviors" / behavior_name
+        self.config_path = self.behavior_directory / "behavior.json"
+        
+        if not self.config_path.exists():
+            raise FileNotFoundError(...)
+        
+        self._config = read_json_file(self.config_path)
+    
+    @property
+    def actions_workflow(self) -> List[Dict[str, Any]]:
+        actions = self._config.get("actions_workflow", {}).get("actions", [])
+        if not isinstance(actions, list):
+            return []
+        return sorted(actions, key=lambda x: x.get("order", 0))
+
+
+3. ACTIONS (receives behavior_config, extracts actions_workflow)
+--------------------------------------------------------------------------------
+class Actions:
+    def __init__(self, behavior_config, behavior):
+        self.behavior_config = behavior_config  # Separate config object
+        self.behavior = behavior
+        self.bot_name = behavior.bot_name
+        self.bot_paths = behavior.bot_paths
+        
+        # Extract actions from behavior_config
+        actions_workflow = getattr(behavior_config, "actions_workflow", [])
+        if isinstance(actions_workflow, list):
+            actions_list = actions_workflow
+        else:
+            # Handle case where actions_workflow is a dict with 'actions' key
+            actions_list = actions_workflow.get('actions', []) if isinstance(actions_workflow, dict) else []
+        
+        # Instantiate Action objects for each action in config
+        self._actions: List[Action] = []
+        for action_dict in actions_list:
+            action_name = action_dict.get("name", "")
+            if action_name:
+                # Load base action config
+                base_action_config = BaseActionConfig(action_name, self.bot_paths)
+                # Override order from behavior.json if present (behavior.json is authoritative)
+                if "order" in action_dict:
+                    base_action_config._config["order"] = action_dict["order"]
+                
+                # Create ActivityTracker
+                from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
+                activity_tracker = ActivityTracker(self.bot_paths, self.bot_name)
+                
+                # Instantiate concrete Action class
+                action_instance = self._instantiate_action(
+                    action_name=action_name,
+                    base_action_config=base_action_config,
+                    behavior=behavior,
+                    activity_tracker=activity_tracker
+                )
+                self._actions.append(action_instance)
+        
+        self._current_index: Optional[int] = None
+        self.load_state()
+
+
+4. BASEACTIONCONFIG (separate config class)
+--------------------------------------------------------------------------------
+class BaseActionConfig:
+    def __init__(self, action_name: str, bot_paths: BotPaths):
+        self.action_name = action_name
+        self.bot_paths = bot_paths
+        
+        # Find base actions directory
+        base_actions_dir = get_base_actions_directory(bot_directory=bot_paths.bot_directory)
+        
+        self.config_path = base_actions_dir / action_name / "action_config.json"
+        
+        # Load config if exists
+        if self.config_path.exists():
+            self._config = read_json_file(self.config_path)
+            self._config['name'] = action_name
+        else:
+            self._config = {
+                "name": action_name,
+                "workflow": True,
+                "order": 0
+            }
+    
+    @property
+    def order(self) -> int:
+        return self._config.get("order", 0)
+    
+    @property
+    def next_action(self) -> Optional[str]:
+        return self._config.get("next_action")
+    
+    @property
+    def custom_class(self) -> Optional[str]:
+        return self._config.get("action_class") or self._config.get("custom_class")
+    
+    @property
+    def instructions(self) -> list:
+        return self._config.get("instructions", [])
+    
+    @property
+    def workflow(self) -> bool:
+        return self._config.get("workflow", True)
+
+
+5. ACTION (uses BaseActionConfig)
+--------------------------------------------------------------------------------
+class Action:
+    def __init__(self, base_action_config=None, behavior=None, activity_tracker: ActivityTracker = None, 
+                 bot_name: str = None, action_name: str = None):
+        if base_action_config is not None:
+            # Use provided base_action_config
+            if behavior is None:
+                raise ValueError("behavior is required when base_action_config is provided")
+            self.base_action_config = base_action_config  # Separate config object
+            self.behavior = behavior
+            self.bot_name = behavior.bot_name
+            self.action_name = base_action_config.action_name
+            self._activity_tracker = activity_tracker
+        elif bot_name is not None and action_name is not None:
+            # Create BaseActionConfig from bot_name and action_name
+            self.bot_name = bot_name
+            self.behavior = behavior
+            self.action_name = action_name
+            from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
+            if behavior is None or behavior.bot_paths is None:
+                raise ValueError("behavior and behavior.bot_paths are required")
+            self.base_action_config = BaseActionConfig(action_name, behavior.bot_paths)
+            self._activity_tracker = activity_tracker
+        else:
+            raise ValueError("Either base_action_config must be provided, or both bot_name and action_name")
+        
+        self.order = self.base_action_config.order
+        self.action_class = self.base_action_config.custom_class
+        self.instructions = self._load_and_merge_instructions()
+
+
+================================================================================
+FLOW SUMMARY
+================================================================================
+
+1. Behavior creates BehaviorConfig → loads behavior.json
+2. Behavior creates Actions(behavior_config, self) → passes BehaviorConfig
+3. Actions extracts actions_workflow from behavior_config
+4. Actions creates BaseActionConfig for each action → loads base action config
+5. Actions creates Action(base_action_config, behavior, ...) → passes BaseActionConfig
+6. Action uses base_action_config to access config properties
+
+Issues:
+- BehaviorConfig is separate object, Behavior just wraps it
+- BaseActionConfig is separate object, Action just wraps it
+- Redundant config loading (BehaviorConfig loaded, then Behavior accesses it)
+- Actions receives behavior_config instead of behavior directly
+

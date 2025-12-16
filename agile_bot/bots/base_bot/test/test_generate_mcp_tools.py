@@ -223,7 +223,7 @@ def given_test_bot_behavior_and_action():
     
     
     """
-    return 'test_bot', 'shape', 'gather_context'
+    return 'test_bot', 'shape', 'clarify'
 
 
 def given_test_bot_name():
@@ -543,8 +543,12 @@ def then_behavior_tool_execution_succeeds(result, expected_behavior: str, expect
     
     """
     result_dict = json.loads(result.content[0].text)
+    # Check if there's an error first
+    if 'error' in result_dict:
+        raise AssertionError(f"MCP tool returned error: {result_dict['error']}")
     # Accept both 'completed' and 'requires_confirmation' as valid statuses
     # 'requires_confirmation' is valid when action needs user confirmation
+    assert 'status' in result_dict, f"Result dict missing 'status' key. Keys: {list(result_dict.keys())}, Result: {result_dict}"
     assert result_dict['status'] in ['completed', 'requires_confirmation']
     # When status is 'requires_confirmation', behavior/action may be empty or different
     # Just verify the tool was invoked and returned a valid response

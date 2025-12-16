@@ -165,17 +165,56 @@ class Actions:
         # Default behavior for unknown attributes
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
     
-    def navigate_to(self, action_name: str):
+    def navigate_to(self, action_name: str, out_of_order: bool = False):
         action = self.find_by_name(action_name)
         if action is None:
             raise ValueError(f"Action '{action_name}' not found")
         
         # Find index of action
+        target_index = None
         for i, a in enumerate(self._actions):
             if a.action_name == action_name:
+                target_index = i
                 self._current_index = i
-                self.save_state()
-                return
+                break
+        
+        if target_index is None:
+            return
+        
+        # If navigating out of order, remove completed actions after target
+        if out_of_order and self.behavior.bot_paths:
+            workspace_dir = self.behavior.bot_paths.workspace_directory
+            state_file = workspace_dir / 'behavior_action_state.json'
+            
+            if state_file.exists():
+                try:
+                    state_data = json.loads(state_file.read_text(encoding='utf-8'))
+                    completed_actions = state_data.get('completed_actions', [])
+                    
+                    if completed_actions:
+                        # Get action names that come after target
+                        action_names_after_target = [a.action_name for a in self._actions[target_index + 1:]]
+                        
+                        # Filter out completed actions that come after target
+                        expected_behavior_prefix = f'{self.bot_name}.{self.behavior.name}.'
+                        filtered_completed = []
+                        for completed_action in completed_actions:
+                            action_state = completed_action.get('action_state', '')
+                            if action_state.startswith(expected_behavior_prefix):
+                                completed_action_name = action_state.split('.')[-1]
+                                # Keep if it's not after target
+                                if completed_action_name not in action_names_after_target:
+                                    filtered_completed.append(completed_action)
+                            else:
+                                # Keep actions from other behaviors
+                                filtered_completed.append(completed_action)
+                        
+                        state_data['completed_actions'] = filtered_completed
+                        state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
+                except Exception:
+                    pass  # If update fails, continue with navigation
+        
+        self.save_state()
     
     def close_current(self):
         if self._current_index is not None:

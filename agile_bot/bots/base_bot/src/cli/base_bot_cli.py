@@ -33,7 +33,8 @@ class BaseBotCli:
     
     def run(self, behavior_name: str = None, action_name: str = None, **kwargs) -> Dict[str, Any]:
         result = self._route_to_action(behavior_name, action_name, kwargs)
-        return self._format_result(result)
+        # _route_to_action already returns a formatted dict, so just return it
+        return result
     
     def close_current_action(self) -> Dict[str, Any]:
         current_behavior = self.bot.behaviors.current

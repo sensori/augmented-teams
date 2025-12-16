@@ -969,9 +969,9 @@ def when_workflow_navigates_to_action(workflow: Workflow, target_action: str, ou
     """When: Workflow navigates to action."""
     workflow.navigate_to_action(target_action, out_of_order=out_of_order)
 
-def then_current_state_is(workflow: Workflow, expected_state: str):
-    """Then: Current state is expected."""
-    assert workflow.current_state == expected_state
+def then_current_state_is(bot: Bot, expected_action: str):
+    """Then: Current action is expected."""
+    then_workflow_current_state_is(bot, expected_action)
 
 def then_completed_actions_do_not_include(workflow_file: Path, bot_name: str, behavior: str, action_name: str):
     """Then: Completed actions do not include specified action."""
@@ -1153,22 +1153,21 @@ def when_create_workflow_with_states_and_transitions(bot_name: str, behavior: st
     )
     return workflow
 
-def given_environment_and_empty_workflow_state(bot_directory: Path, workspace_directory: Path, bot_name: str, behavior: str, completed: list):
-    """Given: Environment and empty workflow state."""
+def given_environment_and_empty_behavior_action_state(bot_directory: Path, workspace_directory: Path, bot_name: str, behavior: str, completed: list):
+    """Given: Environment and empty current_action in behavior_action_state."""
     bootstrap_env(bot_directory, workspace_directory)
-    given_workflow_state_file_with_empty_current_action(workspace_directory, bot_name, behavior, completed)
-    states, transitions = given_standard_states_and_transitions()
-    workflow = when_create_workflow_with_states_and_transitions(bot_name, behavior, bot_directory, states, transitions)
-    workflow.workspace_root = workspace_directory  # Set workspace_root so load_state can find the file
-    workflow.load_state()  # Load state from file (this will fall back to completed_actions)
-    return workflow
+    # Create state file with empty current_action but with completed_actions
+    state_file = create_behavior_action_state_file(workspace_directory, bot_name, behavior, '', completed)
+    # Create bot - it will load state and determine current action from completed_actions
+    bot = create_test_behavior_action_state(bot_directory, workspace_directory, bot_name, behavior, '', completed, return_state_file=False)
+    return bot
 
-def given_environment_and_verify_no_workflow_file(bot_directory: Path, workspace_directory: Path):
-    """Given: Environment and verify no workflow file."""
+def given_environment_and_verify_no_state_file(bot_directory: Path, workspace_directory: Path):
+    """Given: Environment and verify no behavior_action_state.json file."""
     bootstrap_env(bot_directory, workspace_directory)
-    workflow_file = workspace_directory / 'workflow_state.json'
-    assert not workflow_file.exists()
-    return workflow_file
+    state_file = workspace_directory / 'behavior_action_state.json'
+    assert not state_file.exists()
+    return state_file
 
 def given_completed_actions_for_four_actions(bot_name: str, behavior: str):
     """Given: Completed actions for four actions."""
@@ -1179,27 +1178,24 @@ def given_completed_actions_for_four_actions(bot_name: str, behavior: str):
         {'action_state': f'{bot_name}.{behavior}.render', 'timestamp': '2025-12-04T15:47:00.000000'},
     ]
 
-def given_environment_workflow_state_and_workflow(bot_directory: Path, workspace_directory: Path, bot_name: str, behavior: str, current_action: str, completed: list):
-    """Given: Environment, workflow state and workflow."""
+def given_environment_behavior_action_state_and_bot(bot_directory: Path, workspace_directory: Path, bot_name: str, behavior: str, current_action: str, completed: list):
+    """Given: Environment, behavior_action_state and bot."""
     bootstrap_env(bot_directory, workspace_directory)
-    workflow_file = given_workflow_state_with_completed_actions(
-        workspace_directory, bot_name, behavior, current_action, completed
-    )
-    states, transitions = given_standard_states_and_transitions()
-    workflow = given_workflow_created(bot_name, behavior, bot_directory, states, transitions)
-    workflow.workspace_root = workspace_directory  # Set workspace_root so load_state can find the file
-    workflow.load_state()  # Load state from file
-    return workflow_file, workflow
+    state_file = create_behavior_action_state_file(workspace_directory, bot_name, behavior, current_action, completed)
+    bot = create_test_behavior_action_state(bot_directory, workspace_directory, bot_name, behavior, current_action, completed, return_state_file=False)
+    return state_file, bot
 
-def when_navigate_to_target_action_out_of_order(workflow, target_action: str):
+def when_navigate_to_target_action_out_of_order(bot: Bot, behavior_name: str, target_action: str):
     """When: Navigate to target action out of order."""
-    when_workflow_navigates_to_action(workflow, target_action, out_of_order=True)
+    behavior = bot.behaviors.find_by_name(behavior_name)
+    if behavior:
+        behavior.actions.navigate_to(target_action, out_of_order=True)
 
-def then_verify_completed_actions_after_navigation(workflow_file: Path, bot_name: str, behavior: str):
+def then_verify_completed_actions_after_navigation(state_file: Path, bot_name: str, behavior: str):
     """Then: Verify completed actions after navigation."""
-    then_completed_actions_do_not_include(workflow_file, bot_name, behavior, 'render')
+    then_completed_actions_do_not_include(state_file, bot_name, behavior, 'render')
     expected_action_states = [f'{bot_name}.{behavior}.clarify', f'{bot_name}.{behavior}.strategy', f'{bot_name}.{behavior}.build']
-    then_completed_actions_include(workflow_file, expected_action_states)
+    then_completed_actions_include(state_file, expected_action_states)
 
 def given_write_tests_behavior_config():
     """Given: Write tests behavior config."""
@@ -1549,80 +1545,79 @@ class TestInvokeBehaviorInActionOrder:
         # Then current action should be build (uses current_action from file)
         then_workflow_current_state_is_build_knowledge(bot)
 
-    def test_workflow_starts_at_first_action_when_no_completed_actions(self, bot_directory, workspace_directory):
+    def test_behavior_action_order_starts_at_first_action_when_no_completed_actions(self, bot_directory, workspace_directory):
         """Scenario: No completed actions yet"""
         
-        # Given workflow loads state with no completed_actions
+        # Given bot loads state with no completed_actions
         bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
         
-        workflow = when_create_workflow_with_current_action(bot_directory, workspace_directory, bot_name, behavior, 'clarify', [])
+        bot = when_create_behavior_action_state_with_current_action(bot_directory, workspace_directory, bot_name, behavior, 'clarify', [])
         
-        # Then current_state should be the first action (clarify)
+        # Then current action should be the first action (clarify)
         then_workflow_current_state_is_gather_context(bot)
 
-    def test_workflow_uses_current_action_when_provided(self, bot_directory, workspace_directory):
-        """Scenario: Workflow uses current_action when provided"""
+    def test_behavior_action_order_uses_current_action_when_provided(self, bot_directory, workspace_directory):
+        """Scenario: Behavior action order uses current_action when provided"""
         
         # Given current_action: strategy
         # And completed_actions: [clarify]
         bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
         completed = given_completed_action_for_gather_context(bot_name, behavior)
         
-        workflow = when_create_workflow_with_current_action(bot_directory, workspace_directory, bot_name, behavior, 'strategy', completed)
+        bot = when_create_behavior_action_state_with_current_action(bot_directory, workspace_directory, bot_name, behavior, 'strategy', completed)
         
-        # Then current_state should be strategy (uses current_action from file)
+        # Then current action should be strategy (uses current_action from file)
         then_workflow_current_state_is_decide_planning_criteria(bot)
 
-    def test_workflow_falls_back_to_completed_actions_when_current_action_missing(self, bot_directory, workspace_directory):
-        """Scenario: Workflow falls back to completed_actions when current_action is missing"""
+    def test_behavior_action_order_falls_back_to_completed_actions_when_current_action_missing(self, bot_directory, workspace_directory):
+        """Scenario: Behavior action order falls back to completed_actions when current_action is missing"""
         # Given: Bot name, behavior, and completed actions
         bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
         completed = given_completed_actions_for_three_actions(bot_name, behavior)
         
-        # When: Workflow is created with empty workflow state
-        workflow = given_environment_and_empty_workflow_state(bot_directory, workspace_directory, bot_name, behavior, completed)
+        # When: Bot is created with empty current_action in state
+        bot = given_environment_and_empty_behavior_action_state(bot_directory, workspace_directory, bot_name, behavior, completed)
         
-        # Then: Current state falls back to validate
-        then_current_state_is(workflow, 'validate')
+        # Then: Current action falls back to validate (next after last completed)
+        then_workflow_current_state_is(bot, 'validate')
 
-    def test_workflow_starts_at_first_action_when_no_workflow_state_file_exists(self, bot_directory, workspace_directory):
-        """Scenario: No workflow_state.json file exists (fresh start)"""
-        # Given: Bot name, behavior, and no workflow file exists
+    def test_behavior_action_order_starts_at_first_action_when_no_state_file_exists(self, bot_directory, workspace_directory):
+        """Scenario: No behavior_action_state.json file exists (fresh start)"""
+        # Given: Bot name, behavior, and no state file exists
         bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
         
-        workflow_file = given_environment_and_verify_no_workflow_file(bot_directory, workspace_directory)
+        state_file = given_environment_and_verify_no_state_file(bot_directory, workspace_directory)
         
-        # When: Workflow is created with standard states and transitions
-        states, transitions = given_standard_workflow_states_and_transitions()
-        workflow = given_workflow_created(bot_name, behavior, bot_directory, states, transitions)
+        # When: Bot is created
+        bot = create_test_behavior_action_state(bot_directory, workspace_directory, bot_name, behavior, 'clarify', [], return_state_file=False)
         
-        # Then: Workflow starts at first action
-        then_current_state_is(workflow, 'clarify')
+        # Then: Bot starts at first action
+        then_workflow_current_state_is(bot, 'clarify')
 
-    def test_workflow_out_of_order_navigation_removes_completed_actions_after_target(self, bot_directory, workspace_directory):
+    def test_behavior_action_order_out_of_order_navigation_removes_completed_actions_after_target(self, bot_directory, workspace_directory):
         """Scenario: When navigating out of order, completed actions after target are removed"""
         
-        # Given workflow_state.json shows:
+        # Given behavior_action_state.json shows:
         #   - current_action: validate (at the end)
         #   - completed_actions: [clarify, strategy, build, validate]
         bot_name, behavior = given_bot_name_and_behavior_setup('story_bot', 'shape')
         completed = given_completed_actions_for_four_actions(bot_name, behavior)
         
         # Bootstrap environment
-        workflow_file, workflow = given_environment_workflow_state_and_workflow(bot_directory, workspace_directory, bot_name, behavior, 'validate', completed)
+        bot, state_file = create_test_behavior_action_state(bot_directory, workspace_directory, bot_name, behavior, 'validate', completed)
         
         # Verify initial state
         then_workflow_current_state_is(bot, 'validate')
         
         # When navigating out of order back to build using production method
         target_action = 'build'
-        when_navigate_to_target_action_out_of_order(workflow, target_action)
+        when_navigate_to_target_action_out_of_order(bot, behavior, target_action)
         
-        # Then current_state should be build
+        # Then current action should be build
         then_workflow_current_state_is(bot, target_action)
         
         # And render should be removed from completed_actions
-        then_verify_completed_actions_after_navigation(workflow_file, bot_name, behavior)
+        then_verify_completed_actions_after_navigation(state_file, bot_name, behavior)
     
     def test_behavior_loads_workflow_order_from_behavior_specific_actions_workflow(self, bot_directory, workspace_directory):
         """Scenario: Behavior loads workflow order from behaviors/{behavior_name}/behavior.json"""
@@ -2283,19 +2278,19 @@ def then_bot_config_name_matches(bot_config: BotConfig, expected_name: str):
     assert bot_config.name == expected_name
 
 
-def then_bot_config_behaviors_list_matches(bot_config: BotConfig, expected_behaviors: list):
-    """Then: BotConfig.behaviors_list matches expected."""
-    assert bot_config.behaviors_list == expected_behaviors
+def then_behaviors_names_matches(behaviors, expected_behaviors: list):
+    """Then: Behaviors.names matches expected."""
+    assert behaviors.names == expected_behaviors
 
 
-def then_bot_config_behaviors_list_has_length(bot_config: BotConfig, expected_length: int):
-    """Then: BotConfig.behaviors_list has expected length."""
-    assert len(bot_config.behaviors_list) == expected_length
+def then_behaviors_names_has_length(behaviors, expected_length: int):
+    """Then: Behaviors.names has expected length."""
+    assert len(behaviors.names) == expected_length
 
 
-def then_bot_config_behaviors_list_is_empty(bot_config: BotConfig):
-    """Then: BotConfig.behaviors_list is empty."""
-    assert bot_config.behaviors_list == []
+def then_behaviors_names_is_empty(behaviors):
+    """Then: Behaviors.names is empty."""
+    assert behaviors.names == []
 
 
 def then_bot_config_base_actions_path_matches(bot_config: BotConfig, expected_path: Path):
@@ -2354,8 +2349,8 @@ class TestLoadBotConfiguration:
         # Then: BotConfig.name matches expected
         then_bot_config_name_matches(bot_config, bot_name)
     
-    def test_bot_config_behaviors_list_property(self, tmp_path, bot_name):
-        """Scenario: BotConfig.behaviors_list property discovers from folders."""
+    def test_behaviors_names_property(self, tmp_path, bot_name):
+        """Scenario: Behaviors.names property discovers from folders."""
         # Given: Bot directory with behavior folders (no behaviors in config)
         behaviors = ['shape', 'prioritization', 'discovery']
         bot_dir = given_bot_directory_and_config_file(
@@ -2367,28 +2362,28 @@ class TestLoadBotConfiguration:
         for idx, behavior_name in enumerate(behaviors, start=1):
             create_actions_workflow_json(bot_dir, behavior_name, order=idx)
         
-        # When: BotConfig is created
+        # When: Bot is created (which creates Behaviors)
         bot_paths = given_bot_paths_configured(tmp_path, bot_dir)
-        bot_config = when_bot_config_is_created(bot_name, bot_paths)
+        bot = Bot(bot_name=bot_name, bot_directory=bot_dir, config_path=bot_dir / 'bot_config.json')
         
-        # Then: BotConfig.behaviors_list discovers from folders (ordered by order field)
-        then_bot_config_behaviors_list_matches(bot_config, behaviors)
-        then_bot_config_behaviors_list_has_length(bot_config, 3)
+        # Then: Behaviors.names discovers from folders (ordered by order field)
+        then_behaviors_names_matches(bot.behaviors, behaviors)
+        then_behaviors_names_has_length(bot.behaviors, 3)
     
-    def test_bot_config_behaviors_list_empty_when_missing(self, tmp_path, bot_name):
-        """Scenario: BotConfig.behaviors_list returns empty list when behaviors missing from config."""
+    def test_behaviors_names_empty_when_missing(self, tmp_path, bot_name):
+        """Scenario: Behaviors.names returns empty list when behaviors missing."""
         # Given: Bot directory and config file without behaviors
         bot_dir = given_bot_directory_and_config_file(
             tmp_path, bot_name,
             {'name': bot_name}
         )
         
-        # When: BotConfig is created
+        # When: Bot is created (which creates Behaviors)
         bot_paths = given_bot_paths_configured(tmp_path, bot_dir)
-        bot_config = when_bot_config_is_created(bot_name, bot_paths)
+        bot = Bot(bot_name=bot_name, bot_directory=bot_dir, config_path=bot_dir / 'bot_config.json')
         
-        # Then: BotConfig.behaviors_list is empty
-        then_bot_config_behaviors_list_is_empty(bot_config)
+        # Then: Behaviors.names is empty
+        then_behaviors_names_is_empty(bot.behaviors)
     
     def test_bot_config_base_actions_path_property(self, tmp_path, bot_name):
         """Scenario: BotConfig.base_actions_path property returns path to base_actions directory."""

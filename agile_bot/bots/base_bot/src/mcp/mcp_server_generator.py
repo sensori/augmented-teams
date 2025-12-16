@@ -594,7 +594,7 @@ class MCPServerGenerator:
     def generate_bot_config_file(self, behaviors: list) -> Path:
         """Ensure bot_config.json exists but don't modify behaviors list.
         
-        Behaviors are discovered from folder structure at runtime by BotConfig.behaviors_list.
+        Behaviors are discovered from folder structure at runtime by Behaviors.names.
         This method only creates a minimal config if none exists; otherwise leaves it untouched.
         """
         config_path = self.bot_directory / 'bot_config.json'

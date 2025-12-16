@@ -9,7 +9,7 @@ Tests for all stories in the 'Build Knowledge' sub-epic:
 import pytest
 from pathlib import Path
 import json
-from agile_bot.bots.base_bot.src.actions.build_knowledge_action import BuildKnowledgeAction
+from agile_bot.bots.base_bot.src.actions.build.build_action import BuildKnowledgeAction
 from agile_bot.bots.base_bot.src.scanners.story_map import (
     StoryMap, Epic, SubEpic, StoryGroup, Story, Scenario, ScenarioOutline
 )

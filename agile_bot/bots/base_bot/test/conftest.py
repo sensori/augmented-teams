@@ -336,6 +336,25 @@ def create_behavior_action_state_file(
     state_file.write_text(json.dumps(behavior_action_state), encoding='utf-8')
     return state_file
 
+# Alias for backward compatibility with tests that haven't been updated yet
+def create_workflow_state_file(
+    workspace_dir: Path,
+    bot_name: str,
+    behavior: str,
+    current_action: str,
+    completed_actions: list = None,
+    action_format: str = "full",
+    timestamp: str = None
+) -> Path:
+    """DEPRECATED: Use create_behavior_action_state_file instead.
+    
+    Alias for backward compatibility.
+    """
+    return create_behavior_action_state_file(
+        workspace_dir, bot_name, behavior, current_action,
+        completed_actions, action_format, timestamp
+    )
+
 def create_base_actions_structure(bot_directory: Path) -> Path:
     """Factory: Create base_actions directory structure in bot_directory (no fallback).
     

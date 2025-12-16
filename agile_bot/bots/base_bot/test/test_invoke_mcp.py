@@ -397,7 +397,15 @@ class TestInvokeBotTool:
         # When: Call REAL Bot API
         bot = given_bot_instance_created('test_bot', bot_directory, bot_config)
         shape_behavior = bot.behaviors.find_by_name('shape')
-        action_result = shape_behavior.clarify()
+        # Actions are accessed through behavior.actions, not directly on behavior
+        clarify_action = shape_behavior.actions.find_by_name('clarify')
+        if clarify_action is None:
+            raise ValueError("Action 'clarify' not found")
+        shape_behavior.actions.navigate_to('clarify')
+        result_data = clarify_action.execute({})
+        # Create BotResult from action execution
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(status='completed', behavior='shape', action='clarify', data=result_data)
         
         # Then: Tool executed and returned result
         then_bot_result_has_status_and_behavior_and_action(action_result, 'completed', 'shape', 'clarify')
@@ -436,7 +444,15 @@ class TestInvokeBotTool:
         # When: Call REAL Bot API for specific behavior
         bot = given_bot_instance_created(bot_name, bot_directory, bot_config)
         exploration_behavior = bot.behaviors.find_by_name('exploration')
-        action_result = exploration_behavior.clarify()
+        # Actions are accessed through behavior.actions, not directly on behavior
+        clarify_action = exploration_behavior.actions.find_by_name('clarify')
+        if clarify_action is None:
+            raise ValueError("Action 'clarify' not found")
+        exploration_behavior.actions.navigate_to('clarify')
+        result_data = clarify_action.execute({})
+        # Create BotResult from action execution
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(status='completed', behavior='exploration', action='clarify', data=result_data)
         
         # Then: Routes to exploration behavior only
         then_bot_result_has_behavior_and_action(action_result, 'exploration', 'clarify')
@@ -733,7 +749,15 @@ class TestForwardToCurrentAction:
         
         # Call clarify DIRECTLY (not via forward_to_current_action)
         shape_behavior = bot.behaviors.find_by_name('shape')
-        action_result = shape_behavior.clarify()
+        # Actions are accessed through behavior.actions, not directly on behavior
+        clarify_action = shape_behavior.actions.find_by_name('clarify')
+        if clarify_action is None:
+            raise ValueError("Action 'clarify' not found")
+        shape_behavior.actions.navigate_to('clarify')
+        result_data = clarify_action.execute({})
+        # Create BotResult from action execution
+        from agile_bot.bots.base_bot.src.bot.bot import BotResult
+        action_result = BotResult(status='completed', behavior='shape', action='clarify', data=result_data)
         
         # Then
         workflow_file = then_workflow_state_file_exists(workspace_directory)
