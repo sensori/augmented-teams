@@ -1,0 +1,35 @@
+{
+  "behaviorName": "exploration",
+  "instructions": [
+    "**RENDER EXPLORATION STORY MAPS AND ACCEPTANCE CRITERIA - DRAWIO AND MARKDOWN GENERATION:**",
+    "",
+    "Render the exploration story graph with acceptance criteria to visual diagrams and markdown documents.",
+    "",
+    "**Configuration Files:**",
+    "- Story exploration markdown render: render_story_exploration.md.json",
+    "- Story exploration DrawIO render: render_story_exploration_drawio.json",
+    "- Acceptance criteria DrawIO render: render_exploration_acceptance_criteria_drawio.json",
+    "- Story map text render: render_story_map_txt.json",
+    "- Templates: templates/story-exploration.md, templates/story-map-exploration.drawio",
+    "",
+    "**Process:**",
+    "1. Read story-graph.json from docs/stories/",
+    "2. Render exploration story maps to DrawIO diagrams (supports multiple scopes)",
+    "3. Render acceptance criteria to DrawIO diagrams (supports multiple scopes)",
+    "4. Render exploration markdown documents for each increment",
+    "5. Render story map text file",
+    "6. Generate all outputs in project area docs/stories/",
+    "",
+    "**Outputs:**",
+    "- File: {project_area}/docs/stories/story-map-explored-{scope}.drawio",
+    "- File: {project_area}/docs/stories/{increment_name_slug}-exploration.md",
+    "- File: {project_area}/docs/stories/story-map.txt",
+    "",
+    "**Scope Support:**",
+    "- Exploration renders support multiple scopes (epic, increment, story, etc.)",
+    "- Output filenames include scope identifiers when applicable",
+    "",
+    "**Next Step:** Proceed to synchronize step after rendering is complete."
+  ]
+}
+

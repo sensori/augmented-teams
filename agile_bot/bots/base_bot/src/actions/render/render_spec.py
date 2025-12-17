@@ -32,9 +32,7 @@ class RenderSpec:
             
             templates_dir = render_folder / 'templates'
             template_path = templates_dir / template_path_str
-            
-            if template_path.exists():
-                self._template = Template(template_path)
+            self._template = Template(template_path)
     
     @property
     def input(self) -> Optional[str]:

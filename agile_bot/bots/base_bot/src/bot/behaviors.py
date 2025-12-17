@@ -19,7 +19,7 @@ class Behaviors:
         self.bot_paths = bot_paths
         
         from agile_bot.bots.base_bot.src.bot.behavior import Behavior
-        from agile_bot.bots.base_bot.src.bot.behavior_config import BehaviorConfig
+        from agile_bot.bots.base_bot.src.utils import read_json_file
         
         self._behaviors: List['Behavior'] = []
         # Discover behaviors from folder structure and load their order from behavior.json
@@ -29,20 +29,22 @@ class Behaviors:
             for item in behaviors_dir.iterdir():
                 if item.is_dir() and not item.name.startswith('_') and not item.name.startswith('.'):
                     # Verify it has a behavior.json
-                    if (item / 'behavior.json').exists():
-                        # Load behavior config to get order
+                    behavior_json_path = item / 'behavior.json'
+                    if behavior_json_path.exists():
                         try:
-                            behavior_config = BehaviorConfig(item.name, self.bot_paths, self.bot_name)
-                            order = behavior_config._config.get('order', 999)  # Default to end if no order
+                            config = read_json_file(behavior_json_path)
+                            order = config.get('order', 999)  # Default to end if no order
                             behavior = Behavior(
                                 name=item.name,
-                                bot_name=self.bot_name,
                                 bot_paths=self.bot_paths,
                                 bot_instance=None
                             )
                             behavior_orders.append((order, behavior))
-                        except Exception:
+                        except Exception as e:
                             # If config load fails, skip this behavior
+                            import traceback
+                            logger.warning(f"Failed to load behavior {item.name}: {e}")
+                            logger.debug(f"Traceback: {traceback.format_exc()}")
                             continue
             
             # Sort by order from behavior.json

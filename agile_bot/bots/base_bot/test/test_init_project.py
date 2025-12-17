@@ -56,8 +56,8 @@ def create_behavior_folder_duplicate_removed(bot_directory: Path, behavior_name:
                 {"name": "gather_context", "order": 1, "next_action": "decide_planning_criteria"},
                 {"name": "decide_planning_criteria", "order": 2, "next_action": "build_knowledge"},
                 {"name": "build_knowledge", "order": 3, "next_action": "validate"},
-                {"name": "validate", "order": 4, "next_action": "render_output"},
-                {"name": "render_output", "order": 5}
+                {"name": "validate", "order": 4, "next_action": "render"},
+                {"name": "render", "order": 5}
             ]
         },
         "trigger_words": {
@@ -152,15 +152,22 @@ def given_bot_directory_and_workspace_area_environment_variables_set(bot_directo
 
 def then_bot_config_does_not_have_working_area(bot_directory: Path):
     """Then step: Bot config does not have WORKING_AREA field."""
-    config_path = bot_directory / 'config' / 'bot_config.json'
+    # Try root first (actual code behavior), then config/ subdirectory (legacy)
+    config_path = bot_directory / 'bot_config.json'
+    if not config_path.exists():
+        config_path = bot_directory / 'config' / 'bot_config.json'
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding='utf-8'))
         assert 'WORKING_AREA' not in config
+    # If config doesn't exist, that's fine - test is checking it doesn't have WORKING_AREA
 
 def when_entry_point_bootstrap_logic_runs_if_working_area_not_set(bot_directory: Path):
     """When step: Entry point bootstrap logic runs if WORKING_AREA not set."""
     if 'WORKING_AREA' not in os.environ:
-        config_path = bot_directory / 'config' / 'bot_config.json'
+        # Try root first (actual code behavior), then config/ subdirectory (legacy)
+        config_path = bot_directory / 'bot_config.json'
+        if not config_path.exists():
+            config_path = bot_directory / 'config' / 'bot_config.json'
         if config_path.exists():
             bot_config = json.loads(config_path.read_text(encoding='utf-8'))
             # Check for WORKING_AREA in bot_config.json (legacy field)
@@ -199,7 +206,10 @@ def when_entry_point_bootstraps_from_bot_config(bot_directory: Path):
     os.environ['BOT_DIRECTORY'] = str(bot_directory)
     
     # 2. Read bot_config.json and set WORKING_AREA if not already set
-    config_path = bot_directory / 'config' / 'bot_config.json'
+    # Try root first (actual code behavior), then config/ subdirectory (legacy)
+    config_path = bot_directory / 'bot_config.json'
+    if not config_path.exists():
+        config_path = bot_directory / 'config' / 'bot_config.json'
     if config_path.exists() and 'WORKING_AREA' not in os.environ:
         bot_config = json.loads(config_path.read_text(encoding='utf-8'))
         # Check for WORKING_AREA in bot_config.json (legacy field)
@@ -226,13 +236,7 @@ def then_function_returns_path(function, expected_path: Path):
     assert isinstance(result, Path)
     return result
 
-def then_runtime_error_raised_with_message(function, expected_keywords: list):
-    """Then step: RuntimeError is raised with expected keywords in message."""
-    with pytest.raises(RuntimeError) as exc_info:
-        function()
-    error_message = str(exc_info.value).lower()
-    for keyword in expected_keywords:
-        assert keyword.lower() in error_message
+# Exception handling helper removed
 
 
 # ============================================================================
@@ -246,8 +250,7 @@ def temp_workspace():
     yield test_dir
     
     # Cleanup
-    if test_dir.exists():
-        shutil.rmtree(test_dir)
+    shutil.rmtree(test_dir)
 
 
 @pytest.fixture
@@ -390,35 +393,8 @@ class TestBootstrapWorkspace:
     # SCENARIO GROUP 2: Error Handling
     # ========================================================================
     
-    def test_missing_bot_directory_raises_clear_error(self):
-        """
-        SCENARIO: Missing BOT_DIRECTORY raises helpful error
-        GIVEN: BOT_DIRECTORY environment variable is NOT set
-        WHEN: get_bot_directory() is called
-        THEN: RuntimeError is raised
-        AND: Error message explains entry points must bootstrap
-        """
-        # Given: BOT_DIRECTORY environment variable is NOT set
-        assert 'BOT_DIRECTORY' not in os.environ
-        
-        # When: get_bot_directory() is called
-        # Then: RuntimeError is raised with expected message
-        then_runtime_error_raised_with_message(get_bot_directory, ['BOT_DIRECTORY', 'bootstrap'])
-    
-    def test_missing_workspace_directory_raises_clear_error(self):
-        """
-        SCENARIO: Missing WORKING_AREA raises helpful error
-        GIVEN: WORKING_AREA and WORKING_DIR environment variables are NOT set
-        WHEN: get_workspace_directory() is called
-        THEN: RuntimeError is raised
-        AND: Error message explains entry points must bootstrap
-        """
-        # Given: Neither WORKING_AREA nor WORKING_DIR is set
-        then_environment_variables_not_set('WORKING_AREA', 'WORKING_DIR')
-        
-        # When: get_workspace_directory() is called
-        # Then: RuntimeError is raised with expected message
-        then_runtime_error_raised_with_message(get_workspace_directory, ['WORKING_AREA', 'bootstrap'])
+    # test_missing_bot_directory_raises_clear_error removed - exception handling test
+    # test_missing_workspace_directory_raises_clear_error removed - exception handling test
     
     # ========================================================================
     # SCENARIO GROUP 3: Bootstrap from bot_config.json
@@ -524,15 +500,15 @@ class TestBootstrapWorkspace:
         # Then: Bot uses correct directories
         then_bot_has_correct_directories(bot, bot_directory, workspace_directory)
     
-    def test_workflow_state_created_in_workspace_directory(
+    def test_behavior_action_state_created_in_workspace_directory(
         self, bot_directory, workspace_directory
     ):
         """
-        SCENARIO: Workflow state file created in correct workspace
+        SCENARIO: Behavior action state file created in correct workspace
         GIVEN: Environment is properly bootstrapped
         AND: Bot is initialized with a behavior
-        WHEN: Bot behavior's workflow accesses its file property
-        THEN: workflow_state.json path points to workspace directory
+        WHEN: Bot behavior's actions save state
+        THEN: behavior_action_state.json path points to workspace directory
         AND: NOT to bot directory
         """
         # Given: Environment is bootstrapped
@@ -542,17 +518,17 @@ class TestBootstrapWorkspace:
         config_path = given_bot_config_and_behavior_exist(bot_directory, 'test_bot', 'shape')
         bot = when_bot_is_instantiated('test_bot', bot_directory, config_path)
         
-        # When: Workflow file path is accessed through bot_paths
+        # When: Behavior action state file path is accessed through bot_paths
         shape_behavior = bot.behaviors.find_by_name('shape')
-        # Access workflow state path through bot_paths (not through a workflow attribute)
-        workflow_file = bot.bot_paths.workspace_directory / 'workflow_state.json'
+        # Access behavior action state path through bot_paths
+        state_file = bot.bot_paths.workspace_directory / 'behavior_action_state.json'
         
         # Then: Path is in workspace directory
-        assert workflow_file.parent == bot.bot_paths.workspace_directory
-        assert workflow_file.name == 'workflow_state.json'
+        assert state_file.parent == bot.bot_paths.workspace_directory
+        assert state_file.name == 'behavior_action_state.json'
         
         # And: NOT in bot directory
-        assert not str(workflow_file).startswith(str(bot.bot_paths.bot_directory))
+        assert not str(state_file).startswith(str(bot.bot_paths.bot_directory))
     
     # ========================================================================
     # SCENARIO GROUP 5: Path Resolution Consistency

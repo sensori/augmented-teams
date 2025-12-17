@@ -63,13 +63,28 @@ class BehaviorToolGenerator:
     def create_behavior_tools(self) -> List[BehaviorTool]:
         tools = []
         
-        for behavior_name in self.config.get('behaviors', []):
-            tool = BehaviorTool(
-                bot_name=self.bot_name,
-                behavior_name=behavior_name,
-                config_path=self.config_path,
-            )
-            tools.append(tool)
+        # Discover behaviors from folder structure (behaviors are not stored in config)
+        config_dir = self.config_path.parent
+        behaviors_dir = config_dir / 'behaviors'
+        if behaviors_dir.exists():
+            for behavior_dir in behaviors_dir.iterdir():
+                if behavior_dir.is_dir() and not behavior_dir.name.startswith('_'):
+                    behavior_name = behavior_dir.name
+                    tool = BehaviorTool(
+                        bot_name=self.bot_name,
+                        behavior_name=behavior_name,
+                        config_path=self.config_path,
+                    )
+                    tools.append(tool)
+        else:
+            # Fallback: try reading from config (for backward compatibility)
+            for behavior_name in self.config.get('behaviors', []):
+                tool = BehaviorTool(
+                    bot_name=self.bot_name,
+                    behavior_name=behavior_name,
+                    config_path=self.config_path,
+                )
+                tools.append(tool)
         
         return tools
 

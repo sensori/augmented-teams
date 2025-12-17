@@ -5,67 +5,52 @@ from pathlib import Path
 from typing import List, Optional, Iterator, Dict, Any, TYPE_CHECKING
 from datetime import datetime
 
-from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-
 if TYPE_CHECKING:
     from agile_bot.bots.base_bot.src.actions.action import Action
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
 
 
 class Actions:
-    def __init__(self, behavior_config, behavior):
-        self.behavior_config = behavior_config
+    def __init__(self, behavior: 'Behavior'):
         self.behavior = behavior
-        self.bot_name = behavior.bot_name
-        self.bot_paths = behavior.bot_paths
         
-        # Extract actions from behavior_config
-        actions_workflow = getattr(behavior_config, "actions_workflow", [])
-        if isinstance(actions_workflow, list):
-            actions_list = actions_workflow
-        else:
-            # Handle case where actions_workflow is a dict with 'actions' key
-            actions_list = actions_workflow.get('actions', []) if isinstance(actions_workflow, dict) else []
+        actions_workflow = behavior._config.get("actions_workflow", {})
+        actions_list = actions_workflow.get("actions", [])
         
-        # Instantiate Action objects for each action in config
-        # Action will handle loading BaseActionConfig and merging with Behavior config
+        actions_list = sorted(actions_list, key=lambda x: x.get("order", 0))
+        
         self._actions: List[Action] = []
         for action_dict in actions_list:
             action_name = action_dict.get("name", "")
             if action_name:
-                # Load base action config
-                base_action_config = BaseActionConfig(action_name, self.bot_paths)
-                # Override order from behavior.json if present (behavior.json is authoritative)
-                if "order" in action_dict:
-                    base_action_config._config["order"] = action_dict["order"]
-                # Create ActivityTracker
-                from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-                workspace_dir = self.bot_paths.workspace_directory
-                activity_tracker = ActivityTracker(self.bot_paths, self.bot_name)
-                
-                # Instantiate concrete Action class (e.g., GatherContextAction)
-                action_instance = self._instantiate_action(
+                action_instance = self._create_action_instance(
                     action_name=action_name,
-                    base_action_config=base_action_config,
                     behavior=behavior,
-                    activity_tracker=activity_tracker
+                    action_config=action_dict
                 )
                 self._actions.append(action_instance)
         
-        # Track current action index
         self._current_index: Optional[int] = None
-        
-        # Load state and set current action
         self.load_state()
     
-    def _instantiate_action(self, action_name: str, base_action_config: BaseActionConfig, 
-                           behavior: Behavior, activity_tracker) -> Action:
+    def _create_action_instance(self, action_name: str, behavior: 'Behavior',
+                               action_config: Dict[str, Any]) -> Action:
         import importlib
+        from agile_bot.bots.base_bot.src.bot.workspace import get_base_actions_directory
+        from agile_bot.bots.base_bot.src.utils import read_json_file
         
-        # Get action class path (from custom_class or default)
-        action_class_path = base_action_config.custom_class
+        custom_class = action_config.get("action_class") or action_config.get("custom_class")
+        
+        if not custom_class:
+            base_actions_dir = get_base_actions_directory()
+            # Normalize action name for path lookup (render_output -> render)
+            normalized_action_name = 'render' if action_name == 'render_output' else action_name
+            action_config_path = base_actions_dir / normalized_action_name / "action_config.json"
+            base_config = read_json_file(action_config_path)
+            custom_class = base_config.get("action_class") or base_config.get("custom_class")
+        
+        action_class_path = custom_class
         if not action_class_path:
-            # Map action names to module names and class names
             action_module_mapping = {
                 'clarify': ('clarify', 'clarify_action', 'ClarifyContextAction'),
                 'strategy': ('strategy', 'strategy_action', 'StrategyAction'),
@@ -81,19 +66,16 @@ class Actions:
                 module_name, module_file, action_class_name = mapping
                 action_class_path = f"agile_bot.bots.base_bot.src.actions.{module_name}.{module_file}.{action_class_name}"
             else:
-                # Default: try to construct from action name
                 module_name = action_name
                 action_class_name = action_name.title().replace('_', '') + 'Action'
                 action_class_path = f"agile_bot.bots.base_bot.src.actions.{module_name}.{module_name}_action.{action_class_name}"
         
-        # Import and instantiate action class
         module_path, class_name = action_class_path.rsplit(".", 1)
         try:
             module = importlib.import_module(module_path)
         except ModuleNotFoundError as e:
             raise ValueError(
                 f"Action '{action_name}' cannot be loaded: module '{module_path}' not found. "
-                f"Action classes must exist for all configured actions. "
                 f"Expected path: {action_class_path}"
             ) from e
         
@@ -102,23 +84,22 @@ class Actions:
         except AttributeError as e:
             raise ValueError(
                 f"Action '{action_name}' cannot be loaded: class '{class_name}' not found in module '{module_path}'. "
-                f"Action classes must exist for all configured actions."
+                f"Expected class: {action_class_path}"
             ) from e
         
-        # Instantiate with BaseActionConfig, Behavior, ActivityTracker
-        try:
-            action_instance = action_class(
-                base_action_config=base_action_config,
+        # Only pass action_name for base Action class; extended classes derive it from class name
+        from agile_bot.bots.base_bot.src.actions.action import Action as BaseAction
+        if action_class is BaseAction:
+            return action_class(
+                action_name=action_name,
                 behavior=behavior,
-                activity_tracker=activity_tracker
+                action_config=action_config
             )
-        except Exception as e:
-            raise ValueError(
-                f"Action '{action_name}' cannot be instantiated: {e}. "
-                f"Action classes must be properly implemented for all configured actions."
-            ) from e
-        
-        return action_instance
+        else:
+            return action_class(
+                behavior=behavior,
+                action_config=action_config
+            )
     
     @property
     def current(self) -> Optional[Action]:
@@ -156,13 +137,10 @@ class Actions:
             yield action
     
     def __getattr__(self, name: str):
-        """Allow accessing actions as attributes (e.g., actions.clarify, actions.build())."""
-        # Check if it's an action name
         action = self.find_by_name(name)
         if action:
             return action
         
-        # Default behavior for unknown attributes
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
     
     def navigate_to(self, action_name: str, out_of_order: bool = False):
@@ -170,7 +148,6 @@ class Actions:
         if action is None:
             raise ValueError(f"Action '{action_name}' not found")
         
-        # Find index of action
         target_index = None
         for i, a in enumerate(self._actions):
             if a.action_name == action_name:
@@ -181,59 +158,112 @@ class Actions:
         if target_index is None:
             return
         
-        # If navigating out of order, remove completed actions after target
         if out_of_order and self.behavior.bot_paths:
             workspace_dir = self.behavior.bot_paths.workspace_directory
             state_file = workspace_dir / 'behavior_action_state.json'
             
-            if state_file.exists():
-                try:
-                    state_data = json.loads(state_file.read_text(encoding='utf-8'))
-                    completed_actions = state_data.get('completed_actions', [])
-                    
-                    if completed_actions:
-                        # Get action names that come after target
-                        action_names_after_target = [a.action_name for a in self._actions[target_index + 1:]]
-                        
-                        # Filter out completed actions that come after target
-                        expected_behavior_prefix = f'{self.bot_name}.{self.behavior.name}.'
-                        filtered_completed = []
-                        for completed_action in completed_actions:
-                            action_state = completed_action.get('action_state', '')
-                            if action_state.startswith(expected_behavior_prefix):
-                                completed_action_name = action_state.split('.')[-1]
-                                # Keep if it's not after target
-                                if completed_action_name not in action_names_after_target:
-                                    filtered_completed.append(completed_action)
-                            else:
-                                # Keep actions from other behaviors
-                                filtered_completed.append(completed_action)
-                        
-                        state_data['completed_actions'] = filtered_completed
-                        state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
-                except Exception:
-                    pass  # If update fails, continue with navigation
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+            completed_actions = state_data.get('completed_actions', [])
+            
+            if completed_actions:
+                action_names_after_target = [a.action_name for a in self._actions[target_index + 1:]]
+                
+                expected_behavior_prefix = f'{self.behavior.bot_name}.{self.behavior.name}.'
+                filtered_completed = []
+                for completed_action in completed_actions:
+                    action_state = completed_action.get('action_state', '')
+                    if action_state.startswith(expected_behavior_prefix):
+                        completed_action_name = action_state.split('.')[-1]
+                        if completed_action_name not in action_names_after_target:
+                            filtered_completed.append(completed_action)
+                    else:
+                        filtered_completed.append(completed_action)
+                
+                state_data['completed_actions'] = filtered_completed
+                state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
         
         self.save_state()
     
     def close_current(self):
-        if self._current_index is not None:
-            current_action_obj = self.current
-            if current_action_obj:
-                self._save_completed_action(current_action_obj.action_name)
-            
-            # Move to next action if available
-            next_action_obj = self.next()
-            if next_action_obj:
-                self._current_index += 1
-                self.save_state()
+        if self.behavior.bot_paths is None:
+            return
+        
+        if self._current_index is None:
+            return
+        
+        current_action_obj = self.current
+        if current_action_obj is None:
+            return
+        
+        workspace_dir = self.behavior.bot_paths.workspace_directory
+        state_file = workspace_dir / 'behavior_action_state.json'
+        
+        expected_behavior = f'{self.behavior.bot_name}.{self.behavior.name}'
+        
+        # Load existing state or create new
+        if state_file.exists():
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        else:
+            state_data = {
+                'current_behavior': expected_behavior,
+                'current_action': '',
+                'completed_actions': [],
+                'timestamp': datetime.now().isoformat()
+            }
+        
+        if 'current_behavior' not in state_data:
+            state_data['current_behavior'] = expected_behavior
+        
+        if 'completed_actions' not in state_data:
+            state_data['completed_actions'] = []
+        
+        action_to_complete = current_action_obj.action_name
+        action_state = f'{self.behavior.bot_name}.{self.behavior.name}.{action_to_complete}'
+        
+        if 'completed_actions' not in state_data:
+            state_data['completed_actions'] = []
+        
+        completed_actions_list = state_data.get('completed_actions', [])
+        
+        is_already_completed = any(
+            a.get('action_state') == action_state 
+            for a in completed_actions_list
+        )
+        
+        new_completed_action_entry = {
+            'action_state': action_state,
+            'timestamp': datetime.now().isoformat()
+        }
+        if not is_already_completed:
+            new_completed_actions = completed_actions_list + [new_completed_action_entry]
+            state_data['completed_actions'] = new_completed_actions
+        else:
+            state_data['completed_actions'] = completed_actions_list
+        
+        if 'completed_actions' not in state_data:
+            state_data['completed_actions'] = completed_actions_list if completed_actions_list else []
+        
+        next_action_obj = self.next()
+        if next_action_obj:
+            self._current_index += 1
+        
+        current_action_obj = self.current
+        if current_action_obj:
+            state_data['current_action'] = f'{self.behavior.bot_name}.{self.behavior.name}.{current_action_obj.action_name}'
+        
+        state_data['timestamp'] = datetime.now().isoformat()
+        
+        if 'completed_actions' not in state_data:
+            state_data['completed_actions'] = []
+        elif not isinstance(state_data.get('completed_actions'), list):
+            existing = state_data.get('completed_actions')
+            state_data['completed_actions'] = [existing] if existing else []
+        
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
     
     def forward_to_current(self) -> Optional['Action']:
-        """Forward to current action - loads state, returns current Action object."""
-        # Load state to sync with persisted state
         self.load_state()
-        
-        # Return current action object (CLI/MCP will execute it)
         return self.current
     
     def is_final_action(self) -> bool:
@@ -248,12 +278,9 @@ class Actions:
         return False
     
     def _get_next_action_reminder(self) -> str:
-        """Get reminder for next action, or next behavior if this is the final action."""
-        # If this is the final action, get next behavior reminder instead
         if self.is_final_action():
             return self._get_next_behavior_reminder()
         
-        # Otherwise, get next action reminder
         try:
             next_action = self.next()
             if next_action:
@@ -266,20 +293,16 @@ class Actions:
         return ""
     
     def _get_next_behavior_reminder(self) -> str:
-        """Internal: Get reminder for next behavior (only called when on final action)."""
         try:
             if not self.behavior or not self.behavior.bot:
                 return ""
-            # Get behavior names from behaviors collection
             behavior_names = self.behavior.bot.behaviors.names
             if not behavior_names:
                 return ""
-            # Find current behavior index
             try:
                 current_index = behavior_names.index(self.behavior.name)
                 if current_index + 1 < len(behavior_names):
                     next_behavior_name = behavior_names[current_index + 1]
-                    # Get first action of next behavior
                     next_behavior = self.behavior.bot.behaviors.find_by_name(next_behavior_name)
                     first_action_name = None
                     if next_behavior and next_behavior.actions.names:
@@ -311,33 +334,42 @@ class Actions:
         workspace_dir = self.behavior.bot_paths.workspace_directory
         state_file = workspace_dir / 'behavior_action_state.json'
         
-        # Load existing state to preserve current_behavior and completed_actions
-        state_data = {}
-        if state_file.exists():
-            try:
-                state_data = json.loads(state_file.read_text(encoding='utf-8'))
-            except Exception:
-                pass
+        expected_behavior = f'{self.behavior.bot_name}.{self.behavior.name}'
         
-        # Only update current action (Behaviors collection manages current_behavior)
+        # Load existing state or create new
+        if state_file.exists():
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        else:
+            state_data = {
+                'current_behavior': expected_behavior,
+                'current_action': '',
+                'completed_actions': [],
+                'timestamp': datetime.now().isoformat()
+            }
+        
+        if 'completed_actions' not in state_data:
+            state_data['completed_actions'] = []
+        
+        # Always update current_behavior to reflect the current behavior
+        state_data['current_behavior'] = expected_behavior
+        
         current_action_obj = self.current
         if current_action_obj:
-            state_data['current_action'] = f'{self.bot_name}.{self.behavior.name}.{current_action_obj.action_name}'
+            state_data['current_action'] = f'{self.behavior.bot_name}.{self.behavior.name}.{current_action_obj.action_name}'
             state_data['timestamp'] = datetime.now().isoformat()
         
         state_file.parent.mkdir(parents=True, exist_ok=True)
         state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
     
     def load_state(self):
-        if self.bot_paths is None or len(self._actions) == 0:
+        if self.behavior.bot_paths is None or len(self._actions) == 0:
             if len(self._actions) > 0:
                 self._current_index = 0
             return
         
-        workspace_dir = self.bot_paths.workspace_directory
+        workspace_dir = self.behavior.bot_paths.workspace_directory
         state_file = workspace_dir / 'behavior_action_state.json'
         
-        # If no state file, set first action as current
         if not state_file.exists():
             if len(self._actions) > 0:
                 self._current_index = 0
@@ -348,55 +380,44 @@ class Actions:
             current_action_full = state_data.get('current_action', '')
             current_behavior_full = state_data.get('current_behavior', '')
             
-            # Check if current_behavior matches this behavior
-            expected_behavior = f'{self.bot_name}.{self.behavior.name}'
+            expected_behavior = f'{self.behavior.bot_name}.{self.behavior.name}'
             if current_behavior_full != expected_behavior:
-                # Behavior doesn't match - set first action as current
                 if len(self._actions) > 0:
                     self._current_index = 0
                 return
             
-            # Extract action name from format "bot.behavior.action" -> "action"
             if current_action_full:
                 parts = current_action_full.split('.')
                 if len(parts) >= 3:
-                    saved_action_name = parts[-1]  # Last part is action name
+                    saved_action_name = parts[-1]
                     
-                    # Find and set current action
                     for i, action in enumerate(self._actions):
                         if action.action_name == saved_action_name:
                             self._current_index = i
                             return
             
-            # If current_action is missing, fall back to completed_actions
-            # Find the last completed action and set current to the next action after it
             completed_actions = state_data.get('completed_actions', [])
             if completed_actions:
-                # Find the last completed action for this behavior
                 last_completed_action_name = None
-                expected_behavior_prefix = f'{self.bot_name}.{self.behavior.name}.'
+                expected_behavior_prefix = f'{self.behavior.bot_name}.{self.behavior.name}.'
                 for completed_action in reversed(completed_actions):
                     action_state = completed_action.get('action_state', '')
                     if action_state.startswith(expected_behavior_prefix):
                         last_completed_action_name = action_state.split('.')[-1]
                         break
                 
-                # If we found a completed action, set current to the next action after it
                 if last_completed_action_name:
                     for i, action in enumerate(self._actions):
                         if action.action_name == last_completed_action_name:
-                            # Set to next action if available, otherwise stay at last completed
                             if i + 1 < len(self._actions):
                                 self._current_index = i + 1
                             else:
                                 self._current_index = i
                             return
             
-            # If saved action not found and no completed actions, default to first
             if len(self._actions) > 0:
                 self._current_index = 0
         except Exception:
-            # If loading fails, default to first action
             if len(self._actions) > 0:
                 self._current_index = 0
     
@@ -407,23 +428,27 @@ class Actions:
         workspace_dir = self.behavior.bot_paths.workspace_directory
         state_file = workspace_dir / 'behavior_action_state.json'
         
-        # Load existing state
-        state_data = {}
+        # Load existing state or create new
         if state_file.exists():
-            try:
-                state_data = json.loads(state_file.read_text(encoding='utf-8'))
-            except Exception:
-                pass
+            state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        else:
+            state_data = {
+                'current_behavior': f'{self.behavior.bot_name}.{self.behavior.name}',
+                'current_action': '',
+                'completed_actions': [],
+                'timestamp': datetime.now().isoformat()
+            }
         
-        # Add completed action
         if 'completed_actions' not in state_data:
             state_data['completed_actions'] = []
         
-        action_state = f'{self.bot_name}.{self.behavior.name}.{action_name}'
-        state_data['completed_actions'].append({
-            'action_state': action_state,
-            'timestamp': datetime.now().isoformat()
-        })
+        action_state = f'{self.behavior.bot_name}.{self.behavior.name}.{action_name}'
+        
+        if not any(a.get('action_state') == action_state for a in state_data['completed_actions']):
+            state_data['completed_actions'].append({
+                'action_state': action_state,
+                'timestamp': datetime.now().isoformat()
+            })
         
         state_file.parent.mkdir(parents=True, exist_ok=True)
         state_file.write_text(json.dumps(state_data, indent=2), encoding='utf-8')
@@ -438,16 +463,11 @@ class Actions:
         if not state_file.exists():
             return False
         
-        try:
-            state_data = json.loads(state_file.read_text(encoding='utf-8'))
-            completed_actions = state_data.get('completed_actions', [])
-            
-            # Check if this action is in completed_actions for this behavior
-            action_state = f'{self.bot_name}.{self.behavior.name}.{action_name}'
-            return any(
-                action.get('action_state') == action_state
-                for action in completed_actions
-            )
-        except Exception:
-            return False
-
+        state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        completed_actions = state_data.get('completed_actions', [])
+        
+        action_state = f'{self.behavior.bot_name}.{self.behavior.name}.{action_name}'
+        return any(
+            action.get('action_state') == action_state
+            for action in completed_actions
+        )

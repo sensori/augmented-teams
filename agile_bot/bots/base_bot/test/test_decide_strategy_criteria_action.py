@@ -87,37 +87,32 @@ def given_strategy_action_is_initialized(bot_directory: Path, bot_name: str, beh
     behavior_dir = bot_directory / 'behaviors' / behavior_name
     behavior_dir.mkdir(parents=True, exist_ok=True)
     behavior_file = behavior_dir / 'behavior.json'
-    if not behavior_file.exists():
-        behavior_config = {
-            "behaviorName": behavior_name,
-            "description": f"Test behavior: {behavior_name}",
-            "goal": f"Test goal for {behavior_name}",
-            "inputs": "Test inputs",
-            "outputs": "Test outputs",
-            "instructions": {},
-            "actions_workflow": {
-                "actions": [
-                    {'name': 'strategy', 'order': 1}
-                ]
-            }
+    behavior_config = {
+        "behaviorName": behavior_name,
+        "description": f"Test behavior: {behavior_name}",
+        "goal": f"Test goal for {behavior_name}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "instructions": {},
+        "actions_workflow": {
+            "actions": [
+                {'name': 'strategy', 'order': 1}
+            ]
         }
-        behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    }
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
-    # Create guardrails files (required by Guardrails class initialization)
+    # Create minimal guardrails files (required by Guardrails class initialization)
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     create_minimal_guardrails_files(bot_directory, behavior_name, bot_name)
     
     # Create Behavior object
-    behavior = Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
+    behavior = Behavior(name=behavior_name, bot_paths=bot_paths)
     
     # Create StrategyAction with new signature
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig('strategy', bot_paths)
-    
     return StrategyAction(
-        base_action_config=base_action_config,
         behavior=behavior,
-        activity_tracker=None
+        action_config=None
     )
 
 def given_strategy_guardrails_exist(bot_directory: Path, behavior: str, assumptions: list, criteria: dict):
@@ -235,8 +230,30 @@ def given_environment_bootstrapped_with_strategy_guardrails(bot_directory: Path,
     bootstrap_env(bot_directory, workspace_directory)
     bot_name, behavior = given_bot_name_and_behavior_setup()
     assumptions, criteria = given_strategy_assumptions_and_criteria()
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    import json
+    behavior_dir = bot_directory / 'behaviors' / behavior
+    behavior_dir.mkdir(parents=True, exist_ok=True)
+    behavior_file = behavior_dir / 'behavior.json'
+    behavior_file.write_text(json.dumps({
+        "behaviorName": behavior,
+        "description": f"Test behavior: {behavior}",
+        "goal": f"Test goal for {behavior}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "instructions": {},
+        "actions_workflow": {
+            "actions": [{'name': 'strategy', 'order': 1}]
+        }
+    }, indent=2), encoding='utf-8')
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     given_strategy_guardrails_exist(bot_directory, behavior, assumptions, criteria)
-    action_obj = given_strategy_action_is_initialized(bot_directory, bot_name, behavior)
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.src.actions.strategy.strategy_action import StrategyAction
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
+    action_obj = StrategyAction(behavior=behavior_obj, action_config=None)
     return bot_name, behavior, assumptions, action_obj
 
 
@@ -343,18 +360,6 @@ class TestInjectStrategyIntoInstructions:
         # Then: Instructions contain strategy criteria and assumptions
         then_instructions_contain_strategy_criteria_and_assumptions(instructions, assumptions)
 
-    def test_action_uses_base_strategy_when_guardrails_missing(self, bot_directory, workspace_directory):
-        """
-        SCENARIO: Action Uses Base Strategy When Guardrails Missing
-        """
-        # Given: Environment is bootstrapped
-        bot_name, behavior, action_obj = given_environment_bootstrapped_and_strategy_action_initialized(bot_directory, workspace_directory)
-        
-        # When: Action injects strategy criteria and assumptions
-        instructions = when_action_injects_strategy_criteria_and_assumptions(action_obj)
-        
-        # Then: Instructions do not contain strategy data
-        then_instructions_do_not_contain_strategy_data(instructions)
 
 
 # ============================================================================

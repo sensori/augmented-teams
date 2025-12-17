@@ -89,7 +89,7 @@ class MCPServerGenerator:
         # Fallback to folder discovery
         return self.discover_behaviors_from_folders()
     
-    def register_all_behavior_action_tools(self, mcp_server: FastMCP):
+    def register_all_tools(self, mcp_server: FastMCP):
         # Discover behaviors from folder structure
         behaviors = self._get_bot_behaviors()
         
@@ -680,7 +680,7 @@ def main():
     )
 
     mcp_server = generator.create_server_instance()
-    generator.register_all_behavior_action_tools(mcp_server)
+    generator.register_all_tools(mcp_server)
 
     mcp_server.run()
 
@@ -780,13 +780,26 @@ if __name__ == '__main__':
                 if behavior_file.exists():
                     behavior_data = read_json_file(behavior_file)
                     behavior_descriptions[behavior] = behavior_data.get('description', '')
-                    trigger_words = self._load_trigger_words_from_behavior_folder(
-                        behavior=behavior,
-                        action=None  # Get behavior-level trigger words
-                    )
+                    # Load trigger words directly from behavior_data
+                    trigger_words_data = behavior_data.get('trigger_words', {})
+                    if isinstance(trigger_words_data, dict):
+                        trigger_words = trigger_words_data.get('patterns', [])
+                    elif isinstance(trigger_words_data, list):
+                        trigger_words = trigger_words_data
+                    else:
+                        trigger_words = []
+                    # If not found in behavior_data, try loading via method
+                    if not trigger_words:
+                        trigger_words = self._load_trigger_words_from_behavior_folder(
+                            behavior=behavior,
+                            action=None  # Get behavior-level trigger words
+                        )
                     if trigger_words:
                         behavior_trigger_words[behavior] = trigger_words
-            except FileNotFoundError:
+            except (FileNotFoundError, Exception) as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.debug(f"Failed to load trigger words for {behavior}: {e}")
                 pass
         
         # Build behavior sections (one section per behavior)

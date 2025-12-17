@@ -1,0 +1,182 @@
+{
+  "description": "CRITICAL: Tests must NEVER contain guard clauses that check variable values, file existence, type checks, or any defensive conditionals. We control the test setup and MUST assume the code we write in tests works correctly. If test setup is wrong, we WANT the test to fail immediately - guard clauses hide problems and reduce our ability to know if tests are actually working. Guard clauses assume the code we wrote won't work, which defeats the purpose of testing. Write tests that assume positive outcomes - if you need different behavior, write a different test.",
+  "examples": [
+    {
+      "do": {
+        "description": "Assume correct setup - let test fail if wrong",
+        "content": [
+          "def test_behavior_loads_config(self, tmp_path, bot_name):",
+          "    # Given: Bot directory with config",
+          "    bot_dir = given_bot_directory_and_config_file(tmp_path, bot_name, {'name': bot_name})",
+          "    behavior_file = bot_dir / 'behaviors' / 'shape' / 'behavior.json'",
+          "    behavior_file.parent.mkdir(parents=True, exist_ok=True)",
+          "    behavior_file.write_text(json.dumps({'name': 'shape'}))",
+          "    ",
+          "    # When: Behavior is created",
+          "    behavior = Behavior(name='shape', bot_paths=bot_paths, bot_instance=None)",
+          "    ",
+          "    # Then: Config is loaded (no guard clause - test fails if file missing)",
+          "    assert behavior.name == 'shape'"
+        ]
+      },
+      "dont": {
+        "description": "Don't add guard clauses checking file existence or variable values",
+        "content": [
+          "# WRONG: Guard clause checking file exists",
+          "def test_behavior_loads_config(self, tmp_path, bot_name):",
+          "    bot_dir = given_bot_directory_and_config_file(tmp_path, bot_name, {'name': bot_name})",
+          "    behavior_file = bot_dir / 'behaviors' / 'shape' / 'behavior.json'",
+          "    ",
+          "    # WRONG: Checking if file exists - test should fail if it doesn't!",
+          "    if behavior_file.exists():",
+          "        behavior = Behavior(name='shape', bot_paths=bot_paths)",
+          "        assert behavior.name == 'shape'",
+          "    ",
+          "# WRONG: Guard clause checking variable type",
+          "def test_behavior_has_actions(self, behavior_obj):",
+          "    # WRONG: Checking if behavior_obj is correct type - test should fail if wrong!",
+          "    if isinstance(behavior_obj, Behavior):",
+          "        assert len(behavior_obj.actions) > 0",
+          "    ",
+          "# WRONG: Guard clause checking variable value",
+          "def test_action_executes(self, action_obj):",
+          "    # WRONG: Checking if action_obj exists - test should fail if None!",
+          "    if action_obj:",
+          "        result = action_obj.execute()",
+          "        assert result.status == 'success'",
+          "    ",
+          "# WRONG: Guard clause checking attribute existence",
+          "def test_behavior_has_config(self, behavior_obj):",
+          "    # WRONG: Checking if attribute exists - test should fail if missing!",
+          "    if hasattr(behavior_obj, 'config'):",
+          "        assert behavior_obj.config is not None"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Use assertions to verify expected state, not guard clauses",
+        "content": [
+          "def test_behavior_has_correct_type(self, behavior_obj):",
+          "    # DO: Assert the expected type directly",
+          "    assert isinstance(behavior_obj, Behavior)",
+          "    assert behavior_obj.name == 'shape'",
+          "    ",
+          "def test_file_is_created(self, tmp_path):",
+          "    # DO: Assert file exists directly (or let test fail if missing)",
+          "    config_file = tmp_path / 'config.json'",
+          "    config_file.write_text('{}')",
+          "    assert config_file.exists()"
+        ]
+      },
+      "dont": {
+        "description": "Don't use conditional logic to handle missing setup",
+        "content": [
+          "# WRONG: Conditional logic instead of assertions",
+          "def test_behavior_has_correct_type(self, behavior_obj):",
+          "    if not isinstance(behavior_obj, Behavior):",
+          "        pytest.skip('Behavior object not created correctly')",
+          "    assert behavior_obj.name == 'shape'",
+          "    ",
+          "# WRONG: Conditional file handling",
+          "def test_file_is_created(self, tmp_path):",
+          "    config_file = tmp_path / 'config.json'",
+          "    if not config_file.exists():",
+          "        config_file.write_text('{}')",
+          "    assert config_file.exists()"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "Let pytest fixtures handle setup - trust the setup",
+        "content": [
+          "@pytest.fixture",
+          "def behavior_obj(bot_paths):",
+          "    \"\"\"Fixture creates behavior with correct setup.\"\"\"",
+          "    return Behavior(name='shape', bot_paths=bot_paths, bot_instance=None)",
+          "    ",
+          "def test_behavior_has_actions(behavior_obj):",
+          "    # DO: Trust fixture setup - no guard clauses needed",
+          "    assert len(behavior_obj.actions) > 0",
+          "    assert behavior_obj.actions.find_by_name('clarify') is not None"
+        ]
+      },
+      "dont": {
+        "description": "Don't add guard clauses in test functions when fixtures handle setup",
+        "content": [
+          "@pytest.fixture",
+          "def behavior_obj(bot_paths):",
+          "    return Behavior(name='shape', bot_paths=bot_paths, bot_instance=None)",
+          "    ",
+          "def test_behavior_has_actions(behavior_obj):",
+          "    # WRONG: Guard clause when fixture already handles setup",
+          "    if behavior_obj and hasattr(behavior_obj, 'actions'):",
+          "        assert len(behavior_obj.actions) > 0"
+        ]
+      }
+    },
+    {
+      "do": {
+        "description": "CRITICAL PRINCIPLE: Assume test code works - write tests for positive outcomes",
+        "content": [
+          "# CRITICAL: We control test setup, so we assume it works correctly",
+          "def test_action_loads_config(bot_directory, behavior_name):",
+          "    # Given: Test setup creates behavior.json",
+          "    behavior_file = bot_directory / 'behaviors' / behavior_name / 'behavior.json'",
+          "    behavior_file.parent.mkdir(parents=True, exist_ok=True)",
+          "    behavior_file.write_text(json.dumps({'name': behavior_name}))",
+          "    ",
+          "    # When: Behavior is created",
+          "    behavior = Behavior(name=behavior_name, bot_paths=bot_paths)",
+          "    ",
+          "    # Then: Config is loaded (test FAILS if file missing - that's what we want!)",
+          "    assert behavior.name == behavior_name",
+          "    ",
+          "# If you need to test missing file scenario, write a SEPARATE test:",
+          "def test_behavior_raises_error_when_config_missing(bot_directory, behavior_name):",
+          "    # Given: Behavior directory exists but no behavior.json",
+          "    behavior_dir = bot_directory / 'behaviors' / behavior_name",
+          "    behavior_dir.mkdir(parents=True, exist_ok=True)",
+          "    ",
+          "    # When: Behavior is created",
+          "    # Then: FileNotFoundError is raised (this is the EXPECTED behavior)",
+          "    with pytest.raises(FileNotFoundError):",
+          "        Behavior(name=behavior_name, bot_paths=bot_paths)"
+        ]
+      },
+      "dont": {
+        "description": "NEVER add guard clauses - they hide test failures",
+        "content": [
+          "# WRONG: Guard clause assumes test code won't work",
+          "def test_action_loads_config(bot_directory, behavior_name):",
+          "    behavior_file = bot_directory / 'behaviors' / behavior_name / 'behavior.json'",
+          "    ",
+          "    # WRONG: Guard clause assumes file might not exist",
+          "    # This hides the fact that test setup is broken!",
+          "    if behavior_file.exists():",
+          "        behavior = Behavior(name=behavior_name, bot_paths=bot_paths)",
+          "        assert behavior.name == behavior_name",
+          "    # If file doesn't exist, test silently passes - WRONG!",
+          "    ",
+          "# WRONG: Guard clause assumes variable might be wrong type",
+          "def test_behavior_has_actions(behavior_obj):",
+          "    # WRONG: This assumes behavior_obj might not be a Behavior",
+          "    # If it's not, test silently skips - we never know!",
+          "    if isinstance(behavior_obj, Behavior):",
+          "        assert len(behavior_obj.actions) > 0",
+          "    ",
+          "# WRONG: Guard clause assumes code we wrote won't work",
+          "def test_helper_creates_file(tmp_path):",
+          "    file_path = tmp_path / 'test.json'",
+          "    # WRONG: We wrote the helper, we should trust it works!",
+          "    if not file_path.exists():",
+          "        create_test_file(file_path)",
+          "    assert file_path.exists()"
+        ]
+      }
+    }
+  ],
+  "scanner": "agile_bot.bots.base_bot.src.actions.validate.scanners.no_guard_clauses_scanner.NoGuardClausesScanner"
+}
+

@@ -20,4 +20,3 @@ class Guardrails:
                 'strategy': self.strategy.instructions
             }
         }
-

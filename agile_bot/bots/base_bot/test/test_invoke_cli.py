@@ -268,12 +268,8 @@ def create_behavior_trigger_words(workspace: Path, bot_name: str, behavior: str,
     behavior_dir.mkdir(parents=True, exist_ok=True)
     behavior_file = behavior_dir / 'behavior.json'
     
-    # Load existing behavior.json or create new one
-    if behavior_file.exists():
-        behavior_data = json.loads(behavior_file.read_text())
-    else:
-        create_actions_workflow_json(bot_dir, behavior)
-        behavior_data = json.loads(behavior_file.read_text())
+    create_actions_workflow_json(bot_dir, behavior)
+    behavior_data = json.loads(behavior_file.read_text())
     
     # Update trigger_words in behavior.json (router reads from behavior.json now)
     behavior_data['trigger_words'] = {
@@ -450,7 +446,7 @@ def given_action_trigger_templates_dictionary():
         'strategy': 'decide planning criteria for {behavior}',
         'build': 'build knowledge for {behavior}',
         'validate': 'validate rules for {behavior}',
-        'render_output': 'render output for {behavior}'
+        'render': 'render output for {behavior}'
     }
 
 def when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_templates: dict, verify_func):
@@ -468,7 +464,7 @@ def when_test_all_behaviors_with_action_templates(setup, helper, action_trigger_
 def _create_base_action_instructions(bot_directory: Path):
     """Helper: Create base action instructions in bot directory."""
     actions = ['initialize_workspace', 'gather_context', 'decide_planning_criteria', 
-               'build_knowledge', 'validate', 'render_output']
+               'build_knowledge', 'validate', 'render']
     for action in actions:
         create_base_action_instructions(bot_directory, action)
 

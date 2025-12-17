@@ -4,7 +4,7 @@
   "description": "Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements",
   "goal": "Shape both story map and domain model together from user context - capture domain concepts, responsibilities, and requirements alongside story structure",
   "inputs": "User context, interviews, vision documents, existing requirements, business Domain Experts interviews",
-  "outputs": "story-graph.json, story-map.md, story-map-outline.drawio, story-map.txt, domain_outline.md, domain_graph.json, domain-model-description.md",
+  "outputs": "story-graph.json, story-map.md, story-map-outline.drawio, story-map.txt, domain_outline.md, domain-model-description.md",
   "baseActionsPath": "agile_bot/bots/base_bot/base_actions",
   "instructions": [
     "Create a story map and domain model outline that captures the user's journey through epics, features, and stories, and captures domain model concepts and requirements"

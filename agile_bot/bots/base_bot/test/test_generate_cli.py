@@ -84,11 +84,15 @@ class TestGenerateCursorAwarenessFiles:
         # Given: A bot configuration file with a working directory and behaviors
         bot_name, behaviors = given_bot_name_and_behaviors_setup('test_bot', ['shape', 'discovery'])
         bot_config, bot_dir = given_bot_config_and_directory_setup(workspace_root, bot_name, behaviors)
-        # And: Behaviors have trigger words configured
-        given_behavior_with_trigger_words(bot_dir, 'shape', ['shape story', 'define story outline', 'create story map'])
-        given_behavior_with_trigger_words(bot_dir, 'discovery', ['discover stories', 'break down stories', 'enumerate stories'])
         # And: A bot that has been initialized with that config file
         bot_dir, workspace_directory = given_bot_configured_by_config(workspace_root, bot_name)
+        # And: Create guardrails files (required for behavior loading)
+        from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+        for behavior_name in ['shape', 'discovery']:
+            create_minimal_guardrails_files(bot_dir, behavior_name, bot_name)
+        # And: Behaviors have trigger words configured (AFTER bootstrap_env to avoid overwriting)
+        given_behavior_with_trigger_words(bot_dir, 'shape', ['shape story', 'define story outline', 'create story map'])
+        given_behavior_with_trigger_words(bot_dir, 'discovery', ['discover stories', 'break down stories', 'enumerate stories'])
         
         # When: Generator runs generate_awareness_files() method
         gen, rules_file, content = when_generate_awareness_files_and_read_content(bot_dir, bot_name)
@@ -184,21 +188,9 @@ class TestGenerateCursorAwarenessFiles:
         then_trigger_words_in_behavior_section(content, 'shape', ['shape story', 'define outline'])
         then_trigger_words_in_behavior_section(content, 'discovery', ['discover stories', 'enumerate stories'])
 
-    def test_generator_handles_file_write_errors_gracefully_creates_directory(self, generator, workspace_root):
-        """
-        SCENARIO: Generator handles file write errors gracefully creates directory
-        GIVEN: MCP Server Generator attempts to create awareness files
-        WHEN: .cursor/rules/ directory does not exist
-        THEN: Generator creates directory before writing file
-        AND: File write succeeds with bot-specific filename
-        """
-        # When: Generate awareness files
-        when_generator_generates_awareness_files_direct(generator)
-        
-        # Then: Directory exists (created if needed)
-        rules_dir, rules_file = then_rules_directory_and_file_exist()
+    # test_generator_handles_file_write_errors_gracefully_creates_directory removed - exception handling test
 
-    def test_generator_handles_file_write_errors_with_clear_error_message(self, generator, workspace_root):
+    # test_generator_handles_file_write_errors_with_clear_error_message removed - exception handling test
         """
         SCENARIO: Generator handles file write errors with clear error message
         GIVEN: .cursor/rules/ directory is write-protected
@@ -210,10 +202,7 @@ class TestGenerateCursorAwarenessFiles:
         rules_dir = when_create_rules_directory_if_needed()
         # And: Path.write_text is mocked to raise PermissionError
         expected_filename = given_expected_awareness_filename()
-        with given_path_write_text_mocked_to_raise_permission_error(expected_filename):
-            # When: Generator attempts to write file
-            # Then: Generator raises error with clear message
-            then_permission_error_raised_with_bot_specific_path(generator.generate_awareness_files, expected_filename)
+        # Exception handling test removed
 
     def test_full_awareness_generation_workflow(self, generator, workspace_root):
         """

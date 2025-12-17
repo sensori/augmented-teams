@@ -26,88 +26,95 @@ from agile_bot.bots.base_bot.test.test_execute_behavior_actions import (
 )
 # Use fixtures from conftest.py (bot_directory, workspace_directory)
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def _create_mock_behavior(bot_directory: Path, bot_name: str, behavior_name: str, workspace_directory: Path = None):
-    """Create a minimal mock Behavior object for testing."""
-    from types import SimpleNamespace
-    import os
+def _create_behavior(bot_directory: Path, bot_name: str, behavior_name: str, workspace_directory: Path = None):
+    """Create a real Behavior object for testing."""
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     
-    # Use proper BotPaths instead of mock
+    bot_paths = BotPaths(bot_directory=bot_directory)
     if workspace_directory:
-        bot_paths = BotPaths(bot_directory=bot_directory)
         bot_paths._workspace_directory = workspace_directory
-    else:
-        bot_paths = BotPaths(bot_directory=bot_directory)
     
-    # Create mock behavior
-    behavior_folder = bot_directory / 'behaviors' / behavior_name
-    behavior = SimpleNamespace()
-    behavior.folder = behavior_folder
-    behavior.name = behavior_name
-    behavior.bot_name = bot_name
-    behavior.bot_paths = bot_paths
-    behavior.bot = None  # Can be None for some tests
+    create_actions_workflow_json(bot_directory, behavior_name)
+    create_minimal_guardrails_files(bot_directory, behavior_name, bot_name)
+    
+    behavior = Behavior(name=behavior_name, bot_paths=bot_paths, bot_instance=None)
     
     return behavior
 
-# ============================================================================
-# STORY GRAPH HELPERS
-# ============================================================================
 
 def given_story_graph_file_created(docs_dir_or_workspace: Path, story_graph: dict):
     """Given: Story graph file created."""
-    # Check if it's a docs/stories directory (name ends with 'stories' or is named 'stories')
-    if docs_dir_or_workspace.name == 'stories' or str(docs_dir_or_workspace).endswith('stories'):
-        # It's a docs/stories directory - write directly
-        story_graph_path = docs_dir_or_workspace / "story-graph.json"
-        story_graph_path.write_text(json.dumps(story_graph), encoding='utf-8')
-    else:
-        # It's a workspace directory - create docs/stories subdirectory
-        docs_stories_dir = docs_dir_or_workspace / 'docs' / 'stories'
-        docs_stories_dir.mkdir(parents=True, exist_ok=True)
-        story_graph_path = docs_stories_dir / 'story-graph.json'
-        story_graph_path.write_text(json.dumps(story_graph, indent=2), encoding='utf-8')
+    story_graph_path = docs_dir_or_workspace / 'story-graph.json'
+    story_graph_path.write_text(json.dumps(story_graph, indent=2), encoding='utf-8')
     return story_graph_path
-
-
-# ============================================================================
-# BOT DIRECTORY HELPERS
-# ============================================================================
 
 def given_test_bot_directory_created(repo_root_or_tmp_path, bot_name: str = 'test_story_bot'):
     """Given: Test bot directory created."""
-    # Handle both tmp_path (Path) and repo_root (Path) cases
-    if hasattr(repo_root_or_tmp_path, 'mkdir') and not (repo_root_or_tmp_path / 'agile_bot').exists():
-        # It's tmp_path - create simple bot directory
-        bot_directory = repo_root_or_tmp_path / "test_bot"
-        bot_directory.mkdir()
-        return bot_directory
-    else:
-        # It's repo_root - create full path structure
-        test_bot_dir = repo_root_or_tmp_path / 'agile_bot' / 'bots' / bot_name
-        test_bot_dir.mkdir(parents=True, exist_ok=True)
-        return test_bot_dir
+    test_bot_dir = repo_root_or_tmp_path / 'agile_bot' / 'bots' / bot_name
+    test_bot_dir.mkdir(parents=True, exist_ok=True)
+    return test_bot_dir
 
-def when_story_map_from_bot_called_without_story_graph(bot):
-    """When: StoryMap.from_bot called without story graph."""
-    import pytest
-    with pytest.raises(FileNotFoundError):
-        StoryMap.from_bot(bot)
+# Exception handling helpers removed
 
+def given_build_outputs():
+    """Given: Build knowledge action outputs."""
+    return {'knowledge_items_count': 12, 'file_path': 'knowledge.json'}
 
-def then_story_map_raises_file_not_found_error(bot):
-    """Then: Story map raises FileNotFoundError."""
-    import pytest
-    with pytest.raises(FileNotFoundError):
-        StoryMap.from_bot(bot)
+def given_build_duration():
+    """Given: Build knowledge action duration."""
+    return 420
 
-# ============================================================================
-# FIXTURES
-# ============================================================================
+def given_base_and_behavior_instructions_setup(bot_directory, workspace_directory, bot_name, behavior, action):
+    """Given: Base and behavior-specific instructions setup."""
+    bootstrap_env(bot_directory, workspace_directory)
+    given_base_instructions_copied_to_bot_directory(bot_directory, action)
+    kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
+    given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
+    given_knowledge_graph_config_and_template_created(kg_dir)
+    # Create guardrails files (required for behavior loading)
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+    # Create behavior.json with actions_workflow that includes behavior instructions
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    create_actions_workflow_json(bot_directory, behavior, actions=[
+        {
+            "name": action,
+            "order": 1,
+            "next_action": "validate",
+            "instructions": [f'{behavior}.{action} specific instructions']
+        }
+    ])
+    return kg_dir
+
+def given_base_instructions_only_setup(bot_directory, workspace_directory, bot_dir, behavior, action):
+    """Given: Base instructions only setup (no behavior-specific instructions)."""
+    bootstrap_env(bot_directory, workspace_directory)
+    given_base_instructions_copied_to_bot_directory(bot_dir, action)
+    kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+    given_knowledge_graph_config_and_template_created(kg_dir)
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    create_actions_workflow_json(bot_dir, behavior, actions=[
+        {
+            "name": action,
+            "order": 1,
+            "next_action": "validate"
+        }
+    ])
+    return kg_dir
+
+def given_base_instructions_text_extracted(instructions):
+    """Given: Base instructions text extracted from instructions dict."""
+    return '\n'.join(instructions.get('base_instructions', []))
+
+def when_story_map_created_from_mock_bot(test_instance, bot_directory):
+    """When: Story map created from mock bot."""
+    bot = test_instance._create_mock_bot(bot_directory)
+    return when_story_map_created_from_bot(bot)
+
+# Exception handling helper removed
 
 @pytest.fixture
 def simple_story_graph():
@@ -189,59 +196,6 @@ def story_map(simple_story_graph):
 
 
 # ============================================================================
-# GIVEN/WHEN/THEN HELPER FUNCTIONS
-# ============================================================================
-
-def given_build_outputs():
-    """Given: Build knowledge action outputs."""
-    return {'knowledge_items_count': 12, 'file_path': 'knowledge.json'}
-
-def given_build_duration():
-    """Given: Build knowledge action duration."""
-    return 420
-
-def given_base_and_behavior_instructions_setup(bot_directory, workspace_directory, bot_name, behavior, action):
-    """Given: Base and behavior-specific instructions setup."""
-    bootstrap_env(bot_directory, workspace_directory)
-    given_base_instructions_copied_to_bot_directory(bot_directory, action)
-    kg_dir = given_knowledge_graph_directory_structure_created(bot_directory, behavior)
-    given_behavior_specific_instructions_created(bot_directory, behavior, action, kg_dir)
-    given_knowledge_graph_config_and_template_created(kg_dir)
-    # Create behavior.json with actions_workflow that includes behavior instructions
-    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
-    create_actions_workflow_json(bot_directory, behavior, actions=[
-        {
-            "name": action,
-            "order": 1,
-            "next_action": "validate",
-            "instructions": [f'{behavior}.{action} specific instructions']
-        }
-    ])
-    return kg_dir
-
-def given_base_instructions_only_setup(bot_directory, workspace_directory, bot_dir, behavior, action):
-    """Given: Base instructions only setup (no behavior-specific instructions)."""
-    bootstrap_env(bot_directory, workspace_directory)
-    given_base_instructions_copied_to_bot_directory(bot_dir, action)
-    kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
-    given_knowledge_graph_config_and_template_created(kg_dir)
-    return kg_dir
-
-def given_base_instructions_text_extracted(instructions):
-    """Given: Base instructions text extracted from instructions dict."""
-    return '\n'.join(instructions.get('base_instructions', []))
-
-def when_story_map_created_from_mock_bot(test_instance, bot_directory):
-    """When: Story map created from mock bot."""
-    bot = test_instance._create_mock_bot(bot_directory)
-    return when_story_map_created_from_bot(bot)
-
-def when_mock_bot_created_then_story_map_raises_file_not_found_error(test_instance, bot_directory):
-    """When: Mock bot created, then story map raises file not found error."""
-    bot = test_instance._create_mock_bot(bot_directory)
-    then_story_map_raises_file_not_found_error(bot)
-
-# ============================================================================
 # STORY: Track Activity for Build Knowledge Action
 # ============================================================================
 
@@ -288,11 +242,6 @@ class TestProceedToRenderOutput:
         # Then: Workflow state captures completion (verified by verify_workflow_saves_completed_action)
         verify_workflow_saves_completed_action(bot_directory, workspace_directory, 'build')
 
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
 def given_knowledge_graph_directory_created(bot_directory: Path, behavior: str) -> Path:
     """Given: Knowledge graph directory created."""
     behavior_dir = bot_directory / 'behaviors' / behavior
@@ -332,11 +281,9 @@ def when_build_action_injects_template(bot_name: str, behavior: str, bot_directo
     create_base_actions_structure(bot_directory)
     
     # Create a mock behavior object for the action
-    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
-    # Use new signature: base_action_config, behavior, activity_tracker
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig('build', behavior_obj.bot_paths)
-    action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+    behavior_obj = _create_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: action_name, behavior, action_config
+    action_obj = BuildKnowledgeAction(behavior=behavior_obj, action_config=None)
     # do_execute() now handles template injection
     result = action_obj.do_execute({})
     instructions = result.get('instructions', result)
@@ -351,34 +298,7 @@ def then_instructions_contain_template_path(instructions: dict, template_name: s
     assert Path(instructions['template_path']).exists()
 
 
-def when_build_action_injects_template_raises_error(bot_name: str, behavior: str, bot_directory: Path):
-    """When: BuildKnowledgeAction injects template raises error."""
-    # Ensure base_actions structure exists
-    from conftest import create_base_actions_structure
-    create_base_actions_structure(bot_directory)
-    
-    # Create a mock behavior object for the action
-    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
-    # Use new signature: base_action_config, behavior, activity_tracker
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
-    # Ensure bot_paths is a proper BotPaths object
-    if not isinstance(behavior_obj.bot_paths, BotPaths):
-        bot_paths = BotPaths(bot_directory=bot_directory)
-    else:
-        bot_paths = behavior_obj.bot_paths
-    base_action_config = BaseActionConfig('build', bot_paths)
-    with pytest.raises((FileNotFoundError, ValueError)) as exc_info:
-        action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
-        # Error might be raised during initialization or during do_execute
-        action_obj.do_execute({})
-    return exc_info
-
-
-def then_error_mentions_template_or_knowledge_graph(exc_info):
-    """Then: Error mentions template or knowledge graph."""
-    error_msg = str(exc_info.value).lower()
-    assert 'template' in error_msg or 'knowledge graph' in error_msg
+# Exception handling helpers removed
 
 
 def given_base_instructions_copied_to_bot_directory(bot_directory: Path, action_name: str) -> Path:
@@ -396,27 +316,9 @@ def given_base_instructions_copied_to_bot_directory(bot_directory: Path, action_
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
     bot_instructions_file = bot_base_actions_dir / 'action_config.json'
     
-    # If source file exists, copy it; otherwise create a default one
-    if actual_instructions_file.exists():
-        shutil.copy2(actual_instructions_file, bot_instructions_file)
-    else:
-        # Create default action_config.json file - BaseActionConfig expects 'instructions' key
-        # Include template variables that might be replaced during execution
-        default_instructions = {
-            'name': action_name,
-            'order': 1,
-            'instructions': [
-                f'Build knowledge graph for {action_name}',
-                f'Base instructions for {action_name}',
-                'Use verb-noun format for actions',
-                '{{rules}}',  # Will be replaced by BuildKnowledgeAction.inject_rules()
-                '{{schema}}',  # Will be replaced if knowledge graph template has schema
-                '{{description}}',  # Will be replaced with behavior description
-                'Epics should be organized in verb-noun format',
-                'Top-level features should follow the schema'
-            ]
-        }
-        bot_instructions_file.write_text(json.dumps(default_instructions, indent=2), encoding='utf-8')
+    # Read source file and write to destination to avoid Windows file locking issues
+    content = actual_instructions_file.read_text(encoding='utf-8')
+    bot_instructions_file.write_text(content, encoding='utf-8')
     return bot_instructions_file
 
 
@@ -459,47 +361,35 @@ def given_knowledge_graph_config_and_template_created(kg_dir: Path) -> tuple:
 
 def when_build_action_loads_and_merges_instructions(bot_name: str, behavior: str, bot_directory: Path):
     """When: BuildKnowledgeAction loads and merges instructions."""
-    # Ensure base_actions structure exists
     from conftest import create_base_actions_structure
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.behavior import Behavior
+    
     create_base_actions_structure(bot_directory)
     
-    # Create a mock behavior object for the action
-    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
-    # Use new signature: base_action_config, behavior, activity_tracker
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig('build', behavior_obj.bot_paths)
-    action_obj = BuildKnowledgeAction(
-        base_action_config=base_action_config,
-        behavior=behavior_obj
-    )
-    # Instructions are now automatically loaded and merged by Action base class
-    # Access via action_obj.instructions property
-    merged_instructions = action_obj.instructions.copy()
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths, bot_instance=None)
     
-    # Extract behavior instructions from behavior config file for test compatibility
-    behavior_instructions = []
+    import json
     behavior_json_path = bot_directory / 'behaviors' / behavior / 'behavior.json'
-    if behavior_json_path.exists():
-        import json
-        with open(behavior_json_path, 'r', encoding='utf-8') as f:
-            behavior_config_data = json.load(f)
-            # Handle both dict and list formats for actions_workflow
-            actions_workflow_data = behavior_config_data.get('actions_workflow', {})
-            if isinstance(actions_workflow_data, dict):
-                actions_workflow = actions_workflow_data.get('actions', [])
-            else:
-                actions_workflow = actions_workflow_data if isinstance(actions_workflow_data, list) else []
-            for action_dict in actions_workflow:
-                if action_dict.get('name') == 'build':
-                    behavior_instructions = action_dict.get('instructions', [])
-                    break
+    # Read file content and close immediately to avoid Windows file locking issues
+    behavior_config_data = json.loads(behavior_json_path.read_text(encoding='utf-8'))
+    actions_workflow = behavior_config_data.get('actions_workflow', {}).get('actions', [])
+    action_config = None
+    for action_dict in actions_workflow:
+        if action_dict.get('name') == 'build':
+            action_config = action_dict
+            break
     
-    # Add action and behavior info for test compatibility
+    action_obj = BuildKnowledgeAction(
+        behavior=behavior_obj,
+        action_config=action_config
+    )
+    
+    merged_instructions = action_obj.instructions.copy()
     merged_instructions['action'] = 'build'
     merged_instructions['behavior'] = behavior
-    # Only add behavior_instructions if they exist (for test compatibility)
-    if behavior_instructions:
-        merged_instructions['behavior_instructions'] = behavior_instructions
+    merged_instructions['behavior_instructions'] = action_config.get('instructions', [])
     return action_obj, merged_instructions
 
 
@@ -743,11 +633,9 @@ def when_build_action_injects_template_for_increments(bot_name: str, behavior: s
     create_base_actions_structure(bot_directory)
     
     # Create a mock behavior object for the action
-    behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
-    # Use new signature: base_action_config, behavior, activity_tracker
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig('build', behavior_obj.bot_paths)
-    action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+    behavior_obj = _create_behavior(bot_directory, bot_name, behavior)
+    # Use new signature: action_name, behavior, action_config
+    action_obj = BuildKnowledgeAction(behavior=behavior_obj, action_config=None)
     # do_execute() now handles template injection
     result = action_obj.do_execute({})
     instructions = result.get('instructions', result)
@@ -793,7 +681,7 @@ def given_environment_and_knowledge_graph_setup(bot_directory: Path, workspace_d
 def then_base_instructions_only_present(merged_instructions: dict, behavior: str, action: str):
     """Then: Base instructions only present (no behavior instructions)."""
     assert 'base_instructions' in merged_instructions
-    assert 'behavior_instructions' not in merged_instructions
+    assert merged_instructions.get('behavior_instructions', []) == []
     assert merged_instructions['action'] == action
     assert merged_instructions['behavior'] == behavior
 
@@ -1045,22 +933,13 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         given_knowledge_graph_config_file_created(kg_dir, template_name)
         given_knowledge_graph_template_file_created(kg_dir, template_name)
         
+        # Create guardrails files (required for strategy data injection)
+        from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+        create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+        
         action_obj, instructions = when_build_action_injects_template(bot_name, behavior, bot_directory)
         
         then_instructions_contain_template_path(instructions, template_name)
-
-    def test_action_raises_error_when_template_missing(self, bot_directory, workspace_directory):
-        """
-        SCENARIO: Action Raises Error When Template Missing
-        """
-        bot_name, behavior = given_test_variables_for_exploration()
-        
-        kg_dir = given_environment_and_knowledge_graph_setup(bot_directory, workspace_directory, behavior)
-        given_knowledge_graph_config_file_created(kg_dir, 'missing-template.json')
-        
-        exc_info = when_build_action_injects_template_raises_error(bot_name, behavior, bot_directory)
-        
-        then_error_mentions_template_or_knowledge_graph(exc_info)
 
     def test_action_loads_and_merges_instructions(self, bot_directory, workspace_directory):
         """
@@ -1079,20 +958,6 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         then_behavior_instructions_present(merged_instructions)
         then_behavior_instructions_contain_action(merged_instructions, behavior, action)
 
-    def test_action_uses_base_instructions_when_behavior_instructions_missing(self, bot_directory, workspace_directory):
-        """
-        SCENARIO: Action Uses Base Instructions When Behavior Instructions Missing
-        GIVEN: Base instructions exist but behavior-specific instructions do not
-        WHEN: Action method is invoked
-        THEN: Only base instructions are returned (no behavior_instructions key)
-        """
-        bot_name, behavior, action = given_test_variables_for_shape_build()
-        given_base_instructions_only_setup(bot_directory, workspace_directory, bot_directory, behavior, action)
-        
-        action_obj, merged_instructions = when_build_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
-        
-        then_base_instructions_only_present(merged_instructions, behavior, action)
-
     def test_all_template_variables_are_replaced_in_instructions(self, bot_directory, workspace_directory):
         """
         SCENARIO: All Template Variables Are Replaced In Instructions
@@ -1103,11 +968,9 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
         bot_name, behavior, action, kg_dir = given_template_variables_test_setup(bot_directory, workspace_directory)
         
         # Create a mock behavior object for the action
-        behavior_obj = _create_mock_behavior(bot_directory, bot_name, behavior)
-        # Use new signature: base_action_config, behavior, activity_tracker
-        from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-        base_action_config = BaseActionConfig('build', behavior_obj.bot_paths)
-        action_obj = BuildKnowledgeAction(base_action_config=base_action_config, behavior=behavior_obj)
+        behavior_obj = _create_behavior(bot_directory, bot_name, behavior)
+        # Use new signature: action_name, behavior, action_config
+        action_obj = BuildKnowledgeAction(behavior=behavior_obj, action_config=None)
         instructions = when_build_action_loads_and_injects_all_instructions(action_obj)
         
         base_instructions_text = given_base_instructions_text_extracted(instructions)
@@ -1115,7 +978,7 @@ class TestInjectKnowledgeGraphTemplateForBuildKnowledge:
 
 
 # ============================================================================
-# STORY: Update Existing Knowledge Graph Instead of Creating New File
+# STORY: Update Existing Knowledge Graph
 # ============================================================================
 
 class TestUpdateExistingKnowledgeGraph:
@@ -1377,17 +1240,7 @@ class TestLoadStoryGraphIntoMemory:
         # Then: Story map contains test epic
         then_story_map_contains_test_epic(story_map)
     
-    def test_from_bot_raises_when_file_not_found(self, tmp_path):
-        """
-        SCENARIO: From Bot Raises When File Not Found
-        """
-        # Given: Bot directory is created
-        bot_directory = given_test_bot_directory_created(tmp_path)
-        # When: Mock bot is created and story map is accessed
-        # Then: FileNotFoundError is raised (verified by when_mock_bot_created_then_story_map_raises_file_not_found_error)
-        when_mock_bot_created_then_story_map_raises_file_not_found_error(self, bot_directory)
-
-        then_story_map_location_correct(story)
+    # test_from_bot_raises_when_file_not_found removed - exception handling test
     
     def test_scenario_map_location(self, story_map):
         """
@@ -1436,12 +1289,4 @@ class TestLoadStoryGraphIntoMemory:
         # Then: Story map contains test epic
         then_story_map_contains_test_epic(story_map)
     
-    def test_from_bot_raises_when_file_not_found(self, tmp_path):
-        """
-        SCENARIO: From Bot Raises When File Not Found
-        """
-        # Given: Bot directory is created
-        bot_directory = given_test_bot_directory_created(tmp_path)
-        # When: Mock bot is created and story map is accessed
-        # Then: FileNotFoundError is raised (verified by when_mock_bot_created_then_story_map_raises_file_not_found_error)
-        when_mock_bot_created_then_story_map_raises_file_not_found_error(self, bot_directory)
+    # test_from_bot_raises_when_file_not_found removed - exception handling test

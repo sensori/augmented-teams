@@ -9,27 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationReportWriter:
-    """Writes validation reports to markdown files."""
-    
     def __init__(self, behavior_name: str, bot_paths: BotPaths):
-        """Initialize ValidationReportWriter.
-        
-        Args:
-            behavior_name: Name of the behavior being validated
-            bot_paths: BotPaths instance for accessing workspace and documentation paths
-        """
         self.behavior_name = behavior_name
         self.bot_paths = bot_paths
         self.workspace_directory = bot_paths.workspace_directory
     
     def write(self, instructions: Dict[str, Any], validation_rules: List[Dict[str, Any]], files: Dict[str, List[Path]]) -> None:
-        """Write validation report to file.
-        
-        Args:
-            instructions: Instructions structure with base_instructions and validation_rules
-            validation_rules: List of validation rules
-            files: Dict mapping file type keys to lists of file paths (e.g., {'test': [...], 'src': [...]})
-        """
         report_path = self._get_report_path()
         
         logger.info("=== _write_validation_report START ===")
@@ -58,26 +43,15 @@ class ValidationReportWriter:
             raise
     
     def get_report_path(self) -> Path:
-        """Get report path from bot_paths.
-        
-        Returns:
-            Path object for the validation report file
-        """
         docs_path = self.bot_paths.documentation_path
         docs_dir = self.workspace_directory / docs_path
         report_file = docs_dir / 'validation-report.md'
         return report_file
     
     def _get_report_path(self) -> str:
-        """Get report path as string (for internal use)."""
         return str(self.get_report_path())
     
     def get_report_hyperlink(self) -> str:
-        """Create a VS Code-compatible hyperlink for the report path.
-        
-        Returns:
-            Markdown-formatted hyperlink string
-        """
         report_path = self.get_report_path()
         try:
             resolved_path = report_path.resolve() if report_path.exists() else report_path
@@ -86,7 +60,6 @@ class ValidationReportWriter:
                 file_str = file_str[0].upper() + ':' + file_str[2:]
             vscode_uri = f"vscode://file/{file_str}"
             
-            # Get relative path for display
             try:
                 rel_path = str(report_path.relative_to(self.workspace_directory))
             except ValueError:
@@ -98,17 +71,6 @@ class ValidationReportWriter:
             return str(report_path)
     
     def _build_report_lines(self, instructions: Dict[str, Any], validation_rules: List[Dict[str, Any]], files: Dict[str, List[Path]], report_path: str) -> List[str]:
-        """Build all lines for the validation report.
-        
-        Args:
-            instructions: Instructions structure
-            validation_rules: List of validation rules
-            files: Dict mapping file type keys to lists of file paths
-            report_path: Path where report will be saved
-            
-        Returns:
-            List of markdown lines
-        """
         lines = []
         lines.extend(self._build_header())
         lines.extend(self._build_metadata())
@@ -121,14 +83,12 @@ class ValidationReportWriter:
         return lines
     
     def _build_header(self) -> List[str]:
-        """Build report header."""
         return [
             f"# Validation Report - {self.behavior_name.replace('_', ' ').title()}",
             ""
         ]
     
     def _build_metadata(self) -> List[str]:
-        """Build metadata section."""
         return [
             f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"**Project:** {self.workspace_directory.name}",
@@ -138,7 +98,6 @@ class ValidationReportWriter:
         ]
     
     def _build_summary(self, validation_rules: List[Dict[str, Any]]) -> List[str]:
-        """Build summary section."""
         total_rules = len(validation_rules)
         return [
             "## Summary",
@@ -148,7 +107,6 @@ class ValidationReportWriter:
         ]
     
     def _build_content_validated(self, files: Dict[str, List[Path]]) -> List[str]:
-        """Build content validated section."""
         lines = [
             "## Content Validated",
             ""
@@ -175,11 +133,6 @@ class ValidationReportWriter:
         return lines
     
     def _find_content_files(self) -> tuple:
-        """Find clarification.json, planning.json, and rendered outputs.
-        
-        Returns:
-            Tuple of (clarification_file, planning_file, rendered_outputs)
-        """
         docs_path = self.bot_paths.documentation_path
         docs_dir = self.workspace_directory / docs_path
         
@@ -190,31 +143,20 @@ class ValidationReportWriter:
         planning = planning_file if planning_file.exists() else None
         
         rendered_outputs = []
-        if docs_dir.exists():
-            rendered_patterns = [
-                '*-story-map.md',
-                '*-domain-model-description.md',
-                '*-domain-model-diagram.md',
-                'story-graph.json',
-                '*-increments.md'
-            ]
-            for pattern in rendered_patterns:
-                for file_path in docs_dir.glob(pattern):
-                    rendered_outputs.append(file_path)
+        rendered_patterns = [
+            '*-story-map.md',
+            '*-domain-model-description.md',
+            '*-domain-model-diagram.md',
+            'story-graph.json',
+            '*-increments.md'
+        ]
+        for pattern in rendered_patterns:
+            for file_path in docs_dir.glob(pattern):
+                rendered_outputs.append(file_path)
         
         return clarification, planning, rendered_outputs
     
     def _build_scanned_files_section(self, file_type: str, files_scanned: List[str], section_title: str) -> List[str]:
-        """Build a scanned files section (test files or code files).
-        
-        Args:
-            file_type: Type of files ('test' or 'src')
-            files_scanned: List of file paths that were scanned
-            section_title: Title for the section
-            
-        Returns:
-            List of markdown lines
-        """
         lines = []
         if files_scanned:
             logger.info(f"{section_title} from content_info: {len(files_scanned)} files")
@@ -227,14 +169,6 @@ class ValidationReportWriter:
         return lines
     
     def _get_relative_path(self, file_path: Path) -> str:
-        """Get relative path for display, falling back to filename if needed.
-        
-        Args:
-            file_path: Path to convert
-            
-        Returns:
-            Relative path string or filename
-        """
         try:
             if file_path.is_absolute() and self.workspace_directory:
                 return str(file_path.relative_to(self.workspace_directory))
@@ -251,7 +185,6 @@ class ValidationReportWriter:
             return file_path.name
     
     def _build_validation_rules(self, validation_rules: List[Dict[str, Any]]) -> List[str]:
-        """Build validation rules section."""
         lines = [
             "## Validation Rules Checked",
             ""
@@ -274,7 +207,6 @@ class ValidationReportWriter:
         return lines
     
     def _build_violations(self, validation_rules: List[Dict[str, Any]]) -> List[str]:
-        """Build violations section."""
         lines = [
             "## Violations Found",
             ""
@@ -305,11 +237,6 @@ class ValidationReportWriter:
         return lines
     
     def _organize_violations(self, validation_rules: List[Dict[str, Any]]) -> tuple:
-        """Organize violations by rule and type.
-        
-        Returns:
-            Tuple of (file_by_file_violations_by_rule, cross_file_violations_by_rule) dicts
-        """
         file_by_file_violations_by_rule = {}
         cross_file_violations_by_rule = {}
         
@@ -319,7 +246,6 @@ class ValidationReportWriter:
             rule_name = Path(rule_file).stem if rule_file else 'unknown'
             
             if 'file_by_file' in scanner_results or 'cross_file' in scanner_results:
-                # Two-pass scanner format
                 file_by_file_violations = scanner_results.get('file_by_file', {}).get('violations', [])
                 cross_file_violations = scanner_results.get('cross_file', {}).get('violations', [])
                 
@@ -328,7 +254,6 @@ class ValidationReportWriter:
                 if cross_file_violations:
                     cross_file_violations_by_rule[rule_name] = cross_file_violations
             elif 'violations' in scanner_results:
-                # Single-pass scanner format (e.g., StoryScanner)
                 violations = scanner_results.get('violations', [])
                 if violations:
                     file_by_file_violations_by_rule[rule_name] = violations
@@ -336,16 +261,6 @@ class ValidationReportWriter:
         return file_by_file_violations_by_rule, cross_file_violations_by_rule
     
     def _build_violations_by_type(self, violations_by_rule: Dict[str, List[Dict[str, Any]]], title: str, description: str) -> List[str]:
-        """Build violations section for a specific type (file-by-file or cross-file).
-        
-        Args:
-            violations_by_rule: Dict mapping rule names to lists of violations
-            title: Section title
-            description: Section description
-            
-        Returns:
-            List of markdown lines
-        """
         lines = [
             f"### {title}",
             "",
@@ -377,7 +292,6 @@ class ValidationReportWriter:
         return lines
     
     def _build_instructions(self, instructions: Dict[str, Any]) -> List[str]:
-        """Build validation instructions section."""
         lines = [
             "## Validation Instructions",
             ""
@@ -396,7 +310,6 @@ class ValidationReportWriter:
         return lines
     
     def _build_report_location(self, report_path: str) -> List[str]:
-        """Build report location section."""
         return [
             "## Report Location",
             "",
@@ -406,15 +319,6 @@ class ValidationReportWriter:
         ]
     
     def _create_file_link(self, location: str, line_number: Optional[int] = None) -> str:
-        """Create a clickable file link for the validation report using VS Code URIs.
-        
-        Args:
-            location: File path (can be absolute or relative)
-            line_number: Optional line number to link to
-            
-        Returns:
-            Markdown link string with VS Code URI
-        """
         if location == 'unknown' or not location:
             return f"`{location}`"
         
@@ -447,16 +351,6 @@ class ValidationReportWriter:
                 return f"`{location}`"
     
     def _extract_test_info(self, message: str, location: str, line_number: Optional[int] = None) -> Optional[str]:
-        """Extract test class and method information from violation message and create links.
-        
-        Args:
-            message: Violation message that may contain test names
-            location: File path
-            line_number: Line number where violation occurs
-            
-        Returns:
-            Formatted message with clickable links to test class/method, or None if no test info found
-        """
         test_method_patterns = [
             r'Test\s+method\s+["\']([^"\']+)["\']',
             r'Test\s+["\']([^"\']+)["\']',
@@ -510,15 +404,6 @@ class ValidationReportWriter:
         return message
     
     def _get_file_uri(self, location: str, line_number: Optional[int] = None) -> str:
-        """Get VS Code-compatible file URI for markdown links.
-        
-        Args:
-            location: File path
-            line_number: Optional line number
-            
-        Returns:
-            VS Code URI format: vscode://file/C:/path/to/file.py:123
-        """
         try:
             file_path = Path(location)
             if file_path.is_absolute():
@@ -547,4 +432,3 @@ class ValidationReportWriter:
             if line_number:
                 vscode_uri = f"{vscode_uri}:{line_number}"
             return vscode_uri
-

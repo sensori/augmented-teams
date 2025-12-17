@@ -102,11 +102,11 @@ class Workflow:
     def save_state(self):
         """Save workflow state to file."""
         if self.workspace_root:
-            state_file = self.workspace_root / 'workflow_state.json'
+            state_file = self.workspace_root / 'behavior_action_state.json'
         else:
             # Try to find workspace from environment
             workspace_dir = Path(os.environ.get('WORKING_AREA', self.bot_directory.parent / 'workspace'))
-            state_file = workspace_dir / 'workflow_state.json'
+            state_file = workspace_dir / 'behavior_action_state.json'
         
         state_file.parent.mkdir(parents=True, exist_ok=True)
         state_data = {
@@ -130,19 +130,18 @@ class Workflow:
     def load_state(self):
         """Load workflow state from file."""
         if self.workspace_root:
-            state_file = self.workspace_root / 'workflow_state.json'
+            state_file = self.workspace_root / 'behavior_action_state.json'
         else:
             workspace_dir = Path(os.environ.get('WORKING_AREA', self.bot_directory.parent / 'workspace'))
-            state_file = workspace_dir / 'workflow_state.json'
+            state_file = workspace_dir / 'behavior_action_state.json'
         
-        if state_file.exists():
-            state_data = json.loads(state_file.read_text(encoding='utf-8'))
-            current_action = state_data.get('current_action', '')
-            self._completed_actions = state_data.get('completed_actions', [])
-            
-            if current_action:
-                action_name = current_action.split('.')[-1]
-                if action_name in self.states:
+        state_data = json.loads(state_file.read_text(encoding='utf-8'))
+        current_action = state_data.get('current_action', '')
+        self._completed_actions = state_data.get('completed_actions', [])
+        
+        if current_action:
+            action_name = current_action.split('.')[-1]
+            if action_name in self.states:
                     self._current_state = action_name
             else:
                 # Fall back to next action after last completed action
@@ -462,6 +461,19 @@ def create_test_behavior_action_state(
     # Create minimal guardrails files (required for Guardrails initialization)
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
+    
+    # Create knowledge graph config files if behavior has build action
+    # Standard actions include 'build', so create kg config for all behaviors
+    # (build action requires knowledge graph config to initialize)
+    try:
+        from agile_bot.bots.base_bot.test.test_build_knowledge import (
+            given_knowledge_graph_directory_structure_created,
+            given_knowledge_graph_config_and_template_created
+        )
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+        given_knowledge_graph_config_and_template_created(kg_dir)
+    except Exception:
+        pass  # If kg config creation fails, continue (some behaviors may not need it)
     
     # Create behavior_action_state.json file
     state_file = create_behavior_action_state_file(

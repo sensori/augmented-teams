@@ -62,7 +62,7 @@ def main():
     )
 
     mcp_server = generator.create_server_instance()
-    generator.register_all_behavior_action_tools(mcp_server)
+    generator.register_all_tools(mcp_server)
 
     mcp_server.run()
 

@@ -17,9 +17,8 @@ class DeploymentResult:
 class ToolEntry:
     name: str
     trigger_patterns: list
-    behavior: str
-    action: str
-    description: str
+    behavior: Optional[str] = None
+    description: str = ''
 
 
 class ToolCatalog:
@@ -95,8 +94,9 @@ class ServerDeployer:
                 )
         
         behaviors = self._discover_behaviors_from_folders()
-        base_actions = 6  # From MCPServerGenerator.BASE_ACTIONS
-        tool_count = len(behaviors) * base_actions
+        # Actual tools registered: bot_tool, get_working_dir, close_current_action, 
+        # confirm_out_of_order, restart_server (5 base tools) + behavior_tool per behavior
+        tool_count = 5 + len(behaviors)
         
         # Use bot_name derived from path, not from config file (path is source of truth)
         server_name = f'{self.bot_name}_server'
@@ -109,50 +109,71 @@ class ServerDeployer:
         )
     
     def get_tool_catalog(self) -> ToolCatalog:
+        """Generate catalog for actual registered tools: bot_tool, get_working_dir, 
+        close_current_action, confirm_out_of_order, restart_server, and behavior_tools."""
         if not self.config_path.exists():
             return self.catalog
         
         behaviors = self._discover_behaviors_from_folders()
         
-        base_actions = [
-            'clarify',
-            'strategy',
-            'build',
-            'render',
-            'validate'
+        # Register base tools
+        base_tools = [
+            ToolEntry(
+                name='tool',
+                trigger_patterns=[],
+                description=f'Bot tool for {self.bot_name} - routes to current behavior and action'
+            ),
+            ToolEntry(
+                name='get_working_dir',
+                trigger_patterns=[],
+                description='Get the current working directory from WORKING_AREA'
+            ),
+            ToolEntry(
+                name='close_current_action',
+                trigger_patterns=[],
+                description=f'Close current action tool for {self.bot_name} - marks current action complete and transitions to next'
+            ),
+            ToolEntry(
+                name='confirm_out_of_order',
+                trigger_patterns=[],
+                description=f'Confirm out-of-order behavior execution for {self.bot_name}'
+            ),
+            ToolEntry(
+                name='restart_server',
+                trigger_patterns=[],
+                description=f'Restart MCP server for {self.bot_name} - terminates processes, clears cache, and restarts to load code changes'
+            )
         ]
         
+        for tool in base_tools:
+            self.catalog.add_tool(tool)
+        
+        # Register behavior tools
         for behavior in behaviors:
-            for action in base_actions:
-                tool_name = f'{self.bot_name}_{behavior}_{action}'
-                
-                trigger_patterns = self._load_trigger_words(behavior, action)
-                
-                tool_entry = ToolEntry(
-                    name=tool_name,
-                    trigger_patterns=trigger_patterns,
-                    behavior=behavior,
-                    action=action,
-                    description=f'{behavior} {action} for {self.bot_name}'
-                )
-                
-                self.catalog.add_tool(tool_entry)
+            trigger_patterns = self._load_trigger_words(behavior)
+            tool_entry = ToolEntry(
+                name=behavior,
+                trigger_patterns=trigger_patterns,
+                behavior=behavior,
+                description=f'{behavior} behavior for {self.bot_name}. Accepts optional action parameter and parameters dict.'
+            )
+            self.catalog.add_tool(tool_entry)
         
         return self.catalog
     
-    def _load_trigger_words(self, behavior: str, action: str) -> list:
-        trigger_path = (
-            self.workspace_root /
-            'agile_bot' / 'bots' / self.bot_name /
-            'behaviors' / behavior / action / 'trigger_words.json'
+    def _load_trigger_words(self, behavior: str) -> list:
+        """Load trigger words from behavior.json (behavior-level, not action-level)."""
+        behavior_file = (
+            self.bot_directory / 'behaviors' / behavior / 'behavior.json'
         )
         
-        if not trigger_path.exists():
+        if not behavior_file.exists():
             return []
         
         try:
-            trigger_data = json.loads(trigger_path.read_text())
-            return trigger_data.get('patterns', [])
+            behavior_data = json.loads(behavior_file.read_text(encoding='utf-8'))
+            trigger_words = behavior_data.get('trigger_words', {})
+            return trigger_words.get('patterns', [])
         except (json.JSONDecodeError, KeyError):
             return []
 

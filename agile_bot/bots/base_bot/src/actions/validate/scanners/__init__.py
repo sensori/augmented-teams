@@ -74,13 +74,16 @@ from agile_bot.bots.base_bot.src.actions.validate.scanners.test_quality_scanner 
 from agile_bot.bots.base_bot.src.actions.validate.scanners.encapsulation_scanner import EncapsulationScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.exception_classification_scanner import ExceptionClassificationScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.error_handling_isolation_scanner import ErrorHandlingIsolationScanner
+from agile_bot.bots.base_bot.src.actions.validate.scanners.excessive_guards_scanner import ExcessiveGuardsScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.third_party_isolation_scanner import ThirdPartyIsolationScanner
+from agile_bot.bots.base_bot.src.actions.validate.scanners.unnecessary_parameter_passing_scanner import UnnecessaryParameterPassingScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.open_closed_principle_scanner import OpenClosedPrincipleScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.noun_redundancy_scanner import NounRedundancyScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.technical_language_scanner import TechnicalLanguageScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.implementation_details_scanner import ImplementationDetailsScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.specification_match_scanner import SpecificationMatchScanner
 from agile_bot.bots.base_bot.src.actions.validate.scanners.invest_principles_scanner import InvestPrinciplesScanner
+from agile_bot.bots.base_bot.src.actions.validate.scanners.primitive_vs_object_scanner import PrimitiveVsObjectScanner
 
 __all__ = [
     'Scanner', 
@@ -157,12 +160,15 @@ __all__ = [
     'EncapsulationScanner',
     'ExceptionClassificationScanner',
     'ErrorHandlingIsolationScanner',
+    'ExcessiveGuardsScanner',
     'ThirdPartyIsolationScanner',
+    'UnnecessaryParameterPassingScanner',
     'OpenClosedPrincipleScanner',
     'NounRedundancyScanner',
     'TechnicalLanguageScanner',
     'ImplementationDetailsScanner',
     'SpecificationMatchScanner',
-    'InvestPrinciplesScanner'
+    'InvestPrinciplesScanner',
+    'PrimitiveVsObjectScanner'
 ]
 

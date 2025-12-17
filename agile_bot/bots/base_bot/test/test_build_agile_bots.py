@@ -53,10 +53,15 @@ def given_behavior_with_trigger_words(bot_dir: Path, behavior: str, patterns: li
     
     
     """
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
+    import json
+    # Create behavior.json if it doesn't exist
     create_actions_workflow_json(bot_dir, behavior)
     behavior_dir = bot_dir / 'behaviors' / behavior
     behavior_file = behavior_dir / 'behavior.json'
-    behavior_data = json.loads(behavior_file.read_text())
+    if not behavior_file.exists():
+        raise FileNotFoundError(f"behavior.json not found at {behavior_file} after create_actions_workflow_json")
+    behavior_data = json.loads(behavior_file.read_text(encoding='utf-8'))
     behavior_data['trigger_words'] = {
         'description': f'Trigger words for {behavior}',
         'patterns': patterns,

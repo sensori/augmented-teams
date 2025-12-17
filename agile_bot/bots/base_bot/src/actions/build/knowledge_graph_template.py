@@ -12,10 +12,6 @@ class KnowledgeGraphTemplate:
     
     def _load_template(self):
         template_path = self._kg_dir / self._template_filename
-        if not template_path.exists():
-            raise FileNotFoundError(
-                f'Template file not found: {template_path}'
-            )
         
         self._template_content = read_json_file(template_path)
         self._template_path = template_path

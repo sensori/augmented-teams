@@ -15,7 +15,7 @@ from pathlib import Path
 from agile_bot.bots.base_bot.test.test_helpers import (
     bootstrap_env,
     create_activity_log_file,
-    get_workflow_state_path,
+    get_behavior_action_state_path,
     read_activity_log,
     given_bot_name_and_behavior_setup
 )
@@ -34,6 +34,12 @@ def verify_action_tracks_start(bot_dir: Path, workspace_dir: Path, action_class,
     
     # Create guardrails files (required by Guardrails class initialization)
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
+    
+    # If action is 'build', create knowledge graph config structure
+    if action_name == 'build':
+        from agile_bot.bots.base_bot.test.test_build_knowledge import given_knowledge_graph_directory_structure_created, given_knowledge_graph_config_and_template_created
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+        given_knowledge_graph_config_and_template_created(kg_dir)
     
     # Create mock behavior object
     from types import SimpleNamespace
@@ -57,15 +63,10 @@ def verify_action_tracks_start(bot_dir: Path, workspace_dir: Path, action_class,
     # Create activity tracker - ActivityTracker needs BotPaths, not Path
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     bot_paths = BotPaths(workspace_path=workspace_dir, bot_directory=bot_dir)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
-    
-    # Create action using new signature (base_action_config, behavior, activity_tracker)
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig(action_name, bot_paths)
+    # Create action - extended classes derive action_name from class name
     action = action_class(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
     action.track_activity_on_start()
     
@@ -87,6 +88,12 @@ def verify_action_tracks_completion(bot_dir: Path, workspace_dir: Path, action_c
     # Create guardrails files (required by Guardrails class initialization)
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
     
+    # If action is 'build', create knowledge graph config structure
+    if action_name == 'build':
+        from agile_bot.bots.base_bot.test.test_build_knowledge import given_knowledge_graph_directory_structure_created, given_knowledge_graph_config_and_template_created
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+        given_knowledge_graph_config_and_template_created(kg_dir)
+    
     # Create mock behavior object
     from types import SimpleNamespace
     from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
@@ -106,18 +113,10 @@ def verify_action_tracks_completion(bot_dir: Path, workspace_dir: Path, action_c
     behavior_obj.bot_paths = MockBotPaths(bot_dir, workspace_dir)
     behavior_obj.bot = None
     
-    # Create activity tracker - ActivityTracker needs BotPaths, not Path
-    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
-    bot_paths = BotPaths(workspace_path=workspace_dir, bot_directory=bot_dir)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
-    
-    # Create action using new signature (base_action_config, behavior, activity_tracker)
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    base_action_config = BaseActionConfig(action_name, bot_paths)
+    # Create action using new signature (action_name, behavior, action_config)
     action = action_class(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
     action.track_activity_on_completion(
         outputs=outputs or {},
@@ -164,6 +163,12 @@ def verify_workflow_transition(bot_dir: Path, workspace_dir: Path, source_action
     create_actions_workflow_json(bot_dir, behavior, actions=actions)
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
     
+    # If build action is involved, create knowledge graph config structure
+    if source_action == 'build' or dest_action == 'build':
+        from agile_bot.bots.base_bot.test.test_build_knowledge import given_knowledge_graph_directory_structure_created, given_knowledge_graph_config_and_template_created
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+        given_knowledge_graph_config_and_template_created(kg_dir)
+    
     config_path = bot_dir / 'bot_config.json'
     bot = Bot(bot_name=bot_name, bot_directory=bot_dir, config_path=config_path)
     
@@ -207,11 +212,21 @@ def verify_workflow_saves_completed_action(bot_dir: Path, workspace_dir: Path, a
     create_actions_workflow_json(bot_dir, behavior, actions=actions)
     create_minimal_guardrails_files(bot_dir, behavior, bot_name)
     
+    # If behavior has 'build' action, create knowledge graph configs
+    if action_name == 'build':
+        from agile_bot.bots.base_bot.test.test_build_knowledge import (
+            given_knowledge_graph_directory_structure_created,
+            given_knowledge_graph_config_and_template_created
+        )
+        kg_dir = given_knowledge_graph_directory_structure_created(bot_dir, behavior)
+        given_knowledge_graph_config_and_template_created(kg_dir)
+    
     config_path = bot_dir / 'bot_config.json'
     bot = Bot(bot_name=bot_name, bot_directory=bot_dir, config_path=config_path)
     
     # Navigate to action and close it (this saves it as completed)
     behavior_obj = bot.behaviors.find_by_name(behavior)
+    assert behavior_obj is not None, f"Behavior '{behavior}' not found in bot. Available behaviors: {[b.name for b in bot.behaviors]}"
     behavior_obj.actions.navigate_to(action_name)
     behavior_obj.actions.close_current()
     
@@ -239,15 +254,6 @@ def then_workflow_current_state_is(workflow, expected_state: str):
 
 def then_completed_actions_include(workflow_file: Path, expected_action_states: list):
     """Then: Completed actions include expected action states."""
-    if not workflow_file.exists():
-        # If workflow file doesn't exist, check behavior_action_state.json instead
-        from agile_bot.bots.base_bot.test.test_helpers import get_workflow_state_path
-        state_file = get_workflow_state_path(workflow_file.parent)
-        if state_file.exists():
-            workflow_file = state_file
-        else:
-            # No state file exists - skip assertion or create empty state
-            return
     state_data = json.loads(workflow_file.read_text(encoding='utf-8'))
     completed_states = [entry.get('action_state') for entry in state_data.get('completed_actions', [])]
     for expected_state in expected_action_states:
@@ -283,16 +289,13 @@ def create_minimal_guardrails_files(bot_dir: Path, behavior_name: str, bot_name:
     required_context_dir.mkdir(parents=True, exist_ok=True)
     
     questions_file = required_context_dir / 'key_questions.json'
-    if not questions_file.exists():
-        questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
+    questions_file.write_text(json.dumps({'questions': []}), encoding='utf-8')
     
     evidence_file = required_context_dir / 'evidence.json'
-    if not evidence_file.exists():
-        evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
+    evidence_file.write_text(json.dumps({'evidence': []}), encoding='utf-8')
     
     instructions_file = required_context_dir / 'instructions.json'
-    if not instructions_file.exists():
-        instructions_file.write_text(json.dumps({'instructions': []}), encoding='utf-8')
+    instructions_file.write_text(json.dumps({'instructions': []}), encoding='utf-8')
     
     # Strategy/planning guardrails files (check both 'strategy' and 'planning' folder names)
     # Always create strategy guardrails (required by Guardrails class)
@@ -300,26 +303,16 @@ def create_minimal_guardrails_files(bot_dir: Path, behavior_name: str, bot_name:
     strategy_dir.mkdir(parents=True, exist_ok=True)
     
     assumptions_file = strategy_dir / 'typical_assumptions.json'
-    if not assumptions_file.exists():
-        assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
+    assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
     
     # Check for both naming conventions
     for activity_file_name in ['recommended_activities.json', 'recommended_human_activity.json']:
         activity_file = strategy_dir / activity_file_name
-        if not activity_file.exists():
-            activity_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
+        activity_file.write_text(json.dumps({'recommended_activities': []}), encoding='utf-8')
     
     # Decision criteria folder
     decision_criteria_dir = strategy_dir / 'decision_criteria'
     decision_criteria_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Also create planning folder if it exists (for backward compatibility)
-    planning_dir = behavior_dir / 'guardrails' / 'planning'
-    if planning_dir.exists():
-        # Copy strategy files to planning if needed
-        planning_assumptions_file = planning_dir / 'typical_assumptions.json'
-        if not planning_assumptions_file.exists():
-            planning_assumptions_file.write_text(json.dumps({'typical_assumptions': []}), encoding='utf-8')
 
 def _create_validate_action(bot_name: str, behavior: str, bot_directory: Path):
     """Helper: Create ValidateRulesAction instance."""
@@ -339,18 +332,11 @@ def _create_validate_action(bot_name: str, behavior: str, bot_directory: Path):
     from agile_bot.bots.base_bot.src.bot.workspace import get_workspace_directory
     workspace_directory = get_workspace_directory()
     bot_paths = BotPaths(workspace_path=workspace_directory, bot_directory=bot_directory)
-    behavior_obj = Behavior(behavior, bot_name, bot_paths)
-    
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-    
-    base_action_config = BaseActionConfig('validate', bot_paths)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     
     return ValidateRulesAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
 
 
@@ -366,34 +352,31 @@ def _create_gather_context_action(bot_name: str, behavior: str, bot_directory: P
     behavior_dir = bot_directory / 'behaviors' / behavior
     behavior_dir.mkdir(parents=True, exist_ok=True)
     behavior_file = behavior_dir / 'behavior.json'
-    if not behavior_file.exists():
-        behavior_config = {
-            "behaviorName": behavior,
-            "description": f"Test behavior: {behavior}",
-            "goal": f"Test goal for {behavior}",
-            "inputs": "Test inputs",
-            "outputs": "Test outputs",
-            "instructions": {},
-            "actions_workflow": {
-                "actions": [
-                    {'name': 'clarify', 'order': 1}
-                ]
-            }
+    behavior_config = {
+        "behaviorName": behavior,
+        "description": f"Test behavior: {behavior}",
+        "goal": f"Test goal for {behavior}",
+        "inputs": "Test inputs",
+        "outputs": "Test outputs",
+        "instructions": {},
+        "actions_workflow": {
+            "actions": [
+                {'name': 'clarify', 'order': 1}
+            ]
         }
-        behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
+    }
+    behavior_file.write_text(json.dumps(behavior_config, indent=2), encoding='utf-8')
     
     # Create guardrails files if they don't exist (required by Guardrails class initialization)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     
     # Create proper Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('clarify', bot_paths)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     
     return ClarifyContextAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=None
+        action_config=None
     )
 
 

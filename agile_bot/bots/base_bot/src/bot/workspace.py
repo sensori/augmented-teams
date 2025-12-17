@@ -33,6 +33,12 @@ def get_base_actions_directory(bot_directory: Path = None) -> Path:
         bot_base_actions_dir = Path(bot_directory) / 'base_actions'
         if bot_base_actions_dir.exists():
             return bot_base_actions_dir
+        # For test scenarios, fall back to test_base_bot/base_actions
+        # This handles both base_bot and other bots (like story_bot) in test environments
+        repo_root = get_python_workspace_root()
+        test_base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'test_base_bot' / 'base_actions'
+        if test_base_actions_dir.exists():
+            return test_base_actions_dir
     
     repo_root = get_python_workspace_root()
     base_actions_dir = repo_root / 'agile_bot' / 'bots' / 'base_bot' / 'base_actions'

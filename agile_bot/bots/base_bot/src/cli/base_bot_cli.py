@@ -65,13 +65,6 @@ class BaseBotCli:
         return self._route_to_current_behavior_and_action()
     
     def _route_to_specific_action(self, behavior_name: str, action_name: str, parameters: Dict[str, Any]):
-        if behavior_name is None:
-            current_behavior = self.bot.behaviors.current
-            if current_behavior:
-                behavior_name = current_behavior.name
-            else:
-                raise ValueError(f"Cannot execute action '{action_name}' without knowing the behavior. No current behavior found in state.")
-        
         behavior_obj = getattr(self.bot, behavior_name)
         action = behavior_obj.actions.find_by_name(action_name)
         if action is None:

@@ -1,0 +1,38 @@
+{
+  "behaviorName": "prioritization",
+  "instructions": [
+    "**RENDER PRIORITIZED INCREMENTS - DRAWIO, MARKDOWN, AND BACKLOG GENERATION:**",
+    "",
+    "Render the prioritized story increments to visual diagrams, markdown documents, and backlog files.",
+    "",
+    "**Configuration Files:**",
+    "- Increments DrawIO render: render_increments_drawio.json",
+    "- Increments markdown render: render_increments_md.json",
+    "- Increments text render: render_increments_txt.json",
+    "- Increments backlog render: render_increments_backlog.json",
+    "- Increments backlog text render: render_increments_backlog_txt.json",
+    "- Templates: templates/story-map-increments.drawio, templates/story-map-increments.md, templates/story-map-increments.txt, templates/story-map-increments-backlog.md",
+    "",
+    "**Process:**",
+    "1. Read story-graph.json from docs/stories/",
+    "2. Render increments to DrawIO diagram using synchronizer",
+    "3. Render increments to markdown document",
+    "4. Render increments to text file",
+    "5. Render increments backlog to markdown and text files",
+    "6. Generate all outputs in project area docs/stories/",
+    "",
+    "**Outputs:**",
+    "- File: {project_area}/docs/stories/story-map-increments.drawio",
+    "- File: {project_area}/docs/stories/story-map-increments.md",
+    "- File: {project_area}/docs/stories/story-map-increments.txt",
+    "- File: {project_area}/docs/stories/story-map-increments-backlog.md",
+    "- File: {project_area}/docs/stories/story-map-increments-backlog.txt",
+    "",
+    "**Synchronizer Usage:**",
+    "- DrawIO rendering uses synchronizer: synchronizers.story_io.DrawIOSynchronizer",
+    "- Execute render-increments command via story_io CLI",
+    "",
+    "**Next Step:** Proceed to synchronize step after rendering is complete."
+  ]
+}
+

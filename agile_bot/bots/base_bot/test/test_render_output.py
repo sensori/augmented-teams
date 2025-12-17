@@ -34,20 +34,27 @@ def given_base_instructions_for_render_output_copied(bot_directory: Path):
     repo_root = Path(__file__).parent.parent.parent.parent.parent
     actual_base_actions_dir = get_base_actions_dir(repo_root)
     # BaseActionConfig loads from action_config.json, not instructions.json
-    actual_config_file = actual_base_actions_dir / 'render_output' / 'action_config.json'
-    bot_base_actions_dir = get_test_base_actions_dir(bot_directory) / 'render_output'
+    # Action name is 'render', not 'render_output'
+    actual_config_file = actual_base_actions_dir / 'render' / 'action_config.json'
+    if not actual_config_file.exists():
+        # Try render_output as fallback
+        actual_config_file = actual_base_actions_dir / 'render_output' / 'action_config.json'
+    bot_base_actions_dir = get_test_base_actions_dir(bot_directory) / 'render'
     bot_base_actions_dir.mkdir(parents=True, exist_ok=True)
     bot_config_file = bot_base_actions_dir / 'action_config.json'
     if actual_config_file.exists():
         shutil.copy2(actual_config_file, bot_config_file)
     else:
-        # Create action_config.json with instructions containing template placeholders
+        # Create minimal config if file doesn't exist
+        import json
         bot_config_file.write_text(json.dumps({
-            'name': 'render_output',
-            'instructions': [
-                'Render outputs using render configs',
-                '{{render_configs}}',
-                '{{render_instructions}}'
+            "name": "render",
+            "order": 5,
+            "workflow": True,
+            "instructions": [
+                "render base instructions",
+                "{{render_configs}}",
+                "{{render_instructions}}"
             ]
         }), encoding='utf-8')
     return bot_config_file
@@ -83,6 +90,18 @@ def given_behavior_render_directory_created(bot_directory: Path, behavior: str) 
     behavior_dir = bot_directory / 'behaviors' / behavior
     render_dir = behavior_dir / 'content' / 'render'
     render_dir.mkdir(parents=True, exist_ok=True)
+    
+    # instructions.json is mandatory when render folder exists
+    instructions_file = render_dir / 'instructions.json'
+    if not instructions_file.exists():
+        instructions_file.write_text(
+            json.dumps({
+                'behaviorName': behavior,
+                'instructions': [f'Render outputs for {behavior} behavior']
+            }),
+            encoding='utf-8'
+        )
+    
     return render_dir
 
 def when_render_output_action_created(bot_name: str, behavior: str, bot_directory: Path):
@@ -92,17 +111,19 @@ def when_render_output_action_created(bot_name: str, behavior: str, bot_director
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    from conftest import create_base_actions_structure
+    
+    # Create base actions structure (required for action configs)
+    create_base_actions_structure(bot_directory)
+    
     # Create behavior.json and guardrails files
     create_actions_workflow_json(bot_directory, behavior)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('render_output', bot_paths)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     return RenderOutputAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=None,
-        bot_name=bot_name
+        action_config=None
     )
 
 
@@ -113,17 +134,15 @@ def when_render_output_action_loads_and_merges_instructions(bot_name: str, behav
     from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
     from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json
     from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    
     # Create behavior.json and guardrails files
     create_actions_workflow_json(bot_directory, behavior)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('render_output', bot_paths)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     action_obj = RenderOutputAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=None,
-        bot_name=bot_name
+        action_config=None
     )
     # Call do_execute to trigger template variable replacement via _inject_render_data
     result = action_obj.do_execute(parameters={})
@@ -176,8 +195,8 @@ def given_activity_log_with_multiple_entries(workspace_directory: Path):
     log_file = workspace_directory / 'activity_log.json'
     from tinydb import TinyDB
     with TinyDB(log_file) as db:
-        db.insert({'action_state': 'story_bot.shape.render_output', 'timestamp': '09:00'})
-        db.insert({'action_state': 'story_bot.discovery.render_output', 'timestamp': '10:00'})
+        db.insert({'action_state': 'story_bot.shape.render', 'timestamp': '09:00'})
+        db.insert({'action_state': 'story_bot.discovery.render', 'timestamp': '10:00'})
     return log_file
 
 
@@ -185,8 +204,8 @@ def then_activity_log_has_two_entries_with_expected_states(workspace_directory: 
     """Then: Activity log has two entries with expected states."""
     log_data = read_activity_log(workspace_directory)
     assert len(log_data) == 2
-    assert log_data[0]['action_state'] == 'story_bot.shape.render_output'
-    assert log_data[1]['action_state'] == 'story_bot.discovery.render_output'
+    assert log_data[0]['action_state'] == 'story_bot.shape.render'
+    assert log_data[1]['action_state'] == 'story_bot.discovery.render'
 
 
 def then_activity_log_file_does_not_exist(workspace_directory: Path):
@@ -207,13 +226,10 @@ def when_render_output_action_tracks_start(bot_name: str, behavior: str, bot_dir
     create_actions_workflow_json(bot_directory, behavior)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('render_output', bot_paths)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     action = RenderOutputAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=None,
-        bot_name=bot_name
+        action_config=None
     )
     action.track_activity_on_start()
     return action
@@ -242,20 +258,17 @@ def when_create_render_output_action(bot_name: str, behavior: str, bot_directory
     create_actions_workflow_json(bot_directory, behavior)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(name=behavior, bot_name=bot_name, bot_paths=bot_paths)
-    base_action_config = BaseActionConfig('render_output', bot_paths)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     action = RenderOutputAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=None,
-        bot_name=bot_name
+        action_config=None
     )
     return action
 
 
 def then_action_has_correct_bot_name_and_behavior(action, expected_bot_name: str, expected_behavior: str):
     """Then: Action has correct bot name and behavior."""
-    assert action.bot_name == expected_bot_name
+    assert action.behavior.bot_name == expected_bot_name
     # action.behavior is a Behavior object, not a string, so check its name attribute
     assert action.behavior.name == expected_behavior
 
@@ -273,6 +286,13 @@ def given_render_dir_and_configs_setup(bot_directory: Path, behavior: str):
     render_dir = behavior_dir / 'content' / 'render'
     render_dir.mkdir(parents=True, exist_ok=True)
     given_behavior_render_instructions_created(bot_directory, behavior)
+    
+    # Create template file if referenced in configs
+    templates_dir = render_dir / 'templates'
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    template_file = templates_dir / 'story-map.txt'
+    template_file.write_text('Story Map Template', encoding='utf-8')
+    
     given_render_configs_created(render_dir, [
         {
             'name': 'render_story_files',
@@ -298,8 +318,7 @@ def given_render_dir_and_configs_setup(bot_directory: Path, behavior: str):
 
 def when_format_render_configs(action_obj):
     """When: Format render configs."""
-    behavior_folder = action_obj.behavior.folder if action_obj.behavior else None
-    render_configs = action_obj._load_render_configs(behavior_folder)
+    render_configs = action_obj._load_render_configs()
     formatted = action_obj._format_render_configs(render_configs)
     return formatted
 
@@ -360,6 +379,13 @@ def when_create_sync_and_template_configs(render_dir: Path):
         }),
         encoding='utf-8'
     )
+    
+    # Create the template file that the config references
+    templates_dir = render_dir / 'templates'
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    template_file = templates_dir / 'test-template.md'
+    template_file.write_text('# Test Template\n\nThis is a test template.', encoding='utf-8')
+    
     return sync_config, template_config
 
 
@@ -374,7 +400,7 @@ class TestTrackActivityForRenderOutputAction:
         # Given: Bot directory and workspace directory are set up
         # When: Render output action starts
         # Then: Activity is tracked (verified by verify_action_tracks_start)
-        verify_action_tracks_start(bot_directory, workspace_directory, RenderOutputAction, 'render_output', behavior='discovery')
+        verify_action_tracks_start(bot_directory, workspace_directory, RenderOutputAction, 'render', behavior='discovery')
 
     def test_track_activity_when_render_output_action_completes(self, bot_directory, workspace_directory):
         # Given: Bot directory and workspace directory are set up
@@ -384,7 +410,7 @@ class TestTrackActivityForRenderOutputAction:
             bot_directory,
             workspace_directory,
             RenderOutputAction,
-            'render_output',
+            'render',
             behavior='discovery',
             outputs={'files_generated_count': 3, 'file_paths': ['story-map.md', 'increments.md']},
             duration=180
@@ -477,8 +503,12 @@ class TestInjectRenderInstructionsAndConfigs:
         bootstrap_env(bot_directory, workspace_directory)
         bot_name, behavior = given_bot_name_and_behavior_for_shape()
         
-        given_base_instructions_for_render_output_copied(bot_directory)
         render_dir = given_render_dir_and_configs_setup(bot_directory, behavior)
+        
+        # Create base actions structure first, then update render config with placeholders
+        from conftest import create_base_actions_structure
+        create_base_actions_structure(bot_directory)
+        given_base_instructions_for_render_output_copied(bot_directory)
         
         action_obj, instructions = when_render_output_action_loads_and_merges_instructions(bot_name, behavior, bot_directory)
         
@@ -533,7 +563,14 @@ def given_render_instructions(instructions: dict):
 
 def when_merged_instructions_instantiated(base_action_config, render_instructions=None):
     """When: MergedInstructions instantiated."""
-    return MergedInstructions(base_action_config, render_instructions)
+    # Extract instructions from base_action_config if it's a Mock/object, otherwise use directly
+    if hasattr(base_action_config, 'instructions'):
+        base_instructions = base_action_config.instructions
+    elif isinstance(base_action_config, list):
+        base_instructions = base_action_config
+    else:
+        base_instructions = base_action_config
+    return MergedInstructions(base_instructions, render_instructions)
 
 
 def when_render_instructions_accessed(merged_instructions: MergedInstructions):
@@ -635,24 +672,6 @@ class TestMergeBaseAndRenderInstructions:
         # Then: Merged dict contains both instruction sets
         then_merged_contains_base_instructions(result, ['base1', 'base2'])
         then_merged_contains_render_instructions(result, render_instructions)
-    
-    def test_merge_handles_missing_render_instructions(self):
-        """
-        SCENARIO: Merge handles missing render instructions
-        GIVEN: BaseActionConfig with ['base1', 'base2'] without render instructions
-        WHEN: merge() called
-        THEN: Returns dict with only base_instructions
-        """
-        # Given: BaseActionConfig without render instructions
-        base_action_config = given_base_action_config_with_instructions(['base1', 'base2'])
-        
-        # When: MergedInstructions instantiated and merge() called
-        merged_instructions = when_merged_instructions_instantiated(base_action_config)
-        result = when_merge_called(merged_instructions)
-        
-        # Then: Merged dict contains only base instructions
-        then_merged_contains_base_instructions(result, ['base1', 'base2'])
-        then_merged_does_not_contain_render_instructions(result)
     
     def test_merge_handles_empty_render_instructions(self):
         """

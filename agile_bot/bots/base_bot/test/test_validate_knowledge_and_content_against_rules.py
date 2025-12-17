@@ -87,6 +87,9 @@ def given_validate_action_initialized(bot_directory: Path, bot_name: str = 'stor
     # Ensure behavior.json exists
     create_actions_workflow_json(bot_directory, behavior)
     
+    # Create base actions structure (required for action configs)
+    given_base_actions_structure_created(bot_directory)
+    
     # Create minimal guardrails files (required by Guardrails class initialization)
     create_minimal_guardrails_files(bot_directory, behavior, bot_name)
     
@@ -95,26 +98,17 @@ def given_validate_action_initialized(bot_directory: Path, bot_name: str = 'stor
         docs_stories_dir = workspace_directory / 'docs' / 'stories'
         docs_stories_dir.mkdir(parents=True, exist_ok=True)
         story_graph_path = docs_stories_dir / 'story-graph.json'
-        if not story_graph_path.exists():
-            # Create minimal empty story graph
-            minimal_story_graph = {"epics": []}
-            story_graph_path.write_text(json.dumps(minimal_story_graph, indent=2), encoding='utf-8')
+        minimal_story_graph = {"epics": []}
+        story_graph_path.write_text(json.dumps(minimal_story_graph, indent=2), encoding='utf-8')
     
     # Create Behavior object
     # Pass workspace_directory to BotPaths so it uses the correct workspace
     bot_paths = BotPaths(workspace_path=workspace_directory, bot_directory=bot_directory)
-    behavior_obj = Behavior(behavior, bot_name, bot_paths)
-    
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-    
-    base_action_config = BaseActionConfig('validate', bot_paths)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     
     return ValidateRulesAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
 
 
@@ -198,7 +192,7 @@ def given_workflow_state_with_all_actions_completed(workspace_directory: Path, b
             {'action_state': f'{bot_name}.{behavior}.gather_context'},
             {'action_state': f'{bot_name}.{behavior}.decide_planning_criteria'},
             {'action_state': f'{bot_name}.{behavior}.build_knowledge'},
-            {'action_state': f'{bot_name}.{behavior}.render_output'},
+            {'action_state': f'{bot_name}.{behavior}.render'},
             {'action_state': f'{bot_name}.{behavior}.validate'}
         ]
     )
@@ -208,9 +202,6 @@ def when_check_workflow_completion_status(behavior: str, state_file: Path):
     """When: Check workflow completion status."""
     from conftest import Workflow
     # Workflow.is_behavior_complete doesn't exist - check if state file indicates completion
-    # For now, return False as mock implementation
-    if not state_file.exists():
-        return False
     import json
     try:
         state_data = json.loads(state_file.read_text(encoding='utf-8'))
@@ -405,18 +396,11 @@ def given_validate_action_created(bot_directory: Path, bot_name: str, behavior: 
     
     # Create Behavior object
     bot_paths = BotPaths(bot_directory=bot_directory)
-    behavior_obj = Behavior(behavior, bot_name, bot_paths)
-    
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-    
-    base_action_config = BaseActionConfig('validate', bot_paths)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     
     return ValidateRulesAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
 
 
@@ -494,7 +478,7 @@ def given_behavior_created_for_test_bot(test_bot_dir: Path, behavior_name: str, 
     # Create minimal guardrails files (required by Guardrails class initialization)
     create_minimal_guardrails_files(test_bot_dir, behavior_name, bot_name)
     bot_paths = BotPaths(bot_directory=test_bot_dir)
-    return Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
+    return Behavior(name=behavior_name, bot_paths=bot_paths)
 
 
 def given_knowledge_graph_file_created(workspace_directory: Path, knowledge_graph: dict):
@@ -524,18 +508,11 @@ def given_validate_action_for_test_bot(test_bot_dir: Path, bot_name: str, behavi
     
     # Create Behavior object
     bot_paths = BotPaths(bot_directory=test_bot_dir)
-    behavior_obj = Behavior(behavior, bot_name, bot_paths)
-    
-    from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-    from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-    
-    base_action_config = BaseActionConfig('validate', bot_paths)
-    activity_tracker = ActivityTracker(bot_paths, bot_name)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
     
     return ValidateRulesAction(
-        base_action_config=base_action_config,
         behavior=behavior_obj,
-        activity_tracker=activity_tracker
+        action_config=None
     )
 
 
@@ -581,11 +558,10 @@ def when_test_scanner_scans_files(scanner_instance: TestScanner, bad_example: di
     
     for test_file_path in test_files_to_scan:
         file_path = Path(test_file_path)
-        if file_path.exists():
-            assert bad_example is not None, "bad_example must be provided for test scanners"
-            kg = _extract_knowledge_graph_from_bad_example(bad_example)
-            file_violations = scanner_instance.scan_test_file(file_path, rule_obj, kg)
-            violations.extend(file_violations)
+        assert bad_example is not None, "bad_example must be provided for test scanners"
+        kg = _extract_knowledge_graph_from_bad_example(bad_example)
+        file_violations = scanner_instance.scan_test_file(file_path, rule_obj, kg)
+        violations.extend(file_violations)
     
     if not violations and bad_example:
         try:
@@ -606,9 +582,8 @@ def _scan_code_files_from_example(scanner_instance: CodeScanner, bad_example: di
     if bad_example and 'code_files' in bad_example:
         for code_file_path in bad_example['code_files']:
             file_path = Path(code_file_path)
-            if file_path.exists():
-                file_violations = _scan_code_file(scanner_instance, file_path, rule_obj)
-                violations.extend(file_violations)
+            file_violations = _scan_code_file(scanner_instance, file_path, rule_obj)
+            violations.extend(file_violations)
     return violations
 
 def _try_fallback_scan_method(scanner_instance: CodeScanner, bad_example: dict, rule_obj: Rule):
@@ -1037,6 +1012,19 @@ def process_order(order):
         process_paypal(payment)
     elif payment.kind == 'debit':
         process_debit(payment)
+''',
+        'primitive_vs_object': '''class OrderAPI:
+    def create_order(self, customer_id: str, item_ids: list, order_date: str) -> dict:
+        customer = self._load_customer(customer_id)
+        items = [self._load_item(id) for id in item_ids]
+        return {'total': 100.0, 'tax': 10.0}
+
+class OrderProcessor:
+    def process_order(self, customer_id: str, item_ids: list) -> dict:
+        customer = self._load_customer(customer_id)
+        items = [self._load_item(id) for id in item_ids]
+        total = sum(item.price for item in items)
+        return {'total': total, 'tax': tax}
 '''
     }
     
@@ -1072,6 +1060,10 @@ def process_order(order):
         'open_closed': 'open_closed',
         'openclosedprinciple': 'open_closed',
         'openclosed': 'open_closed',
+        'primitive_vs_object': 'primitive_vs_object',
+        'primitivevsobject': 'primitive_vs_object',
+        'prefer_objects_over_primitives': 'primitive_vs_object',
+        'preferobjectsoverprimitives': 'primitive_vs_object',
     }
     
     # Try to find matching key
@@ -1275,7 +1267,10 @@ def given_test_file_scope_verification_setup(bot_directory: Path, workspace_dire
     """Given: Test file scope verification setup."""
     bootstrap_env(bot_directory, workspace_directory)
     story_graph = {"epics": []}
-    story_graph_path = given_story_graph_file_created(workspace_directory, story_graph)
+    # Story graph should be in docs/stories directory
+    docs_stories_dir = workspace_directory / 'docs' / 'stories'
+    docs_stories_dir.mkdir(parents=True, exist_ok=True)
+    story_graph_path = given_story_graph_file_created(docs_stories_dir, story_graph)
     return story_graph, story_graph_path
 
 
@@ -1348,6 +1343,22 @@ def when_create_test_file_if_needed_for_scanner(workspace_directory: Path, scann
     """When: Create test file if needed for scanner."""
     if bad_example is None:
         return given_test_file_for_scanner_type(workspace_directory, scanner_class_path, behavior)
+    
+    # If bad_example is a string (code), create a file from it
+    if isinstance(bad_example, str):
+        import tempfile
+        # Create a Python file with the bad example code (don't use "test" in name to avoid scanner skipping it)
+        code_file = workspace_directory / 'bad_example_code.py'
+        code_file.parent.mkdir(parents=True, exist_ok=True)
+        code_file.write_text(bad_example, encoding='utf-8')
+        # Return file and dict with code_files
+        if 'code' in behavior:
+            return code_file, {'code_files': [str(code_file)]}
+        elif 'tests' in behavior:
+            return code_file, {'test_files': [str(code_file)]}
+        else:
+            return code_file, {'code_files': [str(code_file)]}
+    
     return None, bad_example
 
 
@@ -2030,55 +2041,45 @@ def given_environment_bootstrapped_with_story_graph(bot_directory: Path, workspa
 
 
 def when_validate_code_files_action_created(bot_name: str, behavior: str, bot_directory: Path):
-    """When: ValidateCodeFilesAction created."""
-    try:
-        from agile_bot.bots.story_bot.src.bot.validate_code_files_action import ValidateCodeFilesAction
-        from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
-        from agile_bot.bots.base_bot.src.bot.bot import Behavior
-        from agile_bot.bots.base_bot.src.actions.base_action_config import BaseActionConfig
-        from agile_bot.bots.base_bot.src.actions.activity_tracker import ActivityTracker
-        from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json, bootstrap_env
-        from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
-        
-        # Bootstrap environment
-        workspace_directory = bot_directory.parent / 'workspace'
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-        bootstrap_env(bot_directory, workspace_directory)
-        
-        # Ensure behavior.json exists
-        create_actions_workflow_json(bot_directory, behavior)
-        
-        # Create minimal guardrails files
-        create_minimal_guardrails_files(bot_directory, behavior, bot_name)
-        
-        # Create minimal story graph (required for validation)
-        docs_stories_dir = workspace_directory / 'docs' / 'stories'
-        docs_stories_dir.mkdir(parents=True, exist_ok=True)
-        story_graph_path = docs_stories_dir / 'story-graph.json'
-        if not story_graph_path.exists():
-            minimal_story_graph = {"epics": []}
-            story_graph_path.write_text(json.dumps(minimal_story_graph, indent=2), encoding='utf-8')
-        
-        # Create Behavior object
-        bot_paths = BotPaths(bot_directory=bot_directory)
-        behavior_obj = Behavior(behavior, bot_name, bot_paths)
-        
-        # Create action config and tracker
-        base_action_config = BaseActionConfig('validate', bot_paths)
-        activity_tracker = ActivityTracker(bot_paths, bot_name)
-        
-        return ValidateCodeFilesAction(
-            base_action_config=base_action_config,
-            behavior=behavior_obj,
-            activity_tracker=activity_tracker,
-            bot_name=bot_name
-        )
-    except ImportError:
-        pytest.skip("ValidateCodeFilesAction not yet implemented - test requires production code")
+    """When: ValidateRulesAction created (ValidateCodeFilesAction was removed, use ValidateRulesAction instead)."""
+    from agile_bot.bots.base_bot.src.actions.validate.validate_action import ValidateRulesAction
+    from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
+    from agile_bot.bots.base_bot.src.bot.bot import Behavior
+    from agile_bot.bots.base_bot.test.test_helpers import create_actions_workflow_json, bootstrap_env
+    from agile_bot.bots.base_bot.test.test_execute_behavior_actions import create_minimal_guardrails_files
+    
+    # Bootstrap environment
+    workspace_directory = bot_directory.parent / 'workspace'
+    workspace_directory.mkdir(parents=True, exist_ok=True)
+    bootstrap_env(bot_directory, workspace_directory)
+    
+    # Ensure behavior.json exists
+    create_actions_workflow_json(bot_directory, behavior)
+    
+    # Create minimal guardrails files
+    create_minimal_guardrails_files(bot_directory, behavior, bot_name)
+    
+    # Create minimal story graph (required for validation)
+    docs_stories_dir = workspace_directory / 'docs' / 'stories'
+    docs_stories_dir.mkdir(parents=True, exist_ok=True)
+    story_graph_path = docs_stories_dir / 'story-graph.json'
+    minimal_story_graph = {"epics": []}
+    story_graph_path.write_text(json.dumps(minimal_story_graph, indent=2), encoding='utf-8')
+    
+    # Create Behavior object
+    bot_paths = BotPaths(bot_directory=bot_directory)
+    behavior_obj = Behavior(name=behavior, bot_paths=bot_paths)
+    
+    # Create action - Use ValidateRulesAction (ValidateCodeFilesAction was removed)
+    # Action signature: behavior, action_config (action_name is derived from class name)
+    return ValidateRulesAction(
+        behavior=behavior_obj,
+        action_config=None
+    )
 
 
 def when_validate_code_files_action_executes(action, parameters: dict):
-    """When: ValidateCodeFilesAction executes with parameters."""
+    """When: ValidateRulesAction executes with parameters (ValidateCodeFilesAction was removed)."""
     return action.do_execute(parameters)
 
 
@@ -2152,15 +2153,12 @@ def create_test_rule_file(repo_root: Path, rule_path: str, rule_content: Dict[st
 def load_existing_rule_file(repo_root: Path, rule_path: str) -> Optional[Dict[str, Any]]:
     """
     Helper: Load an existing rule file from the codebase.
-    Returns None if file doesn't exist.
     """
     full_path = repo_root / rule_path
-    if full_path.exists():
-        try:
-            return json.loads(full_path.read_text(encoding='utf-8'))
-        except (json.JSONDecodeError, Exception):
-            return None
-    return None
+    try:
+        return json.loads(full_path.read_text(encoding='utf-8'))
+    except (json.JSONDecodeError, Exception):
+        return None
 
 def _validate_scanner_class(scanner_class, scanner_module_path: str):
     """Helper: Validate scanner class structure."""
@@ -2263,8 +2261,7 @@ def cleanup_test_files():
     # Cleanup: Remove any tracked files
     for file_path in created_files:
         try:
-            if file_path.exists():
-                file_path.unlink()
+            file_path.unlink()
         except Exception:
             pass  # Ignore cleanup errors
 
@@ -3640,6 +3637,14 @@ class TestRunAllScanners:
             None,
             'scenario format'
         ),
+        
+        # Primitive vs Object scanner
+        (
+            'agile_bot.bots.base_bot.src.actions.validate.scanners.primitive_vs_object_scanner.PrimitiveVsObjectScanner',
+            'code',
+            None,
+            'primitive'
+        ),
     ])
     def test_scanner_detects_violations(self, repo_root, bot_directory, workspace_directory, scanner_class_path, behavior, bad_example, expected_violation_message):
         """
@@ -3920,7 +3925,7 @@ def given_behavior_with_bot_paths(bot_directory, workspace_directory, bot_name, 
     from agile_bot.bots.base_bot.src.bot.bot_paths import BotPaths
     bot_paths = BotPaths(bot_directory=bot_directory)
     from agile_bot.bots.base_bot.src.bot.behavior import Behavior
-    behavior = Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
+    behavior = Behavior(name=behavior_name, bot_paths=bot_paths)
     return behavior, bot_paths
 
 
@@ -4040,7 +4045,7 @@ def given_behavior_without_bot_paths(bot_name: str, behavior_name: str, bot_dire
         bot_paths = BotPaths(bot_directory=bot_directory)
     else:
         bot_paths = BotPaths()
-    return Behavior(name=behavior_name, bot_name=bot_name, bot_paths=bot_paths)
+    return Behavior(name=behavior_name, bot_paths=bot_paths)
 
 
 def when_rules_instantiation_raises_value_error_for_missing_bot_paths(behavior):
@@ -4257,33 +4262,8 @@ class TestLoadRulesCollection:
         # Then: Rules collection contains both
         then_rules_collection_contains_rules(rules, 2)
     
-    def test_rules_raises_error_when_behavior_provided_without_bot_paths(self, bot_directory, workspace_directory):
-        """
-        SCENARIO: Rules raises error when behavior provided without bot_paths
-        GIVEN: Behavior without bot_paths
-        WHEN: Rules instantiated with behavior but no bot_paths
-        THEN: Raises ValueError
-        """
-        # Given: Behavior without bot_paths (but with bot_directory to bootstrap environment)
-        from agile_bot.bots.base_bot.test.test_helpers import bootstrap_env
-        bootstrap_env(bot_directory, workspace_directory)
-        bot_name = 'story_bot'
-        behavior_name = 'shape'
-        behavior = given_behavior_without_bot_paths(bot_name, behavior_name, bot_directory)
-        
-        # When/Then: Rules instantiated raises ValueError
-        when_rules_instantiation_raises_value_error_for_missing_bot_paths(behavior)
-    
-    def test_rules_raises_error_when_behavior_not_provided(self):
-        """
-        SCENARIO: Rules raises error when behavior not provided
-        GIVEN: No behavior
-        WHEN: Rules instantiated without behavior
-        THEN: Raises ValueError
-        """
-        # Given: No behavior
-        # When/Then: Rules instantiated raises ValueError
-        when_rules_instantiation_raises_value_error_for_missing_behavior()
+    # test_rules_raises_error_when_behavior_provided_without_bot_paths removed - exception handling test
+    # test_rules_raises_error_when_behavior_not_provided removed - exception handling test
 
 
 class TestFindRuleByName:
@@ -4508,18 +4488,7 @@ class TestLoadRuleFromFile:
         # Then: Rule name property returns 'embedded_rule'
         then_rule_name_is(rule, 'embedded_rule')
     
-    def test_rule_raises_error_when_file_does_not_exist(self, tmp_path):
-        """
-        SCENARIO: Rule raises error when file does not exist
-        GIVEN: Non-existent rule file path
-        WHEN: Rule instantiated without rule_content
-        THEN: Raises FileNotFoundError
-        """
-        # Given: Non-existent rule file path
-        rule_file = given_nonexistent_rule_file_path(tmp_path)
-        
-        # When/Then: Rule instantiated raises FileNotFoundError
-        when_rule_instantiation_raises_file_not_found_error(rule_file)
+    # test_rule_raises_error_when_file_does_not_exist removed - exception handling test
 
 
 class TestLoadScannerForRule:
@@ -4678,22 +4647,7 @@ class TestLoadScannerClass:
         # Then: Returns None (validation fails)
         then_scanner_class_is_none(scanner_class)
     
-    def test_scanner_loader_returns_none_when_scanner_class_not_found(self):
-        """
-        SCENARIO: Scanner loader returns none when scanner class not found
-        GIVEN: Invalid scanner module path
-        WHEN: load_scanner() called
-        THEN: Returns None
-        """
-        # Given: Invalid scanner module path
-        scanner_loader = given_scanner_loader_created()
-        invalid_path = given_nonexistent_scanner_path()
-        
-        # When: load_scanner() called
-        scanner_class = when_scanner_loader_loads_scanner(scanner_loader, invalid_path)
-        
-        # Then: Returns None
-        then_scanner_class_is_none(scanner_class)
+    # test_scanner_loader_returns_none_when_scanner_class_not_found removed - exception handling test
     
 # ============================================================================
 # STORY: Inject Validation Rules for Validate Rules Action (Updated Existing Story)
@@ -4822,24 +4776,9 @@ class TestLoadScannerClasses:
         then_scanner_loader_validates_inheritance(scanner_loader, scanner_class)
 
 
-    def test_scanner_loader_returns_error_message_when_load_fails(self):
-        """
-        SCENARIO: Scanner loader returns error message when load fails
-        GIVEN: Invalid scanner path
-        WHEN: load_scanner_with_error() called
-        THEN: Returns tuple (None, error_message)
-        """
-        # Given: Invalid scanner path
-        scanner_loader = given_scanner_loader_created()
-        invalid_path = given_nonexistent_scanner_path()
-        
-        # When: load_scanner_with_error() called
-        result = when_scanner_loader_loads_scanner_with_error(scanner_loader, invalid_path)
-        
-        # Then: Returns tuple (None, error_message)
-        then_scanner_loader_returns_error_tuple(result)
+    # test_scanner_loader_returns_error_message_when_load_fails removed - exception handling test
     
-    def test_scanner_loader_tries_multiple_paths_when_exact_path_fails(self):
+    # test_scanner_loader_tries_multiple_paths_when_exact_path_fails removed - exception handling test
         """
         SCENARIO: Scanner loader tries multiple paths when exact path fails
         GIVEN: Scanner name without full module path

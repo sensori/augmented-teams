@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from typing import List, Optional, Iterator, Dict, Any
+from typing import List, Optional, Iterator, Dict, Any, TYPE_CHECKING
 from pathlib import Path
+
+if TYPE_CHECKING:
+    from agile_bot.bots.base_bot.src.actions.validate.rule import Rule
 
 
 class Rules:
@@ -22,26 +25,19 @@ class Rules:
         else:
             raise ValueError("Either behavior or bot_config must be provided")
         
-        # Lazy load rules
         self._rules: Optional[List['Rule']] = None
-        
-        # Track violations from all rules
         self._all_violations: List[Dict[str, Any]] = []
     
     def _load_rules(self) -> List['Rule']:
         if self._rules is not None:
             return self._rules
         
-        # Import here to avoid circular import
         from agile_bot.bots.base_bot.src.actions.validate.rule import Rule
         
         all_rules = []
-        
-        # Load bot-level rules from bot's own rules directory
         bot_rules = self._load_bot_rules()
         all_rules.extend(bot_rules)
         
-        # Load behavior-specific rules if behavior is provided
         if self.behavior:
             behavior_rules = self._load_behavior_rules()
             all_rules.extend(behavior_rules)
@@ -53,26 +49,15 @@ class Rules:
         from agile_bot.bots.base_bot.src.actions.validate.rule import Rule
         
         bot_rules = []
-        
-        # Get bot directory from bot_paths
-        if not self.bot_paths:
-            return bot_rules
-        
         bot_dir = self.bot_paths.bot_directory
-        if not bot_dir:
-            return bot_rules
-        
-        # Load from bot's own rules directory
         bot_rules_dir = bot_dir / 'rules'
-        if bot_rules_dir.exists() and bot_rules_dir.is_dir():
-            for rule_file in bot_rules_dir.glob('*.json'):
-                # Rule object loads its own JSON file and scanner
-                rule_obj = Rule(
-                    rule_file_path=rule_file,
-                    behavior_name='common',
-                    bot_name=self.bot_name
-                )
-                bot_rules.append(rule_obj)
+        for rule_file in bot_rules_dir.glob('*.json'):
+            rule_obj = Rule(
+                rule_file_path=rule_file,
+                behavior_name='common',
+                bot_name=self.bot_name
+            )
+            bot_rules.append(rule_obj)
         
         return bot_rules
     
@@ -80,52 +65,33 @@ class Rules:
         from agile_bot.bots.base_bot.src.actions.validate.rule import Rule
         
         behavior_rules = []
-        
-        # Find behavior folder
-        if not self.behavior or not self.bot_paths:
-            return behavior_rules
-        
-       
         behavior_folder = self.bot_paths.bot_directory / 'behaviors' / self.behavior_name
         behavior_rules_dir = behavior_folder / 'rules'
         
-        # Load all .json files from rules directory if it exists
-        if behavior_rules_dir.exists() and behavior_rules_dir.is_dir():
-            for rule_file in behavior_rules_dir.glob('*.json'):
-                # Rule object loads its own JSON file and scanner
-                rule_obj = Rule(
-                    rule_file_path=rule_file,
-                    behavior_name=self.behavior_name,
-                    bot_name=self.bot_name
-                )
-                behavior_rules.append(rule_obj)
+        for rule_file in behavior_rules_dir.glob('*.json'):
+            rule_obj = Rule(
+                rule_file_path=rule_file,
+                behavior_name=self.behavior_name,
+                bot_name=self.bot_name
+            )
+            behavior_rules.append(rule_obj)
         
-        # Also check for rules in specific rule subdirectories (e.g., 3_rules)
-        # This handles cases where rules are organized in subdirectories
-        # Only check known rule subdirectories to avoid loading guardrails/config files
         rule_subdirs = ['3_rules', 'rules']
-        if behavior_folder.exists():
-            for subdir_name in rule_subdirs:
-                subdir = behavior_folder / subdir_name
-                if subdir.exists() and subdir.is_dir() and subdir != behavior_rules_dir:
-                    # Check if this subdirectory contains rule files
-                    for rule_file in subdir.rglob('*.json'):
-                        # Skip if this file was already loaded from rules directory
-                        if behavior_rules_dir.exists() and rule_file.is_relative_to(behavior_rules_dir):
-                            continue
-                        # Rule object loads its own JSON file and scanner
-                        # Add rules even if they don't have scanners (they provide context)
-                        try:
-                            rule_obj = Rule(
-                                rule_file_path=rule_file,
-                                behavior_name=self.behavior_name,
-                                bot_name=self.bot_name
-                            )
-                            # Add all rules (with or without scanners) - rules without scanners still provide context
-                            behavior_rules.append(rule_obj)
-                        except Exception:
-                            # Skip files that can't be loaded as rules
-                            continue
+        for subdir_name in rule_subdirs:
+            subdir = behavior_folder / subdir_name
+            if subdir != behavior_rules_dir:
+                for rule_file in subdir.rglob('*.json'):
+                    if behavior_rules_dir.exists() and rule_file.is_relative_to(behavior_rules_dir):
+                        continue
+                    try:
+                        rule_obj = Rule(
+                            rule_file_path=rule_file,
+                            behavior_name=self.behavior_name,
+                            bot_name=self.bot_name
+                        )
+                        behavior_rules.append(rule_obj)
+                    except Exception:
+                        continue
         
         return behavior_rules
     
@@ -142,7 +108,6 @@ class Rules:
             yield rule
     
     def __len__(self) -> int:
-        """Return the number of rules."""
         return len(self._load_rules())
     
     def add_violations(self, violations: List[Dict[str, Any]]) -> None:
@@ -204,41 +169,33 @@ class Rules:
         
         logger = logging.getLogger(__name__)
         
-        # Import here to avoid circular import
         from agile_bot.bots.base_bot.src.actions.validate.validate_action import ScannerExecutionError
         
         files = files or {}
         processed_rules = []
         
         for rule in self:
-            # Build rule result dict from rule properties
             rule_result = {
                 'rule_file': rule.rule_file,
                 'rule_content': rule.rule_content
             }
             
-            # Scan if rule has a scanner
             if rule.has_scanner:
                 try:
                     scanner_results = rule.scan(knowledge_graph, files)
                     rule_result['scanner_results'] = scanner_results
-                    
-                    # Track violations in rules collection
                     self.add_violations(rule.violations)
                 except Exception as e:
                     logger.error(f"Scanner execution failed for rule {rule.rule_file}: {e}", exc_info=True)
                     scanner_path = rule.scanner_path if rule else 'unknown'
                     raise ScannerExecutionError(rule.rule_file, scanner_path, e) from e
             elif rule.scanner_path:
-                # Scanner failed to load - exceptional circumstance, raise error
                 error_msg = f"Scanner failed to load: {rule.scanner_path}"
                 logger.error(f"Scanner failed to load for rule {rule.rule_file}: {error_msg}")
                 raise ScannerExecutionError(rule.rule_file, rule.scanner_path, RuntimeError(error_msg))
             else:
-                # No scanner - empty results
                 rule_result['scanner_results'] = {}
             
             processed_rules.append(rule_result)
         
         return processed_rules
-
