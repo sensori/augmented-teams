@@ -1,5 +1,5 @@
 ﻿{
-    "python.defaultInterpreterPath":  "python",
+    "python.defaultInterpreterPath":  "${python_interpreter_default}",
     "python.testing.unittestArgs":  [
                                         "-v",
                                         "-s",
@@ -18,17 +18,4 @@
     "python.testing.autoTestDiscoverOnSaveEnabled":  true,
     "cursor.ai.autoAcceptFileWrites":  true,
     "cursor.general.autoAcceptFileWrites":  true,
-    "github.copilot.chat.mcp.servers":  {
-                                            "story_bot":  {
-                                                              "command":  "python",
-                                                              "args":  [
-                                                                           "agile_bot/bots/story_bot/src/story_bot_mcp_server.py"
-                                                                       ],
-                                                              "cwd":  "${workspaceFolder}",
-                                                              "env":  {
-                                                                          "AGENT_NAME":  "story_bot",
-                                                                          "PYTHONPATH":  "${workspaceFolder}"
-                                                                      }
-                                                          }
-                                        }
 }
